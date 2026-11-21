@@ -4,6 +4,7 @@ import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/admin/admin_web/presentation/pages/admin_categories_page.dart';
 import 'package:delwaqty/features/admin/admin_web/presentation/pages/admin_overview_page.dart';
 import 'package:delwaqty/features/admin/admin_web/presentation/pages/admin_region_scope_page.dart';
+import 'package:delwaqty/features/admin/admin_web/presentation/pages/admin_users_page.dart';
 import 'package:delwaqty/features/admin_management/presentation/pages/admin_management_list_page.dart';
 import 'package:delwaqty/features/admin/admin_web/presentation/pages/admin_verifications_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -20,6 +21,7 @@ class _AdminWebShellState extends State<AdminWebShell> {
 
   final _pages = const [
     AdminOverviewPage(),
+    AdminUsersWebPage(),
     AdminManagementListPage(),
     AdminVerificationsWebPage(),
     AdminCategoriesPage(),
@@ -29,6 +31,7 @@ class _AdminWebShellState extends State<AdminWebShell> {
   List<(IconData, String)> _getNavItems(AppLocalizations l10n) => [
     (Icons.dashboard_rounded, l10n.adminCommandCenter),
     (Icons.people_rounded, l10n.adminUsersPage),
+    (Icons.admin_panel_settings_rounded, l10n.adminMgmtList),
     (Icons.verified_rounded, l10n.adminVerifications),
     (Icons.category_rounded, l10n.menuCategories),
     (Icons.location_city_rounded, l10n.adminMgmtRegion),

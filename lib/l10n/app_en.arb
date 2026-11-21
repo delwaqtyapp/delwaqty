@@ -2512,5 +2512,8 @@
   "recipientHandoffHint": "Give this code to the driver only after receiving the items. For another recipient, share it with them, not the driver.",
   "showHandoffCode": "Show handoff code",
   "askRecipientHandoff": "Ask the recipient for their code after handing over the items.",
-  "askPickupHandoff": "Ask the merchant or sender for their code when collecting the items."
+  "askPickupHandoff": "Ask the merchant or sender for their code when collecting the items.",
+  "adminUsersPageSubtitle": "Every registered account on the platform",
+  "adminUsersSearchHint": "Search by name, email, or phone...",
+  "joinedDate": "Joined"
 }

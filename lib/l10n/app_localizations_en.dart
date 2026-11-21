@@ -7712,4 +7712,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String minutesAway(Object minutes) {
     return '$minutes min';
   }
+
+  @override
+  String sinceMinutesAgo(Object minutes) {
+    return '$minutes min ago';
+  }
+
+  @override
+  String sinceHoursAgo(Object hours) {
+    return '$hours h ago';
+  }
 }

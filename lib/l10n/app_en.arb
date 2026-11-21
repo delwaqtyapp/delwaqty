@@ -2634,5 +2634,19 @@
     "placeholders": {
       "minutes": {}
     }
+  },
+  "sinceMinutesAgo": "{minutes} min ago",
+  "@sinceMinutesAgo": {
+    "description": "Elapsed time in minutes",
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "sinceHoursAgo": "{hours} h ago",
+  "@sinceHoursAgo": {
+    "description": "Elapsed time in hours",
+    "placeholders": {
+      "hours": {}
+    }
   }
 }

@@ -7650,4 +7650,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String minutesAway(Object minutes) {
     return '$minutes دقيقة';
   }
+
+  @override
+  String sinceMinutesAgo(Object minutes) {
+    return 'منذ $minutes دقيقة';
+  }
+
+  @override
+  String sinceHoursAgo(Object hours) {
+    return 'منذ $hours ساعة';
+  }
 }

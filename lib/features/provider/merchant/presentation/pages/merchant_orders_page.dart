@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:delwaqty/shared/widgets/delivery_handoff_button.dart';
 import 'package:delwaqty/core/utils/rpc_result.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +17,7 @@ import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/services/realtime/realtime_channel_constants.dart';
 import 'package:delwaqty/services/realtime/realtime_service.dart';
@@ -278,10 +281,10 @@ class _OrderCard extends StatelessWidget {
 
     final statusColor = switch (order.status) {
       'delivered' => AppColors.successLight,
-      'delivering' => Colors.indigo,
+      'delivering' => AppColors.orderInTransit,
       'ready' => AppColors.orderReady,
       'preparing' => AppColors.infoLight,
-      'confirmed' || 'accepted' => Colors.teal,
+      'confirmed' || 'accepted' => AppColors.orderConfirmed,
       'pending' => AppColors.warningLight,
       'cancelled' => AppColors.errorLight,
       _ => theme.colorScheme.onSurfaceVariant,
@@ -304,8 +307,20 @@ class _OrderCard extends StatelessWidget {
               '${item.quantity}x ${item.productName}${item.modifiers.isNotEmpty ? ' (${item.modifiers.join(', ')})' : ''}',
         )
         .join(', ');
-    final formattedDate = DateFormat('yyyy-MM-dd HH:mm')
-        .format(order.createdAt.toLocal());
+    final createdLocal = order.createdAt.toLocal();
+    final age = DateTime.now().difference(createdLocal);
+    final String relativeTime;
+    if (age.inMinutes < 1) {
+      relativeTime = l10n.sinceMinutesAgo('1');
+    } else if (age.inHours < 1) {
+      relativeTime = l10n.sinceMinutesAgo('${age.inMinutes}');
+    } else if (age.inHours < 24) {
+      relativeTime = l10n.sinceHoursAgo('${age.inHours}');
+    } else if (age.inDays < 2) {
+      relativeTime = l10n.yesterday;
+    } else {
+      relativeTime = DateFormat('yyyy-MM-dd HH:mm').format(createdLocal);
+    }
     final deliveryAddress = order.deliveryAddress?.trim() ?? '';
     final notes = order.notes?.trim() ?? '';
     final customerPhone = order.customerPhone?.trim() ?? '';
@@ -320,9 +335,20 @@ class _OrderCard extends StatelessWidget {
           'ready',
         }.contains(order.status);
 
+    final isPending = order.status == 'pending';
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Card(
+        elevation: isPending ? 2 : null,
+        shadowColor: isPending
+            ? AppColors.warningLight.withValues(alpha: 0.35)
+            : null,
+        shape: isPending
+            ? RoundedRectangleBorder(
+                borderRadius: AppSpacing.borderRadiusCard,
+                side: const BorderSide(color: AppColors.warningLight, width: 2),
+              )
+            : null,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -347,7 +373,7 @@ class _OrderCard extends StatelessWidget {
                         Text(
                           // Same short ref the customer sees on their
                           // confirmation screen (batch 14 item A).
-                          '#${order.id.length > 6 ? order.id.substring(order.id.length - 6).toUpperCase() : order.id.toUpperCase()} · $formattedDate',
+                          '#${order.id.length > 6 ? order.id.substring(order.id.length - 6).toUpperCase() : order.id.toUpperCase()} · $relativeTime',
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
@@ -367,6 +393,8 @@ class _OrderCard extends StatelessWidget {
                       onPressed: () => _whatsappCustomer(customerPhone),
                     ),
                   ],
+                  _ElapsedPill(createdAt: order.createdAt, pending: isPending),
+                  const SizedBox(width: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
@@ -389,6 +417,8 @@ class _OrderCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 itemsSummary,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -477,6 +507,7 @@ class _OrderCard extends StatelessWidget {
                     _ActionButton(
                       label: l10n.reject,
                       color: theme.colorScheme.error,
+                      outlined: true,
                       onPressed: () async {
                         final confirmed = await showDialog<bool>(
                           context: context,
@@ -524,7 +555,7 @@ class _OrderCard extends StatelessWidget {
                     // Delivered belongs to the delivering state (item B).
                     _ActionButton(
                       label: l10n.startOrderDelivery,
-                      color: Colors.indigo,
+                      color: AppColors.orderInTransit,
                       onPressed: () => onStatusChanged('delivering'),
                     ),
                   ] else if (order.status == 'delivering') ...[
@@ -549,27 +580,102 @@ class _ActionButton extends StatelessWidget {
     required this.label,
     required this.color,
     required this.onPressed,
+    this.outlined = false,
   });
 
   final String label;
   final Color color;
   final VoidCallback onPressed;
+  final bool outlined;
 
   @override
   Widget build(BuildContext context) {
-    return FilledButton.tonal(
+    final textStyle = AppTextStyles.labelMedium.copyWith(
+      fontWeight: FontWeight.bold,
+    );
+    if (outlined) {
+      return OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: color,
+          side: BorderSide(color: color.withValues(alpha: 0.5)),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        child: Text(label, style: textStyle),
+      );
+    }
+    // Primary next-step: solid fill in the status color.
+    return FilledButton(
       onPressed: onPressed,
       style: FilledButton.styleFrom(
-        backgroundColor: color.withValues(alpha: 0.1),
-        foregroundColor: color,
+        backgroundColor: color,
+        foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
+      child: Text(label, style: textStyle.copyWith(color: Colors.white)),
+    );
+  }
+}
+
+/// "منذ ٣ دقائق" style pill that re-ticks every 30 seconds; turns red once a
+/// pending order is older than 2 minutes.
+class _ElapsedPill extends StatefulWidget {
+  const _ElapsedPill({required this.createdAt, required this.pending});
+
+  final DateTime createdAt;
+  final bool pending;
+
+  @override
+  State<_ElapsedPill> createState() => _ElapsedPillState();
+}
+
+class _ElapsedPillState extends State<_ElapsedPill> {
+  Timer? _ticker;
+
+  @override
+  void initState() {
+    super.initState();
+    _ticker = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _ticker?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    final age = DateTime.now().difference(widget.createdAt);
+    final minutes = age.inMinutes < 1 ? 1 : age.inMinutes;
+    final late = widget.pending && age.inMinutes >= 2;
+    final color = late
+        ? AppColors.errorLight
+        : theme.colorScheme.onSurfaceVariant;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: Text(
-        label,
-        style: AppTextStyles.labelMedium.copyWith(fontWeight: FontWeight.bold),
+        age.inHours >= 1
+            ? l10n.sinceHoursAgo('${age.inHours}')
+            : l10n.sinceMinutesAgo('$minutes'),
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

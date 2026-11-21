@@ -2575,5 +2575,19 @@
     "placeholders": {
       "minutes": {}
     }
+  },
+  "sinceMinutesAgo": "منذ {minutes} دقيقة",
+  "@sinceMinutesAgo": {
+    "description": "Elapsed time in minutes",
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "sinceHoursAgo": "منذ {hours} ساعة",
+  "@sinceHoursAgo": {
+    "description": "Elapsed time in hours",
+    "placeholders": {
+      "hours": {}
+    }
   }
 }

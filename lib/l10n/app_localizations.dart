@@ -14665,6 +14665,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{minutes} min'**
   String minutesAway(Object minutes);
+
+  /// Elapsed time in minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min ago'**
+  String sinceMinutesAgo(Object minutes);
+
+  /// Elapsed time in hours
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h ago'**
+  String sinceHoursAgo(Object hours);
 }
 
 class _AppLocalizationsDelegate

@@ -120,6 +120,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settings => 'الإعدادات';
 
   @override
+  String get openSettings => 'فتح الإعدادات';
+
+  @override
   String get profile => 'الملف الشخصي';
 
   @override

@@ -121,6 +121,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings';
 
   @override
+  String get openSettings => 'Open Settings';
+
+  @override
   String get profile => 'Profile';
 
   @override

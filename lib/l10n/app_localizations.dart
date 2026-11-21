@@ -14551,6 +14551,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go online and accept your first delivery to start earning. Your balance, bonuses and payouts will show up here.'**
   String get earningsEmptyBody;
+
+  /// Checkout RPC error mapping
+  ///
+  /// In en, this message translates to:
+  /// **'{product} is out of stock'**
+  String checkoutOutOfStock(String product);
+
+  /// Checkout RPC error mapping
+  ///
+  /// In en, this message translates to:
+  /// **'{product} is no longer available'**
+  String checkoutProductUnavailable(String product);
+
+  /// Checkout RPC error mapping
+  ///
+  /// In en, this message translates to:
+  /// **'This store is unavailable right now'**
+  String get checkoutMerchantUnavailable;
+
+  /// Checkout RPC error mapping
+  ///
+  /// In en, this message translates to:
+  /// **'Your cart is empty'**
+  String get checkoutEmptyCartError;
+
+  /// Checkout RPC error mapping
+  ///
+  /// In en, this message translates to:
+  /// **'This store requires a minimum order of {amount}'**
+  String checkoutBelowMinOrder(String amount);
+
+  /// Checkout RPC error mapping
+  ///
+  /// In en, this message translates to:
+  /// **'This coupon cannot be used for this order'**
+  String get checkoutCouponInvalid;
+
+  /// Checkout RPC error mapping
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a delivery location on the map'**
+  String get checkoutMissingDeliveryLocation;
+
+  /// Checkout RPC error mapping
+  ///
+  /// In en, this message translates to:
+  /// **'Your account cannot place orders right now'**
+  String get checkoutAccountSuspended;
+
+  /// Checkout RPC error mapping (no product detail)
+  ///
+  /// In en, this message translates to:
+  /// **'This item is out of stock'**
+  String get checkoutItemOutOfStock;
 }
 
 class _AppLocalizationsDelegate

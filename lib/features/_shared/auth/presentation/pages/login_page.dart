@@ -397,68 +397,82 @@ class _LoginPageState extends ConsumerState<LoginPage>
                           MediaQuery.of(context).size.height -
                           MediaQuery.of(context).padding.vertical,
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 14),
-                        Row(
+                    // Desktop: auth content stays a centered ~440px column
+                    // instead of stretching edge to edge (batch 8, item 1).
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 440),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            PressableScale(
-                              scale: 0.92,
-                              onTap: () {
-                                if (context.canPop()) {
-                                  context.pop();
-                                } else {
-                                  context.go('/welcome');
-                                }
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(9),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.08),
-                                  borderRadius: BorderRadius.circular(13),
-                                  border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.12),
+                            const SizedBox(height: 14),
+                            Row(
+                              children: [
+                                PressableScale(
+                                  scale: 0.92,
+                                  onTap: () {
+                                    if (context.canPop()) {
+                                      context.pop();
+                                    } else {
+                                      context.go('/welcome');
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(9),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.08,
+                                      ),
+                                      borderRadius: BorderRadius.circular(13),
+                                      border: Border.all(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.12,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.close_rounded,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.75,
+                                      ),
+                                      size: 17,
+                                    ),
                                   ),
                                 ),
-                                child: Icon(
-                                  Icons.close_rounded,
-                                  color: Colors.white.withValues(alpha: 0.75),
-                                  size: 17,
-                                ),
-                              ),
+                              ],
                             ),
+                            const SizedBox(height: 12),
+                            _buildLogoWithWings(),
+                            const SizedBox(height: 28),
+                            _buildWelcome(l10n),
+                            const SizedBox(height: 8),
+                            _buildSubtitle(l10n),
+                            const SizedBox(height: 32),
+                            _buildSavedAccountsSection(l10n),
+                            _buildForm(l10n, authState),
+                            if (!isAdminApp) ...[
+                              const SizedBox(height: 24),
+                              SocialAuthButtons(
+                                onGoogle: () => ref
+                                    .read(authStateProvider.notifier)
+                                    .signInWithGoogle(),
+                                onFacebook: () => ref
+                                    .read(authStateProvider.notifier)
+                                    .signInWithFacebook(),
+                                isLoading: isLoading,
+                                dividerColor: Colors.white54,
+                              ),
+                            ],
+                            const SizedBox(height: 24),
+                            if (!isAdminApp) ...[
+                              _buildRegisterLink(l10n),
+                              const SizedBox(height: 24),
+                            ],
+                            const SizedBox(height: 16),
                           ],
                         ),
-                        const SizedBox(height: 12),
-                        _buildLogoWithWings(),
-                        const SizedBox(height: 28),
-                        _buildWelcome(l10n),
-                        const SizedBox(height: 8),
-                        _buildSubtitle(l10n),
-                        const SizedBox(height: 32),
-                        _buildSavedAccountsSection(l10n),
-                        _buildForm(l10n, authState),
-                        if (!isAdminApp) ...[
-                          const SizedBox(height: 24),
-                          SocialAuthButtons(
-                            onGoogle: () => ref
-                                .read(authStateProvider.notifier)
-                                .signInWithGoogle(),
-                            onFacebook: () => ref
-                                .read(authStateProvider.notifier)
-                                .signInWithFacebook(),
-                            isLoading: isLoading,
-                            dividerColor: Colors.white54,
-                          ),
-                        ],
-                        const SizedBox(height: 24),
-                        if (!isAdminApp) ...[
-                          _buildRegisterLink(l10n),
-                          const SizedBox(height: 24),
-                        ],
-                        const SizedBox(height: 16),
-                      ],
+                      ),
                     ),
                   ),
                 ),

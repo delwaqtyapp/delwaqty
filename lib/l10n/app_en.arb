@@ -2543,5 +2543,56 @@
   "earningsEmptyBody": "Go online and accept your first delivery to start earning. Your balance, bonuses and payouts will show up here.",
   "@earningsEmptyBody": {
     "description": "Friendly zero-state body on the driver financial center"
+  },
+  "checkoutOutOfStock": "{product} is out of stock",
+  "@checkoutOutOfStock": {
+    "description": "Checkout RPC error mapping",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutProductUnavailable": "{product} is no longer available",
+  "@checkoutProductUnavailable": {
+    "description": "Checkout RPC error mapping",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutMerchantUnavailable": "This store is unavailable right now",
+  "@checkoutMerchantUnavailable": {
+    "description": "Checkout RPC error mapping"
+  },
+  "checkoutEmptyCartError": "Your cart is empty",
+  "@checkoutEmptyCartError": {
+    "description": "Checkout RPC error mapping"
+  },
+  "checkoutBelowMinOrder": "This store requires a minimum order of {amount}",
+  "@checkoutBelowMinOrder": {
+    "description": "Checkout RPC error mapping",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutCouponInvalid": "This coupon cannot be used for this order",
+  "@checkoutCouponInvalid": {
+    "description": "Checkout RPC error mapping"
+  },
+  "checkoutMissingDeliveryLocation": "Please choose a delivery location on the map",
+  "@checkoutMissingDeliveryLocation": {
+    "description": "Checkout RPC error mapping"
+  },
+  "checkoutAccountSuspended": "Your account cannot place orders right now",
+  "@checkoutAccountSuspended": {
+    "description": "Checkout RPC error mapping"
+  },
+  "checkoutItemOutOfStock": "This item is out of stock",
+  "@checkoutItemOutOfStock": {
+    "description": "Checkout RPC error mapping (no product detail)"
   }
 }

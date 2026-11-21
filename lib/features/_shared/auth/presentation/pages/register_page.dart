@@ -392,13 +392,21 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 350),
-                      switchInCurve: Curves.easeOutCubic,
-                      switchOutCurve: Curves.easeInCubic,
-                      child: KeyedSubtree(
-                        key: ValueKey('register_step_$_currentStep'),
-                        child: _buildStepContent(l10n, authState),
+                    // Desktop: keep the form a centered ~440px column
+                    // (batch 8, item 1).
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 440),
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 350),
+                          switchInCurve: Curves.easeOutCubic,
+                          switchOutCurve: Curves.easeInCubic,
+                          child: KeyedSubtree(
+                            key: ValueKey('register_step_$_currentStep'),
+                            child: _buildStepContent(l10n, authState),
+                          ),
+                        ),
                       ),
                     ),
                   ),

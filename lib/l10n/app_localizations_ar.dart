@@ -7576,4 +7576,38 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get earningsEmptyBody =>
       'فعّل التوصيل واقبل أول طلب لبدء الربح. سيظهر رصيدك ومكافآتك ومدفوعاتك هنا.';
+
+  @override
+  String checkoutOutOfStock(String product) {
+    return '$product غير متوفر في المخزون حالياً';
+  }
+
+  @override
+  String checkoutProductUnavailable(String product) {
+    return '$product لم يعد متاحاً';
+  }
+
+  @override
+  String get checkoutMerchantUnavailable => 'هذا المتجر غير متاح حالياً';
+
+  @override
+  String get checkoutEmptyCartError => 'سلة التسوق فارغة';
+
+  @override
+  String checkoutBelowMinOrder(String amount) {
+    return 'هذا المتجر يتطلب حد أدنى للطلب $amount';
+  }
+
+  @override
+  String get checkoutCouponInvalid => 'لا يمكن استخدام هذه القسيمة لهذا الطلب';
+
+  @override
+  String get checkoutMissingDeliveryLocation =>
+      'يرجى اختيار موقع التوصيل على الخريطة';
+
+  @override
+  String get checkoutAccountSuspended => 'حسابك لا يمكنه إتمام الطلبات حالياً';
+
+  @override
+  String get checkoutItemOutOfStock => 'هذا الصنف غير متوفر في المخزون حالياً';
 }

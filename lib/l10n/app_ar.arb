@@ -2484,5 +2484,56 @@
   "earningsEmptyBody": "فعّل التوصيل واقبل أول طلب لبدء الربح. سيظهر رصيدك ومكافآتك ومدفوعاتك هنا.",
   "@earningsEmptyBody": {
     "description": "Friendly zero-state body on the driver financial center"
+  },
+  "checkoutOutOfStock": "{product} غير متوفر في المخزون حالياً",
+  "@checkoutOutOfStock": {
+    "description": "Checkout RPC error mapping",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutProductUnavailable": "{product} لم يعد متاحاً",
+  "@checkoutProductUnavailable": {
+    "description": "Checkout RPC error mapping",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutMerchantUnavailable": "هذا المتجر غير متاح حالياً",
+  "@checkoutMerchantUnavailable": {
+    "description": "Checkout RPC error mapping"
+  },
+  "checkoutEmptyCartError": "سلة التسوق فارغة",
+  "@checkoutEmptyCartError": {
+    "description": "Checkout RPC error mapping"
+  },
+  "checkoutBelowMinOrder": "هذا المتجر يتطلب حد أدنى للطلب {amount}",
+  "@checkoutBelowMinOrder": {
+    "description": "Checkout RPC error mapping",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutCouponInvalid": "لا يمكن استخدام هذه القسيمة لهذا الطلب",
+  "@checkoutCouponInvalid": {
+    "description": "Checkout RPC error mapping"
+  },
+  "checkoutMissingDeliveryLocation": "يرجى اختيار موقع التوصيل على الخريطة",
+  "@checkoutMissingDeliveryLocation": {
+    "description": "Checkout RPC error mapping"
+  },
+  "checkoutAccountSuspended": "حسابك لا يمكنه إتمام الطلبات حالياً",
+  "@checkoutAccountSuspended": {
+    "description": "Checkout RPC error mapping"
+  },
+  "checkoutItemOutOfStock": "هذا الصنف غير متوفر في المخزون حالياً",
+  "@checkoutItemOutOfStock": {
+    "description": "Checkout RPC error mapping (no product detail)"
   }
 }

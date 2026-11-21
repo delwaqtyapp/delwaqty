@@ -225,8 +225,11 @@ class _TransparentBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+    // Desktop: keep the pill compact and centered instead of stretching the
+    // mobile bar edge to edge (UI review batch 8, item 3).
+    final wide = MediaQuery.sizeOf(context).width >= 900;
+    final bar = Container(
+      margin: EdgeInsets.fromLTRB(wide ? 0 : 16, 0, wide ? 0 : 16, 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
@@ -278,6 +281,9 @@ class _TransparentBottomNav extends StatelessWidget {
         ),
       ),
     );
+    return wide
+        ? Align(widthFactor: 1, child: SizedBox(width: 520, child: bar))
+        : bar;
   }
 }
 

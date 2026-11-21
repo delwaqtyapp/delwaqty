@@ -135,6 +135,48 @@ String appErrorMessage(AppLocalizations l10n, Object? error) {
   }
 }
 
+/// Checkout (create_order RPC) errors arrive as P0001 with a machine code and
+/// an optional detail ("INSUFFICIENT_STOCK <product>", "BELOW_MIN_ORDER 100").
+/// Map them to actionable localized sentences instead of the generic
+/// "something went wrong" (UI review: the snackbar hid the real cause).
+String checkoutErrorMessage(AppLocalizations l10n, Object? error) {
+  final raw = (_readStringField(error, 'message') ?? error.toString());
+  final match = RegExp(
+    r'(INSUFFICIENT_STOCK|PRODUCT_UNAVAILABLE|PRODUCT_NOT_FOUND|MERCHANT_NOT_FOUND|EMPTY_CART|TOO_MANY_ITEMS|INVALID_QUANTITY|BELOW_MIN_ORDER|COUPON_[A-Z_]+|MISSING_DELIVERY_LOCATION|ACCOUNT_SUSPENDED|INVALID_PAYMENT_METHOD)\b\s*([^\n]*)',
+  ).firstMatch(raw);
+  if (match == null) return appErrorMessage(l10n, error);
+  final code = match.group(1)!;
+  final detail = (match.group(2) ?? '').trim();
+  switch (code) {
+    case 'INSUFFICIENT_STOCK':
+      return detail.isNotEmpty
+          ? l10n.checkoutOutOfStock(detail)
+          : l10n.checkoutItemOutOfStock;
+    case 'PRODUCT_UNAVAILABLE':
+    case 'PRODUCT_NOT_FOUND':
+      return detail.isNotEmpty
+          ? l10n.checkoutProductUnavailable(detail)
+          : l10n.checkoutMerchantUnavailable;
+    case 'MERCHANT_NOT_FOUND':
+      return l10n.checkoutMerchantUnavailable;
+    case 'EMPTY_CART':
+      return l10n.checkoutEmptyCartError;
+    case 'BELOW_MIN_ORDER':
+      return l10n.checkoutBelowMinOrder(detail);
+    case 'MISSING_DELIVERY_LOCATION':
+      return l10n.checkoutMissingDeliveryLocation;
+    case 'ACCOUNT_SUSPENDED':
+      return l10n.checkoutAccountSuspended;
+    default:
+      if (code.startsWith('COUPON_')) return l10n.checkoutCouponInvalid;
+      return appErrorMessage(l10n, error);
+  }
+}
+
+/// Convenience wrapper for call sites that hold a [BuildContext].
+String checkoutErrorText(BuildContext context, Object? error) =>
+    checkoutErrorMessage(AppLocalizations.of(context), error);
+
 /// Convenience wrapper for call sites that hold a [BuildContext].
 String appErrorText(BuildContext context, Object? error) =>
     appErrorMessage(AppLocalizations.of(context), error);

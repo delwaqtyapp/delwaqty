@@ -7635,4 +7635,41 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get earningsEmptyBody =>
       'Go online and accept your first delivery to start earning. Your balance, bonuses and payouts will show up here.';
+
+  @override
+  String checkoutOutOfStock(String product) {
+    return '$product is out of stock';
+  }
+
+  @override
+  String checkoutProductUnavailable(String product) {
+    return '$product is no longer available';
+  }
+
+  @override
+  String get checkoutMerchantUnavailable =>
+      'This store is unavailable right now';
+
+  @override
+  String get checkoutEmptyCartError => 'Your cart is empty';
+
+  @override
+  String checkoutBelowMinOrder(String amount) {
+    return 'This store requires a minimum order of $amount';
+  }
+
+  @override
+  String get checkoutCouponInvalid =>
+      'This coupon cannot be used for this order';
+
+  @override
+  String get checkoutMissingDeliveryLocation =>
+      'Please choose a delivery location on the map';
+
+  @override
+  String get checkoutAccountSuspended =>
+      'Your account cannot place orders right now';
+
+  @override
+  String get checkoutItemOutOfStock => 'This item is out of stock';
 }

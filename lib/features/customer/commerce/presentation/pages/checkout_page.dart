@@ -507,7 +507,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(l10n.somethingWentWrong),
+          content: Text(checkoutErrorText(context, e)),
           backgroundColor: cs.error,
         ),
       );

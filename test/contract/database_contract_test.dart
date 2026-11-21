@@ -489,6 +489,29 @@ void main() {
     });
   });
 
+  group('owner store hiding (migration 232)', () {
+    // Owner decision: platform-owner stores must not appear to customers.
+    test('read policies gate on merchant active status', () {
+      final m = migrationFiles
+          .where((f) => f.path.contains('232_hide_owner_stores'))
+          .single
+          .readAsStringSync();
+      expect(m, contains("SET status = 'suspended'"));
+      expect(m, contains("status = 'active'"));
+      expect(m, contains('owner_user_id = auth.uid()'));
+      expect(m, contains('is_admin'));
+      for (final tbl in [
+        'merchants',
+        'products',
+        'offers',
+        'branches',
+        'reviews',
+      ]) {
+        expect(m, contains('public.$tbl'), reason: '$tbl policy missing');
+      }
+    });
+  });
+
   group('rpc grant lockdown (migration 218)', () {
     // Security reviewer C4/C5: client-callable SECURITY DEFINER money and
     // pricing functions. The app calls none of them; they must be revoked

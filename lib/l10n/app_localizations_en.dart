@@ -7672,4 +7672,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get checkoutItemOutOfStock => 'This item is out of stock';
+
+  @override
+  String checkoutRequiredModifier(Object group) {
+    return 'Please choose an option for: $group';
+  }
+
+  @override
+  String checkoutModifierMaxExceeded(Object group) {
+    return 'Too many options chosen for: $group';
+  }
 }

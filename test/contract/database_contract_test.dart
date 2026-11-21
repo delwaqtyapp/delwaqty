@@ -474,6 +474,21 @@ void main() {
     });
   });
 
+  group('order lifecycle guards (migration 230)', () {
+    // F4a: orders without delivery coordinates are undispatchable.
+    test('create_order rejects missing delivery location', () {
+      final latest = latestDefining221('FUNCTION public.create_order(');
+      expect(latest, contains('MISSING_DELIVERY_LOCATION'));
+      expect(latest, contains('p_delivery_latitude is null'));
+    });
+
+    // Reviewer #22: accept_order must never regress a 'ready' order.
+    test('accept_order only advances pending/confirmed to preparing', () {
+      final latest = latestDefining221('FUNCTION public.accept_order(');
+      expect(latest, contains('CASE WHEN v_order.status IN'));
+    });
+  });
+
   group('rpc grant lockdown (migration 218)', () {
     // Security reviewer C4/C5: client-callable SECURITY DEFINER money and
     // pricing functions. The app calls none of them; they must be revoked

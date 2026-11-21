@@ -14605,6 +14605,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This item is out of stock'**
   String get checkoutItemOutOfStock;
+
+  /// Checkout RPC error mapping (required modifier group)
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose an option for: {group}'**
+  String checkoutRequiredModifier(Object group);
+
+  /// Checkout RPC error mapping (modifier group max selections)
+  ///
+  /// In en, this message translates to:
+  /// **'Too many options chosen for: {group}'**
+  String checkoutModifierMaxExceeded(Object group);
 }
 
 class _AppLocalizationsDelegate

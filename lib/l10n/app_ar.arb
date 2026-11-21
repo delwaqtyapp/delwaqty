@@ -2535,5 +2535,15 @@
   "checkoutItemOutOfStock": "هذا الصنف غير متوفر في المخزون حالياً",
   "@checkoutItemOutOfStock": {
     "description": "Checkout RPC error mapping (no product detail)"
+  },
+  "checkoutRequiredModifier": "يرجى اختيار خيار لـ: {group}",
+  "@checkoutRequiredModifier": {
+    "description": "Checkout RPC error mapping (required modifier group)",
+    "placeholders": {"group": {}}
+  },
+  "checkoutModifierMaxExceeded": "تم اختيار عدد كبير من الخيارات لـ: {group}",
+  "@checkoutModifierMaxExceeded": {
+    "description": "Checkout RPC error mapping (modifier group max selections)",
+    "placeholders": {"group": {}}
   }
 }

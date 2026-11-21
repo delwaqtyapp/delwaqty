@@ -2594,5 +2594,15 @@
   "checkoutItemOutOfStock": "This item is out of stock",
   "@checkoutItemOutOfStock": {
     "description": "Checkout RPC error mapping (no product detail)"
+  },
+  "checkoutRequiredModifier": "Please choose an option for: {group}",
+  "@checkoutRequiredModifier": {
+    "description": "Checkout RPC error mapping (required modifier group)",
+    "placeholders": {"group": {}}
+  },
+  "checkoutModifierMaxExceeded": "Too many options chosen for: {group}",
+  "@checkoutModifierMaxExceeded": {
+    "description": "Checkout RPC error mapping (modifier group max selections)",
+    "placeholders": {"group": {}}
   }
 }

@@ -7610,4 +7610,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get checkoutItemOutOfStock => 'هذا الصنف غير متوفر في المخزون حالياً';
+
+  @override
+  String checkoutRequiredModifier(Object group) {
+    return 'يرجى اختيار خيار لـ: $group';
+  }
+
+  @override
+  String checkoutModifierMaxExceeded(Object group) {
+    return 'تم اختيار عدد كبير من الخيارات لـ: $group';
+  }
 }

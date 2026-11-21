@@ -76,6 +76,9 @@ class SupabaseMerchantDashboardDataSource {
           .from('orders')
           .count()
           .eq('merchant_id', merchantId)
+          // Today's Orders counts every non-cancelled order placed today,
+          // matching the revenue aggregate below (batch 14 item C).
+          .neq('status', 'cancelled')
           .gte('created_at', todayStart.toIso8601String());
 
       final pendingRes = await _client

@@ -309,12 +309,16 @@ class _OrderCard extends StatelessWidget {
     final deliveryAddress = order.deliveryAddress?.trim() ?? '';
     final notes = order.notes?.trim() ?? '';
     final customerPhone = order.customerPhone?.trim() ?? '';
-    final canDispatchDriver = const {
-      'confirmed',
-      'accepted',
-      'preparing',
-      'ready',
-    }.contains(order.status);
+    // Dispatch/handoff only before a driver is assigned; once a driver is
+    // on the order the merchant no longer dispatches (batch 14 item B).
+    final canDispatchDriver =
+        order.driverId == null &&
+        const {
+          'confirmed',
+          'accepted',
+          'preparing',
+          'ready',
+        }.contains(order.status);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -331,14 +335,19 @@ class _OrderCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          order.customerName ?? l10n.customer,
+                          order.customerName ??
+                              (customerPhone.isNotEmpty
+                                  ? customerPhone
+                                  : l10n.customer),
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          formattedDate,
+                          // Same short ref the customer sees on their
+                          // confirmation screen (batch 14 item A).
+                          '#${order.id.length > 6 ? order.id.substring(order.id.length - 6).toUpperCase() : order.id.toUpperCase()} · $formattedDate',
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
@@ -511,16 +520,12 @@ class _OrderCard extends StatelessWidget {
                       onPressed: () => onStatusChanged('ready'),
                     ),
                   ] else if (order.status == 'ready') ...[
+                    // Ready offers only the handoff to delivery; Mark
+                    // Delivered belongs to the delivering state (item B).
                     _ActionButton(
                       label: l10n.startOrderDelivery,
                       color: Colors.indigo,
                       onPressed: () => onStatusChanged('delivering'),
-                    ),
-                    const SizedBox(width: 8),
-                    _ActionButton(
-                      label: l10n.markDelivered,
-                      color: AppColors.successLight,
-                      onPressed: () => onStatusChanged('delivered'),
                     ),
                   ] else if (order.status == 'delivering') ...[
                     _ActionButton(

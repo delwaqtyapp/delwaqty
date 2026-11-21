@@ -50,6 +50,7 @@ class SupabaseMerchantDashboardDataSource {
       customerPhone: (user is Map && user['phone'] != null)
           ? user['phone'] as String
           : (row['customer_phone'] as String?),
+      driverId: row['driver_id'] as String?,
       items: items,
       totalAmount: (row['total_amount'] as num).toDouble(),
       status: row['status'] as String,

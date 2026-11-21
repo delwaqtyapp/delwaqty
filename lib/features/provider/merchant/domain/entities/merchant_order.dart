@@ -10,6 +10,7 @@ abstract class MerchantOrder with _$MerchantOrder {
     required String customerId,
     String? customerName,
     String? customerPhone,
+    String? driverId,
     @Default([]) List<MerchantOrderItem> items,
     required double totalAmount,
     required String status,

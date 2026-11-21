@@ -12,6 +12,7 @@ _MerchantOrder _$MerchantOrderFromJson(Map<String, dynamic> json) =>
       customerId: json['customerId'] as String,
       customerName: json['customerName'] as String?,
       customerPhone: json['customerPhone'] as String?,
+      driverId: json['driverId'] as String?,
       items:
           (json['items'] as List<dynamic>?)
               ?.map(
@@ -33,6 +34,7 @@ Map<String, dynamic> _$MerchantOrderToJson(_MerchantOrder instance) =>
       'customerId': instance.customerId,
       'customerName': instance.customerName,
       'customerPhone': instance.customerPhone,
+      'driverId': instance.driverId,
       'items': instance.items.map((e) => e.toJson()).toList(),
       'totalAmount': instance.totalAmount,
       'status': instance.status,

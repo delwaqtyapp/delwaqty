@@ -377,3 +377,48 @@ Any authenticated user can create an order with arbitrary prices.
 - WhatsApp OTP remains ceremonial until the Meta inbound webhook lands
   (app displays the code for the user to send; verify only checks the
   code). Blocked on business verification - flagged since pass 1.
+
+## Owner decisions 2026-11-21 (voice note ~2:08 PM) + execution
+
+Six decisions relayed by main; all executed same day except Meta (gated).
+
+1. Cancel/edit policy — migration 184 (commit 8b5e026):
+   - Customer solo-cancel blocked once status='delivering'
+     (OUT_FOR_DELIVERY); lifetime allowance of 2 customer cancels, then
+     CANCEL_ALLOWANCE_EXHAUSTED. orders.cancelled_by records
+     customer/admin/customer_refusal.
+   - add_order_items RPC: add items while pending/confirmed/preparing,
+     repriced server-side (same pricing path as create_order), stock
+     decrement/restore, coupon discount recomputed on new subtotal,
+     merchant notified. Paid orders blocked (ORDER_ALREADY_PAID).
+   - report_delivery_refusal RPC (assigned driver, 'delivering' only):
+     cancels the order with stock restore + refund, refusal warnings 1/2
+     then 2/2, 3rd refusal suspends the customer account
+     (users.refusal_count, account_status='suspended').
+   - OPEN design calls flagged to owner: cancel allowance is lifetime
+     (per-month possible); refusal closure uses reversible 'suspended';
+     edits stop at 'ready'.
+   - APP-SIDE (Antigravity list): add-items UI on live orders, driver
+     refusal button, new error codes OUT_FOR_DELIVERY /
+     CANCEL_ALLOWANCE_EXHAUSTED / ORDER_NOT_EDITABLE / ORDER_ALREADY_PAID.
+2. Settlement parameters — migration 181 (commit 0d6747a): remittance
+   window 12h (was 24h), suspension trigger 1500 EGP unremitted (was
+   5000), suspension duration 5 days (was 3-day overdue trigger). Ceiling
+   stays 1000, commissions 7%/3% unchanged. Sweep now auto-suspends
+   (offline + account_status='suspended' + Arabic push + ops complaint)
+   and auto-reactivates after expiry once balance <= 1500.
+3. Coupon release on cancel — migration 182 (commit 00a0356):
+   cancel_order deletes the coupon_redemptions row and decrements
+   used_count exactly once (status transition + row lock), freeing the
+   UNIQUE(coupon_id,user_id) slot so the customer can reuse the coupon.
+4. Reviews closed to actual customers — migration 183 (commit d9702b0):
+   order-less merchant reviews require a delivered order; ride_ratings
+   require a completed ride; service_reviews require a completed booking.
+5. Meta verification re-check (2:17 PM, config-h, read-only): security
+   center now shows "مؤهلة للتحقق" (eligible) with an active "بدء التحقق"
+   button — verification flow is OPEN but not started; business NOT
+   verified. Live flip stays parked; starting verification needs his
+   legal business details/documents and his call.
+6. Emergency chat: owner decided NO rate limit on open_emergency_chat.
+   Recorded as a decision, not a bug — the LOW spam-vector note above is
+   closed by this decision.

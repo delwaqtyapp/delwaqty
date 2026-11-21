@@ -19,8 +19,10 @@ class LocaleNotifier extends Notifier<Locale> {
       return Locale(savedLocale);
     }
     final system = PlatformDispatcher.instance.locale;
-    final code = system.languageCode;
-    return code.toLowerCase() == 'ar' ? const Locale('ar') : const Locale('en');
+    final code = system.languageCode.toLowerCase();
+    // Egypt-first: Arabic is the default; English only when the device/browser
+    // locale is explicitly English (or the user picked it before).
+    return code == 'en' ? const Locale('en') : const Locale('ar');
   }
 
   Future<void> setLocale(Locale locale) async {

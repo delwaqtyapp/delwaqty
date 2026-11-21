@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,6 +15,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_profile.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
@@ -211,9 +213,9 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
           ),
           const SizedBox(height: 32),
           if (online)
-            const AnimatedFadeIn(
-              delay: Duration(milliseconds: 200),
-              child: _RadarPulseWidget(),
+            AnimatedFadeIn(
+              delay: const Duration(milliseconds: 200),
+              child: _RadarPulseWidget(paused: _offerShowing),
             )
           else
             AnimatedFadeIn(
@@ -230,12 +232,15 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
 
   Future<void> _presentOffer(RideOffer offer) async {
     _offerShowing = true;
+    unawaited(HapticFeedback.mediumImpact());
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context);
-    final accepted = await showDialog<bool>(
+    final accepted = await showModalBottomSheet<bool>(
       context: context,
-      barrierDismissible: false,
-      builder: (_) => _DeliveryOfferDialog(offer: offer),
+      isDismissible: false,
+      enableDrag: false,
+      isScrollControlled: true,
+      builder: (_) => _DeliveryOfferSheet(offer: offer),
     );
     _offerShowing = false;
     if (!mounted) return;
@@ -274,7 +279,10 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
 }
 
 class _RadarPulseWidget extends StatefulWidget {
-  const _RadarPulseWidget();
+  const _RadarPulseWidget({this.paused = false});
+
+  /// Motion standard: the radar stops while an offer sheet is up.
+  final bool paused;
 
   @override
   State<_RadarPulseWidget> createState() => _RadarPulseWidgetState();
@@ -288,7 +296,7 @@ class _RadarPulseWidgetState extends State<_RadarPulseWidget> {
   void initState() {
     super.initState();
     _pulseTimer = Timer.periodic(const Duration(milliseconds: 1100), (_) {
-      if (mounted) {
+      if (mounted && !widget.paused) {
         setState(() => _expanded = !_expanded);
       }
     });
@@ -563,24 +571,26 @@ class _MiniStat extends StatelessWidget {
   }
 }
 
-class _DeliveryOfferDialog extends StatefulWidget {
-  const _DeliveryOfferDialog({required this.offer});
-  final dynamic offer;
+class _DeliveryOfferSheet extends StatefulWidget {
+  const _DeliveryOfferSheet({required this.offer});
+  final RideOffer offer;
 
   @override
-  State<_DeliveryOfferDialog> createState() => _DeliveryOfferDialogState();
+  State<_DeliveryOfferSheet> createState() => _DeliveryOfferSheetState();
 }
 
-class _DeliveryOfferDialogState extends State<_DeliveryOfferDialog>
+class _DeliveryOfferSheetState extends State<_DeliveryOfferSheet>
     with SingleTickerProviderStateMixin {
-  late AnimationController _timerController;
+  late final AnimationController _timerController;
+  late final Duration _total;
 
   @override
   void initState() {
     super.initState();
-    final remaining = widget.offer.remaining;
-    _timerController = AnimationController(vsync: this, duration: remaining)
+    _total = widget.offer.remaining;
+    _timerController = AnimationController(vsync: this, duration: _total)
       ..addStatusListener((status) {
+        // Timeout: same auto-decline semantics as the old dialog pop().
         if (status == AnimationStatus.completed && mounted) {
           Navigator.of(context).pop();
         }
@@ -598,68 +608,169 @@ class _DeliveryOfferDialogState extends State<_DeliveryOfferDialog>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final offer = widget.offer;
-    return AlertDialog(
-      title: Text(l10n.delivery),
-      content: SingleChildScrollView(
+    final fareText = l10n.amountWithCurrency(
+      offer.fare.toStringAsFixed(0),
+      offer.currency,
+    );
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            AnimatedBuilder(
-              animation: _timerController,
-              builder: (context, _) {
-                return LinearProgressIndicator(
-                  value: _timerController.value,
-                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            Text('${offer.pickupAddress}', style: theme.textTheme.bodyMedium),
-            const SizedBox(height: 4),
-            Icon(
-              Icons.arrow_downward_rounded,
-              size: 20,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: 4),
-            Text('${offer.dropoffAddress}', style: theme.textTheme.bodyMedium),
-            const SizedBox(height: 12),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Flexible(
+                Expanded(
                   child: Text(
-                    '${offer.distanceKm.toStringAsFixed(1)} ${l10n.kmUnit}',
+                    fareText,
+                    style: AppTextStyles.price.copyWith(
+                      fontSize: 32,
+                      color: cs.onSurface,
+                    ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    l10n.amountWithCurrency(
-                      offer.fare.toStringAsFixed(0),
-                      offer.currency,
-                    ),
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                AnimatedBuilder(
+                  animation: _timerController,
+                  builder: (context, _) {
+                    final secondsLeft =
+                        (_total.inMilliseconds * (1 - _timerController.value))
+                            .ceil() ~/
+                        1000;
+                    final warn = secondsLeft < 10;
+                    final ringColor = warn
+                        ? AppColors.warningLight
+                        : cs.primary;
+                    return SizedBox(
+                      width: 56,
+                      height: 56,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            value: 1 - _timerController.value,
+                            strokeWidth: 4,
+                            color: ringColor,
+                            backgroundColor: cs.surfaceContainerHighest,
+                          ),
+                          Text(
+                            '$secondsLeft',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: ringColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ],
+            ),
+            const SizedBox(height: 16),
+            _OfferRouteRow(
+              dotColor: AppColors.successLight,
+              label: l10n.pickupLabel,
+              address: '${offer.pickupAddress}',
+              meta:
+                  l10n.kmAway(offer.pickupDistanceKm.toStringAsFixed(1)) +
+                  ' · ' +
+                  l10n.minutesAway('${offer.etaMinutes}'),
+            ),
+            const SizedBox(height: 12),
+            _OfferRouteRow(
+              dotColor: AppColors.warningLight,
+              label: l10n.dropoffLabel,
+              address: '${offer.dropoffAddress}',
+              meta: l10n.kmAway(offer.distanceKm.toStringAsFixed(1)),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              height: 56,
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.successLight,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(
+                  l10n.acceptRideWithFare(fareText),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(l10n.decline),
             ),
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: Text(l10n.cancel),
+    );
+  }
+}
+
+class _OfferRouteRow extends StatelessWidget {
+  const _OfferRouteRow({
+    required this.dotColor,
+    required this.label,
+    required this.address,
+    required this.meta,
+  });
+
+  final Color dotColor;
+  final String label;
+  final String address;
+  final String meta;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
+          ),
         ),
-        FilledButton(
-          onPressed: () => Navigator.of(context).pop(true),
-          child: Text(l10n.confirm),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+              Text(
+                address,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                meta,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

@@ -7685,4 +7685,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String checkoutModifierMaxExceeded(Object group) {
     return 'Too many options chosen for: $group';
   }
+
+  @override
+  String acceptRideWithFare(Object fare) {
+    return 'Accept ride · $fare';
+  }
+
+  @override
+  String get decline => 'Decline';
+
+  @override
+  String get pickupLabel => 'Pickup';
+
+  @override
+  String get dropoffLabel => 'Dropoff';
+
+  @override
+  String get secondsUnit => 'sec';
+
+  @override
+  String kmAway(Object km) {
+    return '$km km away';
+  }
+
+  @override
+  String minutesAway(Object minutes) {
+    return '$minutes min';
+  }
 }

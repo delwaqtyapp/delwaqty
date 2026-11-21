@@ -14623,6 +14623,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Too many options chosen for: {group}'**
   String checkoutModifierMaxExceeded(Object group);
+
+  /// Driver offer accept button
+  ///
+  /// In en, this message translates to:
+  /// **'Accept ride · {fare}'**
+  String acceptRideWithFare(Object fare);
+
+  /// No description provided for @decline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get decline;
+
+  /// No description provided for @pickupLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup'**
+  String get pickupLabel;
+
+  /// No description provided for @dropoffLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dropoff'**
+  String get dropoffLabel;
+
+  /// No description provided for @secondsUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'sec'**
+  String get secondsUnit;
+
+  /// Distance away
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km away'**
+  String kmAway(Object km);
+
+  /// Drive time
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String minutesAway(Object minutes);
 }
 
 class _AppLocalizationsDelegate

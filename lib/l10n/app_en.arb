@@ -2599,11 +2599,40 @@
   "checkoutRequiredModifier": "Please choose an option for: {group}",
   "@checkoutRequiredModifier": {
     "description": "Checkout RPC error mapping (required modifier group)",
-    "placeholders": {"group": {}}
+    "placeholders": {
+      "group": {}
+    }
   },
   "checkoutModifierMaxExceeded": "Too many options chosen for: {group}",
   "@checkoutModifierMaxExceeded": {
     "description": "Checkout RPC error mapping (modifier group max selections)",
-    "placeholders": {"group": {}}
+    "placeholders": {
+      "group": {}
+    }
+  },
+  "acceptRideWithFare": "Accept ride · {fare}",
+  "@acceptRideWithFare": {
+    "description": "Driver offer accept button",
+    "placeholders": {
+      "fare": {}
+    }
+  },
+  "decline": "Decline",
+  "pickupLabel": "Pickup",
+  "dropoffLabel": "Dropoff",
+  "secondsUnit": "sec",
+  "kmAway": "{km} km away",
+  "@kmAway": {
+    "description": "Distance away",
+    "placeholders": {
+      "km": {}
+    }
+  },
+  "minutesAway": "{minutes} min",
+  "@minutesAway": {
+    "description": "Drive time",
+    "placeholders": {
+      "minutes": {}
+    }
   }
 }

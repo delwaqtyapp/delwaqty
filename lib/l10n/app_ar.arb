@@ -2540,11 +2540,40 @@
   "checkoutRequiredModifier": "يرجى اختيار خيار لـ: {group}",
   "@checkoutRequiredModifier": {
     "description": "Checkout RPC error mapping (required modifier group)",
-    "placeholders": {"group": {}}
+    "placeholders": {
+      "group": {}
+    }
   },
   "checkoutModifierMaxExceeded": "تم اختيار عدد كبير من الخيارات لـ: {group}",
   "@checkoutModifierMaxExceeded": {
     "description": "Checkout RPC error mapping (modifier group max selections)",
-    "placeholders": {"group": {}}
+    "placeholders": {
+      "group": {}
+    }
+  },
+  "acceptRideWithFare": "قبول الرحلة · {fare}",
+  "@acceptRideWithFare": {
+    "description": "Driver offer accept button",
+    "placeholders": {
+      "fare": {}
+    }
+  },
+  "decline": "رفض",
+  "pickupLabel": "الاستلام",
+  "dropoffLabel": "التسليم",
+  "secondsUnit": "ثانية",
+  "kmAway": "على بُعد {km} كم",
+  "@kmAway": {
+    "description": "Distance away",
+    "placeholders": {
+      "km": {}
+    }
+  },
+  "minutesAway": "{minutes} دقيقة",
+  "@minutesAway": {
+    "description": "Drive time",
+    "placeholders": {
+      "minutes": {}
+    }
   }
 }

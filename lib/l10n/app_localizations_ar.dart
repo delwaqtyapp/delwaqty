@@ -7623,4 +7623,31 @@ class AppLocalizationsAr extends AppLocalizations {
   String checkoutModifierMaxExceeded(Object group) {
     return 'تم اختيار عدد كبير من الخيارات لـ: $group';
   }
+
+  @override
+  String acceptRideWithFare(Object fare) {
+    return 'قبول الرحلة · $fare';
+  }
+
+  @override
+  String get decline => 'رفض';
+
+  @override
+  String get pickupLabel => 'الاستلام';
+
+  @override
+  String get dropoffLabel => 'التسليم';
+
+  @override
+  String get secondsUnit => 'ثانية';
+
+  @override
+  String kmAway(Object km) {
+    return 'على بُعد $km كم';
+  }
+
+  @override
+  String minutesAway(Object minutes) {
+    return '$minutes دقيقة';
+  }
 }

@@ -223,3 +223,18 @@ Any authenticated user can create an order with arbitrary prices.
   call-shape quirk, not a bug.)
 - cancel_delivery/cancel_ride_lifecycle: actor derived from auth.uid(), not the
   client-supplied p_actor_role.
+
+## F16 — CRITICAL — Self-serve unvetted merchant storefronts (live-verified end-to-end)
+
+- users.user_type is NOT covered by the users guard trigger: any signed-in user
+  PATCHes user_type='merchant' (204). role, role_key, account_status,
+  verification_status ARE guarded (blocked with proper messages).
+- resolve_my_merchant then auto-provisions a merchant row for
+  user_type IN (merchant, provider) with status='active', is_open=true,
+  rating=5.0 - no admin approval, no documents. Live: customer test account
+  minted active storefront 82da5114 in two calls (deleted; user_type restored).
+- is_admin() reads the guarded role column, so admin takeover does NOT work;
+  blast radius is unvetted merchant/provider provisioning (products, orders,
+  banner campaigns via provider gate). With F8 OTP bypass, mass fake vendors.
+- Fix: guard user_type in the users trigger; require approved provider record
+  in resolve_my_merchant instead of auto-minting active merchants.

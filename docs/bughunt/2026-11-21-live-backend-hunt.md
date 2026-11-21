@@ -491,3 +491,7 @@ Owner confirmation: written WhatsApp recap 2:58 PM + his "تمام" reply 2:59 P
 - 186 (bug found by probing): wallet_refund's 145 guard silently dropped credits to ANOTHER user - hit 185's apology AND 184's driver-reported refusal refund AND admin-cancel refunds. Fixed via revoked server-only _wallet_credit; all three flows rerouted. Re-probed: wallet +5 and delay_apology txn land.
 - ANTIGRAVITY BUILD LIST: driver app button to report a delay/breakdown (report_driver_delay), merchant re-dispatch action (redispatch_delayed_order), surface EDIT/CANCEL_ALLOWANCE_EXHAUSTED errors in customer app.
 - OPEN for owner: driver-delay allowance exact number (3 now, he said 3-4 - one UPDATE to platform_settings); apology amount exact (5 now, he said ~5-7 - same); consequence beyond driver allowance (currently: logged + ops complaint, no penalty); refusal suspension 2nd-vs-3rd was NOT answered (kept 3rd).
+
+## Migration 187: Cairo month windows (applied + probed 3:07 PM, commit 2a9cecc)
+
+All four allowance functions (cancel_order, add_order_items, report_delivery_refusal, _driver_delay_redispatch) now bound months by Africa/Cairo local month start (verified: Nov 2026 Cairo start = 2026-10-31 22:00 UTC). Cancel path re-probed live after the swap. Change made on main's call under the owner's blanket authority.

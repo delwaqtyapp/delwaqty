@@ -91,8 +91,13 @@ class CartPage extends ConsumerWidget {
 
           return Column(
             children: [
-              Expanded(
+              // Loose + shrinkWrap: with few items the totals sit right under
+              // the list instead of a screen of empty space (batch 7 item 6);
+              // with many items the list still takes the room and scrolls.
+              Flexible(
+                fit: FlexFit.loose,
                 child: ListView.builder(
+                  shrinkWrap: true,
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   itemCount: cart.items.length,
                   itemBuilder: (context, index) {

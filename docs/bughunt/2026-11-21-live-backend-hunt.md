@@ -171,3 +171,14 @@ Any authenticated user can create an order with arbitrary prices.
 ## Also verified clean
 
 - `send-push` edge function: 401 unauthorized without service credentials.
+
+## F12 — HIGH — Fake reviews: any account can rate any merchant with no order (live-verified)
+
+- reviews INSERT policy allows order_id IS NULL with only auth.uid()=user_id.
+- Probe: test customer (never ordered from merchant a1b2c3d4-0003…) posted a
+  1-star review with order_id null — INSERT succeeded; probe row deleted.
+- Impact: unlimited review-bombing / self-boosting with throwaway accounts
+  (trivially created, see F8 OTP bypass). Public SELECT means ratings are
+  immediately visible and pollute merchant ratings.
+- Fix: require order_id NOT NULL pointing to a completed order by that user
+  for that merchant (drop the NULL branch).

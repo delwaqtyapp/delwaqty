@@ -13,9 +13,15 @@ class StartupErrorPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: const Color(0xFF241E44),
-      child: SafeArea(
+    // No MaterialApp/WidgetsApp ancestor exists on this path (runApp points
+    // straight at this page), so provide Directionality ourselves. Without
+    // it the Scrollable below inserts a RawScrollbar that throws
+    // 'No Directionality widget found' and the page renders pure white.
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Material(
+        color: const Color(0xFF241E44),
+        child: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -54,6 +60,7 @@ class StartupErrorPage extends StatelessWidget {
                   const SizedBox(height: 16),
                   const _HintBox(),
                 ],
+                ),
               ),
             ),
           ),

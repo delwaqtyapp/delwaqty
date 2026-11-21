@@ -14,6 +14,7 @@ import 'package:delwaqty/shared/widgets/floating_glass_buttons.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/customer/driver/presentation/providers/dispatch_providers.dart';
 import 'package:delwaqty/core/auth/platform_capabilities.dart';
 
@@ -161,7 +162,20 @@ class DriverDashboardPage extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        AnimatedFadeIn(child: _OnlineHeader(profile: profile)),
+        performanceAsync.when(
+          loading: () => const SizedBox.shrink(),
+          error: (e, _) => const SizedBox.shrink(),
+          data: (perf) => Column(
+            children: [
+              AnimatedFadeIn(child: _TodayEarningsHero(performance: perf)),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+        AnimatedFadeIn(
+          delay: const Duration(milliseconds: 50),
+          child: _OnlineHeader(profile: profile),
+        ),
         const SizedBox(height: 16),
         performanceAsync.when(
           loading: () => const SizedBox.shrink(),
@@ -169,25 +183,28 @@ class DriverDashboardPage extends ConsumerWidget {
           data: (perf) => Column(
             children: [
               AnimatedFadeIn(
-                delay: const Duration(milliseconds: 50),
+                delay: const Duration(milliseconds: 100),
                 child: _EarningsOverviewCard(performance: perf),
               ),
               const SizedBox(height: 12),
               AnimatedFadeIn(
-                delay: const Duration(milliseconds: 100),
-                child: _PerformanceGrid(performance: perf),
+                delay: const Duration(milliseconds: 150),
+                child: _PerformanceGrid(
+                  performance: perf,
+                  rating: profile.rating,
+                ),
               ),
             ],
           ),
         ),
         const SizedBox(height: 16),
         AnimatedFadeIn(
-          delay: const Duration(milliseconds: 150),
+          delay: const Duration(milliseconds: 200),
           child: _ActionGrid(profile: profile),
         ),
         const SizedBox(height: 16),
         AnimatedFadeIn(
-          delay: const Duration(milliseconds: 200),
+          delay: const Duration(milliseconds: 250),
           child: Text(
             l10n.vehicleInfo,
             style: theme.textTheme.titleMedium?.copyWith(
@@ -197,7 +214,7 @@ class DriverDashboardPage extends ConsumerWidget {
         ),
         const SizedBox(height: 8),
         AnimatedFadeIn(
-          delay: const Duration(milliseconds: 250),
+          delay: const Duration(milliseconds: 300),
           child: _VehicleInfoCard(profile: profile),
         ),
       ],
@@ -331,8 +348,10 @@ class _OnlineHeader extends ConsumerWidget {
       }
     });
 
+    // Full-width 56dp switch card (sunlight rule: primary control >= 48dp).
     return Container(
-      padding: const EdgeInsets.all(20),
+      constraints: const BoxConstraints(minHeight: 56),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -342,76 +361,84 @@ class _OnlineHeader extends ConsumerWidget {
         ),
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Column(
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      isOnline ? l10n.online : l10n.offline,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: theme.colorScheme.onPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      isOnline
-                          ? l10n.onlineReadyForOrders
-                          : l10n.offlineTapToGoOnline,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onPrimary.withValues(
-                          alpha: 0.85,
-                        ),
-                      ),
-                    ),
-                  ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  isOnline ? l10n.online : l10n.offline,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              Switch(
-                value: isOnline,
-                activeThumbColor: theme.colorScheme.onPrimary,
-                onChanged: onlineState.isLoading
-                    ? null
-                    : (value) async {
-                        await ref
-                            .read(driverOnlineProvider(profile.id).notifier)
-                            .setOnline(value);
-                        ref.invalidate(driverProfileProvider(profile.userId));
-                      },
-              ),
-            ],
+                Text(
+                  isOnline
+                      ? l10n.onlineReadyForOrders
+                      : l10n.offlineTapToGoOnline,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onPrimary.withValues(alpha: 0.85),
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              // Ledger-backed numbers (migration 225): the denormalized
-              // profile counters drift because crediting RPCs never update
-              // them. Fall back to the profile only while loading.
-              _StatItem(
-                label: l10n.totalDeliveries,
-                value:
-                    '${ref.watch(_performanceProvider(profile.id)).value?.completedTrips ?? profile.totalDeliveries}',
-              ),
-              _StatItem(
-                label: l10n.earnings,
-                value: l10n.amountWithCurrency(
-                  (ref.watch(_performanceProvider(profile.id)).value?.balance ??
-                          profile.totalEarnings)
-                      .toStringAsFixed(0),
-                  l10n.currencySymbol,
-                ),
-              ),
-              _StatItem(
-                label: l10n.rating,
-                value: profile.rating.toStringAsFixed(1),
-              ),
-            ],
+          Switch(
+            value: isOnline,
+            activeThumbColor: theme.colorScheme.onPrimary,
+            onChanged: onlineState.isLoading
+                ? null
+                : (value) async {
+                    await ref
+                        .read(driverOnlineProvider(profile.id).notifier)
+                        .setOnline(value);
+                    ref.invalidate(driverProfileProvider(profile.userId));
+                  },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Today's earnings as the top hero (32sp price style).
+class _TodayEarningsHero extends StatelessWidget {
+  const _TodayEarningsHero({required this.performance});
+  final DriverPerformance performance;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.todayEarnings,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.amountWithCurrency(
+              performance.todayEarnings.toStringAsFixed(2),
+              l10n.currencySymbol,
+            ),
+            style: AppTextStyles.price.copyWith(
+              fontSize: 32,
+              color: theme.colorScheme.onSurface,
+            ),
           ),
         ],
       ),
@@ -527,8 +554,9 @@ class _EarningsOverviewCard extends StatelessWidget {
 }
 
 class _PerformanceGrid extends StatelessWidget {
-  const _PerformanceGrid({required this.performance});
+  const _PerformanceGrid({required this.performance, this.rating});
   final DriverPerformance performance;
+  final double? rating;
 
   @override
   Widget build(BuildContext context) {
@@ -572,6 +600,15 @@ class _PerformanceGrid extends StatelessWidget {
                   value: '${performance.cancellationRate.toStringAsFixed(0)}%',
                 ),
               ),
+              if (rating != null) ...[
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _MiniStat(
+                    label: l10n.rating,
+                    value: rating!.toStringAsFixed(1),
+                  ),
+                ),
+              ],
             ],
           ),
         ],

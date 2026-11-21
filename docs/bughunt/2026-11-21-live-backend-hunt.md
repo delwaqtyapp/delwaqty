@@ -318,3 +318,62 @@ Any authenticated user can create an order with arbitrary prices.
   the participant-scoped policy (168): realtime inherits it.
 - Intentionally-public reads flagged for his awareness, not changed:
   offers (q=true), reviews (q=true), coupons/promo_codes (is_active).
+
+---
+
+# Third pass (same day): provider/booking flows, chat/campaign, dispatch/geo, storage, auth code
+
+## F21 — HIGH — self-serve VERIFIED service providers (live-verified) — FIXED (178)
+
+- resolve_my_service_provider auto-provisioned a service_providers row for
+  any authenticated caller with is_verified=true, is_available=true,
+  rating=5.0, hourly_rate=100. Combined with the public
+  "available providers" policy (is_available=true), one call put anyone in
+  the public directory as a verified 5-star provider. Proven live with the
+  customer test account (anon could read the fabricated verified listing).
+- Fix: provisioning is dormant (unverified, unavailable, no rating, no rate);
+  activation goes through the admin verification path. The existing column
+  guard already blocks self-update of managed fields. App resolve flow
+  unchanged (stable id, idempotent).
+
+## F22 — MEDIUM — customer self-confirm of reservations (live-verified) — FIXED (179)
+
+- RLS allowed the reservation owner to UPDATE their row directly (the
+  customer app writes the table, not the RPC), so a customer could set
+  status='confirmed' (and table_number etc.) without the merchant. The
+  update_reservation_status RPC had the same hole (dead code in-app, but
+  callable).
+- Fix: SECURITY INVOKER guard trigger - non-merchant non-admin callers may
+  only change status to 'cancelled', ownership fields immutable. RPC returns
+  MERCHANT_ONLY_STATUS for customer confirms. Verified: REST + RPC self-
+  confirm blocked, customer logistics edits and cancel work, merchant
+  confirm works.
+
+## Areas audited CLEAN this pass
+
+- Wallet: grant-gated credits, self-only debits, RLS, approval gates.
+- Coupons table RLS (no user UPDATE; the app's direct-update fallback is
+  RLS-blocked by design).
+- Admin RPC wrapper layer (supervisor-tree / permission gates intact; the
+  F19 hole was the internal exec layer).
+- Chat: message insert participant-scoped; chat RPCs are trigger bodies or
+  participant-gated (chat_set_call_status).
+- Campaigns: publish/pause/resume/cancel/archive/submit all admin-gated;
+  provider banner flow creates draft -> review only.
+- Dispatch/driver lifecycle: accept/reject/arrive/start/complete/cancel all
+  bind auth.uid() to the driver in the inner functions; driver online-state
+  self-scoped with verification + vehicle preconditions.
+- Storage: sensitive buckets private + owner/admin-scoped; ID documents in
+  private identity-documents (moved off the public profiles bucket in 103);
+  public buckets only hold avatars/category images.
+- Service bookings: create is self-scoped; estimated_price is a pending
+  estimate with no payment attached.
+
+## Notes (no action)
+
+- open_emergency_chat lets any signed-in user open unlimited emergency
+  support rooms paging admins (spam vector, LOW). Rate limiting is a
+  product decision.
+- WhatsApp OTP remains ceremonial until the Meta inbound webhook lands
+  (app displays the code for the user to send; verify only checks the
+  code). Blocked on business verification - flagged since pass 1.

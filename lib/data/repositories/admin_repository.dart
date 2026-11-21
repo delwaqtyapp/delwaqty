@@ -939,16 +939,16 @@ class AdminRepository implements admin.AdminRepository {
       final String? fromStr = from?.toIso8601String();
       final String? toStr = to?.toIso8601String();
 
-      var query = _supabase.rpc('get_admin_analytics');
-
-      if (fromStr != null) {
-        query = query.eq('date_from', fromStr);
-      }
-      if (toStr != null) {
-        query = query.eq('date_to', toStr);
-      }
-
-      final response = await query;
+      // RPC params must be passed via `params:` — applying .eq() to an RPC
+      // call filters on a non-existent result column and the dates never
+      // reach the function.
+      final response = await _supabase.rpc(
+        'get_admin_analytics',
+        params: {
+          if (fromStr != null) 'date_from': fromStr,
+          if (toStr != null) 'date_to': toStr,
+        },
+      );
       return Map<String, dynamic>.from(response as Map);
     } catch (e) {
       throw AdminException('Failed to fetch analytics: $e');

@@ -61,7 +61,7 @@ class DriverDashboardPage extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: l10n.settings,
-            onPressed: () => context.push('/settings'),
+            onPressed: () => context.push('/settings/privacy-security'),
           ),
           IconButton(
             icon: const Icon(Icons.support_agent_rounded),

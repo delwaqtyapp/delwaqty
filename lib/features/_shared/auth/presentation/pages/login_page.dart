@@ -457,14 +457,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
                           _buildRegisterLink(l10n),
                           const SizedBox(height: 24),
                         ],
-                        if (_biometricAvailable) ...[
-                          _BiometricButton(
-                            onPressed: isLoading
-                                ? null
-                                : _authenticateWithBiometric,
-                          ),
-                          const SizedBox(height: 32),
-                        ],
                         const SizedBox(height: 16),
                       ],
                     ),
@@ -679,10 +671,22 @@ class _LoginPageState extends ConsumerState<LoginPage>
             ],
           ),
           const SizedBox(height: 24),
-          _LoginButton(
-            onPressed: isLoading ? null : _onLogin,
-            isLoading: isLoading,
-            label: l10n.signIn,
+          Row(
+            children: [
+              Expanded(
+                child: _LoginButton(
+                  onPressed: isLoading ? null : _onLogin,
+                  isLoading: isLoading,
+                  label: l10n.signIn,
+                ),
+              ),
+              if (_biometricAvailable) ...[
+                const SizedBox(width: 12),
+                _BiometricIconButton(
+                  onPressed: isLoading ? null : _authenticateWithBiometric,
+                ),
+              ],
+            ],
           ),
         ],
       ),
@@ -953,52 +957,42 @@ class _SavedAccountChip extends StatelessWidget {
   }
 }
 
-class _BiometricButton extends StatelessWidget {
-  const _BiometricButton({required this.onPressed});
+/// Compact gold-accented fingerprint button that sits beside the sign-in
+/// button (same 58px height) so biometric users never scroll for it.
+class _BiometricIconButton extends StatelessWidget {
+  const _BiometricIconButton({required this.onPressed});
 
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return Tooltip(
+      message: AppLocalizations.of(context).fingerprintLogin,
       child: GestureDetector(
         onTap: onPressed,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
-                  width: 1.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.1),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.fingerprint_rounded,
-                color: const Color(0xFFD4AF37).withValues(alpha: 0.8),
-                size: 28,
-              ),
+        child: Container(
+          width: 58,
+          height: 58,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+              width: 1.5,
             ),
-            const SizedBox(height: 6),
-            Text(
-              AppLocalizations.of(context).fingerprintLogin,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.white.withValues(alpha: 0.4),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFD4AF37).withValues(alpha: 0.12),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
-            ),
-          ],
+            ],
+          ),
+          child: const Icon(
+            Icons.fingerprint_rounded,
+            color: Color(0xFFD4AF37),
+            size: 28,
+          ),
         ),
       ),
     );

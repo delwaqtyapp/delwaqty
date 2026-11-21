@@ -944,7 +944,7 @@ class AdminRepository implements admin.AdminRepository {
       // reach the function.
       final response = await _supabase.rpc(
         'get_admin_analytics',
-        params: {?'date_from': fromStr, ?'date_to': toStr},
+        params: {'date_from': ?fromStr, 'date_to': ?toStr},
       );
       return Map<String, dynamic>.from(response as Map);
     } catch (e) {

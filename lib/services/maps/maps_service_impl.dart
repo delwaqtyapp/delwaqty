@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:delwaqty/config/app_config.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/geo_location.dart';
 import 'package:delwaqty/services/maps/maps_service.dart';
+import 'package:delwaqty/services/maps/android_cert_headers.dart';
 import 'package:http/http.dart' as http;
 
 String get _googleMapsApiKey => AppConfig.mapsApiKey;
@@ -33,6 +34,7 @@ class MapsServiceImpl implements MapsService {
           'mode': 'driving',
         },
       ),
+      headers: await androidMapsCertHeaders(),
     );
 
     if (response.statusCode != 200) {
@@ -94,6 +96,7 @@ class MapsServiceImpl implements MapsService {
           'alternatives': 'false',
         },
       ),
+      headers: await androidMapsCertHeaders(),
     );
 
     if (response.statusCode != 200) {

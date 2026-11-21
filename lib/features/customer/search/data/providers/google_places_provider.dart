@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:delwaqty/services/maps/android_cert_headers.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:delwaqty/features/customer/search/domain/entities/geo_point.dart';
@@ -185,7 +186,9 @@ class GooglePlacesProvider implements GeocodingProvider {
     final uri = Uri.https(_base, path, params);
     http.Response response;
     try {
-      response = await _client.get(uri).timeout(const Duration(seconds: 10));
+      response = await _client
+          .get(uri, headers: await androidMapsCertHeaders())
+          .timeout(const Duration(seconds: 10));
     } on Exception catch (e) {
       throw GeocodingException(GeocodingErrorKind.network, e.toString());
     }

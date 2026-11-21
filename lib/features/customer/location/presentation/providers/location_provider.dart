@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:delwaqty/services/maps/android_cert_headers.dart';
 import 'package:delwaqty/config/app_config.dart';
 import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
@@ -31,8 +32,6 @@ final userLocationProvider =
     );
 
 const double precisionTargetMeters = 1.0;
-
-const String _androidCertSha1 = '63F883088459AFB138B3105AAE428B0CC65A4F09';
 
 class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
   @override
@@ -431,11 +430,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
         'https://maps.googleapis.com/maps/api/geocode/json'
         '?latlng=$lat,$lng&key=$apiKey&language=$language',
       );
-      final headers = <String, String>{};
-      if (defaultTargetPlatform == TargetPlatform.android) {
-        headers['X-Android-Package'] = 'com.delwaqty.app';
-        headers['X-Android-Cert'] = _androidCertSha1;
-      }
+      final headers = await androidMapsCertHeaders();
       final response = await http
           .get(uri, headers: headers)
           .timeout(const Duration(seconds: 8));

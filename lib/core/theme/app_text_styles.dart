@@ -14,8 +14,8 @@ abstract final class AppTextStyles {
   static const TextStyle displayLarge = TextStyle(
     fontSize: 57,
     fontWeight: FontWeight.w400,
-    letterSpacing: -0.25,
-    height: 1.12,
+    letterSpacing: 0,
+    height: 1.2,
   );
 
   /// Display medium — 45sp.
@@ -23,7 +23,7 @@ abstract final class AppTextStyles {
     fontSize: 45,
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
-    height: 1.16,
+    height: 1.22,
   );
 
   /// Display small — 36sp.
@@ -31,7 +31,7 @@ abstract final class AppTextStyles {
     fontSize: 36,
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
-    height: 1.22,
+    height: 1.28,
   );
 
   // ---------------------------------------------------------------------------
@@ -43,7 +43,7 @@ abstract final class AppTextStyles {
     fontSize: 32,
     fontWeight: FontWeight.w600,
     letterSpacing: 0,
-    height: 1.25,
+    height: 1.3,
   );
 
   /// Headline medium — 28sp.
@@ -51,7 +51,7 @@ abstract final class AppTextStyles {
     fontSize: 28,
     fontWeight: FontWeight.w600,
     letterSpacing: 0,
-    height: 1.29,
+    height: 1.3,
   );
 
   /// Headline small — 24sp.
@@ -59,7 +59,7 @@ abstract final class AppTextStyles {
     fontSize: 24,
     fontWeight: FontWeight.w600,
     letterSpacing: 0,
-    height: 1.33,
+    height: 1.3,
   );
 
   // ---------------------------------------------------------------------------
@@ -71,23 +71,23 @@ abstract final class AppTextStyles {
     fontSize: 22,
     fontWeight: FontWeight.w600,
     letterSpacing: 0,
-    height: 1.27,
+    height: 1.35,
   );
 
   /// Title medium — 16sp, 0.15px letter spacing.
   static const TextStyle titleMedium = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w600,
-    letterSpacing: 0.15,
-    height: 1.5,
+    letterSpacing: 0,
+    height: 1.35,
   );
 
   /// Title small — 14sp, 0.1px letter spacing.
   static const TextStyle titleSmall = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w600,
-    letterSpacing: 0.1,
-    height: 1.43,
+    letterSpacing: 0,
+    height: 1.35,
   );
 
   // ---------------------------------------------------------------------------
@@ -98,24 +98,24 @@ abstract final class AppTextStyles {
   static const TextStyle bodyLarge = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w400,
-    letterSpacing: 0.5,
-    height: 1.5,
+    letterSpacing: 0,
+    height: 1.55,
   );
 
   /// Body medium — 14sp, 0.25px letter spacing.
   static const TextStyle bodyMedium = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w400,
-    letterSpacing: 0.25,
-    height: 1.43,
+    letterSpacing: 0,
+    height: 1.55,
   );
 
   /// Body small — 12sp, 0.4px letter spacing.
   static const TextStyle bodySmall = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.w400,
-    letterSpacing: 0.4,
-    height: 1.33,
+    letterSpacing: 0,
+    height: 1.45,
   );
 
   // ---------------------------------------------------------------------------
@@ -126,24 +126,37 @@ abstract final class AppTextStyles {
   static const TextStyle labelLarge = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w500,
-    letterSpacing: 0.1,
-    height: 1.43,
+    letterSpacing: 0,
+    height: 1.4,
   );
 
   /// Label medium — 12sp, 0.5px letter spacing.
   static const TextStyle labelMedium = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.w500,
-    letterSpacing: 0.5,
-    height: 1.33,
+    letterSpacing: 0,
+    height: 1.4,
   );
 
   /// Label small — 11sp, 0.5px letter spacing.
   static const TextStyle labelSmall = TextStyle(
     fontSize: 11,
     fontWeight: FontWeight.w500,
-    letterSpacing: 0.5,
-    height: 1.45,
+    letterSpacing: 0,
+    height: 1.4,
+  );
+
+  // ---------------------------------------------------------------------------
+  // Money
+  // ---------------------------------------------------------------------------
+
+  /// Price — 16sp, extra-bold, tabular figures so numbers align in lists.
+  static const TextStyle price = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w800,
+    letterSpacing: 0,
+    height: 1.3,
+    fontFeatures: [FontFeature.tabularFigures()],
   );
 
   // ---------------------------------------------------------------------------

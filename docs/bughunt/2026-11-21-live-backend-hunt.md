@@ -238,3 +238,83 @@ Any authenticated user can create an order with arbitrary prices.
   banner campaigns via provider gate). With F8 OTP bypass, mass fake vendors.
 - Fix: guard user_type in the users trigger; require approved provider record
   in resolve_my_merchant instead of auto-minting active merchants.
+
+---
+
+# Second pass (same day): wallet, coupons, admin RPC auth, realtime
+
+## F17 — HIGH — redeem_coupon anon + cross-account (live-verified) — FIXED (175)
+
+- Granted to anon+PUBLIC, SECURITY DEFINER, p_user_id caller-supplied with no
+  auth.uid() binding. Proven: signed-out caller burned 2/3 global uses of a
+  test coupon, planted coupon_redemptions rows for two foreign users (targeted
+  blocking: their orders then fail COUPON_ALREADY_REDEEMED), and the
+  already_redeemed reply is a per-user redemption oracle.
+- Fix: redeem is self-only (auth.uid() = p_user_id). Only internal caller is
+  create_order, which passes the caller's uid. Verified: anon + cross-user
+  now forbidden; legit create_order with coupon applies the server-side
+  discount and counts exactly one redemption.
+
+## F18 — MEDIUM — coupon usage-limit burn without ordering (live-verified) — FIXED (175)
+
+- increment_coupon_usage (authenticated, bare counter bump) and apply_coupon
+  (increments used_count at VALIDATION time) let any signed-in user exhaust
+  any coupon's global usage_limit without ordering. Both proven live.
+- Fix: both revoked from anon/authenticated/PUBLIC (service_role kept).
+  create_order's redeem_coupon is the authoritative counter; the app's extra
+  post-order increment now fails silently into an RLS-blocked fallback, which
+  also removes the double-count per coupon order.
+- Related (not a bug today): the app's fallback attempts a direct UPDATE on
+  coupons.used_count; only RLS blocks it. No UPDATE policy exists on coupons.
+- Open product question: cancel_order does not release a consumed coupon
+  redemption - a cancelled order burns the coupon.
+
+## F19 — CRITICAL — internal exec RPCs: p_actor forgery privilege escalation (live-verified) — FIXED (176)
+
+- _admin_exec_{create,deactivate,reactivate,region,role,supervisor},
+  _member_exec_{delete,sanction,revoke_sanction}, _approval_apply and other
+  internals were executable by authenticated; their gates validate a
+  CALLER-SUPPLIED p_actor, not the caller. Proven: customer account issued an
+  ACTIVE sanction against a driver as the owner (account_status flipped to
+  restricted); same path could deactivate admins, rewrite roles, soft-delete
+  and anonymize any member.
+- Fix (176): revoked EXECUTE from PUBLIC/anon/authenticated on 21 internal
+  functions (exec internals + write_audit/log_admin_action (fake-audit
+  planting) + notify_order_events/notify_notification_push/_enqueue_push +
+  _settlement_escalation_sweep + _issue/_redact_delivery_handoff +
+  _enforce_member_status/run_member_engines/_provision_business_target/
+  _sanction_status_for). Legit paths are SECURITY DEFINER wrappers passing
+  auth.uid() themselves; no app code calls these directly; triggers need no
+  EXECUTE grant. Re-probes now return permission denied.
+
+## F20 — LOW/MEDIUM — delivery_pricing world-readable (live-verified) — FIXED (177)
+
+- Base fees / per-km / multipliers for all service types readable by anon
+  (competitor intel). App reads post-login; estimate_delivery_fee RPC was
+  already authenticated-only. Fix: SELECT restricted to authenticated.
+  Verified anon -> [], customer unchanged.
+
+## Wallet audit — CLEAN
+
+- wallet_topup/wallet_refund/wallet_pay(uid variant) not granted to app
+  roles; wallet_pay(amount variant) is self-only debit; RLS on wallets +
+  wallet_transactions has no user UPDATE; approve_wallet_funding_request
+  gated by has_financial_permission; admin_direct_topup owner-only.
+
+## Admin RPC audit — wrapper layer CLEAN (post-176)
+
+- assign_admin_role/region, create_admin_account, deactivate_admin,
+  count_table_rows, approve_wallet_funding_request, admin_direct_topup all
+  check is_admin / supervisor tree / financial permission. The exposure was
+  the ungated internal layer (F19).
+
+## Realtime publication audit — CLOSED
+
+- supabase_realtime publishes 26 tables. postgres_changes enforces RLS per
+  subscriber, so exposure equals SELECT policy. After 168/169/174/177 every
+  published table's SELECT is owner/participant/admin-scoped or intentionally
+  public (offers, reviews, coupons - marketing surfaces, product decision to
+  keep). The F8-era concern about order_tracking broadcasting is closed by
+  the participant-scoped policy (168): realtime inherits it.
+- Intentionally-public reads flagged for his awareness, not changed:
+  offers (q=true), reviews (q=true), coupons/promo_codes (is_active).

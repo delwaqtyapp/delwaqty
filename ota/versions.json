@@ -1,28 +1,28 @@
 {
   "channels": {
     "customer": {
-      "version": 2,
-      "versionName": "1.0.1+2",
+      "version": 4,
+      "versionName": "1.0.3+4",
       "apk": "delwaqty-customer.apk",
-      "notes": "تحديث العروض وتحسينات الأداء"
+      "notes": "إصلاحات الدفع والطلبات وتحسينات لوحة التاجر والكابتن"
     },
     "admin": {
-      "version": 2,
-      "versionName": "1.0.1+2",
+      "version": 4,
+      "versionName": "1.0.3+4",
       "apk": "delwaqty-admin.apk",
-      "notes": "تحديث العروض وتحسينات الأداء"
+      "notes": "إصلاحات الدفع والطلبات وتحسينات لوحة التاجر والكابتن"
     },
     "driver": {
-      "version": 2,
-      "versionName": "1.0.1+2",
+      "version": 4,
+      "versionName": "1.0.3+4",
       "apk": "delwaqty-driver.apk",
-      "notes": "تحديث العروض وتحسينات الأداء"
+      "notes": "إصلاحات الدفع والطلبات وتحسينات لوحة التاجر والكابتن"
     },
     "provider": {
-      "version": 2,
-      "versionName": "1.0.1+2",
+      "version": 4,
+      "versionName": "1.0.3+4",
       "apk": "delwaqty-provider.apk",
-      "notes": "تحديث العروض وتحسينات الأداء"
+      "notes": "إصلاحات الدفع والطلبات وتحسينات لوحة التاجر والكابتن"
     }
   }
 }

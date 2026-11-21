@@ -224,6 +224,31 @@ abstract class VerificationRequest with _$VerificationRequest {
       _$VerificationRequestFromJson(json);
 }
 
+// ─── Verification Documents ────────────────────────────────
+
+/// Document URLs a driver/merchant/provider uploaded at registration, for
+/// admin review before approving verification. Plain class (not freezed):
+/// read-only, no copyWith/equality needs, and avoids a codegen round.
+class VerificationDocuments {
+  const VerificationDocuments({
+    this.idCardUrl,
+    this.profilePhotoUrl,
+    this.tradeLicenseUrl,
+    this.drivingLicenseUrl,
+  });
+
+  final String? idCardUrl;
+  final String? profilePhotoUrl;
+  final String? tradeLicenseUrl;
+  final String? drivingLicenseUrl;
+
+  bool get isEmpty =>
+      idCardUrl == null &&
+      profilePhotoUrl == null &&
+      tradeLicenseUrl == null &&
+      drivingLicenseUrl == null;
+}
+
 // ─── Exception ─────────────────────────────────────────────
 
 class AdminException implements Exception {

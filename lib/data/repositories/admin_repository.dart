@@ -987,6 +987,28 @@ class AdminRepository implements admin.AdminRepository {
   }
 
   @override
+  Future<VerificationDocuments> getVerificationDocuments(String userId) async {
+    try {
+      final row = await _supabase
+          .from('users')
+          .select(
+            'id_card_url, profile_photo_url, trade_license_url, driving_license_url',
+          )
+          .eq('id', userId)
+          .maybeSingle();
+      if (row == null) return const VerificationDocuments();
+      return VerificationDocuments(
+        idCardUrl: row['id_card_url'] as String?,
+        profilePhotoUrl: row['profile_photo_url'] as String?,
+        tradeLicenseUrl: row['trade_license_url'] as String?,
+        drivingLicenseUrl: row['driving_license_url'] as String?,
+      );
+    } catch (e) {
+      throw AdminException('Failed to fetch verification documents: $e');
+    }
+  }
+
+  @override
   Future<void> approveVerification(String userId) async {
     try {
       await _supabase.rpc(

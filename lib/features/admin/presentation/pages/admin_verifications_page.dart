@@ -530,34 +530,10 @@ class _VerificationCard extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 12),
-          if (request.idCardUrl != null || request.profilePhotoUrl != null)
-            Row(
-              children: [
-                if (request.idCardUrl != null)
-                  Expanded(
-                    child: _DocumentThumb(
-                      label: l10n.idCard,
-                      url: request.idCardUrl!,
-                      onTap: () =>
-                          onViewDocument(request.idCardUrl!, l10n.idCard),
-                    ),
-                  ),
-                if (request.idCardUrl != null &&
-                    request.profilePhotoUrl != null)
-                  const SizedBox(width: 10),
-                if (request.profilePhotoUrl != null)
-                  Expanded(
-                    child: _DocumentThumb(
-                      label: l10n.profilePhoto,
-                      url: request.profilePhotoUrl!,
-                      onTap: () => onViewDocument(
-                        request.profilePhotoUrl!,
-                        l10n.profilePhoto,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+          _VerificationDocsSection(
+            userId: request.userId,
+            onViewDocument: onViewDocument,
+          ),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -603,6 +579,112 @@ class _VerificationCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Loads and lays out every document the applicant uploaded at
+/// registration (ID card, driving license, trade license, profile photo),
+/// each openable for review. When nothing was uploaded the admin sees an
+/// explicit note instead of a blank card - approving with no documents is
+/// a visible choice, not an accident.
+class _VerificationDocsSection extends ConsumerWidget {
+  const _VerificationDocsSection({
+    required this.userId,
+    required this.onViewDocument,
+  });
+
+  final String userId;
+  final void Function(String url, String label) onViewDocument;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final docsAsync = ref.watch(verificationDocumentsProvider(userId));
+    final cs = Theme.of(context).colorScheme;
+
+    return docsAsync.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      ),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (docs) {
+        if (docs.isEmpty) {
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: cs.error.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: cs.error.withValues(alpha: 0.25)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, size: 18, color: cs.error),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.noDocuments,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: cs.error),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        final entries = <MapEntry<String, String>>[
+          if (docs.idCardUrl != null) MapEntry(l10n.idCard, docs.idCardUrl!),
+          if (docs.drivingLicenseUrl != null)
+            MapEntry(l10n.drivingLicense, docs.drivingLicenseUrl!),
+          if (docs.tradeLicenseUrl != null)
+            MapEntry(l10n.tradeLicense, docs.tradeLicenseUrl!),
+          if (docs.profilePhotoUrl != null)
+            MapEntry(l10n.profilePhoto, docs.profilePhotoUrl!),
+        ];
+        final rows = <Widget>[];
+        for (var i = 0; i < entries.length; i += 2) {
+          rows.add(
+            Row(
+              children: [
+                Expanded(
+                  child: _DocumentThumb(
+                    label: entries[i].key,
+                    url: entries[i].value,
+                    onTap: () =>
+                        onViewDocument(entries[i].value, entries[i].key),
+                  ),
+                ),
+                if (i + 1 < entries.length) ...[
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _DocumentThumb(
+                      label: entries[i + 1].key,
+                      url: entries[i + 1].value,
+                      onTap: () => onViewDocument(
+                        entries[i + 1].value,
+                        entries[i + 1].key,
+                      ),
+                    ),
+                  ),
+                ] else
+                  const Expanded(child: SizedBox.shrink()),
+              ],
+            ),
+          );
+          if (i + 2 < entries.length) rows.add(const SizedBox(height: 10));
+        }
+        return Column(children: rows);
+      },
     );
   }
 }

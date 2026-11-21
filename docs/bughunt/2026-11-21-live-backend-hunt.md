@@ -182,3 +182,22 @@ Any authenticated user can create an order with arbitrary prices.
   immediately visible and pollute merchant ratings.
 - Fix: require order_id NOT NULL pointing to a completed order by that user
   for that merchant (drop the NULL branch).
+
+## F13 — HIGH — No server-side stock enforcement (live-verified)
+
+- product set to stock_quantity=0 + is_in_stock=false, then create_order qty=3
+  SUCCEEDED (order bfef6c47, 165 EGP, since cancelled). stock_quantity also
+  never decrements on create (5 -> 5 observed). Stock is cosmetic; oversell
+  guaranteed under any concurrency. Fix: enforce + atomically decrement in
+  create_order; restore on cancel.
+
+## F14 — HIGH — Cancel after driver assigned; merchant/driver never notified (live-verified)
+
+- cancel_order blocks only delivered/cancelled. Live: order a9dcd505 accepted
+  by driver (status preparing, driver assigned), customer cancelled -> ok.
+- Notification rows: cancel notice went ONLY to the customer (actor). Merchant
+  got the new-order ping but nothing on cancel; driver got nothing and
+  driver_id stays on the cancelled order. Driver would pick up a cancelled
+  order while the merchant prepares it. No stock restore either (moot, F13).
+- Fix: block customer cancel once accepted (merchant/driver-confirmed cancel),
+  notify merchant + driver, unassign driver, clean deliveries.

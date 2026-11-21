@@ -99,12 +99,6 @@ for flavor in "${!RENAMES[@]}"; do
   gh release upload "$TAG" "$TMP_APK" --clobber >/dev/null
   echo "  uploaded ${RENAMES[$flavor]}.apk"
 done
-# Upload the OTA manifest as a release asset too — served via the immutable
-# per-tag URL /releases/download/<tag>/versions.json which the apps fetch via
-# the GitHub API "latest tag" lookup (no raw-file or redirect cache delay).
-gh release upload "$TAG" "ota/versions.json" --clobber >/dev/null
-echo "  uploaded versions.json"
-
 # ── 4. Update ota/versions.json ───────────────────────────────────
 NOTES="${NOTES:-تحديث جديد}"
 python3 - "$NEW_BUILD" "$BASE" <<'PYEOF'
@@ -121,6 +115,12 @@ with open(path, "w", encoding="utf-8") as f:
     json.dump(data, f, ensure_ascii=False, indent=2)
 print("ota/versions.json updated to build", build_num)
 PYEOF
+
+# Upload the OTA manifest as a release asset too — served via the immutable
+# per-tag URL /releases/download/<tag>/versions.json which the apps fetch via
+# the GitHub API "latest tag" lookup (no raw-file or redirect cache delay).
+gh release upload "$TAG" "ota/versions.json" --clobber >/dev/null
+echo "  uploaded versions.json"
 
 echo ""
 echo "============================================"

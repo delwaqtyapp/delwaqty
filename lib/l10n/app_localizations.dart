@@ -2096,6 +2096,12 @@ abstract class AppLocalizations {
   /// **'No orders found'**
   String get noOrdersFound;
 
+  /// No description provided for @noOrdersFoundHint.
+  ///
+  /// In en, this message translates to:
+  /// **'New orders will show up here'**
+  String get noOrdersFoundHint;
+
   /// No description provided for @markInTransit.
   ///
   /// In en, this message translates to:

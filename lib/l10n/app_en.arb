@@ -354,6 +354,7 @@
   "searchOrders": "Search orders...",
   "filterOrders": "Filter Orders",
   "noOrdersFound": "No orders found",
+  "noOrdersFoundHint": "New orders will show up here",
   "markInTransit": "Mark In Transit",
   "markDelivered": "Mark Delivered",
   "cancelOrder": "Cancel Order",

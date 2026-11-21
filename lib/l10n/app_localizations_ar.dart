@@ -1041,6 +1041,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noOrdersFound => 'لم يتم العثور على طلبات';
 
   @override
+  String get noOrdersFoundHint => 'ستظهر الطلبات الجديدة هنا';
+
+  @override
   String get markInTransit => 'تعيين كـجاري التوصيل';
 
   @override

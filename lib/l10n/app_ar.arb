@@ -350,6 +350,7 @@
   "searchOrders": "ابحث عن طلبات...",
   "filterOrders": "تصفية الطلبات",
   "noOrdersFound": "لم يتم العثور على طلبات",
+  "noOrdersFoundHint": "ستظهر الطلبات الجديدة هنا",
   "markInTransit": "تعيين كـجاري التوصيل",
   "markDelivered": "تعيين كـتم التوصيل",
   "cancelOrder": "إلغاء الطلب",

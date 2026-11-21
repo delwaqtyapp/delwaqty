@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -308,6 +309,10 @@ class _OnlineHeader extends ConsumerWidget {
       next,
     ) {
       if (next.hasError && next.error != null) {
+        // Web has no app-settings screen: the "Open Settings" action is a
+        // dead end there, and the browser re-prompts on the next attempt
+        // anyway, so the nag adds nothing (UI batch 15).
+        if (kIsWeb) return;
         final error = next.error!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -431,8 +436,11 @@ class _EarningsOverviewCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Labelled "Available balance" (not "Wallet"): period tiles show
+          // GROSS earnings, this card shows the withdrawable remainder,
+          // and identical labels read as a contradiction (UI batch 15).
           Text(
-            l10n.wallet,
+            l10n.availableBalance,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),

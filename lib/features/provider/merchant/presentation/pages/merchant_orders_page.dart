@@ -120,7 +120,7 @@ class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
                     child: PremiumEmptyState(
                       icon: Icons.receipt_long_rounded,
                       title: l10n.noOrdersFound,
-                      message: l10n.noOrdersFound,
+                      message: l10n.noOrdersFoundHint,
                     ),
                   );
                 }

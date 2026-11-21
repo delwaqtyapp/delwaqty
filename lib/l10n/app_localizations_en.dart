@@ -1047,6 +1047,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noOrdersFound => 'No orders found';
 
   @override
+  String get noOrdersFoundHint => 'New orders will show up here';
+
+  @override
   String get markInTransit => 'Mark In Transit';
 
   @override

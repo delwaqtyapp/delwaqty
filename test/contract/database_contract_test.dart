@@ -409,6 +409,37 @@ void main() {
     });
   });
 
+  String latestDefining221(String marker) {
+    int numOf(File f) => int.parse(f.path.split('/').last.split('_').first);
+    final hits =
+        migrationFiles
+            .where((f) => f.readAsStringSync().contains(marker))
+            .toList()
+          ..sort((a, b) => numOf(a).compareTo(numOf(b)));
+    expect(hits, isNotEmpty, reason: '$marker not found in migrations');
+    return hits.last.readAsStringSync();
+  }
+
+  group('canonical create path (migration 221)', () {
+    test('create_order accepts every payment method the CHECK allows', () {
+      final latest = latestDefining221('FUNCTION public.create_order(');
+      expect(latest, contains("'card'"));
+      expect(latest, contains("'wallet'"));
+      expect(latest, contains('orders_payment_method_check'));
+    });
+
+    test('create_order_idempotent delegates to server-side pricing', () {
+      // C5: the wrapper must never trust client amounts; it forwards only
+      // product ids and quantities to the canonical create_order.
+      final latest = latestDefining221(
+        'FUNCTION public.create_order_idempotent',
+      );
+      expect(latest, contains('RETURN public.create_order('));
+      expect(latest, isNot(contains('INSERT INTO public.orders')));
+      expect(latest, isNot(contains('p_subtotal,')));
+    });
+  });
+
   group('rpc grant lockdown (migration 218)', () {
     // Security reviewer C4/C5: client-callable SECURITY DEFINER money and
     // pricing functions. The app calls none of them; they must be revoked

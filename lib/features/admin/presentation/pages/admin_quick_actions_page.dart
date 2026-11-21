@@ -330,7 +330,13 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
                                         .outlineVariant
                                         .withValues(alpha: 0.5),
                                   ),
-                                ListTile(
+                                // Wrapped in a transparent Material so the
+                                // tile's background/ink splash paint above
+                                // PremiumCard's DecoratedBox (framework
+                                // assertion otherwise).
+                                Material(
+                                  type: MaterialType.transparency,
+                                  child: ListTile(
                                   onTap: () =>
                                       context.push(filtered[g].$4[index].route),
                                   dense: true,
@@ -366,6 +372,7 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
                                       context,
                                     ).colorScheme.onSurfaceVariant,
                                   ),
+                                ),
                                 ),
                               ],
                             ],

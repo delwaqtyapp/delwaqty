@@ -10,7 +10,7 @@ class SearchSession {
     final seq = _counter++;
     final rand =
         (now ^ (now >> 17) ^ (seq * 0x9E3779B1) ^ 0x5DEECE66D) &
-        0x7FFFFFFFFFFFFFFF;
+        0x7FFFFFFF; // 32-bit-safe mask: JS (web) cannot represent max-int64
     return SearchSession(
       'sess_${now.toRadixString(16)}_${seq.toRadixString(16)}_${rand.toRadixString(16)}',
     );

@@ -1163,6 +1163,7 @@
   "securityAlerts": "Security Alerts",
   "securityAlertsDescription": "Get notified about suspicious activity",
   "somethingWentWrong": "Something went wrong. Please try again.",
+  "locationPermissionRequired": "Location permission is required",
   "securityCenter": "Security Center",
   "trustedDevices": "Trusted Devices",
   "mainSection": "Main",

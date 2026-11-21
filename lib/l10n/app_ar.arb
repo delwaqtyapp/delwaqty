@@ -1161,6 +1161,7 @@
   "securityAlerts": "تنبيهات الأمان",
   "securityAlertsDescription": "استلام إشعارات عن أنشطة مشبوهة",
   "somethingWentWrong": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+  "locationPermissionRequired": "مطلوب إذن الوصول إلى الموقع",
   "securityCenter": "مركز الأمان",
   "trustedDevices": "الأجهزة الموثوقة",
   "mainSection": "الرئيسية",

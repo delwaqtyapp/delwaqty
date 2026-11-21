@@ -7624,4 +7624,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get each => 'each';
+
+  @override
+  String get mapUnavailableOnWeb =>
+      'Map preview is unavailable in the browser. Use Detect My Location or confirm the pinned position.';
 }

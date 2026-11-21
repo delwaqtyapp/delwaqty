@@ -265,7 +265,8 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
     try {
       final loc = await ref
           .read(userLocationProvider.notifier)
-          .refreshDeepLocked();
+          .refreshDeepLocked()
+          .timeout(const Duration(seconds: 12), onTimeout: () => null);
       if (!mounted) return;
       if (loc != null) {
         final target = LatLng(loc.latitude, loc.longitude);
@@ -451,43 +452,46 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: _center,
-                    zoom: 17,
-                  ),
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: false,
-                  zoomControlsEnabled: false,
-                  mapToolbarEnabled: false,
-                  gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-                    const Factory<OneSequenceGestureRecognizer>(
-                      EagerGestureRecognizer.new,
+                if (kIsWeb)
+                  const _WebMapFallback()
+                else
+                  GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: _center,
+                      zoom: 17,
                     ),
-                  },
-                  onMapCreated: (ctrl) {
-                    if (!_mapController.isCompleted) {
-                      _mapController.complete(ctrl);
-                    }
-                  },
-                  onCameraMoveStarted: () {
-                    if (!_isMoving || _accuracyMeters != null) {
-                      setState(() {
-                        _isMoving = true;
-                        _accuracyMeters = null;
-                      });
-                    }
-                  },
-                  onCameraMove: (pos) {
-                    _center = pos.target;
-                  },
-                  onCameraIdle: () {
-                    if (_isMoving) {
-                      setState(() => _isMoving = false);
-                    }
-                    _reverseGeocodeCenter(_center);
-                  },
-                ),
+                    myLocationEnabled: true,
+                    myLocationButtonEnabled: false,
+                    zoomControlsEnabled: false,
+                    mapToolbarEnabled: false,
+                    gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                      const Factory<OneSequenceGestureRecognizer>(
+                        EagerGestureRecognizer.new,
+                      ),
+                    },
+                    onMapCreated: (ctrl) {
+                      if (!_mapController.isCompleted) {
+                        _mapController.complete(ctrl);
+                      }
+                    },
+                    onCameraMoveStarted: () {
+                      if (!_isMoving || _accuracyMeters != null) {
+                        setState(() {
+                          _isMoving = true;
+                          _accuracyMeters = null;
+                        });
+                      }
+                    },
+                    onCameraMove: (pos) {
+                      _center = pos.target;
+                    },
+                    onCameraIdle: () {
+                      if (_isMoving) {
+                        setState(() => _isMoving = false);
+                      }
+                      _reverseGeocodeCenter(_center);
+                    },
+                  ),
                 // Animated floating center pin
                 IgnorePointer(
                   child: Column(
@@ -722,6 +726,40 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Web has no Google Maps JS key, so the native map plugin throws a raw
+/// null-check error. Show a calm placeholder instead; Detect/Confirm still
+/// work, so checkout is never blocked by the map.
+class _WebMapFallback extends StatelessWidget {
+  const _WebMapFallback();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      color: cs.surfaceContainerHighest,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.map_outlined, size: 48, color: cs.onSurfaceVariant),
+              const SizedBox(height: 12),
+              Text(
+                l10n.mapUnavailableOnWeb,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(color: cs.onSurfaceVariant),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -2534,5 +2534,6 @@
   "each": "each",
   "@each": {
     "description": "Unit-price suffix on a cart line, e.g. '25 EGP each'"
-  }
+  },
+  "mapUnavailableOnWeb": "Map preview is unavailable in the browser. Use Detect My Location or confirm the pinned position."
 }

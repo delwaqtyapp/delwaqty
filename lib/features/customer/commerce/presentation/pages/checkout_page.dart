@@ -13,6 +13,7 @@ import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CheckoutPage extends ConsumerStatefulWidget {
   const CheckoutPage({super.key});
@@ -114,6 +115,28 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     final textTheme = context.textTheme;
     final cartAsync = ref.watch(_cartFutureProvider);
     final userLoc = ref.watch(userLocationProvider).value;
+    final savedAddresses = ref.watch(_savedAddressesProvider).value;
+    if (!_addressPrefilled &&
+        _addressController.text.isEmpty &&
+        savedAddresses != null &&
+        savedAddresses.isNotEmpty) {
+      final def = savedAddresses.firstWhere(
+        (a) => a['is_default'] == true,
+        orElse: () => savedAddresses.first,
+      );
+      final lat = (def['latitude'] as num?)?.toDouble();
+      final lng = (def['longitude'] as num?)?.toDouble();
+      final addr = (def['address'] as String?) ?? '';
+      if (lat != null && lng != null && addr.isNotEmpty) {
+        _addressController.text = addr;
+        _deliveryLocation = UserLocation(
+          latitude: lat,
+          longitude: lng,
+          detailedAddress: addr,
+        );
+        _addressPrefilled = true;
+      }
+    }
     if (!_addressPrefilled &&
         _addressController.text.isEmpty &&
         userLoc != null &&
@@ -149,6 +172,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             );
           }
 
+          final deliveryFee =
+              ref.watch(_merchantFeeProvider(cart.merchantId)).value ??
+              cart.deliveryFee;
+          final orderTotal = cart.subtotal + deliveryFee - cart.discount;
+
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -171,6 +199,45 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   ),
                 ),
               ),
+              if (savedAddresses != null && savedAddresses.isNotEmpty)
+                SizedBox(
+                  height: 44,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.only(top: 8),
+                    itemCount: savedAddresses.length,
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
+                    itemBuilder: (context, i) {
+                      final a = savedAddresses[i];
+                      final lat = (a['latitude'] as num?)?.toDouble();
+                      final lng = (a['longitude'] as num?)?.toDouble();
+                      final label =
+                          (a['label'] as String?)?.trim().isNotEmpty == true
+                          ? a['label'] as String
+                          : (a['address'] as String? ?? '');
+                      final selected =
+                          lat != null &&
+                          _deliveryLocation?.latitude == lat &&
+                          _deliveryLocation?.longitude == lng;
+                      return ChoiceChip(
+                        label: Text(label),
+                        selected: selected,
+                        onSelected: lat == null || lng == null
+                            ? null
+                            : (_) => setState(() {
+                                final addr = (a['address'] as String?) ?? '';
+                                _addressController.text = addr;
+                                _deliveryLocation = UserLocation(
+                                  latitude: lat,
+                                  longitude: lng,
+                                  detailedAddress: addr,
+                                );
+                                _addressPrefilled = true;
+                              }),
+                      );
+                    },
+                  ),
+                ),
               Wrap(
                 alignment: WrapAlignment.end,
                 children: [
@@ -262,11 +329,10 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                                 discount = coupon.value;
                                 break;
                               case CouponType.freeDelivery:
-                                discount = cart.deliveryFee;
+                                discount = deliveryFee;
                                 break;
                             }
-                            final maxDiscount =
-                                cart.subtotal + cart.deliveryFee;
+                            final maxDiscount = cart.subtotal + deliveryFee;
                             discount = discount.clamp(0.0, maxDiscount);
                             await ref
                                 .read(cartProvider.notifier)
@@ -330,11 +396,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                           value:
                               '${cart.subtotal.toStringAsFixed(0)} ${l10n.egp}',
                         ),
-                        if (cart.deliveryFee > 0)
+                        if (deliveryFee > 0)
                           _SummaryRow(
                             label: l10n.deliveryFee,
                             value:
-                                '${cart.deliveryFee.toStringAsFixed(0)} ${l10n.egp}',
+                                '${deliveryFee.toStringAsFixed(0)} ${l10n.egp}',
                           ),
                         if (cart.discount > 0)
                           _SummaryRow(
@@ -346,7 +412,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                         Divider(color: colorScheme.outlineVariant),
                         _SummaryRow(
                           label: l10n.total,
-                          value: '${cart.total.toStringAsFixed(0)} ${l10n.egp}',
+                          value: '${orderTotal.toStringAsFixed(0)} ${l10n.egp}',
                           isBold: true,
                         ),
                       ],
@@ -455,6 +521,37 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
 
 final _cartFutureProvider = Provider<AsyncValue<commerce.Cart?>>((ref) {
   return ref.watch(cartProvider);
+});
+
+/// Saved delivery addresses (user_addresses) for the checkout picker.
+final _savedAddressesProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
+  final client = Supabase.instance.client;
+  final uid = client.auth.currentUser?.id;
+  if (uid == null) return const <Map<String, dynamic>>[];
+  final rows = await client
+      .from('user_addresses')
+      .select('id,label,address,latitude,longitude,is_default')
+      .eq('user_id', uid)
+      .order('is_default', ascending: false)
+      .order('created_at');
+  return (rows as List<dynamic>).cast<Map<String, dynamic>>();
+});
+
+/// The local cart never stores the merchant's delivery fee, so the summary
+/// must read it from the merchant row (the server charges the same value).
+final _merchantFeeProvider = FutureProvider.family<double, String>((
+  ref,
+  merchantId,
+) async {
+  if (merchantId.isEmpty) return 0;
+  final row = await Supabase.instance.client
+      .from('merchants')
+      .select('delivery_fee')
+      .eq('id', merchantId)
+      .maybeSingle();
+  return (row?['delivery_fee'] as num?)?.toDouble() ?? 0;
 });
 
 class _SectionTitle extends StatelessWidget {

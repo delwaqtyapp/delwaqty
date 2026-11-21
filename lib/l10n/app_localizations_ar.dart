@@ -7565,4 +7565,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get each => 'للقطعة';
+
+  @override
+  String get mapUnavailableOnWeb =>
+      'معاينة الخريطة غير متاحة في المتصفح. استخدم تحديد موقعي أو أكّد الموضع الحالي.';
 }

@@ -14533,6 +14533,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'each'**
   String get each;
+
+  /// No description provided for @mapUnavailableOnWeb.
+  ///
+  /// In en, this message translates to:
+  /// **'Map preview is unavailable in the browser. Use Detect My Location or confirm the pinned position.'**
+  String get mapUnavailableOnWeb;
 }
 
 class _AppLocalizationsDelegate

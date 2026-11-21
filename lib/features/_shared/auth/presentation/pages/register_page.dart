@@ -24,6 +24,7 @@ import 'package:delwaqty/shared/widgets/social_auth_buttons.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/pressable_scale.dart';
 import 'package:delwaqty/data/repositories/cached_service_booking_repository.dart';
+import 'package:delwaqty/data/datasources/local/biometric_auth_store.dart';
 
 const _kRegBg = Color(0xFF0A0614);
 const _kGold = Color(0xFFD4AF37);
@@ -323,6 +324,24 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         );
   }
 
+  /// Registers this device for the App Lock gate + biometric unlock by
+  /// storing the fresh credentials in secure storage. Without this, accounts
+  /// created on this device never get a device account: the cold-start gate
+  /// sees hasDeviceAccount=false and the persisted session walks straight
+  /// into the app, and the fingerprint button never appears on login.
+  Future<void> _saveDeviceCredentials() async {
+    try {
+      final authState = ref.read(authStateProvider);
+      final user = authState.whenOrNull(authenticated: (u) => u);
+      final email = _emailController.text.trim();
+      final password = _passwordController.text;
+      if (user == null || email.isEmpty || password.isEmpty) return;
+      await ref
+          .read(biometricAuthStoreProvider)
+          .saveCredentials(userId: user.id, email: email, password: password);
+    } catch (_) {}
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -330,8 +349,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
     ref.listen<AuthState>(authStateProvider, (prev, next) {
       next.whenOrNull(
-        authenticated: (_) =>
-            context.go(postAuthRoute(ref.read(appFlavorProvider))),
+        authenticated: (_) {
+          _saveDeviceCredentials();
+          context.go(postAuthRoute(ref.read(appFlavorProvider)));
+        },
         pendingVerification: () => context.go('/pending-verification'),
         emailConfirmationRequired: (email) {
           showDialog(

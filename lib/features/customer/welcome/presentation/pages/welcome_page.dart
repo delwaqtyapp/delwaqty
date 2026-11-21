@@ -8,8 +8,9 @@ import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/animated_slide_in.dart';
-import 'package:delwaqty/shared/widgets/app_button.dart';
-import 'package:delwaqty/shared/widgets/gradient_background.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/shared/widgets/cinematic_auth_background.dart';
+import 'package:delwaqty/shared/widgets/pressable_scale.dart';
 import 'package:delwaqty/shared/widgets/social_auth_buttons.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
@@ -21,8 +22,11 @@ class WelcomePage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      body: GradientBackground(
-        child: SafeArea(
+      backgroundColor: const Color(0xFF0A0614),
+      body: Stack(
+        children: [
+          const CinematicAuthBackground(),
+          SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Column(
@@ -100,20 +104,17 @@ class WelcomePage extends ConsumerWidget {
                 const Spacer(flex: 3),
                 AnimatedSlideIn(
                   delay: const Duration(milliseconds: 600),
-                  child: AppButton(
+                  child: _WelcomePrimaryButton(
                     onPressed: () => context.pushNamed('login'),
-                    isExpanded: true,
-                    child: Text(l10n.welcomeLoginButton),
+                    label: l10n.welcomeLoginButton,
                   ),
                 ),
                 const SizedBox(height: 12),
                 AnimatedSlideIn(
                   delay: const Duration(milliseconds: 700),
-                  child: AppButton(
+                  child: _WelcomeOutlineButton(
                     onPressed: () => context.pushNamed('register'),
-                    isExpanded: true,
-                    variant: AppButtonVariant.outlined,
-                    child: Text(l10n.welcomeRegisterButton),
+                    label: l10n.welcomeRegisterButton,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -150,6 +151,90 @@ class WelcomePage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
               ],
+            ),
+          ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Primary CTA matching the login page's gradient button (58px, radius 22).
+class _WelcomePrimaryButton extends StatelessWidget {
+  const _WelcomePrimaryButton({required this.onPressed, required this.label});
+
+  final VoidCallback onPressed;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressableScale(
+      scale: 0.98,
+      onTap: onPressed,
+      child: Container(
+        width: double.infinity,
+        height: 58,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.brandPurple, Color(0xFF6B5CE7)],
+          ),
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.brandPurple.withValues(alpha: 0.25),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Secondary CTA matching the login page's glass/outline language.
+class _WelcomeOutlineButton extends StatelessWidget {
+  const _WelcomeOutlineButton({required this.onPressed, required this.label});
+
+  final VoidCallback onPressed;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressableScale(
+      scale: 0.98,
+      onTap: onPressed,
+      child: Container(
+        width: double.infinity,
+        height: 58,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.25),
+            width: 1.2,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              letterSpacing: 0.5,
             ),
           ),
         ),

@@ -112,7 +112,7 @@ class DriverModule extends FeatureModule {
       label: (ctx) => AppLocalizations.of(ctx).settings,
       icon: Icons.settings_outlined,
       position: DrawerPosition.settings,
-      onTap: (ctx, _) => ctx.push('/settings'),
+      onTap: (ctx, _) => ctx.push('/settings/privacy-security'),
     ),
     DrawerEntry(
       id: 'driver-support',

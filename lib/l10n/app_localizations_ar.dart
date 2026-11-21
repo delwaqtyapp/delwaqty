@@ -2986,13 +2986,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get locationError => 'مقدرش أحدد موقعك';
 
   @override
-  String get locationPermissionRequired =>
-      'التطبيق محتاج إذن الموقع عشان تقدر تشتغل وتستلم الطلبات';
-
-  @override
-  String get openSettings => 'فتح الإعدادات';
-
-  @override
   String get accuracyInsufficient =>
       'الدقة الحالية غير كافية (مطلوب دقة 1 متر). اقترب من النافذة أو توجه لمكان مفتوح ثم أعد المحاولة.';
 
@@ -3593,6 +3586,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get somethingWentWrong => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get locationPermissionRequired => 'مطلوب إذن الوصول إلى الموقع';
 
   @override
   String get securityCenter => 'مركز الأمان';
@@ -7022,10 +7018,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get confirmCancelDeliveryTitle => 'إلغاء التوصيل النشط؟';
 
   @override
+  String get confirmCancelDeliveryBody =>
+      'هل أنت متأكد من رغبتك في إلغاء مهمة التوصيل الحالية؟';
+
+  @override
   String get reportIncidentTitle => 'الإبلاغ عن مشكلة';
 
   @override
-  String get reportIncidentBody => 'الطلب مع المندوب بالفعل، لذا لا يمكن إلغاؤه مباشرة. أبلغ عن المشكلة وسيتدخل الدعم.';
+  String get reportIncidentBody =>
+      'الطلب مع المندوب بالفعل، لذا لا يمكن إلغاؤه مباشرة. أبلغ عن المشكلة وسيتدخل الدعم.';
 
   @override
   String get incidentKindBreakdown => 'عطل في المركبة';
@@ -7050,10 +7051,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get sendReport => 'إرسال البلاغ';
-
-  @override
-  String get confirmCancelDeliveryBody =>
-      'هل أنت متأكد من رغبتك في إلغاء مهمة التوصيل الحالية؟';
 
   @override
   String get radarSearchingForOrders =>

@@ -385,14 +385,20 @@ class _OnlineHeader extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
+              // Ledger-backed numbers (migration 225): the denormalized
+              // profile counters drift because crediting RPCs never update
+              // them. Fall back to the profile only while loading.
               _StatItem(
                 label: l10n.totalDeliveries,
-                value: '${profile.totalDeliveries}',
+                value:
+                    '${ref.watch(_performanceProvider(profile.id)).value?.completedTrips ?? profile.totalDeliveries}',
               ),
               _StatItem(
                 label: l10n.earnings,
                 value: l10n.amountWithCurrency(
-                  profile.totalEarnings.toStringAsFixed(0),
+                  (ref.watch(_performanceProvider(profile.id)).value?.balance ??
+                          profile.totalEarnings)
+                      .toStringAsFixed(0),
                   l10n.currencySymbol,
                 ),
               ),

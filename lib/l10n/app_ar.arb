@@ -2456,5 +2456,14 @@
   "askPickupHandoff": "اطلب كود الاستلام من التاجر أو المرسل عند استلام الطلب فعليًا.",
   "adminUsersPageSubtitle": "كل الحسابات المسجلة على المنصة",
   "adminUsersSearchHint": "ابحث بالاسم أو البريد أو الهاتف...",
-  "joinedDate": "انضم في"
+  "joinedDate": "انضم في",
+  "posCashier": "الكاشير (نقطة البيع)",
+  "posCompleteSale": "إتمام البيع",
+  "posSaleComplete": "تم البيع بنجاح",
+  "posSaleTotal": "الإجمالي المحصل",
+  "posCustomerNameOptional": "اسم العميل (اختياري)",
+  "posTapToAdd": "اضغط على منتج لإضافته",
+  "posVodafoneCash": "فودافون كاش",
+  "posSaleFailed": "فشل البيع",
+  "posNoProducts": "لا توجد منتجات قابلة للبيع بعد"
 }

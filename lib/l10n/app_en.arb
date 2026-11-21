@@ -2515,5 +2515,14 @@
   "askPickupHandoff": "Ask the merchant or sender for their code when collecting the items.",
   "adminUsersPageSubtitle": "Every registered account on the platform",
   "adminUsersSearchHint": "Search by name, email, or phone...",
-  "joinedDate": "Joined"
+  "joinedDate": "Joined",
+  "posCashier": "Cashier (POS)",
+  "posCompleteSale": "Complete Sale",
+  "posSaleComplete": "Sale completed",
+  "posSaleTotal": "Charged total",
+  "posCustomerNameOptional": "Customer name (optional)",
+  "posTapToAdd": "Tap a product to add it",
+  "posVodafoneCash": "Vodafone Cash",
+  "posSaleFailed": "Sale failed",
+  "posNoProducts": "No sellable products yet"
 }

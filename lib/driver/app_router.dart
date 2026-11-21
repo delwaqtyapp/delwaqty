@@ -59,9 +59,7 @@ final driverGoRouterProvider = Provider<GoRouter>((ref) {
         return null;
       }
 
-      if (isVerificationPending &&
-          !isVerificationPendingRoute &&
-          !isAuthRoute) {
+      if (isVerificationPending && !isVerificationPendingRoute) {
         return '/pending-verification';
       }
 

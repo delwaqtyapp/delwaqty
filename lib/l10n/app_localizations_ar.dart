@@ -2986,6 +2986,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get locationError => 'مقدرش أحدد موقعك';
 
   @override
+  String get locationPermissionRequired =>
+      'التطبيق محتاج إذن الموقع عشان تقدر تشتغل وتستلم الطلبات';
+
+  @override
+  String get openSettings => 'فتح الإعدادات';
+
+  @override
   String get accuracyInsufficient =>
       'الدقة الحالية غير كافية (مطلوب دقة 1 متر). اقترب من النافذة أو توجه لمكان مفتوح ثم أعد المحاولة.';
 

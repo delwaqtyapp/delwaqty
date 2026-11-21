@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
@@ -10,9 +11,9 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/floating_glass_buttons.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/customer/driver/presentation/providers/dispatch_providers.dart';
 import 'package:delwaqty/core/auth/platform_capabilities.dart';
-import 'package:delwaqty/core/errors/app_error_text.dart';
 
 final _performanceProvider = FutureProvider.family<DriverPerformance, String>((
   ref,
@@ -306,8 +307,20 @@ class _OnlineHeader extends ConsumerWidget {
       next,
     ) {
       if (next.hasError && next.error != null) {
+        final error = next.error!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, next.error!))),
+          SnackBar(
+            content: Text(appErrorText(context, error)),
+            // Location denials get a way out: open the system app settings.
+            action: classifyAppError(error) == AppErrorKind.location
+                ? SnackBarAction(
+                    label: l10n.openSettings,
+                    onPressed: () {
+                      geolocator.Geolocator.openAppSettings();
+                    },
+                  )
+                : null,
+          ),
         );
       }
     });

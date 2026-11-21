@@ -93,26 +93,6 @@ class PrivacySecurityPage extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          _buildSection(
-            context,
-            title: l10n.about,
-            children: [
-              _buildNavTile(
-                context,
-                icon: Icons.privacy_tip_outlined,
-                title: l10n.privacyPolicy,
-                onTap: () => context.push('/settings/privacy-policy'),
-              ),
-              _buildDivider(cs),
-              _buildNavTile(
-                context,
-                icon: Icons.description_outlined,
-                title: l10n.termsOfService,
-                onTap: () => context.push('/settings/terms-of-service'),
-              ),
-            ],
-          ),
           const SizedBox(height: 32),
         ],
       ),

@@ -1,5 +1,6 @@
 import 'package:delwaqty/core/module/feature_registry.dart';
 import 'package:delwaqty/features/_shared/auth/auth_module.dart';
+import 'package:delwaqty/features/customer/welcome/welcome_module.dart';
 import 'package:delwaqty/features/admin/admin_module.dart';
 import 'package:delwaqty/features/admin/member_management/member_management_module.dart';
 import 'package:delwaqty/features/_shared/complaints/complaints_module.dart';
@@ -17,6 +18,7 @@ void registerAdminModules() {
 
   registry.registerAll([
     AuthModule(),
+    WelcomeModule(),
     AdminModule(),
     MemberManagementModule(),
     ComplaintsModule(),

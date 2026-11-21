@@ -3003,13 +3003,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get locationError => 'Could not get your location';
 
   @override
-  String get locationPermissionRequired =>
-      'Location permission is needed to go online and receive deliveries';
-
-  @override
-  String get openSettings => 'Open settings';
-
-  @override
   String get accuracyInsufficient =>
       'Current accuracy is insufficient (1 m required). Move near a window or go to an open area and try again.';
 
@@ -3619,6 +3612,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get somethingWentWrong => 'Something went wrong. Please try again.';
+
+  @override
+  String get locationPermissionRequired => 'Location permission is required';
 
   @override
   String get securityCenter => 'Security Center';
@@ -7073,10 +7069,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmCancelDeliveryTitle => 'Cancel Active Delivery?';
 
   @override
+  String get confirmCancelDeliveryBody =>
+      'Are you sure you want to cancel this delivery assignment?';
+
+  @override
   String get reportIncidentTitle => 'Report a problem';
 
   @override
-  String get reportIncidentBody => 'The order is already with the driver, so it can\'t simply be cancelled. Report the problem and support will step in.';
+  String get reportIncidentBody =>
+      'The order is already with the driver, so it can\'t simply be cancelled. Report the problem and support will step in.';
 
   @override
   String get incidentKindBreakdown => 'Vehicle breakdown';
@@ -7101,10 +7102,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sendReport => 'Send report';
-
-  @override
-  String get confirmCancelDeliveryBody =>
-      'Are you sure you want to cancel this delivery assignment?';
 
   @override
   String get radarSearchingForOrders =>

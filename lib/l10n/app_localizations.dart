@@ -14539,6 +14539,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Map preview is unavailable in the browser. Use Detect My Location or confirm the pinned position.'**
   String get mapUnavailableOnWeb;
+
+  /// Friendly zero-state title on the driver financial center
+  ///
+  /// In en, this message translates to:
+  /// **'No earnings yet'**
+  String get earningsEmptyTitle;
+
+  /// Friendly zero-state body on the driver financial center
+  ///
+  /// In en, this message translates to:
+  /// **'Go online and accept your first delivery to start earning. Your balance, bonuses and payouts will show up here.'**
+  String get earningsEmptyBody;
 }
 
 class _AppLocalizationsDelegate

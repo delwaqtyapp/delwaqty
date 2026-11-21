@@ -78,33 +78,41 @@ class _EarningsBody extends ConsumerWidget {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          statsAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text(appErrorText(context, e))),
-            data: (stats) => _BalanceCard(driverId: driverId, stats: stats),
-          ),
-          const SizedBox(height: 16),
-          walletAsync.when(
-            loading: () => const SizedBox.shrink(),
-            error: (e, _) => Center(child: Text(appErrorText(context, e))),
-            data: (wallet) => _WalletBreakdownCard(wallet: wallet),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            l10n.earningsHistory,
-            style: Theme.of(context).textTheme.titleMedium
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
+          // Friendly zero state: a brand-new driver sees one welcoming card
+          // instead of a wall of zero stats and jargon.
+          if (_isZeroState(statsAsync, walletAsync, earningsAsync))
+            const _EarningsZeroState()
+          else ...[
+            statsAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text(appErrorText(context, e))),
+              data: (stats) => _BalanceCard(driverId: driverId, stats: stats),
+            ),
+            const SizedBox(height: 16),
+            walletAsync.when(
+              loading: () => const SizedBox.shrink(),
+              error: (e, _) => Center(child: Text(appErrorText(context, e))),
+              data: (wallet) => _WalletBreakdownCard(wallet: wallet),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              l10n.earningsHistory,
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+          ],
           earningsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => Center(child: Text(appErrorText(context, e))),
             data: (earnings) {
               if (earnings.isEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Center(child: Text(l10n.noTransactionsYet)),
-                );
+                return _isZeroState(statsAsync, walletAsync, earningsAsync)
+                    ? const SizedBox.shrink()
+                    : Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Center(child: Text(l10n.noTransactionsYet)),
+                      );
               }
               return Column(
                 children: earnings.map((e) {
@@ -163,6 +171,71 @@ class _EarningsBody extends ConsumerWidget {
       default:
         return l10n.adjustment;
     }
+  }
+}
+
+bool _isZeroState(
+  AsyncValue<DriverStats> statsAsync,
+  AsyncValue<WalletDetail> walletAsync,
+  AsyncValue<List<dynamic>> earningsAsync,
+) {
+  final stats = statsAsync.value;
+  final earnings = earningsAsync.value;
+  if (stats == null || earnings == null) return false;
+  final wallet = walletAsync.value;
+  final walletZero =
+      wallet == null ||
+      (wallet.balance == 0 &&
+          wallet.bonusBalance == 0 &&
+          wallet.incentiveBalance == 0 &&
+          wallet.pendingWithdrawals == 0 &&
+          wallet.totalWithdrawn == 0);
+  return stats.balance == 0 &&
+      stats.weekEarnings == 0 &&
+      stats.pendingWithdrawals == 0 &&
+      earnings.isEmpty &&
+      walletZero;
+}
+
+class _EarningsZeroState extends StatelessWidget {
+  const _EarningsZeroState();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.payments_outlined,
+            size: 56,
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            l10n.earningsEmptyTitle,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.earningsEmptyBody,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
   }
 }
 

@@ -2476,5 +2476,13 @@
   "@each": {
     "description": "Unit-price suffix on a cart line, e.g. '25 EGP each'"
   },
-  "mapUnavailableOnWeb": "معاينة الخريطة غير متاحة في المتصفح. استخدم تحديد موقعي أو أكّد الموضع الحالي."
+  "mapUnavailableOnWeb": "معاينة الخريطة غير متاحة في المتصفح. استخدم تحديد موقعي أو أكّد الموضع الحالي.",
+  "earningsEmptyTitle": "لا توجد أرباح بعد",
+  "@earningsEmptyTitle": {
+    "description": "Friendly zero-state title on the driver financial center"
+  },
+  "earningsEmptyBody": "فعّل التوصيل واقبل أول طلب لبدء الربح. سيظهر رصيدك ومكافآتك ومدفوعاتك هنا.",
+  "@earningsEmptyBody": {
+    "description": "Friendly zero-state body on the driver financial center"
+  }
 }

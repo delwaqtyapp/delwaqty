@@ -2535,5 +2535,13 @@
   "@each": {
     "description": "Unit-price suffix on a cart line, e.g. '25 EGP each'"
   },
-  "mapUnavailableOnWeb": "Map preview is unavailable in the browser. Use Detect My Location or confirm the pinned position."
+  "mapUnavailableOnWeb": "Map preview is unavailable in the browser. Use Detect My Location or confirm the pinned position.",
+  "earningsEmptyTitle": "No earnings yet",
+  "@earningsEmptyTitle": {
+    "description": "Friendly zero-state title on the driver financial center"
+  },
+  "earningsEmptyBody": "Go online and accept your first delivery to start earning. Your balance, bonuses and payouts will show up here.",
+  "@earningsEmptyBody": {
+    "description": "Friendly zero-state body on the driver financial center"
+  }
 }

@@ -7628,4 +7628,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get mapUnavailableOnWeb =>
       'Map preview is unavailable in the browser. Use Detect My Location or confirm the pinned position.';
+
+  @override
+  String get earningsEmptyTitle => 'No earnings yet';
+
+  @override
+  String get earningsEmptyBody =>
+      'Go online and accept your first delivery to start earning. Your balance, bonuses and payouts will show up here.';
 }

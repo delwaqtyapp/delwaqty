@@ -7569,4 +7569,11 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get mapUnavailableOnWeb =>
       'معاينة الخريطة غير متاحة في المتصفح. استخدم تحديد موقعي أو أكّد الموضع الحالي.';
+
+  @override
+  String get earningsEmptyTitle => 'لا توجد أرباح بعد';
+
+  @override
+  String get earningsEmptyBody =>
+      'فعّل التوصيل واقبل أول طلب لبدء الربح. سيظهر رصيدك ومكافآتك ومدفوعاتك هنا.';
 }

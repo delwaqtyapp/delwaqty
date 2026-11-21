@@ -537,12 +537,23 @@ Source: owner's 2026-11-21 15:14 voice note (full spec, all 5 items).
 - Static: commission waiver present in both settlement functions'
   live prosrc; `_duty_admin_for_region` + `_lift_expired_member_sanctions` exist.
 
-### Infra incident during 188
-- pg_cron extension was DROPPED from the live project between the 187 probes
-  (~15:07) and 188 application (~15:19). Re-enabled via SQL; re-created the 3
-  jobs from migration 055 (deactivate-stale-tokens, apply-retention-policies,
-  run-member-engines) plus 188's lift-expired-member-sanctions. 4 jobs live.
-  Cause unknown - worth asking who touched the project dashboard.
+### pg_cron episode during 188 - RESOLVED: never installed, not dropped
+- 188's cron.schedule failed with schema "cron" does not exist; initially
+  misreported as an extension drop between 15:07-15:19.
+- Forensic follow-up (owner-requested) via pg_stat_statements per-statement
+  stats_since + job-execution history proved pg_cron was NEVER installed:
+  zero executions of any 055 job since August setup, no August-era
+  create-extension for pg_cron, and the extension was already absent on
+  2026-11-20 ~19:32 EET (agent's own extension-list read during settlement
+  design). The 3 historical applications of migration 055 all failed at
+  statement 1 unnoticed ("need pg_cron to be scheduled" assumption).
+- No intruder, no credential compromise, no dashboard actor. Only platform
+  automation (realtime partition housekeeping) touched the DB today.
+- Fix applied 2026-11-21 15:19 EET: extension created, all 3 jobs from 055
+  scheduled for the FIRST time, plus 188's lift-expired-member-sanctions.
+  First-ever runs: run_member_engines hourly, deactivate-stale-tokens daily,
+  apply-retention-policies weekly (Sun 02:00 UTC; will first purge
+  location_updates/driver_locations > 90d and notifications > 365d).
 
 ### App-side work (Antigravity, not in this migration)
 - Appeal button in the customer app (routes to `submit_appeal`).

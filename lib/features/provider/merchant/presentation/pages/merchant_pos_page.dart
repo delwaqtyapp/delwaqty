@@ -6,6 +6,8 @@ import 'dart:math';
 
 import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_spacing.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
@@ -131,9 +133,9 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
                     gridDelegate:
                         const SliverGridDelegateWithMaxCrossAxisExtent(
                           maxCrossAxisExtent: 180,
-                          // Fixed tile height: fits a 2-line name above the
-                          // price and stock rows without collision.
-                          mainAxisExtent: 150,
+                          // Fixed tile height: image/monogram area above a
+                          // 2-line name, price and stock rows.
+                          mainAxisExtent: 210,
                           mainAxisSpacing: 12,
                           crossAxisSpacing: 12,
                         ),
@@ -214,46 +216,127 @@ class _ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final name = (product['name'] ?? '').toString();
+    final imageUrl = (product['image_url'] ?? '').toString();
     final price = (product['price'] as num?)?.toDouble() ?? 0;
     final stock = (product['stock_quantity'] as num?)?.toInt() ?? 0;
     final soldOut = stock <= 0;
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: soldOut ? null : onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
+    final monogram = name.trim().isEmpty ? '؟' : name.trim()[0];
+
+    final visual = imageUrl.isNotEmpty
+        ? Image.network(
+            imageUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => _MonogramTile(letter: monogram),
+            loadingBuilder: (context, child, progress) =>
+                progress == null ? child : _MonogramTile(letter: monogram),
+          )
+        : _MonogramTile(letter: monogram);
+
+    return Opacity(
+      opacity: soldOut ? 0.45 : 1,
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: soldOut ? null : onTap,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Text(
-                  name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    visual,
+                    if (qty > 0)
+                      PositionedDirectional(
+                        top: 6,
+                        start: 6,
+                        child: Badge(
+                          label: Text('$qty'),
+                          backgroundColor: AppColors.brandPurple,
+                          textColor: Colors.white,
+                        ),
+                      ),
+                    if (soldOut)
+                      PositionedDirectional(
+                        bottom: 6,
+                        start: 6,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.errorLight,
+                            borderRadius: AppSpacing.borderRadiusMd,
+                          ),
+                          child: Text(
+                            l10n.outOfStock,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              Text(
-                '${price.toStringAsFixed(2)} ${l10n.currencySymbol}',
-                style: const TextStyle(
-                  color: AppColors.brandPurple,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                soldOut
-                    ? l10n.outOfStock
-                    : '${l10n.quantity}: $stock${qty > 0 ? '  •  $qty' : ''}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: soldOut ? AppColors.errorLight : Colors.grey.shade600,
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${price.toStringAsFixed(2)} ${l10n.currencySymbol}',
+                      style: AppTextStyles.price.copyWith(
+                        color: AppColors.brandPurple,
+                      ),
+                    ),
+                    Text(
+                      '${l10n.quantity}: $stock',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: soldOut
+                            ? AppColors.errorLight
+                            : theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MonogramTile extends StatelessWidget {
+  const _MonogramTile({required this.letter});
+
+  final String letter;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.brandLavender,
+      alignment: Alignment.center,
+      child: Text(
+        letter,
+        style: AppTextStyles.displaySmall.copyWith(
+          color: AppColors.brandPurple,
+          fontWeight: FontWeight.w800,
         ),
       ),
     );
@@ -295,130 +378,164 @@ class _CartPanel extends StatelessWidget {
       for (final p in products)
         if ((cart[p['id']] ?? 0) > 0) p,
     ];
-    return ListView(
-      padding: const EdgeInsets.all(16),
+    return Column(
       children: [
-        Row(
-          children: [
-            Text(
-              l10n.cart,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const Spacer(),
-            if (lines.isNotEmpty)
-              TextButton(onPressed: onClear, child: Text(l10n.clearCart)),
-          ],
-        ),
-        if (lines.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 32),
-            child: Center(child: Text(l10n.posTapToAdd)),
-          )
-        else
-          for (final p in lines)
-            ListTile(
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              title: Text(
-                (p['name'] ?? '').toString(),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              subtitle: Text(
-                '${((p['price'] as num?)?.toDouble() ?? 0).toStringAsFixed(2)} '
-                '${l10n.currencySymbol}',
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.remove_circle_outline),
-                    onPressed: () => onQtyChanged(
-                      p['id'] as String,
-                      (cart[p['id']] ?? 1) - 1,
+                  Text(
+                    l10n.cart,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text('${cart[p['id']]}'),
-                  IconButton(
-                    icon: const Icon(Icons.add_circle_outline),
-                    onPressed: () {
-                      final stock = (p['stock_quantity'] as num?)?.toInt() ?? 0;
-                      final cur = cart[p['id']] ?? 0;
-                      if (cur < stock) {
-                        onQtyChanged(p['id'] as String, cur + 1);
-                      }
-                    },
-                  ),
+                  const Spacer(),
+                  if (lines.isNotEmpty)
+                    TextButton(onPressed: onClear, child: Text(l10n.clearCart)),
                 ],
               ),
-            ),
-        const Divider(height: 24),
-        TextField(
-          controller: customerCtrl,
-          decoration: InputDecoration(
-            labelText: l10n.posCustomerNameOptional,
-            border: const OutlineInputBorder(),
-            isDense: true,
-          ),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: discountCtrl,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: InputDecoration(
-            labelText: l10n.discount,
-            border: const OutlineInputBorder(),
-            isDense: true,
-          ),
-        ),
-        const SizedBox(height: 12),
-        DropdownButtonFormField<String>(
-          initialValue: paymentMethod,
-          decoration: InputDecoration(
-            labelText: l10n.paymentMethod,
-            border: const OutlineInputBorder(),
-            isDense: true,
-          ),
-          items: [
-            DropdownMenuItem(value: 'cash', child: Text(l10n.cash)),
-            DropdownMenuItem(value: 'instapay', child: Text(l10n.instapay)),
-            DropdownMenuItem(
-              value: 'vodafone_cash',
-              child: Text(l10n.posVodafoneCash),
-            ),
-          ],
-          onChanged: (v) {
-            if (v != null) onPaymentChanged(v);
-          },
-        ),
-        const Divider(height: 24),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(l10n.subtotal),
-            Text(
-              '${subtotal.toStringAsFixed(2)} ${l10n.currencySymbol}',
-              style: const TextStyle(fontWeight: FontWeight.w700),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        FilledButton.icon(
-          onPressed: lines.isEmpty || submitting ? null : onComplete,
-          icon: submitting
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+              if (lines.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 32),
+                  child: Center(child: Text(l10n.posTapToAdd)),
                 )
-              : const Icon(Icons.point_of_sale_rounded),
-          label: Text(
-            l10n.posCompleteSale,
-            maxLines: 1,
-            softWrap: false,
-            overflow: TextOverflow.ellipsis,
+              else
+                for (final p in lines)
+                  ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      (p['name'] ?? '').toString(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Text(
+                      '${((p['price'] as num?)?.toDouble() ?? 0).toStringAsFixed(2)} '
+                      '${l10n.currencySymbol}',
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.remove_circle_outline),
+                          constraints: const BoxConstraints(
+                            minWidth: 44,
+                            minHeight: 44,
+                          ),
+                          onPressed: () => onQtyChanged(
+                            p['id'] as String,
+                            (cart[p['id']] ?? 1) - 1,
+                          ),
+                        ),
+                        Text('${cart[p['id']]}'),
+                        IconButton(
+                          icon: const Icon(Icons.add_circle_outline),
+                          constraints: const BoxConstraints(
+                            minWidth: 44,
+                            minHeight: 44,
+                          ),
+                          onPressed: () {
+                            final stock =
+                                (p['stock_quantity'] as num?)?.toInt() ?? 0;
+                            final cur = cart[p['id']] ?? 0;
+                            if (cur < stock) {
+                              onQtyChanged(p['id'] as String, cur + 1);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+              const Divider(height: 24),
+              TextField(
+                controller: customerCtrl,
+                decoration: InputDecoration(
+                  labelText: l10n.posCustomerNameOptional,
+                  border: const OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: discountCtrl,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(
+                  labelText: l10n.discount,
+                  border: const OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                initialValue: paymentMethod,
+                decoration: InputDecoration(
+                  labelText: l10n.paymentMethod,
+                  border: const OutlineInputBorder(),
+                  isDense: true,
+                ),
+                items: [
+                  DropdownMenuItem(value: 'cash', child: Text(l10n.cash)),
+                  DropdownMenuItem(
+                    value: 'instapay',
+                    child: Text(l10n.instapay),
+                  ),
+                  DropdownMenuItem(
+                    value: 'vodafone_cash',
+                    child: Text(l10n.posVodafoneCash),
+                  ),
+                ],
+                onChanged: (v) {
+                  if (v != null) onPaymentChanged(v);
+                },
+              ),
+            ],
           ),
-          style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+        ),
+        // Sticky charge bar: total (22sp price style) + 56dp charge button.
+        const Divider(height: 1),
+        SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '${subtotal.toStringAsFixed(2)} ${l10n.currencySymbol}',
+                    style: AppTextStyles.titleLarge.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                SizedBox(
+                  height: 56,
+                  child: FilledButton.icon(
+                    onPressed: lines.isEmpty || submitting ? null : onComplete,
+                    icon: submitting
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.point_of_sale_rounded),
+                    label: Text(
+                      l10n.posCharge,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );

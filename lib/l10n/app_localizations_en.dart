@@ -7722,4 +7722,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String sinceHoursAgo(Object hours) {
     return '$hours h ago';
   }
+
+  @override
+  String get posCharge => 'Charge';
 }

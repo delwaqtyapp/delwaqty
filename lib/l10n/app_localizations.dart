@@ -14677,6 +14677,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{hours} h ago'**
   String sinceHoursAgo(Object hours);
+
+  /// No description provided for @posCharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Charge'**
+  String get posCharge;
 }
 
 class _AppLocalizationsDelegate

@@ -7660,4 +7660,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String sinceHoursAgo(Object hours) {
     return 'منذ $hours ساعة';
   }
+
+  @override
+  String get posCharge => 'تحصيل';
 }

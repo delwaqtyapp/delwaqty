@@ -2648,5 +2648,6 @@
     "placeholders": {
       "hours": {}
     }
-  }
+  },
+  "posCharge": "Charge"
 }

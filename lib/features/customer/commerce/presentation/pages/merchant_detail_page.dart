@@ -20,6 +20,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
+import 'package:delwaqty/shared/widgets/responsive_content.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
@@ -133,32 +134,39 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
           bottomNavigationBar: _StickyCartBar(merchantId: widget.merchantId),
           body: RefreshIndicator(
             onRefresh: _onRefresh,
-            child: CustomScrollView(
-              slivers: [
-                _buildSliverAppBar(merchant, l10n),
-                SliverToBoxAdapter(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildMerchantInfo(merchant, l10n),
-                      _buildActionButtons(merchant, l10n),
-                      _buildBusinessInfoDropdown(merchant, l10n),
-                      if (merchant.type == MerchantType.restaurant)
-                        _buildFullMenuButton(merchant, l10n),
-                      _buildSearchField(merchant, l10n),
-                      _buildOffersAndPopular(merchant, l10n),
-                      _buildCategoriesSection(l10n),
-                      _buildMenuHeader(l10n),
-                    ],
+            // Desktop: cap the store page at a centered 1100px container so
+            // info chips and content do not spread across the full width
+            // (batch 8, item 4).
+            child: ResponsiveContent(
+              child: CustomScrollView(
+                slivers: [
+                  _buildSliverAppBar(merchant, l10n),
+                  SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildMerchantInfo(merchant, l10n),
+                        _buildActionButtons(merchant, l10n),
+                        _buildBusinessInfoDropdown(merchant, l10n),
+                        if (merchant.type == MerchantType.restaurant)
+                          _buildFullMenuButton(merchant, l10n),
+                        _buildSearchField(merchant, l10n),
+                        _buildOffersAndPopular(merchant, l10n),
+                        _buildCategoriesSection(l10n),
+                        _buildMenuHeader(l10n),
+                      ],
+                    ),
                   ),
-                ),
-                _buildProductGrid(merchant, l10n),
-                SliverToBoxAdapter(child: _buildReviewsSection(merchant, l10n)),
-                SliverToBoxAdapter(
-                  child: _buildSimilarMerchants(merchant, l10n),
-                ),
-                const SliverToBoxAdapter(child: SizedBox(height: 32)),
-              ],
+                  _buildProductGrid(merchant, l10n),
+                  SliverToBoxAdapter(
+                    child: _buildReviewsSection(merchant, l10n),
+                  ),
+                  SliverToBoxAdapter(
+                    child: _buildSimilarMerchants(merchant, l10n),
+                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 32)),
+                ],
+              ),
             ),
           ),
         );

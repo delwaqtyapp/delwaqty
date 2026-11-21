@@ -11,6 +11,7 @@ import 'package:delwaqty/features/customer/home/presentation/widgets/category_vi
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/pressable_scale.dart';
+import 'package:delwaqty/shared/widgets/responsive_content.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
@@ -151,289 +152,295 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
           ref.invalidate(_merchantsFutureProvider);
           ref.invalidate(_featuredFutureProvider);
         },
-        child: ListView(
+        child: ResponsiveContent(
           padding: const EdgeInsets.all(16),
-          children: [
-            AnimatedFadeIn(
-              child: TextField(
-                controller: _searchController,
-                onChanged: (value) =>
-                    setState(() => _searchQuery = value.trim()),
-                decoration: InputDecoration(
-                  hintText: l10n.searchMerchantsProducts,
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear_rounded),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() => _searchQuery = '');
-                          },
-                        )
-                      : null,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              AnimatedFadeIn(
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: (value) =>
+                      setState(() => _searchQuery = value.trim()),
+                  decoration: InputDecoration(
+                    hintText: l10n.searchMerchantsProducts,
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear_rounded),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _searchQuery = '');
+                            },
+                          )
+                        : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.3),
                   ),
-                  filled: true,
-                  fillColor: theme.colorScheme.surfaceContainerHighest
-                      .withValues(alpha: 0.3),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            AnimatedFadeIn(
-              delay: const Duration(milliseconds: 100),
-              child: SizedBox(
-                height: 48,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsetsDirectional.only(end: 8),
-                      child: PressableScale(
-                        onTap: () =>
-                            ref.read(_selectedTypeProvider.notifier).state =
-                                null,
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: selectedType == null
-                                ? const LinearGradient(
-                                    colors: [
-                                      AppColors.brandPurpleDeep,
-                                      AppColors.brandViolet,
-                                    ],
-                                  )
-                                : null,
-                            color: selectedType == null
-                                ? null
-                                : theme.colorScheme.surfaceContainerHighest
-                                      .withValues(alpha: 0.35),
-                            borderRadius: BorderRadius.circular(999),
-                            border: Border.all(
-                              color: selectedType == null
-                                  ? Colors.transparent
-                                  : theme.colorScheme.outlineVariant.withValues(
-                                      alpha: 0.15,
-                                    ),
-                            ),
-                          ),
-                          child: Text(
-                            l10n.all,
-                            style: theme.textTheme.labelLarge?.copyWith(
-                              color: selectedType == null
-                                  ? Colors.white
-                                  : theme.colorScheme.onSurfaceVariant,
-                              fontWeight: selectedType == null
-                                  ? FontWeight.w700
-                                  : FontWeight.w600,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    ...MerchantType.values.map(
-                      (type) => Padding(
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 100),
+                child: SizedBox(
+                  height: 48,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      Padding(
                         padding: const EdgeInsetsDirectional.only(end: 8),
-                        child: MerchantTypeChip(
-                          type: type,
-                          selected: selectedType == type,
-                          onSelected: (_) =>
+                        child: PressableScale(
+                          onTap: () =>
                               ref.read(_selectedTypeProvider.notifier).state =
-                                  type,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            featuredAsync.when(
-              data: (merchants) {
-                final filteredFeatured = _filterMerchants(
-                  merchants,
-                  selectedType,
-                );
-                if (filteredFeatured.isEmpty) return const SizedBox();
-                return AnimatedFadeIn(
-                  delay: const Duration(milliseconds: 200),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.featured,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        height: 250,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: filteredFeatured.length,
-                          separatorBuilder: (_, _) => const SizedBox(width: 12),
-                          itemBuilder: (context, index) {
-                            final merchant = filteredFeatured[index];
-                            return SizedBox(
-                              width: 260,
-                              child: MerchantCard(
-                                merchant: merchant,
-                                onTap: () => context.push(
-                                  '/market/merchant/${merchant.id}',
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-                  ),
-                );
-              },
-              loading: () => const SizedBox(
-                height: 250,
-                child: Center(child: CircularProgressIndicator()),
-              ),
-              error: (_, _) => const SizedBox(),
-            ),
-
-            merchantsAsync.when(
-              data: (merchants) {
-                final filteredMost = _filterMerchants(merchants, selectedType);
-                if (filteredMost.isEmpty) return const SizedBox();
-                final mostRequested = List<Merchant>.from(filteredMost)
-                  ..sort((a, b) => b.rating.compareTo(a.rating));
-                final topRequested = mostRequested.take(10).toList();
-                return AnimatedFadeIn(
-                  delay: const Duration(milliseconds: 250),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(6),
+                                  null,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
                             decoration: BoxDecoration(
-                              color: AppColors.brandPurple.withValues(
-                                alpha: 0.1,
+                              gradient: selectedType == null
+                                  ? const LinearGradient(
+                                      colors: [
+                                        AppColors.brandPurpleDeep,
+                                        AppColors.brandViolet,
+                                      ],
+                                    )
+                                  : null,
+                              color: selectedType == null
+                                  ? null
+                                  : theme.colorScheme.surfaceContainerHighest
+                                        .withValues(alpha: 0.35),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: selectedType == null
+                                    ? Colors.transparent
+                                    : theme.colorScheme.outlineVariant
+                                          .withValues(alpha: 0.15),
                               ),
-                              borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(
-                              Icons.trending_up_rounded,
-                              color: AppColors.brandPurple,
-                              size: 18,
+                            child: Text(
+                              l10n.all,
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                color: selectedType == null
+                                    ? Colors.white
+                                    : theme.colorScheme.onSurfaceVariant,
+                                fontWeight: selectedType == null
+                                    ? FontWeight.w700
+                                    : FontWeight.w600,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            l10n.mostRequested,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        height: 180,
-                        child: _AnimatedMerchantCarousel(
-                          merchants: topRequested,
-                          onTap: (m) =>
-                              context.push('/market/merchant/${m.id}'),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      ...MerchantType.values.map(
+                        (type) => Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 8),
+                          child: MerchantTypeChip(
+                            type: type,
+                            selected: selectedType == type,
+                            onSelected: (_) =>
+                                ref.read(_selectedTypeProvider.notifier).state =
+                                    type,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                );
-              },
-              loading: () => const SizedBox(
-                height: 180,
-                child: Center(child: CircularProgressIndicator()),
-              ),
-              error: (_, _) => const SizedBox(),
-            ),
-
-            AnimatedFadeIn(
-              delay: const Duration(milliseconds: 300),
-              child: Text(
-                l10n.allMerchants,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
-            const SizedBox(height: 8),
+              const SizedBox(height: 16),
 
-            merchantsAsync.when(
-              data: (merchants) {
-                final filtered = _filterMerchants(merchants, selectedType);
-
-                if (filtered.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 40),
-                    child: PremiumEmptyState(
-                      icon: Icons.store_outlined,
-                      title: l10n.noMerchantsFound,
-                      message: l10n.nearbyEmptyHint,
+              featuredAsync.when(
+                data: (merchants) {
+                  final filteredFeatured = _filterMerchants(
+                    merchants,
+                    selectedType,
+                  );
+                  if (filteredFeatured.isEmpty) return const SizedBox();
+                  return AnimatedFadeIn(
+                    delay: const Duration(milliseconds: 200),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.featured,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          height: 250,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: filteredFeatured.length,
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(width: 12),
+                            itemBuilder: (context, index) {
+                              final merchant = filteredFeatured[index];
+                              return SizedBox(
+                                width: 260,
+                                child: MerchantCard(
+                                  merchant: merchant,
+                                  onTap: () => context.push(
+                                    '/market/merchant/${merchant.id}',
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
                     ),
                   );
-                }
+                },
+                loading: () => const SizedBox(
+                  height: 250,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (_, _) => const SizedBox(),
+              ),
 
-                return GridView.builder(
+              merchantsAsync.when(
+                data: (merchants) {
+                  final filteredMost = _filterMerchants(
+                    merchants,
+                    selectedType,
+                  );
+                  if (filteredMost.isEmpty) return const SizedBox();
+                  final mostRequested = List<Merchant>.from(filteredMost)
+                    ..sort((a, b) => b.rating.compareTo(a.rating));
+                  final topRequested = mostRequested.take(10).toList();
+                  return AnimatedFadeIn(
+                    delay: const Duration(milliseconds: 250),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: AppColors.brandPurple.withValues(
+                                  alpha: 0.1,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.trending_up_rounded,
+                                color: AppColors.brandPurple,
+                                size: 18,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              l10n.mostRequested,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 180,
+                          child: _AnimatedMerchantCarousel(
+                            merchants: topRequested,
+                            onTap: (m) =>
+                                context.push('/market/merchant/${m.id}'),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  );
+                },
+                loading: () => const SizedBox(
+                  height: 180,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (_, _) => const SizedBox(),
+              ),
+
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 300),
+                child: Text(
+                  l10n.allMerchants,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              merchantsAsync.when(
+                data: (merchants) {
+                  final filtered = _filterMerchants(merchants, selectedType);
+
+                  if (filtered.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40),
+                      child: PremiumEmptyState(
+                        icon: Icons.store_outlined,
+                        title: l10n.noMerchantsFound,
+                        message: l10n.nearbyEmptyHint,
+                      ),
+                    );
+                  }
+
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: ResponsiveGrid.columns(context),
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      childAspectRatio: 0.74,
+                    ),
+                    itemCount: filtered.length,
+                    itemBuilder: (context, index) {
+                      final merchant = filtered[index];
+                      return MerchantCard(
+                        merchant: merchant,
+                        onTap: () =>
+                            context.push('/market/merchant/${merchant.id}'),
+                      );
+                    },
+                  );
+                },
+                loading: () => GridView.count(
+                  crossAxisCount: ResponsiveGrid.columns(context),
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 0.74,
-                  ),
-                  itemCount: filtered.length,
-                  itemBuilder: (context, index) {
-                    final merchant = filtered[index];
-                    return MerchantCard(
-                      merchant: merchant,
-                      onTap: () =>
-                          context.push('/market/merchant/${merchant.id}'),
-                    );
-                  },
-                );
-              },
-              loading: () => GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 0.74,
-                children: const [
-                  ShimmerCard(height: 200),
-                  ShimmerCard(height: 200),
-                  ShimmerCard(height: 200),
-                  ShimmerCard(height: 200),
-                ],
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 0.74,
+                  children: const [
+                    ShimmerCard(height: 200),
+                    ShimmerCard(height: 200),
+                    ShimmerCard(height: 200),
+                    ShimmerCard(height: 200),
+                  ],
+                ),
+                error: (e, _) => PremiumEmptyState(
+                  icon: Icons.error_outline_rounded,
+                  title: l10n.error,
+                  message: l10n.errorLoading,
+                  actionLabel: l10n.retry,
+                  onAction: () => ref.invalidate(_merchantsFutureProvider),
+                ),
               ),
-              error: (e, _) => PremiumEmptyState(
-                icon: Icons.error_outline_rounded,
-                title: l10n.error,
-                message: l10n.errorLoading,
-                actionLabel: l10n.retry,
-                onAction: () => ref.invalidate(_merchantsFutureProvider),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

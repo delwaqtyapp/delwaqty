@@ -102,3 +102,40 @@ Any authenticated user can create an order with arbitrary prices.
 - `drivers` self-update guard (`drivers_guard_sensitive_fields`) and
   `orders_guard_sensitive` cover the sensitive columns well: earnings, verification,
   financial fields, and status transitions are properly locked.
+
+## F7 — CRITICAL — Anonymous user-enumeration oracles leak account emails (live-verified)
+
+- `lookup_email_by_phone(p_phone)` and `lookup_email_by_username(p_username)` are
+  SECURITY DEFINER, executable by `anon`, no rate limiting.
+- Repro (anonymous, anon key only): lookup_email_by_phone with a real user's phone
+  returned their real account email; lookup_email_by_username('SuperAdmin') likewise.
+- Impact: mass phone/username → email harvesting of the entire user base for
+  phishing and password spraying.
+- Fix: revoke from anon; gate behind server-side proxy with rate limiting, or mask.
+
+## F8 — CRITICAL — WhatsApp OTP verification fully bypassable (live-verified)
+
+- `request_whatsapp_otp` returns `otp_code` in its API response: the out-of-band
+  secret is served to the requester. Anonymous repro: request OTP for an arbitrary
+  phone, read code from response, verify → `{"ok":true,"verified":true}`.
+- When authenticated, `verify_whatsapp_otp` also stamps the (victim's) phone onto the
+  caller's account (`UPDATE users SET phone = ... WHERE id = auth.uid()`).
+- Secondary: no attempt counter/lockout on verify (6-digit code, 10-min validity,
+  unlimited guesses); each request adds a new valid OTP row without invalidating
+  previous ones (brute-force amplification).
+- Fix: never return the code (server-side send only); rotate/invalidate prior codes;
+  attempt limits; require auth for phone-linking flows.
+
+## Verified clean (no issue)
+
+- Wallet layer: cross-user `wallet_pay` debit FORBIDDEN; `wallet_refund`/`wallet_topup`
+  not executable by users; `wallet_adjust` owner-only; over-balance and negative
+  withdrawals blocked; `create_topup_request` rejects negative amounts.
+- Admin RPCs from customer seat: `admin_set_user_role`, `admin_broadcast_notification`,
+  `get_admin_analytics` all "Not authorized"; `admin_direct_topup` owner-only;
+  `list_all_topup_requests` and `platform_kpi_summary` return NULL without permission.
+- Cancel flow: pending cancellable by customer; delivered not cancellable; cross-user
+  FORBIDDEN. Double completion blocked (ALREADY_DONE). `confirm_cash_collection`
+  correctly gated to assigned driver / owner, idempotent, cash-only, lifecycle-checked.
+- `create_order` (new path): server-side pricing, quantity bounds, stock check,
+  min-order, coupon merchant scoping — clean.

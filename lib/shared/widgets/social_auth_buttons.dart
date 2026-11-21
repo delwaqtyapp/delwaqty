@@ -3,6 +3,13 @@ import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
+/// Kills Facebook sign-in UI while the Meta app lacks business
+/// verification (owner decision 2026-11-21: no سجل تجاري yet, registration
+/// runs on phone number + WhatsApp OTP only). Flip back to `true` to
+/// re-enable - the data layer (OAuth use cases, deep-link callback) is
+/// untouched and works as before.
+const bool kFacebookLoginEnabled = false;
+
 /// Google + Facebook sign-in buttons with an "or continue with" divider.
 ///
 /// The OAuth use cases and the `io.delwaqty://login-callback` deep-link
@@ -64,12 +71,14 @@ class SocialAuthButtons extends StatelessWidget {
           logoAsset: 'assets/branding/google_logo.png',
           label: l10n.loginWithGoogle,
         ),
-        const SizedBox(height: AppSpacing.sm),
-        _SocialButton(
-          onPressed: isLoading ? null : onFacebook,
-          logoAsset: 'assets/branding/facebook_logo.png',
-          label: l10n.loginWithFacebook,
-        ),
+        if (kFacebookLoginEnabled) ...[
+          const SizedBox(height: AppSpacing.sm),
+          _SocialButton(
+            onPressed: isLoading ? null : onFacebook,
+            logoAsset: 'assets/branding/facebook_logo.png',
+            label: l10n.loginWithFacebook,
+          ),
+        ],
       ],
     );
   }

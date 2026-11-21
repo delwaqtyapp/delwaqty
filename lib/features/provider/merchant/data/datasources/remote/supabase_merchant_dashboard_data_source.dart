@@ -201,6 +201,21 @@ class SupabaseMerchantDashboardDataSource {
         }
         return;
       }
+      // Rejection must go through the RPC: it runs the shared cancellation
+      // finalizer (stock, coupon, refund, cancelled_by='merchant') and the
+      // orders guard refuses direct 'cancelled' writes from merchants.
+      if (status == 'cancelled') {
+        final res = await _client.rpc(
+          'merchant_reject_order',
+          params: {'p_order_id': orderId},
+        );
+        final ok = res is Map && res['ok'] == true;
+        if (!ok) {
+          final code = res is Map ? res['code'] : null;
+          throw StateError('merchant_reject_order failed: $code');
+        }
+        return;
+      }
       await _client
           .from('orders')
           .update({

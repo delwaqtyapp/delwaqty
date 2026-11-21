@@ -444,11 +444,15 @@ void main() {
     // MEDIUM-3: modifier price adjustments must be priced server-side from
     // product_modifier_options, never from client-supplied amounts.
     test('create_order prices modifiers from the catalog', () {
+      // 234: the pricing loop lives in the shared _price_order_line
+      // helper; create_order must call it.
       final latest = latestDefining221('FUNCTION public.create_order(');
-      expect(latest, contains('product_modifier_options'));
-      expect(latest, contains('price_adjustment'));
-      expect(latest, contains('INVALID_MODIFIER'));
-      expect(latest, contains('modifier_option_ids'));
+      expect(latest, contains('_price_order_line'));
+      final helper = latestDefining221('FUNCTION public._price_order_line(');
+      expect(helper, contains('product_modifier_options'));
+      expect(helper, contains('price_adjustment'));
+      expect(helper, contains('INVALID_MODIFIER'));
+      expect(helper, contains('modifier_option_ids'));
     });
 
     test('create_order_idempotent forwards modifier selections', () {
@@ -465,12 +469,12 @@ void main() {
     // product_modifier_groups must be enforced server-side; duplicate
     // option ids are deduped so one option can never be charged twice.
     test('create_order enforces group rules and dedupes options', () {
-      final latest = latestDefining221('FUNCTION public.create_order(');
-      expect(latest, contains('REQUIRED_MODIFIER_MISSING'));
-      expect(latest, contains('MODIFIER_MAX_EXCEEDED'));
-      expect(latest, contains('product_modifier_groups'));
-      expect(latest, contains('max_selections'));
-      expect(latest, contains('select distinct value #>>'));
+      final helper = latestDefining221('FUNCTION public._price_order_line(');
+      expect(helper, contains('REQUIRED_MODIFIER_MISSING'));
+      expect(helper, contains('MODIFIER_MAX_EXCEEDED'));
+      expect(helper, contains('product_modifier_groups'));
+      expect(helper, contains('max_selections'));
+      expect(helper.toLowerCase(), contains('select distinct value #>>'));
     });
   });
 
@@ -524,6 +528,42 @@ void main() {
       expect(m, contains('no_driver_timeout'));
       // Young stuck rides still get redispatched, not cancelled.
       expect(m, contains("interval '2 minutes'"));
+    });
+  });
+
+  group('shared pricing helper (migration 234)', () {
+    // Reviewer #21: ONE pricing loop for every order path.
+    test('all three pricing paths call the shared helper', () {
+      for (final fn in [
+        'FUNCTION public.create_order(',
+        'FUNCTION public.add_order_items(',
+        'FUNCTION public.pos_create_sale(',
+      ]) {
+        final latest = latestDefining221(fn);
+        expect(
+          latest,
+          contains('_price_order_line'),
+          reason: '$fn not unified',
+        );
+      }
+    });
+
+    test('add_order_items persists modifiers on order_items', () {
+      final latest = latestDefining221('FUNCTION public.add_order_items(');
+      expect(latest, contains('total_price, modifiers)'));
+    });
+
+    test('the helper is not client-callable', () {
+      final m = migrationFiles
+          .where((f) => f.path.contains('234_shared_pricing_helper'))
+          .single
+          .readAsStringSync();
+      expect(
+        m,
+        contains(
+          'REVOKE EXECUTE ON FUNCTION public._price_order_line(uuid, jsonb, boolean) FROM PUBLIC, anon, authenticated',
+        ),
+      );
     });
   });
 

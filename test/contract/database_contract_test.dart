@@ -512,6 +512,21 @@ void main() {
     });
   });
 
+  group('redispatch give-up (migration 233)', () {
+    // Reviewer #23: rides searching forever must eventually give up.
+    test('sweep cancels orders stuck searching over 45 minutes', () {
+      final m = migrationFiles
+          .where((f) => f.path.contains('233_redispatch_give_up'))
+          .single
+          .readAsStringSync();
+      expect(m, contains("interval '45 minutes'"));
+      expect(m, contains('_finalize_order_cancel'));
+      expect(m, contains('no_driver_timeout'));
+      // Young stuck rides still get redispatched, not cancelled.
+      expect(m, contains("interval '2 minutes'"));
+    });
+  });
+
   group('rpc grant lockdown (migration 218)', () {
     // Security reviewer C4/C5: client-callable SECURITY DEFINER money and
     // pricing functions. The app calls none of them; they must be revoked

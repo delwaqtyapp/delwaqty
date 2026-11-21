@@ -60,6 +60,9 @@ abstract class AdminRepository {
   Future<void> updateDeliveryStatus(String deliveryId, String status);
   Future<Map<String, dynamic>> getAnalytics({DateTime? from, DateTime? to});
   Future<List<VerificationRequest>> getVerificationRequests();
+
+  /// Documents uploaded by the user for verification review.
+  Future<VerificationDocuments> getVerificationDocuments(String userId);
   Future<void> approveVerification(String userId);
   Future<void> rejectVerification(String userId, {required String reason});
 }

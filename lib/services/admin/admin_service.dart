@@ -384,6 +384,15 @@ class AdminService {
     }
   }
 
+  Future<VerificationDocuments> getVerificationDocuments(String userId) async {
+    try {
+      return await _repository.getVerificationDocuments(userId);
+    } catch (e) {
+      debugPrint('AdminService.getVerificationDocuments error: $e');
+      return const VerificationDocuments();
+    }
+  }
+
   Future<bool> approveVerification(String userId) async {
     try {
       await _repository.approveVerification(userId);

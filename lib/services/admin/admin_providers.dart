@@ -264,3 +264,10 @@ final verificationRequestsProvider = FutureProvider<List<VerificationRequest>>((
   final adminService = ref.watch(adminServiceProvider);
   return adminService.getVerificationRequests();
 });
+
+/// Documents for one verification request, loaded per card.
+final verificationDocumentsProvider =
+    FutureProvider.family<VerificationDocuments, String>((ref, userId) async {
+      final adminService = ref.watch(adminServiceProvider);
+      return adminService.getVerificationDocuments(userId);
+    });

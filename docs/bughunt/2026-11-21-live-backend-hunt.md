@@ -148,3 +148,26 @@ Any authenticated user can create an order with arbitrary prices.
   (the capability secret itself), breaking the share-link model.
 - Live probe returned zero rows today (no active sessions); the hole is standing.
 - Fix: drop public SELECT; serve shares via a SECURITY DEFINER function keyed by token.
+
+## F10 — LOW/MEDIUM — `product_inventory` world-readable anonymously (live-verified)
+
+- Anon SELECT returns every merchant's stock_quantity, reserved_quantity,
+  low_stock_threshold, is_in_stock. Business-sensitive (competitor intel,
+  stock-out targeting), not PII. Policy `inventory_select_public` qual=true.
+- Fix: scope to the merchant owner + admins; public menu display only needs
+  is_in_stock on the product itself.
+
+## F11 — MEDIUM (latent) — Priced modifiers are never charged
+
+- `create_order` has zero modifier handling: totals are product.price × qty only.
+  `create_order_idempotent` stores client-supplied `modifiers` on order_items but
+  never prices them either (see F1).
+- No priced modifiers exist in the DB today (`product_modifiers.price_adjustment > 0`
+  = 0 rows), so nothing is lost yet — but the app's product page exposes modifiers,
+  and the first merchant to add a priced extra will give it away free on every order.
+- Fix: server-side modifier pricing from product_modifier_options.price_adjustment
+  inside create_order.
+
+## Also verified clean
+
+- `send-push` edge function: 401 unauthorized without service credentials.

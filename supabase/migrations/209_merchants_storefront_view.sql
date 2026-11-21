@@ -13,11 +13,11 @@ WHERE status = 'active';
 REVOKE ALL ON public.merchant_storefront FROM public;
 GRANT SELECT ON public.merchant_storefront TO anon, authenticated;
 
-DROP POLICY "Merchants are viewable by everyone" ON public.merchants;
+DROP POLICY IF EXISTS "Merchants are viewable by everyone" ON public.merchants;
 CREATE POLICY "Merchants readable by signed-in users"
   ON public.merchants FOR SELECT TO authenticated USING (true);
 
-DROP POLICY "Merchants can update own via owner_user_id" ON public.merchants;
+DROP POLICY IF EXISTS "Merchants can update own via owner_user_id" ON public.merchants;
 CREATE POLICY "Merchants can update own via owner_user_id"
   ON public.merchants FOR UPDATE TO authenticated
   USING (auth.uid() = owner_user_id)

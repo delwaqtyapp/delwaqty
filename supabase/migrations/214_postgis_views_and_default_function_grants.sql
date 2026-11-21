@@ -5,8 +5,15 @@ REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON public.geography_columns FROM anon, a
 REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON public.geometry_columns FROM anon, authenticated;
 
 -- R4: future functions created by postgres no longer default-grant EXECUTE to
--- PUBLIC (which anon/authenticated inherit). Migrations must grant explicitly.
+-- anon/authenticated (the defaults carry role-specific entries, so revoking
+-- PUBLIC alone does not help). Migrations must grant explicitly.
 ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
-  REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
+  REVOKE EXECUTE ON FUNCTIONS FROM anon, authenticated;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA storage
+  REVOKE ALL ON TABLES FROM anon;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA storage
+  REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON TABLES FROM authenticated;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA storage
+  REVOKE EXECUTE ON FUNCTIONS FROM anon, authenticated;
 
 NOTIFY pgrst, 'reload schema';

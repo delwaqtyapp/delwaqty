@@ -44,6 +44,11 @@ jobs:
         run: flutter pub get
       - name: Generate code
         run: dart run build_runner build --delete-conflicting-outputs
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Auth edge safety tests
+        run: node --test tool/edge_safety_test.cjs
       - name: Publisher safety tests
         run: python3 -m unittest discover -s tool -p test_publish_development.py
       - name: Run tests with coverage

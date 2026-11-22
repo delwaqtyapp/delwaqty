@@ -5,7 +5,7 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_temp'
-AS $function$
+AS $function$;
 DECLARE
   v_user_type TEXT := COALESCE(
     NULLIF(NEW.raw_user_meta_data->>'user_type', ''),
@@ -96,7 +96,7 @@ BEGIN
 
   RETURN NEW;
 END;
-$function$
+$function$;
 
 
 -- Provider app entry must not recreate a storefront.
@@ -105,7 +105,7 @@ CREATE OR REPLACE FUNCTION public.resolve_my_merchant()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_temp'
-AS $function$
+AS $function$;
 declare
   v_uid uuid := auth.uid();
   v_active_cat text;
@@ -214,5 +214,5 @@ begin
 
   return null;
 end;
-$function$
+$function$;
 

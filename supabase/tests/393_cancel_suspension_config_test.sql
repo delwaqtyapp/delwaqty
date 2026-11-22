@@ -157,6 +157,14 @@ begin
   exception when others then
     if sqlerrm <> 'Only the platform owner can create platform settings rows' then raise; end if;
   end;
+  -- #74 round 2: country-admin primary-key UPDATE (rename the singleton)
+  -- is blocked even though it touches no protected duration column.
+  begin
+    update public.platform_settings set id = 'zz393-renamed' where id = 'default';
+    raise exception 'TEST_FAIL_ADMIN_ID_RENAME_ACCEPTED';
+  exception when others then
+    if sqlerrm <> 'The platform settings row id cannot be changed' then raise; end if;
+  end;
 end $neg$;
 reset role;
 
@@ -350,5 +358,58 @@ end $missing$;
 insert into public.platform_settings(id, cancel_suspension_days, refusal_suspension_days)
 values ('default', 5, 5);
 
-select 'PASS393: no-auth/customer/country-admin negatives under SET ROLE authenticated, DELETE+shadow-insert blocked, owner audit exactly-one (RPC and direct), range validation, cancel+refusal configured durations, missing-row fail-safe' as result;
+-- ===== owner positives under the REAL authenticated role =====
+-- _is_country_admin_uid includes _is_owner_uid (356), so the 367 UPDATE
+-- policy admits the owner and the triggers do the owner-only enforcement.
+set local role authenticated;
+do $authowner$
+declare
+  t record;
+  v_days int;
+begin
+  select * into t from _t393;
+  perform set_config('request.jwt.claim.sub', t.owner_id::text, true);
+
+  -- RPC works under real RLS + triggers.
+  v_days := public.set_cancel_suspension_days(8, 'zz-test-393-auth-rpc');
+  assert v_days = 8, 'authenticated owner RPC returns new value';
+
+  -- The setter cleared the reason GUC: this unrelated direct UPDATE in the
+  -- same transaction must NOT inherit it (its audit row gets NULL reason).
+  update public.platform_settings set cancel_suspension_days = 11 where id = 'default';
+
+  -- id-rename is blocked for the owner too: the id is immutable for everyone.
+  begin
+    update public.platform_settings set id = 'zz393-renamed' where id = 'default';
+    raise exception 'TEST_FAIL_OWNER_ID_RENAME_ACCEPTED';
+  exception when others then
+    if sqlerrm <> 'The platform settings row id cannot be changed' then raise; end if;
+  end;
+end $authowner$;
+reset role;
+
+do $$
+declare
+  t record;
+begin
+  select * into t from _t393;
+  assert (select count(*) from public.activity_logs
+          where action = 'PENALTY_CONFIG_CHANGED'
+            and details->>'field' = 'cancel_suspension_days'
+            and details->>'new_value' = '8'
+            and details->>'reason' = 'zz-test-393-auth-rpc'
+            and user_id = t.owner_id::text) = 1,
+    'authenticated owner RPC writes exactly one audit row';
+  assert (select count(*) from public.activity_logs
+          where action = 'PENALTY_CONFIG_CHANGED'
+            and details->>'field' = 'cancel_suspension_days'
+            and details->>'new_value' = '11'
+            and details->>'reason' is null
+            and user_id = t.owner_id::text) = 1,
+    'reason GUC cleared: same-transaction direct UPDATE audit has NULL reason';
+  assert (select id from public.platform_settings) = 'default',
+    'singleton id unchanged after rename attempts';
+end $$;
+
+select 'PASS393: no-auth/customer/country-admin negatives under SET ROLE authenticated, DELETE+shadow-insert+id-rename blocked, owner audit exactly-one (postgres + authenticated, RPC and direct), reason GUC cleared, range validation, cancel+refusal configured durations, missing-row fail-safe' as result;
 rollback;

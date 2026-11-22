@@ -120,6 +120,10 @@ void main() {
     // Second tap while the first save is still in flight.
     await tester.tap(find.text('حفظ'), warnIfMissed: false);
     await tester.pump();
+    // Barrier tap while saving must not dismiss the dialog.
+    await tester.tapAt(const Offset(5, 5));
+    await tester.pump();
+    expect(find.text('تعديل العقوبة'), findsOneWidget);
 
     env.repo.gate!.complete(10);
     await tester.pumpAndSettle();

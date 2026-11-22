@@ -76,11 +76,13 @@ BEGIN
 END;
 $function$;
 
--- 2b) Singleton lifecycle: client roles can never DELETE the default row,
--- and only the owner can delete or create settings rows. Closes the
--- bypass where a country admin deletes id='default', silently resetting
--- the penalties (and every other setting) to defaults. Backend roles
--- (auth.uid() IS NULL) are unaffected.
+-- 2b) Singleton lifecycle invariant. Exactly one logical settings row,
+-- id='default', is created by migrations and may be re-created by the
+-- backend (auth.uid() IS NULL) only. For client roles: only the owner can
+-- INSERT (restore path) or DELETE non-default rows, NO client can DELETE
+-- the singleton, and the id is immutable for EVERYONE (owner, admins and
+-- backend included): renaming id='default' would detach every reader
+-- (silent fallback to defaults) and break the setters (row-missing).
 CREATE OR REPLACE FUNCTION public.guard_platform_settings_lifecycle()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -88,6 +90,13 @@ CREATE OR REPLACE FUNCTION public.guard_platform_settings_lifecycle()
  SET search_path TO 'public', 'pg_temp'
 AS $function$
 BEGIN
+  IF TG_OP = 'UPDATE' THEN
+    -- Primary-key immutability: no caller may rename a settings row.
+    IF NEW.id IS DISTINCT FROM OLD.id THEN
+      RAISE EXCEPTION 'The platform settings row id cannot be changed';
+    END IF;
+    RETURN NEW;
+  END IF;
   IF auth.uid() IS NOT NULL THEN
     IF TG_OP = 'DELETE' THEN
       IF OLD.id = 'default' THEN
@@ -111,12 +120,18 @@ BEGIN
 END;
 $function$;
 
+REVOKE ALL ON FUNCTION public.guard_platform_settings_lifecycle() FROM PUBLIC, anon, authenticated;
+
 DROP TRIGGER IF EXISTS trg_guard_platform_settings_lifecycle ON public.platform_settings;
-CREATE TRIGGER trg_guard_platform_settings_lifecycle BEFORE INSERT OR DELETE ON public.platform_settings FOR EACH ROW EXECUTE FUNCTION guard_platform_settings_lifecycle();
+CREATE TRIGGER trg_guard_platform_settings_lifecycle BEFORE INSERT OR DELETE OR UPDATE ON public.platform_settings FOR EACH ROW EXECUTE FUNCTION guard_platform_settings_lifecycle();
 
 -- 2c) Penalty-config audit at the table level, so BOTH the owner-only
 -- setter RPCs and a direct owner UPDATE produce exactly one audit row per
--- change. The setters pass the reason through a transaction-local GUC.
+-- change. The setters pass the reason through a transaction-local GUC and
+-- clear it right after their UPDATE so a later unrelated direct UPDATE in
+-- the same transaction does not inherit it. Audit covers authenticated
+-- owner changes; backend maintenance writes (auth.uid() IS NULL) skip the
+-- audit by design.
 CREATE OR REPLACE FUNCTION public.audit_platform_settings_penalty_changes()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -151,6 +166,8 @@ $function$;
 DROP TRIGGER IF EXISTS trg_zz_audit_platform_settings_penalties ON public.platform_settings;
 CREATE TRIGGER trg_zz_audit_platform_settings_penalties BEFORE UPDATE ON public.platform_settings FOR EACH ROW EXECUTE FUNCTION audit_platform_settings_penalty_changes();
 
+REVOKE ALL ON FUNCTION public.audit_platform_settings_penalty_changes() FROM PUBLIC, anon, authenticated;
+
 -- 3) Owner-only setter. The audit lives in the table trigger (2c).
 CREATE OR REPLACE FUNCTION public.set_cancel_suspension_days(p_days integer, p_reason text DEFAULT NULL::text)
  RETURNS integer
@@ -160,7 +177,6 @@ CREATE OR REPLACE FUNCTION public.set_cancel_suspension_days(p_days integer, p_r
 AS $function$
 DECLARE
   v_uid uuid := auth.uid();
-  v_old integer;
 BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'UNAUTHENTICATED';
@@ -172,7 +188,7 @@ BEGIN
     RAISE EXCEPTION 'Suspension duration must be between 1 and 365 days';
   END IF;
 
-  SELECT cancel_suspension_days INTO v_old
+  PERFORM 1
   FROM public.platform_settings
   WHERE id = 'default'
   FOR UPDATE;
@@ -186,6 +202,10 @@ BEGIN
   SET cancel_suspension_days = p_days,
       updated_at = now()
   WHERE id = 'default';
+
+  -- Clear the reason so a later unrelated direct UPDATE in the same
+  -- transaction does not inherit it.
+  PERFORM set_config('app.penalty_change_reason', '', true);
 
   RETURN p_days;
 END;
@@ -205,7 +225,6 @@ CREATE OR REPLACE FUNCTION public.set_refusal_suspension_days(p_days integer, p_
 AS $function$
 DECLARE
   v_uid uuid := auth.uid();
-  v_old integer;
 BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'UNAUTHENTICATED';
@@ -217,7 +236,7 @@ BEGIN
     RAISE EXCEPTION 'Suspension duration must be between 1 and 365 days';
   END IF;
 
-  SELECT refusal_suspension_days INTO v_old
+  PERFORM 1
   FROM public.platform_settings
   WHERE id = 'default'
   FOR UPDATE;
@@ -231,6 +250,10 @@ BEGIN
   SET refusal_suspension_days = p_days,
       updated_at = now()
   WHERE id = 'default';
+
+  -- Clear the reason so a later unrelated direct UPDATE in the same
+  -- transaction does not inherit it.
+  PERFORM set_config('app.penalty_change_reason', '', true);
 
   RETURN p_days;
 END;

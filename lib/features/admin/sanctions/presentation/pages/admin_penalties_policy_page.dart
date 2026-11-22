@@ -217,6 +217,7 @@ class _PenaltyEditDialogState extends State<_PenaltyEditDialog> {
   }
 
   Future<void> _submit() async {
+    if (_saving) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final days = int.parse(_daysController.text);
     setState(() => _saving = true);
@@ -235,7 +236,11 @@ class _PenaltyEditDialogState extends State<_PenaltyEditDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return AlertDialog(
+    // While a write is in flight, block barrier taps and back-button
+    // dismissal so the dialog cannot vanish mid-save.
+    return PopScope(
+      canPop: !_saving,
+      child: AlertDialog(
       title: Text(l10n.editPenalty),
       content: Form(
         key: _formKey,
@@ -287,6 +292,7 @@ class _PenaltyEditDialogState extends State<_PenaltyEditDialog> {
           child: Text(l10n.save),
         ),
       ],
+    ),
     );
   }
 }

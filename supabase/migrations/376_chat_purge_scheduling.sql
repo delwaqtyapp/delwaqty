@@ -26,9 +26,9 @@ BEGIN
     WHERE auto_delete_at IS NOT NULL AND auto_delete_at <= now()
   LOOP
     DELETE FROM public.chat_messages WHERE room_id = r.id;
-    DELETE FROM storage.objects
-      WHERE bucket_id = 'chat_attachments'
-        AND name LIKE r.id::text || '/%';
+    -- storage.objects rows cannot be deleted from SQL (Supabase trigger
+    -- blocks direct deletes); attachments stay orphaned in the private
+    -- chat_attachments bucket until a service-key Storage API sweep exists.
     DELETE FROM public.chat_rooms WHERE id = r.id;
   END LOOP;
 

@@ -35,12 +35,6 @@ CREATE TRIGGER products_barcode_canonicalize_trg
   BEFORE INSERT OR UPDATE OF barcode ON public.products
   FOR EACH ROW EXECUTE FUNCTION public.products_barcode_canonicalize();
 
--- Backfill existing rows to canonical form (no-op where already clean).
-UPDATE public.products
-SET barcode = NULLIF(btrim(barcode, E' \t\r\n'), '')
-WHERE barcode IS NOT NULL
-  AND barcode IS DISTINCT FROM NULLIF(btrim(barcode, E' \t\r\n'), '');
-
 -- #76: executable preflight. Abort the migration if any store still holds
 -- duplicate normalized barcodes (verified on prod 2026-11-23: 0 groups).
 DO $$
@@ -57,6 +51,12 @@ BEGIN
     RAISE EXCEPTION '400 abort: % merchant/barcode duplicate groups exist; resolve them before re-applying', v_dupe_groups;
   END IF;
 END $$;
+
+-- Backfill existing rows to canonical form (no-op where already clean).
+UPDATE public.products
+SET barcode = NULLIF(btrim(barcode, E' \t\r\n'), '')
+WHERE barcode IS NOT NULL
+  AND barcode IS DISTINCT FROM NULLIF(btrim(barcode, E' \t\r\n'), '');
 
 CREATE UNIQUE INDEX IF NOT EXISTS products_merchant_barcode_uq
   ON public.products (merchant_id, barcode)
@@ -204,6 +204,15 @@ BEGIN
     RAISE EXCEPTION 'NOT_YOUR_STORE';
   END IF;
 
+  -- #96: serialize concurrent same-key sales per store BEFORE the replay
+  -- lookup and before any pricing/stock write. The loser of a same-key
+  -- race waits for the winner's transaction to end, then sees the
+  -- committed row below and replays - stock is decremented exactly once.
+  IF p_idempotency_key IS NOT NULL THEN
+    PERFORM pg_advisory_xact_lock(
+      hashtext(p_merchant_id::text || ':' || p_idempotency_key));
+  END IF;
+
   IF p_idempotency_key IS NOT NULL THEN
     -- Replay lookup is scoped to the store: the idempotency key is unique
     -- per merchant (400), never globally across tenants.
@@ -220,47 +229,50 @@ BEGIN
     END IF;
   END IF;
 
-  IF p_items IS NULL OR jsonb_typeof(p_items) <> 'array'
-     OR jsonb_array_length(p_items) = 0 THEN
-    RAISE EXCEPTION 'EMPTY_CART';
-  END IF;
-
-  -- Price every line from the live products table; stock-check and decrement
-  -- atomically so two tills cannot sell the same last unit.
-  FOR v_item IN SELECT * FROM jsonb_array_elements(p_items) LOOP
-    v_qty := COALESCE((v_item->>'qty')::int, 0);
-    IF v_qty <= 0 THEN
-      RAISE EXCEPTION 'INVALID_QTY';
-    END IF;
-    -- #21: same shared pricing as the order flow (modifiers priced and
-    -- group-validated when the till sends modifier_option_ids).
-    v_line := public._price_order_line(
-      p_merchant_id,
-      jsonb_build_object(
-        'product_id', v_item->>'product_id',
-        'quantity', v_qty,
-        'modifier_option_ids', COALESCE(v_item->'modifier_option_ids', '[]'::jsonb)),
-      true);
-    v_subtotal := v_subtotal + (v_line->>'total_price')::numeric;
-    v_lines := v_lines || jsonb_build_object(
-      'product_id', v_line->>'product_id',
-      'name', v_line->>'name',
-      'name_ar', v_line->>'name_ar',
-      'qty', v_qty,
-      'unit_price', (v_line->>'unit_price')::numeric,
-      'line_total', (v_line->>'total_price')::numeric,
-      'modifiers', v_line->'modifiers'
-    );
-  END LOOP;
-
-  v_discount := LEAST(GREATEST(COALESCE(p_discount, 0), 0), v_subtotal);
-  v_total := v_subtotal - v_discount;
-
-  -- Security LOW-1: two tills with the same idempotency key can both pass
-  -- the replay lookup above; the loser of the insert race re-reads the
-  -- winner and returns the idempotent replay. No winner row means a
-  -- different unique_violation happened: rethrow, never fake a replay.
+  -- #96: cart validation, pricing, stock decrements and the sale insert
+  -- live in ONE sub-block. The advisory lock above already serializes
+  -- same-key callers, so a unique_violation here is a backstop for
+  -- unexpected conflicts only: the sub-block rollback undoes this call's
+  -- stock changes and the error is re-raised - a losing call never
+  -- commits extra stock decrements or reports the winner's sale as its
+  -- own success.
   BEGIN
+    IF p_items IS NULL OR jsonb_typeof(p_items) <> 'array'
+       OR jsonb_array_length(p_items) = 0 THEN
+      RAISE EXCEPTION 'EMPTY_CART';
+    END IF;
+
+    -- Price every line from the live products table; stock-check and
+    -- decrement atomically so two tills cannot sell the same last unit.
+    FOR v_item IN SELECT * FROM jsonb_array_elements(p_items) LOOP
+      v_qty := COALESCE((v_item->>'qty')::int, 0);
+      IF v_qty <= 0 THEN
+        RAISE EXCEPTION 'INVALID_QTY';
+      END IF;
+      -- #21: same shared pricing as the order flow (modifiers priced and
+      -- group-validated when the till sends modifier_option_ids).
+      v_line := public._price_order_line(
+        p_merchant_id,
+        jsonb_build_object(
+          'product_id', v_item->>'product_id',
+          'quantity', v_qty,
+          'modifier_option_ids', COALESCE(v_item->'modifier_option_ids', '[]'::jsonb)),
+        true);
+      v_subtotal := v_subtotal + (v_line->>'total_price')::numeric;
+      v_lines := v_lines || jsonb_build_object(
+        'product_id', v_line->>'product_id',
+        'name', v_line->>'name',
+        'name_ar', v_line->>'name_ar',
+        'qty', v_qty,
+        'unit_price', (v_line->>'unit_price')::numeric,
+        'line_total', (v_line->>'total_price')::numeric,
+        'modifiers', v_line->'modifiers'
+      );
+    END LOOP;
+
+    v_discount := LEAST(GREATEST(COALESCE(p_discount, 0), 0), v_subtotal);
+    v_total := v_subtotal - v_discount;
+
     INSERT INTO public.pos_sales
       (merchant_id, cashier_user_id, items, subtotal, discount, total_amount,
        payment_method, customer_name, notes, idempotency_key)
@@ -270,19 +282,6 @@ BEGIN
        p_notes, p_idempotency_key)
     RETURNING id INTO v_sale_id;
   EXCEPTION WHEN unique_violation THEN
-    IF p_idempotency_key IS NOT NULL THEN
-      SELECT id INTO v_existing FROM public.pos_sales
-        WHERE idempotency_key = p_idempotency_key
-          AND merchant_id = p_merchant_id;
-      IF v_existing IS NOT NULL THEN
-        RETURN (
-          SELECT jsonb_build_object(
-            'ok', true, 'sale_id', s.id, 'idempotent', true,
-            'subtotal', s.subtotal, 'discount', s.discount,
-            'total', s.total_amount, 'items', s.items)
-          FROM public.pos_sales s WHERE s.id = v_existing);
-      END IF;
-    END IF;
     RAISE;
   END;
 
@@ -673,4 +672,8 @@ BEGIN
   END LOOP;
   RETURN jsonb_build_object('ok', true, 'results', v_results);
 END;
-$function$
+$function$;
+
+-- cashier_sync_push stays callable by authenticated cashiers only.
+REVOKE EXECUTE ON FUNCTION public.cashier_sync_push(uuid, jsonb) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.cashier_sync_push(uuid, jsonb) TO authenticated;

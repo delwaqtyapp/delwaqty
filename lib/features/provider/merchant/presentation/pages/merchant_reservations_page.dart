@@ -202,10 +202,12 @@ class _MerchantReservationsPageState
                         delay: Duration(milliseconds: index * 50),
                         child: _ServiceBookingCard(
                           booking: booking,
-                          onUpdateStatus: (status) => _updateBookingStatus(
-                            booking['id'] as String? ?? '',
-                            status,
-                          ),
+                          onUpdateStatus: (status) => status == 'completed'
+                              ? _completeBookingWithPrice(booking)
+                              : _updateBookingStatus(
+                                  booking['id'] as String? ?? '',
+                                  status,
+                                ),
                         ),
                       );
                     },
@@ -316,32 +318,54 @@ class _MerchantReservationsPageState
     }
   }
 
-  Future<void> _updateBookingStatus(String bookingId, String status) async {
+  Future<void> _completeBookingWithPrice(Map<String, dynamic> booking) async {
+    final l10n = AppLocalizations.of(context);
+    final bookingId = booking['id'] as String? ?? '';
     if (bookingId.isEmpty) return;
-    if (status == 'cancelled') {
-      final l10n = AppLocalizations.of(context);
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (dlgCtx) => AlertDialog(
-          title: Text(l10n.cancel),
-          content: Text(l10n.cancelReservationConfirm),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dlgCtx).pop(false),
-              child: Text(l10n.no),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(dlgCtx).pop(true),
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(dlgCtx).colorScheme.error,
-              ),
-              child: Text(l10n.yes),
-            ),
-          ],
+    final estimated = (booking['estimated_price'] as num?)?.toDouble();
+    final existingFinal = (booking['final_price'] as num?)?.toDouble();
+    final controller = TextEditingController(
+      text: (existingFinal ?? estimated)?.toStringAsFixed(0) ?? '',
+    );
+    final price = await showDialog<double>(
+      context: context,
+      builder: (dlgCtx) => AlertDialog(
+        title: Text(l10n.markCompleted),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(
+            labelText: l10n.finalPriceLabel,
+            hintText: l10n.finalPriceRequired,
+          ),
         ),
-      );
-      if (confirmed != true || !mounted) return;
-    }
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dlgCtx).pop(),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              final parsed = double.tryParse(controller.text.trim());
+              if (parsed == null || parsed <= 0) return;
+              Navigator.of(dlgCtx).pop(parsed);
+            },
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+    if (price == null || !mounted) return;
+    await _updateBookingStatus(bookingId, 'completed', finalPrice: price);
+  }
+
+  Future<void> _updateBookingStatus(
+    String bookingId,
+    String status, {
+    double? finalPrice,
+  }) async {
+    if (bookingId.isEmpty) return;
     try {
       SupabaseClient client;
       try {
@@ -352,12 +376,26 @@ class _MerchantReservationsPageState
       // Status transitions go through the role-aware RPC: it records the
       // provider commission on completion and is the only path the booking
       // guard trigger accepts.
+      final params = <String, dynamic>{
+        'p_booking_id': bookingId,
+        'p_status': status,
+      };
+      if (finalPrice != null) {
+        params['p_final_price'] = finalPrice;
+      }
       final res = await client.rpc(
         'update_service_booking_status',
-        params: {'p_booking_id': bookingId, 'p_status': status},
+        params: params,
       );
       if (res is Map && res['ok'] != true) {
-        throw StateError('update_service_booking_status: ${res['reason']}');
+        if (mounted) {
+          final l10n = AppLocalizations.of(context);
+          context.showAppSnackBar(
+            bookingStatusErrorText(l10n, res['reason'] as String?),
+            isError: true,
+          );
+        }
+        return;
       }
       ref.invalidate(_serviceBookingsProvider);
       if (mounted) {
@@ -612,6 +650,18 @@ class _ReservationCard extends StatelessWidget {
   }
 }
 
+String bookingStatusErrorText(AppLocalizations l10n, String? reason) {
+  return switch (reason) {
+    'INVALID_TRANSITION' => l10n.bookingErrInvalidTransition,
+    'PRICE_REQUIRED' => l10n.finalPriceRequired,
+    'INVALID_PRICE' => l10n.bookingErrInvalidPrice,
+    'NOT_YOUR_BOOKING' => l10n.bookingErrNotYours,
+    'TERMINAL_STATE' => l10n.bookingErrTerminal,
+    'PRICE_PROVIDER_ONLY' => l10n.bookingErrNotYours,
+    _ => l10n.error,
+  };
+}
+
 class _ServiceBookingCard extends StatelessWidget {
   const _ServiceBookingCard({
     required this.booking,
@@ -627,6 +677,7 @@ class _ServiceBookingCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     final status = (booking['status'] as String?) ?? 'pending';
+    final statusKey = status == 'in_progress' ? 'inProgress' : status;
     final description = (booking['description'] as String?)?.isNotEmpty == true
         ? booking['description'] as String
         : ((booking['category_type'] as String?) ?? l10n.serviceBookingsTitle);
@@ -634,6 +685,7 @@ class _ServiceBookingCard extends StatelessWidget {
     final scheduledTime = booking['scheduled_time'] as String? ?? '';
     final address = booking['address'] as String? ?? '';
     final estimatedPrice = (booking['estimated_price'] as num?)?.toDouble();
+    final finalPrice = (booking['final_price'] as num?)?.toDouble();
 
     String dateStr = '';
     if (scheduledDateRaw != null && scheduledDateRaw.isNotEmpty) {
@@ -646,19 +698,19 @@ class _ServiceBookingCard extends StatelessWidget {
       }
     }
 
-    final statusColor = switch (status) {
+    final statusColor = switch (statusKey) {
       'pending' => AppColors.warningLight,
       'confirmed' => AppColors.infoLight,
-      'in_progress' => AppColors.brandPurple,
+      'inProgress' => AppColors.brandPurple,
       'completed' => AppColors.successLight,
       'cancelled' => AppColors.errorLight,
       _ => AppColors.infoLight,
     };
 
-    final statusLabel = switch (status) {
+    final statusLabel = switch (statusKey) {
       'pending' => l10n.pending,
       'confirmed' => l10n.confirmed,
-      'in_progress' => l10n.inProgress,
+      'inProgress' => l10n.inProgress,
       'completed' => l10n.completed,
       'cancelled' => l10n.cancelled,
       _ => status,
@@ -742,47 +794,45 @@ class _ServiceBookingCard extends StatelessWidget {
                 ],
               ),
             ],
-            if (estimatedPrice != null) ...[
+            if (finalPrice != null || estimatedPrice != null) ...[
               const SizedBox(height: 4),
               Text(
-                '${estimatedPrice.toStringAsFixed(0)} ${l10n.currencySymbol}',
+                '${(finalPrice ?? estimatedPrice)!.toStringAsFixed(0)} ${l10n.currencySymbol}',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppColors.brandPurple,
                 ),
               ),
+            ] else ...[
+              const SizedBox(height: 4),
+              Text(
+                l10n.bookingQuotePending,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
             ],
-            if (status != 'completed' && status != 'cancelled') ...[
+            if (statusKey != 'completed' && statusKey != 'cancelled') ...[
               const SizedBox(height: AppSpacing.md),
               Wrap(
                 spacing: AppSpacing.sm,
                 runSpacing: AppSpacing.sm,
                 children: [
-                  if (status == 'pending')
+                  if (statusKey == 'pending')
                     FilledButton.tonal(
                       onPressed: () => onUpdateStatus('confirmed'),
                       child: Text(l10n.confirm),
                     ),
-                  if (status == 'pending' || status == 'confirmed')
+                  if (statusKey == 'confirmed')
                     FilledButton.tonal(
-                      onPressed: () => onUpdateStatus('in_progress'),
+                      onPressed: () => onUpdateStatus('inProgress'),
                       child: Text(l10n.inProgress),
                     ),
-                  if (status == 'confirmed' || status == 'in_progress')
+                  if (statusKey == 'inProgress')
                     FilledButton.tonal(
                       onPressed: () => onUpdateStatus('completed'),
                       child: Text(l10n.markCompleted),
                     ),
-                  FilledButton.tonal(
-                    onPressed: () => onUpdateStatus('cancelled'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: theme.colorScheme.error.withValues(
-                        alpha: 0.1,
-                      ),
-                      foregroundColor: theme.colorScheme.error,
-                    ),
-                    child: Text(l10n.cancel),
-                  ),
                 ],
               ),
             ],

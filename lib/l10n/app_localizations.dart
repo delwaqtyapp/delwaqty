@@ -7166,6 +7166,48 @@ abstract class AppLocalizations {
   /// **'{lines} of {total} lines priced by cashier ({pct}%)'**
   String clientPricedRatioLabel(Object lines, Object pct, Object total);
 
+  /// No description provided for @bookingQuotePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Price quoted on completion'**
+  String get bookingQuotePending;
+
+  /// No description provided for @finalPriceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Final price'**
+  String get finalPriceLabel;
+
+  /// No description provided for @finalPriceRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the final price to complete this booking'**
+  String get finalPriceRequired;
+
+  /// No description provided for @bookingErrInvalidTransition.
+  ///
+  /// In en, this message translates to:
+  /// **'This status change isn\'t allowed for this booking'**
+  String get bookingErrInvalidTransition;
+
+  /// No description provided for @bookingErrInvalidPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid price greater than zero'**
+  String get bookingErrInvalidPrice;
+
+  /// No description provided for @bookingErrNotYours.
+  ///
+  /// In en, this message translates to:
+  /// **'This booking isn\'t assigned to you'**
+  String get bookingErrNotYours;
+
+  /// No description provided for @bookingErrTerminal.
+  ///
+  /// In en, this message translates to:
+  /// **'This booking is already closed'**
+  String get bookingErrTerminal;
+
   /// No description provided for @escalationEscalate.
   ///
   /// In en, this message translates to:

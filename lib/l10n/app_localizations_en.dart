@@ -3731,6 +3731,29 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get bookingQuotePending => 'Price quoted on completion';
+
+  @override
+  String get finalPriceLabel => 'Final price';
+
+  @override
+  String get finalPriceRequired =>
+      'Enter the final price to complete this booking';
+
+  @override
+  String get bookingErrInvalidTransition =>
+      'This status change isn\'t allowed for this booking';
+
+  @override
+  String get bookingErrInvalidPrice => 'Enter a valid price greater than zero';
+
+  @override
+  String get bookingErrNotYours => 'This booking isn\'t assigned to you';
+
+  @override
+  String get bookingErrTerminal => 'This booking is already closed';
+
+  @override
   String get escalationEscalate => 'Escalate';
 
   @override

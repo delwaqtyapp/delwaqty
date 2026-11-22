@@ -3703,6 +3703,28 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get bookingQuotePending => 'يُحدَّد السعر عند الإكمال';
+
+  @override
+  String get finalPriceLabel => 'السعر النهائي';
+
+  @override
+  String get finalPriceRequired => 'أدخل السعر النهائي لإكمال هذا الحجز';
+
+  @override
+  String get bookingErrInvalidTransition =>
+      'تغيير الحالة هذا غير مسموح لهذا الحجز';
+
+  @override
+  String get bookingErrInvalidPrice => 'أدخل سعرًا صالحًا أكبر من صفر';
+
+  @override
+  String get bookingErrNotYours => 'هذا الحجز غير مخصص لك';
+
+  @override
+  String get bookingErrTerminal => 'هذا الحجز مغلق بالفعل';
+
+  @override
   String get escalationEscalate => 'تصعيد';
 
   @override

@@ -148,6 +148,12 @@ class _MemberOperationsCenterState
                   color: const Color(0xFFFF6482),
                   onTap: () => context.push('/admin/escalations'),
                 ),
+                _MemberQuickAction(
+                  icon: Icons.gpp_maybe_rounded,
+                  label: l10n.tamperAlertsTitle,
+                  color: Theme.of(context).colorScheme.tertiary,
+                  onTap: () => context.push('/admin/tamper-alerts'),
+                ),
               ],
             ),
           ),

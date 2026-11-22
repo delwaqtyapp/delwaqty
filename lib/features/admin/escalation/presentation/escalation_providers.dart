@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/escalation/domain/entities/escalation_event.dart';
+import 'package:delwaqty/features/admin/escalation/domain/entities/tamper_alert.dart';
 import 'package:delwaqty/features/admin/escalation/domain/repositories/escalation_repository.dart';
 import 'package:delwaqty/features/admin/escalation/data/datasources/remote/supabase_escalation_data_source.dart';
 import 'package:delwaqty/features/admin/escalation/data/repositories/escalation_repository_impl.dart';
@@ -22,6 +23,14 @@ final escalationEventsProvider = FutureProvider<List<EscalationEvent>>((
   final repo = ref.read(escalationRepositoryProvider);
   return repo.getEscalationEvents();
 });
+
+final clientPricedAlertsProvider = FutureProvider<List<ClientPricedAlert>>(
+  (ref) => ref.read(escalationRepositoryProvider).getClientPricedAlerts(),
+);
+
+final insuranceMismatchesProvider = FutureProvider<List<InsuranceMismatch>>(
+  (ref) => ref.read(escalationRepositoryProvider).getInsuranceMismatches(),
+);
 
 final escalateComplaintProvider =
     Provider<

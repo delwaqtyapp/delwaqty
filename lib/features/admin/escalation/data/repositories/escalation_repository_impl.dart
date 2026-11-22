@@ -1,4 +1,5 @@
 import 'package:delwaqty/features/admin/escalation/domain/entities/escalation_event.dart';
+import 'package:delwaqty/features/admin/escalation/domain/entities/tamper_alert.dart';
 import 'package:delwaqty/features/admin/escalation/domain/repositories/escalation_repository.dart';
 import 'package:delwaqty/features/admin/escalation/data/datasources/remote/supabase_escalation_data_source.dart';
 
@@ -31,5 +32,15 @@ class EscalationRepositoryImpl implements EscalationRepository {
   @override
   Future<List<EscalationEvent>> getEscalationEvents({String? complaintId}) {
     return _dataSource.getEscalationEvents(complaintId: complaintId);
+  }
+
+  @override
+  Future<List<ClientPricedAlert>> getClientPricedAlerts() {
+    return _dataSource.getClientPricedAlerts();
+  }
+
+  @override
+  Future<List<InsuranceMismatch>> getInsuranceMismatches() {
+    return _dataSource.getInsuranceMismatches();
   }
 }

@@ -3680,6 +3680,29 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noEscalationsDescription => 'ستظهر التصعيدات هنا بعد رفعها.';
 
   @override
+  String get tamperAlertsTitle => 'تنبيهات العبث';
+
+  @override
+  String get clientPricedSection => 'بنود سعّرها الكاشير (آخر ٣٠ يومًا)';
+
+  @override
+  String get insuranceMismatchSection =>
+      'فروقات إجماليات التأمين (آخر ٣٠ يومًا)';
+
+  @override
+  String get noTamperSignals => 'لا توجد مؤشرات عبث خلال آخر ٣٠ يومًا';
+
+  @override
+  String claimedVsServer(Object claimed, Object server) {
+    return 'المطالَب $claimed · الخادم $server';
+  }
+
+  @override
+  String clientPricedRatioLabel(Object lines, Object pct, Object total) {
+    return '$lines من $total بندًا سعّرها الكاشير ($pct%)';
+  }
+
+  @override
   String get escalationEscalate => 'تصعيد';
 
   @override

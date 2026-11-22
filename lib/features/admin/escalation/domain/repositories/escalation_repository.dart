@@ -1,4 +1,5 @@
 import 'package:delwaqty/features/admin/escalation/domain/entities/escalation_event.dart';
+import 'package:delwaqty/features/admin/escalation/domain/entities/tamper_alert.dart';
 
 abstract class EscalationRepository {
   Future<void> escalateComplaint({
@@ -12,4 +13,8 @@ abstract class EscalationRepository {
   });
 
   Future<List<EscalationEvent>> getEscalationEvents({String? complaintId});
+
+  Future<List<ClientPricedAlert>> getClientPricedAlerts();
+
+  Future<List<InsuranceMismatch>> getInsuranceMismatches();
 }

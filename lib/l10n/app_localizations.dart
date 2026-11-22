@@ -7130,6 +7130,42 @@ abstract class AppLocalizations {
   /// **'Escalations will appear here once raised.'**
   String get noEscalationsDescription;
 
+  /// No description provided for @tamperAlertsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tamper Alerts'**
+  String get tamperAlertsTitle;
+
+  /// No description provided for @clientPricedSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashier-priced lines (last 30 days)'**
+  String get clientPricedSection;
+
+  /// No description provided for @insuranceMismatchSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Insurance total mismatches (last 30 days)'**
+  String get insuranceMismatchSection;
+
+  /// No description provided for @noTamperSignals.
+  ///
+  /// In en, this message translates to:
+  /// **'No tamper signals in the last 30 days'**
+  String get noTamperSignals;
+
+  /// No description provided for @claimedVsServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Claimed {claimed} · server {server}'**
+  String claimedVsServer(Object claimed, Object server);
+
+  /// No description provided for @clientPricedRatioLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{lines} of {total} lines priced by cashier ({pct}%)'**
+  String clientPricedRatioLabel(Object lines, Object pct, Object total);
+
   /// No description provided for @escalationEscalate.
   ///
   /// In en, this message translates to:

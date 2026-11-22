@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/features/admin/escalation/domain/entities/escalation_event.dart';
+import 'package:delwaqty/features/admin/escalation/domain/entities/tamper_alert.dart';
 
 class SupabaseEscalationDataSource {
   SupabaseEscalationDataSource(this._client);
@@ -47,6 +48,36 @@ class SupabaseEscalationDataSource {
           .map(
             (r) =>
                 EscalationEvent.fromJson(Map<String, dynamic>.from(r as Map)),
+          )
+          .toList();
+    } catch (e) {
+      throw ServerException(message: _rpcError(e));
+    }
+  }
+
+  Future<List<ClientPricedAlert>> getClientPricedAlerts() async {
+    try {
+      final result = await _client.rpc('admin_client_priced_ratio');
+      final rows = (result as List?) ?? const [];
+      return rows
+          .map(
+            (r) =>
+                ClientPricedAlert.fromJson(Map<String, dynamic>.from(r as Map)),
+          )
+          .toList();
+    } catch (e) {
+      throw ServerException(message: _rpcError(e));
+    }
+  }
+
+  Future<List<InsuranceMismatch>> getInsuranceMismatches() async {
+    try {
+      final result = await _client.rpc('admin_insurance_mismatches');
+      final rows = (result as List?) ?? const [];
+      return rows
+          .map(
+            (r) =>
+                InsuranceMismatch.fromJson(Map<String, dynamic>.from(r as Map)),
           )
           .toList();
     } catch (e) {

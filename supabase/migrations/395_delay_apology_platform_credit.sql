@@ -1,4 +1,10 @@
--- 395 (v2): the late-delivery apology gift becomes spendable platform credit.
+-- 395 (v3): the late-delivery apology gift becomes spendable platform credit.
+-- v3 review changes: settlement NETS the gift into the driver remittance
+-- (owner decision: driver remits pre-credit goods minus the gift, merchant
+-- still receives full goods, residuals are platform payables recorded on
+-- platform_subsidies); create_order serializes same-key checkouts with an
+-- advisory lock before any pricing or mutation; the v1->v2 backfill is
+-- removed (v1 never reached production, staging is reset by the builder).
 --
 -- v1 granted the gift as ordinary wallet credit and derived availability
 -- from reference strings in the wallet ledger. Review rejected that: the
@@ -54,7 +60,7 @@ create table if not exists public.platform_credit_ledger (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.users(id) on delete cascade,
   order_id uuid references public.orders(id) on delete set null,
-  kind text not null check (kind in ('grant', 'spend', 'restore', 'backfill')),
+  kind text not null check (kind in ('grant', 'spend', 'restore')),
   amount numeric not null check (amount > 0),
   balance_after numeric not null check (balance_after >= 0),
   note text,
@@ -66,6 +72,12 @@ create unique index if not exists platform_credit_ledger_order_kind_uniq
 create index if not exists platform_credit_ledger_user_idx
   on public.platform_credit_ledger (user_id, created_at desc);
 
+alter table public.platform_credit_ledger
+  drop constraint if exists platform_credit_ledger_kind_check;
+alter table public.platform_credit_ledger
+  add constraint platform_credit_ledger_kind_check
+  check (kind in ('grant', 'spend', 'restore'));
+
 create table if not exists public.platform_subsidies (
   id uuid primary key default gen_random_uuid(),
   order_id uuid not null references public.orders(id) on delete cascade,
@@ -73,11 +85,31 @@ create table if not exists public.platform_subsidies (
   amount numeric not null check (amount > 0),
   settlement_model text not null check (settlement_model in ('direct', 'platform')),
   reimburses text not null check (reimburses in ('driver')),
-  status text not null default 'open' check (status in ('open', 'settled', 'void')),
+  -- How the gift is split at settlement time (owner decision 2026-11-23):
+  -- remittance_reduction nets into the driver's goods obligation,
+  -- driver_payable is the platform's debt to him when the gift eats into
+  -- his fare, merchant_payable the platform's debt to a direct-model
+  -- merchant who must still receive full goods.
+  remittance_reduction numeric not null default 0 check (remittance_reduction >= 0),
+  driver_payable numeric not null default 0 check (driver_payable >= 0),
+  merchant_payable numeric not null default 0 check (merchant_payable >= 0),
+  status text not null default 'netted'
+    check (status in ('open', 'netted', 'netted_noncash', 'settled', 'void')),
   created_at timestamptz not null default now(),
   settled_at timestamptz,
   unique (order_id, kind)
 );
+
+-- Converge databases that applied an earlier revision of this migration.
+alter table public.platform_subsidies
+  add column if not exists remittance_reduction numeric not null default 0,
+  add column if not exists driver_payable numeric not null default 0,
+  add column if not exists merchant_payable numeric not null default 0;
+alter table public.platform_subsidies
+  drop constraint if exists platform_subsidies_status_check;
+alter table public.platform_subsidies
+  add constraint platform_subsidies_status_check
+  check (status in ('open', 'netted', 'netted_noncash', 'settled', 'void'));
 
 alter table public.platform_credit_accounts enable row level security;
 alter table public.platform_credit_ledger enable row level security;
@@ -272,6 +304,11 @@ begin
   end if;
 
   if p_idempotency_key is not null then
+    -- 395 (#89): serialize same-key checkouts BEFORE any pricing, stock
+    -- decrement or coupon redemption. A concurrent loser waits here until
+    -- the winner commits, then sees the order and replays cleanly, so it
+    -- never commits its own stock/coupon side effects.
+    perform pg_advisory_xact_lock(hashtext(v_uid::text || ':' || p_idempotency_key));
     select id into v_existing from public.orders
     where user_id = v_uid and idempotency_key = p_idempotency_key;
     if v_existing is not null then
@@ -737,6 +774,7 @@ DECLARE
   v_currency text;
   v_due_hours integer;
   v_goods numeric;
+  v_goods_pre numeric;
   v_credit numeric := 0;
   v_is_cash boolean;
 BEGIN
@@ -813,12 +851,19 @@ BEGIN
 
           -- Goods money: order value minus the delivery fee (driver keeps the
           -- fare side). Owed to the platform (model A) or the merchant (B).
-          -- 395: remittance uses the PRE-CREDIT amount. The platform
-          -- gift must not shrink what the merchant/platform is owed:
-          -- the driver remits goods as if no credit existed.
-          v_goods := GREATEST(
+          -- 395 (owner decision 2026-11-23): the gift is netted INTO
+          -- the remittance at settlement time. The driver owes
+          -- pre-credit goods minus the gift (never below zero), so
+          -- the escalation, overdue and dispatch cash-ceiling checks
+          -- all read the net amount straight from the obligation.
+          -- The platform_subsidies row records the split: remittance
+          -- reduction, a payable to the driver when the gift eats
+          -- into his fare, and (direct model) a payable to the
+          -- merchant, who must still receive full goods.
+          v_goods_pre := GREATEST(
             COALESCE(v_order.total_amount, 0) + COALESCE(v_order.platform_credit_applied, 0)
             - COALESCE(v_order.delivery_fee, 0), 0);
+          v_goods := GREATEST(v_goods_pre - v_credit, 0);
           IF v_goods > 0 THEN
             INSERT INTO public.driver_obligations
               (driver_id, ride_id, order_id, merchant_id, kind, amount, currency,
@@ -836,10 +881,9 @@ BEGIN
                    'تسوية كاش مستحقة',
                    CASE WHEN v_credit > 0 THEN
                        'التوريد ' || v_goods::text || ' ' || v_currency ||
-                         ' مستحق خلال ' || v_due_hours::text || ' ساعة. قبضت ' ||
-                         trim(to_char(v_goods - v_credit, 'FM999990.##')) ||
-                         ' من العميل والمنصة بتغطي ' || trim(to_char(v_credit, 'FM999990.##')) ||
-                         ' (هدية العميل مننا).'
+                         ' مستحق خلال ' || v_due_hours::text || ' ساعة. المنصة بتغطي ' ||
+                         trim(to_char(v_credit, 'FM999990.##')) ||
+                         ' من قيمة البضاعة (هدية العميل مننا).'
                    ELSE
                        'قبضت ' || v_goods::text || ' ' || v_currency ||
                          ' من الطلب. التوريد مستحق خلال ' || v_due_hours::text || ' ساعة.'
@@ -852,6 +896,22 @@ BEGIN
                WHERE n.user_id = v_driver_uid AND n.type = 'settlement'
                  AND (n.data->>'ride_id' = p_ride_id::text
                       OR n.data->>'order_id' = v_order.id::text)
+            );
+          ELSIF v_credit > 0 THEN
+            -- The gift covered every pound of goods: no remittance is due.
+            INSERT INTO public.notifications
+              (user_id, title, body, type, data, send_push)
+            SELECT v_driver_uid,
+                   'مفيش توريد على الطلب ده',
+                   'المنصة بتغطي ' || trim(to_char(v_credit, 'FM999990.##')) || ' ' || v_currency ||
+                     ' (هدية العميل مننا). مفيش توريد بضاعة مستحق عليك للطلب ده.',
+                   'settlement',
+                   jsonb_build_object('order_id', v_order.id, 'amount', 0),
+                   true
+            WHERE NOT EXISTS (
+              SELECT 1 FROM public.notifications n
+               WHERE n.user_id = v_driver_uid AND n.type = 'settlement'
+                 AND (n.data->>'ride_id' = p_ride_id::text OR n.data->>'order_id' = v_order.id::text)
             );
           END IF;
 
@@ -868,24 +928,55 @@ BEGIN
               DO NOTHING;
           END IF;
 
-          -- 395: platform subsidy ledger. The customer paid less by the
-          -- gift credit; the platform owes that amount to the driver (he
-          -- remits pre-credit goods but collected post-credit cash) in both
-          -- settlement models. In the platform model ops nets it against
-          -- his remittance; in the direct model it is paid at settlement.
-          IF v_credit > 0 THEN
+          -- 395: netted platform subsidy ledger. The gift reduces the
+          -- driver's goods remittance (recorded net above); this row is the
+          -- accounting trail of who the platform still owes: the driver when
+          -- the gift ate into his fare (driver_payable) and, in the direct
+          -- model, the merchant who must receive full goods
+          -- (merchant_payable). Inserted exactly once per order, in the same
+          -- transaction as the obligation; admin reads it via service_role.
+          IF v_credit > 0
+             AND NOT EXISTS (SELECT 1 FROM public.platform_subsidies ps
+                              WHERE ps.order_id = v_order.id
+                                AND ps.kind = 'delay_apology_credit') THEN
             INSERT INTO public.platform_subsidies
-              (order_id, kind, amount, settlement_model, reimburses)
+              (order_id, kind, amount, settlement_model, reimburses,
+               remittance_reduction, driver_payable, merchant_payable, status)
             VALUES
               (v_order.id, 'delay_apology_credit', v_credit,
                CASE WHEN v_merchant_model = 'direct' THEN 'direct' ELSE 'platform' END,
-               'driver')
-            ON CONFLICT (order_id, kind) DO NOTHING;
-            PERFORM public.write_audit('PLATFORM_SUBSIDY_RECORDED', 'orders', v_order.id::text,
-              jsonb_build_object('amount', v_credit, 'reimburses', 'driver',
+               'driver',
+               LEAST(v_credit, v_goods_pre),
+               GREATEST(v_credit - v_goods_pre, 0),
+               CASE WHEN v_merchant_model = 'direct'
+                    THEN LEAST(v_credit, v_goods_pre) ELSE 0 END,
+               'netted');
+            PERFORM public.write_audit('PLATFORM_SUBSIDY_NETTED', 'orders', v_order.id::text,
+              jsonb_build_object('amount', v_credit,
+                'remittance_reduction', LEAST(v_credit, v_goods_pre),
+                'driver_payable', GREATEST(v_credit - v_goods_pre, 0),
                 'settlement_model', CASE WHEN v_merchant_model = 'direct' THEN 'direct' ELSE 'platform' END));
           END IF;
+
         END IF;
+
+          -- 395: non-cash credited orders carry no remittance, so the gift
+          -- costs the platform nothing extra here (it already holds the
+          -- money); record the subsidy for complete accounting only.
+          IF NOT v_is_cash AND v_credit > 0
+             AND NOT EXISTS (SELECT 1 FROM public.platform_subsidies ps
+                              WHERE ps.order_id = v_order.id
+                                AND ps.kind = 'delay_apology_credit') THEN
+            INSERT INTO public.platform_subsidies
+              (order_id, kind, amount, settlement_model, reimburses,
+               remittance_reduction, driver_payable, merchant_payable, status)
+            VALUES
+              (v_order.id, 'delay_apology_credit', v_credit,
+               CASE WHEN v_merchant_model = 'direct' THEN 'direct' ELSE 'platform' END,
+               'driver', 0, 0, 0, 'netted_noncash');
+            PERFORM public.write_audit('PLATFORM_SUBSIDY_NETTED', 'orders', v_order.id::text,
+              jsonb_build_object('amount', v_credit, 'status', 'netted_noncash'));
+          END IF;
       END IF;
     END IF;
   END IF;
@@ -928,6 +1019,7 @@ DECLARE
   v_currency text := 'EGP';
   v_due_hours integer;
   v_goods numeric;
+  v_goods_pre numeric;
   v_credit numeric := 0;
   v_is_cash boolean;
 BEGIN
@@ -999,12 +1091,19 @@ BEGIN
         v_due_hours := COALESCE(v_due_hours, 24);
 
         -- Goods money owed by the driver (order value minus the delivery fee).
-        -- 395: remittance uses the PRE-CREDIT amount. The platform
-        -- gift must not shrink what the merchant/platform is owed:
-        -- the driver remits goods as if no credit existed.
-        v_goods := GREATEST(
+        -- 395 (owner decision 2026-11-23): the gift is netted INTO
+        -- the remittance at settlement time. The driver owes
+        -- pre-credit goods minus the gift (never below zero), so
+        -- the escalation, overdue and dispatch cash-ceiling checks
+        -- all read the net amount straight from the obligation.
+        -- The platform_subsidies row records the split: remittance
+        -- reduction, a payable to the driver when the gift eats
+        -- into his fare, and (direct model) a payable to the
+        -- merchant, who must still receive full goods.
+        v_goods_pre := GREATEST(
           COALESCE(o.total_amount, 0) + COALESCE(o.platform_credit_applied, 0)
           - COALESCE(o.delivery_fee, 0), 0);
+        v_goods := GREATEST(v_goods_pre - v_credit, 0);
         IF v_goods > 0 THEN
           INSERT INTO public.driver_obligations
             (driver_id, ride_id, order_id, merchant_id, kind, amount, currency,
@@ -1022,10 +1121,9 @@ BEGIN
                  'تسوية كاش مستحقة',
                  CASE WHEN v_credit > 0 THEN
                      'التوريد ' || v_goods::text || ' ' || v_currency ||
-                       ' مستحق خلال ' || v_due_hours::text || ' ساعة. قبضت ' ||
-                       trim(to_char(v_goods - v_credit, 'FM999990.##')) ||
-                       ' من العميل والمنصة بتغطي ' || trim(to_char(v_credit, 'FM999990.##')) ||
-                       ' (هدية العميل مننا).'
+                       ' مستحق خلال ' || v_due_hours::text || ' ساعة. المنصة بتغطي ' ||
+                       trim(to_char(v_credit, 'FM999990.##')) ||
+                       ' من قيمة البضاعة (هدية العميل مننا).'
                  ELSE
                      'قبضت ' || v_goods::text || ' ' || v_currency ||
                        ' من الطلب. التوريد مستحق خلال ' || v_due_hours::text || ' ساعة.'
@@ -1040,6 +1138,22 @@ BEGIN
                     OR n.data->>'ride_id' IN (
                       SELECT r2.id::text FROM public.rides r2
                        WHERE r2.order_id = p_order_id))
+          );
+        ELSIF v_credit > 0 THEN
+          -- The gift covered every pound of goods: no remittance is due.
+          INSERT INTO public.notifications
+            (user_id, title, body, type, data, send_push)
+          SELECT v_driver_uid,
+                 'مفيش توريد على الطلب ده',
+                 'المنصة بتغطي ' || trim(to_char(v_credit, 'FM999990.##')) || ' ' || v_currency ||
+                   ' (هدية العميل مننا). مفيش توريد بضاعة مستحق عليك للطلب ده.',
+                 'settlement',
+                 jsonb_build_object('order_id', p_order_id, 'amount', 0),
+                 true
+          WHERE NOT EXISTS (
+            SELECT 1 FROM public.notifications n
+             WHERE n.user_id = v_driver_uid AND n.type = 'settlement'
+               AND (n.data->>'order_id' = p_order_id::text)
           );
         END IF;
 
@@ -1056,24 +1170,55 @@ BEGIN
             DO NOTHING;
         END IF;
 
-        -- 395: platform subsidy ledger. The customer paid less by the
-        -- gift credit; the platform owes that amount to the driver (he
-        -- remits pre-credit goods but collected post-credit cash) in both
-        -- settlement models. In the platform model ops nets it against
-        -- his remittance; in the direct model it is paid at settlement.
-        IF v_credit > 0 THEN
+        -- 395: netted platform subsidy ledger. The gift reduces the
+        -- driver's goods remittance (recorded net above); this row is the
+        -- accounting trail of who the platform still owes: the driver when
+        -- the gift ate into his fare (driver_payable) and, in the direct
+        -- model, the merchant who must receive full goods
+        -- (merchant_payable). Inserted exactly once per order, in the same
+        -- transaction as the obligation; admin reads it via service_role.
+        IF v_credit > 0
+           AND NOT EXISTS (SELECT 1 FROM public.platform_subsidies ps
+                            WHERE ps.order_id = p_order_id
+                              AND ps.kind = 'delay_apology_credit') THEN
           INSERT INTO public.platform_subsidies
-            (order_id, kind, amount, settlement_model, reimburses)
+            (order_id, kind, amount, settlement_model, reimburses,
+             remittance_reduction, driver_payable, merchant_payable, status)
           VALUES
             (p_order_id, 'delay_apology_credit', v_credit,
              CASE WHEN v_merchant_model = 'direct' THEN 'direct' ELSE 'platform' END,
-             'driver')
-          ON CONFLICT (order_id, kind) DO NOTHING;
-          PERFORM public.write_audit('PLATFORM_SUBSIDY_RECORDED', 'orders', p_order_id::text,
-            jsonb_build_object('amount', v_credit, 'reimburses', 'driver',
+             'driver',
+             LEAST(v_credit, v_goods_pre),
+             GREATEST(v_credit - v_goods_pre, 0),
+             CASE WHEN v_merchant_model = 'direct'
+                  THEN LEAST(v_credit, v_goods_pre) ELSE 0 END,
+             'netted');
+          PERFORM public.write_audit('PLATFORM_SUBSIDY_NETTED', 'orders', p_order_id::text,
+            jsonb_build_object('amount', v_credit,
+              'remittance_reduction', LEAST(v_credit, v_goods_pre),
+              'driver_payable', GREATEST(v_credit - v_goods_pre, 0),
               'settlement_model', CASE WHEN v_merchant_model = 'direct' THEN 'direct' ELSE 'platform' END));
         END IF;
+
       END IF;
+
+        -- 395: non-cash credited orders carry no remittance, so the gift
+        -- costs the platform nothing extra here (it already holds the
+        -- money); record the subsidy for complete accounting only.
+        IF NOT v_is_cash AND v_credit > 0
+           AND NOT EXISTS (SELECT 1 FROM public.platform_subsidies ps
+                            WHERE ps.order_id = p_order_id
+                              AND ps.kind = 'delay_apology_credit') THEN
+          INSERT INTO public.platform_subsidies
+            (order_id, kind, amount, settlement_model, reimburses,
+             remittance_reduction, driver_payable, merchant_payable, status)
+          VALUES
+            (p_order_id, 'delay_apology_credit', v_credit,
+             CASE WHEN v_merchant_model = 'direct' THEN 'direct' ELSE 'platform' END,
+             'driver', 0, 0, 0, 'netted_noncash');
+          PERFORM public.write_audit('PLATFORM_SUBSIDY_NETTED', 'orders', p_order_id::text,
+            jsonb_build_object('amount', v_credit, 'status', 'netted_noncash'));
+        END IF;
     END IF;
   END IF;
 
@@ -1090,173 +1235,6 @@ BEGIN
        now() + make_interval(hours => COALESCE(v_due_hours, 24)))
     ON CONFLICT (order_id, kind) WHERE ride_id IS NULL AND order_id IS NOT NULL DO NOTHING;
   END IF;
-END;
-$function$
-;
--- patched: sweep
-
-CREATE OR REPLACE FUNCTION public._settlement_escalation_sweep()
- RETURNS integer
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public'
-AS $function$
-DECLARE
-  v_cfg public.platform_settings;
-  ob RECORD;
-  v_count integer := 0;
-  v_driver RECORD;
-  v_amount numeric;
-  v_days integer;
-BEGIN
-  PERFORM set_config('app.escalation_rpc', 'true', true);
-  SELECT * INTO v_cfg FROM public._settlement_settings();
-  v_amount := COALESCE(v_cfg.settlement_suspension_amount, 1500);
-  v_days := COALESCE(v_cfg.settlement_suspension_days, 5);
-
-  -- 1) Overdue individual obligations -> ops complaint (unchanged behavior)
-  FOR ob IN
-    SELECT o.*, d.user_id AS driver_uid
-      FROM public.driver_obligations o
-      JOIN public.drivers d ON d.id = o.driver_id
-     WHERE o.status = 'open'
-       AND o.escalated_at IS NULL
-       AND o.due_at + make_interval(hours => COALESCE(v_cfg.settlement_escalation_hours, 24)) < now()
-  LOOP
-    INSERT INTO public.complaints
-      (order_id, ride_id, complainant_id, respondent_id, reporter_id,
-       complaint_type, category, subject, description, status, priority)
-    VALUES
-      (ob.order_id, ob.ride_id, ob.driver_uid, ob.driver_uid, ob.driver_uid,
-       'driver', 'settlement_overdue',
-       'مديونية كاش متأخرة',
-       'الكابتن متأخر عن توريد ' || ob.amount::text || ' ' || ob.currency ||
-         ' (نوع: ' || ob.kind || '، مستحق لـ ' || ob.owed_to || ') منذ ' ||
-         ob.due_at::date::text || '.',
-       'pending', 'high');
-    UPDATE public.driver_obligations SET escalated_at = now() WHERE id = ob.id;
-    v_count := v_count + 1;
-  END LOOP;
-
-  -- 2) Outstanding > suspension amount -> auto-suspend 5 days
-  FOR v_driver IN
-    SELECT o.driver_id, d.user_id AS driver_uid,
-           sum(o.amount) FILTER (WHERE o.status IN ('open','disputed')) AS outstanding
-      FROM public.driver_obligations o
-      JOIN public.drivers d ON d.id = o.driver_id
-     WHERE o.status IN ('open','disputed')
-     GROUP BY o.driver_id, d.user_id
-    -- 395: open platform subsidies owed to the driver (gift-credit cash
-    -- gaps) net against his outstanding debt: a credited order must never
-    -- suspend a captain over money the platform owes him.
-    HAVING sum(o.amount) FILTER (WHERE o.status IN ('open','disputed'))
-           - COALESCE((SELECT sum(ps.amount) FROM public.platform_subsidies ps
-                        JOIN public.orders oo ON oo.id = ps.order_id
-                       WHERE oo.driver_id = o.driver_id
-                         AND ps.reimburses = 'driver' AND ps.status = 'open'), 0)
-           > v_amount
-  LOOP
-    -- Skip if already suspended for settlement and still within the window
-    IF EXISTS (
-      SELECT 1 FROM public.drivers d
-      WHERE d.id = v_driver.driver_id
-        AND d.settlement_suspended_until IS NOT NULL
-        AND d.settlement_suspended_until > now()
-    ) THEN
-      CONTINUE;
-    END IF;
-
-    UPDATE public.drivers
-       SET settlement_suspended_until = now() + make_interval(days => v_days),
-           is_online = false
-     WHERE id = v_driver.driver_id;
-    UPDATE public.users
-       SET account_status = 'suspended'
-     WHERE id = v_driver.driver_uid
-       AND account_status = 'active';
-
-    INSERT INTO public.notifications (user_id, title, body, type, data, priority)
-    VALUES (
-      v_driver.driver_uid,
-      'إيقاف مؤقت لمدة ' || v_days || ' أيام',
-      'تم إيقاف حسابك ' || v_days || ' أيام لأن المديونية غير الموردة تجاوزت ' ||
-        v_amount::text || ' جنيه. الإجمالي القائم: ' ||
-        COALESCE(v_driver.outstanding,0)::text || ' جنيه. قم بالتوريد لاستعادة حسابك.',
-      'settlement_suspension',
-      jsonb_build_object('driver_id', v_driver.driver_id,
-                         'outstanding', v_driver.outstanding,
-                         'suspended_days', v_days),
-      'high');
-    v_count := v_count + 1;
-
-    -- Ops audit trail (kept from previous behavior)
-    IF NOT EXISTS (
-      SELECT 1 FROM public.complaints c
-       WHERE c.respondent_id = v_driver.driver_uid
-         AND c.category = 'settlement_suspension_review'
-         AND c.status IN ('pending','investigating','escalated','open')
-    ) THEN
-      INSERT INTO public.complaints
-        (complainant_id, respondent_id, reporter_id, complaint_type, category,
-         subject, description, status, priority)
-      VALUES
-        (v_driver.driver_uid, v_driver.driver_uid, v_driver.driver_uid,
-         'driver', 'settlement_suspension_review',
-         'إيقاف كابتن لتجاوز حد التسوية',
-         'تم إيقاف الكابتن ' || v_days || ' أيام: مديونية غير موردة ' ||
-           COALESCE(v_driver.outstanding,0)::text || ' جنيه (الحد: ' || v_amount::text || ').',
-         'pending', 'urgent');
-      v_count := v_count + 1;
-    END IF;
-  END LOOP;
-
-  -- 3) Reactivate drivers whose suspension expired and balance is back in limit.
-  --    If still over the limit at expiry, extend the suspension another window.
-  FOR v_driver IN
-    SELECT d.id AS driver_id, d.user_id AS driver_uid, d.settlement_suspended_until,
-           COALESCE((SELECT sum(o.amount) FROM public.driver_obligations o
-                      WHERE o.driver_id = d.id AND o.status IN ('open','disputed')), 0)
-           -- 395: net open platform subsidies owed to the driver (see loop 2).
-           - COALESCE((SELECT sum(ps.amount) FROM public.platform_subsidies ps
-                        JOIN public.orders oo ON oo.id = ps.order_id
-                       WHERE oo.driver_id = d.id
-                         AND ps.reimburses = 'driver' AND ps.status = 'open'), 0)
-           AS outstanding
-      FROM public.drivers d
-     WHERE d.settlement_suspended_until IS NOT NULL
-       AND d.settlement_suspended_until <= now()
-  LOOP
-    IF v_driver.outstanding > v_amount THEN
-      UPDATE public.drivers
-         SET settlement_suspended_until = now() + make_interval(days => v_days)
-       WHERE id = v_driver.driver_id;
-      v_count := v_count + 1;
-    ELSE
-      UPDATE public.drivers SET settlement_suspended_until = NULL WHERE id = v_driver.driver_id;
-      -- Do not revive a user suspended by ops for a different reason.
-      UPDATE public.users
-         SET account_status = 'active'
-       WHERE id = v_driver.driver_uid
-         AND account_status = 'suspended'
-         AND NOT EXISTS (
-           SELECT 1 FROM public.sanctions s
-            WHERE s.target_user_id = v_driver.driver_uid
-              AND s.is_active);
-      INSERT INTO public.notifications (user_id, title, body, type, data, priority)
-      VALUES (
-        v_driver.driver_uid,
-        'تمت استعادة حسابك',
-        'انتهت فترة الإيقاف ومديونيتك الحالية ' || v_driver.outstanding::text ||
-          ' جنيه ضمن الحد المسموح. يمكنك استقبال الطلبات من جديد.',
-        'settlement_reactivation',
-        jsonb_build_object('driver_id', v_driver.driver_id,
-                           'outstanding', v_driver.outstanding),
-        'high');
-      v_count := v_count + 1;
-    END IF;
-  END LOOP;
-
-  RETURN v_count;
 END;
 $function$
 ;
@@ -1293,69 +1271,6 @@ begin
     'currency', 'EGP');
 end;
 $function$;
-
--- ---------------------------------------------------------------------------
--- Backfill: move any gift credit stranded in the wallet by v1 into the
--- dedicated account. Idempotent (one 'backfill' ledger row per user). The
--- wallet is debited back so the same pounds cannot be spent twice; the
--- debit is capped at the wallet balance to respect wallets_balance_check.
--- ---------------------------------------------------------------------------
-
-do $$
-declare
-  r record;
-  v_balance numeric;
-  v_debit numeric;
-begin
-  for r in
-    select w.id as wallet_id, w.user_id,
-           coalesce(sum(case when wt.type = 'credit'
-                              and wt.reference_type = 'delay_apology'
-                             then wt.amount end), 0)
-         - coalesce(sum(case when wt.type = 'debit'
-                              and wt.reference_type = 'delay_apology_spend'
-                             then wt.amount end), 0) as stranded
-      from public.wallets w
-      join public.wallet_transactions wt on wt.wallet_id = w.id
-     where wt.reference_type in ('delay_apology', 'delay_apology_spend')
-     group by w.id, w.user_id
-  loop
-    if r.stranded <= 0 then
-      continue;
-    end if;
-    if exists (select 1 from public.platform_credit_ledger l
-                where l.user_id = r.user_id and l.kind = 'backfill') then
-      continue;
-    end if;
-    select balance into v_balance from public.wallets
-     where id = r.wallet_id for update;
-    v_debit := least(v_balance, r.stranded);
-    insert into public.platform_credit_accounts (user_id, balance)
-    values (r.user_id, r.stranded)
-    on conflict (user_id) do update
-      set balance = platform_credit_accounts.balance + excluded.balance,
-          updated_at = now();
-    if v_debit > 0 then
-      update public.wallets set balance = balance - v_debit, updated_at = now()
-       where id = r.wallet_id;
-      insert into public.wallet_transactions
-        (wallet_id, user_id, type, amount, reference_type, reference_id,
-         description, balance_after)
-      values
-        (r.wallet_id, r.user_id, 'debit', v_debit, 'delay_apology_backfill',
-         null, 'نقل رصيد هدية الاعتذار إلى حساب الهدايا', v_balance - v_debit);
-    end if;
-    insert into public.platform_credit_ledger
-      (user_id, order_id, kind, amount, balance_after, note)
-    select r.user_id, null, 'backfill', r.stranded, a.balance,
-           'migrated from wallet delay_apology credit'
-      from public.platform_credit_accounts a
-     where a.user_id = r.user_id;
-    perform public.write_audit('PLATFORM_CREDIT_BACKFILLED', 'users', r.user_id::text,
-      jsonb_build_object('amount', r.stranded, 'wallet_debit', v_debit));
-  end loop;
-end;
-$$;
 
 -- ---------------------------------------------------------------------------
 -- Privileges

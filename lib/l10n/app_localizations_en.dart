@@ -823,6 +823,75 @@ class AppLocalizationsEn extends AppLocalizations {
   String get egp => 'EGP';
 
   @override
+  String get provTabCashier => 'Cashier';
+
+  @override
+  String get provTabMenu => 'Menu';
+
+  @override
+  String get provManageMenu => 'Manage menu';
+
+  @override
+  String get provTabItems => 'Items';
+
+  @override
+  String get provManageItems => 'Manage items';
+
+  @override
+  String get provTabMedicines => 'Medicines';
+
+  @override
+  String get provManageMedicines => 'Manage medicines';
+
+  @override
+  String get provTabTableBookings => 'Table bookings';
+
+  @override
+  String get provTabJobs => 'Jobs';
+
+  @override
+  String get provServiceRequests => 'Service requests';
+
+  @override
+  String get provTabLessonRequests => 'Lesson requests';
+
+  @override
+  String get provTabAppointments => 'Appointments';
+
+  @override
+  String get provTabMyServices => 'My services';
+
+  @override
+  String get provTabMyLessons => 'My lessons';
+
+  @override
+  String get provMyServicesPrices => 'My services & prices';
+
+  @override
+  String get provMyLessonsPrices => 'My lessons & prices';
+
+  @override
+  String get provPricesAdminManaged =>
+      'Prices are set by the admin team. Contact support to change them.';
+
+  @override
+  String get provEmptyServices =>
+      'No services are registered on your account yet';
+
+  @override
+  String get provEmptyLessons =>
+      'No lessons are registered on your account yet';
+
+  @override
+  String get provHourlyRate => 'Hourly rate';
+
+  @override
+  String get provFixedPrice => 'Fixed price';
+
+  @override
+  String get provPriceNotSet => 'Price not set by admin yet';
+
+  @override
   String get searchRestaurants => 'Search restaurants...';
 
   @override

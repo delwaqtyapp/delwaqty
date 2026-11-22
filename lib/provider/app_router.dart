@@ -7,6 +7,7 @@ import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart';
 import 'package:delwaqty/features/_shared/device_lock/presentation/device_unlock_page.dart';
+import 'package:delwaqty/features/provider/capability/presentation/providers/provider_capability_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 final GlobalKey<NavigatorState> providerRootNavigatorKey =
@@ -21,6 +22,12 @@ final providerGoRouterProvider = Provider<GoRouter>((ref) {
   });
 
   ref.listen(deviceLockProvider, (previous, next) {
+    refreshNotifier.value++;
+  });
+
+  // Re-run the redirect when the account type resolves or switches so a
+  // hidden surface is left immediately.
+  ref.listen(providerProfileProvider, (previous, next) {
     refreshNotifier.value++;
   });
 
@@ -73,6 +80,15 @@ final providerGoRouterProvider = Provider<GoRouter>((ref) {
         return '/welcome';
       }
       if (isAuth && isAuthRoute) {
+        return '/merchant-dashboard';
+      }
+      // Capability guard (UX layer; RLS/RPC remain the enforcement): a stale
+      // deep link or notification must not open a surface the account type
+      // does not have (e.g. a plumber opening the cashier).
+      if (isAuth &&
+          !ref
+              .read(providerProfileProvider)
+              .allowsRoute(state.matchedLocation)) {
         return '/merchant-dashboard';
       }
       return null;

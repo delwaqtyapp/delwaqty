@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/core/auth/platform_capabilities.dart';
+import 'package:delwaqty/core/module/shell_customization.dart';
 import 'package:delwaqty/features/provider/capability/domain/provider_capability.dart';
+import 'package:delwaqty/features/provider/capability/domain/provider_profile.dart';
 
 class ProviderBusinessProfile {
   const ProviderBusinessProfile({
@@ -158,4 +160,25 @@ final providerCategoryProvider = Provider<ProviderCategory>((ref) {
 /// The resolved capability set for the current provider account.
 final providerCapabilitiesProvider = Provider<Set<ProviderCapability>>((ref) {
   return resolveCapabilities(ref.watch(providerCategoryProvider));
+});
+
+/// The operating profile (tabs, menu, flags, wording) for the signed-in
+/// account. Neutral until the account type is known so no type-specific tab
+/// flashes and disappears.
+final providerProfileProvider = Provider<ProviderProfile>((ref) {
+  final raw = ref.watch(providerRawCategoryProvider);
+  final value = raw.value;
+  if (value == null) return ProviderProfile.neutral();
+  return ProviderProfile.forCategory(ProviderCategory.normalize(value));
+});
+
+/// Shell configuration derived from [providerProfileProvider]. The provider
+/// app overrides `shellNavConfigProvider` with this.
+final providerShellNavConfigProvider = Provider<ShellNavConfig>((ref) {
+  return ref.watch(providerProfileProvider).toShellNavConfig();
+});
+
+/// Drawer filter derived from [providerProfileProvider].
+final providerDrawerFilterProvider = Provider<bool Function(String)>((ref) {
+  return ref.watch(providerProfileProvider).allowsDrawerEntry;
 });

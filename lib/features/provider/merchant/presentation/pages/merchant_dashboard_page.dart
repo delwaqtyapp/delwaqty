@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/features/provider/capability/domain/provider_profile.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/core/utils/bidi_text.dart';
 import 'package:go_router/go_router.dart';
@@ -574,12 +575,14 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
   Widget _buildQuickActionsGrid(BuildContext context, MerchantStats? stats) {
     final l10n = AppLocalizations.of(context);
     final caps = ref.watch(providerCapabilitiesProvider);
+    final profile = ref.watch(providerProfileProvider);
+    final lang = AppLocalizations.of(context);
     final pendingCount = stats?.pendingOrders ?? 0;
 
     final items = <_QuickActionItem>[
       if (caps.contains(ProviderCapability.orders))
         _QuickActionItem(
-          title: l10n.viewOrders,
+          title: profile.label(ProviderLabel.viewOrders, lang),
           icon: Icons.receipt_long_rounded,
           color: AppColors.infoLight,
           badgeCount: pendingCount,
@@ -587,38 +590,39 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
         ),
       if (caps.contains(ProviderCapability.catalog))
         _QuickActionItem(
-          title: l10n.manageProducts,
+          title: profile.label(ProviderLabel.manageProducts, lang),
           icon: Icons.inventory_2_rounded,
           color: AppColors.brandPurple,
           onTap: () => context.push('/merchant-dashboard/products'),
         ),
-      if (caps.contains(ProviderCapability.catalog) && _isPharmacyWorkspace())
+      if (caps.contains(ProviderCapability.drugCatalog))
         _QuickActionItem(
           title: l10n.drugImportTitle,
           icon: Icons.medication_rounded,
           color: AppColors.infoLight,
           onTap: () => context.push('/merchant-dashboard/drugs'),
         ),
-      if (caps.contains(ProviderCapability.catalog))
+      if (caps.contains(ProviderCapability.cashier))
         _QuickActionItem(
           title: l10n.posCashier,
           icon: Icons.point_of_sale_rounded,
           color: AppColors.brandCyan,
           onTap: () => context.push('/merchant-dashboard/pos'),
         ),
-      if (caps.contains(ProviderCapability.catalog))
+      if (caps.contains(ProviderCapability.inventory))
         _QuickActionItem(
           title: l10n.inventory,
           icon: Icons.warehouse_rounded,
           color: AppColors.brandViolet,
           onTap: () => context.push('/merchant-dashboard/inventory'),
         ),
-      _QuickActionItem(
-        title: l10n.storefront,
-        icon: Icons.storefront_rounded,
-        color: AppColors.successLight,
-        onTap: () => context.push('/merchant-dashboard/storefront'),
-      ),
+      if (caps.contains(ProviderCapability.storefront))
+        _QuickActionItem(
+          title: l10n.storefront,
+          icon: Icons.storefront_rounded,
+          color: AppColors.successLight,
+          onTap: () => context.push('/merchant-dashboard/storefront'),
+        ),
       if (caps.contains(ProviderCapability.offers))
         _QuickActionItem(
           title: l10n.createOffer,
@@ -626,12 +630,13 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
           color: AppColors.warningLight,
           onTap: () => context.push('/merchant-dashboard/offers'),
         ),
-      _QuickActionItem(
-        title: l10n.adminBannersTitle,
-        icon: Icons.view_carousel_rounded,
-        color: AppColors.brandViolet,
-        onTap: () => context.push('/merchant-dashboard/banners'),
-      ),
+      if (caps.contains(ProviderCapability.banners))
+        _QuickActionItem(
+          title: l10n.adminBannersTitle,
+          icon: Icons.view_carousel_rounded,
+          color: AppColors.brandViolet,
+          onTap: () => context.push('/merchant-dashboard/banners'),
+        ),
       if (caps.contains(ProviderCapability.branches))
         _QuickActionItem(
           title: l10n.branches,
@@ -639,13 +644,21 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
           color: Colors.teal,
           onTap: () => context.push('/merchant-dashboard/branches'),
         ),
-      if (caps.contains(ProviderCapability.bookings) ||
-          caps.contains(ProviderCapability.orders))
+      if (caps.contains(ProviderCapability.bookings))
         _QuickActionItem(
-          title: l10n.reservations,
+          title: profile.label(ProviderLabel.bookingsTitle, lang),
           icon: Icons.calendar_month_rounded,
           color: Colors.indigo,
-          onTap: () => context.push('/merchant-dashboard/reservations'),
+          onTap: () => profile.bookingsAreServiceJobs
+              ? context.go('/provider-bookings')
+              : context.push('/merchant-dashboard/reservations'),
+        ),
+      if (caps.contains(ProviderCapability.services))
+        _QuickActionItem(
+          title: profile.label(ProviderLabel.myServicesTitle, lang),
+          icon: Icons.handyman_rounded,
+          color: Colors.teal,
+          onTap: () => context.go('/provider-services'),
         ),
       if (caps.contains(ProviderCapability.reviews))
         _QuickActionItem(

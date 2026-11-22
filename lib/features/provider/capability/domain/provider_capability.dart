@@ -26,6 +26,12 @@ enum ProviderCapability {
   documents,
   support,
   notifications,
+  cashier,
+  storefront,
+  banners,
+  inventory,
+  drugCatalog,
+  barcode,
 }
 
 /// Canonical provider categories derived from the database vocabulary.
@@ -36,6 +42,8 @@ enum ProviderCategory {
   marketplace,
   retail,
   homeServices,
+  teacher,
+  healthProfessional,
   owner,
   unknown;
 
@@ -49,15 +57,15 @@ enum ProviderCategory {
     switch (value) {
       case 'food':
       case 'restaurant':
+      case 'cafe':
         return ProviderCategory.restaurant;
       case 'pharmacy':
         return ProviderCategory.pharmacy;
       case 'grocery':
       case 'supermarket':
+        return ProviderCategory.grocery;
       case 'marketplace':
-        return value == 'marketplace'
-            ? ProviderCategory.marketplace
-            : ProviderCategory.grocery;
+        return ProviderCategory.marketplace;
       case 'electronics':
       case 'fashion':
       case 'flowers':
@@ -65,6 +73,14 @@ enum ProviderCategory {
       case 'general':
       case 'retail':
         return ProviderCategory.retail;
+      case 'teacher':
+      case 'teachers':
+      case 'tutor':
+        return ProviderCategory.teacher;
+      case 'doctor':
+      case 'clinic':
+      case 'nurse':
+        return ProviderCategory.healthProfessional;
       case 'service':
       case 'home_services':
       case 'homeservices':
@@ -80,8 +96,15 @@ enum ProviderCategory {
       case 'pest_control':
       case 'appliancerepair':
       case 'appliance_repair':
-      case 'doctor':
-      case 'clinic':
+      case 'pipechange':
+      case 'pipe_change':
+      case 'plastering':
+      case 'carpetcleaning':
+      case 'carpet_cleaning':
+      case 'dishrepair':
+      case 'dish_repair':
+      case 'barber':
+      case 'other':
         return ProviderCategory.homeServices;
       case 'owner':
         return ProviderCategory.owner;
@@ -103,16 +126,20 @@ Set<ProviderCapability> resolveCapabilities(ProviderCategory category) {
         ProviderCapability.dashboard,
         ProviderCapability.orders,
         ProviderCapability.catalog,
+        ProviderCapability.cashier,
+        ProviderCapability.storefront,
+        ProviderCapability.banners,
         ProviderCapability.branches,
         ProviderCapability.offers,
         ProviderCapability.reviews,
         ProviderCapability.availability,
         ProviderCapability.deliveries,
+        ProviderCapability.bookings,
+        ProviderCapability.verification,
         ProviderCapability.wallet,
         ProviderCapability.earnings,
         ProviderCapability.commission,
         ProviderCapability.financial,
-        ProviderCapability.verification,
         ProviderCapability.notifications,
         ProviderCapability.support,
       };
@@ -121,8 +148,15 @@ Set<ProviderCapability> resolveCapabilities(ProviderCategory category) {
         ProviderCapability.dashboard,
         ProviderCapability.orders,
         ProviderCapability.catalog,
+        ProviderCapability.cashier,
+        ProviderCapability.barcode,
+        ProviderCapability.drugCatalog,
+        ProviderCapability.inventory,
+        ProviderCapability.storefront,
+        ProviderCapability.banners,
         ProviderCapability.branches,
         ProviderCapability.offers,
+        ProviderCapability.reviews,
         ProviderCapability.availability,
         ProviderCapability.verification,
         ProviderCapability.wallet,
@@ -139,23 +173,29 @@ Set<ProviderCapability> resolveCapabilities(ProviderCategory category) {
         ProviderCapability.dashboard,
         ProviderCapability.orders,
         ProviderCapability.catalog,
+        ProviderCapability.cashier,
+        ProviderCapability.barcode,
+        ProviderCapability.inventory,
+        ProviderCapability.storefront,
+        ProviderCapability.banners,
         ProviderCapability.branches,
         ProviderCapability.offers,
+        ProviderCapability.reviews,
         ProviderCapability.availability,
         ProviderCapability.deliveries,
+        ProviderCapability.verification,
         ProviderCapability.wallet,
         ProviderCapability.earnings,
         ProviderCapability.commission,
         ProviderCapability.financial,
-        ProviderCapability.verification,
         ProviderCapability.notifications,
         ProviderCapability.support,
       };
     case ProviderCategory.homeServices:
+    case ProviderCategory.teacher:
+    case ProviderCategory.healthProfessional:
       return {
         ProviderCapability.dashboard,
-        ProviderCapability.orders,
-        ProviderCapability.catalog,
         ProviderCapability.services,
         ProviderCapability.bookings,
         ProviderCapability.availability,
@@ -202,6 +242,12 @@ Set<ProviderCapability> resolveCapabilities(ProviderCategory category) {
         ProviderCapability.financial,
         ProviderCapability.notifications,
         ProviderCapability.support,
+        ProviderCapability.cashier,
+        ProviderCapability.storefront,
+        ProviderCapability.banners,
+        ProviderCapability.inventory,
+        ProviderCapability.drugCatalog,
+        ProviderCapability.barcode,
       };
   }
 }

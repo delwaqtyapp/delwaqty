@@ -816,6 +816,73 @@ class AppLocalizationsAr extends AppLocalizations {
   String get egp => 'ج.م';
 
   @override
+  String get provTabCashier => 'الكاشير';
+
+  @override
+  String get provTabMenu => 'المنيو';
+
+  @override
+  String get provManageMenu => 'إدارة المنيو';
+
+  @override
+  String get provTabItems => 'الأصناف';
+
+  @override
+  String get provManageItems => 'إدارة الأصناف';
+
+  @override
+  String get provTabMedicines => 'الأدوية';
+
+  @override
+  String get provManageMedicines => 'إدارة الأدوية';
+
+  @override
+  String get provTabTableBookings => 'حجز الطاولات';
+
+  @override
+  String get provTabJobs => 'الطلبات';
+
+  @override
+  String get provServiceRequests => 'طلبات الخدمة';
+
+  @override
+  String get provTabLessonRequests => 'طلبات الدروس';
+
+  @override
+  String get provTabAppointments => 'المواعيد';
+
+  @override
+  String get provTabMyServices => 'خدماتي';
+
+  @override
+  String get provTabMyLessons => 'دروسي';
+
+  @override
+  String get provMyServicesPrices => 'خدماتي وأسعارها';
+
+  @override
+  String get provMyLessonsPrices => 'دروسي وأسعارها';
+
+  @override
+  String get provPricesAdminManaged =>
+      'الأسعار بتتحدد من الإدارة. لو محتاج تعديل كلم الدعم.';
+
+  @override
+  String get provEmptyServices => 'لسه مفيش خدمات متسجلة على حسابك';
+
+  @override
+  String get provEmptyLessons => 'لسه مفيش دروس متسجلة على حسابك';
+
+  @override
+  String get provHourlyRate => 'سعر الساعة';
+
+  @override
+  String get provFixedPrice => 'السعر الثابت';
+
+  @override
+  String get provPriceNotSet => 'السعر لسه ما اتحددش من الإدارة';
+
+  @override
   String get searchRestaurants => 'ابحث عن مطاعم...';
 
   @override

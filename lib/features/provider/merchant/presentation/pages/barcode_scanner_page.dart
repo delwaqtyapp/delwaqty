@@ -148,7 +148,8 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     if (_popped || _manualEntryOpen) return;
     for (final barcode in capture.barcodes) {
       final raw = barcode.rawValue;
-      if (raw != null && raw.trim().isNotEmpty) {
+      // Same canonical rule as every other barcode path (#77).
+      if (raw != null && normalizeBarcode(raw).isNotEmpty) {
         _finish(raw);
         return;
       }

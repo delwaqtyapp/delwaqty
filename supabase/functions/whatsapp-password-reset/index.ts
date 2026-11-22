@@ -12,6 +12,8 @@
 //
 // Deploy: supabase functions deploy whatsapp-password-reset
 // (JWT verification stays ON: the app calls this with the anon key.)
+// CORS: OPTIONS preflight answered and headers sent on every response so
+// web callers can reach it.
 //
 // Anti-enumeration: every failure returns the same RESET_NOT_VERIFIED, so
 // the endpoint reveals nothing about phones, accounts, or challenges.
@@ -69,9 +71,10 @@ Deno.serve(async (req) => {
     return json({ ok: false, code: "WEAK_PASSWORD" }, 400);
   }
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  const supabase = createClient(supabaseUrl, serviceKey);
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+  );
 
   // Atomic validate + consume. A failed password update after this point
   // burns the challenge on purpose: the user simply requests a fresh code,
@@ -93,17 +96,16 @@ Deno.serve(async (req) => {
   }
 
   // Revoke every existing session for this user: anyone still logged in
-  // with the old credentials (including a possible hijacker) is signed
-  // out and must use the new password. The user logs in fresh after a
-  // reset, so revoking ALL sessions is correct here.
-  try {
-    await fetch(`${supabaseUrl}/auth/v1/admin/users/${userId}/logout?scope=global`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${serviceKey}`, apikey: serviceKey },
-    });
-  } catch {
-    // Password is already changed; a missed revocation only means old
-    // sessions live until expiry. Do not fail the reset over this.
+  // with the old credentials (including a possible hijacker) loses their
+  // refresh tokens and must use the new password. revoke_user_sessions
+  // (migration 388, service-role) deletes auth.sessions + refresh_tokens
+  // directly; already-issued access JWTs remain valid until they expire.
+  const { error: revokeError } = await supabase.rpc("revoke_user_sessions", {
+    p_user_id: userId as string,
+  });
+  if (revokeError) {
+    // Fail loudly: a reset that leaves old sessions alive is not a reset.
+    return json({ ok: false, code: "SESSION_REVOKE_FAILED" }, 500);
   }
 
   return json({ ok: true });

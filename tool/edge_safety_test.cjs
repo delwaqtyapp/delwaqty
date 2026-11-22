@@ -5,7 +5,7 @@ const vm = require('node:vm');
 const { stripTypeScriptTypes } = require('node:module');
 const { webcrypto } = require('node:crypto');
 
-function loadHandler(file, { verified = false } = {}) {
+function loadHandler(file, { verified = false, revokeError = false, calls = [] } = {}) {
   let handler;
   const source = fs.readFileSync(file, 'utf8').replace(
     /^import \{ createClient \} from .*;\r?\n/m, '',
@@ -22,8 +22,18 @@ function loadHandler(file, { verified = false } = {}) {
       serve: (callback) => { handler = callback; },
     },
     createClient: () => ({
-      rpc: async () => ({ data: verified ? '00000000-0000-4000-8000-000000000008' : null, error: null }),
-      auth: { admin: { updateUserById: async () => ({ error: null }) } },
+      rpc: async (name) => {
+        calls.push(name);
+        if (name === 'consume_whatsapp_reset_challenge') {
+          return { data: verified ? '00000000-0000-4000-8000-000000000008' : null, error: null };
+        }
+        assert.equal(name, 'revoke_user_sessions');
+        return { data: null, error: revokeError ? { message: 'test failure' } : null };
+      },
+      auth: { admin: { updateUserById: async () => {
+        calls.push('updateUserById');
+        return { error: null };
+      } } },
     }),
     fetch: async () => new Response(null, { status: 204 }),
   };
@@ -66,14 +76,16 @@ test('unverified reset challenge fails closed and carries CORS', async () => {
   cors(response);
 });
 
-test('verified reset response carries CORS', async () => {
-  const handler = loadHandler(resetFile, { verified: true });
+test('verified reset revokes sessions before success and carries CORS', async () => {
+  const calls = [];
+  const handler = loadHandler(resetFile, { verified: true, calls });
   const response = await handler(new Request('https://example.invalid', {
     method: 'POST', body: JSON.stringify({ phone: '+201000000001',
       challenge: '00000000-0000-4000-8000-000000000008', new_password: 'TestOnlyPassword123' }),
   }));
   assert.equal(response.status, 200);
   assert.equal((await response.json()).ok, true);
+  assert.deepEqual(calls, ['consume_whatsapp_reset_challenge', 'updateUserById', 'revoke_user_sessions']);
   cors(response);
 });
 
@@ -90,4 +102,16 @@ test('unsigned webhook POST is rejected before processing a message', async () =
   const handler = loadHandler('supabase/functions/whatsapp-webhook/index.ts');
   const response = await handler(new Request('https://example.invalid', { method: 'POST', body: '{}' }));
   assert.equal(response.status, 401);
+});
+
+
+test('session revocation failure cannot report a successful reset', async () => {
+  const handler = loadHandler(resetFile, { verified: true, revokeError: true });
+  const response = await handler(new Request('https://example.invalid', {
+    method: 'POST', body: JSON.stringify({ phone: '+201000000001',
+      challenge: '00000000-0000-4000-8000-000000000008', new_password: 'TestOnlyPassword123' }),
+  }));
+  assert.equal(response.status, 500);
+  assert.equal((await response.json()).code, 'SESSION_REVOKE_FAILED');
+  cors(response);
 });

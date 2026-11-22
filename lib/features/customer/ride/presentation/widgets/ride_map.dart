@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
+import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -73,13 +74,13 @@ class _RideMapState extends State<RideMap> {
     // none, so show the same graceful fallback the map picker uses.
     if (kIsWeb) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppSpacing.d20),
         child: Container(
           height: widget.height,
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: Text(
                 AppLocalizations.of(context).mapUnavailableOnWeb,
                 textAlign: TextAlign.center,

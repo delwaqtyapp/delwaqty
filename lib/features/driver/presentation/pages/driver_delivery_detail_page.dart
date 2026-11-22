@@ -141,9 +141,16 @@ class _DriverDeliveryDetailPageState
         : l10n.deliveryCompletedEarnings(
             '${fare.toStringAsFixed(0)} ${order.currency}',
           );
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    // Batch 24 #2: pop FIRST, then show the snackbar through the captured
+    // messenger (showing before the pop dismissed it with the route), and
+    // refresh the hub's providers so the stats row and active-delivery card
+    // reflect the completed delivery without a manual pull-to-refresh.
+    final messenger = ScaffoldMessenger.of(context);
+    ref.invalidate(driverStatsProvider(driverId));
+    ref.invalidate(activeDeliveryProvider(driverId));
+    ref.invalidate(driverEarningsProvider(driverId));
     context.pop();
+    messenger.showSnackBar(SnackBar(content: Text(message)));
   }
 
   String? _resolveCustomerPhone(DeliveryOrder order) {
@@ -389,6 +396,7 @@ class _DriverDeliveryDetailPageState
                       dropoff: dropoffLatLng,
                       driver: driverLatLng,
                       height: 240,
+                      webFallbackText: l10n.mapUnavailableOnWebRide,
                     ),
                   ),
                   const SizedBox(height: 12),

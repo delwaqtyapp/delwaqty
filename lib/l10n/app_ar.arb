@@ -2481,6 +2481,7 @@
     "description": "Unit-price suffix on a cart line, e.g. '25 EGP each'"
   },
   "mapUnavailableOnWeb": "معاينة الخريطة غير متاحة في المتصفح. ابحث عن عنوانك بالأعلى أو استخدم تحديد موقعي.",
+  "mapUnavailableOnWebRide": "معاينة الخريطة غير متاحة في المتصفح. استخدم أزرار التنقل بالأسفل.",
   "webMapSearchHint": "ابحث عن عنوانك أو اضغط تحديد موقعي",
   "locationConfirmFailed": "تعذر تأكيد الموقع. تحقق من اتصالك وحاول مرة أخرى.",
   "earningsEmptyTitle": "لا توجد أرباح بعد",

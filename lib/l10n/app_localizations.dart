@@ -14564,6 +14564,12 @@ abstract class AppLocalizations {
   /// **'Map preview is unavailable in the browser. Search for your address above or use Detect My Location.'**
   String get mapUnavailableOnWeb;
 
+  /// No description provided for @mapUnavailableOnWebRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Map preview is not available in the browser. Use the Navigate buttons below.'**
+  String get mapUnavailableOnWebRide;
+
   /// No description provided for @webMapSearchHint.
   ///
   /// In en, this message translates to:

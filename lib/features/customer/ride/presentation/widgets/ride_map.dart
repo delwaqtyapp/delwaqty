@@ -13,6 +13,7 @@ class RideMap extends StatefulWidget {
     this.dropoff,
     this.driver,
     this.height = 200,
+    this.webFallbackText,
     super.key,
   });
 
@@ -20,6 +21,10 @@ class RideMap extends StatefulWidget {
   final LatLng? dropoff;
   final LatLng? driver;
   final double height;
+
+  /// Web-only override for the no-map fallback message (driver pages show
+  /// ride-specific copy instead of the address-picker text).
+  final String? webFallbackText;
 
   @override
   State<RideMap> createState() => _RideMapState();
@@ -82,7 +87,8 @@ class _RideMapState extends State<RideMap> {
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: Text(
-                AppLocalizations.of(context).mapUnavailableOnWeb,
+                widget.webFallbackText ??
+                    AppLocalizations.of(context).mapUnavailableOnWeb,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),

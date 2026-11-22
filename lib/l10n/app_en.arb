@@ -2540,6 +2540,7 @@
     "description": "Unit-price suffix on a cart line, e.g. '25 EGP each'"
   },
   "mapUnavailableOnWeb": "Map preview is unavailable in the browser. Search for your address above or use Detect My Location.",
+  "mapUnavailableOnWebRide": "Map preview is not available in the browser. Use the Navigate buttons below.",
   "webMapSearchHint": "Search for your address or tap Detect My Location",
   "locationConfirmFailed": "Couldn't confirm the location. Check your connection and try again.",
   "earningsEmptyTitle": "No earnings yet",

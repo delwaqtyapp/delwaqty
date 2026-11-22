@@ -126,8 +126,6 @@ void main() {
             child: GlassMenuPanel(
               authState: ref.read(authStateProvider),
               l10n: l10n,
-              themeMode: ThemeMode.light,
-              locale: const Locale('en'),
               ref: ref,
               drawerEntries: const [],
               width: 240,
@@ -159,8 +157,6 @@ void main() {
             child: GlassMenuPanel(
               authState: ref.read(authStateProvider),
               l10n: l10n,
-              themeMode: ThemeMode.light,
-              locale: const Locale('en'),
               ref: ref,
               drawerEntries: const [],
               width: 240,
@@ -199,8 +195,6 @@ void main() {
             child: GlassMenuPanel(
               authState: ref.read(authStateProvider),
               l10n: l10n,
-              themeMode: ThemeMode.light,
-              locale: const Locale('en'),
               ref: ref,
               drawerEntries: const [],
               width: 240,
@@ -238,7 +232,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(GlassMenuPanel), findsOneWidget);
-    expect(find.text('Dark Mode'), findsOneWidget);
+    expect(find.text('Logout'), findsOneWidget);
 
     await tester.tapAt(const Offset(500, 300));
     await tester.pumpAndSettle();
@@ -283,7 +277,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(GlassMenuPanel), findsOneWidget);
-    expect(find.text('Dark Mode'), findsOneWidget);
+    expect(find.text('Logout'), findsOneWidget);
   });
 
   testWidgets(

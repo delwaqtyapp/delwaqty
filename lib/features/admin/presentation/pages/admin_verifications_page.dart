@@ -529,6 +529,22 @@ class _VerificationCard extends StatelessWidget {
               ],
             ),
           ],
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Icon(
+                Icons.schedule_outlined,
+                size: 16,
+                color: cs.onSurfaceVariant,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '${l10n.joinedDate}: ${MaterialLocalizations.of(context).formatMediumDate(request.createdAt)}',
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: cs.onSurfaceVariant),
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
           _VerificationDocsSection(
             userId: request.userId,

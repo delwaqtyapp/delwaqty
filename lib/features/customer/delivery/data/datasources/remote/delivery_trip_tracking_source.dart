@@ -55,6 +55,9 @@ class DeliveryTripTrackingSource {
       promoCode: row['promo_code'] as String?,
       paymentMethod: row['payment_method'] as String? ?? 'cash',
       paymentStatus: row['payment_status'] as String? ?? 'pending',
+      cashCollectedAt: row['cash_collected_at'] != null
+          ? DateTime.parse(row['cash_collected_at'] as String)
+          : null,
       pickupOtp: row['pickup_otp'] as String?,
       currency: row['currency'] as String? ?? 'EGP',
       distance: (row['distance'] as num?)?.toDouble(),

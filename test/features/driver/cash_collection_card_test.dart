@@ -2,6 +2,7 @@ import 'package:delwaqty/features/customer/delivery/domain/entities/cash_collect
 import 'package:delwaqty/features/driver/presentation/widgets/cash_collection_card.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -148,5 +149,71 @@ void main() {
       matchesGoldenFile('goldens/cash_collection_retry_ar.png'),
     );
     expect(tester.takeException(), isNull);
+  });
+
+  Widget sectionApp(AsyncValue<CashCollectionState?> state) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      locale: const Locale('ar'),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      theme: ThemeData(fontFamily: 'Cairo'),
+      home: Scaffold(
+        body: CashCollectionSection(
+          state: state,
+          busy: false,
+          onCollect: () {},
+          onDone: () {},
+          onRetry: () {},
+        ),
+      ),
+    );
+  }
+
+  testWidgets('section fails closed on null and error, hides on non-cash', (
+    tester,
+  ) async {
+    // #84: unknown (null) state → retry card, never silently blank.
+    await tester.pumpWidget(sectionApp(const AsyncData(null)));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('cashCollectionRetryCard')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('cashCollectionCard')), findsNothing);
+
+    // Error → retry card.
+    await tester.pumpWidget(
+      sectionApp(AsyncError(Exception('x'), StackTrace.empty)),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('cashCollectionRetryCard')),
+      findsOneWidget,
+    );
+
+    // Positively known NON-cash → nothing renders.
+    await tester.pumpWidget(
+      sectionApp(
+        AsyncData(
+          CashCollectionState(
+            rideId: 'ride-1',
+            rideStatus: 'completed',
+            paymentMethod: 'wallet',
+            paymentStatus: 'paid',
+            collected: true,
+            currency: 'EGP',
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('cashCollectionRetryCard')), findsNothing);
+    expect(find.byKey(const ValueKey('cashCollectionCard')), findsNothing);
+
+    // Cash → the collection card.
+    await tester.pumpWidget(sectionApp(AsyncData(state(collected: false))));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('cashCollectionCard')), findsOneWidget);
   });
 }

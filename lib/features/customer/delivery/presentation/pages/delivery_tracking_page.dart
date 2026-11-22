@@ -83,13 +83,14 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
             _TrackingBody(ride: ride, deliveryId: widget.deliveryId),
       ),
       // Rating opens once the delivery is completed — and, for cash
-      // deliveries, only after the captain collected the cash (migration
-      // 392). Non-cash completion is unchanged.
+      // deliveries, only after the captain's collection stamp lands
+      // (migration 392), the same rule the ride_ratings RLS uses. Non-cash
+      // completion is unchanged.
       bottomNavigationBar:
           rideAsync.value != null &&
               rideAsync.value!.status == RideStatus.completed &&
               (rideAsync.value!.paymentMethod != 'cash' ||
-                  rideAsync.value!.paymentStatus == 'paid')
+                  rideAsync.value!.cashCollectedAt != null)
           ? DriverRatingBar(
               rating: _rating,
               onRatingChanged: (r) => setState(() => _rating = r),

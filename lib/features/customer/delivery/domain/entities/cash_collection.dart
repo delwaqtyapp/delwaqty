@@ -49,6 +49,7 @@ class CashCollectionResult {
     required this.ok,
     required this.code,
     this.amount,
+    this.pairWarnings = const [],
   });
 
   factory CashCollectionResult.fromJson(Map<String, dynamic> json) {
@@ -56,12 +57,22 @@ class CashCollectionResult {
       ok: json['ok'] as bool? ?? false,
       code: json['code'] as String? ?? 'UNKNOWN',
       amount: (json['amount'] as num?)?.toDouble(),
+      pairWarnings:
+          (json['pair_warnings'] as List<dynamic>?)
+              ?.whereType<Map<String, dynamic>>()
+              .toList() ??
+          const [],
     );
   }
 
   final bool ok;
   final String code;
   final double? amount;
+
+  /// Linked partners the server skipped (refunded, failed, non-cash). The
+  /// captain still sees plain success; the server also writes one
+  /// CASH_PAIR_MISMATCH audit row for owner reconciliation.
+  final List<Map<String, dynamic>> pairWarnings;
 
   /// Both a fresh COLLECTED and an idempotent ALREADY_COLLECTED replay mean
   /// the cash is marked collected.

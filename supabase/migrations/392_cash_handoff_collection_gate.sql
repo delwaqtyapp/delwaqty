@@ -26,9 +26,16 @@
 --      sync and the audit postcondition, so a paid source with an
 --      uncollected linked target converges instead of staying split.
 --   5. Audit rule (owner): exactly one CASH_COLLECTED audit_log row per
---      resource, the partner included. A backfill stamps historical paid
---      cash rows (they showed as collected in the UI already) and writes
---      their audit rows, so the UI stamp rule and the rating RLS agree.
+--      resource, the partner included, and the amount is always what the
+--      customer handed over — the order total — on both partners and both
+--      endpoints. Skipped partners (refunded/failed/non-cash) are surfaced
+--      to the caller as pair_warnings AND to the owner as one admin-visible
+--      CASH_PAIR_MISMATCH audit row per reference. A restricted backfill
+--      stamps only historical paid cash rows that actually completed the
+--      handoff (completed rides from their real completed_at; delivered
+--      orders from the linked ride's completed_at), leaving cancelled,
+--      incomplete and timestamp-less rows null, and writes system/backfill
+--      audit rows for the stamped rows only.
 --   6. Both paths take locks in one canonical order — orders first, then
 --      rides — so concurrent opposite-reference calls serialize on the
 --      order row instead of deadlocking.
@@ -70,6 +77,48 @@ $function$
 REVOKE ALL ON FUNCTION public._audit_cash_collection(text, uuid, numeric) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public._audit_cash_collection(text, uuid, numeric) TO postgres;
 GRANT EXECUTE ON FUNCTION public._audit_cash_collection(text, uuid, numeric) TO service_role;
+
+-- One admin-visible row per mismatched/refunded pair, so reconciliation
+-- reaches the owner even though the captain sees plain success. Idempotent
+-- per reference: the latest warnings replace the record, not stack up.
+CREATE OR REPLACE FUNCTION public._audit_cash_pair_mismatch(p_resource text, p_reference_id uuid, p_warnings jsonb)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+BEGIN
+  IF p_warnings IS NULL OR jsonb_array_length(p_warnings) = 0 THEN
+    RETURN;
+  END IF;
+  IF EXISTS (SELECT 1 FROM public.audit_log a
+              WHERE a.action = 'CASH_PAIR_MISMATCH'
+                AND a.resource = p_resource
+                AND a.resource_id = p_reference_id::text) THEN
+    UPDATE public.audit_log
+       SET after = jsonb_build_object('pair_warnings', p_warnings, 'reported_by', auth.uid()),
+           created_at = now()
+     WHERE action = 'CASH_PAIR_MISMATCH'
+       AND resource = p_resource
+       AND resource_id = p_reference_id::text;
+  ELSE
+    INSERT INTO public.audit_log (actor, actor_role, scope, action, resource, resource_id, after, reason)
+    VALUES (auth.uid(),
+            COALESCE((SELECT u.role FROM public.users u WHERE u.id = auth.uid()), 'unknown'),
+            'GLOBAL',
+            'CASH_PAIR_MISMATCH',
+            p_resource,
+            p_reference_id::text,
+            jsonb_build_object('pair_warnings', p_warnings, 'reported_by', auth.uid()),
+            'cash_handoff_pair_mismatch');
+  END IF;
+END;
+$function$
+;
+
+REVOKE ALL ON FUNCTION public._audit_cash_pair_mismatch(text, uuid, jsonb) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public._audit_cash_pair_mismatch(text, uuid, jsonb) TO postgres;
+GRANT EXECUTE ON FUNCTION public._audit_cash_pair_mismatch(text, uuid, jsonb) TO service_role;
 
 CREATE OR REPLACE FUNCTION public.confirm_cash_collection(p_reference_type cash_ref_type, p_reference_id uuid)
  RETURNS jsonb
@@ -162,7 +211,7 @@ BEGIN
     -- partners are skipped and reported for reconciliation. Every paid cash
     -- partner gets its own CASH_COLLECTED audit row (idempotent).
     FOR v_r IN
-      SELECT id, fare, payment_method, payment_status, status
+      SELECT id, fare, payment_method, payment_status, status, cash_collected_at
         FROM public.rides
        WHERE order_id = p_reference_id
          AND status <> 'cancelled'
@@ -175,9 +224,16 @@ BEGIN
                cash_collected_at = COALESCE(cash_collected_at, now()),
                cash_collected_by = COALESCE(cash_collected_by, v_uid)
          WHERE id = v_r.id;
-        PERFORM public._audit_cash_collection('ride', v_r.id, v_r.fare);
+        PERFORM public._audit_cash_collection('ride', v_r.id, v_amount);
       ELSIF v_r.payment_method = 'cash' AND v_r.payment_status = 'paid' THEN
-        -- Partner already paid: heal its audit row (idempotent).
+        -- Partner already paid: heal its missing stamp and audit row
+        -- (both idempotent) so the rating RLS and the UI agree.
+        IF v_r.cash_collected_at IS NULL THEN
+          UPDATE public.rides
+             SET cash_collected_at = COALESCE(completed_at, now()),
+                 cash_collected_by = COALESCE(cash_collected_by, v_uid)
+           WHERE id = v_r.id;
+        END IF;
         PERFORM public._audit_cash_collection('ride', v_r.id, v_r.fare);
       ELSE
         v_warnings := v_warnings || jsonb_build_object(
@@ -188,6 +244,7 @@ BEGIN
     END LOOP;
 
     PERFORM public._audit_cash_collection('order', p_reference_id, v_amount);
+    PERFORM public._audit_cash_pair_mismatch('order', p_reference_id, v_warnings);
     RETURN jsonb_build_object(
       'ok', true,
       'code', CASE WHEN v_already THEN 'ALREADY_COLLECTED' ELSE 'COLLECTED' END,
@@ -271,7 +328,13 @@ BEGIN
          WHERE id = v_order_id;
         PERFORM public._audit_cash_collection('order', v_order_id, v_linked_amount);
       ELSIF v_pay_method = 'cash' AND v_pay_status = 'paid' THEN
-        -- Partner already paid: heal its audit row (idempotent).
+        -- Partner already paid: heal its missing stamp and audit row
+        -- (both idempotent) so the rating RLS and the UI agree.
+        UPDATE public.orders
+           SET cash_collected_at = COALESCE(cash_collected_at, updated_at, now()),
+               cash_collected_by = COALESCE(cash_collected_by, v_uid)
+         WHERE id = v_order_id
+           AND cash_collected_at IS NULL;
         PERFORM public._audit_cash_collection('order', v_order_id, v_linked_amount);
       ELSIF v_pay_status IS NOT NULL THEN
         v_warnings := v_warnings || jsonb_build_object(
@@ -282,6 +345,7 @@ BEGIN
     END IF;
 
     PERFORM public._audit_cash_collection('ride', p_reference_id, v_amount);
+    PERFORM public._audit_cash_pair_mismatch('ride', p_reference_id, v_warnings);
     RETURN jsonb_build_object(
       'ok', true,
       'code', CASE WHEN v_already THEN 'ALREADY_COLLECTED' ELSE 'COLLECTED' END,
@@ -307,6 +371,15 @@ BEGIN
       RETURN jsonb_build_object('ok', false, 'code', 'NOT_FOUND');
     END IF;
 
+    -- Method and state checks BEFORE the paid replay: a paid card/wallet
+    -- booking must never get a cash stamp or a CASH_COLLECTED audit, and a
+    -- refunded booking is refused, not resurrected.
+    IF v_pay_method <> 'cash' THEN
+      RETURN jsonb_build_object('ok', false, 'code', 'NOT_CASH');
+    END IF;
+    IF v_pay_status NOT IN ('unpaid', 'pending', 'paid') THEN
+      RETURN jsonb_build_object('ok', false, 'code', 'INVALID_STATUS', 'current_status', v_pay_status);
+    END IF;
     IF v_pay_status = 'paid' THEN
       UPDATE public.service_bookings
          SET cash_collected_at = COALESCE(cash_collected_at, updated_at, now()),
@@ -314,9 +387,6 @@ BEGIN
        WHERE id = p_reference_id;
       PERFORM public._audit_cash_collection('service_booking', p_reference_id, NULL);
       RETURN jsonb_build_object('ok', true, 'code', 'ALREADY_COLLECTED', 'reference_id', p_reference_id);
-    END IF;
-    IF v_pay_method <> 'cash' THEN
-      RETURN jsonb_build_object('ok', false, 'code', 'NOT_CASH');
     END IF;
     IF NOT v_is_owner AND v_status <> 'completed' THEN
       RETURN jsonb_build_object('ok', false, 'code', 'INVALID_LIFECYCLE', 'current_status', v_status);
@@ -342,28 +412,41 @@ END;
 $function$
 ;
 
--- Backfill: historical paid cash rows predate the collection stamp. The UI
--- already showed them as collected; stamp them (from the completion time
--- when known) so the rating RLS, which requires the stamp, agrees — and
--- write their CASH_COLLECTED audit rows (idempotent), one per resource.
+-- Backfill: historical paid cash rows predate the collection stamp. Only
+-- rows that actually completed the handoff are stamped — completed rides
+-- (from their real completed_at) and delivered orders (from the linked
+-- ride's completed_at). Cancelled, incomplete, and timestamp-less rows stay
+-- null; a later replay heals them. Audit rows are written for the stamped
+-- rows only, marked system/backfill, with the collected amount (the order
+-- total where one is linked).
 UPDATE public.rides
-   SET cash_collected_at = COALESCE(completed_at, created_at)
+   SET cash_collected_at = completed_at
  WHERE payment_method = 'cash'
    AND payment_status = 'paid'
+   AND status = 'completed'
+   AND completed_at IS NOT NULL
    AND cash_collected_at IS NULL;
 
-UPDATE public.orders
-   SET cash_collected_at = COALESCE(updated_at, created_at)
- WHERE payment_method = 'cash'
-   AND payment_status = 'paid'
-   AND cash_collected_at IS NULL;
+UPDATE public.orders o
+   SET cash_collected_at = r.completed_at
+  FROM (SELECT order_id, min(completed_at) AS completed_at
+          FROM public.rides
+         WHERE status = 'completed' AND completed_at IS NOT NULL
+         GROUP BY order_id) r
+ WHERE r.order_id = o.id
+   AND o.payment_method = 'cash'
+   AND o.payment_status = 'paid'
+   AND o.status = 'delivered'
+   AND o.cash_collected_at IS NULL;
 
 INSERT INTO public.audit_log (actor, actor_role, scope, action, resource, resource_id, after, reason)
 SELECT NULL, 'system', 'GLOBAL', 'CASH_COLLECTED', 'ride', r.id::text,
-       jsonb_build_object('amount', r.fare, 'backfill', true),
+       jsonb_build_object('amount', COALESCE(o.total_amount, r.fare), 'backfill', true),
        'backfill_392'
   FROM public.rides r
+  LEFT JOIN public.orders o ON o.id = r.order_id
  WHERE r.payment_method = 'cash' AND r.payment_status = 'paid'
+   AND r.cash_collected_at IS NOT NULL
    AND NOT EXISTS (SELECT 1 FROM public.audit_log a
                     WHERE a.action = 'CASH_COLLECTED' AND a.resource = 'ride' AND a.resource_id = r.id::text);
 
@@ -373,6 +456,7 @@ SELECT NULL, 'system', 'GLOBAL', 'CASH_COLLECTED', 'order', o.id::text,
        'backfill_392'
   FROM public.orders o
  WHERE o.payment_method = 'cash' AND o.payment_status = 'paid'
+   AND o.cash_collected_at IS NOT NULL
    AND NOT EXISTS (SELECT 1 FROM public.audit_log a
                     WHERE a.action = 'CASH_COLLECTED' AND a.resource = 'order' AND a.resource_id = o.id::text);
 

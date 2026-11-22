@@ -11,15 +11,17 @@ begin;
 
 create temporary table zz_cash_ctx(
   c uuid, x uuid, du uuid, drv uuid, merch uuid,
-  o1 uuid, o2 uuid, o3 uuid, o4 uuid, o5 uuid, o6 uuid, o7 uuid,
-  r1 uuid, r2 uuid, r3 uuid, r5 uuid, r6 uuid, r7 uuid, r8 uuid, r9 uuid
+  o1 uuid, o2 uuid, o3 uuid, o4 uuid, o5 uuid, o6 uuid, o7 uuid, o8 uuid, o9 uuid, o10 uuid,
+  r1 uuid, r2 uuid, r3 uuid, r5 uuid, r6 uuid, r7 uuid, r8 uuid, r9 uuid, r10 uuid, r11 uuid, r12 uuid,
+  sp uuid, sb1 uuid, sb2 uuid
 );
 insert into zz_cash_ctx
 select gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(),
        gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(),
-       gen_random_uuid(), gen_random_uuid(),
        gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(),
-       gen_random_uuid(), gen_random_uuid(), gen_random_uuid();
+       gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(),
+       gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(),
+       gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid();
 
 -- cash_collected_by references auth.users, so the fixture needs both sides.
 insert into auth.users(id,email)
@@ -88,11 +90,42 @@ select r8,c,drv,'courier','motorcycle','completed','paid','cash',30,NULL,now()-i
 insert into public.rides(id,rider_id,driver_id,service_type,ride_type,status,payment_status,payment_method,fare,pickup_latitude,pickup_longitude,dropoff_latitude,dropoff_longitude)
 select r9,c,drv,'courier','motorcycle','inTrip','pending','wallet',20,0,0,0.001,0.001 from zz_cash_ctx;
 
+-- o8/r10 and o9/r11: historical paid cash pairs with NULL stamps on BOTH
+-- sides, replayed from the opposite resource (#73 follow-up).
+insert into public.orders(id,user_id,merchant_id,driver_id,status,payment_status,payment_method,subtotal,delivery_fee,total_amount,cash_collected_at)
+select o8,c,merch,drv,'delivered','paid','cash',100,15,115,NULL from zz_cash_ctx;
+insert into public.rides(id,rider_id,driver_id,order_id,merchant_id,service_type,ride_type,status,payment_status,payment_method,fare,cash_collected_at,completed_at,pickup_latitude,pickup_longitude,dropoff_latitude,dropoff_longitude)
+select r10,c,drv,o8,merch,'food_delivery','motorcycle','completed','paid','cash',15,NULL,now()-interval '1 day',0,0,0.001,0.001 from zz_cash_ctx;
+insert into public.orders(id,user_id,merchant_id,driver_id,status,payment_status,payment_method,subtotal,delivery_fee,total_amount,cash_collected_at)
+select o9,c,merch,drv,'delivered','paid','cash',90,15,105,NULL from zz_cash_ctx;
+insert into public.rides(id,rider_id,driver_id,order_id,merchant_id,service_type,ride_type,status,payment_status,payment_method,fare,cash_collected_at,completed_at,pickup_latitude,pickup_longitude,dropoff_latitude,dropoff_longitude)
+select r11,c,drv,o9,merch,'food_delivery','motorcycle','completed','paid','cash',15,NULL,now()-interval '1 day',0,0,0.001,0.001 from zz_cash_ctx;
+
+-- o10/r12: reverse-direction bad partner — completed cash ride whose linked
+-- order was refunded (#73 reverse).
+insert into public.orders(id,user_id,merchant_id,driver_id,status,payment_status,payment_method,subtotal,delivery_fee,total_amount)
+select o10,c,merch,drv,'delivered','refunded','cash',45,15,60 from zz_cash_ctx;
+insert into public.rides(id,rider_id,driver_id,order_id,merchant_id,service_type,ride_type,status,payment_status,payment_method,fare,pickup_latitude,pickup_longitude,dropoff_latitude,dropoff_longitude)
+select r12,c,drv,o10,merch,'food_delivery','motorcycle','completed','pending','cash',15,0,0,0.001,0.001 from zz_cash_ctx;
+
+-- sb1: paid WALLET service booking; sb2: REFUNDED cash booking (#83).
+insert into public.service_providers(id,user_id,name,category_type)
+select sp,du,'zz-cash-provider','plumbing' from zz_cash_ctx;
+insert into public.service_bookings(id,user_id,provider_id,provider_name,category_type,status,scheduled_date,scheduled_time,payment_method,payment_status)
+select sb1,c,sp,'zz-cash-provider','plumbing','pending',current_date,'10:00','wallet','unpaid' from zz_cash_ctx;
+insert into public.service_bookings(id,user_id,provider_id,provider_name,category_type,status,scheduled_date,scheduled_time,payment_method,payment_status)
+select sb2,c,sp,'zz-cash-provider','plumbing','pending',current_date,'11:00','cash','unpaid' from zz_cash_ctx;
+-- The normalize trigger forces pending/unpaid on insert; set the target
+-- states with an update (runs as postgres, the client-writes guard allows it).
+update public.service_bookings set status='completed', payment_status='paid' where id=(select sb1 from zz_cash_ctx);
+update public.service_bookings set status='completed', payment_status='refunded' where id=(select sb2 from zz_cash_ctx);
+
 -- Full settlement-ledger snapshot: collection must never add rows.
 create temporary table zz_cash_ledger_snap as
 select (select count(*) from public.driver_obligations) as obligations,
        (select count(*) from public.merchant_ledger) as merchant_ledger,
-       (select count(*) from public.platform_commissions) as commissions;
+       (select count(*) from public.platform_commissions) as commissions,
+       (select count(*) from public.driver_earnings) as earnings;
 
 do $$
 declare
@@ -147,6 +180,12 @@ begin
     'exactly one order audit row';
   assert (select count(*) from public.audit_log where action='CASH_COLLECTED' and resource='ride' and resource_id=t.r1::text)=1,
     'partner ride audit row included';
+  assert (select (after->>'amount')::numeric from public.audit_log
+          where action='CASH_COLLECTED' and resource='order' and resource_id=t.o1::text)=115,
+    'order audit amount is the order total';
+  assert (select (after->>'amount')::numeric from public.audit_log
+          where action='CASH_COLLECTED' and resource='ride' and resource_id=t.r1::text)=115,
+    'partner ride audit amount is also the order total';
 
   -- Replay is idempotent for the authorized driver only.
   r:=public.confirm_cash_collection('order',t.o1);
@@ -168,6 +207,12 @@ begin
     'exactly one ride audit row';
   assert (select count(*) from public.audit_log where action='CASH_COLLECTED' and resource='order' and resource_id=t.o2::text)=1,
     'partner order audit row included';
+  assert (select (after->>'amount')::numeric from public.audit_log
+          where action='CASH_COLLECTED' and resource='ride' and resource_id=t.r2::text)=95,
+    'ride audit amount is the order total';
+  assert (select (after->>'amount')::numeric from public.audit_log
+          where action='CASH_COLLECTED' and resource='order' and resource_id=t.o2::text)=95,
+    'partner order audit amount is also the order total';
   r:=public.driver_cash_collection_state(t.r2);
   assert (r->>'collected')::boolean=true, 'cash state reflects collection';
 
@@ -190,6 +235,8 @@ begin
   assert jsonb_array_length(r->'pair_warnings')=1, 'refunded partner surfaced: '||r::text;
   assert (select count(*) from public.audit_log where action='CASH_COLLECTED' and resource='ride' and resource_id=t.r6::text)=0,
     'no audit for a skipped partner';
+  assert (select count(*) from public.audit_log where action='CASH_PAIR_MISMATCH' and resource='order' and resource_id=t.o6::text)=1,
+    'refunded pair reaches the reconciliation surface';
 
   -- ── #73b: non-cash partner is never stamped cash-collected.
   r:=public.confirm_cash_collection('order',t.o7);
@@ -197,6 +244,18 @@ begin
   assert (select payment_status from public.rides where id=t.r7)='pending', 'wallet ride untouched';
   assert (select cash_collected_at from public.rides where id=t.r7) is null, 'wallet ride not stamped';
   assert jsonb_array_length(r->'pair_warnings')=1, 'non-cash partner surfaced: '||r::text;
+  assert (select count(*) from public.audit_log where action='CASH_PAIR_MISMATCH' and resource='order' and resource_id=t.o7::text)=1,
+    'non-cash pair reaches the reconciliation surface';
+
+  -- ── #73 reverse: refunded ORDER partner is never resurrected from a ride.
+  r:=public.confirm_cash_collection('ride',t.r12);
+  assert r->>'ok'='true' and r->>'code'='COLLECTED', 'ride with refunded order collects: '||r::text;
+  assert (select payment_status from public.rides where id=t.r12)='paid', 'ride r12 paid';
+  assert (select payment_status from public.orders where id=t.o10)='refunded', 'refunded order NOT resurrected';
+  assert (select cash_collected_at from public.orders where id=t.o10) is null, 'refunded order not stamped';
+  assert jsonb_array_length(r->'pair_warnings')=1, 'refunded order surfaced: '||r::text;
+  assert (select count(*) from public.audit_log where action='CASH_PAIR_MISMATCH' and resource='ride' and resource_id=t.r12::text)=1,
+    'reverse mismatch reaches the reconciliation surface';
 
   -- ── Historical null-stamp compatibility: replay heals stamp + audit.
   assert (select cash_collected_at from public.rides where id=t.r8) is null, 'fixture starts unstamped';
@@ -205,6 +264,35 @@ begin
   assert (select cash_collected_at from public.rides where id=t.r8) is not null, 'replay heals the missing stamp';
   assert (select count(*) from public.audit_log where action='CASH_COLLECTED' and resource='ride' and resource_id=t.r8::text)=1,
     'replay heals the missing audit row';
+
+  -- ── #73 follow-up: replay from the OPPOSITE resource heals the partner stamp.
+  r:=public.confirm_cash_collection('order',t.o8);
+  assert r->>'ok'='true' and r->>'code'='ALREADY_COLLECTED', 'paid order replays: '||r::text;
+  assert (select cash_collected_at from public.orders where id=t.o8) is not null, 'order stamp healed';
+  assert (select cash_collected_at from public.rides where id=t.r10) is not null,
+    'partner ride stamp healed from the order reference';
+  assert (select count(*) from public.audit_log where action='CASH_COLLECTED' and resource='ride' and resource_id=t.r10::text)=1,
+    'partner ride audit healed';
+  r:=public.confirm_cash_collection('ride',t.r11);
+  assert r->>'ok'='true' and r->>'code'='ALREADY_COLLECTED', 'paid ride replays: '||r::text;
+  assert (select cash_collected_at from public.rides where id=t.r11) is not null, 'ride stamp healed';
+  assert (select cash_collected_at from public.orders where id=t.o9) is not null,
+    'partner order stamp healed from the ride reference';
+  assert (select count(*) from public.audit_log where action='CASH_COLLECTED' and resource='order' and resource_id=t.o9::text)=1,
+    'partner order audit healed';
+
+  -- ── #83: paid non-cash and refunded service bookings are refused.
+  r:=public.confirm_cash_collection('service_booking',t.sb1);
+  assert r->>'ok'='false' and r->>'code'='NOT_CASH', 'paid wallet booking refused: '||r::text;
+  assert (select cash_collected_at from public.service_bookings where id=t.sb1) is null,
+    'no cash stamp on a non-cash booking';
+  assert (select count(*) from public.audit_log where action='CASH_COLLECTED' and resource='service_booking' and resource_id=t.sb1::text)=0,
+    'no cash audit for a non-cash booking';
+  r:=public.confirm_cash_collection('service_booking',t.sb2);
+  assert r->>'ok'='false' and r->>'code'='INVALID_STATUS' and r->>'current_status'='refunded',
+    'refunded cash booking refused: '||r::text;
+  assert (select payment_status from public.service_bookings where id=t.sb2)='refunded',
+    'refunded booking not resurrected';
 end $$;
 
 -- ── Rating gate (RLS): cash ride is rateable only after collection.
@@ -291,6 +379,7 @@ begin
   assert (select count(*) from public.driver_obligations)=s.obligations, 'driver_obligations unchanged';
   assert (select count(*) from public.merchant_ledger)=s.merchant_ledger, 'merchant_ledger unchanged';
   assert (select count(*) from public.platform_commissions)=s.commissions, 'platform_commissions unchanged';
+  assert (select count(*) from public.driver_earnings)=s.earnings, 'driver_earnings unchanged';
 end $$;
 
 select 'PASS: oracle closed, completed-handoff gate both paths, never-resurrect sync, replay heals, per-resource audit, historical null-stamp, rating gate + completion check, no ledger writes' as result;

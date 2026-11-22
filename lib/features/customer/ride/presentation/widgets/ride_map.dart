@@ -1,6 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+
+import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class RideMap extends StatefulWidget {
@@ -65,6 +68,28 @@ class _RideMapState extends State<RideMap> {
 
   @override
   Widget build(BuildContext context) {
+    // google_maps_flutter_web crashes hard ("Null check operator used on a
+    // null value") when no Maps JS API key is loaded; web/index.html ships
+    // none, so show the same graceful fallback the map picker uses.
+    if (kIsWeb) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          height: widget.height,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                AppLocalizations.of(context).mapUnavailableOnWeb,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     final markers = <Marker>{
       Marker(
         markerId: const MarkerId('pickup'),

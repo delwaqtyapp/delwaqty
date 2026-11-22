@@ -142,6 +142,56 @@ class _DriverDeliveryDetailPageState
     return null;
   }
 
+  String _statusLabel(AppLocalizations l10n, String status) {
+    switch (status) {
+      case 'searching':
+        return l10n.searching;
+      case 'matched':
+        return l10n.matched;
+      case 'accepted':
+        return l10n.accepted;
+      case 'arrived':
+        return l10n.arrived;
+      case 'picked_up':
+        return l10n.pickedUp;
+      case 'out_for_delivery':
+        return l10n.outForDelivery;
+      case 'delivered':
+        return l10n.delivered;
+      case 'completed':
+        return l10n.completed;
+      case 'cancelled':
+        return l10n.cancelled;
+      default:
+        return status;
+    }
+  }
+
+  String _serviceTypeLabel(AppLocalizations l10n, String type) {
+    switch (type) {
+      case 'food_delivery':
+        return l10n.food;
+      case 'grocery_delivery':
+        return l10n.grocery;
+      case 'pharmacy_delivery':
+        return l10n.pharmacy;
+      case 'marketplace_delivery':
+        return l10n.shopping;
+      case 'courier':
+        return l10n.delivery;
+      case 'package_delivery':
+        return l10n.package;
+      case 'document_delivery':
+        return l10n.documents;
+      case 'flower_delivery':
+        return l10n.flowers;
+      case 'retail_delivery':
+        return l10n.storefront;
+      default:
+        return l10n.delivery;
+    }
+  }
+
   Future<void> _callPhone(String phone) async {
     final uri = Uri.parse('tel:$phone');
     try {
@@ -341,9 +391,9 @@ class _DriverDeliveryDetailPageState
                                 );
                           },
                           icon: const Icon(Icons.storefront_rounded, size: 18),
-                          label: Text(
-                            l10n.navigateToPickup,
-                            overflow: TextOverflow.ellipsis,
+                          label: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(l10n.navigateToPickup),
                           ),
                         ),
                       ),
@@ -361,9 +411,9 @@ class _DriverDeliveryDetailPageState
                                 );
                           },
                           icon: const Icon(Icons.navigation_rounded, size: 18),
-                          label: Text(
-                            l10n.navigateToCustomer,
-                            overflow: TextOverflow.ellipsis,
+                          label: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(l10n.navigateToCustomer),
                           ),
                         ),
                       ),
@@ -408,8 +458,11 @@ class _DriverDeliveryDetailPageState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _row(l10n.status, status),
-                          _row(l10n.type, order.serviceType),
+                          _row(l10n.status, _statusLabel(l10n, status)),
+                          _row(
+                            l10n.type,
+                            _serviceTypeLabel(l10n, order.serviceType),
+                          ),
                           if (order.merchantName != null &&
                               order.merchantName!.isNotEmpty)
                             _row(l10n.merchant, order.merchantName!),

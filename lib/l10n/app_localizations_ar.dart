@@ -4196,7 +4196,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String platformCreditAutoApplied(Object amount) {
-    return 'عندك هدية من دلوقتي بقيمة $amount ج.م 🎁 هتنخصم تلقائي من الطلب ده';
+    return 'عندك هدية من دلوقتي بقيمة $amount ج.م هتنخصم تلقائي من الطلب ده';
   }
 
   @override

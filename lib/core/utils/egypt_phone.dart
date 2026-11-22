@@ -16,3 +16,18 @@ String phoneAuthIdentifier(String phone) {
 
 bool isEgyptMobilePhone(String raw) =>
     RegExp(r'^\+201[0-9]{9}$').hasMatch(normalizeEgyptPhone(raw));
+
+/// Keep known legacy account emails. If lookup is unavailable, all new phone
+/// aliases fall back to the same canonical technical identifier.
+Future<String> resolvePhoneAuthIdentifier(
+  String raw,
+  Future<String?> Function(String phone) lookup,
+) async {
+  try {
+    final known = await lookup(raw);
+    if (known != null && known.isNotEmpty) return known;
+  } catch (_) {
+    // Offline/unavailable lookup must not produce a new alias per formatting.
+  }
+  return phoneAuthIdentifier(raw);
+}

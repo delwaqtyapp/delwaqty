@@ -401,7 +401,24 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             ),
           );
         },
-        error: (msg) => context.showAppSnackBar(msg),
+        error: (msg) {
+          final code = msg.toUpperCase();
+          final needsReverification =
+              code.contains('PHONE_NOT_VERIFIED') ||
+              code.contains('CHALLENGE_EXPIRED') ||
+              code.contains('CHALLENGE_CONSUMED');
+          if (needsReverification) {
+            setState(() {
+              _whatsappVerified = false;
+              _phoneVerificationChallenge = null;
+              _verifiedPhone = '';
+              _currentStep = 1;
+            });
+          }
+          context.showAppSnackBar(
+            needsReverification ? l10n.verifyViaWhatsApp : msg,
+          );
+        },
       );
     });
 

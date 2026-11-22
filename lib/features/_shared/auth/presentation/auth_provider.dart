@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'
     show Supabase, SupabaseClient;
 import 'package:delwaqty/config/app_config.dart';
+import 'package:delwaqty/core/utils/egypt_phone.dart';
 import 'package:delwaqty/data/datasources/local/biometric_auth_store.dart';
 import 'package:delwaqty/domain/enums/user_type.dart';
 import 'package:delwaqty/domain/entities/user.dart';
@@ -194,17 +195,12 @@ class AuthStateNotifier extends Notifier<AuthState> {
     );
     final phonePattern = RegExp(r'^[+0-9][0-9\s\-]{7,}$');
     if (phonePattern.hasMatch(trimmed)) {
-      try {
-        final resolvedPhone = await client.rpc(
+      return resolvePhoneAuthIdentifier(trimmed, (phone) async {
+        return await client.rpc(
           'lookup_email_by_phone',
-          params: {'p_phone': trimmed},
+          params: {'p_phone': phone},
         ) as String?;
-        if (resolvedPhone != null && resolvedPhone.isNotEmpty) {
-          return resolvedPhone;
-        }
-      } catch (_) {}
-      final digits = trimmed.replaceAll(RegExp(r'[^0-9]'), '');
-      return 'phone_$digits@delwaqty.app';
+      });
     }
     final resolved = await client.rpc(
       'lookup_email_by_username',

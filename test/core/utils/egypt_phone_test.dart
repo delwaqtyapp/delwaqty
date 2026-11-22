@@ -20,4 +20,36 @@ void main() {
       expect(isEgyptMobilePhone(phone), isFalse);
     }
   });
+  test(
+    'lookup failure canonicalizes local and international login aliases',
+    () async {
+      for (final phone in [
+        '01000000001',
+        '+201000000001',
+        '00201000000001',
+        '1000000001',
+      ]) {
+        expect(
+          await resolvePhoneAuthIdentifier(
+            phone,
+            (_) async => throw Exception('offline'),
+          ),
+          'phone_201000000001@delwaqty.app',
+        );
+        expect(
+          await resolvePhoneAuthIdentifier(phone, (_) async => null),
+          'phone_201000000001@delwaqty.app',
+        );
+      }
+    },
+  );
+  test('successful lookup preserves legacy technical emails', () async {
+    expect(
+      await resolvePhoneAuthIdentifier(
+        '01000000001',
+        (_) async => 'phone_01000000001@delwaqty.app',
+      ),
+      'phone_01000000001@delwaqty.app',
+    );
+  });
 }

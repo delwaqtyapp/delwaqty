@@ -177,6 +177,34 @@ final commissionRulesProvider = FutureProvider<Map<String, dynamic>>((
   return Map<String, dynamic>.from(response as Map);
 });
 
+// ─── Provider Pricing (397) ──────────────────────────────────
+
+final categoryPricingProvider = FutureProvider<Map<String, dynamic>>((
+  ref,
+) async {
+  final client = ref.watch(supabaseClientProvider);
+  final response = await client.rpc('admin_list_category_pricing');
+  return Map<String, dynamic>.from(response as Map);
+});
+
+final providerPricingProvider =
+    FutureProvider.family<
+      Map<String, dynamic>,
+      ({String? search, String? category})
+    >((ref, query) async {
+      final client = ref.watch(supabaseClientProvider);
+      final response = await client.rpc(
+        'admin_list_provider_pricing',
+        params: {
+          'p_search': query.search,
+          'p_category_type': query.category,
+          'p_limit': 100,
+          'p_offset': 0,
+        },
+      );
+      return Map<String, dynamic>.from(response as Map);
+    });
+
 // ─── Pending Approval Requests (052) ───────────────────────
 
 final pendingApprovalsProvider = FutureProvider<List<Map<String, dynamic>>>((

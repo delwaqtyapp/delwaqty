@@ -34,6 +34,7 @@ import 'package:delwaqty/features/admin/member_management/presentation/pages/mem
 import 'package:delwaqty/features/admin/member_management/presentation/pages/member_detail_page.dart';
 import 'package:delwaqty/features/admin/admin_shell.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_commission_management_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_provider_pricing_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_approvals_center_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_quick_actions_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_profile_page.dart';
@@ -207,6 +208,11 @@ class AdminModule extends FeatureModule {
           path: 'commissions',
           pageBuilder: (context, state) =>
               _adminPage(const AdminCommissionManagementPage()),
+        ),
+        GoRoute(
+          path: 'provider-pricing',
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminProviderPricingPage()),
         ),
         GoRoute(
           path: 'approvals',

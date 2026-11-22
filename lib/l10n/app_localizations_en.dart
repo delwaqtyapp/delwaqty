@@ -7973,4 +7973,76 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get appInvitationsFooter =>
       'Downloading an app does not grant a role. Access follows your current account approval. Android installation permission may be required.';
+
+  @override
+  String get adminProviderPricing => 'Provider Pricing';
+
+  @override
+  String get adminProviderPricingDesc =>
+      'Set hourly and fixed rates for home-service providers and category defaults';
+
+  @override
+  String get providerPricingTabProviders => 'Providers';
+
+  @override
+  String get providerPricingTabCategories => 'Category defaults';
+
+  @override
+  String get providerPricingSearchHint => 'Search by name or city';
+
+  @override
+  String get providerPricingAllCategories => 'All categories';
+
+  @override
+  String get providerPricingHourly => 'Hourly rate';
+
+  @override
+  String get providerPricingFixedMin => 'Fixed price from';
+
+  @override
+  String get providerPricingFixedMax => 'Fixed price to';
+
+  @override
+  String get providerPricingNote => 'Note (optional)';
+
+  @override
+  String get providerPricingCustom => 'Custom';
+
+  @override
+  String get providerPricingCategoryDefault => 'Category default';
+
+  @override
+  String get providerPricingPlatformDefault => 'Platform default';
+
+  @override
+  String get providerPricingNoFixed => 'No fixed price';
+
+  @override
+  String get providerPricingEditTitle => 'Edit pricing';
+
+  @override
+  String get providerPricingSaved => 'Pricing updated';
+
+  @override
+  String get providerPricingFailed => 'Could not update pricing';
+
+  @override
+  String get providerPricingEmpty => 'No providers in your scope';
+
+  @override
+  String get providerPricingReadOnlyHint =>
+      'Category defaults can be changed by the owner or country admins only';
+
+  @override
+  String get providerPricingLeaveEmpty => 'Leave empty to use the default';
+
+  @override
+  String get providerMyPricing => 'My pricing';
+
+  @override
+  String get providerMyPricingAdminNote =>
+      'Prices are set by the administration. Contact support to request a change.';
+
+  @override
+  String get providerMyPricingEmpty => 'No service profiles yet';
 }

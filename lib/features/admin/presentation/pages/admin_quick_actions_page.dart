@@ -175,6 +175,12 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
             '/admin/commissions',
           ),
           _ActionData(
+            l10n.adminProviderPricing,
+            Icons.handyman_outlined,
+            const Color(0xFF0D9488),
+            '/admin/provider-pricing',
+          ),
+          _ActionData(
             l10n.adminTransactionLedger,
             Icons.menu_book_rounded,
             const Color(0xFFFF9500),

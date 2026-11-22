@@ -730,12 +730,16 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
             );
             if (narrow) {
               // Stack cart under products; a side-by-side split leaves the
-              // cart unusably narrow on phones.
+              // cart unusably narrow on phones. While the keyboard is open
+              // the split flips in the cart's favor: discount, customer and
+              // payment must stay fully reachable, and the cashier is
+              // typing, not browsing the grid.
+              final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
               return Column(
                 children: [
-                  Expanded(flex: 3, child: productsPane),
+                  Expanded(flex: keyboardOpen ? 1 : 3, child: productsPane),
                   const Divider(height: 1),
-                  Expanded(flex: 2, child: cartPane),
+                  Expanded(flex: keyboardOpen ? 3 : 2, child: cartPane),
                 ],
               );
             }

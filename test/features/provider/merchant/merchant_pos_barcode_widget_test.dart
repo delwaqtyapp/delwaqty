@@ -476,6 +476,14 @@ void main() {
             .first,
         const Offset(0, -120),
       );
+      // dragUntilVisible stops at the viewport edge; align the field fully
+      // inside so nothing is half-cut with the keyboard open.
+      await Scrollable.ensureVisible(
+        tester.element(
+          find.widgetWithText(DropdownButtonFormField<String>, 'طريقة الدفع'),
+        ),
+        alignment: 0.25,
+      );
       await tester.pumpAndSettle();
       expect(find.text('تحصيل'), findsOneWidget);
 

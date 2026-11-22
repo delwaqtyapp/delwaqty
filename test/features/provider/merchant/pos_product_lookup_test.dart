@@ -15,6 +15,17 @@ void main() {
       expect(normalizeBarcode(null), '');
       expect(normalizeBarcode('   '), '');
     });
+
+    test('trims exactly ASCII space/tab/CR/LF, matching the server rule', () {
+      expect(normalizeBarcode('\t6223000111\r\n'), '6223000111');
+      // Non-breaking space and other Unicode whitespace are NOT trimmed:
+      // the SQL trigger (migration 400) uses the same narrow set, so wider
+      // whitespace must survive on both sides or lookups would disagree.
+      expect(
+        normalizeBarcode('\u00A06223000111\u00A0'),
+        '\u00A06223000111\u00A0',
+      );
+    });
   });
 
   group('findProductByBarcode', () {

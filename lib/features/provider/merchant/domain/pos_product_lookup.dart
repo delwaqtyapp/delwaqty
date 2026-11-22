@@ -1,9 +1,14 @@
 /// Pure POS lookup helpers (no I/O) shared by the cashier page and the
 /// product form. Unit-tested; keep free of Flutter/Supabase imports.
 
-/// Normalizes a typed or scanned barcode: trims surrounding whitespace.
+/// Normalizes a typed or scanned barcode. THE one rule, shared with the
+/// server (products_barcode_canonicalize in migration 400): trim ASCII
+/// space, tab, CR and LF from both ends; empty becomes empty. Wider
+/// Unicode whitespace is deliberately NOT trimmed so client lookup and the
+/// unique index can never disagree.
 /// Returns an empty string for null/blank input.
-String normalizeBarcode(String? raw) => (raw ?? '').trim();
+String normalizeBarcode(String? raw) =>
+    (raw ?? '').replaceAll(RegExp(r'^[ \t\r\n]+|[ \t\r\n]+$'), '');
 
 /// Exact barcode match over a merchant's product rows (PostgREST maps).
 /// Returns the first product whose normalized barcode equals [barcode],

@@ -3,6 +3,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/features/provider/merchant/domain/pos_product_lookup.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
@@ -136,7 +137,8 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
   }
 
   void _finish(String value) {
-    final code = value.trim();
+    // THE one trim rule (migration 400): ASCII space/tab/CR/LF only.
+    final code = normalizeBarcode(value);
     if (code.isEmpty || _popped) return;
     _popped = true;
     Navigator.of(context).pop(code);
@@ -146,7 +148,8 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     if (_popped || _manualEntryOpen) return;
     for (final barcode in capture.barcodes) {
       final raw = barcode.rawValue;
-      if (raw != null && raw.trim().isNotEmpty) {
+      // Same canonical rule as every other barcode path (#77).
+      if (raw != null && normalizeBarcode(raw).isNotEmpty) {
         _finish(raw);
         return;
       }
@@ -154,6 +157,9 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
   }
 
   Future<void> _openManualEntry() async {
+    // Reentrancy guard (#78): a second tap while the sheet animates in
+    // must not stack sheets or pause an already-paused camera.
+    if (_manualEntryOpen || _popped) return;
     _manualEntryOpen = true;
     // Pause the camera while the sheet covers the preview; resumed in
     // finally when the merchant cancels (a typed code pops the scanner
@@ -161,49 +167,19 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     try {
       await _controller.stop();
     } catch (_) {}
+    // The await above can outlive the page: never open the sheet on a
+    // dead context.
+    if (!mounted) {
+      _manualEntryOpen = false;
+      return;
+    }
+    // The sheet owns and disposes its own controller (#78): disposal
+    // happens in the sheet's State, never on a timer.
     try {
-      final l10n = AppLocalizations.of(context);
-      final ctrl = TextEditingController();
       final code = await showModalBottomSheet<String>(
         context: context,
         isScrollControlled: true,
-        builder: (sheetCtx) {
-          final l10nSheet = AppLocalizations.of(sheetCtx);
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.viewInsetsOf(sheetCtx).bottom,
-            ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    TextField(
-                      controller: ctrl,
-                      autofocus: true,
-                      keyboardType: TextInputType.text,
-                      textInputAction: TextInputAction.done,
-                      decoration: InputDecoration(
-                        labelText: l10nSheet.scannerManualHint,
-                        border: const OutlineInputBorder(),
-                        prefixIcon: const Icon(Icons.barcode_reader),
-                      ),
-                      onSubmitted: (v) => Navigator.of(sheetCtx).pop(v.trim()),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    FilledButton(
-                      onPressed: () =>
-                          Navigator.of(sheetCtx).pop(ctrl.text.trim()),
-                      child: Text(l10nSheet.confirm),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
+        builder: (_) => const _ManualEntrySheet(),
       );
       if (!mounted || code == null || code.isEmpty) return;
       _finish(code);
@@ -340,6 +316,64 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Manual barcode entry bottom sheet. Stateful so the text controller's
+/// lifetime is tied to the sheet itself: created in initState, disposed
+/// in dispose, no deferred timers (#78).
+class _ManualEntrySheet extends StatefulWidget {
+  const _ManualEntrySheet();
+
+  @override
+  State<_ManualEntrySheet> createState() => _ManualEntrySheetState();
+}
+
+class _ManualEntrySheetState extends State<_ManualEntrySheet> {
+  final TextEditingController _ctrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _submit([String? value]) {
+    final code = normalizeBarcode(value ?? _ctrl.text);
+    Navigator.of(context).pop(code.isEmpty ? null : code);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: _ctrl,
+                autofocus: true,
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.done,
+                decoration: InputDecoration(
+                  labelText: l10n.scannerManualHint,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.barcode_reader),
+                ),
+                onSubmitted: _submit,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              FilledButton(onPressed: _submit, child: Text(l10n.confirm)),
+            ],
+          ),
         ),
       ),
     );

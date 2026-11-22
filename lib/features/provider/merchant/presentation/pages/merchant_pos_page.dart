@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -30,6 +32,9 @@ class MerchantPosPage extends ConsumerStatefulWidget {
   ConsumerState<MerchantPosPage> createState() => _MerchantPosPageState();
 }
 
+/// Outcome of a tap/scan add attempt, so scan-to-add reports the truth.
+enum _ProductAddResult { added, stockLimited, cancelled }
+
 class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
   /// line key -> quantity. Key is the bare product id for plain lines, or
   /// 'productId|sortedOptionId1,sortedOptionId2,...' for lines with
@@ -43,9 +48,10 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
   final _searchCtrl = TextEditingController();
   String _searchQuery = '';
 
-  /// Latest sellable product rows, refreshed from [merchantProductsProvider]
-  /// on every build so barcode handlers can match without a new fetch.
-  List<Map<String, dynamic>> _products = const [];
+  /// Every store product, including unavailable ones. Barcode matching runs
+  /// against this set so scanning a hidden/unavailable item says exactly
+  /// that instead of falling through to catalog import or quick-create.
+  List<Map<String, dynamic>> _allProducts = const [];
   String _paymentMethod = 'cash';
   bool _submitting = false;
   String _saleKey = _newSaleKey();
@@ -66,27 +72,30 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
     return sum;
   }
 
-  Future<void> _onProductTap(Map<String, dynamic> product) async {
+  /// Adds one unit of [product] to the cart. Returns what actually
+  /// happened so callers (scan-to-add) report the truth: a cancelled
+  /// modifier sheet or a stock limit is NOT an add.
+  Future<_ProductAddResult> _onProductTap(Map<String, dynamic> product) async {
     final id = product['id'] as String;
     final stock = (product['stock_quantity'] as num?)?.toInt() ?? 0;
-    if (_qtyForProduct(id) >= stock) return;
+    if (_qtyForProduct(id) >= stock) return _ProductAddResult.stockLimited;
     List<_ModifierGroup> groups;
     try {
       groups = await ref.read(_posModifierGroupsProvider(id).future);
     } catch (_) {
       groups = const [];
     }
-    if (!mounted) return;
+    if (!mounted) return _ProductAddResult.cancelled;
     if (groups.isEmpty) {
       setState(() => _cart[id] = (_cart[id] ?? 0) + 1);
-      return;
+      return _ProductAddResult.added;
     }
     final selection = await showModalBottomSheet<List<String>>(
       context: context,
       isScrollControlled: true,
       builder: (_) => _ModifierSheet(groups: groups),
     );
-    if (selection == null || !mounted) return;
+    if (selection == null || !mounted) return _ProductAddResult.cancelled;
     final sorted = [...selection]..sort();
     final key = '$id|${sorted.join(',')}';
     var surcharge = 0.0;
@@ -105,6 +114,7 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
       _cartOptionLabel[key] = labels.join(', ');
       _cartSurcharge[key] = surcharge;
     });
+    return _ProductAddResult.added;
   }
 
   double _previewSubtotal(List<Map<String, dynamic>> products) {
@@ -217,16 +227,26 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
     final barcode = normalizeBarcode(code);
     if (barcode.isEmpty) return;
 
-    final match = findProductByBarcode(_products, barcode);
+    final match = findProductByBarcode(_allProducts, barcode);
     if (match != null) {
+      if (match['is_available'] != true) {
+        _showSnack(l10n.posErrUnavailable, isError: true);
+        return;
+      }
       final stock = (match['stock_quantity'] as num?)?.toInt() ?? 0;
-      if (stock > 0) {
-        await _onProductTap(match);
-        if (mounted) {
-          _showSnack('${l10n.posScanAdded}: ${match['name']}', isError: false);
-        }
-      } else if (mounted) {
+      if (stock <= 0) {
         _showSnack(l10n.posErrStock, isError: true);
+        return;
+      }
+      final result = await _onProductTap(match);
+      if (!mounted) return;
+      switch (result) {
+        case _ProductAddResult.added:
+          _showSnack('${l10n.posScanAdded}: ${match['name']}', isError: false);
+        case _ProductAddResult.stockLimited:
+          _showSnack(l10n.posErrStock, isError: true);
+        case _ProductAddResult.cancelled:
+          break;
       }
       return;
     }
@@ -329,8 +349,14 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
     );
     final priceText = priceCtrl.text.trim();
     final stockText = stockCtrl.text.trim();
-    priceCtrl.dispose();
-    stockCtrl.dispose();
+    // The dialog route is still animating out and rebuilding its fields;
+    // dispose the controllers only after it has fully closed.
+    unawaited(
+      Future<void>.delayed(const Duration(milliseconds: 400), () {
+        priceCtrl.dispose();
+        stockCtrl.dispose();
+      }),
+    );
     if (confirmed != true || !mounted) return;
 
     final messenger = ScaffoldMessenger.of(context);
@@ -360,12 +386,25 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
       ref.invalidate(merchantProductsProvider);
       await _addFreshProductByBarcode(merchantId, barcode);
     } catch (e) {
-      if (mounted) {
-        _showSnack(
-          '${l10n.drugImportFailed}: ${appErrorText(context, e)}',
-          isError: true,
-        );
+      if (!mounted) return;
+      // Lost a race with another till importing the same drug: the unique
+      // index rejected the insert (the server also maps this to
+      // duplicate:true), so just re-read and add the product that won.
+      final msg = e.toString();
+      if (msg.contains('products_merchant_barcode_uq') ||
+          msg.contains('duplicate key')) {
+        try {
+          final merchantId = await ref.read(providerMerchantIdProvider.future);
+          if (!mounted) return;
+          ref.invalidate(merchantProductsProvider);
+          await _addFreshProductByBarcode(merchantId, barcode);
+        } catch (_) {}
+        return;
       }
+      _showSnack(
+        '${l10n.drugImportFailed}: ${appErrorText(context, e)}',
+        isError: true,
+      );
     }
   }
 
@@ -464,9 +503,15 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
     final name = nameCtrl.text.trim();
     final priceText = priceCtrl.text.trim();
     final stockText = stockCtrl.text.trim();
-    nameCtrl.dispose();
-    priceCtrl.dispose();
-    stockCtrl.dispose();
+    // The dialog route is still animating out and rebuilding its fields;
+    // dispose the controllers only after it has fully closed.
+    unawaited(
+      Future<void>.delayed(const Duration(milliseconds: 400), () {
+        nameCtrl.dispose();
+        priceCtrl.dispose();
+        stockCtrl.dispose();
+      }),
+    );
     if (confirmed != true || !mounted) return;
 
     try {
@@ -566,7 +611,7 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
             final sellable = allProducts
                 .where((p) => p['is_available'] == true)
                 .toList();
-            _products = sellable;
+            _allProducts = allProducts;
             final products = filterProductsForPos(sellable, _searchQuery);
             final subtotal = _previewSubtotal(sellable);
             final narrow = MediaQuery.sizeOf(context).width < 640;
@@ -609,12 +654,21 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
                       isDense: true,
                     ),
                     onChanged: (v) => setState(() => _searchQuery = v),
+                    // Scanner, manual sheet and typed submit all funnel
+                    // through the same handler. A typed value counts as a
+                    // barcode when it matches a product barcode exactly, or
+                    // when it is a bare numeric code worth looking up in the
+                    // drug catalog / quick-create (a name search stays a
+                    // search: onChanged already filters the grid).
                     onSubmitted: (v) {
-                      final match = findProductByBarcode(sellable, v);
-                      if (match != null) {
-                        _onProductTap(match);
+                      final q = normalizeBarcode(v);
+                      if (q.isEmpty) return;
+                      final looksLikeCode = RegExp(r'^\d{4,}$').hasMatch(q);
+                      if (findProductByBarcode(_allProducts, q) != null ||
+                          looksLikeCode) {
                         _searchCtrl.clear();
                         setState(() => _searchQuery = '');
+                        _onBarcode(q);
                       }
                     },
                   ),

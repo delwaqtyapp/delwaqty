@@ -30,7 +30,8 @@ class BarcodeScannerPage extends StatefulWidget {
 
 enum _PermissionUiState { checking, granted, denied, permanentlyDenied }
 
-class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
+class _BarcodeScannerPageState extends State<BarcodeScannerPage>
+    with WidgetsBindingObserver {
   final MobileScannerController _controller = MobileScannerController(
     // One good read is enough; duplicates would pop the page twice.
     detectionSpeed: DetectionSpeed.noDuplicates,
@@ -49,11 +50,58 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
   );
   _PermissionUiState _permission = _PermissionUiState.checking;
   bool _popped = false;
+  // While the manual-entry sheet is open, camera detection must not fire:
+  // onDetect would pop the SHEET (the top route) and leave the scanner
+  // stuck underneath. Detection is both ignored here and paused on the
+  // controller for the duration of the sheet.
+  bool _manualEntryOpen = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _checkPermission();
+  }
+
+  /// App lifecycle: release the camera while backgrounded, and re-check
+  /// permission on resume so "Open Settings -> grant -> return" flips the
+  /// page to the live preview without re-opening it. Status is only checked
+  /// here, never re-requested, to avoid looping the system dialog.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      if (_permission == _PermissionUiState.granted && !_manualEntryOpen) {
+        _controller.stop().catchError((_) {});
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      _onResumed();
+    }
+  }
+
+  Future<void> _onResumed() async {
+    if (_popped) return;
+    PermissionStatus status;
+    try {
+      status = await Permission.camera.status;
+    } catch (_) {
+      status = PermissionStatus.permanentlyDenied;
+    }
+    if (!mounted) return;
+    if (status.isGranted) {
+      if (_permission != _PermissionUiState.granted) {
+        // The preview mounts now and auto-starts the controller; starting
+        // it here as well collides with its own start.
+        setState(() => _permission = _PermissionUiState.granted);
+      } else if (!_manualEntryOpen) {
+        _controller.start().catchError((_) {});
+      }
+    } else {
+      final next = status.isPermanentlyDenied || status.isRestricted
+          ? _PermissionUiState.permanentlyDenied
+          : _PermissionUiState.denied;
+      if (_permission != next) setState(() => _permission = next);
+    }
   }
 
   Future<void> _checkPermission() async {
@@ -82,6 +130,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
     super.dispose();
   }
@@ -93,52 +142,79 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
     Navigator.of(context).pop(code);
   }
 
+  void _onDetect(BarcodeCapture capture) {
+    if (_popped || _manualEntryOpen) return;
+    for (final barcode in capture.barcodes) {
+      final raw = barcode.rawValue;
+      if (raw != null && raw.trim().isNotEmpty) {
+        _finish(raw);
+        return;
+      }
+    }
+  }
+
   Future<void> _openManualEntry() async {
-    final l10n = AppLocalizations.of(context);
-    final ctrl = TextEditingController();
-    final code = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      builder: (sheetCtx) {
-        final l10nSheet = AppLocalizations.of(sheetCtx);
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.viewInsetsOf(sheetCtx).bottom,
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextField(
-                    controller: ctrl,
-                    autofocus: true,
-                    keyboardType: TextInputType.text,
-                    textInputAction: TextInputAction.done,
-                    decoration: InputDecoration(
-                      labelText: l10nSheet.scannerManualHint,
-                      border: const OutlineInputBorder(),
-                      prefixIcon: const Icon(Icons.barcode_reader),
+    _manualEntryOpen = true;
+    // Pause the camera while the sheet covers the preview; resumed in
+    // finally when the merchant cancels (a typed code pops the scanner
+    // instead, so no resume happens after a successful entry).
+    try {
+      await _controller.stop();
+    } catch (_) {}
+    try {
+      final l10n = AppLocalizations.of(context);
+      final ctrl = TextEditingController();
+      final code = await showModalBottomSheet<String>(
+        context: context,
+        isScrollControlled: true,
+        builder: (sheetCtx) {
+          final l10nSheet = AppLocalizations.of(sheetCtx);
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.viewInsetsOf(sheetCtx).bottom,
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextField(
+                      controller: ctrl,
+                      autofocus: true,
+                      keyboardType: TextInputType.text,
+                      textInputAction: TextInputAction.done,
+                      decoration: InputDecoration(
+                        labelText: l10nSheet.scannerManualHint,
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.barcode_reader),
+                      ),
+                      onSubmitted: (v) => Navigator.of(sheetCtx).pop(v.trim()),
                     ),
-                    onSubmitted: (v) => Navigator.of(sheetCtx).pop(v.trim()),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  FilledButton(
-                    onPressed: () =>
-                        Navigator.of(sheetCtx).pop(ctrl.text.trim()),
-                    child: Text(l10nSheet.confirm),
-                  ),
-                ],
+                    const SizedBox(height: AppSpacing.md),
+                    FilledButton(
+                      onPressed: () =>
+                          Navigator.of(sheetCtx).pop(ctrl.text.trim()),
+                      child: Text(l10nSheet.confirm),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      },
-    );
-    if (!mounted || code == null || code.isEmpty) return;
-    _finish(code);
+          );
+        },
+      );
+      if (!mounted || code == null || code.isEmpty) return;
+      _finish(code);
+    } finally {
+      _manualEntryOpen = false;
+      if (mounted && !_popped && _permission == _PermissionUiState.granted) {
+        try {
+          await _controller.start();
+        } catch (_) {}
+      }
+    }
   }
 
   @override
@@ -194,18 +270,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        MobileScanner(
-          controller: _controller,
-          onDetect: (capture) {
-            for (final barcode in capture.barcodes) {
-              final raw = barcode.rawValue;
-              if (raw != null && raw.trim().isNotEmpty) {
-                _finish(raw);
-                return;
-              }
-            }
-          },
-        ),
+        MobileScanner(controller: _controller, onDetect: _onDetect),
         // Aim frame: plain bordered box, deliberately token-styled.
         Center(
           child: Container(

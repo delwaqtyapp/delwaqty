@@ -1,2 +1,0 @@
-User-agent: *
-Disallow: /bf997193ca2a9693732a/

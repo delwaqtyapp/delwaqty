@@ -60,4 +60,40 @@ class SanctionsRepositoryImpl implements SanctionsRepository {
       throw ServerException(message: e.toString());
     }
   }
+
+  @override
+  Future<int> getCancelSuspensionDays() async {
+    try {
+      return await _dataSource.getCancelSuspensionDays();
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<int> setCancelSuspensionDays(int days, {String? reason}) async {
+    try {
+      return await _dataSource.setCancelSuspensionDays(days, reason: reason);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<int> getRefusalSuspensionDays() async {
+    try {
+      return await _dataSource.getRefusalSuspensionDays();
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<int> setRefusalSuspensionDays(int days, {String? reason}) async {
+    try {
+      return await _dataSource.setRefusalSuspensionDays(days, reason: reason);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
 }

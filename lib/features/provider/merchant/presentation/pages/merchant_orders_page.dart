@@ -368,63 +368,72 @@ class _OrderCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          order.customerName ??
-                              (customerPhone.isNotEmpty
-                                  ? customerPhone
-                                  : l10n.customer),
-                          style: theme.textTheme.titleMedium?.copyWith(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        order.customerName ??
+                            (customerPhone.isNotEmpty
+                                ? customerPhone
+                                : l10n.customer),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        // Same short ref the customer sees on their
+                        // confirmation screen (batch 14 item A).
+                        '#${order.id.length > 6 ? order.id.substring(order.id.length - 6).toUpperCase() : order.id.toUpperCase()} · $relativeTime',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      if (customerPhone.isNotEmpty) ...[
+                        IconButton(
+                          tooltip: l10n.callCustomer,
+                          icon: const Icon(Icons.phone_outlined, size: 20),
+                          onPressed: () => _callCustomer(customerPhone),
+                        ),
+                        IconButton(
+                          tooltip: l10n.whatsappCustomer,
+                          icon: const Icon(Icons.chat_bubble_outline, size: 20),
+                          onPressed: () => _whatsappCustomer(customerPhone),
+                        ),
+                      ],
+                      _ElapsedPill(
+                        createdAt: order.createdAt,
+                        pending: isPending,
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusColor.withValues(alpha: 0.1),
+                          borderRadius: AppSpacing.borderRadiusMd,
+                        ),
+                        child: Text(
+                          statusLabel,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: statusColor,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          // Same short ref the customer sees on their
-                          // confirmation screen (batch 14 item A).
-                          '#${order.id.length > 6 ? order.id.substring(order.id.length - 6).toUpperCase() : order.id.toUpperCase()} · $relativeTime',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (customerPhone.isNotEmpty) ...[
-                    IconButton(
-                      tooltip: l10n.callCustomer,
-                      icon: const Icon(Icons.phone_outlined, size: 20),
-                      onPressed: () => _callCustomer(customerPhone),
-                    ),
-                    IconButton(
-                      tooltip: l10n.whatsappCustomer,
-                      icon: const Icon(Icons.chat_bubble_outline, size: 20),
-                      onPressed: () => _whatsappCustomer(customerPhone),
-                    ),
-                  ],
-                  _ElapsedPill(createdAt: order.createdAt, pending: isPending),
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.1),
-                      borderRadius: AppSpacing.borderRadiusMd,
-                    ),
-                    child: Text(
-                      statusLabel,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: statusColor,
-                        fontWeight: FontWeight.bold,
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),

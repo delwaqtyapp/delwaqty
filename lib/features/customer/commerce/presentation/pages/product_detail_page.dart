@@ -43,6 +43,9 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
   /// Required modifier groups: group id -> option ids. Every group needs at
   /// least one selected option before the item can be added to the cart.
   Map<String, Set<String>> _requiredGroups = const {};
+
+  /// All modifier groups with their selection rules (radio / max cap).
+  List<ModifierGroupInfo> _modifierGroups = const [];
   bool _modifiersLoaded = false;
   late Future<Product?> _productFuture;
 
@@ -85,17 +88,46 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
     try {
       final repo = ref.read(restaurant.modifierRepositoryProvider);
       final mods = await repo.getModifiers(widget.productId);
-      final required = await repo.getRequiredGroupOptions(widget.productId);
+      final groups = await repo.getModifierGroups(widget.productId);
       if (mounted) {
         setState(() {
           _currentModifiers = mods;
-          _requiredGroups = required;
+          _modifierGroups = groups;
+          _requiredGroups = {
+            for (final g in groups)
+              if (g.isRequired) g.id: g.optionIds,
+          };
           _modifiersLoaded = true;
         });
       }
     } catch (e) {
       debugPrint('Failed to load product modifiers: $e');
       if (mounted) setState(() => _modifiersLoaded = true);
+    }
+  }
+
+  /// Adds an option honoring its group's selection rules, like the POS
+  /// picker: single-choice groups (max 1) replace the current pick, capped
+  /// groups ignore taps past the cap.
+  void _addModifierSelection(String optionId) {
+    ModifierGroupInfo? group;
+    for (final g in _modifierGroups) {
+      if (g.optionIds.contains(optionId)) {
+        group = g;
+        break;
+      }
+    }
+    if (group == null) {
+      _selectedModifierIds.add(optionId);
+      return;
+    }
+    if (group.maxSelections == 1) {
+      _selectedModifierIds.removeAll(group.optionIds);
+      _selectedModifierIds.add(optionId);
+    } else if (group.maxSelections <= 0 ||
+        _selectedModifierIds.where(group.optionIds.contains).length <
+            group.maxSelections) {
+      _selectedModifierIds.add(optionId);
     }
   }
 
@@ -318,7 +350,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                             onChanged: mod.isAvailable
                                 ? (val) => setState(() {
                                     if (val == true) {
-                                      _selectedModifierIds.add(mod.id);
+                                      _addModifierSelection(mod.id);
                                     } else {
                                       _selectedModifierIds.remove(mod.id);
                                     }

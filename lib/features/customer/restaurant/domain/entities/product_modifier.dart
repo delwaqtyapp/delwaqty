@@ -19,3 +19,20 @@ abstract class ProductModifier with _$ProductModifier {
   factory ProductModifier.fromJson(Map<String, dynamic> json) =>
       _$ProductModifierFromJson(json);
 }
+
+/// Modifier group selection rules for the customer picker
+/// (product_modifier_groups): which options belong to the group, whether a
+/// pick is required, and the maximum number of picks (0 = unlimited).
+class ModifierGroupInfo {
+  const ModifierGroupInfo({
+    required this.id,
+    required this.isRequired,
+    required this.maxSelections,
+    required this.optionIds,
+  });
+
+  final String id;
+  final bool isRequired;
+  final int maxSelections;
+  final Set<String> optionIds;
+}

@@ -92,6 +92,36 @@ class SupabaseModifierDataSource {
     ];
   }
 
+  /// All modifier groups of a product with their selection rules and option
+  /// membership (product_modifier_groups + product_modifier_options).
+  Future<List<ModifierGroupInfo>> getModifierGroups(String productId) async {
+    final groups = await _client
+        .from('product_modifier_groups')
+        .select('id, is_required, max_selections')
+        .eq('product_id', productId)
+        .order('sort_order');
+    final groupRows = (groups as List).cast<Map<String, dynamic>>();
+    if (groupRows.isEmpty) return const [];
+    final groupIds = [for (final g in groupRows) g['id'] as String];
+    final options = await _client
+        .from('product_modifier_options')
+        .select('id, group_id')
+        .inFilter('group_id', groupIds);
+    final byGroup = <String, Set<String>>{for (final id in groupIds) id: {}};
+    for (final o in (options as List).cast<Map<String, dynamic>>()) {
+      byGroup[o['group_id']]?.add(o['id'] as String);
+    }
+    return [
+      for (final g in groupRows)
+        ModifierGroupInfo(
+          id: g['id'] as String,
+          isRequired: g['is_required'] == true,
+          maxSelections: (g['max_selections'] as num?)?.toInt() ?? 0,
+          optionIds: byGroup[g['id']] ?? const {},
+        ),
+    ];
+  }
+
   Future<ProductModifier> createModifier(ProductModifier modifier) async {
     final data = await _client
         .from('product_modifiers')

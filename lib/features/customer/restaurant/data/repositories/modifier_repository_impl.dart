@@ -28,6 +28,15 @@ class ModifierRepositoryImpl implements ModifierRepository {
   }
 
   @override
+  Future<List<ModifierGroupInfo>> getModifierGroups(String productId) async {
+    try {
+      return await _dataSource.getModifierGroups(productId);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
   Future<ProductModifier> createModifier(ProductModifier modifier) async {
     try {
       return await _dataSource.createModifier(modifier);

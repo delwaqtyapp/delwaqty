@@ -110,3 +110,5 @@ app.*.map.json
 .backups/
 dwq_ui.xml
 tools/db_functions.json
+**/bin/
+**/obj/

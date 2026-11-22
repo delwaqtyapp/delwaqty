@@ -1,0 +1,115 @@
+<Window x:Class="Delwaqty.Pos.Wpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="دلوقتي - كاشير الصيدلية" Height="760" Width="1280"
+        FlowDirection="RightToLeft" WindowState="Maximized" FontSize="16">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Background="#1565C0" Padding="12,6">
+            <DockPanel>
+                <TextBlock Text="دلوقتي كاشير" Foreground="White" FontSize="22" FontWeight="Bold"/>
+                <TextBlock x:Name="LicenseBadge" Text="تجريبي" Foreground="#FFE082" FontWeight="Bold"
+                           VerticalAlignment="Center" Margin="16,0,0,0"/>
+                <TextBlock x:Name="SyncBadge" Text="غير متصل" Foreground="#FFAB91"
+                           VerticalAlignment="Center" DockPanel.Dock="Left"/>
+            </DockPanel>
+        </Border>
+
+        <TabControl Grid.Row="1" x:Name="Tabs">
+            <TabItem Header="صرف / بيع">
+                <Grid Margin="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBox x:Name="SearchBox" FontSize="20" Padding="8"
+                                 TextChanged="SearchBox_TextChanged" />
+                        <TextBlock Text="ابحث بالاسم أو الباركود أو المادة الفعالة" Foreground="#777" Margin="4,2"/>
+                        <DataGrid x:Name="SearchResults" AutoGenerateColumns="False" IsReadOnly="True"
+                                  Height="420" SelectionMode="Single" MouseDoubleClick="AddSelected_Click">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="الاسم" Width="2*" Binding="{Binding NameAr}"/>
+                                <DataGridTextColumn Header="انجليزي" Width="2*" Binding="{Binding NameEn}"/>
+                                <DataGridTextColumn Header="السعر الرسمي" Width="*" Binding="{Binding OfficialPriceEgp}"/>
+                                <DataGridTextColumn Header="الباركود" Width="*" Binding="{Binding Barcode}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <Button Content="إضافة للفاتورة  ➕" FontSize="18" Padding="10" Margin="0,8"
+                                Click="AddSelected_Click" Background="#2E7D32" Foreground="White"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                        <DataGrid x:Name="CartGrid" AutoGenerateColumns="False" CanUserAddRows="False" Height="360">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="الصنف" Width="2*" Binding="{Binding Name}"/>
+                                <DataGridTextColumn Header="الكمية" Width="*" Binding="{Binding Qty}"/>
+                                <DataGridTextColumn Header="السعر" Width="*" Binding="{Binding UnitPrice}"/>
+                                <DataGridTextColumn Header="الإجمالي" Width="*" Binding="{Binding Total}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <DockPanel Margin="0,8">
+                            <TextBlock Text="الإجمالي:" FontSize="24" FontWeight="Bold"/>
+                            <TextBlock x:Name="TotalText" Text="0" FontSize="24" FontWeight="Bold" Foreground="#1565C0"/>
+                            <TextBlock Text="خصم:" Margin="24,0,4,0" VerticalAlignment="Center"/>
+                            <TextBox x:Name="DiscountBox" Text="0" Width="80" TextChanged="Discount_Changed"/>
+                        </DockPanel>
+                        <WrapPanel>
+                            <Button Content="نقدي 💵" FontSize="18" Padding="16,10" Margin="4" Click="PayCash_Click" Background="#00695C" Foreground="White"/>
+                            <Button Content="آجل (دين) 📒" FontSize="18" Padding="16,10" Margin="4" Click="PayDeferred_Click" Background="#E65100" Foreground="White"/>
+                            <Button Content="إلغاء الفاتورة" FontSize="18" Padding="16,10" Margin="4" Click="ClearCart_Click" Background="#B71C1C" Foreground="White"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="جرد المخزون">
+                <StackPanel Margin="12">
+                    <TextBlock Text="عدّ صنفاً: ابحث، أدخل الكمية الفعلية، وسجّل. الفرق يظهر في حركة المخزون." TextWrapping="Wrap"/>
+                    <TextBox x:Name="StockSearchBox" FontSize="18" Padding="6" Margin="0,8" TextChanged="StockSearch_TextChanged"/>
+                    <DataGrid x:Name="StockResults" AutoGenerateColumns="False" IsReadOnly="True" Height="380">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="الاسم" Width="2*" Binding="{Binding NameAr}"/>
+                            <DataGridTextColumn Header="انجليزي" Width="2*" Binding="{Binding NameEn}"/>
+                            <DataGridTextColumn Header="السعر" Width="*" Binding="{Binding OfficialPriceEgp}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <StackPanel Orientation="Horizontal" Margin="0,8">
+                        <TextBlock Text="الكمية الفعلية:" VerticalAlignment="Center"/>
+                        <TextBox x:Name="CountedBox" Width="100" FontSize="18" Margin="8,0"/>
+                        <Button Content="تسجيل الجرد" FontSize="18" Padding="14,8" Click="RecordCount_Click" Background="#1565C0" Foreground="White"/>
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="العملاء والديون">
+                <StackPanel Margin="12">
+                    <TextBlock Text="عميل جديد لتسجيل ديونه (آجل):" FontWeight="Bold"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,8">
+                        <TextBox x:Name="CustomerNameBox" Width="220" Padding="6" />
+                        <TextBox x:Name="CustomerPhoneBox" Width="160" Padding="6" Margin="8,0"/>
+                        <Button Content="حفظ العميل" Padding="14,6" Click="SaveCustomer_Click" Background="#2E7D32" Foreground="White"/>
+                    </StackPanel>
+                    <TextBlock Text="الاسم ورقم الموبايل. الدفعات تسجل من فاتورة الآجل." Foreground="#777" TextWrapping="Wrap"/>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="تقفيل اليوم">
+                <StackPanel Margin="12" Width="420">
+                    <TextBlock Text="النقدية المتوقعة في الدرج:" FontWeight="Bold"/>
+                    <TextBlock x:Name="ExpectedCashText" Text="-" FontSize="28" Foreground="#1565C0" Margin="0,4"/>
+                    <TextBlock Text="النقدية الفعلية (العد اليدوي):"/>
+                    <TextBox x:Name="ClosingCashBox" FontSize="20" Padding="6" Margin="0,4"/>
+                    <Button Content="تقفيل الوردية" FontSize="18" Padding="14,8" Margin="0,8" Click="CloseShift_Click" Background="#00695C" Foreground="White"/>
+                    <TextBlock x:Name="CloseResultText" TextWrapping="Wrap" Foreground="#2E7D32"/>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+
+        <StatusBar Grid.Row="2">
+            <StatusBarItem><TextBlock x:Name="StatusText" Text="جاهز"/></StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Left"><TextBlock x:Name="ClockText"/></StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>

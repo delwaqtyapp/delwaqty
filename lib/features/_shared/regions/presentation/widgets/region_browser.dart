@@ -19,10 +19,20 @@ class RegionBrowser extends ConsumerStatefulWidget {
     super.key,
     required this.onSelected,
     this.selectedRegionId,
+    this.roots,
+    this.allowedIds,
   });
 
   final void Function(Region region) onSelected;
   final String? selectedRegionId;
+
+  /// When set, the top level lists these regions instead of all
+  /// governorates (scoped admin pickers start at their assigned regions).
+  final List<Region>? roots;
+
+  /// When set, regions outside this set render disabled (not selectable,
+  /// not drillable). Applied by scoped admin pickers.
+  final Set<String>? allowedIds;
 
   @override
   ConsumerState<RegionBrowser> createState() => _RegionBrowserState();
@@ -78,8 +88,12 @@ class _RegionBrowserState extends ConsumerState<RegionBrowser> {
     }
   }
 
+  bool _isAllowed(Region region) =>
+      widget.allowedIds == null || widget.allowedIds!.contains(region.id);
+
   Future<void> _openOrSelect(Region region) async {
     if (_openingId != null) return;
+    if (!_isAllowed(region)) return;
     setState(() => _openingId = region.id);
     try {
       final children = await ref.read(regionChildrenProvider(region.id).future);
@@ -100,15 +114,20 @@ class _RegionBrowserState extends ConsumerState<RegionBrowser> {
     final l10n = AppLocalizations.of(context);
     final isCurrent = region.id == widget.selectedRegionId;
     final opening = _openingId == region.id;
+    final allowed = _isAllowed(region);
     return ListTile(
       key: ValueKey('region-row-${region.id}'),
-      leading: Icon(_typeIcon(region), color: _typeColor(region)),
+      enabled: allowed,
+      leading: Icon(
+        _typeIcon(region),
+        color: allowed ? _typeColor(region) : Theme.of(context).disabledColor,
+      ),
       title: Text(
         _displayName(region),
         style: const TextStyle(fontWeight: FontWeight.w600),
       ),
       subtitle: Text(_typeLabel(region, l10n)),
-      onTap: opening ? null : () => _openOrSelect(region),
+      onTap: opening || !allowed ? null : () => _openOrSelect(region),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -122,7 +141,9 @@ class _RegionBrowserState extends ConsumerState<RegionBrowser> {
                   ? Theme.of(context).colorScheme.primary
                   : Theme.of(context).colorScheme.outline,
             ),
-            onPressed: opening ? null : () => widget.onSelected(region),
+            onPressed: opening || !allowed
+                ? null
+                : () => widget.onSelected(region),
           ),
           if (opening)
             const SizedBox(
@@ -165,8 +186,13 @@ class _RegionBrowserState extends ConsumerState<RegionBrowser> {
         child: Row(
           children: [
             ActionChip(
-              avatar: const Icon(Icons.public_rounded, size: 16),
-              label: Text(l10n.allOfEgypt),
+              avatar: Icon(
+                widget.roots == null
+                    ? Icons.public_rounded
+                    : Icons.home_work_outlined,
+                size: 16,
+              ),
+              label: Text(widget.roots == null ? l10n.allOfEgypt : l10n.back),
               onPressed: _crumbs.isEmpty ? null : () => setState(_crumbs.clear),
             ),
             for (var i = 0; i < _crumbs.length; i++) ...[
@@ -194,7 +220,9 @@ class _RegionBrowserState extends ConsumerState<RegionBrowser> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final childrenAsync = _crumbs.isEmpty
-        ? ref.watch(governoratesProvider)
+        ? (widget.roots != null
+              ? AsyncData<List<Region>>(widget.roots!)
+              : ref.watch(governoratesProvider))
         : ref.watch(regionChildrenProvider(_crumbs.last.id));
 
     return Column(
@@ -212,8 +240,10 @@ class _RegionBrowserState extends ConsumerState<RegionBrowser> {
                   const SizedBox(height: 12),
                   FilledButton.tonal(
                     onPressed: () {
-                      if (_crumbs.isEmpty) {
+                      if (_crumbs.isEmpty && widget.roots == null) {
                         ref.invalidate(governoratesProvider);
+                      } else if (_crumbs.isEmpty) {
+                        setState(() {});
                       } else {
                         ref.invalidate(regionChildrenProvider(_crumbs.last.id));
                       }

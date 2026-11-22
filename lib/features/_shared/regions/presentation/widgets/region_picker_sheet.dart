@@ -6,13 +6,25 @@ import 'package:delwaqty/features/_shared/regions/presentation/widgets/region_br
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class RegionPickerSheet extends ConsumerStatefulWidget {
-  const RegionPickerSheet({super.key, this.selectedRegionId});
+  const RegionPickerSheet({
+    super.key,
+    this.selectedRegionId,
+    this.roots,
+    this.allowedIds,
+  });
 
   final String? selectedRegionId;
+
+  /// Scoped-admin support: top level lists these regions instead of all
+  /// governorates, and regions outside [allowedIds] are not selectable.
+  final List<Region>? roots;
+  final Set<String>? allowedIds;
 
   static Future<Region?> show(
     BuildContext context, {
     String? selectedRegionId,
+    List<Region>? roots,
+    Set<String>? allowedIds,
   }) {
     return showModalBottomSheet<Region>(
       context: context,
@@ -21,7 +33,11 @@ class RegionPickerSheet extends ConsumerStatefulWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => RegionPickerSheet(selectedRegionId: selectedRegionId),
+      builder: (_) => RegionPickerSheet(
+        selectedRegionId: selectedRegionId,
+        roots: roots,
+        allowedIds: allowedIds,
+      ),
     );
   }
 
@@ -108,6 +124,8 @@ class _RegionPickerSheetState extends ConsumerState<RegionPickerSheet> {
                 ? _buildSearchResults(lang, l10n)
                 : RegionBrowser(
                     selectedRegionId: widget.selectedRegionId,
+                    roots: widget.roots,
+                    allowedIds: widget.allowedIds,
                     onSelected: (region) => Navigator.of(context).pop(region),
                   ),
           ),
@@ -127,7 +145,12 @@ class _RegionPickerSheetState extends ConsumerState<RegionPickerSheet> {
           label: Text(l10n.retry),
         ),
       ),
-      data: (regions) {
+      data: (allRegions) {
+        final regions = widget.allowedIds == null
+            ? allRegions
+            : allRegions
+                  .where((r) => widget.allowedIds!.contains(r.id))
+                  .toList();
         if (regions.isEmpty) {
           return Center(child: Text(l10n.noResults));
         }

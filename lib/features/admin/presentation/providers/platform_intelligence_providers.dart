@@ -2,6 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:delwaqty/features/admin/data/datasources/remote/platform_intelligence_data_source.dart';
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
+import 'package:delwaqty/services/supabase/supabase_service.dart';
+import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
+import 'package:delwaqty/features/_shared/regions/presentation/providers/region_providers.dart';
 
 // ─── Data Source Provider ─────────────────────────────────
 
@@ -13,6 +16,71 @@ final platformIntelligenceDataSourceProvider =
 // ─── Admin Scope State ────────────────────────────────────
 
 final adminScopeRegionProvider = StateProvider<String?>((ref) => null);
+
+// ─── Admin Region Scope (373) ─────────────────────────────
+
+/// The signed-in admin's geographic footprint, from the
+/// admin_my_scope_region_ids RPC. Owner/country admins are unrestricted;
+/// region-scoped admins get their assigned roots and every covered region id;
+/// anyone else is restricted with empty sets. Used to gate the Command Center
+/// region selector and the /admin/regions controls.
+class AdminRegionScope {
+  const AdminRegionScope({
+    required this.unrestricted,
+    required this.rootIds,
+    required this.regionIds,
+  });
+
+  final bool unrestricted;
+  final List<String> rootIds;
+  final Set<String> regionIds;
+
+  static const restricted = AdminRegionScope(
+    unrestricted: false,
+    rootIds: <String>[],
+    regionIds: <String>{},
+  );
+
+  bool covers(String regionId) => unrestricted || regionIds.contains(regionId);
+}
+
+final adminRegionScopeProvider = FutureProvider<AdminRegionScope>((ref) async {
+  try {
+    final res = await ref
+        .watch(supabaseClientProvider)
+        .rpc('admin_my_scope_region_ids');
+    if (res is! Map) return AdminRegionScope.restricted;
+    final unrestricted = res['unrestricted'] == true;
+    List<String> idsOf(String key) => res[key] is List
+        ? (res[key] as List).map((e) => e.toString()).toList()
+        : const <String>[];
+    return AdminRegionScope(
+      unrestricted: unrestricted,
+      rootIds: idsOf('root_ids'),
+      regionIds: idsOf('region_ids').toSet(),
+    );
+  } catch (_) {
+    // Fail closed: a scope we cannot load must not unlock governorate-wide
+    // controls for a scoped admin.
+    return AdminRegionScope.restricted;
+  }
+});
+
+/// Region entities for the scoped admin's assigned roots, for pickers that
+/// must start at the admin's own regions instead of all governorates.
+final adminScopeRootsProvider = FutureProvider<List<Region>>((ref) async {
+  final scope = await ref.watch(adminRegionScopeProvider.future);
+  if (scope.unrestricted || scope.rootIds.isEmpty) return const <Region>[];
+  final repo = ref.watch(regionRepositoryProvider);
+  final roots = <Region>[];
+  for (final id in scope.rootIds) {
+    final region = await repo
+        .getRegion(id)
+        .then<Region?>((r) => r, onError: (Object _) => null);
+    if (region != null) roots.add(region);
+  }
+  return roots;
+});
 
 // ─── Time Filter State ────────────────────────────────────
 

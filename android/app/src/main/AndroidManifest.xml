@@ -11,7 +11,10 @@
          an online driver streams GPS and needs it; customer/provider/admin
          must not request background location (Play rejection risk). -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
+    <!-- FOREGROUND_SERVICE_LOCATION removed: nothing in any flavor starts a
+         location-type foreground service (geolocator is used without
+         ForegroundNotificationConfig; no background-service plugin). Declaring
+         it forces a Play permission declaration for every flavor. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.CAMERA"/>

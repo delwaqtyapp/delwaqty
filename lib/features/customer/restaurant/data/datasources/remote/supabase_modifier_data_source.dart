@@ -25,14 +25,47 @@ class SupabaseModifierDataSource {
   );
 
   Future<List<ProductModifier>> getModifiers(String productId) async {
-    final data = await _client
-        .from('product_modifiers')
-        .select()
+    // Read the group model (product_modifier_groups + _options), which is
+    // what merchants manage and what the server-side pricing validates.
+    // The old flat product_modifiers table is legacy. Flattened here so the
+    // product detail page keeps its existing checkbox UI.
+    final groups = await _client
+        .from('product_modifier_groups')
+        .select('id, sort_order')
         .eq('product_id', productId)
         .order('sort_order');
-    return (data as List)
-        .map((r) => _fromRow(r as Map<String, dynamic>))
-        .toList();
+    final groupRows = (groups as List).cast<Map<String, dynamic>>();
+    if (groupRows.isEmpty) return const [];
+    final groupIds = [for (final g in groupRows) g['id'] as String];
+    final options = await _client
+        .from('product_modifier_options')
+        .select('id, group_id, name, name_ar, price_adjustment, sort_order')
+        .inFilter('group_id', groupIds)
+        .order('sort_order');
+    final optionRows = (options as List).cast<Map<String, dynamic>>();
+    final groupOrder = {
+      for (var i = 0; i < groupRows.length; i++) groupRows[i]['id']: i,
+    };
+    optionRows.sort(
+      (a, b) => (groupOrder[a['group_id']] ?? 0).compareTo(
+        groupOrder[b['group_id']] ?? 0,
+      ),
+    );
+    return [
+      for (final (i, o) in optionRows.indexed)
+        ProductModifier(
+          id: o['id'] as String,
+          productId: productId,
+          name: ((o['name_ar'] ?? '') as String).isNotEmpty
+              ? o['name_ar'] as String
+              : (o['name'] ?? '') as String,
+          description: null,
+          priceAdjustment: (o['price_adjustment'] as num? ?? 0).toDouble(),
+          isAvailable: true,
+          sortOrder: i,
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+    ];
   }
 
   Future<ProductModifier> createModifier(ProductModifier modifier) async {

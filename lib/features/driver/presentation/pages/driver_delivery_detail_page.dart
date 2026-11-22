@@ -571,37 +571,18 @@ class _DriverDeliveryDetailPageState
                   // retryable card keeps the uncollected state visible
                   // instead of silently showing nothing.
                   if (status == 'completed')
-                    ref
-                        .watch(cashCollectionStateProvider(order.id))
-                        .when(
-                          data: (cash) =>
-                              cash != null &&
-                                  cash.isCash &&
-                                  order.status == 'completed'
-                              ? Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: CashCollectionCard(
-                                    state: cash,
-                                    busy: _busy,
-                                    onCollect: () =>
-                                        _confirmCollection(order, driverId),
-                                    onDone: () => context.pop(),
-                                  ),
-                                )
-                              : const SizedBox.shrink(),
-                          loading: () => const Padding(
-                            padding: EdgeInsets.only(bottom: 12),
-                            child: Center(child: CircularProgressIndicator()),
-                          ),
-                          error: (_, __) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: CashCollectionRetryCard(
-                              onRetry: () => ref.invalidate(
-                                cashCollectionStateProvider(order.id),
-                              ),
-                            ),
-                          ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: CashCollectionSection(
+                        state: ref.watch(cashCollectionStateProvider(order.id)),
+                        busy: _busy,
+                        onCollect: () => _confirmCollection(order, driverId),
+                        onDone: () => context.pop(),
+                        onRetry: () => ref.invalidate(
+                          cashCollectionStateProvider(order.id),
                         ),
+                      ),
+                    ),
                   if (_busy) const Center(child: CircularProgressIndicator()),
                   if (status == 'searching' || status == 'requested')
                     FilledButton(

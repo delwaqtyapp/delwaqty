@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:delwaqty/features/customer/delivery/domain/entities/cash_collection.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -166,6 +167,49 @@ class CashCollectionRetryCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// The completed-delivery cash block (migration 392, review #84): decides
+/// what renders from the async collection state. FAIL CLOSED — an
+/// unreadable (error) or unknown (null) state shows the retry card; only a
+/// positively known NON-cash delivery renders nothing.
+class CashCollectionSection extends StatelessWidget {
+  const CashCollectionSection({
+    super.key,
+    required this.state,
+    required this.busy,
+    required this.onCollect,
+    required this.onDone,
+    required this.onRetry,
+  });
+
+  final AsyncValue<CashCollectionState?> state;
+  final bool busy;
+  final VoidCallback onCollect;
+  final VoidCallback onDone;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return state.when(
+      data: (cash) {
+        if (cash == null) {
+          return CashCollectionRetryCard(onRetry: onRetry);
+        }
+        if (!cash.isCash) {
+          return const SizedBox.shrink();
+        }
+        return CashCollectionCard(
+          state: cash,
+          busy: busy,
+          onCollect: onCollect,
+          onDone: onDone,
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => CashCollectionRetryCard(onRetry: onRetry),
     );
   }
 }

@@ -37,6 +37,20 @@ void main() {
         isFalse,
       );
     });
+
+    test('parses pair_warnings from the RPC payload', () {
+      final result = CashCollectionResult.fromJson({
+        'ok': true,
+        'code': 'COLLECTED',
+        'amount': 115,
+        'pair_warnings': [
+          {'resource': 'ride', 'id': 'r9', 'payment_status': 'refunded'},
+        ],
+      });
+      expect(result.pairWarnings, hasLength(1));
+      expect(result.pairWarnings.single['payment_status'], 'refunded');
+      expect(CashCollectionResult.fromJson({'ok': true}).pairWarnings, isEmpty);
+    });
   });
 
   group('OrderDeliveryRide.rateable', () {

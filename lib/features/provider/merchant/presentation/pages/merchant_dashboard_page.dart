@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
+import 'package:delwaqty/core/utils/bidi_text.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
@@ -764,7 +765,7 @@ class _StoreHeroCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      storeName,
+                      isolateLtr(storeName),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(

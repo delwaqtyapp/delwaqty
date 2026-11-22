@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
+import 'package:delwaqty/core/utils/bidi_text.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/favorite.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/favorite_button.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -2809,7 +2810,7 @@ class _HomeDiscoveryListCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          name,
+                          isolateLtr(name),
                           style: context.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),

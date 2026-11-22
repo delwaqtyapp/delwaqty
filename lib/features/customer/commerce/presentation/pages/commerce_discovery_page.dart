@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
+import 'package:delwaqty/core/utils/bidi_text.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/merchant_card.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/merchant_type_chip.dart';
@@ -727,7 +728,7 @@ class _MostRequestedCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  merchant.name,
+                  isolateLtr(merchant.name),
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,

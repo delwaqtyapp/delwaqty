@@ -2711,6 +2711,86 @@
   "@posErrInvalidQty": {
     "description": "POS: posErrInvalidQty"
   },
+  "posScanBarcode": "مسح الباركود",
+  "@posScanBarcode": {
+    "description": "POS: posScanBarcode"
+  },
+  "posSearchHint": "ابحث بالاسم أو الباركود",
+  "@posSearchHint": {
+    "description": "POS: posSearchHint"
+  },
+  "posScanAdded": "تمت الإضافة إلى السلة",
+  "@posScanAdded": {
+    "description": "POS: posScanAdded"
+  },
+  "posDrugFoundTitle": "موجود في كتالوج الأدوية",
+  "@posDrugFoundTitle": {
+    "description": "POS: posDrugFoundTitle"
+  },
+  "posDrugImportAdd": "استيراد وإضافة",
+  "@posDrugImportAdd": {
+    "description": "POS: posDrugImportAdd"
+  },
+  "posQuickAddTitle": "منتج جديد لهذا الباركود",
+  "@posQuickAddTitle": {
+    "description": "POS: posQuickAddTitle"
+  },
+  "posQuickAddCreate": "إنشاء وإضافة",
+  "@posQuickAddCreate": {
+    "description": "POS: posQuickAddCreate"
+  },
+  "barcodeFieldLabel": "الباركود",
+  "@barcodeFieldLabel": {
+    "description": "Product form: barcodeFieldLabel"
+  },
+  "barcodeFieldHint": "اكتب أو امسح باركود المنتج",
+  "@barcodeFieldHint": {
+    "description": "Product form: barcodeFieldHint"
+  },
+  "barcodeUniqueHint": "باركود واحد لكل منتج في هذا المحل",
+  "@barcodeUniqueHint": {
+    "description": "Product form: barcodeUniqueHint"
+  },
+  "barcodeScanToFill": "امسح لملء الحقل",
+  "@barcodeScanToFill": {
+    "description": "Product form: barcodeScanToFill"
+  },
+  "barcodeDuplicateError": "منتج آخر في هذا المحل يستخدم نفس الباركود",
+  "@barcodeDuplicateError": {
+    "description": "Product form: barcodeDuplicateError"
+  },
+  "scannerTitle": "مسح الباركود",
+  "@scannerTitle": {
+    "description": "Scanner: scannerTitle"
+  },
+  "scannerTorch": "الفلاش",
+  "@scannerTorch": {
+    "description": "Scanner: scannerTorch"
+  },
+  "scannerEnterManually": "إدخال الباركود يدويًا",
+  "@scannerEnterManually": {
+    "description": "Scanner: scannerEnterManually"
+  },
+  "scannerManualHint": "رقم الباركود",
+  "@scannerManualHint": {
+    "description": "Scanner: scannerManualHint"
+  },
+  "scannerAimHint": "وجّه الكاميرا نحو باركود المنتج",
+  "@scannerAimHint": {
+    "description": "Scanner: scannerAimHint"
+  },
+  "scannerPermissionNeeded": "نحتاج إذن الكاميرا لمسح الباركود. يمكنك أيضًا إدخال الباركود يدويًا.",
+  "@scannerPermissionNeeded": {
+    "description": "Scanner: scannerPermissionNeeded"
+  },
+  "scannerGrantPermission": "السماح بالكاميرا",
+  "@scannerGrantPermission": {
+    "description": "Scanner: scannerGrantPermission"
+  },
+  "scannerOpenSettings": "فتح الإعدادات",
+  "@scannerOpenSettings": {
+    "description": "Scanner: scannerOpenSettings"
+  },
   "productModifierRequiredError": "يرجى اختيار الخيارات المطلوبة أولاً",
   "@productModifierRequiredError": {
     "description": "Shown when required product modifier groups have no selection"

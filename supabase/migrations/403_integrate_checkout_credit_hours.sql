@@ -230,3 +230,221 @@ begin
   );
 end;
 $function$;
+
+CREATE OR REPLACE FUNCTION public.cancel_order(p_order_id uuid, p_reason text DEFAULT NULL::text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_order public.orders%rowtype;
+  v_uid uuid := auth.uid();
+  v_suspend_after boolean := false;
+  v_refunded boolean := false;
+  v_actor uuid;
+  v_driver_uid uuid;
+  v_merchant_uid uuid;
+  v_short text;
+  v_suspension_days integer;
+begin
+  if v_uid is null then
+    return jsonb_build_object('ok', false, 'code', 'UNAUTHENTICATED');
+  end if;
+
+  select * into v_order from public.orders where id = p_order_id for update;
+  if v_order.id is null then
+    return jsonb_build_object('ok', false, 'code', 'NOT_FOUND');
+  end if;
+
+  if v_order.user_id is distinct from v_uid and not public._admin_write_scope(public._ops_scope_region(public._merchant_region_id(v_order.merchant_id))) then
+    return jsonb_build_object('ok', false, 'code', 'FORBIDDEN');
+  end if;
+
+  if v_order.status in ('delivered', 'cancelled') then
+    return jsonb_build_object('ok', false, 'code', 'NOT_CANCELLABLE', 'status', v_order.status);
+  end if;
+
+  -- Customer self-cancel policy (owner-confirmed 2026-11-21, mig 185):
+  -- no solo-cancel once the order is out for delivery, and a MONTHLY
+  -- allowance of 2 customer cancels (Cairo calendar month; further cancels
+  -- go through merchant/support).
+  if v_uid = v_order.user_id and not public._admin_write_scope(public._ops_scope_region(public._merchant_region_id(v_order.merchant_id))) then
+    if v_order.status = 'delivering' then
+      return jsonb_build_object('ok', false, 'code', 'OUT_FOR_DELIVERY', 'status', v_order.status);
+    end if;
+    -- 188: the 3rd monthly cancel EXECUTES and triggers a suspension
+    -- (length configurable by the owner since 393); it is not blocked.
+    if (select count(*) from public.orders
+         where user_id = v_uid and cancelled_by = 'customer'
+           and cancelled_at >= date_trunc('month', now() at time zone 'Africa/Cairo') at time zone 'Africa/Cairo') >= 2 then
+      v_suspend_after := true;
+    end if;
+  end if;
+
+  -- 194: shared finalizer owns stock/coupon/refund/order+ride cancellation.
+  v_refunded := v_order.payment_status = 'paid';
+  perform public._finalize_order_cancel(
+    p_order_id,
+    case when v_uid = v_order.user_id then 'customer' else 'admin' end,
+    coalesce(p_reason, v_order.cancelled_reason, 'Order cancelled'),
+    true, true, true,
+    case when v_uid is distinct from v_order.user_id then 'system' else 'rider' end);
+
+  -- Notify the assigned driver: stop heading to pickup.
+  if v_order.driver_id is not null then
+    select user_id into v_driver_uid from public.drivers where id = v_order.driver_id;
+    if v_driver_uid is not null then
+      insert into public.notifications (user_id, title, body, type, data, send_push)
+      values (v_driver_uid,
+              'تم إلغاء الطلب',
+              'ألغى العميل الطلب. لا تتوجه للاستلام.',
+              'order',
+              jsonb_build_object('order_id', v_order.id, 'status', 'cancelled',
+                                 'reason', p_reason),
+              true);
+    end if;
+  end if;
+
+  -- Notify the merchant owner.
+  if v_order.merchant_id is not null then
+    select owner_user_id into v_merchant_uid from public.merchants where id = v_order.merchant_id;
+    if v_merchant_uid is not null then
+      v_short := right(v_order.id::text, 6);
+      insert into public.notifications (user_id, title, body, type, data, send_push)
+      values (v_merchant_uid,
+              'تم إلغاء طلب',
+              'ألغى العميل الطلب رقم ' || v_short || '.',
+              'order',
+              jsonb_build_object('order_id', v_order.id, 'status', 'cancelled',
+                                 'reason', p_reason),
+              true);
+    end if;
+  end if;
+
+  -- 188/393: suspension after the 3rd monthly cancel. The duration comes
+  -- from platform_settings.cancel_suspension_days (owner-only, default 5);
+  -- the moderation engine owns account_status. The message routes the
+  -- customer to in-app support to understand the repeated cancellations.
+  if v_suspend_after then
+    v_actor := coalesce(
+      (select id from public.users where role = 'owner' order by created_at limit 1),
+      v_order.user_id);
+    v_suspension_days := coalesce(
+      (select ps.cancel_suspension_days
+         from public.platform_settings ps
+        where ps.id = 'default'),
+      5);
+    perform public._member_exec_sanction(
+      v_actor, v_order.user_id, 'suspension',
+      'تجاوز سماحية الإلغاء الشهرية (إلغاء ثالث خلال شهر واحد)', v_suspension_days);
+    insert into public.notifications (user_id, title, body, type, data, deep_link, send_push)
+    values (v_order.user_id,
+            'تم إيقاف حسابك ' || v_suspension_days || ' يوم',
+            'تم تنفيذ إلغاء الطلب، لكن ده ثالث إلغاء ليك هذا الشهر (السماحية: 2). اتوقف حسابك ' || v_suspension_days || ' يوم. تواصل مع الدعم من التطبيق عشان تفهم سبب تكرار الإلغاء وإزاي تتجنب الإيقاف مرة تانية.',
+            'account',
+            jsonb_build_object('event', 'cancel_suspension', 'order_id', v_order.id,
+                               'duration_days', v_suspension_days),
+            '/support',
+            true);
+    return jsonb_build_object('ok', true, 'code', 'OK', 'status', 'cancelled',
+                              'refunded', v_refunded, 'suspended', true,
+                              'suspension_days', v_suspension_days);
+  end if;
+
+  return jsonb_build_object('ok', true, 'code', 'OK', 'status', 'cancelled', 'refunded', v_refunded);
+end;
+$function$;
+
+CREATE OR REPLACE FUNCTION public._finalize_order_cancel(p_order_id uuid, p_actor text, p_reason text, p_restock boolean DEFAULT true, p_refund boolean DEFAULT true, p_release_coupon boolean DEFAULT true, p_ride_cancelled_by text DEFAULT 'system'::text)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_order public.orders%rowtype;
+begin
+  select * into v_order from public.orders where id = p_order_id for update;
+  if not found then
+    raise exception 'ORDER_NOT_FOUND';
+  end if;
+  if v_order.status in ('delivered','cancelled') then
+    return; -- already closed: nothing to finalize
+  end if;
+
+  if p_restock and v_order.stock_decremented then
+    update public.products p
+       set stock_quantity = p.stock_quantity + s.qty
+      from (select oi.product_id, sum(oi.quantity) as qty
+              from public.order_items oi
+             where oi.order_id = p_order_id
+             group by oi.product_id) s
+     where p.id = s.product_id
+       and p.stock_quantity is not null;
+  end if;
+
+  if p_release_coupon and v_order.coupon_id is not null then
+    delete from public.coupon_redemptions
+     where coupon_id = v_order.coupon_id
+       and user_id = v_order.user_id;
+    if found then
+      update public.coupons
+         set used_count = greatest(used_count - 1, 0)
+       where id = v_order.coupon_id;
+    end if;
+  end if;
+
+  -- 395: an order cancelled or rejected before delivery returns the
+  -- platform credit it consumed, so the gift survives the failed order.
+  -- The terminal-state early return above plus the order row lock make
+  -- this fire once; the ledger partial-unique index backstops it.
+  if coalesce(v_order.platform_credit_applied, 0) > 0 then
+    perform public._platform_credit_restore(
+      v_order.user_id, v_order.platform_credit_applied, p_order_id);
+  end if;
+
+  if p_refund and v_order.payment_status = 'paid' then
+    perform public._wallet_credit(
+      p_user_id := v_order.user_id,
+      p_amount := v_order.total_amount,
+      p_description := 'Refund for cancelled order ' || p_order_id::text,
+      p_reference_type := 'refund',
+      p_reference_id := p_order_id
+    );
+  end if;
+
+  update public.orders
+     set status = 'cancelled',
+         cancelled_reason = p_reason,
+         cancelled_by = p_actor,
+         cancelled_at = now(),
+         payment_status = case when p_refund and payment_status = 'paid' then 'refunded' else payment_status end,
+         stock_decremented = false,
+         driver_id = null,
+         updated_at = now()
+   where id = p_order_id;
+
+  -- 196: release the driver and close open offers on every ride of the order.
+  update public.driver_locations
+     set ride_id = null
+   where ride_id in (select id from public.rides where order_id = p_order_id);
+  update public.ride_requests
+     set status = 'expired', responded_at = now()
+   where ride_id in (select id from public.rides where order_id = p_order_id)
+     and status = 'offered';
+  update public.ride_requests
+     set status = 'cancelled', responded_at = now()
+   where ride_id in (select id from public.rides where order_id = p_order_id)
+     and status = 'accepted';
+
+  update public.rides
+     set status = 'cancelled',
+         cancelled_at = now(),
+         cancelled_by = p_ride_cancelled_by,
+         cancellation_reason = p_reason
+   where order_id = p_order_id
+     and status not in ('completed', 'cancelled');
+end;
+$function$
+;

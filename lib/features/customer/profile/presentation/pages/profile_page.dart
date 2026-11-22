@@ -41,9 +41,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     PackageInfo.fromPlatform()
         .then((info) {
           if (mounted) {
-            setState(
-              () => _appVersionLabel = '${info.version}+${info.buildNumber}',
-            );
+            setState(() => _appVersionLabel = info.version);
           }
         })
         .catchError((_) {

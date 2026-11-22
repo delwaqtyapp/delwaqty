@@ -6,7 +6,7 @@ INSERT INTO public.notifications
   (user_id, title, body, type, data, deep_link, audience, send_push, idempotency_key)
 SELECT DISTINCT t.user_id,
   'تحديث جديد متاح',
-  'الإصدار <VERSION> جاهز — اضغط للتحديث الآن',
+  'تحسينات جديدة جاهزة. اضغط لتحديث التطبيق.',
   'ota_update',
   jsonb_build_object('version', '<VERSION>+<BUILD>'),
   '/settings/about',

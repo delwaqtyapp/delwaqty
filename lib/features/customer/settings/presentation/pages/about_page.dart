@@ -26,9 +26,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
     PackageInfo.fromPlatform()
         .then((info) {
           if (mounted) {
-            setState(
-              () => _versionLabel = '${info.version}+${info.buildNumber}',
-            );
+            setState(() => _versionLabel = info.version);
           }
         })
         .catchError((_) {

@@ -205,8 +205,8 @@ class _OtaUpdateDialogState extends State<_OtaUpdateDialog> {
           ] else ...[
             Text(
               isAr
-                  ? 'نسختك الحالية ${widget.result.current} والنسخة الأحدث ${widget.result.latest}.'
-                  : 'You are on build ${widget.result.current}; the latest is ${widget.result.latest}.',
+                  ? 'تحسينات جديدة جاهزة للتطبيق.'
+                  : 'New improvements are ready to install.',
             ),
             const SizedBox(height: 8),
             Text(

@@ -13,11 +13,8 @@ import 'dart:async';
 
 /// OTA update channel backed by GitHub Releases.
 ///
-/// Strategy (cache-proof): the app first asks the GitHub API for the LATEST
-/// release tag (an API response, never cached), then downloads the manifest and
-/// APK from the immutable per-tag URL `/releases/download/<tag>/...`. Because a
-/// brand-new tag is generated on every publish, there is deliberately no shared
-/// "latest" redirect whose CDN cache could serve a stale file.
+/// The development release keeps one stable tag. Manifest requests bypass
+/// caches, while each build uses new APK asset names and a verified SHA-256.
 const kOtaRepoOwner = 'delwaqtyapp';
 const kOtaRepoName = 'delwaqty';
 const kOtaApiLatest =
@@ -89,11 +86,23 @@ class OtaCheckResult {
 
 const _otaMethodChannel = MethodChannel('com.delwaqty.app/ota');
 
+/// Mutable release metadata must not reuse a cached response. APK assets use
+/// build-specific names instead, so a download remains pinned to its manifest.
+Uri otaFreshUri(String url, {int? requestId}) {
+  final uri = Uri.parse(url);
+  return uri.replace(
+    queryParameters: {
+      ...uri.queryParameters,
+      'ota': '${requestId ?? DateTime.now().microsecondsSinceEpoch}',
+    },
+  );
+}
+
 /// Finds the latest release tag via the GitHub API (never cached).
 Future<String?> _fetchLatestTag() async {
   try {
     final response = await http
-        .get(Uri.parse(kOtaApiLatest))
+        .get(otaFreshUri(kOtaApiLatest))
         .timeout(const Duration(seconds: 15));
     if (response.statusCode != 200) return null;
     final json = jsonDecode(response.body);
@@ -116,7 +125,7 @@ Future<OtaManifest?> fetchOtaManifest() async {
 /// Fetches the OTA manifest pinned to a specific release tag.
 Future<OtaManifest?> fetchOtaManifestForTag(String tag) async {
   try {
-    final uri = Uri.parse('$kOtaDownloadBaseUrl$tag/versions.json');
+    final uri = otaFreshUri('$kOtaDownloadBaseUrl$tag/versions.json');
     final response = await http.get(uri).timeout(const Duration(seconds: 12));
     if (response.statusCode != 200) return null;
     final json = jsonDecode(response.body);

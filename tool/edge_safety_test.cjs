@@ -11,7 +11,7 @@ function loadHandler(file, { verified = false } = {}) {
     /^import \{ createClient \} from .*;\r?\n/m, '',
   );
   const context = {
-    Request, Response, TextEncoder, crypto: webcrypto,
+    Request, Response, URL, TextEncoder, crypto: webcrypto,
     Deno: {
       env: { get: (key) => ({
         WHATSAPP_VERIFY_TOKEN: 'test-verify-token',

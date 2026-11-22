@@ -7630,7 +7630,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mapUnavailableOnWeb =>
-      'Map preview is unavailable in the browser. Use Detect My Location or confirm the pinned position.';
+      'Map preview is unavailable in the browser. Search for your address above or use Detect My Location.';
+
+  @override
+  String get webMapSearchHint =>
+      'Search for your address or tap Detect My Location';
 
   @override
   String get earningsEmptyTitle => 'No earnings yet';

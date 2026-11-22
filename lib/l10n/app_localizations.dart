@@ -14543,8 +14543,14 @@ abstract class AppLocalizations {
   /// No description provided for @mapUnavailableOnWeb.
   ///
   /// In en, this message translates to:
-  /// **'Map preview is unavailable in the browser. Use Detect My Location or confirm the pinned position.'**
+  /// **'Map preview is unavailable in the browser. Search for your address above or use Detect My Location.'**
   String get mapUnavailableOnWeb;
+
+  /// No description provided for @webMapSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for your address or tap Detect My Location'**
+  String get webMapSearchHint;
 
   /// Friendly zero-state title on the driver financial center
   ///

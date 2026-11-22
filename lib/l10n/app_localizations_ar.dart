@@ -7571,7 +7571,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get mapUnavailableOnWeb =>
-      'معاينة الخريطة غير متاحة في المتصفح. استخدم تحديد موقعي أو أكّد الموضع الحالي.';
+      'معاينة الخريطة غير متاحة في المتصفح. ابحث عن عنوانك بالأعلى أو استخدم تحديد موقعي.';
+
+  @override
+  String get webMapSearchHint => 'ابحث عن عنوانك أو اضغط تحديد موقعي';
 
   @override
   String get earningsEmptyTitle => 'لا توجد أرباح بعد';

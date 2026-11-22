@@ -2536,7 +2536,8 @@
   "@each": {
     "description": "Unit-price suffix on a cart line, e.g. '25 EGP each'"
   },
-  "mapUnavailableOnWeb": "Map preview is unavailable in the browser. Use Detect My Location or confirm the pinned position.",
+  "mapUnavailableOnWeb": "Map preview is unavailable in the browser. Search for your address above or use Detect My Location.",
+  "webMapSearchHint": "Search for your address or tap Detect My Location",
   "earningsEmptyTitle": "No earnings yet",
   "@earningsEmptyTitle": {
     "description": "Friendly zero-state title on the driver financial center"

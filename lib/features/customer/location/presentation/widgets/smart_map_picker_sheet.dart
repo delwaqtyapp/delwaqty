@@ -266,7 +266,9 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
       final loc = await ref
           .read(userLocationProvider.notifier)
           .refreshDeepLocked()
-          .timeout(const Duration(seconds: 12), onTimeout: () => null);
+          // Web browsers can hold the permission prompt open indefinitely;
+          // give up sooner there so the spinner always resolves.
+          .timeout(Duration(seconds: kIsWeb ? 8 : 12), onTimeout: () => null);
       if (!mounted) return;
       if (loc != null) {
         final target = LatLng(loc.latitude, loc.longitude);
@@ -349,7 +351,9 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
                         ),
                       ),
                       Text(
-                        l10n.dragMapToRefineLocation,
+                        kIsWeb
+                            ? l10n.webMapSearchHint
+                            : l10n.dragMapToRefineLocation,
                         style: AppTextStyles.bodySmall.copyWith(
                           color: cs.onSurfaceVariant,
                         ),
@@ -693,7 +697,11 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
                   SizedBox(
                     height: 52,
                     child: FilledButton.icon(
-                      onPressed: _isConfirming || _isGeocoding
+                      onPressed:
+                          _isConfirming ||
+                              _isGeocoding ||
+                              _isLockingGps ||
+                              _resolvedAddress.isEmpty
                           ? null
                           : _confirmSelection,
                       style: FilledButton.styleFrom(

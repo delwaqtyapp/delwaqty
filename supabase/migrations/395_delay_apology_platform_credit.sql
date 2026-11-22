@@ -5,6 +5,13 @@
 -- platform_subsidies); create_order serializes same-key checkouts with an
 -- advisory lock before any pricing or mutation; the v1->v2 backfill is
 -- removed (v1 never reached production, staging is reset by the builder).
+-- v5 review changes: both payables RPCs are gated on
+-- _admin_write_scope(NULL) - the same global-finance scope the platform
+-- uses for global admin writes (owner or country-level admin; regional,
+-- unassigned and inactive admins denied); void subsidy rows are excluded
+-- from the list and the setter; NULL kind is rejected explicitly; the
+-- audit row and the result carry an optional settlement reference and the
+-- result states that no money moved.
 -- v4 review changes: launch-scope manual settlement of the platform
 -- payables through two admin-gated RPCs (admin_open_platform_payables and
 -- mark_platform_payable_settled; no automatic payouts); the nonnegative
@@ -1470,6 +1477,10 @@ $function$;
 -- admin_open_platform_payables lists the outstanding driver/merchant
 -- payables per order; mark_platform_payable_settled flips one payable kind
 -- once (per-kind settled_at, audit row, idempotent). Nothing auto-pays.
+-- Both are global-finance scope (#97): owner or country-level admin, via
+-- _admin_write_scope(NULL). The optional note is the ops settlement
+-- reference (transfer id, receipt no) kept in the audit row; the result
+-- states explicitly that it records settlement and moves no money.
 -- ---------------------------------------------------------------------------
 
 create or replace function public.admin_open_platform_payables(p_order_id uuid default null)
@@ -1493,7 +1504,10 @@ create or replace function public.admin_open_platform_payables(p_order_id uuid d
  set search_path to 'public', 'pg_temp'
 as $function$
 begin
-  if not public.is_admin() then
+  -- #97: platform payables are global finance scope - the same NULL-region
+  -- rule _admin_write_scope uses for global writes. Owner or country-level
+  -- admin only; regional, unassigned and inactive admins are denied.
+  if not public._admin_write_scope(null) then
     raise exception 'Not authorized';
   end if;
   return query
@@ -1504,6 +1518,7 @@ begin
            ps.created_at, ps.settled_at
       from public.platform_subsidies ps
      where (p_order_id is null or ps.order_id = p_order_id)
+       and ps.status <> 'void'
        -- Outstanding = a positive payable whose kind is not settled yet.
        and ( (ps.driver_payable > 0 and ps.driver_payable_settled_at is null)
           or (ps.merchant_payable > 0 and ps.merchant_payable_settled_at is null) )
@@ -1523,17 +1538,19 @@ declare
   v_amount numeric;
   v_all_settled boolean;
 begin
-  if not public.is_admin() then
+  -- #97: global finance scope, same as the read path above.
+  if not public._admin_write_scope(null) then
     raise exception 'Not authorized';
   end if;
-  if p_kind not in ('driver_payable', 'merchant_payable') then
-    raise exception 'invalid payable kind: %', p_kind;
+  if p_kind is null or p_kind not in ('driver_payable', 'merchant_payable') then
+    raise exception 'invalid payable kind: %', coalesce(p_kind, 'NULL');
   end if;
   select * into v_sub from public.platform_subsidies
    where order_id = p_order_id and kind = 'delay_apology_credit'
+     and status <> 'void'
    for update;
   if not found then
-    raise exception 'no platform subsidy recorded for order %', p_order_id;
+    raise exception 'no settleable platform subsidy recorded for order %', p_order_id;
   end if;
   v_amount := case p_kind
                 when 'driver_payable' then v_sub.driver_payable
@@ -1546,7 +1563,9 @@ begin
   if (p_kind = 'driver_payable' and v_sub.driver_payable_settled_at is not null)
      or (p_kind = 'merchant_payable' and v_sub.merchant_payable_settled_at is not null) then
     return jsonb_build_object('ok', true, 'order_id', p_order_id, 'kind', p_kind,
-                              'amount', v_amount, 'already_settled', true);
+                              'amount', v_amount, 'already_settled', true,
+                              'settlement_recorded', true, 'money_moved', false,
+                              'reference', p_note);
   end if;
   if p_kind = 'driver_payable' then
     update public.platform_subsidies set driver_payable_settled_at = now()
@@ -1567,10 +1586,12 @@ begin
   end if;
   perform public.write_audit('PLATFORM_PAYABLE_SETTLED', 'orders', p_order_id::text,
     jsonb_build_object('payable_kind', p_kind, 'amount', v_amount,
-                       'note', p_note, 'row_status',
+                       'reference', p_note, 'money_moved', false, 'row_status',
                        case when v_all_settled then 'settled' else v_sub.status end));
   return jsonb_build_object('ok', true, 'order_id', p_order_id, 'kind', p_kind,
                             'amount', v_amount, 'already_settled', false,
+                            'settlement_recorded', true, 'money_moved', false,
+                            'reference', p_note,
                             'row_status', case when v_all_settled then 'settled' else v_sub.status end);
 end;
 $function$;

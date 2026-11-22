@@ -1,5 +1,6 @@
--- Forward integration: preserve 395 credit, live checkout guards, and 398 Cairo schedule enforcement.
--- No money is moved by this function definition.
+-- Forward integration of reviewed checkout, cancellation, and category provisioning deltas.
+
+
 CREATE OR REPLACE FUNCTION public.create_order(p_merchant_id uuid, p_items jsonb, p_delivery_address text DEFAULT NULL::text, p_delivery_latitude numeric DEFAULT NULL::numeric, p_delivery_longitude numeric DEFAULT NULL::numeric, p_payment_method text DEFAULT 'cash'::text, p_coupon_code text DEFAULT NULL::text, p_special_instructions text DEFAULT NULL::text, p_idempotency_key text DEFAULT NULL::text)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -55,6 +56,11 @@ begin
   end if;
 
   if p_idempotency_key is not null then
+    -- 395 (#89): serialize same-key checkouts BEFORE any pricing, stock
+    -- decrement or coupon redemption. A concurrent loser waits here until
+    -- the winner commits, then sees the order and replays cleanly, so it
+    -- never commits its own stock/coupon side effects.
+    perform pg_advisory_xact_lock(hashtext(v_uid::text || ':' || p_idempotency_key));
     select id into v_existing from public.orders
     where user_id = v_uid and idempotency_key = p_idempotency_key;
     if v_existing is not null then
@@ -449,7 +455,6 @@ end;
 $function$
 ;
 
--- Preserve 399 category-specific targets and 397 live category pricing.
 CREATE OR REPLACE FUNCTION public._provision_business_target(p_user_id uuid, p_category_type text, p_display_name text)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -552,3 +557,21 @@ BEGIN
 END;
 $function$
 ;
+
+-- Fail the deployment transaction if a final function differs from the composed preview.
+DO $verify403$
+BEGIN
+  IF md5(pg_get_functiondef('public._finalize_order_cancel(uuid,text,text,boolean,boolean,boolean,text)'::regprocedure)) <> '531924418b20c3b27e3e41dbca184bfe' THEN
+    RAISE EXCEPTION '403 definition mismatch: _finalize_order_cancel';
+  END IF;
+  IF md5(pg_get_functiondef('public._provision_business_target(uuid,text,text)'::regprocedure)) <> '6a5c26fe8d1769ef5e924a7993b0ae96' THEN
+    RAISE EXCEPTION '403 definition mismatch: _provision_business_target';
+  END IF;
+  IF md5(pg_get_functiondef('public.cancel_order(uuid,text)'::regprocedure)) <> 'fe7c451dbffecebaa5e237bb9566d40b' THEN
+    RAISE EXCEPTION '403 definition mismatch: cancel_order';
+  END IF;
+  IF md5(pg_get_functiondef('public.create_order(uuid,jsonb,text,numeric,numeric,text,text,text,text)'::regprocedure)) <> 'f7c19454adb885b5e542823d26933512' THEN
+    RAISE EXCEPTION '403 definition mismatch: create_order';
+  END IF;
+END;
+$verify403$;

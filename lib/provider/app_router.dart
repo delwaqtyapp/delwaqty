@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -51,7 +52,9 @@ final providerGoRouterProvider = Provider<GoRouter>((ref) {
       if (isSplash || isOnboarding) return null;
 
       final lock = ref.read(deviceLockProvider);
-      if (lock.hasDeviceAccount && !lock.unlocked) {
+      // App Lock is a device-credential gate; it does not apply to web
+      // sessions (B01: the gate was locking admin web users out).
+      if (!kIsWeb && lock.hasDeviceAccount && !lock.unlocked) {
         if (state.matchedLocation != '/device-unlock' && !isAuthRoute) {
           return '/device-unlock';
         }

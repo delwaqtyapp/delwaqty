@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/provider/capability/domain/provider_profile.dart';
+import 'package:delwaqty/features/provider/capability/presentation/widgets/provider_category_picker.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/core/utils/bidi_text.dart';
 import 'package:go_router/go_router.dart';
@@ -184,7 +185,7 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
                             alpha: 0.12,
                           ),
                           child: Icon(
-                            p.categoryType == 'home_services'
+                            _isServiceCategory(p.categoryType)
                                 ? Icons.handyman_rounded
                                 : Icons.storefront_rounded,
                             color: AppColors.brandPurple,
@@ -264,42 +265,17 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
     return cat == 'pharmacy';
   }
 
-  String _categoryLabel(AppLocalizations l10n, String category) {
-    switch (category) {
-      case 'restaurant':
-        return l10n.restaurant;
-      case 'grocery':
-        return l10n.grocery;
-      case 'pharmacy':
-        return l10n.pharmacy;
-      case 'bakery':
-        return l10n.bakery;
-      case 'cafe':
-        return l10n.cafe;
-      case 'electronics':
-        return l10n.electronics;
-      case 'fashion':
-        return l10n.fashion;
-      case 'home_services':
-        return l10n.homeServices;
-      default:
-        return l10n.other;
-    }
-  }
+  bool _isServiceCategory(String category) =>
+      isServiceProviderCategory(category);
+
+  String _categoryLabel(AppLocalizations l10n, String category) =>
+      providerCategoryLabel(l10n, category);
 
   Future<void> _openRequestServiceDialog(
     BuildContext context,
     AppLocalizations l10n,
   ) async {
-    const categories = [
-      'restaurant',
-      'grocery',
-      'pharmacy',
-      'bakery',
-      'home_services',
-      'electronics',
-      'fashion',
-    ];
+    const categories = kRequestableProviderCategories;
     String selectedCat = 'grocery';
     final nameCtrl = TextEditingController();
 
@@ -317,23 +293,11 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
                 style: Theme.of(ctx).textTheme.bodySmall,
               ),
               const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                initialValue: selectedCat,
-                decoration: InputDecoration(
-                  labelText: l10n.storeCategoryLabel,
-                  border: const OutlineInputBorder(),
-                ),
-                items: categories
-                    .map(
-                      (c) => DropdownMenuItem(
-                        value: c,
-                        child: Text(_categoryLabel(l10n, c)),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (v) {
-                  if (v != null) setDlgState(() => selectedCat = v);
-                },
+              ProviderCategoryPickerField(
+                l10n: l10n,
+                categories: categories,
+                value: selectedCat,
+                onChanged: (v) => setDlgState(() => selectedCat = v),
               ),
               const SizedBox(height: 12),
               TextField(

@@ -13,6 +13,7 @@ _MerchantOrder _$MerchantOrderFromJson(Map<String, dynamic> json) =>
       customerName: json['customerName'] as String?,
       customerPhone: json['customerPhone'] as String?,
       driverId: json['driverId'] as String?,
+      hasLinkedDelivery: json['hasLinkedDelivery'] as bool? ?? false,
       items:
           (json['items'] as List<dynamic>?)
               ?.map(
@@ -35,6 +36,7 @@ Map<String, dynamic> _$MerchantOrderToJson(_MerchantOrder instance) =>
       'customerName': instance.customerName,
       'customerPhone': instance.customerPhone,
       'driverId': instance.driverId,
+      'hasLinkedDelivery': instance.hasLinkedDelivery,
       'items': instance.items.map((e) => e.toJson()).toList(),
       'totalAmount': instance.totalAmount,
       'status': instance.status,

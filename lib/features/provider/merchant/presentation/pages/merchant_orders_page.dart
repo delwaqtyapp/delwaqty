@@ -482,7 +482,9 @@ class _OrderCard extends StatelessWidget {
                   ],
                 ),
               ],
-              if (canDispatchDriver)
+              if (order.hasLinkedDelivery &&
+                  order.driverId != null &&
+                  const {'ready', 'delivering'}.contains(order.status))
                 DeliveryHandoffButton(orderId: order.id, pickup: true),
               if (canDispatchDriver) ...[
                 // Batch 16 #2: a failed dispatch used to be invisible once
@@ -608,7 +610,8 @@ class _OrderCard extends StatelessWidget {
                       onPressed: () => onStatusChanged('ready'),
                     ),
                   ] else if (order.status == 'ready' &&
-                      order.driverId != null) ...[
+                      order.driverId != null &&
+                      !order.hasLinkedDelivery) ...[
                     // Batch 16 #3: out-for-delivery only exists once a
                     // driver is on the order; before that the card offers
                     // dispatch, not a phantom handoff. Mark Delivered
@@ -618,7 +621,8 @@ class _OrderCard extends StatelessWidget {
                       color: AppColors.orderInTransit,
                       onPressed: () => onStatusChanged('delivering'),
                     ),
-                  ] else if (order.status == 'delivering') ...[
+                  ] else if (order.status == 'delivering' &&
+                      !order.hasLinkedDelivery) ...[
                     _ActionButton(
                       label: l10n.markDelivered,
                       color: AppColors.successLight,

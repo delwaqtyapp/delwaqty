@@ -11,6 +11,7 @@ abstract class MerchantOrder with _$MerchantOrder {
     String? customerName,
     String? customerPhone,
     String? driverId,
+    @Default(false) bool hasLinkedDelivery,
     @Default([]) List<MerchantOrderItem> items,
     required double totalAmount,
     required String status,

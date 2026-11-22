@@ -51,6 +51,8 @@ class SupabaseMerchantDashboardDataSource {
           ? user['phone'] as String
           : (row['customer_phone'] as String?),
       driverId: row['driver_id'] as String?,
+      hasLinkedDelivery:
+          row['rides'] is List && (row['rides'] as List).isNotEmpty,
       items: items,
       totalAmount: (row['total_amount'] as num).toDouble(),
       status: row['status'] as String,
@@ -149,7 +151,7 @@ class SupabaseMerchantDashboardDataSource {
       var query = _client
           .from('orders')
           .select(
-            'id, user_id, status, dispatch_status, total_amount, created_at, delivery_address, notes, '
+            'id, user_id, driver_id, status, dispatch_status, total_amount, created_at, delivery_address, notes, rides!rides_order_id_fkey(id), '
             'order_items(product_id, product_name, quantity, unit_price, modifiers, products(name))',
           )
           .eq('merchant_id', merchantId);

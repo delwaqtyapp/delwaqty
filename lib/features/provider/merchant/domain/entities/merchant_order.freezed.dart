@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MerchantOrder {
 
- String get id; String get customerId; String? get customerName; String? get customerPhone; String? get driverId; List<MerchantOrderItem> get items; double get totalAmount; String get status; String? get dispatchStatus; DateTime get createdAt; String? get deliveryAddress; String? get notes;
+ String get id; String get customerId; String? get customerName; String? get customerPhone; String? get driverId; bool get hasLinkedDelivery; List<MerchantOrderItem> get items; double get totalAmount; String get status; String? get dispatchStatus; DateTime get createdAt; String? get deliveryAddress; String? get notes;
 /// Create a copy of MerchantOrder
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $MerchantOrderCopyWith<MerchantOrder> get copyWith => _$MerchantOrderCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as MerchantOrder;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MerchantOrder&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.customerId, _this.customerId) || other.customerId == _this.customerId)&&(identical(other.customerName, _this.customerName) || other.customerName == _this.customerName)&&(identical(other.customerPhone, _this.customerPhone) || other.customerPhone == _this.customerPhone)&&(identical(other.driverId, _this.driverId) || other.driverId == _this.driverId)&&const DeepCollectionEquality().equals(other.items, _this.items)&&(identical(other.totalAmount, _this.totalAmount) || other.totalAmount == _this.totalAmount)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.dispatchStatus, _this.dispatchStatus) || other.dispatchStatus == _this.dispatchStatus)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.deliveryAddress, _this.deliveryAddress) || other.deliveryAddress == _this.deliveryAddress)&&(identical(other.notes, _this.notes) || other.notes == _this.notes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MerchantOrder&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.customerId, _this.customerId) || other.customerId == _this.customerId)&&(identical(other.customerName, _this.customerName) || other.customerName == _this.customerName)&&(identical(other.customerPhone, _this.customerPhone) || other.customerPhone == _this.customerPhone)&&(identical(other.driverId, _this.driverId) || other.driverId == _this.driverId)&&(identical(other.hasLinkedDelivery, _this.hasLinkedDelivery) || other.hasLinkedDelivery == _this.hasLinkedDelivery)&&const DeepCollectionEquality().equals(other.items, _this.items)&&(identical(other.totalAmount, _this.totalAmount) || other.totalAmount == _this.totalAmount)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.dispatchStatus, _this.dispatchStatus) || other.dispatchStatus == _this.dispatchStatus)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.deliveryAddress, _this.deliveryAddress) || other.deliveryAddress == _this.deliveryAddress)&&(identical(other.notes, _this.notes) || other.notes == _this.notes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as MerchantOrder;
-  return Object.hash(runtimeType,_this.id,_this.customerId,_this.customerName,_this.customerPhone,_this.driverId,const DeepCollectionEquality().hash(_this.items),_this.totalAmount,_this.status,_this.dispatchStatus,_this.createdAt,_this.deliveryAddress,_this.notes);
+  return Object.hash(runtimeType,_this.id,_this.customerId,_this.customerName,_this.customerPhone,_this.driverId,_this.hasLinkedDelivery,const DeepCollectionEquality().hash(_this.items),_this.totalAmount,_this.status,_this.dispatchStatus,_this.createdAt,_this.deliveryAddress,_this.notes);
 }
 
 @override
 String toString() {
   final _this = this as MerchantOrder;
-  return 'MerchantOrder(id: ${_this.id}, customerId: ${_this.customerId}, customerName: ${_this.customerName}, customerPhone: ${_this.customerPhone}, driverId: ${_this.driverId}, items: ${_this.items}, totalAmount: ${_this.totalAmount}, status: ${_this.status}, dispatchStatus: ${_this.dispatchStatus}, createdAt: ${_this.createdAt}, deliveryAddress: ${_this.deliveryAddress}, notes: ${_this.notes})';
+  return 'MerchantOrder(id: ${_this.id}, customerId: ${_this.customerId}, customerName: ${_this.customerName}, customerPhone: ${_this.customerPhone}, driverId: ${_this.driverId}, hasLinkedDelivery: ${_this.hasLinkedDelivery}, items: ${_this.items}, totalAmount: ${_this.totalAmount}, status: ${_this.status}, dispatchStatus: ${_this.dispatchStatus}, createdAt: ${_this.createdAt}, deliveryAddress: ${_this.deliveryAddress}, notes: ${_this.notes})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $MerchantOrderCopyWith<$Res>  {
   factory $MerchantOrderCopyWith(MerchantOrder value, $Res Function(MerchantOrder) _then) = _$MerchantOrderCopyWithImpl;
 @useResult
 $Res call({
- String id, String customerId, String? customerName, String? customerPhone, String? driverId, List<MerchantOrderItem> items, double totalAmount, String status, String? dispatchStatus, DateTime createdAt, String? deliveryAddress, String? notes
+ String id, String customerId, String? customerName, String? customerPhone, String? driverId, bool hasLinkedDelivery, List<MerchantOrderItem> items, double totalAmount, String status, String? dispatchStatus, DateTime createdAt, String? deliveryAddress, String? notes
 });
 
 
@@ -71,14 +71,15 @@ class _$MerchantOrderCopyWithImpl<$Res>
 
 /// Create a copy of MerchantOrder
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? customerId = null,Object? customerName = freezed,Object? customerPhone = freezed,Object? driverId = freezed,Object? items = null,Object? totalAmount = null,Object? status = null,Object? dispatchStatus = freezed,Object? createdAt = null,Object? deliveryAddress = freezed,Object? notes = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? customerId = null,Object? customerName = freezed,Object? customerPhone = freezed,Object? driverId = freezed,Object? hasLinkedDelivery = null,Object? items = null,Object? totalAmount = null,Object? status = null,Object? dispatchStatus = freezed,Object? createdAt = null,Object? deliveryAddress = freezed,Object? notes = freezed,}) {
   return _then(MerchantOrder(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,customerId: null == customerId ? _self.customerId : customerId // ignore: cast_nullable_to_non_nullable
 as String,customerName: freezed == customerName ? _self.customerName : customerName // ignore: cast_nullable_to_non_nullable
 as String?,customerPhone: freezed == customerPhone ? _self.customerPhone : customerPhone // ignore: cast_nullable_to_non_nullable
 as String?,driverId: freezed == driverId ? _self.driverId : driverId // ignore: cast_nullable_to_non_nullable
-as String?,items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
+as String?,hasLinkedDelivery: null == hasLinkedDelivery ? _self.hasLinkedDelivery : hasLinkedDelivery // ignore: cast_nullable_to_non_nullable
+as bool,items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
 as List<MerchantOrderItem>,totalAmount: null == totalAmount ? _self.totalAmount : totalAmount // ignore: cast_nullable_to_non_nullable
 as double,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,dispatchStatus: freezed == dispatchStatus ? _self.dispatchStatus : dispatchStatus // ignore: cast_nullable_to_non_nullable
@@ -170,10 +171,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String customerId,  String? customerName,  String? customerPhone,  String? driverId,  List<MerchantOrderItem> items,  double totalAmount,  String status,  String? dispatchStatus,  DateTime createdAt,  String? deliveryAddress,  String? notes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String customerId,  String? customerName,  String? customerPhone,  String? driverId,  bool hasLinkedDelivery,  List<MerchantOrderItem> items,  double totalAmount,  String status,  String? dispatchStatus,  DateTime createdAt,  String? deliveryAddress,  String? notes)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MerchantOrder() when $default != null:
-return $default(_that.id,_that.customerId,_that.customerName,_that.customerPhone,_that.driverId,_that.items,_that.totalAmount,_that.status,_that.dispatchStatus,_that.createdAt,_that.deliveryAddress,_that.notes);case _:
+return $default(_that.id,_that.customerId,_that.customerName,_that.customerPhone,_that.driverId,_that.hasLinkedDelivery,_that.items,_that.totalAmount,_that.status,_that.dispatchStatus,_that.createdAt,_that.deliveryAddress,_that.notes);case _:
   return orElse();
 
 }
@@ -191,10 +192,10 @@ return $default(_that.id,_that.customerId,_that.customerName,_that.customerPhone
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String customerId,  String? customerName,  String? customerPhone,  String? driverId,  List<MerchantOrderItem> items,  double totalAmount,  String status,  String? dispatchStatus,  DateTime createdAt,  String? deliveryAddress,  String? notes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String customerId,  String? customerName,  String? customerPhone,  String? driverId,  bool hasLinkedDelivery,  List<MerchantOrderItem> items,  double totalAmount,  String status,  String? dispatchStatus,  DateTime createdAt,  String? deliveryAddress,  String? notes)  $default,) {final _that = this;
 switch (_that) {
 case _MerchantOrder():
-return $default(_that.id,_that.customerId,_that.customerName,_that.customerPhone,_that.driverId,_that.items,_that.totalAmount,_that.status,_that.dispatchStatus,_that.createdAt,_that.deliveryAddress,_that.notes);case _:
+return $default(_that.id,_that.customerId,_that.customerName,_that.customerPhone,_that.driverId,_that.hasLinkedDelivery,_that.items,_that.totalAmount,_that.status,_that.dispatchStatus,_that.createdAt,_that.deliveryAddress,_that.notes);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -211,10 +212,10 @@ return $default(_that.id,_that.customerId,_that.customerName,_that.customerPhone
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String customerId,  String? customerName,  String? customerPhone,  String? driverId,  List<MerchantOrderItem> items,  double totalAmount,  String status,  String? dispatchStatus,  DateTime createdAt,  String? deliveryAddress,  String? notes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String customerId,  String? customerName,  String? customerPhone,  String? driverId,  bool hasLinkedDelivery,  List<MerchantOrderItem> items,  double totalAmount,  String status,  String? dispatchStatus,  DateTime createdAt,  String? deliveryAddress,  String? notes)?  $default,) {final _that = this;
 switch (_that) {
 case _MerchantOrder() when $default != null:
-return $default(_that.id,_that.customerId,_that.customerName,_that.customerPhone,_that.driverId,_that.items,_that.totalAmount,_that.status,_that.dispatchStatus,_that.createdAt,_that.deliveryAddress,_that.notes);case _:
+return $default(_that.id,_that.customerId,_that.customerName,_that.customerPhone,_that.driverId,_that.hasLinkedDelivery,_that.items,_that.totalAmount,_that.status,_that.dispatchStatus,_that.createdAt,_that.deliveryAddress,_that.notes);case _:
   return null;
 
 }
@@ -226,7 +227,7 @@ return $default(_that.id,_that.customerId,_that.customerName,_that.customerPhone
 @JsonSerializable()
 
 class _MerchantOrder implements MerchantOrder {
-  const _MerchantOrder({required this.id, required this.customerId, this.customerName, this.customerPhone, this.driverId,  List<MerchantOrderItem> items = const [], required this.totalAmount, required this.status, this.dispatchStatus, required this.createdAt, this.deliveryAddress, this.notes}): _items = items;
+  const _MerchantOrder({required this.id, required this.customerId, this.customerName, this.customerPhone, this.driverId, this.hasLinkedDelivery = false,  List<MerchantOrderItem> items = const [], required this.totalAmount, required this.status, this.dispatchStatus, required this.createdAt, this.deliveryAddress, this.notes}): _items = items;
   factory _MerchantOrder.fromJson(Map<String, dynamic> json) => _$MerchantOrderFromJson(json);
 
 @override final  String id;
@@ -234,6 +235,7 @@ class _MerchantOrder implements MerchantOrder {
 @override final  String? customerName;
 @override final  String? customerPhone;
 @override final  String? driverId;
+@override@JsonKey() final  bool hasLinkedDelivery;
  final  List<MerchantOrderItem> _items;
 @override@JsonKey() List<MerchantOrderItem> get items {
   if (_items is EqualUnmodifiableListView) return _items;
@@ -261,18 +263,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MerchantOrder&&(identical(other.id, id) || other.id == id)&&(identical(other.customerId, customerId) || other.customerId == customerId)&&(identical(other.customerName, customerName) || other.customerName == customerName)&&(identical(other.customerPhone, customerPhone) || other.customerPhone == customerPhone)&&(identical(other.driverId, driverId) || other.driverId == driverId)&&const DeepCollectionEquality().equals(other.items, _items)&&(identical(other.totalAmount, totalAmount) || other.totalAmount == totalAmount)&&(identical(other.status, status) || other.status == status)&&(identical(other.dispatchStatus, dispatchStatus) || other.dispatchStatus == dispatchStatus)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.deliveryAddress, deliveryAddress) || other.deliveryAddress == deliveryAddress)&&(identical(other.notes, notes) || other.notes == notes));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MerchantOrder&&(identical(other.id, id) || other.id == id)&&(identical(other.customerId, customerId) || other.customerId == customerId)&&(identical(other.customerName, customerName) || other.customerName == customerName)&&(identical(other.customerPhone, customerPhone) || other.customerPhone == customerPhone)&&(identical(other.driverId, driverId) || other.driverId == driverId)&&(identical(other.hasLinkedDelivery, hasLinkedDelivery) || other.hasLinkedDelivery == hasLinkedDelivery)&&const DeepCollectionEquality().equals(other.items, _items)&&(identical(other.totalAmount, totalAmount) || other.totalAmount == totalAmount)&&(identical(other.status, status) || other.status == status)&&(identical(other.dispatchStatus, dispatchStatus) || other.dispatchStatus == dispatchStatus)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.deliveryAddress, deliveryAddress) || other.deliveryAddress == deliveryAddress)&&(identical(other.notes, notes) || other.notes == notes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,customerId,customerName,customerPhone,driverId,const DeepCollectionEquality().hash(_items),totalAmount,status,dispatchStatus,createdAt,deliveryAddress,notes);
+    return Object.hash(runtimeType,id,customerId,customerName,customerPhone,driverId,hasLinkedDelivery,const DeepCollectionEquality().hash(_items),totalAmount,status,dispatchStatus,createdAt,deliveryAddress,notes);
 }
 
 @override
 String toString() {
-    return 'MerchantOrder(id: $id, customerId: $customerId, customerName: $customerName, customerPhone: $customerPhone, driverId: $driverId, items: $items, totalAmount: $totalAmount, status: $status, dispatchStatus: $dispatchStatus, createdAt: $createdAt, deliveryAddress: $deliveryAddress, notes: $notes)';
+    return 'MerchantOrder(id: $id, customerId: $customerId, customerName: $customerName, customerPhone: $customerPhone, driverId: $driverId, hasLinkedDelivery: $hasLinkedDelivery, items: $items, totalAmount: $totalAmount, status: $status, dispatchStatus: $dispatchStatus, createdAt: $createdAt, deliveryAddress: $deliveryAddress, notes: $notes)';
 }
 
 
@@ -283,7 +285,7 @@ abstract mixin class _$MerchantOrderCopyWith<$Res> implements $MerchantOrderCopy
   factory _$MerchantOrderCopyWith(_MerchantOrder value, $Res Function(_MerchantOrder) _then) = __$MerchantOrderCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String customerId, String? customerName, String? customerPhone, String? driverId, List<MerchantOrderItem> items, double totalAmount, String status, String? dispatchStatus, DateTime createdAt, String? deliveryAddress, String? notes
+ String id, String customerId, String? customerName, String? customerPhone, String? driverId, bool hasLinkedDelivery, List<MerchantOrderItem> items, double totalAmount, String status, String? dispatchStatus, DateTime createdAt, String? deliveryAddress, String? notes
 });
 
 
@@ -300,14 +302,15 @@ class __$MerchantOrderCopyWithImpl<$Res>
 
 /// Create a copy of MerchantOrder
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? customerId = null,Object? customerName = freezed,Object? customerPhone = freezed,Object? driverId = freezed,Object? items = null,Object? totalAmount = null,Object? status = null,Object? dispatchStatus = freezed,Object? createdAt = null,Object? deliveryAddress = freezed,Object? notes = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? customerId = null,Object? customerName = freezed,Object? customerPhone = freezed,Object? driverId = freezed,Object? hasLinkedDelivery = null,Object? items = null,Object? totalAmount = null,Object? status = null,Object? dispatchStatus = freezed,Object? createdAt = null,Object? deliveryAddress = freezed,Object? notes = freezed,}) {
   return _then(_MerchantOrder(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,customerId: null == customerId ? _self.customerId : customerId // ignore: cast_nullable_to_non_nullable
 as String,customerName: freezed == customerName ? _self.customerName : customerName // ignore: cast_nullable_to_non_nullable
 as String?,customerPhone: freezed == customerPhone ? _self.customerPhone : customerPhone // ignore: cast_nullable_to_non_nullable
 as String?,driverId: freezed == driverId ? _self.driverId : driverId // ignore: cast_nullable_to_non_nullable
-as String?,items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
+as String?,hasLinkedDelivery: null == hasLinkedDelivery ? _self.hasLinkedDelivery : hasLinkedDelivery // ignore: cast_nullable_to_non_nullable
+as bool,items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
 as List<MerchantOrderItem>,totalAmount: null == totalAmount ? _self.totalAmount : totalAmount // ignore: cast_nullable_to_non_nullable
 as double,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,dispatchStatus: freezed == dispatchStatus ? _self.dispatchStatus : dispatchStatus // ignore: cast_nullable_to_non_nullable

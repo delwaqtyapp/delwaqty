@@ -2720,5 +2720,19 @@
   "@modifierEmptyGroups": {
     "description": "Merchant modifiers: modifierEmptyGroups"
   },
-  "accountSuspendedBody": "تم إيقاف صلاحيات الإدارة الخاصة بك. تواصل مع مالك المنصة إذا كنت تعتقد أن هذا خطأ."
+  "accountSuspendedBody": "تم إيقاف صلاحيات الإدارة الخاصة بك. تواصل مع مالك المنصة إذا كنت تعتقد أن هذا خطأ.",
+  "appInvitationsTitle": "دعوات تحميل التطبيقات",
+  "appInvitationsSubtitle": "صلاحيتك المعتمدة لها تطبيق مخصص. حمّله من هنا وسجّل الدخول بنفس حسابك.",
+  "appInvitationsEmpty": "لا توجد دعوات مفعّلة لهذا الحساب. تظهر التطبيقات هنا بعد اعتماد صلاحيتك وتفعيلها.",
+  "appInvitationsLoadFailed": "تعذّر التحقق من دعواتك. حاول مرة أخرى.",
+  "appInvitationUnavailable": "هذه الدعوة لم تعد مفعّلة. تواصل مع الدعم إذا احتجت مساعدة.",
+  "appInvitationProvider": "دلوقتي لمقدمي الخدمات والمتاجر",
+  "appInvitationDriver": "دلوقتي للتوصيل",
+  "appInvitationAdmin": "دلوقتي للإدارة",
+  "appInvitationApproved": "تم الاعتماد والتفعيل",
+  "appInvitationDownload": "تحميل التطبيق",
+  "appInvitationDownloading": "جارٍ التحميل الآمن...",
+  "appInvitationInstallReady": "التحميل الموثّق جاهز. اتبع رسالة التثبيت.",
+  "appInvitationDownloadFailed": "تعذّر بدء التحميل. راجع اتصالك وإذن تثبيت التطبيقات ثم حاول مرة أخرى.",
+  "appInvitationsFooter": "تحميل التطبيق لا يمنح صلاحيات جديدة. الدخول مرتبط باعتماد حسابك الحالي. قد تحتاج إلى السماح بالتثبيت على أندرويد."
 }

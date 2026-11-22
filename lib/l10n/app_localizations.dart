@@ -15025,6 +15025,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your admin access has been suspended. Contact the platform owner if you believe this is a mistake.'**
   String get accountSuspendedBody;
+
+  /// No description provided for @appInvitationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App download invitations'**
+  String get appInvitationsTitle;
+
+  /// No description provided for @appInvitationsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your approved role has its own app. Download it here and sign in with the same account.'**
+  String get appInvitationsSubtitle;
+
+  /// No description provided for @appInvitationsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no active app invitations for this account. Approved roles appear here after activation.'**
+  String get appInvitationsEmpty;
+
+  /// No description provided for @appInvitationsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not check your invitations. Try again.'**
+  String get appInvitationsLoadFailed;
+
+  /// No description provided for @appInvitationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This invitation is no longer active. Contact support if you need help.'**
+  String get appInvitationUnavailable;
+
+  /// No description provided for @appInvitationProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Delwaqty Provider'**
+  String get appInvitationProvider;
+
+  /// No description provided for @appInvitationDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Delwaqty Delivery'**
+  String get appInvitationDriver;
+
+  /// No description provided for @appInvitationAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Delwaqty Admin'**
+  String get appInvitationAdmin;
+
+  /// No description provided for @appInvitationApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved and active'**
+  String get appInvitationApproved;
+
+  /// No description provided for @appInvitationDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download the app'**
+  String get appInvitationDownload;
+
+  /// No description provided for @appInvitationDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading securely...'**
+  String get appInvitationDownloading;
+
+  /// No description provided for @appInvitationInstallReady.
+  ///
+  /// In en, this message translates to:
+  /// **'The verified download is ready. Follow the installation prompt.'**
+  String get appInvitationInstallReady;
+
+  /// No description provided for @appInvitationDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Download could not start. Check your connection and installation permission, then retry.'**
+  String get appInvitationDownloadFailed;
+
+  /// No description provided for @appInvitationsFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading an app does not grant a role. Access follows your current account approval. Android installation permission may be required.'**
+  String get appInvitationsFooter;
 }
 
 class _AppLocalizationsDelegate

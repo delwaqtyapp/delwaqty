@@ -7924,4 +7924,53 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accountSuspendedBody =>
       'Your admin access has been suspended. Contact the platform owner if you believe this is a mistake.';
+
+  @override
+  String get appInvitationsTitle => 'App download invitations';
+
+  @override
+  String get appInvitationsSubtitle =>
+      'Your approved role has its own app. Download it here and sign in with the same account.';
+
+  @override
+  String get appInvitationsEmpty =>
+      'There are no active app invitations for this account. Approved roles appear here after activation.';
+
+  @override
+  String get appInvitationsLoadFailed =>
+      'Could not check your invitations. Try again.';
+
+  @override
+  String get appInvitationUnavailable =>
+      'This invitation is no longer active. Contact support if you need help.';
+
+  @override
+  String get appInvitationProvider => 'Delwaqty Provider';
+
+  @override
+  String get appInvitationDriver => 'Delwaqty Delivery';
+
+  @override
+  String get appInvitationAdmin => 'Delwaqty Admin';
+
+  @override
+  String get appInvitationApproved => 'Approved and active';
+
+  @override
+  String get appInvitationDownload => 'Download the app';
+
+  @override
+  String get appInvitationDownloading => 'Downloading securely...';
+
+  @override
+  String get appInvitationInstallReady =>
+      'The verified download is ready. Follow the installation prompt.';
+
+  @override
+  String get appInvitationDownloadFailed =>
+      'Download could not start. Check your connection and installation permission, then retry.';
+
+  @override
+  String get appInvitationsFooter =>
+      'Downloading an app does not grant a role. Access follows your current account approval. Android installation permission may be required.';
 }

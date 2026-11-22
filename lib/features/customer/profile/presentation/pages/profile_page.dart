@@ -16,6 +16,7 @@ import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/domain/usecases/profile/profile_usecases.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/customer/profile/presentation/app_invitations_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/app_shell.dart';
@@ -922,9 +923,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     AppLocalizations l10n,
   ) {
     final primary = context.colorScheme.primary;
+    final hasInvitations =
+        ref.watch(appFlavorProvider) == AppFlavor.customer &&
+        (ref.watch(appInvitationsProvider).value?.isNotEmpty ?? false);
     return _SectionCard(
       title: l10n.support,
       children: [
+        if (hasInvitations)
+          _SectionTile(
+            icon: Icons.mark_email_read_outlined,
+            color: primary,
+            title: l10n.appInvitationsTitle,
+            subtitle: l10n.appInvitationApproved,
+            onTap: () => context.push('/profile/app-invitations'),
+          ),
         _SectionTile(
           icon: Icons.help_outline_rounded,
           color: primary,

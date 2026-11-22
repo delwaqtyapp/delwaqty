@@ -2779,5 +2779,19 @@
   "@modifierEmptyGroups": {
     "description": "Merchant modifiers: modifierEmptyGroups"
   },
-  "accountSuspendedBody": "Your admin access has been suspended. Contact the platform owner if you believe this is a mistake."
+  "accountSuspendedBody": "Your admin access has been suspended. Contact the platform owner if you believe this is a mistake.",
+  "appInvitationsTitle": "App download invitations",
+  "appInvitationsSubtitle": "Your approved role has its own app. Download it here and sign in with the same account.",
+  "appInvitationsEmpty": "There are no active app invitations for this account. Approved roles appear here after activation.",
+  "appInvitationsLoadFailed": "Could not check your invitations. Try again.",
+  "appInvitationUnavailable": "This invitation is no longer active. Contact support if you need help.",
+  "appInvitationProvider": "Delwaqty Provider",
+  "appInvitationDriver": "Delwaqty Delivery",
+  "appInvitationAdmin": "Delwaqty Admin",
+  "appInvitationApproved": "Approved and active",
+  "appInvitationDownload": "Download the app",
+  "appInvitationDownloading": "Downloading securely...",
+  "appInvitationInstallReady": "The verified download is ready. Follow the installation prompt.",
+  "appInvitationDownloadFailed": "Download could not start. Check your connection and installation permission, then retry.",
+  "appInvitationsFooter": "Downloading an app does not grant a role. Access follows your current account approval. Android installation permission may be required."
 }

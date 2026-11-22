@@ -7856,4 +7856,53 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get accountSuspendedBody =>
       'تم إيقاف صلاحيات الإدارة الخاصة بك. تواصل مع مالك المنصة إذا كنت تعتقد أن هذا خطأ.';
+
+  @override
+  String get appInvitationsTitle => 'دعوات تحميل التطبيقات';
+
+  @override
+  String get appInvitationsSubtitle =>
+      'صلاحيتك المعتمدة لها تطبيق مخصص. حمّله من هنا وسجّل الدخول بنفس حسابك.';
+
+  @override
+  String get appInvitationsEmpty =>
+      'لا توجد دعوات مفعّلة لهذا الحساب. تظهر التطبيقات هنا بعد اعتماد صلاحيتك وتفعيلها.';
+
+  @override
+  String get appInvitationsLoadFailed =>
+      'تعذّر التحقق من دعواتك. حاول مرة أخرى.';
+
+  @override
+  String get appInvitationUnavailable =>
+      'هذه الدعوة لم تعد مفعّلة. تواصل مع الدعم إذا احتجت مساعدة.';
+
+  @override
+  String get appInvitationProvider => 'دلوقتي لمقدمي الخدمات والمتاجر';
+
+  @override
+  String get appInvitationDriver => 'دلوقتي للتوصيل';
+
+  @override
+  String get appInvitationAdmin => 'دلوقتي للإدارة';
+
+  @override
+  String get appInvitationApproved => 'تم الاعتماد والتفعيل';
+
+  @override
+  String get appInvitationDownload => 'تحميل التطبيق';
+
+  @override
+  String get appInvitationDownloading => 'جارٍ التحميل الآمن...';
+
+  @override
+  String get appInvitationInstallReady =>
+      'التحميل الموثّق جاهز. اتبع رسالة التثبيت.';
+
+  @override
+  String get appInvitationDownloadFailed =>
+      'تعذّر بدء التحميل. راجع اتصالك وإذن تثبيت التطبيقات ثم حاول مرة أخرى.';
+
+  @override
+  String get appInvitationsFooter =>
+      'تحميل التطبيق لا يمنح صلاحيات جديدة. الدخول مرتبط باعتماد حسابك الحالي. قد تحتاج إلى السماح بالتثبيت على أندرويد.';
 }

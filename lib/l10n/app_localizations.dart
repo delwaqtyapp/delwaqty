@@ -1658,6 +1658,138 @@ abstract class AppLocalizations {
   /// **'EGP'**
   String get egp;
 
+  /// No description provided for @provTabCashier.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashier'**
+  String get provTabCashier;
+
+  /// No description provided for @provTabMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Menu'**
+  String get provTabMenu;
+
+  /// No description provided for @provManageMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage menu'**
+  String get provManageMenu;
+
+  /// No description provided for @provTabItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get provTabItems;
+
+  /// No description provided for @provManageItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage items'**
+  String get provManageItems;
+
+  /// No description provided for @provTabMedicines.
+  ///
+  /// In en, this message translates to:
+  /// **'Medicines'**
+  String get provTabMedicines;
+
+  /// No description provided for @provManageMedicines.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage medicines'**
+  String get provManageMedicines;
+
+  /// No description provided for @provTabTableBookings.
+  ///
+  /// In en, this message translates to:
+  /// **'Table bookings'**
+  String get provTabTableBookings;
+
+  /// No description provided for @provTabJobs.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs'**
+  String get provTabJobs;
+
+  /// No description provided for @provServiceRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Service requests'**
+  String get provServiceRequests;
+
+  /// No description provided for @provTabLessonRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson requests'**
+  String get provTabLessonRequests;
+
+  /// No description provided for @provTabAppointments.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointments'**
+  String get provTabAppointments;
+
+  /// No description provided for @provTabMyServices.
+  ///
+  /// In en, this message translates to:
+  /// **'My services'**
+  String get provTabMyServices;
+
+  /// No description provided for @provTabMyLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'My lessons'**
+  String get provTabMyLessons;
+
+  /// No description provided for @provMyServicesPrices.
+  ///
+  /// In en, this message translates to:
+  /// **'My services & prices'**
+  String get provMyServicesPrices;
+
+  /// No description provided for @provMyLessonsPrices.
+  ///
+  /// In en, this message translates to:
+  /// **'My lessons & prices'**
+  String get provMyLessonsPrices;
+
+  /// No description provided for @provPricesAdminManaged.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices are set by the admin team. Contact support to change them.'**
+  String get provPricesAdminManaged;
+
+  /// No description provided for @provEmptyServices.
+  ///
+  /// In en, this message translates to:
+  /// **'No services are registered on your account yet'**
+  String get provEmptyServices;
+
+  /// No description provided for @provEmptyLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'No lessons are registered on your account yet'**
+  String get provEmptyLessons;
+
+  /// No description provided for @provHourlyRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly rate'**
+  String get provHourlyRate;
+
+  /// No description provided for @provFixedPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed price'**
+  String get provFixedPrice;
+
+  /// No description provided for @provPriceNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Price not set by admin yet'**
+  String get provPriceNotSet;
+
   /// No description provided for @searchRestaurants.
   ///
   /// In en, this message translates to:

@@ -9,6 +9,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:delwaqty/core/module/shell_customization.dart';
+import 'package:delwaqty/features/provider/capability/presentation/providers/provider_capability_providers.dart';
 import 'package:delwaqty/provider/app.dart';
 import 'package:delwaqty/config/app_config.dart';
 import 'package:delwaqty/config/config_validator.dart';
@@ -126,6 +128,12 @@ void main() async {
         appFlavorProvider.overrideWithValue(AppFlavor.provider),
         themeModeProvider.overrideWith(() => ProviderThemeModeNotifier()),
         backendBootstrapProvider.overrideWithValue(backendBootstrap),
+        shellNavConfigProvider.overrideWith(
+          (ref) => ref.watch(providerShellNavConfigProvider),
+        ),
+        drawerEntryFilterProvider.overrideWith(
+          (ref) => ref.watch(providerDrawerFilterProvider),
+        ),
       ],
       child: const ProviderApp(),
     ),

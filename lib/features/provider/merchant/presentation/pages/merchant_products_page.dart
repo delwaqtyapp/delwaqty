@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/features/provider/capability/domain/provider_profile.dart';
+import 'package:delwaqty/features/provider/capability/presentation/providers/provider_capability_providers.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
@@ -39,13 +41,22 @@ class _MerchantProductsPageState extends ConsumerState<MerchantProductsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.manageProducts),
+        title: Text(
+          ref
+              .watch(providerProfileProvider)
+              .label(
+                ProviderLabel.manageProducts,
+                AppLocalizations.of(context),
+              ),
+        ),
         actions: [
-          IconButton(
-            tooltip: l10n.inventory,
-            icon: const Icon(Icons.inventory_2_outlined),
-            onPressed: () => context.push('/merchant-dashboard/inventory'),
-          ),
+          if (ref.watch(providerProfileProvider).hasInventory ||
+              ref.watch(providerProfileProvider).isNeutral)
+            IconButton(
+              tooltip: l10n.inventory,
+              icon: const Icon(Icons.inventory_2_outlined),
+              onPressed: () => context.push('/merchant-dashboard/inventory'),
+            ),
           IconButton(
             tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),

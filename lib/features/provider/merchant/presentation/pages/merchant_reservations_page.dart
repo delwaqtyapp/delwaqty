@@ -50,8 +50,24 @@ final _serviceBookingsProvider = FutureProvider<List<Map<String, dynamic>>>((
   return (res as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
 });
 
+/// Which reservation lists the page shows.
+enum ReservationsMode { both, tables, services }
+
 class MerchantReservationsPage extends ConsumerStatefulWidget {
-  const MerchantReservationsPage({super.key});
+  const MerchantReservationsPage({
+    super.key,
+    this.mode = ReservationsMode.both,
+    this.title,
+    this.showBack = true,
+  });
+
+  final ReservationsMode mode;
+
+  /// Optional per-account-type title (see ProviderLabels).
+  final String? title;
+
+  /// False when the page is a bottom-tab root.
+  final bool showBack;
 
   @override
   ConsumerState<MerchantReservationsPage> createState() =>
@@ -63,14 +79,22 @@ class _MerchantReservationsPageState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final reservationsAsync = ref.watch(_reservationsProvider);
-    final serviceBookingsAsync = ref.watch(_serviceBookingsProvider);
+    final mode = widget.mode;
+    final showTables = mode != ReservationsMode.services;
+    final showServices = mode != ReservationsMode.tables;
+    final reservationsAsync = showTables
+        ? ref.watch(_reservationsProvider)
+        : const AsyncValue<List<Reservation>>.data([]);
+    final serviceBookingsAsync = showServices
+        ? ref.watch(_serviceBookingsProvider)
+        : const AsyncValue<List<Map<String, dynamic>>>.data([]);
 
     return DefaultTabController(
-      length: 2,
+      length: (showTables ? 1 : 0) + (showServices ? 1 : 0),
       child: Scaffold(
         appBar: AppBar(
-          title: Text(l10n.reservations),
+          automaticallyImplyLeading: widget.showBack,
+          title: Text(widget.title ?? l10n.reservations),
           actions: [
             IconButton(
               tooltip: l10n.refresh,
@@ -81,15 +105,20 @@ class _MerchantReservationsPageState
               },
             ),
           ],
-          bottom: TabBar(
-            tabs: [
-              Tab(text: l10n.tableReservationsTitle),
-              Tab(text: l10n.serviceBookingsTitle),
-            ],
-          ),
+          bottom: mode == ReservationsMode.both
+              ? TabBar(
+                  tabs: [
+                    Tab(text: l10n.tableReservationsTitle),
+                    Tab(text: l10n.serviceBookingsTitle),
+                  ],
+                )
+              : null,
         ),
         body: TabBarView(
-          children: [
+          physics: mode == ReservationsMode.both
+              ? null
+              : const NeverScrollableScrollPhysics(),
+          children: _pick([
             Column(
               children: [
                 _buildFilterChips(ref, l10n),
@@ -215,10 +244,21 @@ class _MerchantReservationsPageState
                 );
               },
             ),
-          ],
+          ]),
         ),
       ),
     );
+  }
+
+  List<Widget> _pick(List<Widget> both) {
+    switch (widget.mode) {
+      case ReservationsMode.both:
+        return both;
+      case ReservationsMode.tables:
+        return [both.first];
+      case ReservationsMode.services:
+        return [both.last];
+    }
   }
 
   Widget _buildFilterChips(WidgetRef ref, AppLocalizations l10n) {

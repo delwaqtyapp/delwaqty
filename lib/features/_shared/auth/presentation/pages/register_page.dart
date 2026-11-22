@@ -12,6 +12,7 @@ import 'package:delwaqty/core/constants/storage_keys.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/utils/validators.dart';
+import 'package:delwaqty/core/utils/egypt_phone.dart';
 import 'package:delwaqty/domain/enums/user_type.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
@@ -67,8 +68,9 @@ int _serviceRank(ServiceCategoryType type) {
 /// Dependency seam for verification UI tests; production always uses the
 /// server-confirmed WhatsApp sheet. Signup itself must also enforce ownership.
 final registerPhoneVerifierProvider =
-    Provider<Future<bool> Function(BuildContext, String)>((ref) {
-      return (context, phone) => WhatsAppOtpSheet.show(context, phone: phone);
+    Provider<Future<String?> Function(BuildContext, String)>((ref) {
+      return (context, phone) =>
+          WhatsAppOtpSheet.showChallenge(context, phone: phone);
     });
 
 class RegisterPage extends ConsumerStatefulWidget {
@@ -93,6 +95,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   String _selectedLanguage = 'ar';
   bool _whatsappVerified = false;
   String _verifiedPhone = '';
+  String? _phoneVerificationChallenge;
 
   UserType? _selectedRole;
   XFile? _idCardFile;
@@ -108,8 +111,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   void _onPhoneChanged() {
-    if (_whatsappVerified && _verifiedPhone != _phoneController.text.trim()) {
-      setState(() => _whatsappVerified = false);
+    if (_whatsappVerified &&
+        _verifiedPhone != normalizeEgyptPhone(_phoneController.text)) {
+      setState(() {
+        _whatsappVerified = false;
+        _phoneVerificationChallenge = null;
+      });
     }
   }
 
@@ -124,16 +131,22 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   Future<void> _openWhatsAppVerification() async {
-    final phone = _phoneController.text.trim();
-    final phoneError = AppValidators.phone(phone);
+    final phone = normalizeEgyptPhone(_phoneController.text);
+    final phoneError = isEgyptMobilePhone(phone)
+        ? null
+        : AppLocalizations.of(context).phoneInvalid;
     if (phoneError != null) {
       context.showAppSnackBar(phoneError);
       return;
     }
-    final ok = await ref.read(registerPhoneVerifierProvider)(context, phone);
+    final challenge = await ref.read(registerPhoneVerifierProvider)(
+      context,
+      phone,
+    );
     if (!mounted) return;
-    if (ok) {
+    if (challenge != null && challenge.isNotEmpty) {
       setState(() {
+        _phoneVerificationChallenge = challenge;
         _whatsappVerified = true;
         _verifiedPhone = phone;
       });
@@ -175,15 +188,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     if (_currentStep == 1) {
       if (!_formKey.currentState!.validate()) return;
       if (!_whatsappVerified ||
-          _verifiedPhone != _phoneController.text.trim()) {
+          _verifiedPhone != normalizeEgyptPhone(_phoneController.text)) {
         await _openWhatsAppVerification();
         return;
       }
-      if (_emailController.text.trim().isEmpty &&
-          _phoneController.text.trim().isNotEmpty) {
-        final digits = _phoneController.text.replaceAll(RegExp(r'[^0-9]'), '');
-        _emailController.text = 'phone_$digits@delwaqty.app';
-      }
+      _emailController.text = phoneAuthIdentifier(_phoneController.text);
     }
     setState(() => _currentStep++);
   }
@@ -270,22 +279,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   Future<void> _onRegister() async {
     final role = _selectedRole!;
-    final phone = _phoneController.text.trim();
-    if (phone.isNotEmpty && (!_whatsappVerified || _verifiedPhone != phone)) {
-      final verified = await ref.read(registerPhoneVerifierProvider)(
-        context,
-        phone,
-      );
-      if (!mounted) return;
-      if (!verified) return;
-      setState(() {
-        _whatsappVerified = true;
-        _verifiedPhone = phone;
-      });
+    final phone = normalizeEgyptPhone(_phoneController.text);
+    if (phone.isNotEmpty &&
+        (!_whatsappVerified ||
+            _verifiedPhone != phone ||
+            _phoneVerificationChallenge == null)) {
+      await _openWhatsAppVerification();
+      if (!mounted || !_whatsappVerified || _phoneVerificationChallenge == null)
+        return;
     }
     // Technical auth identifier only. Email signup is not exposed to users.
-    final digits = phone.replaceAll(RegExp(r'[^0-9]'), '');
-    final email = 'phone_$digits@delwaqty.app';
+    final email = phoneAuthIdentifier(phone);
     _emailController.text = email;
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -332,6 +336,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           password: _passwordController.text,
           fullName: _nameController.text.trim(),
           phone: phone.isEmpty ? null : phone,
+          phoneVerificationChallenge: _phoneVerificationChallenge,
           userType: role,
           language: _selectedLanguage,
           idCardBytes: idCardBytes,
@@ -803,7 +808,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final isPhoneVerified =
         _whatsappVerified &&
         _verifiedPhone.isNotEmpty &&
-        _verifiedPhone == _phoneController.text.trim();
+        _verifiedPhone == normalizeEgyptPhone(_phoneController.text);
     return Form(
       key: _formKey,
       child: Column(
@@ -831,7 +836,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 icon: Icons.phone_outlined,
                 keyboardType: TextInputType.phone,
                 textInputAction: TextInputAction.next,
-                validator: AppValidators.phone,
+                validator: (value) =>
+                    isEgyptMobilePhone(value ?? '') ? null : l10n.phoneInvalid,
               );
               if (constraints.maxWidth >= 340) {
                 return Row(

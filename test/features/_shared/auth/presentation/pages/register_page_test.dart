@@ -56,7 +56,7 @@ Widget _buildTestApp({List<ServiceCategory>? catalog, String locale = 'en'}) {
     overrides: [
       authStateProvider.overrideWith(_FakeAuthNotifier.new),
       registerPhoneVerifierProvider.overrideWithValue(
-        (context, phone) async => true,
+        (context, phone) async => '00000000-0000-4000-8000-000000000008',
       ),
       if (catalog != null)
         providerServicesCatalogProvider.overrideWith((ref) async => catalog),

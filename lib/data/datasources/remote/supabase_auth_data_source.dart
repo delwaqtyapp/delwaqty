@@ -55,6 +55,7 @@ class SupabaseAuthDataSource {
     required String password,
     String? fullName,
     String? phone,
+    String? phoneVerificationChallenge,
     String? userType = 'customer',
     String? language = 'en',
   }) async {
@@ -65,6 +66,8 @@ class SupabaseAuthDataSource {
         data: {
           'full_name': fullName,
           'phone': phone,
+          if (phoneVerificationChallenge != null)
+            'phone_verification_challenge': phoneVerificationChallenge,
           'user_type': userType,
           'language': language,
           'verification_status': userType == 'customer'

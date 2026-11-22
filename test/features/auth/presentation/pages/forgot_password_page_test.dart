@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -68,4 +70,45 @@ void main() {
       );
     },
   );
+  testWidgets('rapid reset taps start only one WhatsApp challenge', (
+    tester,
+  ) async {
+    final reply = Completer<String?>();
+    var requests = 0;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          whatsappResetVerifierProvider.overrideWithValue((context, phone) {
+            requests++;
+            return reply.future;
+          }),
+        ],
+        child: const MaterialApp(
+          locale: Locale('en'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: ForgotPasswordPage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField), '01000000001');
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
+    final tap = tester
+        .widget<InkWell>(
+          find
+              .ancestor(
+                of: find.text('Verify via WhatsApp'),
+                matching: find.byType(InkWell),
+              )
+              .first,
+        )
+        .onTap!;
+    tap();
+    tap();
+    expect(requests, 1);
+    reply.complete(null);
+    await tester.pumpAndSettle();
+  });
 }

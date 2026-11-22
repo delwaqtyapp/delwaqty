@@ -14,6 +14,7 @@ abstract class AuthRepository {
     required String password,
     String? fullName,
     String? phone,
+    String? phoneVerificationChallenge,
     UserType userType = UserType.customer,
     String language = 'en',
     Uint8List? idCardBytes,

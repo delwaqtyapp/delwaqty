@@ -52,6 +52,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     String? fullName,
     String? phone,
+    String? phoneVerificationChallenge,
     UserType userType = UserType.customer,
     String language = 'en',
     Uint8List? idCardBytes,
@@ -69,6 +70,7 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
         fullName: fullName,
         phone: phone,
+        phoneVerificationChallenge: phoneVerificationChallenge,
         userType: userType.code,
         language: language,
       );

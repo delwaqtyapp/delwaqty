@@ -7,6 +7,8 @@ import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart'
     as commerce;
 import 'package:delwaqty/features/customer/commerce/domain/entities/coupon.dart';
 import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
+import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/customer/location/presentation/widgets/smart_map_picker_sheet.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
@@ -252,11 +254,13 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
               cart.deliveryFee;
           // Migration 395: the delay-apology gift shows here as an
           // automatic platform-credit discount. The server is authoritative
-          // at create_order; this mirrors min(available, amount due) for
-          // display only.
+          // at create_order; the provider mirrors min(available, amount due)
+          // for display only.
           final dueBeforeCredit = cart.subtotal + deliveryFee - cart.discount;
-          final platformCredit =
-              ref.watch(_platformCreditProvider).value ?? 0.0;
+          final platformCredit = ref
+                  .watch(_platformCreditProvider(dueBeforeCredit))
+                  .value ??
+              0.0;
           final creditApplied = dueBeforeCredit <= 0
               ? 0.0
               : platformCredit.clamp(0.0, dueBeforeCredit).toDouble();
@@ -633,6 +637,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       await ref.read(cartProvider.notifier).clear();
 
       if (!mounted) return;
+      // The gift was spent server-side; drop the cached balance.
+      ref.invalidate(_platformCreditProvider);
       context.go('/market/order-completed/${order.id}');
     } catch (e) {
       if (!mounted) return;
@@ -672,15 +678,21 @@ final _savedAddressesProvider = FutureProvider<List<Map<String, dynamic>>>((
 
 /// Spendable platform credit (migration 395): the delay-apology gift the
 /// server auto-applies as a discount inside create_order. Display-only
-/// mirror; a missing pre-395 backend must not break checkout.
-final _platformCreditProvider = FutureProvider<double>((ref) async {
+/// mirror; a missing pre-395 backend must not break checkout. autoDispose
+/// keeps no stale balance after leaving checkout, ref.watch(authStateProvider)
+/// re-fetches when the signed-in user changes, and the family key is the
+/// amount due, so the server-side min(balance, due) is what renders.
+final _platformCreditProvider =
+    FutureProvider.autoDispose.family<double, double>((ref, amountDue) async {
+  final auth = ref.watch(authStateProvider);
+  if (auth is! AuthAuthenticated) return 0;
   final client = Supabase.instance.client;
-  if (client.auth.currentUser == null) return 0;
   try {
-    final res = await client.rpc('my_platform_credit');
+    final res = await client
+        .rpc('my_platform_credit', params: {'p_amount_due': amountDue});
     final map = Map<String, dynamic>.from(res as Map);
     if (map['ok'] != true) return 0;
-    return (map['available'] as num?)?.toDouble() ?? 0;
+    return (map['applies'] as num?)?.toDouble() ?? 0;
   } catch (_) {
     return 0;
   }

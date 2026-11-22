@@ -240,7 +240,7 @@ class _PendingVerificationPageState
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF1A1035),
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -250,7 +250,7 @@ class _PendingVerificationPageState
                   style: TextStyle(
                     fontSize: 13,
                     height: 1.5,
-                    color: const Color(0xFF1A1035).withValues(alpha: 0.6),
+                    color: AppColors.textPrimary.withValues(alpha: 0.6),
                   ),
                 ),
                 if ((user.rejectionReason ?? '').isNotEmpty) ...[
@@ -316,7 +316,7 @@ class _PendingVerificationPageState
           const Icon(
             Icons.cloud_off_rounded,
             size: 56,
-            color: Color(0xFF1A1035),
+            color: AppColors.textPrimary,
           ),
           const SizedBox(height: 20),
           Text(
@@ -324,7 +324,7 @@ class _PendingVerificationPageState
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 15,
-              color: const Color(0xFF1A1035).withValues(alpha: 0.6),
+              color: AppColors.textPrimary.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 24),
@@ -374,7 +374,7 @@ class _PendingVerificationPageState
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: const Color(0xFF1A1035).withValues(alpha: 0.08),
+                color: AppColors.textPrimary.withValues(alpha: 0.08),
               ),
             ),
             child: Column(
@@ -401,7 +401,7 @@ class _PendingVerificationPageState
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF1A1035),
+                          color: AppColors.textPrimary,
                         ),
                       ),
                     ),
@@ -413,7 +413,7 @@ class _PendingVerificationPageState
                   style: TextStyle(
                     fontSize: 13,
                     height: 1.5,
-                    color: const Color(0xFF1A1035).withValues(alpha: 0.5),
+                    color: AppColors.textPrimary.withValues(alpha: 0.5),
                   ),
                 ),
                 const SizedBox(height: 18),
@@ -508,7 +508,7 @@ class _PendingVerificationPageState
           style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w800,
-            color: Color(0xFF1A1035),
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 12),
@@ -518,7 +518,7 @@ class _PendingVerificationPageState
           style: TextStyle(
             fontSize: 14,
             height: 1.6,
-            color: const Color(0xFF1A1035).withValues(alpha: 0.6),
+            color: AppColors.textPrimary.withValues(alpha: 0.6),
           ),
         ),
       ],
@@ -534,9 +534,9 @@ class _PendingVerificationPageState
             ? null
             : () => ref.read(authStateProvider.notifier).signOut(),
         style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF1A1035),
+          foregroundColor: AppColors.textPrimary,
           side: BorderSide(
-            color: const Color(0xFF1A1035).withValues(alpha: 0.15),
+            color: AppColors.textPrimary.withValues(alpha: 0.15),
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18),
@@ -581,7 +581,7 @@ class _DocumentTile extends StatelessWidget {
           border: Border.all(
             color: hasFile
                 ? color.withValues(alpha: 0.6)
-                : const Color(0xFF1A1035).withValues(alpha: 0.08),
+                : AppColors.textPrimary.withValues(alpha: 0.08),
             width: hasFile ? 2 : 1,
           ),
         ),
@@ -617,7 +617,7 @@ class _DocumentTile extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF1A1035),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -625,7 +625,7 @@ class _DocumentTile extends StatelessWidget {
                     hint,
                     style: TextStyle(
                       fontSize: 12,
-                      color: const Color(0xFF1A1035).withValues(alpha: 0.5),
+                      color: AppColors.textPrimary.withValues(alpha: 0.5),
                     ),
                   ),
                 ],
@@ -636,7 +636,7 @@ class _DocumentTile extends StatelessWidget {
               hasFile ? Icons.check_circle_rounded : Icons.add_circle_outline,
               color: hasFile
                   ? color
-                  : const Color(0xFF1A1035).withValues(alpha: 0.3),
+                  : AppColors.textPrimary.withValues(alpha: 0.3),
             ),
           ],
         ),
@@ -663,19 +663,19 @@ class _SourceOption extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 18),
         decoration: BoxDecoration(
-          color: const Color(0xFFF5F3FF),
+          color: AppColors.brandLavenderSoft,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
           children: [
-            Icon(icon, color: const Color(0xFF1A1035), size: 28),
+            Icon(icon, color: AppColors.textPrimary, size: 28),
             const SizedBox(height: 10),
             Text(
               label,
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1A1035),
+                color: AppColors.textPrimary,
               ),
             ),
           ],

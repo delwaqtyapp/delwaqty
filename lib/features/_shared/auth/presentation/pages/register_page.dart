@@ -190,7 +190,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1A1035).withValues(alpha: 0.12),
+                  color: AppColors.textPrimary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),

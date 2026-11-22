@@ -80,14 +80,16 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(13),
                             border: Border.all(
-                              color: const Color(0xFF1A1035)
-                                  .withValues(alpha: 0.1),
+                              color: AppColors.textPrimary.withValues(
+                                alpha: 0.1,
+                              ),
                             ),
                           ),
                           child: Icon(
                             Icons.arrow_back_rounded,
-                            color: const Color(0xFF1A1035)
-                                .withValues(alpha: 0.75),
+                            color: AppColors.textPrimary.withValues(
+                              alpha: 0.75,
+                            ),
                             size: 17,
                           ),
                         ),
@@ -122,7 +124,11 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFFF8F6FF), Color(0xFFEFEBFF), Color(0xFFF5F3FF)],
+          colors: [
+            Color(0xFFF8F6FF),
+            Color(0xFFEFEBFF),
+            AppColors.brandLavenderSoft,
+          ],
         ),
       ),
       child: Stack(
@@ -194,7 +200,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
           style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF1A1035),
+            color: AppColors.textPrimary,
           ),
           textAlign: TextAlign.center,
         ),
@@ -203,7 +209,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
           l10n.resetEmailSent,
           style: TextStyle(
             fontSize: 15,
-            color: const Color(0xFF1A1035).withValues(alpha: 0.5),
+            color: AppColors.textPrimary.withValues(alpha: 0.5),
             height: 1.5,
           ),
           textAlign: TextAlign.center,
@@ -248,7 +254,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1A1035),
+              color: AppColors.textPrimary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -257,7 +263,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             l10n.resetEmailHint,
             style: TextStyle(
               fontSize: 15,
-              color: const Color(0xFF1A1035).withValues(alpha: 0.5),
+              color: AppColors.textPrimary.withValues(alpha: 0.5),
               height: 1.5,
             ),
             textAlign: TextAlign.center,
@@ -269,16 +275,16 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             textInputAction: TextInputAction.done,
             validator: AppValidators.email,
             onFieldSubmitted: (_) => _handleResetPassword(),
-            style: const TextStyle(color: Color(0xFF1A1035), fontSize: 15),
+            style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
             decoration: InputDecoration(
               hintText: l10n.email,
               hintStyle: TextStyle(
-                color: const Color(0xFF1A1035).withValues(alpha: 0.3),
+                color: AppColors.textPrimary.withValues(alpha: 0.3),
                 fontSize: 15,
               ),
               prefixIcon: Icon(
                 Icons.email_outlined,
-                color: const Color(0xFF1A1035).withValues(alpha: 0.35),
+                color: AppColors.textPrimary.withValues(alpha: 0.35),
                 size: 20,
               ),
               filled: true,
@@ -286,13 +292,13 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(18),
                 borderSide: BorderSide(
-                  color: const Color(0xFF1A1035).withValues(alpha: 0.08),
+                  color: AppColors.textPrimary.withValues(alpha: 0.08),
                 ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(18),
                 borderSide: BorderSide(
-                  color: const Color(0xFF1A1035).withValues(alpha: 0.08),
+                  color: AppColors.textPrimary.withValues(alpha: 0.08),
                 ),
               ),
               focusedBorder: OutlineInputBorder(
@@ -355,7 +361,7 @@ class _PurpleButton extends StatelessWidget {
                 )
               : null,
           color: onPressed == null
-              ? const Color(0xFF1A1035).withValues(alpha: 0.08)
+              ? AppColors.textPrimary.withValues(alpha: 0.08)
               : null,
           borderRadius: BorderRadius.circular(22),
           boxShadow: onPressed != null

@@ -837,7 +837,7 @@ class _LoginButton extends StatelessWidget {
                 )
               : null,
           color: onPressed == null
-              ? const Color(0xFF1A1035).withValues(alpha: 0.55)
+              ? AppColors.textPrimary.withValues(alpha: 0.55)
               : null,
           borderRadius: BorderRadius.circular(22),
           boxShadow: onPressed != null

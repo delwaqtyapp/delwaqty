@@ -641,13 +641,13 @@ abstract class AppLocalizations {
   /// No description provided for @resetEmailSent.
   ///
   /// In en, this message translates to:
-  /// **'Password reset link has been sent to your email.'**
+  /// **'Your password has been changed. You can sign in now.'**
   String get resetEmailSent;
 
   /// No description provided for @resetEmailHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter your email address and we\'ll send you a link to reset your password.'**
+  /// **'Enter your phone number and verify it through WhatsApp, then choose a new password.'**
   String get resetEmailHint;
 
   /// No description provided for @backToLogin.
@@ -13409,7 +13409,7 @@ abstract class AppLocalizations {
   /// No description provided for @whatsappOtpSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Verify your phone number instantly via WhatsApp to activate your account.'**
+  /// **'Open WhatsApp and send the verification message from the number you entered. We will confirm it automatically.'**
   String get whatsappOtpSubtitle;
 
   /// No description provided for @sendCodeViaWhatsApp.
@@ -13427,7 +13427,7 @@ abstract class AppLocalizations {
   /// No description provided for @whatsappCodeSentBanner.
   ///
   /// In en, this message translates to:
-  /// **'Your WhatsApp activation code is: {code}'**
+  /// **'Verification message code: {code}'**
   String whatsappCodeSentBanner(String code);
 
   /// No description provided for @enterOtpCode.
@@ -13451,7 +13451,7 @@ abstract class AppLocalizations {
   /// No description provided for @phoneOrEmailOrUsername.
   ///
   /// In en, this message translates to:
-  /// **'Phone Number, Email, or Username'**
+  /// **'Phone Number or Username'**
   String get phoneOrEmailOrUsername;
 
   /// No description provided for @phoneOptionalEmailHint.

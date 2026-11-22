@@ -53,6 +53,7 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet> {
   bool _verifying = false;
   bool _statusInFlight = false;
   bool _completed = false;
+  int _requestGeneration = 0;
   String? _otpCode;
   String? _challenge;
   String _whatsappNumber = '+201000000000';
@@ -71,9 +72,13 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet> {
   }
 
   Future<void> _requestOtp() async {
+    if (_completed) return;
+    final generation = ++_requestGeneration;
     _pollTimer?.cancel();
     setState(() {
       _loadingRequest = true;
+      _challenge = null;
+      _otpCode = null;
       _errorText = null;
     });
     try {
@@ -81,7 +86,7 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet> {
         'request_whatsapp_otp',
         params: {'p_phone': widget.phone.trim(), 'p_purpose': widget.purpose},
       );
-      if (!mounted) return;
+      if (!mounted || generation != _requestGeneration) return;
       final map = raw is Map
           ? Map<String, dynamic>.from(raw)
           : <String, dynamic>{};
@@ -109,7 +114,7 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet> {
         });
       }
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted || generation != _requestGeneration) return;
       setState(() {
         _loadingRequest = false;
         _errorText = appErrorText(context, e);
@@ -140,6 +145,8 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet> {
 
   Future<bool> _checkStatus() async {
     if (_statusInFlight || _completed || _challenge == null) return false;
+    final challenge = _challenge!;
+    final generation = _requestGeneration;
     _statusInFlight = true;
     try {
       final raw = await (widget.client ?? Supabase.instance.client).rpc(
@@ -147,18 +154,23 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet> {
         params: {
           'p_phone': widget.phone.trim(),
           'p_purpose': widget.purpose,
-          'p_challenge': _challenge,
+          'p_challenge': challenge,
         },
       );
-      if (!mounted || _completed) return false;
+      if (!mounted ||
+          _completed ||
+          generation != _requestGeneration ||
+          challenge != _challenge)
+        return false;
       final map = raw is Map
           ? Map<String, dynamic>.from(raw)
           : <String, dynamic>{};
       final status = map['status'] as String?;
       if (status == 'verified') {
+        if (ModalRoute.of(context)?.isCurrent != true) return false;
         _completed = true;
         _pollTimer?.cancel();
-        Navigator.of(context).pop(_challenge);
+        Navigator.of(context).pop(challenge);
         return true;
       }
       if (status == 'expired') {
@@ -180,6 +192,7 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet> {
   /// it), so this just checks whether the webhook already confirmed the
   /// WhatsApp round-trip.
   Future<void> _verifyOtp() async {
+    if (_statusInFlight || _completed) return;
     final l10n = AppLocalizations.of(context);
     setState(() {
       _verifying = true;

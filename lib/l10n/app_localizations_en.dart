@@ -289,11 +289,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetEmailSent =>
-      'Password reset link has been sent to your email.';
+      'Your password has been changed. You can sign in now.';
 
   @override
   String get resetEmailHint =>
-      'Enter your email address and we\'ll send you a link to reset your password.';
+      'Enter your phone number and verify it through WhatsApp, then choose a new password.';
 
   @override
   String get backToLogin => 'Back to Login';
@@ -7012,7 +7012,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get whatsappOtpSubtitle =>
-      'Verify your phone number instantly via WhatsApp to activate your account.';
+      'Open WhatsApp and send the verification message from the number you entered. We will confirm it automatically.';
 
   @override
   String get sendCodeViaWhatsApp => 'Send Verification via WhatsApp';
@@ -7022,7 +7022,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String whatsappCodeSentBanner(String code) {
-    return 'Your WhatsApp activation code is: $code';
+    return 'Verification message code: $code';
   }
 
   @override
@@ -7035,7 +7035,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resendWhatsAppCode => 'Resend Code';
 
   @override
-  String get phoneOrEmailOrUsername => 'Phone Number, Email, or Username';
+  String get phoneOrEmailOrUsername => 'Phone Number or Username';
 
   @override
   String get phoneOptionalEmailHint =>

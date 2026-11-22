@@ -64,6 +64,13 @@ int _serviceRank(ServiceCategoryType type) {
   return i == -1 ? _servicePriority.length : i;
 }
 
+/// Dependency seam for verification UI tests; production always uses the
+/// server-confirmed WhatsApp sheet. Signup itself must also enforce ownership.
+final registerPhoneVerifierProvider =
+    Provider<Future<bool> Function(BuildContext, String)>((ref) {
+      return (context, phone) => WhatsAppOtpSheet.show(context, phone: phone);
+    });
+
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
 
@@ -95,6 +102,18 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final Set<String> _selectedServices = {};
 
   @override
+  void initState() {
+    super.initState();
+    _phoneController.addListener(_onPhoneChanged);
+  }
+
+  void _onPhoneChanged() {
+    if (_whatsappVerified && _verifiedPhone != _phoneController.text.trim()) {
+      setState(() => _whatsappVerified = false);
+    }
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
@@ -105,25 +124,23 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   Future<void> _openWhatsAppVerification() async {
-    final l10n = AppLocalizations.of(context);
     final phone = _phoneController.text.trim();
     final phoneError = AppValidators.phone(phone);
     if (phoneError != null) {
       context.showAppSnackBar(phoneError);
       return;
     }
-    final ok = await WhatsAppOtpSheet.show(context, phone: phone);
+    final ok = await ref.read(registerPhoneVerifierProvider)(context, phone);
     if (!mounted) return;
     if (ok) {
       setState(() {
         _whatsappVerified = true;
         _verifiedPhone = phone;
       });
-      context.showAppSnackBar(l10n.whatsappVerifiedSuccess);
     }
   }
 
-  void _nextStep() {
+  Future<void> _nextStep() async {
     if (_currentStep == 0) {
       final role = _selectedRole;
       if (role == null) {
@@ -157,6 +174,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
     if (_currentStep == 1) {
       if (!_formKey.currentState!.validate()) return;
+      if (!_whatsappVerified ||
+          _verifiedPhone != _phoneController.text.trim()) {
+        await _openWhatsAppVerification();
+        return;
+      }
       if (_emailController.text.trim().isEmpty &&
           _phoneController.text.trim().isNotEmpty) {
         final digits = _phoneController.text.replaceAll(RegExp(r'[^0-9]'), '');
@@ -249,10 +271,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   Future<void> _onRegister() async {
     final role = _selectedRole!;
     final phone = _phoneController.text.trim();
-    if (role == UserType.customer &&
-        phone.isNotEmpty &&
-        (!_whatsappVerified || _verifiedPhone != phone)) {
-      final verified = await WhatsAppOtpSheet.show(context, phone: phone);
+    if (phone.isNotEmpty && (!_whatsappVerified || _verifiedPhone != phone)) {
+      final verified = await ref.read(registerPhoneVerifierProvider)(
+        context,
+        phone,
+      );
       if (!mounted) return;
       if (!verified) return;
       setState(() {
@@ -260,12 +283,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         _verifiedPhone = phone;
       });
     }
-    var email = _emailController.text.trim();
-    if (email.isEmpty && phone.isNotEmpty) {
-      final digits = phone.replaceAll(RegExp(r'[^0-9]'), '');
-      email = 'phone_$digits@delwaqty.app';
-      _emailController.text = email;
-    }
+    // Technical auth identifier only. Email signup is not exposed to users.
+    final digits = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    final email = 'phone_$digits@delwaqty.app';
+    _emailController.text = email;
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(StorageKeys.deliveryUpdates, _notificationsEnabled);
@@ -810,13 +831,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 icon: Icons.phone_outlined,
                 keyboardType: TextInputType.phone,
                 textInputAction: TextInputAction.next,
-                validator: (v) {
-                  if ((v == null || v.trim().isEmpty) &&
-                      _emailController.text.trim().isNotEmpty) {
-                    return null;
-                  }
-                  return AppValidators.phone(v);
-                },
+                validator: AppValidators.phone,
               );
               if (constraints.maxWidth >= 340) {
                 return Row(
@@ -891,57 +906,45 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               ),
             ),
           const SizedBox(height: 14),
-          _PremiumField(
-            controller: _emailController,
-            hint: l10n.phoneOptionalEmailHint,
-            icon: Icons.email_outlined,
-            keyboardType: TextInputType.emailAddress,
-            textInputAction: TextInputAction.next,
-            validator: (v) {
-              if ((v == null || v.trim().isEmpty) &&
-                  _phoneController.text.trim().isNotEmpty) {
-                return null;
-              }
-              return AppValidators.email(v);
-            },
-          ),
-          const SizedBox(height: 14),
-          _PremiumField(
-            controller: _passwordController,
-            hint: l10n.password,
-            icon: Icons.lock_outline_rounded,
-            obscure: _obscurePassword,
-            validator: (v) => AppValidators.password(v),
-            suffix: GestureDetector(
-              onTap: () => setState(() => _obscurePassword = !_obscurePassword),
-              child: Icon(
-                _obscurePassword
-                    ? Icons.visibility_off_rounded
-                    : Icons.visibility_rounded,
-                color: Colors.white.withValues(alpha: 0.55),
-                size: 20,
+          if (isPhoneVerified) ...[
+            _PremiumField(
+              controller: _passwordController,
+              hint: l10n.password,
+              icon: Icons.lock_outline_rounded,
+              obscure: _obscurePassword,
+              validator: (v) => AppValidators.password(v),
+              suffix: GestureDetector(
+                onTap: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
+                child: Icon(
+                  _obscurePassword
+                      ? Icons.visibility_off_rounded
+                      : Icons.visibility_rounded,
+                  color: Colors.white.withValues(alpha: 0.55),
+                  size: 20,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 14),
-          _PremiumField(
-            controller: _confirmPasswordController,
-            hint: l10n.confirmPassword,
-            icon: Icons.lock_outline_rounded,
-            obscure: _obscureConfirm,
-            validator: (v) =>
-                AppValidators.confirmPassword(v, _passwordController.text),
-            suffix: GestureDetector(
-              onTap: () => setState(() => _obscureConfirm = !_obscureConfirm),
-              child: Icon(
-                _obscureConfirm
-                    ? Icons.visibility_off_rounded
-                    : Icons.visibility_rounded,
-                color: Colors.white.withValues(alpha: 0.55),
-                size: 20,
+            const SizedBox(height: 14),
+            _PremiumField(
+              controller: _confirmPasswordController,
+              hint: l10n.confirmPassword,
+              icon: Icons.lock_outline_rounded,
+              obscure: _obscureConfirm,
+              validator: (v) =>
+                  AppValidators.confirmPassword(v, _passwordController.text),
+              suffix: GestureDetector(
+                onTap: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                child: Icon(
+                  _obscureConfirm
+                      ? Icons.visibility_off_rounded
+                      : Icons.visibility_rounded,
+                  color: Colors.white.withValues(alpha: 0.55),
+                  size: 20,
+                ),
               ),
             ),
-          ),
+          ],
           if (_selectedRole == UserType.customer) ...[
             const SizedBox(height: 28),
             SocialAuthButtons(
@@ -1092,11 +1095,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           icon: Icons.person_outline_rounded,
           label: l10n.fullName,
           value: _nameController.text.trim(),
-        ),
-        _ReviewTile(
-          icon: Icons.email_outlined,
-          label: l10n.email,
-          value: _emailController.text.trim(),
         ),
         if (_phoneController.text.trim().isNotEmpty)
           _ReviewTile(

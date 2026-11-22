@@ -287,12 +287,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dontHaveAccount => 'ليس لديك حساب؟';
 
   @override
-  String get resetEmailSent =>
-      'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.';
+  String get resetEmailSent => 'تم تغيير كلمة المرور. يمكنك تسجيل الدخول الآن.';
 
   @override
   String get resetEmailHint =>
-      'أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور.';
+      'أدخل رقم هاتفك وأكّد ملكيته عبر واتساب، ثم اختر كلمة مرور جديدة.';
 
   @override
   String get backToLogin => 'العودة لتسجيل الدخول';
@@ -6959,7 +6958,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get whatsappOtpSubtitle =>
-      'فعّل رقم هاتفك فورًا عبر رسالة واتساب لتنشيط حسابك بسهولة.';
+      'افتح واتساب وأرسل رسالة التأكيد من نفس الرقم الذي أدخلته. سنؤكد وصولها تلقائيًا.';
 
   @override
   String get sendCodeViaWhatsApp => 'إرسال كود التفعيل عبر واتساب';
@@ -6969,7 +6968,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String whatsappCodeSentBanner(String code) {
-    return 'كود تفعيل واتساب الخاص بك هو: $code';
+    return 'رمز رسالة التأكيد: $code';
   }
 
   @override
@@ -6982,8 +6981,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resendWhatsAppCode => 'إعادة إرسال الكود';
 
   @override
-  String get phoneOrEmailOrUsername =>
-      'رقم الهاتف أو البريد الإلكتروني أو اسم المستخدم';
+  String get phoneOrEmailOrUsername => 'رقم الهاتف أو اسم المستخدم';
 
   @override
   String get phoneOptionalEmailHint =>

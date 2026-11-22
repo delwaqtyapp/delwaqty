@@ -55,6 +55,9 @@ Widget _buildTestApp({List<ServiceCategory>? catalog, String locale = 'en'}) {
   return ProviderScope(
     overrides: [
       authStateProvider.overrideWith(_FakeAuthNotifier.new),
+      registerPhoneVerifierProvider.overrideWithValue(
+        (context, phone) async => true,
+      ),
       if (catalog != null)
         providerServicesCatalogProvider.overrideWith((ref) async => catalog),
     ],
@@ -125,6 +128,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
 
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const Key('registerStepNext')));
       await tester.tap(find.byKey(const Key('registerStepNext')));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
@@ -134,12 +140,16 @@ void main() {
         'أحمد',
       );
       await tester.enterText(
-        find.widgetWithText(
-          TextFormField,
-          'البريد الإلكتروني (اختياري - يتم توليده تلقائيًا من رقم الهاتف)',
-        ),
-        'a@b.com',
+        find.widgetWithText(TextFormField, 'رقم الهاتف'),
+        '01000000001',
       );
+      expect(find.widgetWithText(TextFormField, 'كلمة المرور'), findsNothing);
+      await tester.ensureVisible(find.byKey(const Key('registerStepNext')));
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const Key('registerStepNext')));
+      await tester.tap(find.byKey(const Key('registerStepNext')));
+      await tester.pumpAndSettle();
       await tester.enterText(
         find.widgetWithText(TextFormField, 'كلمة المرور'),
         '12345678',
@@ -148,12 +158,19 @@ void main() {
         find.widgetWithText(TextFormField, 'تأكيد كلمة المرور'),
         '12345678',
       );
-      await tester.pump();
-
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const Key('registerStepNext')));
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const Key('registerStepNext')));
       await tester.tap(find.byKey(const Key('registerStepNext')));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
 
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const Key('registerStepNext')));
       await tester.tap(find.byKey(const Key('registerStepNext')));
       await tester.pumpAndSettle();
 

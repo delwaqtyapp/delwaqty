@@ -97,8 +97,8 @@
   "confirmPassword": "Confirm Password",
   "alreadyHaveAccount": "Already have an account?",
   "dontHaveAccount": "Don't have an account?",
-  "resetEmailSent": "Password reset link has been sent to your email.",
-  "resetEmailHint": "Enter your email address and we'll send you a link to reset your password.",
+  "resetEmailSent": "Your password has been changed. You can sign in now.",
+  "resetEmailHint": "Enter your phone number and verify it through WhatsApp, then choose a new password.",
   "backToLogin": "Back to Login",
   "noConnection": "No internet connection",
   "connectionRestored": "Internet connection restored",
@@ -2257,10 +2257,10 @@
   "registerWithPhoneFast": "Quick Registration with Phone & WhatsApp",
   "verifyViaWhatsApp": "Verify via WhatsApp",
   "whatsappOtpTitle": "WhatsApp Account Verification",
-  "whatsappOtpSubtitle": "Verify your phone number instantly via WhatsApp to activate your account.",
+  "whatsappOtpSubtitle": "Open WhatsApp and send the verification message from the number you entered. We will confirm it automatically.",
   "sendCodeViaWhatsApp": "Send Verification via WhatsApp",
   "openWhatsAppToVerify": "Open WhatsApp to Activate",
-  "whatsappCodeSentBanner": "Your WhatsApp activation code is: {code}",
+  "whatsappCodeSentBanner": "Verification message code: {code}",
   "@whatsappCodeSentBanner": {
     "placeholders": {
       "code": {
@@ -2271,7 +2271,7 @@
   "enterOtpCode": "Enter 6-digit verification code",
   "verifyAndActivateAccount": "Verify & Activate Account",
   "resendWhatsAppCode": "Resend Code",
-  "phoneOrEmailOrUsername": "Phone Number, Email, or Username",
+  "phoneOrEmailOrUsername": "Phone Number or Username",
   "phoneOptionalEmailHint": "Email (Optional - auto-generated from phone if left blank)",
   "whatsappVerifiedSuccess": "Phone number verified via WhatsApp successfully!",
   "invalidOtpCode": "Invalid or expired verification code.",

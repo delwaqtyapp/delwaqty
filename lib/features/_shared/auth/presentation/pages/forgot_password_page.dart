@@ -5,8 +5,37 @@ import 'package:delwaqty/shared/widgets/pressable_scale.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/utils/validators.dart';
-import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/widgets/whatsapp_otp_sheet.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+
+final whatsappResetVerifierProvider =
+    Provider<Future<String?> Function(BuildContext, String)>((ref) {
+      return (context, phone) => WhatsAppOtpSheet.showChallenge(
+        context,
+        phone: phone,
+        purpose: 'password_reset',
+      );
+    });
+
+final whatsappPasswordResetProvider =
+    Provider<Future<void> Function(String, String, String)>((ref) {
+      return (phone, challenge, password) async {
+        final response = await Supabase.instance.client.functions.invoke(
+          'whatsapp-password-reset',
+          body: {
+            'phone': phone,
+            'challenge': challenge,
+            'new_password': password,
+          },
+        );
+        if (response.status != 200 ||
+            response.data is! Map ||
+            response.data['ok'] != true) {
+          throw StateError('Password reset not confirmed');
+        }
+      };
+    });
 
 class ForgotPasswordPage extends ConsumerStatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -17,13 +46,18 @@ class ForgotPasswordPage extends ConsumerStatefulWidget {
 
 class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  bool _emailSent = false;
+  final _phoneController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmController = TextEditingController();
+  String? _challenge;
+  bool _resetDone = false;
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    _confirmController.dispose();
     super.dispose();
   }
 
@@ -31,21 +65,32 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     try {
-      await ref
-          .read(authStateProvider.notifier)
-          .resetPassword(email: _emailController.text.trim());
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _emailSent = true;
-        });
+      if (_challenge == null) {
+        final challenge = await ref.read(whatsappResetVerifierProvider)(
+          context,
+          _phoneController.text.trim(),
+        );
+        if (mounted) setState(() => _challenge = challenge);
+        return;
       }
-    } catch (e) {
+      await ref.read(whatsappPasswordResetProvider)(
+        _phoneController.text.trim(),
+        _challenge!,
+        _passwordController.text,
+      );
+      if (mounted) setState(() => _resetDone = true);
+    } catch (_) {
       if (mounted) {
-        setState(() => _isLoading = false);
-        final l10n = AppLocalizations.of(context);
-        context.showAppSnackBar(l10n.somethingWentWrong, isError: true);
+        // A failed server update can burn its one-time ticket. Require a fresh
+        // WhatsApp confirmation instead of replaying or faking success.
+        setState(() => _challenge = null);
+        context.showAppSnackBar(
+          AppLocalizations.of(context).somethingWentWrong,
+          isError: true,
+        );
       }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -103,7 +148,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                       padding: const EdgeInsets.all(24),
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 400),
-                        child: _emailSent
+                        child: _resetDone
                             ? _buildSuccessView(l10n)
                             : _buildFormView(l10n),
                       ),
@@ -186,7 +231,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                   ),
                 ),
                 child: const Icon(
-                  Icons.mark_email_read_outlined,
+                  Icons.check_circle_outline_rounded,
                   size: 55,
                   color: AppColors.brandPurple,
                 ),
@@ -222,6 +267,41 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
       ],
     );
   }
+
+  InputDecoration _inputDecoration(
+    String hint,
+    IconData icon,
+  ) => InputDecoration(
+    hintText: hint,
+    hintStyle: TextStyle(
+      color: AppColors.textPrimary.withValues(alpha: 0.3),
+      fontSize: 15,
+    ),
+    prefixIcon: Icon(
+      icon,
+      color: AppColors.textPrimary.withValues(alpha: 0.35),
+      size: 20,
+    ),
+    filled: true,
+    fillColor: Colors.white,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(18),
+      borderSide: BorderSide(
+        color: AppColors.textPrimary.withValues(alpha: 0.08),
+      ),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(18),
+      borderSide: BorderSide(
+        color: AppColors.textPrimary.withValues(alpha: 0.08),
+      ),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(18),
+      borderSide: const BorderSide(color: AppColors.brandPurple, width: 1.5),
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+  );
 
   Widget _buildFormView(AppLocalizations l10n) {
     return Form(
@@ -270,55 +350,61 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
           ),
           const SizedBox(height: 32),
           TextFormField(
-            controller: _emailController,
-            keyboardType: TextInputType.emailAddress,
+            controller: _phoneController,
+            keyboardType: TextInputType.phone,
+            readOnly: _challenge != null,
             textInputAction: TextInputAction.done,
-            validator: AppValidators.email,
+            validator: AppValidators.phone,
             onFieldSubmitted: (_) => _handleResetPassword(),
             style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
-            decoration: InputDecoration(
-              hintText: l10n.email,
-              hintStyle: TextStyle(
-                color: AppColors.textPrimary.withValues(alpha: 0.3),
-                fontSize: 15,
-              ),
-              prefixIcon: Icon(
-                Icons.email_outlined,
-                color: AppColors.textPrimary.withValues(alpha: 0.35),
-                size: 20,
-              ),
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide(
-                  color: AppColors.textPrimary.withValues(alpha: 0.08),
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide(
-                  color: AppColors.textPrimary.withValues(alpha: 0.08),
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: const BorderSide(
-                  color: AppColors.brandPurple,
-                  width: 1.5,
-                ),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 18,
-                vertical: 18,
-              ),
+            decoration: _inputDecoration(
+              l10n.phoneNumber,
+              Icons.phone_outlined,
             ),
           ),
+          if (_challenge != null) ...[
+            const SizedBox(height: 24),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: true,
+              autofillHints: const [AutofillHints.newPassword],
+              decoration: _inputDecoration(
+                l10n.newPassword,
+                Icons.lock_outline_rounded,
+              ),
+              validator: (value) {
+                final error = AppValidators.password(value);
+                if (error != null) return error;
+                return (value?.length ?? 0) < 8 ? l10n.passwordTooShort : null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _confirmController,
+              obscureText: true,
+              decoration: _inputDecoration(
+                l10n.confirmPassword,
+                Icons.lock_outline_rounded,
+              ),
+              validator: (value) => AppValidators.confirmPassword(
+                value,
+                _passwordController.text,
+              ),
+            ),
+            TextButton(
+              onPressed: _isLoading
+                  ? null
+                  : () => setState(() => _challenge = null),
+              child: Text(l10n.edit),
+            ),
+          ],
           const SizedBox(height: 24),
           _PurpleButton(
             onPressed: _isLoading ? null : _handleResetPassword,
             isLoading: _isLoading,
-            label: l10n.resetPassword,
+            label: _challenge == null
+                ? l10n.verifyViaWhatsApp
+                : l10n.resetPassword,
           ),
           const SizedBox(height: 16),
           TextButton(

@@ -209,22 +209,25 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
             },
           ),
           const SizedBox(height: 16),
-          statsAsync.when(
-            loading: () => const Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: CircularProgressIndicator(),
+          // While offline the stats query is not refreshed; showing its
+          // loading spinner above the offline card reads as a stuck load.
+          if (online)
+            statsAsync.when(
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+              error: (e, _) => _HubErrorCard(
+                message: appErrorText(context, e),
+                onRetry: () => ref.invalidate(driverStatsProvider(_driverId)),
+              ),
+              data: (stats) => AnimatedFadeIn(
+                delay: const Duration(milliseconds: 100),
+                child: _StatsRow(stats: stats),
               ),
             ),
-            error: (e, _) => _HubErrorCard(
-              message: appErrorText(context, e),
-              onRetry: () => ref.invalidate(driverStatsProvider(_driverId)),
-            ),
-            data: (stats) => AnimatedFadeIn(
-              delay: const Duration(milliseconds: 100),
-              child: _StatsRow(stats: stats),
-            ),
-          ),
           const SizedBox(height: 20),
           AnimatedFadeIn(
             delay: const Duration(milliseconds: 150),

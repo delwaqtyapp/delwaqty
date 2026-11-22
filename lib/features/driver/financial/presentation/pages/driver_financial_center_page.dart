@@ -44,10 +44,14 @@ class DriverFinancialCenterPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.financialCenter)),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/driver/financial-center/topup'),
-        icon: const Icon(Icons.add),
-        label: Text(l10n.topUp),
+      floatingActionButton: Padding(
+        // Keep the FAB above the shell's floating bottom navigation bar.
+        padding: const EdgeInsets.only(bottom: 96),
+        child: FloatingActionButton.extended(
+          onPressed: () => context.push('/driver/financial-center/topup'),
+          icon: const Icon(Icons.add),
+          label: Text(l10n.topUp),
+        ),
       ),
       body: RefreshIndicator(
         onRefresh: () async {

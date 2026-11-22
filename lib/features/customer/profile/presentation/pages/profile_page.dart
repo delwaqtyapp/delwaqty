@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
@@ -32,6 +33,23 @@ class ProfilePage extends ConsumerStatefulWidget {
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
   bool _isUploadingAvatar = false;
+  String _appVersionLabel = '';
+
+  @override
+  void initState() {
+    super.initState();
+    PackageInfo.fromPlatform()
+        .then((info) {
+          if (mounted) {
+            setState(
+              () => _appVersionLabel = '${info.version}+${info.buildNumber}',
+            );
+          }
+        })
+        .catchError((_) {
+          // Keep the l10n fallback label when package info is unavailable.
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -925,7 +943,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           icon: Icons.info_outline_rounded,
           color: primary,
           title: l10n.about,
-          subtitle: l10n.version,
+          subtitle: _appVersionLabel.isEmpty
+              ? l10n.version
+              : '${l10n.version.split(' ').first} $_appVersionLabel',
           onTap: () => context.push('/settings/about'),
         ),
         _SectionTile(

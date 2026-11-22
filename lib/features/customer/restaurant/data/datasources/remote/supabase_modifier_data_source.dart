@@ -24,6 +24,30 @@ class SupabaseModifierDataSource {
     createdAt: DateTime.parse(row['created_at'] as String),
   );
 
+  /// Required modifier groups for a product: group id -> its option ids.
+  /// Used to block checkout until every required group has a pick.
+  Future<Map<String, Set<String>>> getRequiredGroupOptions(
+    String productId,
+  ) async {
+    final groups = await _client
+        .from('product_modifier_groups')
+        .select('id')
+        .eq('product_id', productId)
+        .eq('is_required', true);
+    final groupRows = (groups as List).cast<Map<String, dynamic>>();
+    if (groupRows.isEmpty) return const {};
+    final groupIds = [for (final g in groupRows) g['id'] as String];
+    final options = await _client
+        .from('product_modifier_options')
+        .select('id, group_id')
+        .inFilter('group_id', groupIds);
+    final result = <String, Set<String>>{for (final id in groupIds) id: {}};
+    for (final o in (options as List).cast<Map<String, dynamic>>()) {
+      result[o['group_id']]?.add(o['id'] as String);
+    }
+    return result;
+  }
+
   Future<List<ProductModifier>> getModifiers(String productId) async {
     // Read the group model (product_modifier_groups + _options), which is
     // what merchants manage and what the server-side pricing validates.

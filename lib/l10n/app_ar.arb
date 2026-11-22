@@ -2670,5 +2670,9 @@
   "posErrInvalidQty": "الكمية غير صالحة لأحد الأصناف",
   "@posErrInvalidQty": {
     "description": "POS: posErrInvalidQty"
+  },
+  "productModifierRequiredError": "يرجى اختيار الخيارات المطلوبة أولاً",
+  "@productModifierRequiredError": {
+    "description": "Shown when required product modifier groups have no selection"
   }
 }

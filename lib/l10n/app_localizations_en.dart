@@ -7840,4 +7840,35 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noDriversYetAutoRetry =>
       'No drivers free yet. We keep retrying automatically; tap dispatch to retry now.';
+
+  @override
+  String get posModifierRequired => 'Required';
+
+  @override
+  String get posModifierConfirm => 'Add to cart';
+
+  @override
+  String get posErrModifierRequired =>
+      'A required option is missing for one of the items';
+
+  @override
+  String get posErrModifierMax =>
+      'Too many options selected for one of the items';
+
+  @override
+  String get posErrModifierInvalid =>
+      'One of the selected options is not valid';
+
+  @override
+  String get posErrStock => 'Not enough stock for one of the items';
+
+  @override
+  String get posErrUnavailable => 'One of the items is no longer available';
+
+  @override
+  String get posErrInvalidQty => 'Invalid quantity for one of the items';
+
+  @override
+  String get productModifierRequiredError =>
+      'Please select the required options first';
 }

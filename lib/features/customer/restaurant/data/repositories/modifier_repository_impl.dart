@@ -17,6 +17,17 @@ class ModifierRepositoryImpl implements ModifierRepository {
   }
 
   @override
+  Future<Map<String, Set<String>>> getRequiredGroupOptions(
+    String productId,
+  ) async {
+    try {
+      return await _dataSource.getRequiredGroupOptions(productId);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
   Future<ProductModifier> createModifier(ProductModifier modifier) async {
     try {
       return await _dataSource.createModifier(modifier);

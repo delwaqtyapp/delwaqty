@@ -2729,5 +2729,9 @@
   "posErrInvalidQty": "Invalid quantity for one of the items",
   "@posErrInvalidQty": {
     "description": "POS: posErrInvalidQty"
+  },
+  "productModifierRequiredError": "Please select the required options first",
+  "@productModifierRequiredError": {
+    "description": "Shown when required product modifier groups have no selection"
   }
 }

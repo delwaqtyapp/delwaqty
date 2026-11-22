@@ -39,6 +39,10 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
   final _instructionsController = TextEditingController();
   final Set<String> _selectedModifierIds = {};
   List<ProductModifier> _currentModifiers = [];
+
+  /// Required modifier groups: group id -> option ids. Every group needs at
+  /// least one selected option before the item can be added to the cart.
+  Map<String, Set<String>> _requiredGroups = const {};
   bool _modifiersLoaded = false;
   late Future<Product?> _productFuture;
 
@@ -81,9 +85,11 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
     try {
       final repo = ref.read(restaurant.modifierRepositoryProvider);
       final mods = await repo.getModifiers(widget.productId);
+      final required = await repo.getRequiredGroupOptions(widget.productId);
       if (mounted) {
         setState(() {
           _currentModifiers = mods;
+          _requiredGroups = required;
           _modifiersLoaded = true;
         });
       }
@@ -91,6 +97,14 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
       debugPrint('Failed to load product modifiers: $e');
       if (mounted) setState(() => _modifiersLoaded = true);
     }
+  }
+
+  /// True when a required modifier group has no selected option.
+  bool get _missingRequiredModifier {
+    for (final optionIds in _requiredGroups.values) {
+      if (!_selectedModifierIds.any(optionIds.contains)) return true;
+    }
+    return false;
   }
 
   Widget _buildHeroPlaceholder(BuildContext context) {
@@ -271,11 +285,24 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                       const SizedBox(height: 24),
                       AnimatedFadeIn(
                         delay: const Duration(milliseconds: 470),
-                        child: Text(
-                          l10n.addOns,
-                          style: context.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        child: Row(
+                          children: [
+                            Text(
+                              l10n.addOns,
+                              style: context.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (_requiredGroups.isNotEmpty) ...[
+                              const SizedBox(width: 8),
+                              Text(
+                                l10n.posModifierRequired,
+                                style: context.textTheme.labelSmall?.copyWith(
+                                  color: context.colorScheme.error,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -434,6 +461,14 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
               child: FilledButton.icon(
                 onPressed: product.isAvailable
                     ? () async {
+                        if (_missingRequiredModifier) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(l10n.productModifierRequiredError),
+                            ),
+                          );
+                          return;
+                        }
                         final selectedModifierNames = _currentModifiers
                             .where((m) => _selectedModifierIds.contains(m.id))
                             .map((m) => m.name)

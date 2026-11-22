@@ -7775,4 +7775,34 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get noDriversYetAutoRetry =>
       'لا يوجد كباتن متاحون حالياً. تتم إعادة المحاولة تلقائياً، أو اضغط إرسال مندوب للمحاولة فوراً.';
+
+  @override
+  String get posModifierRequired => 'مطلوب';
+
+  @override
+  String get posModifierConfirm => 'أضف إلى السلة';
+
+  @override
+  String get posErrModifierRequired =>
+      'يوجد خيار مطلوب لم يتم اختياره لأحد الأصناف';
+
+  @override
+  String get posErrModifierMax =>
+      'تم اختيار عدد خيارات أكثر من المسموح لأحد الأصناف';
+
+  @override
+  String get posErrModifierInvalid => 'أحد الخيارات المحددة غير صالح';
+
+  @override
+  String get posErrStock => 'الكمية المتوفرة من أحد الأصناف غير كافية';
+
+  @override
+  String get posErrUnavailable => 'أحد الأصناف لم يعد متاحًا';
+
+  @override
+  String get posErrInvalidQty => 'الكمية غير صالحة لأحد الأصناف';
+
+  @override
+  String get productModifierRequiredError =>
+      'يرجى اختيار الخيارات المطلوبة أولاً';
 }

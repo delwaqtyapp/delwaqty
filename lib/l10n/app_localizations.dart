@@ -14875,6 +14875,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No drivers free yet. We keep retrying automatically; tap dispatch to retry now.'**
   String get noDriversYetAutoRetry;
+
+  /// POS: posModifierRequired
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get posModifierRequired;
+
+  /// POS: posModifierConfirm
+  ///
+  /// In en, this message translates to:
+  /// **'Add to cart'**
+  String get posModifierConfirm;
+
+  /// POS: posErrModifierRequired
+  ///
+  /// In en, this message translates to:
+  /// **'A required option is missing for one of the items'**
+  String get posErrModifierRequired;
+
+  /// POS: posErrModifierMax
+  ///
+  /// In en, this message translates to:
+  /// **'Too many options selected for one of the items'**
+  String get posErrModifierMax;
+
+  /// POS: posErrModifierInvalid
+  ///
+  /// In en, this message translates to:
+  /// **'One of the selected options is not valid'**
+  String get posErrModifierInvalid;
+
+  /// POS: posErrStock
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough stock for one of the items'**
+  String get posErrStock;
+
+  /// POS: posErrUnavailable
+  ///
+  /// In en, this message translates to:
+  /// **'One of the items is no longer available'**
+  String get posErrUnavailable;
+
+  /// POS: posErrInvalidQty
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid quantity for one of the items'**
+  String get posErrInvalidQty;
+
+  /// Shown when required product modifier groups have no selection
+  ///
+  /// In en, this message translates to:
+  /// **'Please select the required options first'**
+  String get productModifierRequiredError;
 }
 
 class _AppLocalizationsDelegate

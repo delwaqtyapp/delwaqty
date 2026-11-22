@@ -626,17 +626,13 @@ class AdminRepository implements admin.AdminRepository {
     String? status,
   }) async {
     try {
-      var query = _supabase.from('merchants').select();
-
-      if (search != null && search.isNotEmpty) {
-        query = query.or('name.ilike.%$search%,email.ilike.%$search%');
-      }
-
-      if (status != null && status.isNotEmpty) {
-        query = query.eq('status', status);
-      }
-
-      final response = await query.order('created_at', ascending: false);
+      // Region-scoped server side (371): the public-catalog SELECT policy on
+      // merchants exposes every active merchant to any signed-in user, so a
+      // bare table select leaks the whole country to scoped admins.
+      final response = await _supabase.rpc(
+        'admin_list_merchants',
+        params: {'p_search': search, 'p_status': status},
+      );
       return List<Map<String, dynamic>>.from(response as List);
     } catch (e) {
       throw AdminException('Failed to fetch merchants: $e');

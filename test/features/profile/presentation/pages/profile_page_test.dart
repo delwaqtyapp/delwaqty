@@ -140,7 +140,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('clearing optional fields sends null for them', (tester) async {
+  testWidgets('clearing username leaves verified phone untouched', (
+    tester,
+  ) async {
     final oldHandler = FlutterError.onError;
     FlutterError.onError = ignoreVisualAssertions(oldHandler);
     addTearDown(() => FlutterError.onError = oldHandler);
@@ -160,7 +162,9 @@ void main() {
 
     await tester.enterText(find.byType(TextField).at(0), 'Only Name');
     await tester.enterText(find.byType(TextField).at(1), '');
-    await tester.enterText(find.byType(TextField).at(2), '');
+    final phone = tester.widget<TextField>(find.byType(TextField).at(2));
+    expect(phone.readOnly, isTrue);
+    expect(phone.controller!.text, '01000000000');
     await tester.pump();
 
     await tester.ensureVisible(find.text('Save Changes'));
@@ -171,7 +175,7 @@ void main() {
     verify(
       () => mockRepo.updateProfile(
         userId: 'u1',
-        data: {'full_name': 'Only Name', 'username': null, 'phone': null},
+        data: {'full_name': 'Only Name', 'username': null},
       ),
     ).called(1);
     expect(tester.takeException(), isNull);

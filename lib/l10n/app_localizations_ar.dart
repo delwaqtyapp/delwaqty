@@ -6954,6 +6954,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get verifyViaWhatsApp => 'تفعيل عبر واتساب';
 
   @override
+  String get phoneChangeUnavailable =>
+      'رقم هاتفك مرتبط بتأكيد واتساب ولا يمكن تغييره من هنا.';
+
+  @override
   String get phoneAlreadyRegistered =>
       'هذا الرقم مسجل بالفعل. سجّل الدخول أو استعد كلمة المرور.';
 

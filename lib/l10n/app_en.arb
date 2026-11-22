@@ -2256,6 +2256,7 @@
   "chatPermissionsShort": "Chat Access",
   "registerWithPhoneFast": "Quick Registration with Phone & WhatsApp",
   "verifyViaWhatsApp": "Verify via WhatsApp",
+  "phoneChangeUnavailable": "Your phone number is linked to WhatsApp verification and cannot be changed here.",
   "phoneAlreadyRegistered": "This phone number is already registered. Sign in or reset your password.",
   "phoneIdentityMismatch": "The verified number does not match this registration. Check your number and verify it again.",
   "phoneSignupRequired": "Use your phone number and WhatsApp verification, or continue with Google.",

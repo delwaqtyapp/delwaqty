@@ -13400,6 +13400,12 @@ abstract class AppLocalizations {
   /// **'Verify via WhatsApp'**
   String get verifyViaWhatsApp;
 
+  /// No description provided for @phoneChangeUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Your phone number is linked to WhatsApp verification and cannot be changed here.'**
+  String get phoneChangeUnavailable;
+
   /// No description provided for @phoneAlreadyRegistered.
   ///
   /// In en, this message translates to:

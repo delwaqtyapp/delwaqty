@@ -2256,6 +2256,7 @@
   "chatPermissionsShort": "صلاحيات الدردشة",
   "registerWithPhoneFast": "تسجيل سريع برقم الهاتف وتفعيل واتساب",
   "verifyViaWhatsApp": "تفعيل عبر واتساب",
+  "phoneChangeUnavailable": "رقم هاتفك مرتبط بتأكيد واتساب ولا يمكن تغييره من هنا.",
   "phoneAlreadyRegistered": "هذا الرقم مسجل بالفعل. سجّل الدخول أو استعد كلمة المرور.",
   "phoneIdentityMismatch": "الرقم الذي تم تأكيده لا يطابق بيانات التسجيل. راجع رقمك وأكّد تفعيله مرة أخرى.",
   "phoneSignupRequired": "استخدم رقم هاتفك وتأكيد واتساب، أو تابع باستخدام جوجل.",

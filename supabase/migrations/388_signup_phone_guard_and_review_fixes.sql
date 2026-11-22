@@ -323,10 +323,10 @@ grant execute on function public.audit_normalized_phone_duplicates() to postgres
 --
 -- (8) #54: public.users.phone can no longer be changed by a direct client
 --     UPDATE (users_guard_account_fields now guards it like role/status).
---     The one legitimate path is claim_phone_change(phone, challenge):
---     webhook-verified, one-time, purpose='phone_change', uniqueness-
---     enforced. A SECURITY DEFINER function updates the row as its owner,
---     so it passes the guard while 'authenticated' is blocked.
+--     A reserved claim_phone_change(phone, challenge) RPC requires a
+--     webhook-verified, one-time proof, purpose='phone_change', and checks
+--     uniqueness, but is NOT granted to clients until identifier reassignment
+--     is designed. The app keeps phone read-only in the meantime.
 CREATE OR REPLACE FUNCTION public.request_whatsapp_otp(p_phone text, p_purpose text DEFAULT 'register'::text)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -476,7 +476,11 @@ begin
 end;
 $function$
 ;
+-- RESERVED INTERNAL FUNCTION, NOT A CLIENT PHONE-CHANGE PATH.
+-- Changing public.users.phone alone leaves the former technical auth email
+-- reserved. Identifier reassignment needs its own design, including Google
+-- users whose real email must never be rewritten. Keep client execution
+-- revoked until that work is complete; the app displays phone read-only.
 revoke all on function public.claim_phone_change(text, uuid) from public;
-revoke all on function public.claim_phone_change(text, uuid) from anon;
-grant execute on function public.claim_phone_change(text, uuid) to authenticated;
+revoke all on function public.claim_phone_change(text, uuid) from anon, authenticated;
 grant execute on function public.claim_phone_change(text, uuid) to service_role;

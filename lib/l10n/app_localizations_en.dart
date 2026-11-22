@@ -7008,6 +7008,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verifyViaWhatsApp => 'Verify via WhatsApp';
 
   @override
+  String get phoneChangeUnavailable =>
+      'Your phone number is linked to WhatsApp verification and cannot be changed here.';
+
+  @override
   String get phoneAlreadyRegistered =>
       'This phone number is already registered. Sign in or reset your password.';
 

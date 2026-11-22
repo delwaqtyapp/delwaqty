@@ -1140,14 +1140,12 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
 
     final name = _nameController.text.trim();
     final username = _usernameController.text.trim();
-    final phone = _phoneController.text.trim();
 
     final data = <String, dynamic>{};
     if (name.isNotEmpty) {
       data['full_name'] = name;
     }
     data['username'] = username.isEmpty ? null : username;
-    data['phone'] = phone.isEmpty ? null : phone;
 
     try {
       if (data.isNotEmpty) {
@@ -1259,8 +1257,13 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
             const SizedBox(height: 12),
             TextField(
               controller: _phoneController,
+              readOnly: true,
               enabled: !_saving,
-              decoration: InputDecoration(labelText: l10n.phone),
+              decoration: InputDecoration(
+                labelText: l10n.phone,
+                helperText: l10n.phoneChangeUnavailable,
+                helperMaxLines: 3,
+              ),
               keyboardType: TextInputType.phone,
             ),
             const SizedBox(height: 12),

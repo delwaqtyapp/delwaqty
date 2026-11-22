@@ -55,6 +55,15 @@ do $$ declare u uuid:=(select uid from invitation_test_context); begin
   update public.provider_business_profiles set status='approved' where user_id=u;
   update public.merchants set status='suspended' where owner_user_id=u;
   assert public._approved_app_channels(u)='{}'::text[], 'suspended store hidden';
+  -- Approved profile can be linked to its active target after both exist.
+  delete from public.notifications where user_id=u and deep_link='/profile/app-invitations';
+  delete from public.app_invitation_deliveries where user_id=u;
+  update public.provider_business_profiles set merchant_id=null where user_id=u;
+  update public.merchants set status='active' where owner_user_id=u;
+  assert public._approved_app_channels(u)='{}'::text[], 'unlinked profile hidden';
+  update public.provider_business_profiles set merchant_id=(select id from public.merchants where owner_user_id=u limit 1) where user_id=u;
+  assert public._approved_app_channels(u)=array['provider'], 'linked profile eligible';
+  assert (select count(*) from public.notifications where user_id=u and deep_link='/profile/app-invitations')=1, 'link-only activation notifies';
   assert not has_function_privilege('anon','public.get_my_app_invitations()','EXECUTE'), 'anon cannot fetch';
   assert not has_function_privilege('authenticated','public._approved_app_channels(uuid)','EXECUTE'), 'cannot inspect other users';
   assert not has_function_privilege('authenticated','public._approved_app_channels_at(uuid,text,jsonb)','EXECUTE'), 'cannot supply old rows';

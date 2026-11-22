@@ -126,7 +126,7 @@ drop trigger if exists app_invitation_merchant on public.merchants;
 create trigger app_invitation_merchant after insert or update of status on public.merchants
 for each row execute function public._notify_approved_app_invitation();
 drop trigger if exists app_invitation_provider on public.provider_business_profiles;
-create trigger app_invitation_provider after insert or update of status on public.provider_business_profiles
+create trigger app_invitation_provider after insert or update of status,merchant_id,service_provider_id on public.provider_business_profiles
 for each row execute function public._notify_approved_app_invitation();
 drop trigger if exists app_invitation_service on public.service_providers;
 create trigger app_invitation_service after insert or update of is_verified on public.service_providers

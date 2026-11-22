@@ -7885,6 +7885,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String get posErrInvalidQty => 'Invalid quantity for one of the items';
 
   @override
+  String get posScanBarcode => 'Scan barcode';
+
+  @override
+  String get posSearchHint => 'Search name or barcode';
+
+  @override
+  String get posScanAdded => 'Added to cart';
+
+  @override
+  String get posDrugFoundTitle => 'Found in drug catalog';
+
+  @override
+  String get posDrugImportAdd => 'Import & add';
+
+  @override
+  String get posQuickAddTitle => 'New product for this barcode';
+
+  @override
+  String get posQuickAddCreate => 'Create & add';
+
+  @override
+  String get barcodeFieldLabel => 'Barcode';
+
+  @override
+  String get barcodeFieldHint => 'Type or scan the product barcode';
+
+  @override
+  String get barcodeUniqueHint => 'One barcode per product in this store';
+
+  @override
+  String get barcodeScanToFill => 'Scan to fill';
+
+  @override
+  String get barcodeDuplicateError =>
+      'Another product in this store already uses this barcode';
+
+  @override
+  String get scannerTitle => 'Scan barcode';
+
+  @override
+  String get scannerTorch => 'Flashlight';
+
+  @override
+  String get scannerEnterManually => 'Type barcode manually';
+
+  @override
+  String get scannerManualHint => 'Barcode number';
+
+  @override
+  String get scannerAimHint => 'Point the camera at the product barcode';
+
+  @override
+  String get scannerPermissionNeeded =>
+      'Camera access is needed to scan barcodes. You can still type the barcode manually.';
+
+  @override
+  String get scannerGrantPermission => 'Allow camera';
+
+  @override
+  String get scannerOpenSettings => 'Open settings';
+
+  @override
   String get productModifierRequiredError =>
       'Please select the required options first';
 

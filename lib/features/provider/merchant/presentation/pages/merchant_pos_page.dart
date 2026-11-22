@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'dart:math';
@@ -9,6 +10,11 @@ import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
+import 'package:delwaqty/features/provider/capability/domain/provider_capability.dart';
+import 'package:delwaqty/features/provider/capability/presentation/providers/provider_capability_providers.dart';
+import 'package:delwaqty/features/provider/merchant/domain/pos_product_lookup.dart';
+import 'package:delwaqty/features/provider/merchant/merchant_module.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/pages/barcode_scanner_page.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/app_shell.dart';
@@ -34,6 +40,12 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
   final Map<String, double> _cartSurcharge = {};
   final _discountCtrl = TextEditingController(text: '0');
   final _customerCtrl = TextEditingController();
+  final _searchCtrl = TextEditingController();
+  String _searchQuery = '';
+
+  /// Latest sellable product rows, refreshed from [merchantProductsProvider]
+  /// on every build so barcode handlers can match without a new fetch.
+  List<Map<String, dynamic>> _products = const [];
   String _paymentMethod = 'cash';
   bool _submitting = false;
   String _saleKey = _newSaleKey();
@@ -42,6 +54,7 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
   void dispose() {
     _discountCtrl.dispose();
     _customerCtrl.dispose();
+    _searchCtrl.dispose();
     super.dispose();
   }
 
@@ -176,6 +189,339 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
     }
   }
 
+  void _showSnack(String message, {required bool isError}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError
+            ? AppColors.errorLight
+            : AppColors.successLight,
+      ),
+    );
+  }
+
+  /// Opens the camera scanner and routes the result through [_onBarcode].
+  Future<void> _scanBarcode() async {
+    final code = await BarcodeScannerPage.show(context);
+    if (!mounted || code == null) return;
+    await _onBarcode(code);
+  }
+
+  /// Handles a scanned or typed barcode in priority order:
+  /// 1. exact match in the store's own products -> add to cart;
+  /// 2. pharmacy accounts: match in the shared drug catalog -> import with
+  ///    the official MoH price pre-filled, then add;
+  /// 3. otherwise offer quick product creation with the barcode pre-filled.
+  Future<void> _onBarcode(String code) async {
+    final l10n = AppLocalizations.of(context);
+    final barcode = normalizeBarcode(code);
+    if (barcode.isEmpty) return;
+
+    final match = findProductByBarcode(_products, barcode);
+    if (match != null) {
+      final stock = (match['stock_quantity'] as num?)?.toInt() ?? 0;
+      if (stock > 0) {
+        await _onProductTap(match);
+        if (mounted) {
+          _showSnack('${l10n.posScanAdded}: ${match['name']}', isError: false);
+        }
+      } else if (mounted) {
+        _showSnack(l10n.posErrStock, isError: true);
+      }
+      return;
+    }
+
+    if (ref.read(providerCategoryProvider) == ProviderCategory.pharmacy) {
+      final drug = await _findDrugByBarcode(barcode);
+      if (!mounted) return;
+      if (drug != null) {
+        await _confirmDrugImport(drug, barcode);
+        return;
+      }
+    }
+
+    await _quickAddProduct(barcode);
+  }
+
+  /// Barcode lookup into the shared drug catalog (drug_catalog.barcode).
+  Future<Map<String, dynamic>?> _findDrugByBarcode(String barcode) async {
+    try {
+      final rows = await Supabase.instance.client
+          .from('drug_catalog')
+          .select(
+            'id, name_en, name_ar, strength, dosage_form, official_price_egp',
+          )
+          .eq('is_active', true)
+          .eq('barcode', barcode)
+          .limit(1);
+      final list = (rows as List).cast<Map<String, dynamic>>();
+      return list.isEmpty ? null : list.first;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Pharmacy path: confirm importing a catalog drug scanned at the till.
+  /// pharmacy_import_drug is idempotent per store (it returns the existing
+  /// product on a duplicate barcode), so a double scan stays safe.
+  Future<void> _confirmDrugImport(
+    Map<String, dynamic> drug,
+    String barcode,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final official = (drug['official_price_egp'] as num?)?.toDouble();
+    final priceCtrl = TextEditingController(
+      text: official != null ? official.toStringAsFixed(2) : '',
+    );
+    final stockCtrl = TextEditingController(text: '0');
+    final nameEn = (drug['name_en'] ?? '').toString();
+    final strength = (drug['strength'] ?? '').toString();
+    final nameAr = (drug['name_ar'] ?? '').toString();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(AppLocalizations.of(ctx).posDrugFoundTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              '$nameEn${strength.isEmpty ? '' : ' $strength'}',
+              style: AppTextStyles.titleMedium,
+            ),
+            if (nameAr.isNotEmpty) Text(nameAr),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: priceCtrl,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: InputDecoration(
+                labelText:
+                    '${AppLocalizations.of(ctx).price} (${AppLocalizations.of(ctx).currencySymbol})',
+                border: const OutlineInputBorder(),
+                isDense: true,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: stockCtrl,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(ctx).quantity,
+                border: const OutlineInputBorder(),
+                isDense: true,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(AppLocalizations.of(ctx).cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(AppLocalizations.of(ctx).posDrugImportAdd),
+          ),
+        ],
+      ),
+    );
+    final priceText = priceCtrl.text.trim();
+    final stockText = stockCtrl.text.trim();
+    priceCtrl.dispose();
+    stockCtrl.dispose();
+    if (confirmed != true || !mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final merchantId = await ref.read(providerMerchantIdProvider.future);
+      final price = double.tryParse(priceText);
+      final stock = int.tryParse(stockText) ?? 0;
+      if (price == null || price < 0) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.drugImportInvalidPrice),
+            backgroundColor: AppColors.errorLight,
+          ),
+        );
+        return;
+      }
+      await Supabase.instance.client.rpc(
+        'pharmacy_import_drug',
+        params: {
+          'p_drug_id': drug['id'],
+          'p_merchant_id': merchantId,
+          'p_price': price,
+          'p_stock': stock,
+        },
+      );
+      if (!mounted) return;
+      ref.invalidate(merchantProductsProvider);
+      await _addFreshProductByBarcode(merchantId, barcode);
+    } catch (e) {
+      if (mounted) {
+        _showSnack(
+          '${l10n.drugImportFailed}: ${appErrorText(context, e)}',
+          isError: true,
+        );
+      }
+    }
+  }
+
+  /// Unknown barcode: let the merchant create the product on the spot with
+  /// the barcode already attached, then add it to the cart. This is what
+  /// makes the cashier usable on day one in a grocery that has no catalog.
+  Future<void> _quickAddProduct(String barcode) async {
+    final l10n = AppLocalizations.of(context);
+    final nameCtrl = TextEditingController();
+    final priceCtrl = TextEditingController();
+    final stockCtrl = TextEditingController(text: '0');
+    final formKey = GlobalKey<FormState>();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        final l10nDialog = AppLocalizations.of(ctx);
+        return AlertDialog(
+          title: Text(l10nDialog.posQuickAddTitle),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: l10nDialog.barcodeFieldLabel,
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  child: Text(barcode),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                TextFormField(
+                  controller: nameCtrl,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    labelText: l10nDialog.productName,
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? l10nDialog.fieldRequired
+                      : null,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                TextFormField(
+                  controller: priceCtrl,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: InputDecoration(
+                    labelText:
+                        '${l10nDialog.price} (${l10nDialog.currencySymbol})',
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  validator: (v) {
+                    final parsed = double.tryParse((v ?? '').trim());
+                    if (parsed == null || parsed <= 0) {
+                      return l10nDialog.invalidPrice;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: AppSpacing.md),
+                TextFormField(
+                  controller: stockCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: l10nDialog.quantity,
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10nDialog.cancel),
+            ),
+            FilledButton(
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  Navigator.pop(ctx, true);
+                }
+              },
+              child: Text(l10nDialog.posQuickAddCreate),
+            ),
+          ],
+        );
+      },
+    );
+    final name = nameCtrl.text.trim();
+    final priceText = priceCtrl.text.trim();
+    final stockText = stockCtrl.text.trim();
+    nameCtrl.dispose();
+    priceCtrl.dispose();
+    stockCtrl.dispose();
+    if (confirmed != true || !mounted) return;
+
+    try {
+      final merchantId = await ref.read(providerMerchantIdProvider.future);
+      final repo = ref.read(merchantDashboardRepositoryProvider);
+      await repo.createProduct(merchantId, {
+        'name': name,
+        'description': '',
+        'price': double.parse(priceText),
+        'category': '',
+        'image_url': '',
+        'barcode': barcode,
+        'stock_quantity': int.tryParse(stockText) ?? 0,
+        'is_available': true,
+        'is_featured': false,
+      });
+      if (!mounted) return;
+      ref.invalidate(merchantProductsProvider);
+      await _addFreshProductByBarcode(merchantId, barcode);
+      if (mounted) {
+        _showSnack('${l10n.productCreated}: $name', isError: false);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      // Lost a race with another till that created the same barcode first:
+      // the unique index rejected the insert, so just add theirs.
+      final msg = e.toString();
+      if (msg.contains('products_merchant_barcode_uq') ||
+          msg.contains('duplicate key')) {
+        final merchantId = await ref.read(providerMerchantIdProvider.future);
+        if (!mounted) return;
+        await _addFreshProductByBarcode(merchantId, barcode);
+      } else {
+        _showSnack(l10n.somethingWentWrong, isError: true);
+      }
+    }
+  }
+
+  /// Re-reads the store's products after a create/import and adds the row
+  /// carrying [barcode] to the cart (through the normal tap path so modifier
+  /// groups and stock checks still apply).
+  Future<void> _addFreshProductByBarcode(
+    String merchantId,
+    String barcode,
+  ) async {
+    final repo = ref.read(merchantDashboardRepositoryProvider);
+    final fresh = await repo.getMerchantProducts(merchantId);
+    if (!mounted) return;
+    final product = findProductByBarcode(fresh, barcode);
+    if (product == null) return;
+    if (product['is_available'] == true) {
+      await _onProductTap(product);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -183,7 +529,25 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
     final productsAsync = ref.watch(merchantProductsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.posCashier)),
+      appBar: AppBar(
+        title: Text(l10n.posCashier),
+        actions: [
+          IconButton(
+            tooltip: l10n.posScanBarcode,
+            icon: const Icon(Icons.qr_code_scanner_rounded),
+            onPressed: _scanBarcode,
+          ),
+          IconButton(
+            tooltip: l10n.products,
+            icon: const Icon(Icons.inventory_2_rounded),
+            onPressed: () async {
+              // Product & price management stays one tap from the till.
+              await context.push('/merchant-dashboard/products');
+              if (mounted) ref.invalidate(merchantProductsProvider);
+            },
+          ),
+        ],
+      ),
       body: merchantIdAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => ErrorState(
@@ -199,37 +563,92 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
             onRetry: () => ref.invalidate(merchantProductsProvider),
           ),
           data: (allProducts) {
-            final products = allProducts
+            final sellable = allProducts
                 .where((p) => p['is_available'] == true)
                 .toList();
-            final subtotal = _previewSubtotal(products);
+            _products = sellable;
+            final products = filterProductsForPos(sellable, _searchQuery);
+            final subtotal = _previewSubtotal(sellable);
             final narrow = MediaQuery.sizeOf(context).width < 640;
-            final productsPane = products.isEmpty
-                ? Center(child: Text(l10n.posNoProducts))
-                : GridView.builder(
-                    padding: const EdgeInsets.all(16),
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 180,
-                          // Fixed tile height: image/monogram area above a
-                          // 2-line name, price and stock rows.
-                          mainAxisExtent: 210,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                        ),
-                    itemCount: products.length,
-                    itemBuilder: (context, i) => _ProductCard(
-                      product: products[i],
-                      qty: _qtyForProduct(products[i]['id'] as String),
-                      l10n: l10n,
-                      onTap: () => _onProductTap(products[i]),
+            final productsPane = Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.md,
+                    AppSpacing.lg,
+                    0,
+                  ),
+                  // One box for name search and typed barcodes: submitting an
+                  // exact barcode adds the product straight to the cart.
+                  child: TextField(
+                    controller: _searchCtrl,
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      hintText: l10n.posSearchHint,
+                      prefixIcon: const Icon(Icons.search_rounded),
+                      suffixIcon: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (_searchQuery.isNotEmpty)
+                            IconButton(
+                              icon: const Icon(Icons.close_rounded),
+                              onPressed: () => setState(() {
+                                _searchCtrl.clear();
+                                _searchQuery = '';
+                              }),
+                            ),
+                          IconButton(
+                            tooltip: l10n.posScanBarcode,
+                            icon: const Icon(Icons.qr_code_scanner_rounded),
+                            onPressed: _scanBarcode,
+                          ),
+                        ],
+                      ),
+                      border: const OutlineInputBorder(),
+                      isDense: true,
                     ),
-                  );
+                    onChanged: (v) => setState(() => _searchQuery = v),
+                    onSubmitted: (v) {
+                      final match = findProductByBarcode(sellable, v);
+                      if (match != null) {
+                        _onProductTap(match);
+                        _searchCtrl.clear();
+                        setState(() => _searchQuery = '');
+                      }
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: products.isEmpty
+                      ? Center(child: Text(l10n.posNoProducts))
+                      : GridView.builder(
+                          padding: const EdgeInsets.all(16),
+                          gridDelegate:
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 180,
+                                // Fixed tile height: image/monogram area above a
+                                // 2-line name, price and stock rows.
+                                mainAxisExtent: 210,
+                                mainAxisSpacing: 12,
+                                crossAxisSpacing: 12,
+                              ),
+                          itemCount: products.length,
+                          itemBuilder: (context, i) => _ProductCard(
+                            product: products[i],
+                            qty: _qtyForProduct(products[i]['id'] as String),
+                            l10n: l10n,
+                            onTap: () => _onProductTap(products[i]),
+                          ),
+                        ),
+                ),
+              ],
+            );
             final cartPane = _CartPanel(
               cart: _cart,
               optionLabels: _cartOptionLabel,
               surcharges: _cartSurcharge,
-              products: products,
+              products: sellable,
               l10n: l10n,
               discountCtrl: _discountCtrl,
               customerCtrl: _customerCtrl,

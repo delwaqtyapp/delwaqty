@@ -352,6 +352,26 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final profileGate = ref.watch(providerProfileProvider);
+    if (!profileGate.isReady) {
+      return Scaffold(
+        appBar: AppBar(title: Text(l10n.merchantDashboard)),
+        body: profileGate.hasFailed
+            ? Center(
+                child: PremiumEmptyState(
+                  icon: Icons.error_outline_rounded,
+                  title: l10n.error,
+                  message: l10n.errorLoading,
+                  actionLabel: l10n.retry,
+                  onAction: () {
+                    ref.invalidate(providerProfilesProvider);
+                    ref.invalidate(providerRawCategoryProvider);
+                  },
+                ),
+              )
+            : const Center(child: CircularProgressIndicator()),
+      );
+    }
     final statsAsync = ref.watch(_statsProvider);
     final availabilityAsync = ref.watch(providerAvailabilityProvider);
     final storefrontAsync = ref.watch(storefrontProvider);

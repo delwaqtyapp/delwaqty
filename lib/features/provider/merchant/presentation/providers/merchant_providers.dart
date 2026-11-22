@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:delwaqty/features/provider/capability/presentation/providers/provider_capability_providers.dart';
 import 'package:delwaqty/features/provider/merchant/data/datasources/remote/supabase_merchant_dashboard_data_source.dart';
 import 'package:delwaqty/features/provider/merchant/merchant_module.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
@@ -18,6 +19,10 @@ final merchantDashboardDataSourceProvider =
 /// uuid that can never match a `merchants.id`. The id is now resolved
 /// server-side (migration 109) and RLS still enforces ownership.
 final providerMerchantIdProvider = FutureProvider<String>((ref) async {
+  // Bound to the signed-in account so an account switch never reuses the
+  // previous account's merchant id.
+  ref.watch(providerUidProvider);
+  ref.watch(providerProfilesProvider);
   final client = ref.watch(supabaseClientProvider);
   // merchants.id is NOT auth.uid(): the merchants table is keyed by its own
   // id and linked to the owner through owner_user_id, so passing the auth

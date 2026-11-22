@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
+import 'package:delwaqty/features/provider/services/presentation/providers/provider_service_providers.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/customer/restaurant/restaurant_module.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/entities/reservation.dart';
@@ -30,25 +31,7 @@ final _reservationsProvider = FutureProvider<List<Reservation>>((ref) async {
   return repo.getReservations(merchantId, status: status);
 });
 
-final _serviceBookingsProvider = FutureProvider<List<Map<String, dynamic>>>((
-  ref,
-) async {
-  SupabaseClient client;
-  try {
-    client = ref.watch(supabaseClientProvider);
-  } catch (_) {
-    client = Supabase.instance.client;
-  }
-  final spIdRaw = await client.rpc('resolve_my_service_provider');
-  final spId = spIdRaw as String? ?? '';
-  if (spId.isEmpty) return const <Map<String, dynamic>>[];
-  final res = await client
-      .from('service_bookings')
-      .select()
-      .eq('provider_id', spId)
-      .order('created_at', ascending: false);
-  return (res as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
-});
+final _serviceBookingsProvider = providerServiceBookingsProvider;
 
 /// Which reservation lists the page shows.
 enum ReservationsMode { both, tables, services }

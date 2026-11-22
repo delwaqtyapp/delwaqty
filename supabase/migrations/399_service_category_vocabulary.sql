@@ -66,13 +66,8 @@ BEGIN
        AND lower(replace(category_type, '_', '')) = lower(replace(v_sp_cat, '_', ''))
      LIMIT 1;
 
-    IF v_sp_id IS NULL THEN
-      SELECT id INTO v_sp_id
-        FROM public.service_providers
-       WHERE user_id = p_user_id
-       ORDER BY created_at ASC
-       LIMIT 1;
-    END IF;
+    -- No fallback to the user's first service row: a second category must get
+    -- its own service_providers row, never share the first one.
 
     IF v_sp_id IS NULL THEN
       INSERT INTO public.service_providers (

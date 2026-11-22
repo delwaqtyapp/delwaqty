@@ -210,14 +210,10 @@ Set<ProviderCapability> resolveCapabilities(ProviderCategory category) {
         ProviderCapability.support,
       };
     case ProviderCategory.unknown:
+      // Fails closed: an unrecognised category gets no catalog, orders or
+      // cashier, only the dashboard, money and support.
       return {
         ProviderCapability.dashboard,
-        ProviderCapability.orders,
-        ProviderCapability.catalog,
-        ProviderCapability.reviews,
-        ProviderCapability.availability,
-        ProviderCapability.verification,
-        ProviderCapability.documents,
         ProviderCapability.financial,
         ProviderCapability.notifications,
         ProviderCapability.support,

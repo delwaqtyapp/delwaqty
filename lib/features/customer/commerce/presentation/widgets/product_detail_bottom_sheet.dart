@@ -344,6 +344,9 @@ class _ProductDetailBottomSheetState
   Widget _buildQuantitySelector(AppLocalizations l10n) {
     return _QuantitySelector(
       initialValue: _quantity,
+      // Batch 18: an unavailable (stock-0) product must not offer quantity
+      // changes when its Add to Cart is already disabled.
+      enabled: widget.product.isAvailable,
       onChanged: (v) => setState(() => _quantity = v),
     );
   }
@@ -639,10 +642,12 @@ class _QuantitySelector extends StatefulWidget {
   const _QuantitySelector({
     required this.initialValue,
     required this.onChanged,
+    this.enabled = true,
   });
 
   final int initialValue;
   final ValueChanged<int> onChanged;
+  final bool enabled;
 
   @override
   State<_QuantitySelector> createState() => _QuantitySelectorState();
@@ -679,7 +684,9 @@ class _QuantitySelectorState extends State<_QuantitySelector> {
               IconButton(
                 tooltip: l10n.decrease,
                 icon: const Icon(Icons.remove, size: 18),
-                onPressed: _qty > 1 ? () => _update(-1) : null,
+                onPressed: widget.enabled && _qty > 1
+                    ? () => _update(-1)
+                    : null,
               ),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
@@ -693,7 +700,7 @@ class _QuantitySelectorState extends State<_QuantitySelector> {
               IconButton(
                 tooltip: l10n.add,
                 icon: const Icon(Icons.add, size: 18),
-                onPressed: () => _update(1),
+                onPressed: widget.enabled ? () => _update(1) : null,
               ),
             ],
           ),

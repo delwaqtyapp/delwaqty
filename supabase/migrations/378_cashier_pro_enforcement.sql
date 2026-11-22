@@ -622,13 +622,19 @@ BEGIN
 END;
 $function$
 ;
--- PostgREST CRUD on the insurance tables is merchant PRO surface too.
+-- PostgREST CRUD on the insurance tables is merchant PRO surface too. The
+-- scoped-admin branch (_admin_write_scope via merchant region) is preserved
+-- verbatim; PRO is added to the merchant-owner branch only.
 DROP POLICY pos_insurance_companies_owner ON public.pos_insurance_companies;
 CREATE POLICY pos_insurance_companies_owner ON public.pos_insurance_companies FOR ALL TO authenticated
-  USING (public.is_admin() OR (public.is_merchant_owner(merchant_id) AND public._cashier_has_pro(merchant_id)))
-  WITH CHECK (public.is_admin() OR (public.is_merchant_owner(merchant_id) AND public._cashier_has_pro(merchant_id)));
+  USING ((public._is_merchant_owner_only(merchant_id) AND public._cashier_has_pro(merchant_id))
+         OR public._admin_write_scope(public._merchant_region_id(merchant_id)))
+  WITH CHECK ((public._is_merchant_owner_only(merchant_id) AND public._cashier_has_pro(merchant_id))
+         OR public._admin_write_scope(public._merchant_region_id(merchant_id)));
 
 DROP POLICY pos_insurance_sales_owner ON public.pos_insurance_sales;
 CREATE POLICY pos_insurance_sales_owner ON public.pos_insurance_sales FOR ALL TO authenticated
-  USING (public.is_admin() OR (public.is_merchant_owner(merchant_id) AND public._cashier_has_pro(merchant_id)))
-  WITH CHECK (public.is_admin() OR (public.is_merchant_owner(merchant_id) AND public._cashier_has_pro(merchant_id)));
+  USING ((public._is_merchant_owner_only(merchant_id) AND public._cashier_has_pro(merchant_id))
+         OR public._admin_write_scope(public._merchant_region_id(merchant_id)))
+  WITH CHECK ((public._is_merchant_owner_only(merchant_id) AND public._cashier_has_pro(merchant_id))
+         OR public._admin_write_scope(public._merchant_region_id(merchant_id)));

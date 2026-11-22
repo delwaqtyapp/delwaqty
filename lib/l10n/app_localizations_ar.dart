@@ -8084,4 +8084,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get providerMyPricingEmpty => 'لا توجد ملفات خدمة بعد';
+
+  @override
+  String get closesNextDay => 'يغلق اليوم التالي';
+
+  @override
+  String get open24Hours => 'مفتوح 24 ساعة';
 }

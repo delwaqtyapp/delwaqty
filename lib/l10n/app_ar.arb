@@ -2791,5 +2791,7 @@
   "providerPricingLeaveEmpty": "اتركه فارغًا لاستخدام الافتراضي",
   "providerMyPricing": "أسعاري",
   "providerMyPricingAdminNote": "الأسعار تحددها الإدارة. لطلب تعديل تواصل مع الدعم.",
-  "providerMyPricingEmpty": "لا توجد ملفات خدمة بعد"
+  "providerMyPricingEmpty": "لا توجد ملفات خدمة بعد",
+  "closesNextDay": "يغلق اليوم التالي",
+  "open24Hours": "مفتوح 24 ساعة"
 }

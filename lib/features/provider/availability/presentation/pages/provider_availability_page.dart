@@ -208,9 +208,7 @@ class _ProviderAvailabilityPageState
                                     ),
                                   ),
                                   Text(
-                                    (row['is_closed'] as bool? ?? false)
-                                        ? l10n.closed
-                                        : '${row['open_time']} – ${row['close_time']}',
+                                    _windowSummary(row, l10n),
                                     style: Theme.of(context).textTheme.bodySmall
                                         ?.copyWith(fontWeight: FontWeight.bold),
                                   ),
@@ -227,6 +225,23 @@ class _ProviderAvailabilityPageState
         ),
       ),
     );
+  }
+
+  /// Read-only schedule summary for one row, with overnight and 24h
+  /// windows called out so "12:00 - 01:00" is not read as a mistake.
+  String _windowSummary(Map row, AppLocalizations l10n) {
+    if (row['is_closed'] as bool? ?? false) return l10n.closed;
+    final open = '${row['open_time'] ?? ''}';
+    final close = '${row['close_time'] ?? ''}';
+    if (open.length >= 5 && close.length >= 5) {
+      final o = open.substring(0, 5);
+      final c = close.substring(0, 5);
+      if (o == c) return l10n.open24Hours;
+      if (c.compareTo(o) < 0) {
+        return '$open – $close (${l10n.closesNextDay})';
+      }
+    }
+    return '$open – $close';
   }
 
   String _dayLabel(int day) {

@@ -8154,4 +8154,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get providerMyPricingEmpty => 'No service profiles yet';
+
+  @override
+  String get closesNextDay => 'Closes next day';
+
+  @override
+  String get open24Hours => 'Open 24 hours';
 }

@@ -2850,5 +2850,7 @@
   "providerPricingLeaveEmpty": "Leave empty to use the default",
   "providerMyPricing": "My pricing",
   "providerMyPricingAdminNote": "Prices are set by the administration. Contact support to request a change.",
-  "providerMyPricingEmpty": "No service profiles yet"
+  "providerMyPricingEmpty": "No service profiles yet",
+  "closesNextDay": "Closes next day",
+  "open24Hours": "Open 24 hours"
 }

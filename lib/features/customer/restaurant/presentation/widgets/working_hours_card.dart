@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/entities/working_hours.dart';
+import 'package:timezone/data/latest.dart' as tzdata;
+import 'package:timezone/timezone.dart' as tz;
 
 class WorkingHoursCard extends StatelessWidget {
   const WorkingHoursCard({super.key, required this.hours});
@@ -12,25 +14,26 @@ class WorkingHoursCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final today = DateTime.now().weekday;
+    // Storage convention is 0=Sunday..6=Saturday; "today" is the Cairo
+    // weekday so the highlight matches the schedule and checkout.
+    final cairoNow = tz.TZDateTime.now(_cairo());
+    final today = cairoNow.weekday % 7;
     final sortedHours = List<WorkingHours>.from(hours)
       ..sort((a, b) => a.dayOfWeek.compareTo(b.dayOfWeek));
 
     final dayNames = [
+      l10n.sunday,
       l10n.monday,
       l10n.tuesday,
       l10n.wednesday,
       l10n.thursday,
       l10n.friday,
       l10n.saturday,
-      l10n.sunday,
     ];
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+      borderRadius: BorderRadius.circular(12),
       child: Theme(
         data: theme.copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
@@ -49,8 +52,8 @@ class WorkingHoursCard extends StatelessWidget {
           ),
           children: sortedHours.map((hour) {
             final isToday = hour.dayOfWeek == today;
-            final dayName = hour.dayOfWeek >= 1 && hour.dayOfWeek <= 7
-                ? dayNames[hour.dayOfWeek - 1]
+            final dayName = hour.dayOfWeek >= 0 && hour.dayOfWeek <= 6
+                ? dayNames[hour.dayOfWeek]
                 : 'Day ${hour.dayOfWeek}';
 
             return Padding(
@@ -82,7 +85,7 @@ class WorkingHoursCard extends StatelessWidget {
                             ),
                           )
                         : Text(
-                            '${hour.openTime} - ${hour.closeTime}',
+                            _windowText(hour, l10n),
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontWeight: isToday
                                   ? FontWeight.bold
@@ -116,5 +119,30 @@ class WorkingHoursCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  static bool _tzReady = false;
+  static tz.Location _cairo() {
+    if (!_tzReady) {
+      tzdata.initializeTimeZones();
+      _tzReady = true;
+    }
+    return tz.getLocation('Africa/Cairo');
+  }
+
+  /// Same-day windows render unchanged; overnight and 24h windows are
+  /// called out so "12:00 - 01:00" is not read as a mistake.
+  String _windowText(WorkingHours hour, AppLocalizations l10n) {
+    final open = hour.openTime.length >= 5
+        ? hour.openTime.substring(0, 5)
+        : hour.openTime;
+    final close = hour.closeTime.length >= 5
+        ? hour.closeTime.substring(0, 5)
+        : hour.closeTime;
+    if (open == close) return l10n.open24Hours;
+    if (close.compareTo(open) < 0) {
+      return '$open - $close (${l10n.closesNextDay})';
+    }
+    return '$open - $close';
   }
 }

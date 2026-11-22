@@ -92,7 +92,7 @@ class _InfoBanner extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: cs.secondaryContainer.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusServiceCard),
       ),
       child: Row(
         children: [
@@ -141,7 +141,7 @@ class ServiceInfoCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cs.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppSpacing.d20),
         border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Column(
@@ -165,7 +165,7 @@ class ServiceInfoCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: (item.isAvailable ? Colors.green : Colors.grey)
                       .withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(AppSpacing.d20),
                 ),
                 child: Text(
                   item.isAvailable ? l10n.available : l10n.unavailable,

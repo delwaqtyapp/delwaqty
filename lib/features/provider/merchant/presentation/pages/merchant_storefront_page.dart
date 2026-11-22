@@ -8,6 +8,7 @@ import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
 import 'package:delwaqty/features/customer/location/presentation/widgets/smart_map_picker_sheet.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/widgets/schedule_window_note.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/app_shell.dart';
@@ -772,35 +773,48 @@ class _MerchantStorefrontPageState
             title: Text(dayNames[_hours[i].day]),
             subtitle: _hours[i].closed
                 ? null
-                : Row(
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: _timeField(
-                          value: _hours[i].open,
-                          onChanged: (v) => setState(() {
-                            _hours[i] = _hours[i].copyWith(
-                              open: v,
-                              closed: false,
-                            );
-                            _hoursDirty = true;
-                          }),
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _timeField(
+                              value: _hours[i].open,
+                              onChanged: (v) => setState(() {
+                                _hours[i] = _hours[i].copyWith(
+                                  open: v,
+                                  closed: false,
+                                );
+                                _hoursDirty = true;
+                              }),
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            child: Text('—'),
+                          ),
+                          Expanded(
+                            child: _timeField(
+                              value: _hours[i].close,
+                              onChanged: (v) => setState(() {
+                                _hours[i] = _hours[i].copyWith(
+                                  close: v,
+                                  closed: false,
+                                );
+                                _hoursDirty = true;
+                              }),
+                            ),
+                          ),
+                        ],
                       ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: Text('—'),
-                      ),
-                      Expanded(
-                        child: _timeField(
-                          value: _hours[i].close,
-                          onChanged: (v) => setState(() {
-                            _hours[i] = _hours[i].copyWith(
-                              close: v,
-                              closed: false,
-                            );
-                            _hoursDirty = true;
-                          }),
-                        ),
+                      // close <= open is valid: equal times mean open 24
+                      // hours, a close before the open is an overnight
+                      // window that ends on the next calendar day.
+                      ScheduleWindowNote(
+                        open: _hours[i].open,
+                        close: _hours[i].close,
+                        closed: _hours[i].closed,
                       ),
                     ],
                   ),

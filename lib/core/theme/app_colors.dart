@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 /// Contains semantic colors, surface variants, merchant type colors,
 /// order status colors, and core brand colors used throughout the app.
 abstract final class AppColors {
+  /// Dark teal accent for admin service-pricing actions.
+  static const Color brandTealDark = Color(0xFF0D9488);
   // ---------------------------------------------------------------------------
   // Premium Brand Palette (V2)
   // ---------------------------------------------------------------------------

@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -144,7 +145,9 @@ class _AdminProviderPricingPageState
             ],
           ),
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.d20),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -408,7 +411,7 @@ class _AdminProviderPricingPageState
                     ),
                     decoration: BoxDecoration(
                       color: scheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                     ),
                     child: Text(
                       _categoryLabel(row, l10n),

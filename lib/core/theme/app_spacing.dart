@@ -206,6 +206,9 @@ abstract final class AppSpacing {
   // Premium Radii (V2)
   // ---------------------------------------------------------------------------
 
+  /// Compact service card corner radius, preserving the existing layout.
+  static const double radiusServiceCard = 14;
+
   /// Card corner radius — 24px.
   static const double radiusCard = 24;
 

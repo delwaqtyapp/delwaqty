@@ -3,15 +3,9 @@ import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
-/// Kills Facebook sign-in UI while the Meta app lacks business
-/// verification (owner decision 2026-11-21: no سجل تجاري yet, registration
-/// runs on phone number + WhatsApp OTP only). Flip back to `true` to
-/// re-enable - the data layer (OAuth use cases, deep-link callback) is
-/// untouched and works as before.
-const bool kFacebookLoginEnabled = false;
-
-/// Google + Facebook sign-in buttons with an "or continue with" divider.
+/// Google sign-in with an "or continue with" divider.
 ///
+/// Registration supports Google or WhatsApp-verified phone only.
 /// The OAuth use cases and the `io.delwaqty://login-callback` deep-link
 /// return path already exist in the data layer; this widget is the UI entry
 /// point. White cards keep the brand logos readable on both the gradient
@@ -20,15 +14,13 @@ class SocialAuthButtons extends StatelessWidget {
   const SocialAuthButtons({
     super.key,
     required this.onGoogle,
-    required this.onFacebook,
     this.isLoading = false,
     this.dividerColor,
   });
 
   final VoidCallback onGoogle;
-  final VoidCallback onFacebook;
 
-  /// Disables both buttons while any auth flow is in progress.
+  /// Disables the button while an auth flow is in progress.
   final bool isLoading;
 
   /// Divider/label color; defaults to the theme's outline color. Pass a
@@ -71,14 +63,6 @@ class SocialAuthButtons extends StatelessWidget {
           logoAsset: 'assets/branding/google_logo.png',
           label: l10n.loginWithGoogle,
         ),
-        if (kFacebookLoginEnabled) ...[
-          const SizedBox(height: AppSpacing.sm),
-          _SocialButton(
-            onPressed: isLoading ? null : onFacebook,
-            logoAsset: 'assets/branding/facebook_logo.png',
-            label: l10n.loginWithFacebook,
-          ),
-        ],
       ],
     );
   }

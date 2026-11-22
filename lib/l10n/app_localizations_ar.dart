@@ -6954,6 +6954,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get verifyViaWhatsApp => 'تفعيل عبر واتساب';
 
   @override
+  String get phoneAlreadyRegistered =>
+      'هذا الرقم مسجل بالفعل. سجّل الدخول أو استعد كلمة المرور.';
+
+  @override
+  String get phoneIdentityMismatch =>
+      'الرقم الذي تم تأكيده لا يطابق بيانات التسجيل. راجع رقمك وأكّد تفعيله مرة أخرى.';
+
+  @override
+  String get phoneSignupRequired =>
+      'استخدم رقم هاتفك وتأكيد واتساب، أو تابع باستخدام جوجل.';
+
+  @override
   String get whatsappOtpTitle => 'تفعيل الحساب عبر واتساب';
 
   @override

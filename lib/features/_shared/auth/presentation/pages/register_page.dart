@@ -407,7 +407,19 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               code.contains('PHONE_NOT_VERIFIED') ||
               code.contains('CHALLENGE_EXPIRED') ||
               code.contains('CHALLENGE_CONSUMED');
-          if (needsReverification) {
+          final identityMismatch =
+              code.contains('PHONE_EMAIL_MISMATCH') ||
+              code.contains('PHONE_MISMATCH');
+          final alreadyRegistered = code.contains('PHONE_ALREADY_REGISTERED');
+          final emailNotAllowed =
+              code.contains('EMAIL_SIGNUP_NOT_ALLOWED') ||
+              code.contains('SIGNUP_PROVIDER_NOT_ALLOWED');
+          final invalidPhone = code.contains('PHONE_INVALID');
+          if (needsReverification ||
+              identityMismatch ||
+              alreadyRegistered ||
+              emailNotAllowed ||
+              invalidPhone) {
             setState(() {
               _whatsappVerified = false;
               _phoneVerificationChallenge = null;
@@ -416,7 +428,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             });
           }
           context.showAppSnackBar(
-            needsReverification ? l10n.verifyViaWhatsApp : msg,
+            invalidPhone
+                ? l10n.phoneInvalid
+                : alreadyRegistered
+                ? l10n.phoneAlreadyRegistered
+                : identityMismatch
+                ? l10n.phoneIdentityMismatch
+                : emailNotAllowed
+                ? l10n.phoneSignupRequired
+                : needsReverification
+                ? l10n.verifyViaWhatsApp
+                : msg,
           );
         },
       );
@@ -973,8 +995,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             SocialAuthButtons(
               onGoogle: () =>
                   ref.read(authStateProvider.notifier).signInWithGoogle(),
-              onFacebook: () =>
-                  ref.read(authStateProvider.notifier).signInWithFacebook(),
               dividerColor: Colors.white54,
             ),
           ],

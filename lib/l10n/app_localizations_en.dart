@@ -7008,6 +7008,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verifyViaWhatsApp => 'Verify via WhatsApp';
 
   @override
+  String get phoneAlreadyRegistered =>
+      'This phone number is already registered. Sign in or reset your password.';
+
+  @override
+  String get phoneIdentityMismatch =>
+      'The verified number does not match this registration. Check your number and verify it again.';
+
+  @override
+  String get phoneSignupRequired =>
+      'Use your phone number and WhatsApp verification, or continue with Google.';
+
+  @override
   String get whatsappOtpTitle => 'WhatsApp Account Verification';
 
   @override

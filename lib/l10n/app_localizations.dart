@@ -13400,6 +13400,24 @@ abstract class AppLocalizations {
   /// **'Verify via WhatsApp'**
   String get verifyViaWhatsApp;
 
+  /// No description provided for @phoneAlreadyRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone number is already registered. Sign in or reset your password.'**
+  String get phoneAlreadyRegistered;
+
+  /// No description provided for @phoneIdentityMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The verified number does not match this registration. Check your number and verify it again.'**
+  String get phoneIdentityMismatch;
+
+  /// No description provided for @phoneSignupRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your phone number and WhatsApp verification, or continue with Google.'**
+  String get phoneSignupRequired;
+
   /// No description provided for @whatsappOtpTitle.
   ///
   /// In en, this message translates to:

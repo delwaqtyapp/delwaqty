@@ -11,8 +11,8 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 class _FakeAuthNotifier extends AuthStateNotifier {
   @override
   AuthState build() => const AuthState.unauthenticated();
-  void rejectProof() =>
-      state = const AuthState.error(message: 'PHONE_NOT_VERIFIED');
+  void rejectProof([String message = 'PHONE_NOT_VERIFIED']) =>
+      state = AuthState.error(message: message);
 }
 
 final _catalog = [
@@ -201,6 +201,50 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.pumpAndSettle();
   });
+  for (final entry in {
+    'PHONE_INVALID': 'Enter a valid phone number',
+    'SIGNUP_PROVIDER_NOT_ALLOWED': 'Use your phone number and WhatsApp verification, or continue with Google.',
+    'PHONE_EMAIL_MISMATCH': 'The verified number does not match this registration. Check your number and verify it again.',
+    'PHONE_MISMATCH': 'The verified number does not match this registration. Check your number and verify it again.',
+    'PHONE_ALREADY_REGISTERED': 'This phone number is already registered. Sign in or reset your password.',
+    'EMAIL_SIGNUP_NOT_ALLOWED': 'Use your phone number and WhatsApp verification, or continue with Google.',
+  }.entries) {
+    testWidgets('${entry.key} clears proof and gives localized recovery', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(412, 892);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(_buildTestApp());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Customer'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('registerStepNext')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Full Name'),
+        'Test',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Phone number'),
+        '01000000001',
+      );
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Verify via WhatsApp'));
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(TextFormField, 'Password'), findsOneWidget);
+      final notifier = ProviderScope.containerOf(
+        tester.element(find.byType(RegisterPage)),
+      ).read(authStateProvider.notifier) as _FakeAuthNotifier;
+      notifier.rejectProof(entry.key);
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(TextFormField, 'Password'), findsNothing);
+      expect(find.text(entry.value), findsOneWidget);
+      expect(find.text(entry.key), findsNothing);
+    });
+  }
+
   testWidgets('expired signup proof reveals WhatsApp verification again', (
     tester,
   ) async {

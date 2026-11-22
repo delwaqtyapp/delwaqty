@@ -22,12 +22,14 @@ function loadHandler(file, { verified = false, revokeError = false, calls = [] }
       serve: (callback) => { handler = callback; },
     },
     createClient: () => ({
-      rpc: async (name) => {
+      rpc: async (name, args) => {
         calls.push(name);
         if (name === 'consume_whatsapp_reset_challenge') {
           return { data: verified ? '00000000-0000-4000-8000-000000000008' : null, error: null };
         }
         assert.equal(name, 'revoke_user_sessions');
+        assert.equal(args.p_user_id, '00000000-0000-4000-8000-000000000008');
+        assert.deepEqual(Object.keys(args), ['p_user_id']);
         return { data: null, error: revokeError ? { message: 'test failure' } : null };
       },
       auth: { admin: { updateUserById: async () => {

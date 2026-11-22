@@ -29,7 +29,7 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Delwaqty uses your location to show nearby services and track deliveries.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Delwaqty uses the camera to capture your national ID and profile photo for account verification, and to scan product barcodes at the cashier.</string>
+	<string>Delwaqty uses the camera to capture your national ID and profile photo for account verification.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Delwaqty accesses your photo library so you can upload your national ID and profile photo for account verification.</string>
 	<key>UIApplicationSceneManifest</key>

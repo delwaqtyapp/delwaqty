@@ -5,9 +5,7 @@ import 'package:delwaqty/features/provider/merchant/presentation/providers/merch
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
-import 'package:delwaqty/features/provider/merchant/domain/pos_product_lookup.dart';
 import 'package:delwaqty/features/provider/merchant/merchant_module.dart';
-import 'package:delwaqty/features/provider/merchant/presentation/pages/barcode_scanner_page.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
@@ -46,7 +44,6 @@ class _MerchantProductFormPageState
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
-  final _barcodeController = TextEditingController();
   final _categoryController = TextEditingController();
   final _imageUrlController = TextEditingController();
   bool _isAvailable = true;
@@ -75,7 +72,6 @@ class _MerchantProductFormPageState
       _nameController.text = product['name'] as String? ?? '';
       _descriptionController.text = product['description'] as String? ?? '';
       _priceController.text = (product['price'] as num?)?.toString() ?? '';
-      _barcodeController.text = product['barcode'] as String? ?? '';
       _categoryController.text = product['category'] as String? ?? '';
       _imageUrlController.text = product['image_url'] as String? ?? '';
       setState(() {
@@ -135,7 +131,6 @@ class _MerchantProductFormPageState
     _nameController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
-    _barcodeController.dispose();
     _categoryController.dispose();
     _imageUrlController.dispose();
     super.dispose();
@@ -338,8 +333,6 @@ class _MerchantProductFormPageState
               },
             ),
             const SizedBox(height: 16),
-            _buildBarcodeField(l10n),
-            const SizedBox(height: 16),
             TextFormField(
               controller: _categoryController,
               decoration: InputDecoration(
@@ -371,32 +364,6 @@ class _MerchantProductFormPageState
     );
   }
 
-  /// Opens the camera scanner and fills the barcode field with the result.
-  Future<void> _scanBarcodeIntoField() async {
-    final code = await BarcodeScannerPage.show(context);
-    if (!mounted || code == null) return;
-    setState(() => _barcodeController.text = normalizeBarcode(code));
-  }
-
-  Widget _buildBarcodeField(AppLocalizations l10n) {
-    return TextFormField(
-      controller: _barcodeController,
-      decoration: InputDecoration(
-        labelText: l10n.barcodeFieldLabel,
-        hintText: l10n.barcodeFieldHint,
-        helperText: l10n.barcodeUniqueHint,
-        border: const OutlineInputBorder(),
-        prefixIcon: const Icon(Icons.barcode_reader),
-        suffixIcon: IconButton(
-          tooltip: l10n.barcodeScanToFill,
-          icon: const Icon(Icons.qr_code_scanner_rounded),
-          onPressed: _scanBarcodeIntoField,
-        ),
-      ),
-      keyboardType: TextInputType.text,
-    );
-  }
-
   Widget _buildToggles(AppLocalizations l10n) {
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -406,35 +373,28 @@ class _MerchantProductFormPageState
           color: context.colorScheme.outlineVariant.withValues(alpha: 0.5),
         ),
       ),
-      // SwitchListTile paints on the nearest Material; without one the
-      // DecoratedBox above hides its ink and Flutter throws in debug.
-      child: Material(
-        type: MaterialType.transparency,
-        child: Column(
-          children: [
-            SwitchListTile(
-              title: Text(l10n.available),
-              subtitle: Text(l10n.productAvailableHint),
-              value: _isAvailable,
-              onChanged: (value) => setState(() => _isAvailable = value),
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-              ),
+      child: Column(
+        children: [
+          SwitchListTile(
+            title: Text(l10n.available),
+            subtitle: Text(l10n.productAvailableHint),
+            value: _isAvailable,
+            onChanged: (value) => setState(() => _isAvailable = value),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
             ),
-            const Divider(height: 1),
-            SwitchListTile(
-              title: Text(l10n.featured),
-              subtitle: Text(l10n.featuredProductHint),
-              value: _isFeatured,
-              onChanged: (value) => setState(() => _isFeatured = value),
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(16),
-                ),
-              ),
+          ),
+          const Divider(height: 1),
+          SwitchListTile(
+            title: Text(l10n.featured),
+            subtitle: Text(l10n.featuredProductHint),
+            value: _isFeatured,
+            onChanged: (value) => setState(() => _isFeatured = value),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -489,7 +449,7 @@ class _MerchantProductFormPageState
       // merchant.
       final merchantId = await ref.read(providerMerchantIdProvider.future);
 
-      final productData = <String, Object?>{
+      final productData = {
         'name': _nameController.text.trim(),
         'description': _descriptionController.text.trim(),
         'price': double.parse(_priceController.text.trim()),
@@ -498,21 +458,6 @@ class _MerchantProductFormPageState
         'is_available': _isAvailable,
         'is_featured': _isFeatured,
       };
-
-      // One barcode per store (migration 400 index enforces it server-side;
-      // this check gives the merchant a clear Arabic error instead of a raw
-      // constraint violation). Empty barcodes are stored as NULL so they
-      // never collide.
-      final barcode = normalizeBarcode(_barcodeController.text);
-      if (barcode.isNotEmpty) {
-        final existing = await repo.getMerchantProducts(merchantId);
-        if (!mounted) return;
-        if (barcodeTakenByOtherProduct(existing, barcode, widget.productId)) {
-          context.showAppSnackBar(l10n.barcodeDuplicateError, isError: true);
-          return;
-        }
-      }
-      productData['barcode'] = barcode.isEmpty ? null : barcode;
 
       if (_isEditing) {
         await repo.updateProduct(widget.productId!, productData);
@@ -529,14 +474,7 @@ class _MerchantProductFormPageState
       }
     } catch (e) {
       if (mounted) {
-        final msg = e.toString();
-        final duplicate =
-            msg.contains('products_merchant_barcode_uq') ||
-            msg.contains('duplicate key');
-        context.showAppSnackBar(
-          duplicate ? l10n.barcodeDuplicateError : l10n.somethingWentWrong,
-          isError: true,
-        );
+        context.showAppSnackBar(l10n.somethingWentWrong, isError: true);
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);

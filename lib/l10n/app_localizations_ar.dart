@@ -7932,68 +7932,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get posErrInvalidQty => 'الكمية غير صالحة لأحد الأصناف';
 
   @override
-  String get posScanBarcode => 'مسح الباركود';
-
-  @override
-  String get posSearchHint => 'ابحث بالاسم أو الباركود';
-
-  @override
-  String get posScanAdded => 'تمت الإضافة إلى السلة';
-
-  @override
-  String get posDrugFoundTitle => 'موجود في كتالوج الأدوية';
-
-  @override
-  String get posDrugImportAdd => 'استيراد وإضافة';
-
-  @override
-  String get posQuickAddTitle => 'منتج جديد لهذا الباركود';
-
-  @override
-  String get posQuickAddCreate => 'إنشاء وإضافة';
-
-  @override
-  String get barcodeFieldLabel => 'الباركود';
-
-  @override
-  String get barcodeFieldHint => 'اكتب أو امسح باركود المنتج';
-
-  @override
-  String get barcodeUniqueHint => 'باركود واحد لكل منتج في هذا المحل';
-
-  @override
-  String get barcodeScanToFill => 'امسح لملء الحقل';
-
-  @override
-  String get barcodeDuplicateError =>
-      'منتج آخر في هذا المحل يستخدم نفس الباركود';
-
-  @override
-  String get scannerTitle => 'مسح الباركود';
-
-  @override
-  String get scannerTorch => 'الفلاش';
-
-  @override
-  String get scannerEnterManually => 'إدخال الباركود يدويًا';
-
-  @override
-  String get scannerManualHint => 'رقم الباركود';
-
-  @override
-  String get scannerAimHint => 'وجّه الكاميرا نحو باركود المنتج';
-
-  @override
-  String get scannerPermissionNeeded =>
-      'نحتاج إذن الكاميرا لمسح الباركود. يمكنك أيضًا إدخال الباركود يدويًا.';
-
-  @override
-  String get scannerGrantPermission => 'السماح بالكاميرا';
-
-  @override
-  String get scannerOpenSettings => 'فتح الإعدادات';
-
-  @override
   String get productModifierRequiredError =>
       'يرجى اختيار الخيارات المطلوبة أولاً';
 

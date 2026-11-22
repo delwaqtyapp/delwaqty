@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -154,6 +156,9 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
   }
 
   Future<void> _openManualEntry() async {
+    // Reentrancy guard (#78): a second tap while the sheet animates in
+    // must not stack sheets or pause an already-paused camera.
+    if (_manualEntryOpen || _popped) return;
     _manualEntryOpen = true;
     // Pause the camera while the sheet covers the preview; resumed in
     // finally when the merchant cancels (a typed code pops the scanner
@@ -161,9 +166,14 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     try {
       await _controller.stop();
     } catch (_) {}
+    // The await above can outlive the page: never open the sheet on a
+    // dead context.
+    if (!mounted) {
+      _manualEntryOpen = false;
+      return;
+    }
+    final ctrl = TextEditingController();
     try {
-      final l10n = AppLocalizations.of(context);
-      final ctrl = TextEditingController();
       final code = await showModalBottomSheet<String>(
         context: context,
         isScrollControlled: true,
@@ -209,6 +219,11 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
       _finish(code);
     } finally {
       _manualEntryOpen = false;
+      // The sheet route is still animating out and rebuilding its field;
+      // dispose the controller only after it has fully closed.
+      unawaited(
+        Future<void>.delayed(const Duration(milliseconds: 400), ctrl.dispose),
+      );
       if (mounted && !_popped && _permission == _PermissionUiState.granted) {
         try {
           await _controller.start();

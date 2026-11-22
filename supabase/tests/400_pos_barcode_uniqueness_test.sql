@@ -74,6 +74,30 @@ select pos_create_sale(m2,jsonb_build_array(
 assert (r->>'idempotent') is null,'same key at another store is a new sale';
 sale2:=(r->>'sale_id')::uuid;
 assert sale2 is distinct from sale1,'tenant isolation of idempotency keys';
+-- security HIGH: offline sync still works against the per-merchant index
+-- (the old global constraint is gone; the fixed ON CONFLICT target must
+-- match pos_sales_merchant_idempotency_uq, predicate included)
+perform set_config('request.jwt.claim.sub',o1::text,true);
+select cashier_sync_push(m1,jsonb_build_array(jsonb_build_object(
+  'type','sale','op_id','11111111-1111-1111-1111-111111111111',
+  'payload',jsonb_build_object(
+    'items',jsonb_build_array(jsonb_build_object(
+      'product_id',(select id from products where merchant_id=m1 and name='zz-test-400-p1'),
+      'qty',1,'unit_price',10)),
+    'discount_amount',0,
+    'payments',jsonb_build_array(jsonb_build_object('method','cash','amount',10)))))) into r;
+assert (r->'results'->0->>'ok')::boolean is true,'offline sale push accepted after 400, got: ' || coalesce(r::text,'null');
+assert (r->'results'->0->>'duplicate') is null,'first push is not a duplicate';
+select cashier_sync_push(m1,jsonb_build_array(jsonb_build_object(
+  'type','sale','op_id','11111111-1111-1111-1111-111111111111',
+  'payload',jsonb_build_object(
+    'items',jsonb_build_array(jsonb_build_object(
+      'product_id',(select id from products where merchant_id=m1 and name='zz-test-400-p1'),
+      'qty',1,'unit_price',10)),
+    'discount_amount',0,
+    'payments',jsonb_build_array(jsonb_build_object('method','cash','amount',10)))))) into r;
+assert (r->'results'->0->>'ok')::boolean is true and (r->'results'->0->>'duplicate')::boolean is true,
+  'offline sale replay is idempotent after 400';
 end $test$;
-select 'PASS400: uniqueness+canonicalization, import idempotency, server pricing, per-merchant idempotency' result;
+select 'PASS400: uniqueness+canonicalization, import idempotency, server pricing, per-merchant idempotency, offline sync' result;
 rollback;

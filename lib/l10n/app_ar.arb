@@ -2602,5 +2602,9 @@
       "total": {}
     }
   },
-  "errorRetryCta": "حاول تاني"
+  "errorRetryCta": "حاول تاني",
+  "noDriversYetAutoRetry": "لا يوجد كباتن متاحون حالياً. تتم إعادة المحاولة تلقائياً، أو اضغط إرسال مندوب للمحاولة فوراً.",
+  "@noDriversYetAutoRetry": {
+    "description": "Persistent banner on a ready merchant order whose dispatch found no driver yet"
+  }
 }

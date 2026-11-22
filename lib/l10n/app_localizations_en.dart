@@ -7742,4 +7742,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorRetryCta => 'Try again';
+
+  @override
+  String get noDriversYetAutoRetry =>
+      'No drivers free yet. We keep retrying automatically; tap dispatch to retry now.';
 }

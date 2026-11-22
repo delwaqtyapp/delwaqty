@@ -42,6 +42,9 @@ class MerchantOrdersPage extends ConsumerStatefulWidget {
 
 class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
   RealtimeService? _realtimeService;
+  // Batch 16 #1: orders with a dispatch RPC in flight; the dispatch button
+  // is disabled for these so one tap can never fire the RPC twice.
+  final Set<String> _dispatchingIds = {};
   @override
   void initState() {
     super.initState();
@@ -138,9 +141,12 @@ class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
                         delay: Duration(milliseconds: index * 50),
                         child: _OrderCard(
                           order: order,
+                          dispatching: _dispatchingIds.contains(order.id),
                           onDispatchDriver: () async {
+                            if (_dispatchingIds.contains(order.id)) return;
                             final messenger = ScaffoldMessenger.of(context);
                             messenger.hideCurrentSnackBar();
+                            setState(() => _dispatchingIds.add(order.id));
                             try {
                               final result = checkedRpcResult(
                                 await Supabase.instance.client.rpc(
@@ -169,6 +175,12 @@ class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
                                   SnackBar(
                                     content: Text(appErrorText(context, e)),
                                   ),
+                                );
+                              }
+                            } finally {
+                              if (mounted) {
+                                setState(
+                                  () => _dispatchingIds.remove(order.id),
                                 );
                               }
                             }
@@ -251,11 +263,13 @@ class _OrderCard extends StatelessWidget {
     required this.order,
     required this.onStatusChanged,
     required this.onDispatchDriver,
+    this.dispatching = false,
   });
 
   final MerchantOrder order;
   final Function(String) onStatusChanged;
   final VoidCallback onDispatchDriver;
+  final bool dispatching;
 
   Future<void> _callCustomer(String phone) async {
     final cleaned = phone.replaceAll(RegExp(r'[^\d+]'), '');
@@ -471,12 +485,55 @@ class _OrderCard extends StatelessWidget {
               if (canDispatchDriver)
                 DeliveryHandoffButton(orderId: order.id, pickup: true),
               if (canDispatchDriver) ...[
+                // Batch 16 #2: a failed dispatch used to be invisible once
+                // the snackbar faded. While the order waits in
+                // PENDING_DISPATCH the card keeps an honest "still
+                // searching" banner; the dispatch button doubles as retry.
+                if (order.driverId == null &&
+                    order.dispatchStatus == 'PENDING_DISPATCH') ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.warningLight.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      border: Border.all(
+                        color: AppColors.warningLight.withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.hourglass_top_rounded,
+                          size: 16,
+                          color: AppColors.warningLight,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            l10n.noDriversYetAutoRetry,
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 10),
                 Align(
                   alignment: AlignmentDirectional.centerStart,
                   child: OutlinedButton.icon(
-                    onPressed: onDispatchDriver,
-                    icon: const Icon(Icons.delivery_dining_rounded, size: 18),
+                    onPressed: dispatching ? null : onDispatchDriver,
+                    icon: dispatching
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.delivery_dining_rounded, size: 18),
                     label: Text(l10n.dispatchDeliveryDriver),
                   ),
                 ),
@@ -550,9 +607,12 @@ class _OrderCard extends StatelessWidget {
                       color: AppColors.orderReady,
                       onPressed: () => onStatusChanged('ready'),
                     ),
-                  ] else if (order.status == 'ready') ...[
-                    // Ready offers only the handoff to delivery; Mark
-                    // Delivered belongs to the delivering state (item B).
+                  ] else if (order.status == 'ready' &&
+                      order.driverId != null) ...[
+                    // Batch 16 #3: out-for-delivery only exists once a
+                    // driver is on the order; before that the card offers
+                    // dispatch, not a phantom handoff. Mark Delivered
+                    // belongs to the delivering state (item B).
                     _ActionButton(
                       label: l10n.startOrderDelivery,
                       color: AppColors.orderInTransit,

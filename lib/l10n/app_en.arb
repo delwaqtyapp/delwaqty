@@ -2661,5 +2661,9 @@
       "total": {}
     }
   },
-  "errorRetryCta": "Try again"
+  "errorRetryCta": "Try again",
+  "noDriversYetAutoRetry": "No drivers free yet. We keep retrying automatically; tap dispatch to retry now.",
+  "@noDriversYetAutoRetry": {
+    "description": "Persistent banner on a ready merchant order whose dispatch found no driver yet"
+  }
 }

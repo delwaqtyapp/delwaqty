@@ -14713,6 +14713,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try again'**
   String get errorRetryCta;
+
+  /// Persistent banner on a ready merchant order whose dispatch found no driver yet
+  ///
+  /// In en, this message translates to:
+  /// **'No drivers free yet. We keep retrying automatically; tap dispatch to retry now.'**
+  String get noDriversYetAutoRetry;
 }
 
 class _AppLocalizationsDelegate

@@ -7680,4 +7680,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errorRetryCta => 'حاول تاني';
+
+  @override
+  String get noDriversYetAutoRetry =>
+      'لا يوجد كباتن متاحون حالياً. تتم إعادة المحاولة تلقائياً، أو اضغط إرسال مندوب للمحاولة فوراً.';
 }

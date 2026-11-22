@@ -65,46 +65,115 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   }
 
   Future<void> _addNewAddress() async {
+    // Batch 20 #2: this used to just edit the current checkout address text.
+    // Now it is a real add-address form: label + address + exact location,
+    // saved to user_addresses and selected for this checkout.
     final l10n = AppLocalizations.of(context);
-    final controller = TextEditingController(text: _addressController.text);
+    final labelController = TextEditingController();
+    final addressController = TextEditingController();
+    UserLocation? loc = _deliveryLocation;
+    if (loc != null) addressController.text = loc.detailedAddress;
     try {
-      final result = await showDialog<String>(
+      final saved = await showDialog<bool>(
         context: context,
-        builder: (dialogContext) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+        builder: (dialogContext) => StatefulBuilder(
+          builder: (dialogContext, setLocal) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Text(l10n.addNewAddress),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: labelController,
+                  decoration: InputDecoration(
+                    hintText: l10n.addressLabel,
+                    prefixIcon: const Icon(Icons.label_outline_rounded),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: addressController,
+                  maxLines: 3,
+                  minLines: 1,
+                  decoration: InputDecoration(
+                    hintText: l10n.selectDeliveryAddress,
+                    prefixIcon: const Icon(Icons.location_on_outlined),
+                  ),
+                ),
+                TextButton.icon(
+                  icon: const Icon(Icons.edit_location_alt_rounded, size: 18),
+                  label: Text(l10n.pickLocationOnMap),
+                  onPressed: () async {
+                    final picked = await SmartMapPickerSheet.show(context);
+                    if (picked != null) {
+                      setLocal(() {
+                        loc = picked;
+                        addressController.text = picked.detailedAddress;
+                      });
+                    }
+                  },
+                ),
+                if (loc == null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      l10n.addressLocationRequired,
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: context.colorScheme.error,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: Text(l10n.cancel),
+              ),
+              FilledButton(
+                onPressed: loc == null
+                    ? null
+                    : () => Navigator.of(dialogContext).pop(true),
+                child: Text(l10n.save),
+              ),
+            ],
           ),
-          title: Text(l10n.addNewAddress),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            maxLines: 3,
-            minLines: 1,
-            decoration: InputDecoration(
-              hintText: l10n.selectDeliveryAddress,
-              prefixIcon: const Icon(Icons.location_on_outlined),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text(l10n.cancel),
-            ),
-            FilledButton(
-              onPressed: () =>
-                  Navigator.of(dialogContext).pop(controller.text.trim()),
-              child: Text(l10n.saveChanges),
-            ),
-          ],
         ),
       );
-      if (result == null || result.isEmpty || !mounted) return;
-      setState(() {
-        if (result != _addressController.text) _deliveryLocation = null;
-        _addressController.text = result;
+      if (saved != true || !mounted || loc == null) return;
+      final client = Supabase.instance.client;
+      final uid = client.auth.currentUser?.id;
+      if (uid == null) return;
+      final addressText = addressController.text.trim().isNotEmpty
+          ? addressController.text.trim()
+          : loc!.detailedAddress;
+      await client.from('user_addresses').insert({
+        'user_id': uid,
+        'label': labelController.text.trim(),
+        'address': addressText,
+        'latitude': loc!.latitude,
+        'longitude': loc!.longitude,
+        'is_default': false,
       });
+      if (!mounted) return;
+      ref.invalidate(_savedAddressesProvider);
+      setState(() {
+        _addressController.text = addressText;
+        _deliveryLocation = loc;
+        _addressPrefilled = true;
+      });
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.addressSaved)));
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.locationConfirmFailed)));
+      }
     } finally {
-      controller.dispose();
+      labelController.dispose();
+      addressController.dispose();
     }
   }
 

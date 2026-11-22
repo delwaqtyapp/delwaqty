@@ -1544,6 +1544,24 @@ abstract class AppLocalizations {
   /// **'Add New Address'**
   String get addNewAddress;
 
+  /// No description provided for @addressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Label (e.g. Home)'**
+  String get addressLabel;
+
+  /// No description provided for @addressLocationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the location on the map to save this address.'**
+  String get addressLocationRequired;
+
+  /// No description provided for @addressSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Address saved.'**
+  String get addressSaved;
+
   /// No description provided for @savedAddresses.
   ///
   /// In en, this message translates to:
@@ -14551,6 +14569,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search for your address or tap Detect My Location'**
   String get webMapSearchHint;
+
+  /// No description provided for @locationConfirmFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t confirm the location. Check your connection and try again.'**
+  String get locationConfirmFailed;
 
   /// Friendly zero-state title on the driver financial center
   ///

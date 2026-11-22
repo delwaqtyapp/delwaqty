@@ -210,7 +210,8 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
               placeId: hit.placeId!,
               languageCode: lang,
               session: _searchSession,
-            );
+            )
+            .timeout(const Duration(seconds: 6));
         lat = details.location.latitude;
         lng = details.location.longitude;
         if (details.formattedAddress.isNotEmpty) {
@@ -238,25 +239,31 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
     if (mounted) {
       setState(() => _isGeocoding = true);
     }
+    // Batch 20: the provider fans out to several geocode backends with no
+    // deadline; on web one hung request stalled the sheet forever. Bound it.
+    String address;
     try {
-      final address = await ref
+      address = await ref
           .read(userLocationProvider.notifier)
-          .reverseGeocodePoint(target.latitude, target.longitude);
-      if (!mounted || token != _geocodeToken) return;
-      setState(() {
-        _resolvedAddress = address.isNotEmpty
-            ? address
-            : '${target.latitude.toStringAsFixed(5)}, ${target.longitude.toStringAsFixed(5)}';
-        _isGeocoding = false;
-      });
+          .reverseGeocodePoint(target.latitude, target.longitude)
+          .timeout(Duration(seconds: kIsWeb ? 8 : 12), onTimeout: () => '');
     } catch (_) {
-      if (!mounted || token != _geocodeToken) return;
-      setState(() {
-        _resolvedAddress =
-            '${target.latitude.toStringAsFixed(5)}, ${target.longitude.toStringAsFixed(5)}';
-        _isGeocoding = false;
-      });
+      address = '';
     }
+    if (!mounted || token != _geocodeToken) return;
+    setState(() {
+      _resolvedAddress = _fallbackAddress(address, target);
+      _isGeocoding = false;
+    });
+  }
+
+  /// What to show when the geocoder fails or times out: the address the user
+  /// typed (search box) beats raw coordinates.
+  String _fallbackAddress(String address, LatLng target) {
+    if (address.isNotEmpty) return address;
+    final typed = _searchController.text.trim();
+    if (typed.isNotEmpty) return typed;
+    return '${target.latitude.toStringAsFixed(5)}, ${target.longitude.toStringAsFixed(5)}';
   }
 
   Future<void> _detectPreciseGps() async {
@@ -302,10 +309,19 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
           .setCustomCoordinates(
             latitude: _center.latitude,
             longitude: _center.longitude,
-            addressOverride: _resolvedAddress,
-          );
+            addressOverride: _resolvedAddress.isNotEmpty
+                ? _resolvedAddress
+                : _searchController.text.trim(),
+          )
+          .timeout(const Duration(seconds: 10));
       if (!mounted) return;
       Navigator.of(context).pop(saved);
+    } catch (_) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.locationConfirmFailed)));
+      }
     } finally {
       if (mounted) {
         setState(() => _isConfirming = false);

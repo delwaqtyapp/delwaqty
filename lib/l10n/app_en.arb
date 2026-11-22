@@ -262,6 +262,9 @@
   "viewCart": "View Cart",
   "selectDeliveryAddress": "Select Delivery Address",
   "addNewAddress": "Add New Address",
+  "addressLabel": "Label (e.g. Home)",
+  "addressLocationRequired": "Pick the location on the map to save this address.",
+  "addressSaved": "Address saved.",
   "savedAddresses": "Saved Addresses",
   "noSavedAddresses": "No saved addresses yet",
   "addressLine1": "Address Line 1",
@@ -2538,6 +2541,7 @@
   },
   "mapUnavailableOnWeb": "Map preview is unavailable in the browser. Search for your address above or use Detect My Location.",
   "webMapSearchHint": "Search for your address or tap Detect My Location",
+  "locationConfirmFailed": "Couldn't confirm the location. Check your connection and try again.",
   "earningsEmptyTitle": "No earnings yet",
   "@earningsEmptyTitle": {
     "description": "Friendly zero-state title on the driver financial center"

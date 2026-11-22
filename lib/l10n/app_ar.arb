@@ -258,6 +258,9 @@
   "viewCart": "عرض السلة",
   "selectDeliveryAddress": "اختر عنوان التوصيل",
   "addNewAddress": "إضافة عنوان جديد",
+  "addressLabel": "الاسم (مثال: البيت)",
+  "addressLocationRequired": "حدد الموقع على الخريطة لحفظ هذا العنوان.",
+  "addressSaved": "تم حفظ العنوان.",
   "savedAddresses": "العناوين المحفوظة",
   "noSavedAddresses": "لا توجد عناوين محفوظة بعد",
   "addressLine1": "العنوان السطر الأول",
@@ -2479,6 +2482,7 @@
   },
   "mapUnavailableOnWeb": "معاينة الخريطة غير متاحة في المتصفح. ابحث عن عنوانك بالأعلى أو استخدم تحديد موقعي.",
   "webMapSearchHint": "ابحث عن عنوانك أو اضغط تحديد موقعي",
+  "locationConfirmFailed": "تعذر تأكيد الموقع. تحقق من اتصالك وحاول مرة أخرى.",
   "earningsEmptyTitle": "لا توجد أرباح بعد",
   "@earningsEmptyTitle": {
     "description": "Friendly zero-state title on the driver financial center"

@@ -751,6 +751,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addNewAddress => 'إضافة عنوان جديد';
 
   @override
+  String get addressLabel => 'الاسم (مثال: البيت)';
+
+  @override
+  String get addressLocationRequired =>
+      'حدد الموقع على الخريطة لحفظ هذا العنوان.';
+
+  @override
+  String get addressSaved => 'تم حفظ العنوان.';
+
+  @override
   String get savedAddresses => 'العناوين المحفوظة';
 
   @override
@@ -7575,6 +7585,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get webMapSearchHint => 'ابحث عن عنوانك أو اضغط تحديد موقعي';
+
+  @override
+  String get locationConfirmFailed =>
+      'تعذر تأكيد الموقع. تحقق من اتصالك وحاول مرة أخرى.';
 
   @override
   String get earningsEmptyTitle => 'لا توجد أرباح بعد';

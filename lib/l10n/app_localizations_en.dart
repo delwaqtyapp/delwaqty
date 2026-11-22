@@ -756,6 +756,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addNewAddress => 'Add New Address';
 
   @override
+  String get addressLabel => 'Label (e.g. Home)';
+
+  @override
+  String get addressLocationRequired =>
+      'Pick the location on the map to save this address.';
+
+  @override
+  String get addressSaved => 'Address saved.';
+
+  @override
   String get savedAddresses => 'Saved Addresses';
 
   @override
@@ -7635,6 +7645,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get webMapSearchHint =>
       'Search for your address or tap Detect My Location';
+
+  @override
+  String get locationConfirmFailed =>
+      'Couldn\'t confirm the location. Check your connection and try again.';
 
   @override
   String get earningsEmptyTitle => 'No earnings yet';

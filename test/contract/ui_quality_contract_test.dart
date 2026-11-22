@@ -121,6 +121,27 @@ void main() {
     });
   });
 
+  group('driver offer presentation (#49)', () {
+    test('delivery offers present on the root navigator', () {
+      final src = File(
+        'lib/features/driver/presentation/pages/driver_delivery_hub_page.dart',
+      ).readAsStringSync();
+      final present = src.indexOf('_presentOffer(');
+      final body = src.indexOf('showModalBottomSheet<bool>(', present);
+      final close = src.indexOf(');', body);
+      expect(present, isPositive, reason: '_presentOffer must exist');
+      expect(body, isPositive, reason: '_presentOffer must show a sheet');
+      expect(
+        src.substring(body, close),
+        contains('useRootNavigator: true'),
+        reason:
+            'the hub lives in a retained indexed-stack branch: an offer '
+            'arriving while another tab is visible must land on the root '
+            'navigator, never on the hidden branch',
+      );
+    });
+  });
+
   group('Arabic UI strings are localized', () {
     test('no user-facing Arabic literal remains in a page', () {
       final offenders = <String>[];

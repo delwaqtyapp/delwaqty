@@ -123,6 +123,24 @@ void main() {
       expect(n.pushStatus, NotificationPushStatus.failed);
     });
 
+    test('maps ota_update rows to NotificationType.otaUpdate (#48)', () async {
+      rows.add({
+        'id': 'n-ota-1',
+        'title': 'Update available',
+        'body': '1.0.5 is ready',
+        'type': 'ota_update',
+        'deep_link': '/settings/about',
+        'is_read': false,
+        'created_at': '2026-11-22T00:00:00.000Z',
+      });
+
+      final notifications = await dataSource.getNotifications();
+
+      expect(notifications, hasLength(1));
+      expect(notifications.single.type, NotificationType.otaUpdate);
+      expect(notifications.single.deepLink, '/settings/about');
+    });
+
     test('defaults priority and push status when absent', () async {
       rows.add({
         'id': 'n1',

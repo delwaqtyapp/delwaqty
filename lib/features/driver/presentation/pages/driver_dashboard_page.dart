@@ -14,6 +14,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/floating_glass_buttons.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/shared/widgets/app_shell.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
@@ -97,7 +98,12 @@ class DriverDashboardPage extends ConsumerWidget {
             return _buildDashboard(context, ref, profile);
           },
           loading: () => ListView(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.fromLTRB(
+              16,
+              16,
+              16,
+              16 + kFloatingNavClearance + MediaQuery.paddingOf(context).bottom,
+            ),
             children: const [
               ShimmerCard(height: 100),
               SizedBox(height: 12),
@@ -166,7 +172,12 @@ class DriverDashboardPage extends ConsumerWidget {
     final performanceAsync = ref.watch(_performanceProvider(profile.id));
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        16,
+        16,
+        16 + kFloatingNavClearance + MediaQuery.paddingOf(context).bottom,
+      ),
       children: [
         performanceAsync.when(
           loading: () => const SizedBox.shrink(),

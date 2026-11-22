@@ -248,15 +248,6 @@ class _NotificationCenterPageState
                         final repo = ref.read(notificationRepositoryProvider);
                         await repo.markAsRead(notification.id);
                         if (!mounted) return;
-                        // OTA announcements open the update dialog directly,
-                        // same as a system push tap (#46).
-                        if (notification.type == NotificationType.otaUpdate) {
-                          await showOtaUpdateIfAvailable(
-                            context: context,
-                            flavor: ref.read(appFlavorProvider),
-                          );
-                          return;
-                        }
                         final index = _items.indexWhere(
                           (n) => n.id == notification.id,
                         );
@@ -265,6 +256,16 @@ class _NotificationCenterPageState
                           setState(() {});
                         }
                         _invalidateNotificationProviders();
+                        // OTA announcements open the update dialog directly,
+                        // same as a system push tap (#46). Read state and the
+                        // badge are already settled above (#48).
+                        if (notification.type == NotificationType.otaUpdate) {
+                          await showOtaUpdateIfAvailable(
+                            context: context,
+                            flavor: ref.read(appFlavorProvider),
+                          );
+                          return;
+                        }
                         if (context.mounted) {
                           final route =
                               NotificationRouteResolver.safeNotification(

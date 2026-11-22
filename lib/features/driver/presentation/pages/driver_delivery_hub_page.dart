@@ -13,6 +13,7 @@ import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_ord
 import 'package:delwaqty/features/customer/driver/domain/entities/ride_offer.dart';
 import 'package:delwaqty/features/customer/driver/presentation/providers/dispatch_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/shared/widgets/app_shell.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
@@ -43,7 +44,12 @@ class DriverDeliveryHubPage extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n.delivery)),
       body: profileAsync.when(
         loading: () => ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            16,
+            16,
+            16 + kFloatingNavClearance + MediaQuery.paddingOf(context).bottom,
+          ),
           children: const [
             ShimmerCard(height: 100),
             SizedBox(height: 12),
@@ -179,7 +185,12 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
         ref.invalidate(driverCapabilitiesProvider(_driverId));
       },
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          16,
+          16,
+          16 + kFloatingNavClearance + MediaQuery.paddingOf(context).bottom,
+        ),
         children: [
           AnimatedFadeIn(
             child: _OnlineCard(
@@ -263,6 +274,10 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
     final l10n = AppLocalizations.of(context);
     final accepted = await showModalBottomSheet<bool>(
       context: context,
+      // The hub lives in a retained indexed-stack branch; without the root
+      // navigator an offer arriving while another tab is visible would land
+      // on the hidden branch and never be seen (#49).
+      useRootNavigator: true,
       isDismissible: false,
       enableDrag: false,
       isScrollControlled: true,

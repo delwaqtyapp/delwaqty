@@ -9,6 +9,7 @@ import 'package:delwaqty/features/provider/financial/presentation/providers/fina
 import 'package:delwaqty/features/driver/financial/presentation/providers/driver_financial_providers.dart';
 import 'package:delwaqty/features/customer/driver/presentation/providers/dispatch_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/shared/widgets/app_shell.dart';
 
 class DriverFinancialCenterPage extends ConsumerWidget {
   const DriverFinancialCenterPage({super.key});
@@ -62,7 +63,12 @@ class DriverFinancialCenterPage extends ConsumerWidget {
           ref.invalidate(driverEarningsProvider(driverId));
         },
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            16,
+            16,
+            16 + kFloatingNavClearance + MediaQuery.paddingOf(context).bottom,
+          ),
           children: [
             summary.when(
               data: (s) => Column(

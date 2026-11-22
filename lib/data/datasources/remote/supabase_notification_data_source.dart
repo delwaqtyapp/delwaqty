@@ -47,6 +47,7 @@ class SupabaseNotificationDataSource {
     'topup_approved': NotificationType.topupApproved,
     'admin_topup': NotificationType.adminTopup,
     'provider_profile': NotificationType.providerProfile,
+    'ota_update': NotificationType.otaUpdate,
   };
 
   NotificationType _parseNotificationType(String raw) {

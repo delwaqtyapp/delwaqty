@@ -16,118 +16,13 @@ class AdminRepository implements admin.AdminRepository {
   @override
   Future<AdminDashboardMetrics> getDashboardMetrics() async {
     try {
-      final now = DateTime.now();
-      final todayStart = DateTime(
-        now.year,
-        now.month,
-        now.day,
-      ).toIso8601String();
-      final monthStart = DateTime(now.year, now.month).toIso8601String();
-
-      final countResults = await Future.wait([
-        _supabase.rpc<int>('count_table_rows', params: {'table_name': 'users'}),
-        _supabase.rpc<int>(
-          'count_table_rows',
-          params: {'table_name': 'drivers'},
-        ),
-        _supabase.rpc<int>(
-          'count_table_rows',
-          params: {'table_name': 'merchants'},
-        ),
-      ]);
-
-      final metrics = await Future.wait([
-        _supabase.from('drivers').select('id').eq('is_online', true).count(),
-        _supabase
-            .from('drivers')
-            .select('id')
-            .eq('verification_status', 'pending')
-            .count(),
-        _supabase
-            .from('rides')
-            .select('id')
-            .neq('service_type', 'ride')
-            .count(),
-        _supabase.from('orders').select('id').eq('status', 'pending').count(),
-        _supabase
-            .from('rides')
-            .select('id')
-            .neq('service_type', 'ride')
-            .eq('status', 'completed')
-            .count(),
-        _supabase
-            .from('users')
-            .select('id')
-            .gte('created_at', todayStart)
-            .count(),
-        _supabase
-            .from('users')
-            .select('id')
-            .gte('created_at', monthStart)
-            .count(),
-      ]);
-
-      final revenueResults = await Future.wait([
-        _supabase.from('rides').select('fare').eq('status', 'completed'),
-        _supabase
-            .from('rides')
-            .select('fare')
-            .neq('service_type', 'ride')
-            .eq('status', 'completed'),
-        _supabase
-            .from('rides')
-            .select('fare')
-            .eq('status', 'completed')
-            .gte('completed_at', todayStart),
-        _supabase
-            .from('rides')
-            .select('fare')
-            .neq('service_type', 'ride')
-            .eq('status', 'completed')
-            .gte('completed_at', todayStart),
-        _supabase
-            .from('rides')
-            .select('fare')
-            .eq('status', 'completed')
-            .gte('completed_at', monthStart),
-        _supabase
-            .from('rides')
-            .select('fare')
-            .neq('service_type', 'ride')
-            .eq('status', 'completed')
-            .gte('completed_at', monthStart),
-      ]);
-
-      double totalRevenue = 0;
-      for (final delivery in revenueResults[1] as List) {
-        totalRevenue += (delivery['fare'] as num?)?.toDouble() ?? 0;
-      }
-
-      double revenueToday = 0;
-      for (final delivery in revenueResults[3] as List) {
-        revenueToday += (delivery['fare'] as num?)?.toDouble() ?? 0;
-      }
-
-      double revenueThisMonth = 0;
-      for (final delivery in revenueResults[5] as List) {
-        revenueThisMonth += (delivery['fare'] as num?)?.toDouble() ?? 0;
-      }
-
-      return AdminDashboardMetrics(
-        totalUsers: countResults[0],
-        totalDrivers: countResults[1],
-        totalMerchants: countResults[2],
-        activeDrivers: metrics[0].count,
-        pendingVerifications: metrics[1].count,
-        totalDeliveries: metrics[2].count,
-        pendingOrders: metrics[3].count,
-        completedDeliveries: metrics[4].count,
-        totalRevenue: totalRevenue,
-        revenueToday: revenueToday,
-        revenueThisMonth: revenueThisMonth,
-        newUsersToday: metrics[5].count,
-        newUsersThisMonth: metrics[6].count,
+      // 372: one scoped RPC replaces count_table_rows + bare .count() selects.
+      // Owner/country admins get global numbers; region-scoped admins get
+      // in-scope counts; anyone else gets zeros (never an error).
+      final data = await _supabase.rpc<Map<String, dynamic>>(
+        'admin_dashboard_metrics',
       );
+      return AdminDashboardMetrics.fromJson(data);
     } catch (e) {
       throw AdminException('Failed to fetch dashboard metrics: $e');
     }

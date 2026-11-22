@@ -67,10 +67,7 @@ void main() {
       controller.add(ride(collectedAt: DateTime(2026)));
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('driverRatingCard')), findsOneWidget);
-      expect(
-        find.text('يمكنك تقييم الكابتن بعد تحصيل المبلغ.'),
-        findsNothing,
-      );
+      expect(find.text('يمكنك تقييم الكابتن بعد تحصيل المبلغ.'), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );

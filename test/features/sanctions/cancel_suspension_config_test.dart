@@ -18,9 +18,8 @@ void main() {
 
   group('SanctionsRepositoryImpl.getCancelSuspensionDays', () {
     test('returns the configured duration', () async {
-      when(
-        () => mockDataSource.getCancelSuspensionDays(),
-      ).thenAnswer((_) async => 7);
+      when(() => mockDataSource.getCancelSuspensionDays())
+          .thenAnswer((_) async => 7);
 
       final result = await repository.getCancelSuspensionDays();
 
@@ -29,9 +28,8 @@ void main() {
     });
 
     test('wraps data source errors in ServerException', () async {
-      when(
-        () => mockDataSource.getCancelSuspensionDays(),
-      ).thenThrow(Exception('network'));
+      when(() => mockDataSource.getCancelSuspensionDays())
+          .thenThrow(Exception('network'));
 
       expect(
         () => repository.getCancelSuspensionDays(),
@@ -73,9 +71,8 @@ void main() {
 
       await repository.setCancelSuspensionDays(5);
 
-      verify(
-        () => mockDataSource.setCancelSuspensionDays(5, reason: null),
-      ).called(1);
+      verify(() => mockDataSource.setCancelSuspensionDays(5, reason: null))
+          .called(1);
     });
 
     test('wraps owner-only rejection in ServerException', () async {
@@ -99,9 +96,8 @@ void main() {
 
   group('SanctionsRepositoryImpl refusal suspension config', () {
     test('getRefusalSuspensionDays returns the configured duration', () async {
-      when(
-        () => mockDataSource.getRefusalSuspensionDays(),
-      ).thenAnswer((_) async => 4);
+      when(() => mockDataSource.getRefusalSuspensionDays())
+          .thenAnswer((_) async => 4);
 
       final result = await repository.getRefusalSuspensionDays();
 

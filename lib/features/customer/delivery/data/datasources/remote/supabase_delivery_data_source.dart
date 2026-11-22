@@ -594,14 +594,12 @@ class SupabaseDeliveryDataSource {
         .stream(primaryKey: ['id'])
         .eq('order_id', orderId)
         .map((rows) {
-          final eligible = rows
-              .where((r) => r['status'] != 'cancelled')
-              .toList()
-            ..sort(
-              (a, b) => (b['created_at'] as String? ?? '').compareTo(
-                a['created_at'] as String? ?? '',
-              ),
-            );
+          final eligible =
+              rows.where((r) => r['status'] != 'cancelled').toList()..sort(
+                (a, b) => (b['created_at'] as String? ?? '').compareTo(
+                  a['created_at'] as String? ?? '',
+                ),
+              );
           if (eligible.isEmpty) return null;
           return OrderDeliveryRide.fromRow(eligible.first);
         });

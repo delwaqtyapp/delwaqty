@@ -76,7 +76,8 @@ class CashCollectionResult {
 
   /// Both a fresh COLLECTED and an idempotent ALREADY_COLLECTED replay mean
   /// the cash is marked collected.
-  bool get collected => ok && (code == 'COLLECTED' || code == 'ALREADY_COLLECTED');
+  bool get collected =>
+      ok && (code == 'COLLECTED' || code == 'ALREADY_COLLECTED');
 }
 
 /// The delivery ride linked to a commerce order, for the customer's
@@ -122,6 +123,5 @@ class OrderDeliveryRide {
   /// 392) — payment_status alone is not enough, because historical paid
   /// rows may carry no stamp until the server replay/backfill heals them.
   bool get rateable =>
-      isCompleted &&
-      (paymentMethod != 'cash' || cashCollectedAt != null);
+      isCompleted && (paymentMethod != 'cash' || cashCollectedAt != null);
 }

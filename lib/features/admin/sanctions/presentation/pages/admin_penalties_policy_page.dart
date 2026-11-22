@@ -241,58 +241,58 @@ class _PenaltyEditDialogState extends State<_PenaltyEditDialog> {
     return PopScope(
       canPop: !_saving,
       child: AlertDialog(
-      title: Text(l10n.editPenalty),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(widget.title, style: Theme.of(context).textTheme.bodyMedium),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _daysController,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: InputDecoration(
-                labelText: l10n.suspensionDaysLabel,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+        title: Text(l10n.editPenalty),
+        content: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(widget.title, style: Theme.of(context).textTheme.bodyMedium),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _daysController,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                decoration: InputDecoration(
+                  labelText: l10n.suspensionDaysLabel,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
+                validator: (value) {
+                  final parsed = int.tryParse(value ?? '');
+                  if (parsed == null || parsed < 1 || parsed > 365) {
+                    return l10n.invalidSuspensionDays;
+                  }
+                  return null;
+                },
               ),
-              validator: (value) {
-                final parsed = int.tryParse(value ?? '');
-                if (parsed == null || parsed < 1 || parsed > 365) {
-                  return l10n.invalidSuspensionDays;
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _reasonController,
-              decoration: InputDecoration(
-                labelText: l10n.penaltyChangeReasonHint,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _reasonController,
+                decoration: InputDecoration(
+                  labelText: l10n.penaltyChangeReasonHint,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
+                maxLines: 2,
               ),
-              maxLines: 2,
-            ),
-          ],
+            ],
+          ),
         ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        actions: [
+          TextButton(
+            onPressed: _saving ? null : () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: _saving ? null : _submit,
+            child: Text(l10n.save),
+          ),
+        ],
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      actions: [
-        TextButton(
-          onPressed: _saving ? null : () => Navigator.of(context).pop(false),
-          child: Text(l10n.cancel),
-        ),
-        TextButton(
-          onPressed: _saving ? null : _submit,
-          child: Text(l10n.save),
-        ),
-      ],
-    ),
     );
   }
 }

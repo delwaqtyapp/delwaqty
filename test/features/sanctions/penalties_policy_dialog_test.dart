@@ -52,15 +52,13 @@ class _FakeSanctionsRepository implements SanctionsRepository {
     int durationDays = 0,
     double amount = 0,
     String? evidenceUrl,
-  }) =>
-      throw UnimplementedError('not needed in this test');
+  }) => throw UnimplementedError('not needed in this test');
 
   @override
   Future<void> revokeSanction({
     required String sanctionId,
     required String reason,
-  }) =>
-      throw UnimplementedError('not needed in this test');
+  }) => throw UnimplementedError('not needed in this test');
 }
 
 void main() {
@@ -107,52 +105,57 @@ void main() {
     expect(find.text('تعديل العقوبة'), findsOneWidget);
   }
 
-  testWidgets('save lock: double-tap save triggers exactly one repository call',
-      (tester) async {
-    final env = await pumpPage(tester);
-    env.repo.gate = Completer<int>();
+  testWidgets(
+    'save lock: double-tap save triggers exactly one repository call',
+    (tester) async {
+      final env = await pumpPage(tester);
+      env.repo.gate = Completer<int>();
 
-    await openCancelDialog(tester);
+      await openCancelDialog(tester);
 
-    await tester.enterText(find.byType(TextFormField), '10');
-    await tester.tap(find.text('حفظ'));
-    await tester.pump();
-    // Second tap while the first save is still in flight.
-    await tester.tap(find.text('حفظ'), warnIfMissed: false);
-    await tester.pump();
-    // Barrier tap while saving must not dismiss the dialog.
-    await tester.tapAt(const Offset(5, 5));
-    await tester.pump();
-    expect(find.text('تعديل العقوبة'), findsOneWidget);
+      await tester.enterText(find.byType(TextFormField), '10');
+      await tester.tap(find.text('حفظ'));
+      await tester.pump();
+      // Second tap while the first save is still in flight.
+      await tester.tap(find.text('حفظ'), warnIfMissed: false);
+      await tester.pump();
+      // Barrier tap while saving must not dismiss the dialog.
+      await tester.tapAt(const Offset(5, 5));
+      await tester.pump();
+      expect(find.text('تعديل العقوبة'), findsOneWidget);
 
-    env.repo.gate!.complete(10);
-    await tester.pumpAndSettle();
+      env.repo.gate!.complete(10);
+      await tester.pumpAndSettle();
 
-    expect(env.repo.cancelCalls, hasLength(1));
-    expect(env.repo.cancelCalls.single.days, 10);
-    // Dialog closed and the success snackbar is shown.
-    expect(find.text('تعديل العقوبة'), findsNothing);
-    expect(find.text('تم تحديث العقوبة'), findsOneWidget);
-  });
+      expect(env.repo.cancelCalls, hasLength(1));
+      expect(env.repo.cancelCalls.single.days, 10);
+      // Dialog closed and the success snackbar is shown.
+      expect(find.text('تعديل العقوبة'), findsNothing);
+      expect(find.text('تم تحديث العقوبة'), findsOneWidget);
+    },
+  );
 
-  testWidgets('invalid days (0) shows the range error and never calls the repo',
-      (tester) async {
-    final env = await pumpPage(tester);
+  testWidgets(
+    'invalid days (0) shows the range error and never calls the repo',
+    (tester) async {
+      final env = await pumpPage(tester);
 
-    await openCancelDialog(tester);
+      await openCancelDialog(tester);
 
-    await tester.enterText(find.byType(TextFormField), '0');
-    await tester.tap(find.text('حفظ'));
-    await tester.pump();
+      await tester.enterText(find.byType(TextFormField), '0');
+      await tester.tap(find.text('حفظ'));
+      await tester.pump();
 
-    expect(env.repo.cancelCalls, isEmpty);
-    expect(find.text('المدة لازم تكون بين 1 و 365 يوم'), findsOneWidget);
-    // Dialog stays open for correction.
-    expect(find.text('تعديل العقوبة'), findsOneWidget);
-  });
+      expect(env.repo.cancelCalls, isEmpty);
+      expect(find.text('المدة لازم تكون بين 1 و 365 يوم'), findsOneWidget);
+      // Dialog stays open for correction.
+      expect(find.text('تعديل العقوبة'), findsOneWidget);
+    },
+  );
 
-  testWidgets('cancel closes the dialog without calling the repo',
-      (tester) async {
+  testWidgets('cancel closes the dialog without calling the repo', (
+    tester,
+  ) async {
     final env = await pumpPage(tester);
 
     await openCancelDialog(tester);

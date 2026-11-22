@@ -24,7 +24,12 @@ void main() {
     currency: 'EGP',
   );
 
-  Widget app({required bool collected, bool busy = false, VoidCallback? onCollect, VoidCallback? onDone}) {
+  Widget app({
+    required bool collected,
+    bool busy = false,
+    VoidCallback? onCollect,
+    VoidCallback? onDone,
+  }) {
     return RepaintBoundary(
       key: const ValueKey('capture'),
       child: MaterialApp(
@@ -140,7 +145,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('تعذر تحميل حالة التحصيل. تحقق من الاتصال وأعد المحاولة.'), findsOneWidget);
+    expect(
+      find.text('تعذر تحميل حالة التحصيل. تحقق من الاتصال وأعد المحاولة.'),
+      findsOneWidget,
+    );
     await tester.tap(find.byKey(const ValueKey('cashCollectionRetry')));
     expect(retries, 1);
 

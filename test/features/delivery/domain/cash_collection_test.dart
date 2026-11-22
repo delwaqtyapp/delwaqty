@@ -85,10 +85,7 @@ void main() {
     });
 
     test('unfinished delivery is never rateable', () {
-      expect(
-        ride(status: 'inTrip', paymentMethod: 'wallet').rateable,
-        isFalse,
-      );
+      expect(ride(status: 'inTrip', paymentMethod: 'wallet').rateable, isFalse);
     });
   });
 }

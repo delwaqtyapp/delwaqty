@@ -795,9 +795,8 @@ class _DriverRatingSectionState extends ConsumerState<DriverRatingSection> {
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   child: Text(
                     l10n.rateDriverPrompt,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
                 if (ride.driverName != null && ride.driverName!.isNotEmpty)

@@ -257,10 +257,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           // at create_order; the provider mirrors min(available, amount due)
           // for display only.
           final dueBeforeCredit = cart.subtotal + deliveryFee - cart.discount;
-          final platformCredit = ref
-                  .watch(_platformCreditProvider(dueBeforeCredit))
-                  .value ??
-              0.0;
+          final platformCredit =
+              ref.watch(_platformCreditProvider(dueBeforeCredit)).value ?? 0.0;
           final creditApplied = dueBeforeCredit <= 0
               ? 0.0
               : platformCredit.clamp(0.0, dueBeforeCredit).toDouble();
@@ -275,310 +273,317 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             },
             child: ListView(
               padding: const EdgeInsets.all(16),
-            children: [
-              AnimatedFadeIn(child: _SectionTitle(title: l10n.deliveryAddress)),
-              const SizedBox(height: 8),
-              AnimatedFadeIn(
-                delay: const Duration(milliseconds: 100),
-                child: TextField(
-                  controller: _addressController,
-                  onChanged: (_) => _deliveryLocation = null,
-                  decoration: InputDecoration(
-                    hintText: l10n.selectDeliveryAddress,
-                    prefixIcon: const Icon(Icons.location_on_outlined),
-                    suffixIcon: IconButton(
-                      tooltip: l10n.pickLocationOnMap,
-                      icon: const Icon(Icons.map_rounded),
+              children: [
+                AnimatedFadeIn(
+                  child: _SectionTitle(title: l10n.deliveryAddress),
+                ),
+                const SizedBox(height: 8),
+                AnimatedFadeIn(
+                  delay: const Duration(milliseconds: 100),
+                  child: TextField(
+                    controller: _addressController,
+                    onChanged: (_) => _deliveryLocation = null,
+                    decoration: InputDecoration(
+                      hintText: l10n.selectDeliveryAddress,
+                      prefixIcon: const Icon(Icons.location_on_outlined),
+                      suffixIcon: IconButton(
+                        tooltip: l10n.pickLocationOnMap,
+                        icon: const Icon(Icons.map_rounded),
+                        onPressed: _pickAddressOnMap,
+                      ),
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                if (savedAddresses != null && savedAddresses.isNotEmpty)
+                  SizedBox(
+                    height: 44,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.only(top: 8),
+                      itemCount: savedAddresses.length,
+                      separatorBuilder: (_, _) => const SizedBox(width: 8),
+                      itemBuilder: (context, i) {
+                        final a = savedAddresses[i];
+                        final lat = (a['latitude'] as num?)?.toDouble();
+                        final lng = (a['longitude'] as num?)?.toDouble();
+                        final label =
+                            (a['label'] as String?)?.trim().isNotEmpty == true
+                            ? a['label'] as String
+                            : (a['address'] as String? ?? '');
+                        final selected =
+                            lat != null &&
+                            _deliveryLocation?.latitude == lat &&
+                            _deliveryLocation?.longitude == lng;
+                        return ChoiceChip(
+                          label: Text(label),
+                          selected: selected,
+                          onSelected: lat == null || lng == null
+                              ? null
+                              : (_) => setState(() {
+                                  final addr = (a['address'] as String?) ?? '';
+                                  final lbl =
+                                      (a['label'] as String?)?.trim() ?? '';
+                                  _addressController.text = lbl.isNotEmpty
+                                      ? '$lbl - $addr'
+                                      : addr;
+                                  _deliveryLocation = UserLocation(
+                                    latitude: lat,
+                                    longitude: lng,
+                                    detailedAddress: addr,
+                                  );
+                                  _addressPrefilled = true;
+                                }),
+                        );
+                      },
+                    ),
+                  ),
+                Wrap(
+                  alignment: WrapAlignment.end,
+                  children: [
+                    TextButton.icon(
                       onPressed: _pickAddressOnMap,
+                      icon: const Icon(
+                        Icons.edit_location_alt_rounded,
+                        size: 18,
+                      ),
+                      label: Text(l10n.pickLocationOnMap),
                     ),
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-              ),
-              if (savedAddresses != null && savedAddresses.isNotEmpty)
-                SizedBox(
-                  height: 44,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.only(top: 8),
-                    itemCount: savedAddresses.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 8),
-                    itemBuilder: (context, i) {
-                      final a = savedAddresses[i];
-                      final lat = (a['latitude'] as num?)?.toDouble();
-                      final lng = (a['longitude'] as num?)?.toDouble();
-                      final label =
-                          (a['label'] as String?)?.trim().isNotEmpty == true
-                          ? a['label'] as String
-                          : (a['address'] as String? ?? '');
-                      final selected =
-                          lat != null &&
-                          _deliveryLocation?.latitude == lat &&
-                          _deliveryLocation?.longitude == lng;
-                      return ChoiceChip(
-                        label: Text(label),
-                        selected: selected,
-                        onSelected: lat == null || lng == null
-                            ? null
-                            : (_) => setState(() {
-                                final addr = (a['address'] as String?) ?? '';
-                                final lbl =
-                                    (a['label'] as String?)?.trim() ?? '';
-                                _addressController.text = lbl.isNotEmpty
-                                    ? '$lbl - $addr'
-                                    : addr;
-                                _deliveryLocation = UserLocation(
-                                  latitude: lat,
-                                  longitude: lng,
-                                  detailedAddress: addr,
-                                );
-                                _addressPrefilled = true;
-                              }),
-                      );
-                    },
-                  ),
-                ),
-              Wrap(
-                alignment: WrapAlignment.end,
-                children: [
-                  TextButton.icon(
-                    onPressed: _pickAddressOnMap,
-                    icon: const Icon(Icons.edit_location_alt_rounded, size: 18),
-                    label: Text(l10n.pickLocationOnMap),
-                  ),
-                  TextButton(
-                    onPressed: _addNewAddress,
-                    child: Text(l10n.addNewAddress),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              AnimatedFadeIn(
-                delay: const Duration(milliseconds: 200),
-                child: _SectionTitle(title: l10n.paymentMethod),
-              ),
-              const SizedBox(height: 8),
-              AnimatedFadeIn(
-                delay: const Duration(milliseconds: 300),
-                child: SegmentedButton<String>(
-                  segments: [
-                    ButtonSegment(
-                      value: 'cash',
-                      label: Text(l10n.cashOnDelivery),
-                      icon: const Icon(Icons.payments_outlined),
-                    ),
-                    ButtonSegment(
-                      value: 'instapay',
-                      label: Text(l10n.paymentInstapay),
-                      icon: const Icon(Icons.account_balance_wallet_outlined),
-                    ),
-                    ButtonSegment(
-                      value: 'vodafone_cash',
-                      label: Text(l10n.paymentVodafoneCash),
-                      icon: const Icon(Icons.phone_iphone_rounded),
+                    TextButton(
+                      onPressed: _addNewAddress,
+                      child: Text(l10n.addNewAddress),
                     ),
                   ],
-                  selected: {_paymentMethod},
-                  onSelectionChanged: (v) =>
-                      setState(() => _paymentMethod = v.first),
-                  showSelectedIcon: false,
                 ),
-              ),
-              const SizedBox(height: 24),
-              AnimatedFadeIn(
-                delay: const Duration(milliseconds: 400),
-                child: _SectionTitle(title: l10n.couponCode),
-              ),
-              const SizedBox(height: 8),
-              AnimatedFadeIn(
-                delay: const Duration(milliseconds: 500),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _couponController,
-                        decoration: InputDecoration(
-                          hintText: l10n.enterCouponCode,
-                          border: const OutlineInputBorder(),
+                const SizedBox(height: 16),
+                AnimatedFadeIn(
+                  delay: const Duration(milliseconds: 200),
+                  child: _SectionTitle(title: l10n.paymentMethod),
+                ),
+                const SizedBox(height: 8),
+                AnimatedFadeIn(
+                  delay: const Duration(milliseconds: 300),
+                  child: SegmentedButton<String>(
+                    segments: [
+                      ButtonSegment(
+                        value: 'cash',
+                        label: Text(l10n.cashOnDelivery),
+                        icon: const Icon(Icons.payments_outlined),
+                      ),
+                      ButtonSegment(
+                        value: 'instapay',
+                        label: Text(l10n.paymentInstapay),
+                        icon: const Icon(Icons.account_balance_wallet_outlined),
+                      ),
+                      ButtonSegment(
+                        value: 'vodafone_cash',
+                        label: Text(l10n.paymentVodafoneCash),
+                        icon: const Icon(Icons.phone_iphone_rounded),
+                      ),
+                    ],
+                    selected: {_paymentMethod},
+                    onSelectionChanged: (v) =>
+                        setState(() => _paymentMethod = v.first),
+                    showSelectedIcon: false,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                AnimatedFadeIn(
+                  delay: const Duration(milliseconds: 400),
+                  child: _SectionTitle(title: l10n.couponCode),
+                ),
+                const SizedBox(height: 8),
+                AnimatedFadeIn(
+                  delay: const Duration(milliseconds: 500),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _couponController,
+                          decoration: InputDecoration(
+                            hintText: l10n.enterCouponCode,
+                            border: const OutlineInputBorder(),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    FilledButton.tonal(
-                      onPressed: () async {
-                        final code = _couponController.text.trim();
-                        if (code.isEmpty) return;
-                        try {
-                          final repo = ref.read(couponRepositoryProvider);
-                          final coupon = await repo.validateCoupon(
-                            code,
-                            cart.subtotal,
-                          );
-                          if (!mounted) return;
-                          if (coupon != null) {
-                            double discount = 0;
-                            switch (coupon.type) {
-                              case CouponType.percentage:
-                                discount = cart.subtotal * (coupon.value / 100);
-                                if (coupon.maximumDiscount != null &&
-                                    discount > coupon.maximumDiscount!) {
-                                  discount = coupon.maximumDiscount!;
-                                }
-                                break;
-                              case CouponType.fixed:
-                                discount = coupon.value;
-                                break;
-                              case CouponType.freeDelivery:
-                                discount = deliveryFee;
-                                break;
-                            }
-                            final maxDiscount = cart.subtotal + deliveryFee;
-                            discount = discount.clamp(0.0, maxDiscount);
-                            await ref
-                                .read(cartProvider.notifier)
-                                .applyCoupon(coupon.code, discount: discount);
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    '${l10n.couponApplied} -${discount.toStringAsFixed(0)} ${l10n.egp}',
+                      const SizedBox(width: 8),
+                      FilledButton.tonal(
+                        onPressed: () async {
+                          final code = _couponController.text.trim();
+                          if (code.isEmpty) return;
+                          try {
+                            final repo = ref.read(couponRepositoryProvider);
+                            final coupon = await repo.validateCoupon(
+                              code,
+                              cart.subtotal,
+                            );
+                            if (!mounted) return;
+                            if (coupon != null) {
+                              double discount = 0;
+                              switch (coupon.type) {
+                                case CouponType.percentage:
+                                  discount =
+                                      cart.subtotal * (coupon.value / 100);
+                                  if (coupon.maximumDiscount != null &&
+                                      discount > coupon.maximumDiscount!) {
+                                    discount = coupon.maximumDiscount!;
+                                  }
+                                  break;
+                                case CouponType.fixed:
+                                  discount = coupon.value;
+                                  break;
+                                case CouponType.freeDelivery:
+                                  discount = deliveryFee;
+                                  break;
+                              }
+                              final maxDiscount = cart.subtotal + deliveryFee;
+                              discount = discount.clamp(0.0, maxDiscount);
+                              await ref
+                                  .read(cartProvider.notifier)
+                                  .applyCoupon(coupon.code, discount: discount);
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      '${l10n.couponApplied} -${discount.toStringAsFixed(0)} ${l10n.egp}',
+                                    ),
+                                    backgroundColor: colorScheme.primary,
                                   ),
-                                  backgroundColor: colorScheme.primary,
-                                ),
-                              );
+                                );
+                              }
+                            } else {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(l10n.couponInvalid),
+                                    backgroundColor: colorScheme.error,
+                                  ),
+                                );
+                              }
                             }
-                          } else {
+                          } catch (e) {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text(l10n.couponInvalid),
+                                  content: Text(appErrorText(context, e)),
                                   backgroundColor: colorScheme.error,
                                 ),
                               );
                             }
                           }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(appErrorText(context, e)),
-                                backgroundColor: colorScheme.error,
-                              ),
-                            );
-                          }
-                        }
-                      },
-                      child: Text(l10n.apply),
-                    ),
-                  ],
+                        },
+                        child: Text(l10n.apply),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              if (platformCredit > 0) ...[
-                const SizedBox(height: 16),
+                if (platformCredit > 0) ...[
+                  const SizedBox(height: 16),
+                  AnimatedFadeIn(
+                    delay: const Duration(milliseconds: 550),
+                    child: Card(
+                      elevation: 0,
+                      color: colorScheme.primaryContainer,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.card_giftcard_rounded,
+                              color: colorScheme.onPrimaryContainer,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                l10n.platformCreditAutoApplied(
+                                  creditApplied.toStringAsFixed(0),
+                                ),
+                                style: textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.onPrimaryContainer,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 24),
                 AnimatedFadeIn(
-                  delay: const Duration(milliseconds: 550),
+                  delay: const Duration(milliseconds: 600),
+                  child: _SectionTitle(title: l10n.orderSummary),
+                ),
+                const SizedBox(height: 8),
+                AnimatedFadeIn(
+                  delay: const Duration(milliseconds: 700),
                   child: Card(
                     elevation: 0,
-                    color: colorScheme.primaryContainer,
+                    color: colorScheme.surfaceContainerLow,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
                         children: [
-                          Icon(
-                            Icons.card_giftcard_rounded,
-                            color: colorScheme.onPrimaryContainer,
+                          _SummaryRow(
+                            label: l10n.subtotal,
+                            value:
+                                '${cart.subtotal.toStringAsFixed(0)} ${l10n.egp}',
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              l10n.platformCreditAutoApplied(
-                                creditApplied.toStringAsFixed(0),
-                              ),
-                              style: textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onPrimaryContainer,
-                              ),
+                          if (deliveryFee > 0)
+                            _SummaryRow(
+                              label: l10n.deliveryFee,
+                              value:
+                                  '${deliveryFee.toStringAsFixed(0)} ${l10n.egp}',
                             ),
+                          if (cart.discount > 0)
+                            _SummaryRow(
+                              label: l10n.discount,
+                              value:
+                                  '-${cart.discount.toStringAsFixed(0)} ${l10n.egp}',
+                              color: colorScheme.primary,
+                            ),
+                          if (creditApplied > 0)
+                            _SummaryRow(
+                              label: l10n.platformCredit,
+                              value:
+                                  '-${creditApplied.toStringAsFixed(0)} ${l10n.egp}',
+                              color: colorScheme.primary,
+                            ),
+                          Divider(color: colorScheme.outlineVariant),
+                          _SummaryRow(
+                            label: l10n.total,
+                            value:
+                                '${orderTotal.toStringAsFixed(0)} ${l10n.egp}',
+                            isBold: true,
                           ),
                         ],
                       ),
                     ),
                   ),
                 ),
-              ],
-              const SizedBox(height: 24),
-              AnimatedFadeIn(
-                delay: const Duration(milliseconds: 600),
-                child: _SectionTitle(title: l10n.orderSummary),
-              ),
-              const SizedBox(height: 8),
-              AnimatedFadeIn(
-                delay: const Duration(milliseconds: 700),
-                child: Card(
-                  elevation: 0,
-                  color: colorScheme.surfaceContainerLow,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        _SummaryRow(
-                          label: l10n.subtotal,
-                          value:
-                              '${cart.subtotal.toStringAsFixed(0)} ${l10n.egp}',
-                        ),
-                        if (deliveryFee > 0)
-                          _SummaryRow(
-                            label: l10n.deliveryFee,
-                            value:
-                                '${deliveryFee.toStringAsFixed(0)} ${l10n.egp}',
-                          ),
-                        if (cart.discount > 0)
-                          _SummaryRow(
-                            label: l10n.discount,
-                            value:
-                                '-${cart.discount.toStringAsFixed(0)} ${l10n.egp}',
-                            color: colorScheme.primary,
-                          ),
-                        if (creditApplied > 0)
-                          _SummaryRow(
-                            label: l10n.platformCredit,
-                            value:
-                                '-${creditApplied.toStringAsFixed(0)} ${l10n.egp}',
-                            color: colorScheme.primary,
-                          ),
-                        Divider(color: colorScheme.outlineVariant),
-                        _SummaryRow(
-                          label: l10n.total,
-                          value: '${orderTotal.toStringAsFixed(0)} ${l10n.egp}',
-                          isBold: true,
-                        ),
-                      ],
+                const SizedBox(height: 24),
+                AnimatedFadeIn(
+                  delay: const Duration(milliseconds: 800),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: _isPlacing ? null : () => _placeOrder(cart),
+                      child: _isPlacing
+                          ? AppLoader.circular(
+                              size: 20,
+                              strokeWidth: 2,
+                              color: colorScheme.onPrimary,
+                            )
+                          : Text(l10n.placeOrder),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              AnimatedFadeIn(
-                delay: const Duration(milliseconds: 800),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: _isPlacing ? null : () => _placeOrder(cart),
-                    child: _isPlacing
-                        ? AppLoader.circular(
-                            size: 20,
-                            strokeWidth: 2,
-                            color: colorScheme.onPrimary,
-                          )
-                        : Text(l10n.placeOrder),
-                  ),
-                ),
-              ),
               ],
             ),
           );
@@ -690,21 +695,23 @@ final _savedAddressesProvider = FutureProvider<List<Map<String, dynamic>>>((
 /// keeps no stale balance after leaving checkout, ref.watch(authStateProvider)
 /// re-fetches when the signed-in user changes, and the family key is the
 /// amount due, so the server-side min(balance, due) is what renders.
-final _platformCreditProvider =
-    FutureProvider.autoDispose.family<double, double>((ref, amountDue) async {
-  final auth = ref.watch(authStateProvider);
-  if (auth is! AuthAuthenticated) return 0;
-  final client = Supabase.instance.client;
-  try {
-    final res = await client
-        .rpc('my_platform_credit', params: {'p_amount_due': amountDue});
-    final map = Map<String, dynamic>.from(res as Map);
-    if (map['ok'] != true) return 0;
-    return (map['applies'] as num?)?.toDouble() ?? 0;
-  } catch (_) {
-    return 0;
-  }
-});
+final _platformCreditProvider = FutureProvider.autoDispose
+    .family<double, double>((ref, amountDue) async {
+      final auth = ref.watch(authStateProvider);
+      if (auth is! AuthAuthenticated) return 0;
+      final client = Supabase.instance.client;
+      try {
+        final res = await client.rpc(
+          'my_platform_credit',
+          params: {'p_amount_due': amountDue},
+        );
+        final map = Map<String, dynamic>.from(res as Map);
+        if (map['ok'] != true) return 0;
+        return (map['applies'] as num?)?.toDouble() ?? 0;
+      } catch (_) {
+        return 0;
+      }
+    });
 
 /// The local cart never stores the merchant's delivery fee, so the summary
 /// must read it from the merchant row (the server charges the same value).

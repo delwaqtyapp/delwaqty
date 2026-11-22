@@ -35,7 +35,9 @@ final deliveryOrderByIdProvider = FutureProvider.family<DeliveryOrder?, String>(
 /// Cash-handoff state for the captain's "تم التحصيل" card (migration 392).
 final cashCollectionStateProvider =
     FutureProvider.family<CashCollectionState?, String>((ref, rideId) {
-      return ref.watch(deliveryRepositoryProvider).getCashCollectionState(rideId);
+      return ref
+          .watch(deliveryRepositoryProvider)
+          .getCashCollectionState(rideId);
     });
 
 /// The delivery ride linked to a commerce order, for the customer's
@@ -44,7 +46,9 @@ final cashCollectionStateProvider =
 /// no stale "waiting for collection" state (review #71).
 final orderDeliveryRideProvider =
     StreamProvider.family<OrderDeliveryRide?, String>((ref, orderId) {
-      return ref.watch(deliveryRepositoryProvider).watchOrderDeliveryRide(orderId);
+      return ref
+          .watch(deliveryRepositoryProvider)
+          .watchOrderDeliveryRide(orderId);
     });
 
 final driverCapabilitiesProvider =

@@ -2638,5 +2638,37 @@
   "noDriversYetAutoRetry": "لا يوجد كباتن متاحون حالياً. تتم إعادة المحاولة تلقائياً، أو اضغط إرسال مندوب للمحاولة فوراً.",
   "@noDriversYetAutoRetry": {
     "description": "Persistent banner on a ready merchant order whose dispatch found no driver yet"
+  },
+  "posModifierRequired": "مطلوب",
+  "@posModifierRequired": {
+    "description": "POS: posModifierRequired"
+  },
+  "posModifierConfirm": "أضف إلى السلة",
+  "@posModifierConfirm": {
+    "description": "POS: posModifierConfirm"
+  },
+  "posErrModifierRequired": "يوجد خيار مطلوب لم يتم اختياره لأحد الأصناف",
+  "@posErrModifierRequired": {
+    "description": "POS: posErrModifierRequired"
+  },
+  "posErrModifierMax": "تم اختيار عدد خيارات أكثر من المسموح لأحد الأصناف",
+  "@posErrModifierMax": {
+    "description": "POS: posErrModifierMax"
+  },
+  "posErrModifierInvalid": "أحد الخيارات المحددة غير صالح",
+  "@posErrModifierInvalid": {
+    "description": "POS: posErrModifierInvalid"
+  },
+  "posErrStock": "الكمية المتوفرة من أحد الأصناف غير كافية",
+  "@posErrStock": {
+    "description": "POS: posErrStock"
+  },
+  "posErrUnavailable": "أحد الأصناف لم يعد متاحًا",
+  "@posErrUnavailable": {
+    "description": "POS: posErrUnavailable"
+  },
+  "posErrInvalidQty": "الكمية غير صالحة لأحد الأصناف",
+  "@posErrInvalidQty": {
+    "description": "POS: posErrInvalidQty"
   }
 }

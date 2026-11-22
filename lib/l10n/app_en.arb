@@ -2697,5 +2697,37 @@
   "noDriversYetAutoRetry": "No drivers free yet. We keep retrying automatically; tap dispatch to retry now.",
   "@noDriversYetAutoRetry": {
     "description": "Persistent banner on a ready merchant order whose dispatch found no driver yet"
+  },
+  "posModifierRequired": "Required",
+  "@posModifierRequired": {
+    "description": "POS: posModifierRequired"
+  },
+  "posModifierConfirm": "Add to cart",
+  "@posModifierConfirm": {
+    "description": "POS: posModifierConfirm"
+  },
+  "posErrModifierRequired": "A required option is missing for one of the items",
+  "@posErrModifierRequired": {
+    "description": "POS: posErrModifierRequired"
+  },
+  "posErrModifierMax": "Too many options selected for one of the items",
+  "@posErrModifierMax": {
+    "description": "POS: posErrModifierMax"
+  },
+  "posErrModifierInvalid": "One of the selected options is not valid",
+  "@posErrModifierInvalid": {
+    "description": "POS: posErrModifierInvalid"
+  },
+  "posErrStock": "Not enough stock for one of the items",
+  "@posErrStock": {
+    "description": "POS: posErrStock"
+  },
+  "posErrUnavailable": "One of the items is no longer available",
+  "@posErrUnavailable": {
+    "description": "POS: posErrUnavailable"
+  },
+  "posErrInvalidQty": "Invalid quantity for one of the items",
+  "@posErrInvalidQty": {
+    "description": "POS: posErrInvalidQty"
   }
 }

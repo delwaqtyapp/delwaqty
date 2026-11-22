@@ -24,8 +24,13 @@ class MerchantPosPage extends ConsumerStatefulWidget {
 }
 
 class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
-  /// product_id -> quantity
+  /// line key -> quantity. Key is the bare product id for plain lines, or
+  /// 'productId|sortedOptionId1,sortedOptionId2,...' for lines with
+  /// modifiers, so the same product with different options stays separate.
   final Map<String, int> _cart = {};
+  final Map<String, List<String>> _cartOptionIds = {};
+  final Map<String, String> _cartOptionLabel = {};
+  final Map<String, double> _cartSurcharge = {};
   final _discountCtrl = TextEditingController(text: '0');
   final _customerCtrl = TextEditingController();
   String _paymentMethod = 'cash';
@@ -39,13 +44,65 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
     super.dispose();
   }
 
-  double _previewSubtotal(List<Map<String, dynamic>> products) {
-    var sum = 0.0;
-    for (final p in products) {
-      final qty = _cart[p['id']] ?? 0;
-      if (qty > 0) {
-        sum += ((p['price'] as num?)?.toDouble() ?? 0) * qty;
+  int _qtyForProduct(String productId) {
+    var sum = 0;
+    for (final e in _cart.entries) {
+      if (e.key.split('|').first == productId) sum += e.value;
+    }
+    return sum;
+  }
+
+  Future<void> _onProductTap(Map<String, dynamic> product) async {
+    final id = product['id'] as String;
+    final stock = (product['stock_quantity'] as num?)?.toInt() ?? 0;
+    if (_qtyForProduct(id) >= stock) return;
+    List<_ModifierGroup> groups;
+    try {
+      groups = await ref.read(_posModifierGroupsProvider(id).future);
+    } catch (_) {
+      groups = const [];
+    }
+    if (!mounted) return;
+    if (groups.isEmpty) {
+      setState(() => _cart[id] = (_cart[id] ?? 0) + 1);
+      return;
+    }
+    final selection = await showModalBottomSheet<List<String>>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _ModifierSheet(groups: groups),
+    );
+    if (selection == null || !mounted) return;
+    final sorted = [...selection]..sort();
+    final key = '$id|${sorted.join(',')}';
+    var surcharge = 0.0;
+    final labels = <String>[];
+    for (final g in groups) {
+      for (final o in g.options) {
+        if (sorted.contains(o.id)) {
+          surcharge += o.priceAdjustment;
+          labels.add(o.displayName);
+        }
       }
+    }
+    setState(() {
+      _cart[key] = (_cart[key] ?? 0) + 1;
+      _cartOptionIds[key] = sorted;
+      _cartOptionLabel[key] = labels.join(', ');
+      _cartSurcharge[key] = surcharge;
+    });
+  }
+
+  double _previewSubtotal(List<Map<String, dynamic>> products) {
+    final byId = {for (final p in products) p['id'] as String: p};
+    var sum = 0.0;
+    for (final e in _cart.entries) {
+      final product = byId[e.key.split('|').first];
+      if (product == null) continue;
+      final unit =
+          ((product['price'] as num?)?.toDouble() ?? 0) +
+          (_cartSurcharge[e.key] ?? 0);
+      sum += unit * e.value;
     }
     return sum;
   }
@@ -60,7 +117,13 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
     setState(() => _submitting = true);
     try {
       final items = [
-        for (final e in _cart.entries) {'product_id': e.key, 'qty': e.value},
+        for (final e in _cart.entries)
+          {
+            'product_id': e.key.split('|').first,
+            'qty': e.value,
+            if ((_cartOptionIds[e.key] ?? const []).isNotEmpty)
+              'modifier_option_ids': _cartOptionIds[e.key],
+          },
       ];
       final discount = double.tryParse(_discountCtrl.text.trim()) ?? 0;
       final res = await Supabase.instance.client.rpc(
@@ -88,6 +151,9 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
       );
       setState(() {
         _cart.clear();
+        _cartOptionIds.clear();
+        _cartOptionLabel.clear();
+        _cartSurcharge.clear();
         _discountCtrl.text = '0';
         _customerCtrl.clear();
         _saleKey = _newSaleKey();
@@ -98,7 +164,9 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${l10n.posSaleFailed}: ${appErrorText(context, e)}'),
+          content: Text(
+            '${l10n.posSaleFailed}: ${posSaleErrorText(context, e)}',
+          ),
           backgroundColor: AppColors.errorLight,
         ),
       );
@@ -151,21 +219,15 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
                     itemCount: products.length,
                     itemBuilder: (context, i) => _ProductCard(
                       product: products[i],
-                      qty: _cart[products[i]['id']] ?? 0,
+                      qty: _qtyForProduct(products[i]['id'] as String),
                       l10n: l10n,
-                      onTap: () {
-                        final id = products[i]['id'] as String;
-                        final stock =
-                            (products[i]['stock_quantity'] as num?)?.toInt() ??
-                            0;
-                        if ((_cart[id] ?? 0) < stock) {
-                          setState(() => _cart[id] = (_cart[id] ?? 0) + 1);
-                        }
-                      },
+                      onTap: () => _onProductTap(products[i]),
                     ),
                   );
             final cartPane = _CartPanel(
               cart: _cart,
+              optionLabels: _cartOptionLabel,
+              surcharges: _cartSurcharge,
               products: products,
               l10n: l10n,
               discountCtrl: _discountCtrl,
@@ -174,14 +236,22 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
               submitting: _submitting,
               subtotal: subtotal,
               onPaymentChanged: (m) => setState(() => _paymentMethod = m),
-              onQtyChanged: (id, qty) => setState(() {
+              onQtyChanged: (lineKey, qty) => setState(() {
                 if (qty <= 0) {
-                  _cart.remove(id);
+                  _cart.remove(lineKey);
+                  _cartOptionIds.remove(lineKey);
+                  _cartOptionLabel.remove(lineKey);
+                  _cartSurcharge.remove(lineKey);
                 } else {
-                  _cart[id] = qty;
+                  _cart[lineKey] = qty;
                 }
               }),
-              onClear: () => setState(_cart.clear),
+              onClear: () => setState(() {
+                _cart.clear();
+                _cartOptionIds.clear();
+                _cartOptionLabel.clear();
+                _cartSurcharge.clear();
+              }),
               onComplete: () => _completeSale(merchantId),
             );
             if (narrow) {
@@ -355,6 +425,8 @@ class _MonogramTile extends StatelessWidget {
 class _CartPanel extends StatelessWidget {
   const _CartPanel({
     required this.cart,
+    required this.optionLabels,
+    required this.surcharges,
     required this.products,
     required this.l10n,
     required this.discountCtrl,
@@ -369,6 +441,8 @@ class _CartPanel extends StatelessWidget {
   });
 
   final Map<String, int> cart;
+  final Map<String, String> optionLabels;
+  final Map<String, double> surcharges;
   final List<Map<String, dynamic>> products;
   final AppLocalizations l10n;
   final TextEditingController discountCtrl;
@@ -377,15 +451,16 @@ class _CartPanel extends StatelessWidget {
   final bool submitting;
   final double subtotal;
   final ValueChanged<String> onPaymentChanged;
-  final void Function(String productId, int qty) onQtyChanged;
+  final void Function(String lineKey, int qty) onQtyChanged;
   final VoidCallback onClear;
   final VoidCallback onComplete;
 
   @override
   Widget build(BuildContext context) {
+    final byId = {for (final p in products) p['id'] as String: p};
     final lines = [
-      for (final p in products)
-        if ((cart[p['id']] ?? 0) > 0) p,
+      for (final e in cart.entries)
+        if (e.value > 0 && byId.containsKey(e.key.split('|').first)) e,
     ];
     return Column(
       children: [
@@ -413,18 +488,22 @@ class _CartPanel extends StatelessWidget {
                   child: Center(child: Text(l10n.posTapToAdd)),
                 )
               else
-                for (final p in lines)
+                for (final line in lines)
                   ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                     title: Text(
-                      (p['name'] ?? '').toString(),
+                      (byId[line.key.split('|').first]!['name'] ?? '')
+                          .toString(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     subtitle: Text(
-                      '${((p['price'] as num?)?.toDouble() ?? 0).toStringAsFixed(2)} '
-                      '${l10n.currencySymbol}',
+                      '${(((byId[line.key.split('|').first]!['price'] as num?)?.toDouble() ?? 0) + (surcharges[line.key] ?? 0)).toStringAsFixed(2)} '
+                      '${l10n.currencySymbol}'
+                      '${(optionLabels[line.key] ?? '').isEmpty ? '' : ' · ${optionLabels[line.key]}'}',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -435,12 +514,10 @@ class _CartPanel extends StatelessWidget {
                             minWidth: 44,
                             minHeight: 44,
                           ),
-                          onPressed: () => onQtyChanged(
-                            p['id'] as String,
-                            (cart[p['id']] ?? 1) - 1,
-                          ),
+                          onPressed: () =>
+                              onQtyChanged(line.key, (cart[line.key] ?? 1) - 1),
                         ),
-                        Text('${cart[p['id']]}'),
+                        Text('${cart[line.key]}'),
                         IconButton(
                           icon: const Icon(Icons.add_circle_outline),
                           constraints: const BoxConstraints(
@@ -448,11 +525,12 @@ class _CartPanel extends StatelessWidget {
                             minHeight: 44,
                           ),
                           onPressed: () {
+                            final p = byId[line.key.split('|').first]!;
                             final stock =
                                 (p['stock_quantity'] as num?)?.toInt() ?? 0;
-                            final cur = cart[p['id']] ?? 0;
+                            final cur = cart[line.key] ?? 0;
                             if (cur < stock) {
-                              onQtyChanged(p['id'] as String, cur + 1);
+                              onQtyChanged(line.key, cur + 1);
                             }
                           },
                         ),
@@ -549,4 +627,212 @@ class _CartPanel extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Modifier option for the POS picker (product_modifier_options).
+class _ModifierOption {
+  const _ModifierOption({
+    required this.id,
+    required this.name,
+    required this.nameAr,
+    required this.priceAdjustment,
+  });
+
+  final String id;
+  final String name;
+  final String nameAr;
+  final double priceAdjustment;
+
+  String get displayName => nameAr.isNotEmpty ? nameAr : name;
+}
+
+/// Modifier group with its options (product_modifier_groups).
+class _ModifierGroup {
+  const _ModifierGroup({
+    required this.id,
+    required this.name,
+    required this.nameAr,
+    required this.isRequired,
+    required this.maxSelections,
+    required this.options,
+  });
+
+  final String id;
+  final String name;
+  final String nameAr;
+  final bool isRequired;
+
+  /// 0 or null means unlimited.
+  final int maxSelections;
+  final List<_ModifierOption> options;
+
+  String get displayName => nameAr.isNotEmpty ? nameAr : name;
+}
+
+/// Lazily fetched modifier groups (+ options) per product for the POS picker.
+final _posModifierGroupsProvider =
+    FutureProvider.family<List<_ModifierGroup>, String>((ref, productId) async {
+      final client = Supabase.instance.client;
+      final groups = await client
+          .from('product_modifier_groups')
+          .select('id, name, name_ar, is_required, max_selections, sort_order')
+          .eq('product_id', productId)
+          .order('sort_order');
+      final groupRows = (groups as List).cast<Map<String, dynamic>>();
+      if (groupRows.isEmpty) return const [];
+      final groupIds = [for (final g in groupRows) g['id'] as String];
+      final options = await client
+          .from('product_modifier_options')
+          .select('id, group_id, name, name_ar, price_adjustment, sort_order')
+          .inFilter('group_id', groupIds)
+          .order('sort_order');
+      final optionRows = (options as List).cast<Map<String, dynamic>>();
+      return [
+        for (final g in groupRows)
+          _ModifierGroup(
+            id: g['id'] as String,
+            name: (g['name'] ?? '').toString(),
+            nameAr: (g['name_ar'] ?? '').toString(),
+            isRequired: g['is_required'] == true,
+            maxSelections: (g['max_selections'] as num?)?.toInt() ?? 0,
+            options: [
+              for (final o in optionRows)
+                if (o['group_id'] == g['id'])
+                  _ModifierOption(
+                    id: o['id'] as String,
+                    name: (o['name'] ?? '').toString(),
+                    nameAr: (o['name_ar'] ?? '').toString(),
+                    priceAdjustment:
+                        (o['price_adjustment'] as num?)?.toDouble() ?? 0,
+                  ),
+            ],
+          ),
+      ];
+    });
+
+/// Bottom sheet to pick modifier options before adding a product to the cart.
+/// Returns the selected option ids, or null when cancelled. Required groups
+/// must have at least one pick before the confirm button enables.
+class _ModifierSheet extends StatefulWidget {
+  const _ModifierSheet({required this.groups});
+
+  final List<_ModifierGroup> groups;
+
+  @override
+  State<_ModifierSheet> createState() => _ModifierSheetState();
+}
+
+class _ModifierSheetState extends State<_ModifierSheet> {
+  final Map<String, Set<String>> _selected = {};
+
+  bool get _valid {
+    for (final g in widget.groups) {
+      if (g.isRequired && (_selected[g.id] ?? const {}).isEmpty) return false;
+    }
+    return true;
+  }
+
+  void _toggle(_ModifierGroup g, _ModifierOption o) {
+    setState(() {
+      final sel = _selected.putIfAbsent(g.id, () => <String>{});
+      if (g.maxSelections == 1) {
+        // Radio behavior for single-choice groups.
+        if (sel.contains(o.id) && !g.isRequired) {
+          sel.clear();
+        } else {
+          sel
+            ..clear()
+            ..add(o.id);
+        }
+      } else if (sel.contains(o.id)) {
+        sel.remove(o.id);
+      } else if (g.maxSelections <= 0 || sel.length < g.maxSelections) {
+        sel.add(o.id);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          children: [
+            for (final g in widget.groups) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      g.displayName,
+                      style: AppTextStyles.titleMedium,
+                    ),
+                  ),
+                  if (g.isRequired)
+                    Text(
+                      l10n.posModifierRequired,
+                      style: const TextStyle(color: AppColors.errorLight),
+                    ),
+                ],
+              ),
+              for (final o in g.options)
+                CheckboxListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  value: (_selected[g.id] ?? const {}).contains(o.id),
+                  onChanged: (_) => _toggle(g, o),
+                  title: Text(o.displayName),
+                  subtitle: o.priceAdjustment == 0
+                      ? null
+                      : Text(
+                          '+${o.priceAdjustment.toStringAsFixed(2)} '
+                          '${l10n.currencySymbol}',
+                        ),
+                ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: _valid
+                    ? () {
+                        final ids = <String>[
+                          for (final sel in _selected.values) ...sel,
+                        ];
+                        Navigator.of(context).pop(ids);
+                      }
+                    : null,
+                child: Text(l10n.posModifierConfirm),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Maps pos_create_sale server error codes to readable localized messages.
+String posSaleErrorText(BuildContext context, Object error) {
+  final l10n = AppLocalizations.of(context);
+  final msg = error.toString();
+  if (msg.contains('REQUIRED_MODIFIER_MISSING')) {
+    return l10n.posErrModifierRequired;
+  }
+  if (msg.contains('MODIFIER_MAX_EXCEEDED')) return l10n.posErrModifierMax;
+  if (msg.contains('INVALID_MODIFIER') || msg.contains('TOO_MANY_MODIFIERS')) {
+    return l10n.posErrModifierInvalid;
+  }
+  if (msg.contains('INSUFFICIENT_STOCK')) return l10n.posErrStock;
+  if (msg.contains('PRODUCT_UNAVAILABLE')) return l10n.posErrUnavailable;
+  if (msg.contains('INVALID_QTY') || msg.contains('INVALID_QUANTITY')) {
+    return l10n.posErrInvalidQty;
+  }
+  return appErrorText(context, error);
 }

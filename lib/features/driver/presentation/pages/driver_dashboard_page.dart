@@ -643,8 +643,8 @@ class _ActionGrid extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: _ActionCard(
-                icon: Icons.account_balance_wallet_rounded,
-                label: l10n.wallet,
+                icon: Icons.payments_rounded,
+                label: l10n.earnings,
                 onTap: () => context.push('/driver/earnings'),
               ),
             ),

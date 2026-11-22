@@ -7,10 +7,12 @@ import 'package:delwaqty/features/customer/settings/settings_module.dart';
 import 'package:delwaqty/features/customer/profile/profile_module.dart';
 import 'package:delwaqty/features/_shared/notifications/notifications_module.dart';
 import 'package:delwaqty/features/_shared/regions/regions_module.dart';
-import 'package:delwaqty/features/_shared/complaints/complaints_module.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
 import 'package:delwaqty/features/admin/support_chat/support_chat_module.dart';
 
+// Driver flavor: customer complaints module intentionally NOT registered
+// (owner route-audit rule: no customer features outside the customer app;
+// support chat covers help).
 void registerDriverModules() {
   final registry = FeatureRegistry.instance;
 
@@ -20,11 +22,12 @@ void registerDriverModules() {
     WelcomeModule(),
     AuthModule(),
     RegionsModule(),
-    ComplaintsModule(),
     SettingsModule(),
     ProfileModule(),
     NotificationsModule(),
     DriverModule(),
+    DriverHubNavModule(),
+    DriverFinancialNavModule(),
     SupportChatModule(),
   ]);
 

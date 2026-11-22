@@ -64,16 +64,29 @@ class DriverModule extends FeatureModule {
   String get id => 'driver';
 
   @override
-  String name(BuildContext context) => AppLocalizations.of(context).delivery;
+  String name(BuildContext context) =>
+      AppLocalizations.of(context).driverDashboard;
 
   @override
-  IconData? get icon => Icons.delivery_dining_outlined;
+  IconData? get icon => Icons.grid_view_rounded;
 
   @override
-  bool get isNavModule => false;
+  bool get isNavModule => true;
 
   @override
-  int get navPriority => 0;
+  int get navPriority => 10;
+
+  @override
+  StatefulShellBranch? buildBranch() {
+    return StatefulShellBranch(
+      routes: [
+        GoRoute(
+          path: '/driver',
+          builder: (context, state) => const DriverDashboardPage(),
+        ),
+      ],
+    );
+  }
 
   @override
   Set<ModuleCapability> get capabilities => {
@@ -126,10 +139,6 @@ class DriverModule extends FeatureModule {
   @override
   List<RouteBase> get standaloneRoutes => [
     GoRoute(
-      path: '/driver',
-      builder: (context, state) => const DriverDashboardPage(),
-    ),
-    GoRoute(
       path: '/driver/access',
       builder: (context, state) => const DriverAccessPage(),
     ),
@@ -150,23 +159,78 @@ class DriverModule extends FeatureModule {
       builder: (context, state) => const DocumentManagementPage(),
     ),
     GoRoute(
-      path: '/driver/financial-center',
-      builder: (context, state) => const DriverFinancialCenterPage(),
-      routes: [
-        GoRoute(
-          path: 'topup',
-          builder: (context, state) => const DriverTopupRequestPage(),
-        ),
-      ],
-    ),
-    GoRoute(
-      path: '/driver/hub',
-      builder: (context, state) => const DriverDeliveryHubPage(),
-    ),
-    GoRoute(
       path: '/driver/delivery/:id',
       builder: (context, state) =>
           DriverDeliveryDetailPage(id: state.pathParameters['id']!),
     ),
   ];
+}
+
+/// Delivery hub (طلبات التوصيل) as a bottom-nav destination (owner D-1:
+/// the driver app had no bottom nav on the dashboard).
+class DriverHubNavModule extends FeatureModule {
+  @override
+  String get id => 'driver-hub-nav';
+
+  @override
+  String name(BuildContext context) => AppLocalizations.of(context).deliveryHub;
+
+  @override
+  IconData? get icon => Icons.local_shipping_rounded;
+
+  @override
+  bool get isNavModule => true;
+
+  @override
+  int get navPriority => 12;
+
+  @override
+  StatefulShellBranch? buildBranch() {
+    return StatefulShellBranch(
+      routes: [
+        GoRoute(
+          path: '/driver/hub',
+          builder: (context, state) => const DriverDeliveryHubPage(),
+        ),
+      ],
+    );
+  }
+}
+
+/// Driver financial center as a bottom-nav destination (the one money
+/// surface in the driver app).
+class DriverFinancialNavModule extends FeatureModule {
+  @override
+  String get id => 'driver-financial-nav';
+
+  @override
+  String name(BuildContext context) =>
+      AppLocalizations.of(context).financialCenter;
+
+  @override
+  IconData? get icon => Icons.account_balance_wallet_outlined;
+
+  @override
+  bool get isNavModule => true;
+
+  @override
+  int get navPriority => 15;
+
+  @override
+  StatefulShellBranch? buildBranch() {
+    return StatefulShellBranch(
+      routes: [
+        GoRoute(
+          path: '/driver/financial-center',
+          builder: (context, state) => const DriverFinancialCenterPage(),
+          routes: [
+            GoRoute(
+              path: 'topup',
+              builder: (context, state) => const DriverTopupRequestPage(),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 }

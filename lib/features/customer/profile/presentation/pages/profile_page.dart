@@ -448,12 +448,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               onTap: () => context.push('/driver/financial-center'),
             ),
             _BentoActionItem(
-              icon: Icons.payments_rounded,
-              label: l10n.earnings,
-              accent: AppColors.brandGold,
-              onTap: () => context.push('/driver/earnings'),
-            ),
-            _BentoActionItem(
               icon: Icons.two_wheeler_rounded,
               label: l10n.vehicleManagement,
               accent: AppColors.brandViolet,
@@ -762,7 +756,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             title: l10n.myBookings,
             onTap: () => context.push('/home-services/my-bookings'),
           ),
-        if (!isProvider)
+        if (!isProvider && !isDriver)
           _SectionTile(
             icon: Icons.notifications_outlined,
             color: primary,

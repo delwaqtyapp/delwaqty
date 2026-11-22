@@ -1,10 +1,13 @@
--- Run after migration 161. Every fixture and resulting row is rolled back.
+-- Run after migration 390. Every fixture and resulting row is rolled back.
 -- Verifies: cash completion creates goods + commission obligations and the
 -- merchant ledger credit; the dispatch gate excludes overdue/over-ceiling
 -- drivers from CASH dispatches only; the admin-code and merchant-confirm
 -- settlement flows; dispute half-weight; escalation + suspension-review
 -- sweeps; payout request/approval; RLS and privilege guards.
 BEGIN;
+-- Deterministic rule fixtures: staging may intentionally have no default rules.
+INSERT INTO public.commission_rules(entity_type,entity_key,rate,is_active,effective_from)
+VALUES('account_type','driver',7,true,current_date),('account_type','merchant',3,true,current_date);
 DO $$
 DECLARE
   c uuid := gen_random_uuid();
@@ -31,7 +34,7 @@ BEGIN
     (c,c::text||'@example.invalid'),(m_user,m_user::text||'@example.invalid'),
     (u1,u1::text||'@example.invalid'),(adm,adm::text||'@example.invalid')
     ON CONFLICT(id) DO NOTHING;
-  UPDATE public.users SET role='admin' WHERE id=adm;
+  UPDATE public.users SET role='owner',user_type='owner',verification_status='approved' WHERE id=adm;
   INSERT INTO public.admin_management(admin_id, supervisor_id, is_active)
     VALUES (adm, m_user, true);
   INSERT INTO public.drivers(id,user_id,full_name,status,is_verified,is_active,accepts_deliveries,current_latitude,current_longitude)
@@ -86,19 +89,19 @@ BEGIN
   PERFORM set_config('role','none',true);
   IF a->>'success' <> 'true' THEN RAISE EXCEPTION 'completion failed: %', a; END IF;
 
-  -- Goods obligation: total(120) - fee(20) = 100, owed to platform, due ~24h.
+  -- Goods obligation: total(120) - fee(20) = 100, owed to platform, due ~12h.
   SELECT id INTO v_ob FROM public.driver_obligations
-   WHERE ride_id=r AND kind='goods';
+   WHERE order_id=o AND kind='goods';
   IF v_ob IS NULL THEN RAISE EXCEPTION 'no goods obligation for cash order'; END IF;
   PERFORM 1 FROM public.driver_obligations
    WHERE id=v_ob AND amount=100 AND owed_to='platform' AND status='open'
-     AND due_at > now() + interval '23 hours';
+     AND due_at > now() + interval '11 hours';
   IF NOT FOUND THEN RAISE EXCEPTION 'goods obligation wrong: %',
     (SELECT row_to_json(x) FROM public.driver_obligations x WHERE id=v_ob); END IF;
 
   -- Commission obligation: 7% of fare(20) = 1.40 to platform.
   PERFORM 1 FROM public.driver_obligations
-   WHERE ride_id=r AND kind='commission' AND amount=round(20*0.07,2)
+   WHERE order_id=o AND kind='commission' AND amount=round(20*0.07,2)
      AND owed_to='platform' AND status='open';
   IF NOT FOUND THEN RAISE EXCEPTION 'no commission obligation for cash order'; END IF;
 
@@ -109,12 +112,12 @@ BEGIN
 
   -- Driver got the settlement notification.
   PERFORM 1 FROM public.notifications
-   WHERE user_id=u1 AND type='settlement' AND data->>'ride_id'=r::text;
+   WHERE user_id=u1 AND type='settlement' AND data->>'order_id'=o::text;
   IF NOT FOUND THEN RAISE EXCEPTION 'no settlement notification'; END IF;
 
   -- Idempotency: a second earnings pass creates nothing new.
   PERFORM public._record_delivery_earnings(r);
-  SELECT count(*) INTO v_count FROM public.driver_obligations WHERE ride_id=r;
+  SELECT count(*) INTO v_count FROM public.driver_obligations WHERE order_id=o;
   IF v_count <> 2 THEN RAISE EXCEPTION 'obligation idempotency broken: %', v_count; END IF;
 
   -- ============ 2. Dispatch gate ========================================
@@ -170,18 +173,18 @@ BEGIN
   -- ============ 3. Escalation + suspension sweeps =======================
   -- v_ob is 1h overdue; escalation window is 24h -> not yet escalated.
   PERFORM public._settlement_escalation_sweep();
-  PERFORM 1 FROM public.complaints WHERE category='settlement_overdue' AND ride_id=r;
+  PERFORM 1 FROM public.complaints WHERE category='settlement_overdue' AND order_id=o;
   IF FOUND THEN RAISE EXCEPTION 'escalation fired before its window'; END IF;
 
   UPDATE public.driver_obligations SET due_at = now() - interval '25 hours' WHERE id=v_ob;
   PERFORM public._settlement_escalation_sweep();
-  PERFORM 1 FROM public.complaints WHERE category='settlement_overdue' AND ride_id=r AND priority='high';
+  PERFORM 1 FROM public.complaints WHERE category='settlement_overdue' AND order_id=o AND priority='high';
   IF NOT FOUND THEN RAISE EXCEPTION 'no escalation complaint'; END IF;
   PERFORM 1 FROM public.driver_obligations WHERE id=v_ob AND escalated_at IS NOT NULL;
   IF NOT FOUND THEN RAISE EXCEPTION 'escalated_at not stamped'; END IF;
   -- Second sweep: no duplicate.
   PERFORM public._settlement_escalation_sweep();
-  SELECT count(*) INTO v_count FROM public.complaints WHERE category='settlement_overdue' AND ride_id=r;
+  SELECT count(*) INTO v_count FROM public.complaints WHERE category='settlement_overdue' AND order_id=o;
   IF v_count <> 1 THEN RAISE EXCEPTION 'duplicate escalation complaints: %', v_count; END IF;
 
   -- Suspension review: outstanding above the 5000 setting.
@@ -394,7 +397,7 @@ BEGIN
 
     -- Goods owed to the MERCHANT now; no ledger credit in model B.
     SELECT id INTO v_obm FROM public.driver_obligations
-     WHERE ride_id=r4 AND kind='goods' AND owed_to='merchant';
+     WHERE order_id=o4 AND kind='goods' AND owed_to='merchant';
     IF v_obm IS NULL THEN RAISE EXCEPTION 'model B obligation not owed to merchant'; END IF;
     PERFORM 1 FROM public.merchant_ledger WHERE order_id=o4;
     IF FOUND THEN RAISE EXCEPTION 'model B wrongly credited the ledger'; END IF;
@@ -415,7 +418,7 @@ BEGIN
     PERFORM 1 FROM public.driver_obligations
      WHERE id=v_obm AND status='settled' AND settled_via='merchant_confirm';
     IF NOT FOUND THEN RAISE EXCEPTION 'merchant settle state wrong'; END IF;
-    PERFORM 1 FROM public.complaints WHERE category='settlement_unpaid' AND ride_id=r4;
+    PERFORM 1 FROM public.complaints WHERE category='settlement_unpaid' AND order_id=o4;
     IF NOT FOUND THEN RAISE EXCEPTION 'unpaid complaint missing'; END IF;
   END;
 
@@ -455,4 +458,5 @@ BEGIN
 
   RAISE NOTICE 'settlement_system_regression: all assertions passed';
 END $$;
+SELECT 'PASS: settlement_system_regression.sql' AS result;
 ROLLBACK;

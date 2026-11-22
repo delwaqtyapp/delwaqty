@@ -1,4 +1,4 @@
--- Run after migration 151. Every fixture and resulting row is rolled back.
+-- Run after migration 390. Every fixture and resulting row is rolled back.
 -- Verifies: customers cannot rewrite their orders, merchants cannot mark
 -- delivered directly but can via merchant_complete_order (which records the
 -- commission idempotently), and rides reject client-side tampering.
@@ -22,7 +22,7 @@ BEGIN
   INSERT INTO public.merchants(id, owner_user_id, name)
     VALUES (m, mo, 'Lockdown Fixture');
   INSERT INTO public.orders(id, user_id, merchant_id, status, subtotal, total_amount)
-    VALUES (o, c, m, 'ready', 100, 120);
+    VALUES (o, c, m, 'confirmed', 100, 120);
 
   -- ── customer tampering ──
   PERFORM set_config('request.jwt.claim.sub', c::text, true);
@@ -46,8 +46,12 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN v_blocked := true; END;
   IF NOT v_blocked THEN RAISE EXCEPTION 'customer rewrote order total'; END IF;
 
-  -- harmless field still editable
-  UPDATE public.orders SET notes = 'please call on arrival' WHERE id = o;
+  -- Notes are RPC-managed too, not an arbitrary direct-write escape.
+  v_blocked := false;
+  BEGIN
+    UPDATE public.orders SET notes = 'please call on arrival' WHERE id = o;
+  EXCEPTION WHEN OTHERS THEN v_blocked := true; END;
+  IF NOT v_blocked THEN RAISE EXCEPTION 'customer rewrote order notes'; END IF;
 
   -- ── merchant boundaries ──
   PERFORM set_config('role','none',true);
@@ -118,4 +122,5 @@ BEGIN
   PERFORM set_config('role','none',true);
 END;
 $$;
+SELECT 'PASS: orders_rides_lockdown_regression.sql' AS result;
 ROLLBACK;

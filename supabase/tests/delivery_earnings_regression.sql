@@ -1,9 +1,12 @@
--- Run after migration 147. Every fixture and resulting row is rolled back.
+-- Run after migration 390. Every fixture and resulting row is rolled back.
 -- Verifies: completing an assigned delivery records the driver earning and
 -- both commission rows exactly once, with the driver charged on the fare and
 -- the merchant on the goods subtotal; the legacy no-ride completion is not
 -- client-callable; the earnings helper is not client-callable.
 BEGIN;
+-- Deterministic rule fixtures: staging may intentionally have no default rules.
+INSERT INTO public.commission_rules(entity_type,entity_key,rate,is_active,effective_from)
+VALUES('account_type','driver',7,true,current_date),('account_type','merchant',3,true,current_date);
 DO $$
 DECLARE
   c uuid := gen_random_uuid();
@@ -94,7 +97,7 @@ BEGIN
 
   -- Driver earning: fare (20) less the 7% driver commission = 18.60.
   SELECT fare INTO v_fare FROM public.rides WHERE id=r;
-  SELECT amount INTO v_earning FROM public.driver_earnings WHERE ride_id=r;
+  SELECT amount INTO v_earning FROM public.driver_earnings WHERE order_id=o;
   IF v_earning IS NULL THEN
     RAISE EXCEPTION 'no driver earning recorded';
   END IF;
@@ -104,7 +107,7 @@ BEGIN
 
   -- Driver commission row: ('ride', ride), gross = fare, rate 7.
   SELECT * INTO v_row FROM public.platform_commissions
-   WHERE reference_type='ride' AND reference_id=r AND member_id=u1;
+   WHERE reference_type='order_driver' AND reference_id=o AND member_id=u1;
   IF NOT FOUND THEN RAISE EXCEPTION 'no driver commission row'; END IF;
   IF v_row.gross_amount <> v_fare OR v_row.commission_rate <> 7
      OR v_row.commission_amount <> round(v_fare * 0.07, 2)
@@ -123,11 +126,12 @@ BEGIN
 
   -- Idempotent: re-running the helper records nothing twice.
   PERFORM public._record_delivery_earnings(r);
-  IF (SELECT count(*) FROM public.driver_earnings WHERE ride_id=r) <> 1
-     OR (SELECT count(*) FROM public.platform_commissions WHERE reference_type='ride' AND reference_id=r) <> 1
+  IF (SELECT count(*) FROM public.driver_earnings WHERE order_id=o) <> 1
+     OR (SELECT count(*) FROM public.platform_commissions WHERE reference_type='order_driver' AND reference_id=o) <> 1
      OR (SELECT count(*) FROM public.platform_commissions WHERE reference_type='order' AND reference_id=o) <> 1 THEN
     RAISE EXCEPTION 'earnings recording not idempotent';
   END IF;
 END;
 $$;
+SELECT 'PASS: delivery_earnings_regression.sql' AS result;
 ROLLBACK;

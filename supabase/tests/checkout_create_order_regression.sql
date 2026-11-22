@@ -1,4 +1,4 @@
--- Run after migration 157. Fixtures and rows roll back.
+-- Run after migration 390. Fixtures and rows roll back.
 -- Verifies server-side checkout: DB prices, coupon redemption, idempotency,
 -- stock/availability guards, and that the client cannot influence totals.
 BEGIN;
@@ -21,8 +21,8 @@ BEGIN
     (c,c::text||'@example.invalid','customer'),
     (o,o::text||'@example.invalid','merchant')
     ON CONFLICT(id) DO NOTHING;
-  INSERT INTO public.merchants(id, owner_user_id, name, delivery_fee, min_order)
-    VALUES (mer, o, 'Checkout Fixture Store', 15, 20);
+  INSERT INTO public.merchants(id, owner_user_id, name, delivery_fee, min_order,status,is_open)
+    VALUES (mer, o, 'Checkout Fixture Store', 15, 20,'active',true);
   INSERT INTO public.products(id, merchant_id, name, price, is_available, stock_quantity)
     VALUES (pr1, mer, 'Item A', 50, true, 10),
            (pr2, mer, 'Item B', 30, false, 10);
@@ -85,7 +85,7 @@ BEGIN
   BEGIN
     PERFORM public.create_order(mer,
       jsonb_build_array(jsonb_build_object('product_id', pr1, 'quantity', 1)),
-      null, null, null, 'cash', 'FIXTEN', null, 'idem-2');
+      'Test address', 30.0, 31.0, 'cash', 'FIXTEN', null, 'idem-2');
   EXCEPTION WHEN OTHERS THEN v_blocked := true; END;
   IF NOT v_blocked THEN RAISE EXCEPTION 'coupon reused by same user'; END IF;
 
@@ -94,7 +94,7 @@ BEGIN
   BEGIN
     PERFORM public.create_order(mer,
       jsonb_build_array(jsonb_build_object('product_id', pr2, 'quantity', 1)),
-      null, null, null, 'cash', null, null, null);
+      'Test address', 30.0, 31.0, 'cash', null, null, null);
   EXCEPTION WHEN OTHERS THEN v_blocked := true; END;
   IF NOT v_blocked THEN RAISE EXCEPTION 'unavailable product ordered'; END IF;
 
@@ -103,7 +103,7 @@ BEGIN
   BEGIN
     PERFORM public.create_order(mer,
       jsonb_build_array(jsonb_build_object('product_id', pr1, 'quantity', 11)),
-      null, null, null, 'cash', null, null, null);
+      'Test address', 30.0, 31.0, 'cash', null, null, null);
   EXCEPTION WHEN OTHERS THEN v_blocked := true; END;
   IF NOT v_blocked THEN RAISE EXCEPTION 'over-stock order allowed'; END IF;
 
@@ -114,7 +114,7 @@ BEGIN
   BEGIN
     PERFORM public.create_order(gen_random_uuid(),
       jsonb_build_array(jsonb_build_object('product_id', pr1, 'quantity', 1)),
-      null, null, null, 'cash', null, null, null);
+      'Test address', 30.0, 31.0, 'cash', null, null, null);
   EXCEPTION WHEN OTHERS THEN v_blocked := true; END;
   IF NOT v_blocked THEN RAISE EXCEPTION 'order to unknown merchant allowed'; END IF;
 
@@ -127,4 +127,5 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN v_blocked := true; END;
   IF NOT v_blocked THEN RAISE EXCEPTION 'direct orders insert allowed'; END IF;
 END $$;
+SELECT 'PASS: checkout_create_order_regression.sql' AS result;
 ROLLBACK;

@@ -1,12 +1,14 @@
--- Staging-only rollback suite for migration 395 v2 (delay-apology platform
+-- Staging-only rollback suite for migration 395 (delay-apology platform
 -- credit). Synthetic zz-test fixtures inside one rolled-back transaction.
 -- Covers the reviewer-required cases: dedicated locked balance unreachable
--- by both wallet_pay overloads, pre-credit settlement in both settlement
+-- by both wallet_pay overloads, net-at-settlement in both settlement
 -- models with subsidy ledger entries, full-credit and credit-above-goods,
 -- paid refund + retry, merchant reject + retry, idempotent replay,
--- coupon+gift stacking, sweep netting, and client lockdown. The two-session
--- concurrency case lives in 395_platform_credit_concurrency_staging.sql
--- (committed fixtures; cannot run inside this rollback).
+-- coupon+gift stacking, net-only sweep, client lockdown, and the
+-- admin-gated manual payables path (list / settle-once / idempotent /
+-- non-admin denied). The two-session concurrency case lives in
+-- 395_platform_credit_concurrency_staging.sql (committed fixtures; cannot
+-- run inside this rollback).
 begin;
 
 -- Deterministic commission rules (same pattern as settlement_system_regression).
@@ -59,6 +61,7 @@ do $$ declare
   t record; r jsonb; a jsonb;
   o1 uuid; o2 uuid; o3 uuid; o4 uuid; o5 uuid; o6 uuid; o7 uuid;
   v_ride uuid; v_count int; v_amt numeric; v_out numeric; v_ob uuid;
+  v_adm uuid := gen_random_uuid(); v_denied boolean;
 begin
   select * into t from zz_ctx;
 
@@ -471,6 +474,101 @@ begin
       and status='netted_noncash'
       and remittance_reduction=0 and driver_payable=0 and merchant_payable=0),
     'I: non-cash subsidy recorded for accounting';
+
+  -- ============ J. Admin payables path (manual settlement) ============
+  -- H1's order (o1) carries driver_payable 15; H2's (o2) carries
+  -- driver_payable 15 + merchant_payable 50; I's (o4) has zero payables.
+  insert into auth.users(id,email) values (v_adm, v_adm::text||'@example.invalid');
+  update public.users set role='owner', user_type='owner', verification_status='approved'
+   where id = v_adm;
+
+  -- J1. Non-admin denied on both RPCs, changing nothing.
+  perform set_config('request.jwt.claim.sub', t.c1::text, true);
+  v_denied := false;
+  begin
+    perform 1 from public.admin_open_platform_payables(null) limit 1;
+  exception when others then
+    v_denied := position('Not authorized' in sqlerrm) > 0;
+  end;
+  assert v_denied, 'J1: non-admin read denied';
+  v_denied := false;
+  begin
+    r := public.mark_platform_payable_settled(o1, 'driver_payable', 'zz');
+  exception when others then
+    v_denied := position('Not authorized' in sqlerrm) > 0;
+  end;
+  assert v_denied, 'J1: non-admin settle denied';
+  assert not exists(select 1 from public.platform_subsidies
+    where order_id=o1 and driver_payable_settled_at is not null),
+    'J1: denied call changed nothing';
+
+  -- J2. Admin lists the outstanding payables, per order, with amounts.
+  perform set_config('request.jwt.claim.sub', v_adm::text, true);
+  assert exists(select 1 from public.admin_open_platform_payables(null)
+    where order_id=o1 and driver_payable=15 and merchant_payable=0),
+    'J2: H1 driver payable listed';
+  assert exists(select 1 from public.admin_open_platform_payables(null)
+    where order_id=o2 and driver_payable=15 and merchant_payable=50),
+    'J2: H2 both payables listed';
+  assert not exists(select 1 from public.admin_open_platform_payables(null)
+    where order_id=o4),
+    'J2: zero-payable (non-cash) row not listed';
+  assert (select count(*) from public.admin_open_platform_payables(o2)) = 1,
+    'J2: per-order filter';
+
+  -- J3. Settle flips once, audits once, and is idempotent.
+  r := public.mark_platform_payable_settled(o1, 'driver_payable', 'zz bank transfer');
+  assert r->>'ok'='true' and (r->>'amount')::numeric=15
+     and r->>'already_settled'='false' and r->>'row_status'='settled',
+    'J3: settle result';
+  assert exists(select 1 from public.platform_subsidies
+    where order_id=o1 and status='settled' and settled_at is not null
+      and driver_payable_settled_at is not null),
+    'J3: row settled';
+  assert exists(select 1 from public.activity_logs
+    where action='PLATFORM_PAYABLE_SETTLED' and resource_id=o1::text),
+    'J3: audit row';
+  r := public.mark_platform_payable_settled(o1, 'driver_payable', 'duplicate');
+  assert r->>'ok'='true' and r->>'already_settled'='true', 'J3: repeat idempotent';
+  assert (select count(*) from public.activity_logs
+    where action='PLATFORM_PAYABLE_SETTLED' and resource_id=o1::text) = 1,
+    'J3: still one audit row';
+  assert not exists(select 1 from public.admin_open_platform_payables(o1)),
+    'J3: settled payable leaves the open list';
+
+  -- J4. A row with two payables settles per kind: the row stays open until
+  -- every positive payable on it is settled.
+  r := public.mark_platform_payable_settled(o2, 'driver_payable', null);
+  assert r->>'row_status'='netted', 'J4: partial settle keeps the row open';
+  assert exists(select 1 from public.platform_subsidies
+    where order_id=o2 and status='netted'
+      and driver_payable_settled_at is not null
+      and merchant_payable_settled_at is null),
+    'J4: driver kind settled, merchant kind open';
+  assert exists(select 1 from public.admin_open_platform_payables(o2)),
+    'J4: merchant payable still outstanding';
+  r := public.mark_platform_payable_settled(o2, 'merchant_payable', 'zz');
+  assert r->>'row_status'='settled', 'J4: fully settled';
+  assert exists(select 1 from public.platform_subsidies
+    where order_id=o2 and status='settled' and settled_at is not null
+      and merchant_payable_settled_at is not null),
+    'J4: row settled';
+  assert not exists(select 1 from public.admin_open_platform_payables(o2)),
+    'J4: nothing outstanding';
+
+  -- J5. Invalid kind and a missing/zero payable are rejected.
+  v_denied := false;
+  begin
+    r := public.mark_platform_payable_settled(o2, 'remittance_reduction', null);
+  exception when others then v_denied := true;
+  end;
+  assert v_denied, 'J5: invalid kind rejected';
+  v_denied := false;
+  begin
+    r := public.mark_platform_payable_settled(o4, 'driver_payable', null);
+  exception when others then v_denied := true;
+  end;
+  assert v_denied, 'J5: zero payable rejected';
 end $$;
 
 -- ============ G. wallet_pay immiscibility (#68) ========================
@@ -559,5 +657,5 @@ do $$ declare t record; a jsonb; begin
     'G: own credit readable';
 end $$;
 
-select 'PASS v3: spend mechanics, one-grant-per-order, above-goods, full-total, remainder, cancel/reject restore + retry, paid refund + retry, coupon+gift, replay, net-at-settlement in both models + netted subsidy + payables, dispatch ceiling on net, sweep on net obligations, full-credit both models (goods extinguished, 13.95 earned, payables), non-cash netted_noncash, wallet_pay immiscibility, client lockdown' as result;
+select 'PASS v4: spend mechanics, one-grant-per-order, above-goods, full-total, remainder, cancel/reject restore + retry, paid refund + retry, coupon+gift, replay, net-at-settlement in both models + netted subsidy + payables, dispatch ceiling on net, sweep on net obligations, full-credit both models (goods extinguished, 13.95 earned, payables), non-cash netted_noncash, admin payables list + settle-once idempotent + per-kind partial settle + non-admin denied + invalid kind rejected, wallet_pay immiscibility, client lockdown' as result;
 rollback;

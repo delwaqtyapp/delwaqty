@@ -272,8 +272,17 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             onRefresh: () async {
               ref.invalidate(_platformCreditProvider);
               ref.invalidate(_merchantFeeProvider(cart.merchantId));
+              // Keep the spinner up until the fresh reads actually come
+              // back; a failure surfaces through the provider error state.
+              try {
+                await ref.read(_platformCreditProvider(dueBeforeCredit).future);
+                await ref.read(_merchantFeeProvider(cart.merchantId).future);
+              } catch (_) {}
             },
             child: ListView(
+              // Always scrollable so pull-to-refresh works even when the
+              // checkout content fits on screen.
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16),
             children: [
               AnimatedFadeIn(child: _SectionTitle(title: l10n.deliveryAddress)),

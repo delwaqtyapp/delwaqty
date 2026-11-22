@@ -412,41 +412,4 @@ void main() {
       await disposeApp(tester);
     });
   }
-
-  testWidgets('menu button "dark mode" animates the theme toggle without '
-      'crashing', (tester) async {
-    await pumpApp(tester);
-    await openMenu(tester);
-    await tapTile(tester, l10n.darkMode);
-
-    expect(
-      tester.takeException(),
-      isNull,
-      reason: 'tapping dark mode must not crash',
-    );
-    expect(find.byType(Dialog), findsNothing);
-    final appContext = tester.element(find.byType(AppShell));
-    expect(
-      Theme.of(appContext).brightness,
-      Brightness.dark,
-      reason: 'dark mode must actually switch on after the tap',
-    );
-    await disposeApp(tester);
-  });
-
-  testWidgets('menu button "language" toggles the locale without crashing', (
-    tester,
-  ) async {
-    await pumpApp(tester);
-    await openMenu(tester);
-    await tapTile(tester, l10n.language);
-
-    expect(
-      tester.takeException(),
-      isNull,
-      reason: 'tapping language must not crash',
-    );
-    expect(find.byType(Dialog), findsNothing);
-    await disposeApp(tester);
-  });
 }

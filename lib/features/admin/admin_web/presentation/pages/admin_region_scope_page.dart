@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_region_assignment.dart';
 import 'package:delwaqty/features/admin/presentation/providers/admin_region_providers.dart';
@@ -124,6 +125,7 @@ class _AdminRegionScopePageState extends ConsumerState<AdminRegionScopePage> {
                     usersAsync: usersAsync,
                     selectedAdminId: _selectedAdminId,
                     onSelect: _selectAdmin,
+                    onRetry: () => ref.invalidate(adminTierUsersProvider),
                   ),
                 ),
                 const SizedBox(width: 24),
@@ -156,11 +158,13 @@ class _UsersPanel extends StatelessWidget {
     required this.usersAsync,
     required this.selectedAdminId,
     required this.onSelect,
+    required this.onRetry,
   });
 
   final AsyncValue<List<Map<String, dynamic>>> usersAsync;
   final String? selectedAdminId;
   final void Function(String adminId) onSelect;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -178,7 +182,11 @@ class _UsersPanel extends StatelessWidget {
       ),
       child: usersAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(appErrorText(context, e))),
+        error: (e, _) => ErrorState(
+          message: appErrorText(context, e),
+          retryLabel: AppLocalizations.of(context).errorRetryCta,
+          onRetry: onRetry,
+        ),
         data: (users) {
           if (users.isEmpty) {
             return Center(child: Text(l10n.adminMgmtNoAdmins));

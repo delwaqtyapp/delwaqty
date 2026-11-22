@@ -1,3 +1,4 @@
+import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/shared/widgets/delivery_handoff_button.dart';
 import 'package:delwaqty/shared/widgets/delivery_incident_dialog.dart';
 
@@ -271,7 +272,12 @@ class _DriverDeliveryDetailPageState
                 ShimmerCard(),
               ],
             ),
-            error: (e, _) => Center(child: Text(appErrorText(context, e))),
+            error: (e, _) => ErrorState(
+              message: appErrorText(context, e),
+              retryLabel: AppLocalizations.of(context).errorRetryCta,
+              onRetry: () =>
+                  ref.invalidate(deliveryOrderByIdProvider(widget.id)),
+            ),
             data: (order) {
               if (order == null) {
                 return Center(child: Text(l10n.orderNotFound));

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
@@ -46,7 +47,11 @@ class DriverEarningsPage extends ConsumerWidget {
       ),
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(appErrorText(context, e))),
+        error: (e, _) => ErrorState(
+          message: appErrorText(context, e),
+          retryLabel: AppLocalizations.of(context).errorRetryCta,
+          onRetry: () => ref.invalidate(driverProfileProvider(userId)),
+        ),
         data: (profile) {
           if (profile == null) {
             return Center(child: Text(l10n.noActiveTrip));
@@ -85,13 +90,21 @@ class _EarningsBody extends ConsumerWidget {
           else ...[
             statsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text(appErrorText(context, e))),
+              error: (e, _) => ErrorState(
+                message: appErrorText(context, e),
+                retryLabel: AppLocalizations.of(context).errorRetryCta,
+                onRetry: () => ref.invalidate(driverStatsProvider(driverId)),
+              ),
               data: (stats) => _BalanceCard(driverId: driverId, stats: stats),
             ),
             const SizedBox(height: 16),
             walletAsync.when(
               loading: () => const SizedBox.shrink(),
-              error: (e, _) => Center(child: Text(appErrorText(context, e))),
+              error: (e, _) => ErrorState(
+                message: appErrorText(context, e),
+                retryLabel: AppLocalizations.of(context).errorRetryCta,
+                onRetry: () => ref.invalidate(_walletDetailProvider(driverId)),
+              ),
               data: (wallet) => _WalletBreakdownCard(wallet: wallet),
             ),
             const SizedBox(height: 24),
@@ -104,7 +117,11 @@ class _EarningsBody extends ConsumerWidget {
           ],
           earningsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text(appErrorText(context, e))),
+            error: (e, _) => ErrorState(
+              message: appErrorText(context, e),
+              retryLabel: AppLocalizations.of(context).errorRetryCta,
+              onRetry: () => ref.invalidate(driverEarningsProvider(driverId)),
+            ),
             data: (earnings) {
               if (earnings.isEmpty) {
                 return _isZeroState(statsAsync, walletAsync, earningsAsync)

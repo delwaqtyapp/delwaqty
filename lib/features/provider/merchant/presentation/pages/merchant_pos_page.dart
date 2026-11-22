@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'dart:math';
 
+import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
@@ -116,10 +117,18 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
       appBar: AppBar(title: Text(l10n.posCashier)),
       body: merchantIdAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(appErrorText(context, e))),
+        error: (e, _) => ErrorState(
+          message: appErrorText(context, e),
+          retryLabel: AppLocalizations.of(context).errorRetryCta,
+          onRetry: () => ref.invalidate(providerMerchantIdProvider),
+        ),
         data: (merchantId) => productsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text(appErrorText(context, e))),
+          error: (e, _) => ErrorState(
+            message: appErrorText(context, e),
+            retryLabel: AppLocalizations.of(context).errorRetryCta,
+            onRetry: () => ref.invalidate(merchantProductsProvider),
+          ),
           data: (allProducts) {
             final products = allProducts
                 .where((p) => p['is_available'] == true)

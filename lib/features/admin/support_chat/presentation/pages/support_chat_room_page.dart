@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide User;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/chat_providers.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/chat_origin_helpers.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/widgets/chat_media_bubbles.dart';
@@ -400,7 +401,11 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
                 );
               },
               loading: () => const Center(child: AppLoaderCircular()),
-              error: (e, _) => Center(child: Text(appErrorText(context, e))),
+              error: (e, _) => ErrorState(
+                message: appErrorText(context, e),
+                retryLabel: AppLocalizations.of(context).errorRetryCta,
+                onRetry: () => ref.invalidate(chatRoomProvider(widget.roomId)),
+              ),
             ),
           ),
 
@@ -508,7 +513,11 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         );
       },
       loading: () => const Center(child: AppLoaderCircular()),
-      error: (e, _) => Center(child: Text(appErrorText(context, e))),
+      error: (e, _) => ErrorState(
+        message: appErrorText(context, e),
+        retryLabel: AppLocalizations.of(context).errorRetryCta,
+        onRetry: () => ref.invalidate(chatMessagesProvider(widget.roomId)),
+      ),
     );
   }
 

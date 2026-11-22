@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
@@ -105,7 +106,11 @@ class DriverDashboardPage extends ConsumerWidget {
               ShimmerCard(height: 100),
             ],
           ),
-          error: (e, _) => Center(child: Text(appErrorText(context, e))),
+          error: (e, _) => ErrorState(
+            message: appErrorText(context, e),
+            retryLabel: AppLocalizations.of(context).errorRetryCta,
+            onRetry: () => ref.invalidate(driverProfileProvider(userId)),
+          ),
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
@@ -75,7 +76,11 @@ class VehicleManagementPage extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           children: const [ShimmerCard(), SizedBox(height: 12), ShimmerCard()],
         ),
-        error: (e, _) => Center(child: Text(appErrorText(context, e))),
+        error: (e, _) => ErrorState(
+          message: appErrorText(context, e),
+          retryLabel: AppLocalizations.of(context).errorRetryCta,
+          onRetry: () => ref.invalidate(driverProfileProvider(userId)),
+        ),
         data: (profile) {
           if (profile == null) {
             return Center(
@@ -154,7 +159,11 @@ class _VehicleListBody extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           children: const [ShimmerCard(), SizedBox(height: 12), ShimmerCard()],
         ),
-        error: (e, _) => Center(child: Text(appErrorText(context, e))),
+        error: (e, _) => ErrorState(
+          message: appErrorText(context, e),
+          retryLabel: AppLocalizations.of(context).errorRetryCta,
+          onRetry: () => ref.invalidate(_vehiclesProvider(driverId)),
+        ),
         data: (vehicles) {
           if (vehicles.isEmpty) {
             return Center(

@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 import '../providers/provider_verification_providers.dart';
@@ -87,7 +88,11 @@ class _ProviderVerificationPageState
       appBar: AppBar(title: Text(l10n.verification)),
       body: state.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(l10n.failedToLoad)),
+        error: (e, _) => ErrorState(
+          message: l10n.failedToLoad,
+          retryLabel: l10n.errorRetryCta,
+          onRetry: () => ref.invalidate(providerVerificationProvider),
+        ),
         data: (data) {
           final status = data['verification_status'] as String?;
           final reason = data['rejection_reason'] as String?;

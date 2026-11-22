@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
@@ -76,7 +77,11 @@ class DocumentManagementPage extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n.documentManagement)),
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(appErrorText(context, e))),
+        error: (e, _) => ErrorState(
+          message: appErrorText(context, e),
+          retryLabel: AppLocalizations.of(context).errorRetryCta,
+          onRetry: () => ref.invalidate(driverProfileProvider(userId)),
+        ),
         data: (profile) {
           if (profile == null) {
             return Center(child: Text(l10n.noDocuments));
@@ -164,7 +169,11 @@ class _DocumentListBodyState extends ConsumerState<_DocumentListBody> {
       onRefresh: () async => ref.invalidate(_documentsProvider(driverId)),
       child: documentsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(appErrorText(context, e))),
+        error: (e, _) => ErrorState(
+          message: appErrorText(context, e),
+          retryLabel: AppLocalizations.of(context).errorRetryCta,
+          onRetry: () => ref.invalidate(_documentsProvider(driverId)),
+        ),
         data: (documents) {
           final docMap = <String, DriverDocument>{};
           for (final doc in documents) {

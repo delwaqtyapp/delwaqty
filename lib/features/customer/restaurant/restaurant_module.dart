@@ -36,7 +36,6 @@ import 'package:delwaqty/features/customer/restaurant/presentation/pages/restaur
 import 'package:delwaqty/features/customer/restaurant/presentation/pages/restaurant_offers_page.dart';
 import 'package:delwaqty/features/customer/restaurant/presentation/pages/restaurant_reviews_page.dart';
 import 'package:delwaqty/features/customer/restaurant/presentation/pages/restaurant_reservation_page.dart';
-import 'package:delwaqty/features/customer/restaurant/presentation/pages/restaurant_order_tracking_page.dart';
 import 'package:delwaqty/features/customer/restaurant/presentation/pages/restaurant_gallery_page.dart';
 
 final branchRepositoryProvider = Provider<BranchRepository>(
@@ -154,9 +153,11 @@ class RestaurantModule extends FeatureModule {
         ),
         GoRoute(
           path: 'order-tracking/:orderId',
-          builder: (context, state) => RestaurantOrderTrackingPage(
-            orderId: state.pathParameters['orderId']!,
-          ),
+          // Dead legacy route (no in-app links; reachable by URL). The unified
+          // order page renders the same timeline the tracking page meant to
+          // show, so redirect instead of surfacing "No tracking data".
+          redirect: (context, state) =>
+              '/market/orders/${state.pathParameters['orderId']}',
         ),
         GoRoute(
           path: 'gallery',

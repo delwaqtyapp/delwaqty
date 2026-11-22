@@ -2601,5 +2601,6 @@
       "current": {},
       "total": {}
     }
-  }
+  },
+  "errorRetryCta": "حاول تاني"
 }

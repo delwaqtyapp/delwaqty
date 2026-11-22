@@ -7677,4 +7677,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String stepXOfY(Object current, Object total) {
     return 'خطوة $current من $total';
   }
+
+  @override
+  String get errorRetryCta => 'حاول تاني';
 }

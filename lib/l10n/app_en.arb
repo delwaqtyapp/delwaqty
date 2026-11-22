@@ -2660,5 +2660,6 @@
       "current": {},
       "total": {}
     }
-  }
+  },
+  "errorRetryCta": "Try again"
 }

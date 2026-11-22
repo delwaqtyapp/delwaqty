@@ -7739,4 +7739,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String stepXOfY(Object current, Object total) {
     return 'Step $current of $total';
   }
+
+  @override
+  String get errorRetryCta => 'Try again';
 }

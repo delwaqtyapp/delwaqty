@@ -14707,6 +14707,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Step {current} of {total}'**
   String stepXOfY(Object current, Object total);
+
+  /// No description provided for @errorRetryCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get errorRetryCta;
 }
 
 class _AppLocalizationsDelegate

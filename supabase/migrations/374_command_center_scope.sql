@@ -134,11 +134,11 @@ BEGIN
   IF v_member_id IS NULL THEN
     RETURN NULL;
   END IF;
-  IF NOT has_permission('MEMBER_VIEW', v_member_id) THEN
+  IF NOT has_permission('MEMBER_VIEW') THEN
     RETURN NULL;
   END IF;
 
-  v_has_revenue := has_permission('PLATFORM_REVENUE', v_member_id);
+  v_has_revenue := has_permission('PLATFORM_REVENUE');
   v_regions := public._kpi_effective_regions(p_region_id);
 
   SELECT jsonb_build_object(
@@ -252,7 +252,7 @@ DECLARE
   v_alerts jsonb := '[]'::jsonb;
 BEGIN
   v_member_id := auth.uid();
-  IF v_member_id IS NULL OR NOT has_permission('MEMBER_VIEW', v_member_id) THEN
+  IF v_member_id IS NULL OR NOT has_permission('MEMBER_VIEW') THEN
     RETURN NULL;
   END IF;
 
@@ -340,10 +340,10 @@ DECLARE
   v_regions uuid[];
 BEGIN
   v_member_id := auth.uid();
-  IF v_member_id IS NULL OR NOT has_permission('MEMBER_VIEW', v_member_id) THEN
+  IF v_member_id IS NULL OR NOT has_permission('MEMBER_VIEW') THEN
     RETURN NULL;
   END IF;
-  v_has_revenue := has_permission('PLATFORM_REVENUE', v_member_id);
+  v_has_revenue := has_permission('PLATFORM_REVENUE');
   IF NOT v_has_revenue THEN
     RETURN jsonb_build_object('error', 'insufficient_permissions');
   END IF;

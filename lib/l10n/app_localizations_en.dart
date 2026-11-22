@@ -7904,4 +7904,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get modifierEmptyGroups => 'No modifier groups yet';
+
+  @override
+  String get accountSuspendedBody =>
+      'Your admin access has been suspended. Contact the platform owner if you believe this is a mistake.';
 }

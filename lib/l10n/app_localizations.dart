@@ -14995,6 +14995,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No modifier groups yet'**
   String get modifierEmptyGroups;
+
+  /// No description provided for @accountSuspendedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your admin access has been suspended. Contact the platform owner if you believe this is a mistake.'**
+  String get accountSuspendedBody;
 }
 
 class _AppLocalizationsDelegate

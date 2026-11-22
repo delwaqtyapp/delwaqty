@@ -7838,4 +7838,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get modifierEmptyGroups => 'لا توجد مجموعات إضافات بعد';
+
+  @override
+  String get accountSuspendedBody =>
+      'تم إيقاف صلاحيات الإدارة الخاصة بك. تواصل مع مالك المنصة إذا كنت تعتقد أن هذا خطأ.';
 }

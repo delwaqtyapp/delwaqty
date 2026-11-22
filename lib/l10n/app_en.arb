@@ -2774,5 +2774,6 @@
   "modifierEmptyGroups": "No modifier groups yet",
   "@modifierEmptyGroups": {
     "description": "Merchant modifiers: modifierEmptyGroups"
-  }
+  },
+  "accountSuspendedBody": "Your admin access has been suspended. Contact the platform owner if you believe this is a mistake."
 }

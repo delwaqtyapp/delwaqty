@@ -2715,5 +2715,6 @@
   "modifierEmptyGroups": "لا توجد مجموعات إضافات بعد",
   "@modifierEmptyGroups": {
     "description": "Merchant modifiers: modifierEmptyGroups"
-  }
+  },
+  "accountSuspendedBody": "تم إيقاف صلاحيات الإدارة الخاصة بك. تواصل مع مالك المنصة إذا كنت تعتقد أن هذا خطأ."
 }

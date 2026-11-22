@@ -6,6 +6,8 @@ import 'package:delwaqty/core/module/feature_registry.dart';
 import 'package:delwaqty/core/auth/admin_access.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/admin/presentation/providers/admin_status_provider.dart';
+import 'package:delwaqty/features/admin/presentation/pages/suspended_admin_page.dart';
 import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart';
 import 'package:delwaqty/features/_shared/device_lock/presentation/device_unlock_page.dart';
 import 'package:delwaqty/features/_shared/notifications/presentation/pages/notification_center_page.dart';
@@ -24,6 +26,10 @@ final adminGoRouterProvider = Provider<GoRouter>((ref) {
   });
 
   ref.listen(deviceLockProvider, (previous, next) {
+    refreshNotifier.value++;
+  });
+
+  ref.listen(adminAccountStatusProvider, (previous, next) {
     refreshNotifier.value++;
   });
 
@@ -60,6 +66,20 @@ final adminGoRouterProvider = Provider<GoRouter>((ref) {
       if (!isAuth && !isAuthRoute) return '/login';
       if (isAuth && isAuthRoute) return '/admin';
       if (isAuth && !isAdmin) return '/login';
+
+      // Suspended admins keep users.role='admin' but every backend call is
+      // denied; send them to a clear suspended screen instead of a shell of
+      // zeros. unknown/notRegistered fail open (transient reads, owner).
+      if (isAuth && isAdmin) {
+        final status = ref.read(adminAccountStatusProvider).value;
+        final onSuspendedRoute = state.matchedLocation == '/admin-suspended';
+        if (status == AdminAccountStatus.suspended && !onSuspendedRoute) {
+          return '/admin-suspended';
+        }
+        if (status == AdminAccountStatus.active && onSuspendedRoute) {
+          return '/admin';
+        }
+      }
       return null;
     },
     routes: [
@@ -75,6 +95,10 @@ final adminGoRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/device-unlock',
         builder: (context, state) => const DeviceUnlockPage(),
+      ),
+      GoRoute(
+        path: '/admin-suspended',
+        builder: (context, state) => const SuspendedAdminPage(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

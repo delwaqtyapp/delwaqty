@@ -268,6 +268,17 @@ BEGIN
 END;
 $function$;
 
+-- Read only the linkage bit through RLS for the order's own merchant/admin.
+create or replace function public.order_has_linked_delivery(p_order_id uuid)
+returns boolean language sql stable security definer set search_path=public,pg_temp as $$
+  select exists(select 1 from public.rides r join public.orders o on o.id=r.order_id
+    where o.id=p_order_id and auth.uid() is not null
+      and (public.is_merchant_owner(o.merchant_id)
+        or public._admin_write_scope(public._ops_scope_region(public._merchant_region_id(o.merchant_id)))));
+$$;
+revoke all on function public.order_has_linked_delivery(uuid) from public,anon;
+grant execute on function public.order_has_linked_delivery(uuid) to authenticated;
+
 CREATE OR REPLACE FUNCTION public.orders_guard_sensitive()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -297,7 +308,7 @@ begin
     end if;
     if new.status='delivering' then
       if old.driver_id is null then raise exception 'DRIVER_REQUIRED'; end if;
-      if exists(select 1 from public.rides r where r.order_id=old.id) then
+      if public.order_has_linked_delivery(old.id) then
         raise exception 'USE_ASSIGNED_DELIVERY_FLOW';
       end if;
     end if;

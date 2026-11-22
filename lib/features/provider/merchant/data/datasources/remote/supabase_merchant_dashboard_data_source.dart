@@ -51,8 +51,7 @@ class SupabaseMerchantDashboardDataSource {
           ? user['phone'] as String
           : (row['customer_phone'] as String?),
       driverId: row['driver_id'] as String?,
-      hasLinkedDelivery:
-          row['rides'] is List && (row['rides'] as List).isNotEmpty,
+      hasLinkedDelivery: row['has_linked_delivery'] == true,
       items: items,
       totalAmount: (row['total_amount'] as num).toDouble(),
       status: row['status'] as String,
@@ -151,7 +150,7 @@ class SupabaseMerchantDashboardDataSource {
       var query = _client
           .from('orders')
           .select(
-            'id, user_id, driver_id, status, dispatch_status, total_amount, created_at, delivery_address, notes, rides!rides_order_id_fkey(id), '
+            'id, user_id, driver_id, status, dispatch_status, total_amount, created_at, delivery_address, notes, '
             'order_items(product_id, product_name, quantity, unit_price, modifiers, products(name))',
           )
           .eq('merchant_id', merchantId);
@@ -176,14 +175,22 @@ class SupabaseMerchantDashboardDataSource {
               Map<String, dynamic>.from(c),
       };
 
-      return (data as List<dynamic>).map((row) {
-        final map = row as Map<String, dynamic>;
-        final contact = contacts[map['id'] as String];
-        final orderMap = Map<String, dynamic>.from(map);
-        orderMap['customer_name'] = contact?['full_name'] as String?;
-        orderMap['customer_phone'] = contact?['phone'] as String?;
-        return _orderFromRow(orderMap);
-      }).toList();
+      return Future.wait(
+        (data as List<dynamic>).map((row) async {
+          final map = row as Map<String, dynamic>;
+          final contact = contacts[map['id'] as String];
+          final orderMap = Map<String, dynamic>.from(map);
+          orderMap['customer_name'] = contact?['full_name'] as String?;
+          orderMap['customer_phone'] = contact?['phone'] as String?;
+          orderMap['has_linked_delivery'] =
+              await _client.rpc(
+                'order_has_linked_delivery',
+                params: {'p_order_id': map['id']},
+              ) ==
+              true;
+          return _orderFromRow(orderMap);
+        }),
+      );
     } catch (e) {
       _logger.e('Failed to get merchant orders', e);
       rethrow;

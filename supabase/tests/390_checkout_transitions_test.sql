@@ -47,5 +47,24 @@ do $$ declare t record; r jsonb; begin
  perform set_config('request.jwt.claim.sub',t.m::text,true);
  r:=public.update_order_status(t.o,'confirmed'); assert r->>'code'='TERMINAL_STATE','terminal frozen';
 end $$;
+-- Direct PATCH-equivalent merchant UPDATE must see linkage through rides RLS.
+update public.orders set status='ready',driver_id=(select id from public.drivers limit 1) where id=(select o from zz_checkout_context);
+-- Give this fixture a real driver row if staging has no drivers.
+insert into public.drivers(user_id,full_name,is_active,is_verified,verification_status)
+select c,'zz-test-checkout-driver',true,true,'verified' from zz_checkout_context;
+update public.orders set driver_id=(select id from public.drivers where user_id=(select c from zz_checkout_context)) where id=(select o from zz_checkout_context);
+insert into public.rides(rider_id,merchant_id,order_id,service_type,ride_type,status,pickup_latitude,pickup_longitude,dropoff_latitude,dropoff_longitude)
+select c,store,o,'food_delivery','motorcycle','searching',0,0,0.001,0.001 from zz_checkout_context;
+grant select on zz_checkout_context to authenticated;
+set local role authenticated;
+do $$ declare t record; begin
+ select * into t from zz_checkout_context;
+ assert public.order_has_linked_delivery(t.o), 'merchant must see linked bit despite rides RLS';
+ begin
+  update public.orders set status='delivering' where id=t.o;
+  raise exception 'TEST_FAIL_LINKED_PATCH_ACCEPTED';
+ exception when others then if sqlerrm<>'USE_ASSIGNED_DELIVERY_FLOW' then raise; end if; end;
+end $$;
+reset role;
 select 'PASS: availability, pricing/replay, lifecycle, authorization, cancellation stock' as result;
 rollback;

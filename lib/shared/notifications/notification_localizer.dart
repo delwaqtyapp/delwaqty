@@ -100,6 +100,7 @@ class NotificationLocalizer {
 
   static Color typeColor(NotificationType type, ColorScheme colorScheme) {
     switch (type) {
+      case NotificationType.otaUpdate:
       case NotificationType.system:
       case NotificationType.info:
         return colorScheme.primary;
@@ -144,6 +145,8 @@ class NotificationLocalizer {
 
   static IconData typeIcon(NotificationType type) {
     switch (type) {
+      case NotificationType.otaUpdate:
+        return Icons.system_update_alt_rounded;
       case NotificationType.system:
       case NotificationType.info:
         return Icons.info_outline_rounded;

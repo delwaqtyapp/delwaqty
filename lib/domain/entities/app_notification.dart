@@ -105,6 +105,8 @@ enum NotificationType {
   adminTopup,
   @JsonValue('provider_profile')
   providerProfile,
+  @JsonValue('ota_update')
+  otaUpdate,
 }
 
 class NotificationPayload {

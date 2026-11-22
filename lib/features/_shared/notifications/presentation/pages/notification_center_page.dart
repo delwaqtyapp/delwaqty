@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/domain/entities/app_notification.dart';
+import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
+import 'package:delwaqty/services/ota/ota_update_dialog.dart';
 import 'package:delwaqty/features/_shared/notifications/notifications_module.dart';
 import 'package:delwaqty/shared/notifications/notification_localizer.dart';
 import 'package:delwaqty/shared/notifications/notification_route_resolver.dart';
@@ -246,6 +248,15 @@ class _NotificationCenterPageState
                         final repo = ref.read(notificationRepositoryProvider);
                         await repo.markAsRead(notification.id);
                         if (!mounted) return;
+                        // OTA announcements open the update dialog directly,
+                        // same as a system push tap (#46).
+                        if (notification.type == NotificationType.otaUpdate) {
+                          await showOtaUpdateIfAvailable(
+                            context: context,
+                            flavor: ref.read(appFlavorProvider),
+                          );
+                          return;
+                        }
                         final index = _items.indexWhere(
                           (n) => n.id == notification.id,
                         );

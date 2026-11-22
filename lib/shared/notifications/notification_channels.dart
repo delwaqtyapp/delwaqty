@@ -48,6 +48,8 @@ class NotificationChannels {
     // ── Cross-app support ────────────────────────────────────────────────
     NotificationChannel('/notifications'),
     NotificationChannel('/safety'),
+    // OTA update announcements deep-link here (ota/announce_update.sql).
+    NotificationChannel('/settings/about'),
     NotificationChannel(
       '/support/room/:roomId',
       contexts: {

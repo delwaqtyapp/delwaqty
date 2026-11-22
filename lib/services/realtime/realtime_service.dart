@@ -69,7 +69,12 @@ class RealtimeService {
         _logger.d('Realtime subscribed: $channelName');
         onSubscribed?.call(channel);
       } else if (status == RealtimeSubscribeStatus.closed) {
-        _channels.remove(channelName);
+        // Remove only if the map still tracks THIS channel instance: when a
+        // same-named channel was re-subscribed, the replacement lives under
+        // this name and the stale close callback must not erase it (#47).
+        if (identical(_channels[channelName], channel)) {
+          _channels.remove(channelName);
+        }
       }
     });
 

@@ -38,11 +38,13 @@ class _AdminRegionsManagementPageState
   //  374 review (#44): scoped admins are READ-ONLY here — no edit/add
   // affordances at all. Server-side scope stays enforced by
   // admin_upsert_region; this is the UI contract only.
+  // Fail closed while scope is loading or failed to load (#44 residual):
+  // null scope means "not known yet", not "unrestricted".
   bool _canEditRegion(AdminRegionScope? scope, Region region) =>
-      scope == null || scope.unrestricted;
+      scope != null && scope.unrestricted;
 
   bool _canAddUnder(AdminRegionScope? scope, Region? parent) {
-    return scope == null || scope.unrestricted;
+    return scope != null && scope.unrestricted;
   }
 
   Future<void> _openUpsertSheet({Region? existing, Region? parent}) async {

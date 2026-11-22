@@ -23,11 +23,17 @@ class _AboutPageState extends ConsumerState<AboutPage> {
   @override
   void initState() {
     super.initState();
-    PackageInfo.fromPlatform().then((info) {
-      if (mounted) {
-        setState(() => _versionLabel = '${info.version}+${info.buildNumber}');
-      }
-    });
+    PackageInfo.fromPlatform()
+        .then((info) {
+          if (mounted) {
+            setState(
+              () => _versionLabel = '${info.version}+${info.buildNumber}',
+            );
+          }
+        })
+        .catchError((_) {
+          // Keep the l10n fallback label when package info is unavailable.
+        });
   }
 
   Future<void> _checkForUpdate() async {

@@ -81,6 +81,7 @@ const _$NotificationTypeEnumMap = {
   NotificationType.topupApproved: 'topup_approved',
   NotificationType.adminTopup: 'admin_topup',
   NotificationType.providerProfile: 'provider_profile',
+  NotificationType.otaUpdate: 'ota_update',
 };
 
 const _$NotificationPriorityEnumMap = {

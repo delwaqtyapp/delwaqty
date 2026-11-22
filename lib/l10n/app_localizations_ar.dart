@@ -7834,5 +7834,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get modifierMaxSelections => 'أقصى عدد للاختيار (0 = بلا حد)';
 
   @override
+  String get modifierMaxInvalid => 'أدخل رقمًا صحيحًا 0 أو أكثر';
+
+  @override
   String get modifierEmptyGroups => 'لا توجد مجموعات إضافات بعد';
 }

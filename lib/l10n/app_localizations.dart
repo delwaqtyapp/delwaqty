@@ -14984,6 +14984,12 @@ abstract class AppLocalizations {
   /// **'Max selections (0 = unlimited)'**
   String get modifierMaxSelections;
 
+  /// No description provided for @modifierMaxInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number, 0 or more'**
+  String get modifierMaxInvalid;
+
   /// Merchant modifiers: modifierEmptyGroups
   ///
   /// In en, this message translates to:

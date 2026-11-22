@@ -2767,6 +2767,7 @@
     "description": "Merchant modifiers: modifierPriceAdjustment"
   },
   "modifierMaxSelections": "Max selections (0 = unlimited)",
+  "modifierMaxInvalid": "Enter a whole number, 0 or more",
   "@modifierMaxSelections": {
     "description": "Merchant modifiers: modifierMaxSelections"
   },

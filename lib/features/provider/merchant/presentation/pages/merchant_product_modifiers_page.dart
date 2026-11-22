@@ -144,10 +144,15 @@ class _MerchantProductModifiersPageState
                       final name = nameCtrl.text.trim();
                       final nameAr = nameArCtrl.text.trim();
                       final maxSel = int.tryParse(maxCtrl.text.trim());
-                      if ((name.isEmpty && nameAr.isEmpty) ||
-                          maxSel == null ||
-                          maxSel < 1) {
+                      if (name.isEmpty && nameAr.isEmpty) {
                         setDialogState(() => errorText = l10n.requiredField);
+                        return;
+                      }
+                      // 0 means unlimited picks (same as POS/customer).
+                      if (maxSel == null || maxSel < 0) {
+                        setDialogState(
+                          () => errorText = l10n.modifierMaxInvalid,
+                        );
                         return;
                       }
                       setDialogState(() {

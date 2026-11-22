@@ -7900,5 +7900,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get modifierMaxSelections => 'Max selections (0 = unlimited)';
 
   @override
+  String get modifierMaxInvalid => 'Enter a whole number, 0 or more';
+
+  @override
   String get modifierEmptyGroups => 'No modifier groups yet';
 }

@@ -2708,6 +2708,7 @@
     "description": "Merchant modifiers: modifierPriceAdjustment"
   },
   "modifierMaxSelections": "أقصى عدد للاختيار (0 = بلا حد)",
+  "modifierMaxInvalid": "أدخل رقمًا صحيحًا 0 أو أكثر",
   "@modifierMaxSelections": {
     "description": "Merchant modifiers: modifierMaxSelections"
   },

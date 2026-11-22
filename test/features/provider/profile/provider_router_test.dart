@@ -51,8 +51,7 @@ class _FakeDashboardRepo implements MerchantDashboardRepository {
     String? status,
     int limit = 20,
     int offset = 0,
-  }) async =>
-      const [];
+  }) async => const [];
 
   @override
   Future<void> updateOrderStatus(String orderId, String status) async {}
@@ -60,8 +59,7 @@ class _FakeDashboardRepo implements MerchantDashboardRepository {
   @override
   Future<List<Map<String, dynamic>>> getMerchantProducts(
     String merchantId,
-  ) async =>
-      const [];
+  ) async => const [];
 
   @override
   Future<void> createProduct(
@@ -79,8 +77,9 @@ class _FakeDashboardRepo implements MerchantDashboardRepository {
   Future<void> deleteProduct(String productId) async {}
 }
 
-Widget _marker(String path) =>
-    Scaffold(body: Center(child: Text('route:$path', key: ValueKey('page'))));
+Widget _marker(String path) => Scaffold(
+  body: Center(child: Text('route:$path', key: ValueKey('page'))),
+);
 
 class _NavTab extends FeatureModule {
   _NavTab(this.id, this.path, this.priority, {this.builder});
@@ -180,9 +179,7 @@ void main() {
     providerCapabilitiesProvider.overrideWithValue(profile.capabilities),
     providerProfilesProvider.overrideWith((ref) async => profilesState),
     providerMerchantIdProvider.overrideWith((ref) async => ''),
-    merchantDashboardRepositoryProvider.overrideWithValue(
-      _FakeDashboardRepo(),
-    ),
+    merchantDashboardRepositoryProvider.overrideWithValue(_FakeDashboardRepo()),
     providerAvailabilityProvider.overrideWith(
       (ref) async => <String, dynamic>{},
     ),

@@ -27,15 +27,14 @@ class _FakeAuth extends AuthStateNotifier {
   @override
   AuthState build() => _initial;
 
-  void signInAs(String uid) =>
-      state = AuthState.authenticated(
-        user: User(
-          id: uid,
-          email: '$uid@test.dev',
-          role: 'provider',
-          createdAt: DateTime(2026),
-        ),
-      );
+  void signInAs(String uid) => state = AuthState.authenticated(
+    user: User(
+      id: uid,
+      email: '$uid@test.dev',
+      role: 'provider',
+      createdAt: DateTime(2026),
+    ),
+  );
 }
 
 class _FakeServiceRepository implements ProviderServiceRepository {
@@ -162,71 +161,80 @@ void main() {
   }
 
   group('account switch (#85): one container, account A then account B', () {
-    test('no stale profile, tabs, guard, services, prices or bookings', () async {
-      // Account A: plumber.
-      directory['uid-a'] = ProviderProfilesState(
-        activeCategory: 'plumbing',
-        profiles: [businessProfile('plumbing', serviceProviderId: 'sp-plumbing')],
-      );
-      auth.signInAs('uid-a');
+    test(
+      'no stale profile, tabs, guard, services, prices or bookings',
+      () async {
+        // Account A: plumber.
+        directory['uid-a'] = ProviderProfilesState(
+          activeCategory: 'plumbing',
+          profiles: [
+            businessProfile('plumbing', serviceProviderId: 'sp-plumbing'),
+          ],
+        );
+        auth.signInAs('uid-a');
 
-      var profile = await currentProfile();
-      expect(profile.family, ProviderFamily.homeServices);
-      expect(profile.tabs, [
-        ProviderTabIds.dashboard,
-        ProviderTabIds.bookings,
-        ProviderTabIds.services,
-        ProviderTabIds.financial,
-      ]);
-      expect(profile.allowsRoute('/provider-services'), isTrue);
-      expect(profile.allowsRoute('/provider-cashier'), isFalse);
-
-      final aServices = await container.read(providerServiceInfoProvider.future);
-      expect(aServices, plumbingServices);
-      final aBookings = await container.read(
-        providerServiceBookingsProvider.future,
-      );
-      expect(aBookings, plumbingBookings);
-      expect(repo.serviceCalls, ['sp-plumbing']);
-      expect(repo.bookingCalls, ['sp-plumbing']);
-
-      // Sign A out, sign B in: a pharmacy shop.
-      directory['uid-b'] = ProviderProfilesState(
-        activeCategory: 'pharmacy',
-        profiles: [businessProfile('pharmacy', merchantId: 'm-1')],
-      );
-      auth.signInAs('uid-b');
-
-      profile = await currentProfile();
-      expect(profile.family, ProviderFamily.pharmacy);
-      expect(profile.category, ProviderCategory.pharmacy);
-      expect(
-        profile.tabs,
-        containsAllInOrder([
+        var profile = await currentProfile();
+        expect(profile.family, ProviderFamily.homeServices);
+        expect(profile.tabs, [
           ProviderTabIds.dashboard,
-          ProviderTabIds.orders,
-          ProviderTabIds.products,
-          ProviderTabIds.cashier,
+          ProviderTabIds.bookings,
+          ProviderTabIds.services,
           ProviderTabIds.financial,
-        ]),
-      );
-      // B's guard: cashier opens, plumber surfaces close.
-      expect(profile.allowsRoute('/provider-cashier'), isTrue);
-      expect(profile.allowsRoute('/merchant-dashboard/drugs'), isTrue);
-      expect(profile.allowsRoute('/provider-services'), isFalse);
-      expect(profile.allowsRoute('/provider-bookings'), isFalse);
+        ]);
+        expect(profile.allowsRoute('/provider-services'), isTrue);
+        expect(profile.allowsRoute('/provider-cashier'), isFalse);
 
-      // No stale A data: B has no service row, so the repo is never asked
-      // and nothing from sp-plumbing leaks through.
-      final bServices = await container.read(providerServiceInfoProvider.future);
-      expect(bServices, isEmpty);
-      final bBookings = await container.read(
-        providerServiceBookingsProvider.future,
-      );
-      expect(bBookings, isEmpty);
-      expect(repo.serviceCalls, ['sp-plumbing']);
-      expect(repo.bookingCalls, ['sp-plumbing']);
-    });
+        final aServices = await container.read(
+          providerServiceInfoProvider.future,
+        );
+        expect(aServices, plumbingServices);
+        final aBookings = await container.read(
+          providerServiceBookingsProvider.future,
+        );
+        expect(aBookings, plumbingBookings);
+        expect(repo.serviceCalls, ['sp-plumbing']);
+        expect(repo.bookingCalls, ['sp-plumbing']);
+
+        // Sign A out, sign B in: a pharmacy shop.
+        directory['uid-b'] = ProviderProfilesState(
+          activeCategory: 'pharmacy',
+          profiles: [businessProfile('pharmacy', merchantId: 'm-1')],
+        );
+        auth.signInAs('uid-b');
+
+        profile = await currentProfile();
+        expect(profile.family, ProviderFamily.pharmacy);
+        expect(profile.category, ProviderCategory.pharmacy);
+        expect(
+          profile.tabs,
+          containsAllInOrder([
+            ProviderTabIds.dashboard,
+            ProviderTabIds.orders,
+            ProviderTabIds.products,
+            ProviderTabIds.cashier,
+            ProviderTabIds.financial,
+          ]),
+        );
+        // B's guard: cashier opens, plumber surfaces close.
+        expect(profile.allowsRoute('/provider-cashier'), isTrue);
+        expect(profile.allowsRoute('/merchant-dashboard/drugs'), isTrue);
+        expect(profile.allowsRoute('/provider-services'), isFalse);
+        expect(profile.allowsRoute('/provider-bookings'), isFalse);
+
+        // No stale A data: B has no service row, so the repo is never asked
+        // and nothing from sp-plumbing leaks through.
+        final bServices = await container.read(
+          providerServiceInfoProvider.future,
+        );
+        expect(bServices, isEmpty);
+        final bBookings = await container.read(
+          providerServiceBookingsProvider.future,
+        );
+        expect(bBookings, isEmpty);
+        expect(repo.serviceCalls, ['sp-plumbing']);
+        expect(repo.bookingCalls, ['sp-plumbing']);
+      },
+    );
   });
 
   group('two service profiles on one account (#86)', () {
@@ -287,29 +295,37 @@ void main() {
       expect(profile.hasServicesView, isTrue);
     });
 
-    test('unapproved profiles never become the active service target', () async {
-      directory['uid-d'] = const ProviderProfilesState(
-        activeCategory: 'plumbing',
-        profiles: [
-          ProviderBusinessProfile(
-            id: 'bp-pending',
-            categoryType: 'plumbing',
-            displayName: 'سباكة',
-            status: 'pending',
-            serviceProviderId: 'sp-plumbing',
-          ),
-        ],
-      );
-      auth.signInAs('uid-d');
+    test(
+      'unapproved profiles never become the active service target',
+      () async {
+        directory['uid-d'] = const ProviderProfilesState(
+          activeCategory: 'plumbing',
+          profiles: [
+            ProviderBusinessProfile(
+              id: 'bp-pending',
+              categoryType: 'plumbing',
+              displayName: 'سباكة',
+              status: 'pending',
+              serviceProviderId: 'sp-plumbing',
+            ),
+          ],
+        );
+        auth.signInAs('uid-d');
 
-      expect(
-        await container.read(providerSelectedServiceProviderIdProvider.future),
-        isNull,
-      );
-      expect(await container.read(providerServiceInfoProvider.future), isEmpty);
-      expect(repo.serviceCalls, isEmpty);
-      expect(repo.bookingCalls, isEmpty);
-    });
+        expect(
+          await container.read(
+            providerSelectedServiceProviderIdProvider.future,
+          ),
+          isNull,
+        );
+        expect(
+          await container.read(providerServiceInfoProvider.future),
+          isEmpty,
+        );
+        expect(repo.serviceCalls, isEmpty);
+        expect(repo.bookingCalls, isEmpty);
+      },
+    );
   });
 
   group('keyed surfaces (widget)', () {

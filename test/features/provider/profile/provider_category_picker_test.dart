@@ -157,10 +157,10 @@ void main() {
         // Every category is listed in the open menu.
         for (final c in kRequestableProviderCategories) {
           expect(
-            find.text(
-              providerCategoryLabel(l10n, c),
-              skipOffstage: false,
-            ).evaluate().isNotEmpty,
+            find
+                .text(providerCategoryLabel(l10n, c), skipOffstage: false)
+                .evaluate()
+                .isNotEmpty,
             isTrue,
             reason: '$c missing from the $lang menu',
           );

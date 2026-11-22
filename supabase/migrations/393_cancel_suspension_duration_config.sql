@@ -39,9 +39,10 @@ ALTER TABLE public.platform_settings
 COMMENT ON COLUMN public.platform_settings.refusal_suspension_days IS
   'Days a customer account is suspended after the 3rd delivery refusal in one Cairo calendar month. Owner-only (393).';
 
--- 2) Owner-only guard at the table level. platform_settings is writable by
--- any admin via RLS, so the trigger enforces the owner-only rule even for
--- direct table writes (defense in depth behind the RPC check).
+-- 2) Owner-only guard at the table level. 367's RLS policies let COUNTRY
+-- admins (_is_country_admin_uid) write platform_settings directly, so the
+-- trigger enforces the owner-only rule even for direct table writes
+-- (defense in depth behind the RPC check).
 CREATE OR REPLACE FUNCTION public.guard_platform_settings_owner_fields()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -75,7 +76,82 @@ BEGIN
 END;
 $function$;
 
--- 3) Owner-only setter with audit.
+-- 2b) Singleton lifecycle: client roles can never DELETE the default row,
+-- and only the owner can delete or create settings rows. Closes the
+-- bypass where a country admin deletes id='default', silently resetting
+-- the penalties (and every other setting) to defaults. Backend roles
+-- (auth.uid() IS NULL) are unaffected.
+CREATE OR REPLACE FUNCTION public.guard_platform_settings_lifecycle()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+BEGIN
+  IF auth.uid() IS NOT NULL THEN
+    IF TG_OP = 'DELETE' THEN
+      IF OLD.id = 'default' THEN
+        RAISE EXCEPTION 'The default platform settings row cannot be deleted';
+      END IF;
+      IF NOT public._is_owner_uid(auth.uid()) THEN
+        RAISE EXCEPTION 'Only the platform owner can delete platform settings rows';
+      END IF;
+      RETURN OLD;
+    END IF;
+    IF TG_OP = 'INSERT' THEN
+      IF NOT public._is_owner_uid(auth.uid()) THEN
+        RAISE EXCEPTION 'Only the platform owner can create platform settings rows';
+      END IF;
+    END IF;
+  END IF;
+  IF TG_OP = 'DELETE' THEN
+    RETURN OLD;
+  END IF;
+  RETURN NEW;
+END;
+$function$;
+
+DROP TRIGGER IF EXISTS trg_guard_platform_settings_lifecycle ON public.platform_settings;
+CREATE TRIGGER trg_guard_platform_settings_lifecycle BEFORE INSERT OR DELETE ON public.platform_settings FOR EACH ROW EXECUTE FUNCTION guard_platform_settings_lifecycle();
+
+-- 2c) Penalty-config audit at the table level, so BOTH the owner-only
+-- setter RPCs and a direct owner UPDATE produce exactly one audit row per
+-- change. The setters pass the reason through a transaction-local GUC.
+CREATE OR REPLACE FUNCTION public.audit_platform_settings_penalty_changes()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+BEGIN
+  IF auth.uid() IS NOT NULL THEN
+    IF NEW.cancel_suspension_days IS DISTINCT FROM OLD.cancel_suspension_days THEN
+      PERFORM public.write_audit(
+        'PENALTY_CONFIG_CHANGED', 'platform_settings', OLD.id,
+        jsonb_build_object('field', 'cancel_suspension_days',
+                           'old_value', OLD.cancel_suspension_days,
+                           'new_value', NEW.cancel_suspension_days,
+                           'reason', nullif(current_setting('app.penalty_change_reason', true), '')));
+    END IF;
+    IF NEW.refusal_suspension_days IS DISTINCT FROM OLD.refusal_suspension_days THEN
+      PERFORM public.write_audit(
+        'PENALTY_CONFIG_CHANGED', 'platform_settings', OLD.id,
+        jsonb_build_object('field', 'refusal_suspension_days',
+                           'old_value', OLD.refusal_suspension_days,
+                           'new_value', NEW.refusal_suspension_days,
+                           'reason', nullif(current_setting('app.penalty_change_reason', true), '')));
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$function$;
+
+-- Named to fire AFTER trg_guard_platform_settings_owner_fields: a rejected
+-- non-owner write never even reaches the audit insert.
+DROP TRIGGER IF EXISTS trg_zz_audit_platform_settings_penalties ON public.platform_settings;
+CREATE TRIGGER trg_zz_audit_platform_settings_penalties BEFORE UPDATE ON public.platform_settings FOR EACH ROW EXECUTE FUNCTION audit_platform_settings_penalty_changes();
+
+-- 3) Owner-only setter. The audit lives in the table trigger (2c).
 CREATE OR REPLACE FUNCTION public.set_cancel_suspension_days(p_days integer, p_reason text DEFAULT NULL::text)
  RETURNS integer
  LANGUAGE plpgsql
@@ -104,17 +180,12 @@ BEGIN
     RAISE EXCEPTION 'Platform settings row missing';
   END IF;
 
+  PERFORM set_config('app.penalty_change_reason', coalesce(p_reason, ''), true);
+
   UPDATE public.platform_settings
   SET cancel_suspension_days = p_days,
       updated_at = now()
   WHERE id = 'default';
-
-  PERFORM public.write_audit(
-    'PENALTY_CONFIG_CHANGED', 'platform_settings', 'default',
-    jsonb_build_object('field', 'cancel_suspension_days',
-                       'old_value', v_old,
-                       'new_value', p_days,
-                       'reason', p_reason));
 
   RETURN p_days;
 END;
@@ -154,17 +225,12 @@ BEGIN
     RAISE EXCEPTION 'Platform settings row missing';
   END IF;
 
+  PERFORM set_config('app.penalty_change_reason', coalesce(p_reason, ''), true);
+
   UPDATE public.platform_settings
   SET refusal_suspension_days = p_days,
       updated_at = now()
   WHERE id = 'default';
-
-  PERFORM public.write_audit(
-    'PENALTY_CONFIG_CHANGED', 'platform_settings', 'default',
-    jsonb_build_object('field', 'refusal_suspension_days',
-                       'old_value', v_old,
-                       'new_value', p_days,
-                       'reason', p_reason));
 
   RETURN p_days;
 END;

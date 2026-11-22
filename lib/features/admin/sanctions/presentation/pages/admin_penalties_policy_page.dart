@@ -161,77 +161,12 @@ class AdminPenaltiesPolicyPage extends ConsumerWidget {
     required VoidCallback onSaved,
   }) async {
     final l10n = AppLocalizations.of(context);
-    final daysController = TextEditingController(text: '$currentDays');
-    final reasonController = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-
     final saved = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.editPenalty),
-        content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(title, style: Theme.of(ctx).textTheme.bodyMedium),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: daysController,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: InputDecoration(
-                  labelText: l10n.suspensionDaysLabel,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                validator: (value) {
-                  final parsed = int.tryParse(value ?? '');
-                  if (parsed == null || parsed < 1 || parsed > 365) {
-                    return l10n.invalidSuspensionDays;
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: reasonController,
-                decoration: InputDecoration(
-                  labelText: l10n.penaltyChangeReasonHint,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                maxLines: 2,
-              ),
-            ],
-          ),
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () async {
-              if (!(formKey.currentState?.validate() ?? false)) return;
-              final days = int.parse(daysController.text);
-              try {
-                await onSave(days, reasonController.text);
-                if (ctx.mounted) Navigator.of(ctx).pop(true);
-              } catch (e) {
-                if (ctx.mounted) {
-                  ScaffoldMessenger.of(
-                    ctx,
-                  ).showSnackBar(SnackBar(content: Text(appErrorText(ctx, e))));
-                }
-              }
-            },
-            child: Text(l10n.save),
-          ),
-        ],
+      builder: (ctx) => _PenaltyEditDialog(
+        title: title,
+        currentDays: currentDays,
+        onSave: onSave,
       ),
     );
 
@@ -240,5 +175,118 @@ class AdminPenaltiesPolicyPage extends ConsumerWidget {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.penaltyUpdated)));
     }
+  }
+}
+
+/// Edit dialog for one penalty row. Owns its controllers so they are
+/// disposed with the dialog widget (disposing them right after showDialog
+/// returns would race the exit animation), and locks both actions while a
+/// save is in flight so a double-tap cannot submit twice.
+class _PenaltyEditDialog extends StatefulWidget {
+  const _PenaltyEditDialog({
+    required this.title,
+    required this.currentDays,
+    required this.onSave,
+  });
+
+  final String title;
+  final int currentDays;
+  final Future<int> Function(int days, String reason) onSave;
+
+  @override
+  State<_PenaltyEditDialog> createState() => _PenaltyEditDialogState();
+}
+
+class _PenaltyEditDialogState extends State<_PenaltyEditDialog> {
+  late final TextEditingController _daysController;
+  final TextEditingController _reasonController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _daysController = TextEditingController(text: '${widget.currentDays}');
+  }
+
+  @override
+  void dispose() {
+    _daysController.dispose();
+    _reasonController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    final days = int.parse(_daysController.text);
+    setState(() => _saving = true);
+    try {
+      await widget.onSave(days, _reasonController.text);
+      if (mounted) Navigator.of(context).pop(true);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _saving = false);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l10n.editPenalty),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(widget.title, style: Theme.of(context).textTheme.bodyMedium),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _daysController,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: InputDecoration(
+                labelText: l10n.suspensionDaysLabel,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              validator: (value) {
+                final parsed = int.tryParse(value ?? '');
+                if (parsed == null || parsed < 1 || parsed > 365) {
+                  return l10n.invalidSuspensionDays;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _reasonController,
+              decoration: InputDecoration(
+                labelText: l10n.penaltyChangeReasonHint,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              maxLines: 2,
+            ),
+          ],
+        ),
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      actions: [
+        TextButton(
+          onPressed: _saving ? null : () => Navigator.of(context).pop(false),
+          child: Text(l10n.cancel),
+        ),
+        TextButton(
+          onPressed: _saving ? null : _submit,
+          child: Text(l10n.save),
+        ),
+      ],
+    );
   }
 }

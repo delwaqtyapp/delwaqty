@@ -10,11 +10,13 @@
 
 ## The flow
 
-1. **Issue** (owner on the web dashboard, or admin):
-   `cashier_license_issue(merchant_id, plan)` → returns the key text once.
-   Plans: trial (30d, starts active), core_monthly/quarterly/semiannual/annual,
-   core_lifetime. Paid plans start `issued` and activate on first device
-   contact.
+1. **Issue**: `cashier_license_issue(merchant_id, plan)` → returns the key
+   text once. Plans: trial (30d, starts active),
+   core_monthly/quarterly/semiannual/annual, core_lifetime. Since review #27
+   (346), owners can self-issue the TRIAL only; paid plans are issued by an
+   admin after payment is collected (the payment gate) — the RPC rejects them
+   with `PAID_PLANS_REQUIRE_ADMIN`. Paid plans start `issued` and activate on
+   first device contact.
 2. **First run**: the cashier enters the key. The app reads a stable device id
    (machine GUID) and calls `cashier_device_link(key, device_id)`.
    - First contact binds the device and flips the license to `active`

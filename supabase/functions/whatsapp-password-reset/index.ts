@@ -1,12 +1,14 @@
 // whatsapp-password-reset: password reset authorized ONLY by a
-// webhook-verified WhatsApp OTP challenge (migration 387).
+// webhook-verified WhatsApp OTP challenge (migrations 387+388).
 //
 // Flow: the app calls request_whatsapp_otp(phone, 'password_reset'), the
 // user sends the shown code from their own WhatsApp to the platform
 // number, the whatsapp-webhook marks it verified, and the app then posts
 // { phone, challenge, new_password } here. consume_whatsapp_reset_challenge
 // (service-role) atomically validates + consumes the one-time challenge and
-// returns the auth user id; we set the new password with the admin API.
+// returns the auth user id only when exactly one account holds that
+// normalized phone; we set the new password with the admin API and revoke
+// all existing sessions for that user.
 //
 // Deploy: supabase functions deploy whatsapp-password-reset
 // (JWT verification stays ON: the app calls this with the anon key.)
@@ -16,10 +18,17 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2.39.0";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
 function json(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...corsHeaders },
   });
 }
 
@@ -33,6 +42,10 @@ function normalizeEgyptPhone(raw: string): string {
 }
 
 Deno.serve(async (req) => {
+  // Web callers send a CORS preflight; answer it before anything else.
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
   if (req.method !== "POST") return json({ error: "method" }, 405);
 
   let body: any;
@@ -56,10 +69,9 @@ Deno.serve(async (req) => {
     return json({ ok: false, code: "WEAK_PASSWORD" }, 400);
   }
 
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-  );
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  const supabase = createClient(supabaseUrl, serviceKey);
 
   // Atomic validate + consume. A failed password update after this point
   // burns the challenge on purpose: the user simply requests a fresh code,
@@ -78,6 +90,20 @@ Deno.serve(async (req) => {
   );
   if (updateError) {
     return json({ ok: false, code: "RESET_FAILED" }, 500);
+  }
+
+  // Revoke every existing session for this user: anyone still logged in
+  // with the old credentials (including a possible hijacker) is signed
+  // out and must use the new password. The user logs in fresh after a
+  // reset, so revoking ALL sessions is correct here.
+  try {
+    await fetch(`${supabaseUrl}/auth/v1/admin/users/${userId}/logout?scope=global`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${serviceKey}`, apikey: serviceKey },
+    });
+  } catch {
+    // Password is already changed; a missed revocation only means old
+    // sessions live until expiry. Do not fail the reset over this.
   }
 
   return json({ ok: true });

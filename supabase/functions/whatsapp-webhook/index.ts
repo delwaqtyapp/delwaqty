@@ -43,6 +43,20 @@ async function hmacSha256Hex(secret: string, body: string): Promise<string> {
     .join("");
 }
 
+// Constant-time string compare: a naive !== leaks how many leading
+// characters matched through response timing, which chips away at the
+// signature (and the verify token) guess by guess.
+function timingSafeEqual(a: string, b: string): boolean {
+  const ba = new TextEncoder().encode(a);
+  const bb = new TextEncoder().encode(b);
+  let diff = ba.length ^ bb.length;
+  const len = Math.max(ba.length, bb.length);
+  for (let i = 0; i < len; i++) {
+    diff |= (ba[i % Math.max(ba.length, 1)] ?? 0) ^ (bb[i % Math.max(bb.length, 1)] ?? 0);
+  }
+  return diff === 0;
+}
+
 // Same normalization the database applies (_normalize_egypt_phone):
 // keep digits, map 01xxxxxxxxx / 1xxxxxxxxx to +201xxxxxxxxx.
 function normalizeEgyptPhone(raw: string): string {
@@ -64,7 +78,7 @@ Deno.serve(async (req) => {
     if (
       url.searchParams.get("hub.mode") === "subscribe" &&
       verifyToken !== "" &&
-      url.searchParams.get("hub.verify_token") === verifyToken
+      timingSafeEqual(url.searchParams.get("hub.verify_token") ?? "", verifyToken)
     ) {
       return new Response(url.searchParams.get("hub.challenge") ?? "", {
         status: 200,
@@ -80,7 +94,7 @@ Deno.serve(async (req) => {
   // Every delivery must carry a valid app-secret signature.
   const header = req.headers.get("x-hub-signature-256") ?? "";
   const expected = `sha256=${await hmacSha256Hex(appSecret, body)}`;
-  if (appSecret === "" || header !== expected) {
+  if (appSecret === "" || !timingSafeEqual(header, expected)) {
     return json({ error: "bad signature" }, 401);
   }
 

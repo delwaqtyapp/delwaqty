@@ -6,6 +6,7 @@ import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
 import 'package:delwaqty/features/_shared/regions/presentation/providers/region_providers.dart';
 import 'package:delwaqty/features/_shared/regions/presentation/widgets/region_picker_sheet.dart';
 import 'package:delwaqty/features/admin/admin_shell.dart';
+import 'package:delwaqty/features/admin/presentation/providers/platform_intelligence_providers.dart';
 import 'package:delwaqty/features/customer/location/presentation/widgets/smart_map_picker_sheet.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
@@ -32,6 +33,19 @@ class _AdminRegionsManagementPageState
   }
 
   Region? get _currentParent => _crumbs.isEmpty ? null : _crumbs.last;
+
+  // 373: scope-gate region editing. Owner/country unrestricted; scoped
+  // admins see only their assigned roots and can edit/add only inside their
+  // covered subtree. Server-side scope is enforced by admin_upsert_region.
+  bool _canEditRegion(AdminRegionScope? scope, Region region) =>
+      scope == null || scope.unrestricted || scope.covers(region.id);
+
+  bool _canAddUnder(AdminRegionScope? scope, Region? parent) {
+    if (scope == null || scope.unrestricted) return true;
+    // Scoped admins cannot create governorates (root level), only
+    // sub-regions inside their coverage.
+    return parent != null && scope.covers(parent.id);
+  }
 
   Future<void> _openUpsertSheet({Region? existing, Region? parent}) async {
     final targetParent = parent ?? _currentParent;
@@ -95,11 +109,17 @@ class _AdminRegionsManagementPageState
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openUpsertSheet(parent: _currentParent),
-        icon: const Icon(Icons.add_location_alt_rounded),
-        label: Text(l10n.addSubRegion),
-      ),
+      floatingActionButton:
+          _canAddUnder(
+            ref.watch(adminRegionScopeProvider).value,
+            _currentParent,
+          )
+          ? FloatingActionButton.extended(
+              onPressed: () => _openUpsertSheet(parent: _currentParent),
+              icon: const Icon(Icons.add_location_alt_rounded),
+              label: Text(l10n.addSubRegion),
+            )
+          : null,
       body: Column(
         children: [
           Padding(
@@ -172,8 +192,12 @@ class _AdminRegionsManagementPageState
 
   Widget _buildHierarchyList(String lang, AppLocalizations l10n) {
     final parent = _currentParent;
+    final scope = ref.watch(adminRegionScopeProvider).value;
+    final restricted = scope != null && !scope.unrestricted;
     final asyncRegions = parent == null
-        ? ref.watch(governoratesProvider)
+        ? (restricted
+              ? ref.watch(adminScopeRootsProvider)
+              : ref.watch(governoratesProvider))
         : ref.watch(regionChildrenProvider(parent.id));
 
     return asyncRegions.when(
@@ -205,8 +229,12 @@ class _AdminRegionsManagementPageState
                 icon: Icons.location_off_outlined,
                 title: parent?.displayName(lang) ?? l10n.manageRegions,
                 message: l10n.noResults,
-                actionLabel: l10n.addSubRegion,
-                onAction: () => _openUpsertSheet(parent: parent),
+                actionLabel: _canAddUnder(scope, parent)
+                    ? l10n.addSubRegion
+                    : null,
+                onAction: _canAddUnder(scope, parent)
+                    ? () => _openUpsertSheet(parent: parent)
+                    : null,
               ),
             ),
           );
@@ -254,8 +282,12 @@ class _AdminRegionsManagementPageState
                     IconButton(
                       tooltip: l10n.edit,
                       icon: const Icon(Icons.edit_outlined, size: 20),
-                      onPressed: () =>
-                          _openUpsertSheet(existing: region, parent: parent),
+                      onPressed: _canEditRegion(scope, region)
+                          ? () => _openUpsertSheet(
+                              existing: region,
+                              parent: parent,
+                            )
+                          : null,
                     ),
                     const Icon(Icons.chevron_right_rounded),
                   ],
@@ -299,7 +331,13 @@ class _AdminRegionsManagementPageState
                   IconButton(
                     tooltip: l10n.edit,
                     icon: const Icon(Icons.edit_outlined, size: 20),
-                    onPressed: () => _openUpsertSheet(existing: region),
+                    onPressed:
+                        _canEditRegion(
+                          ref.watch(adminRegionScopeProvider).value,
+                          region,
+                        )
+                        ? () => _openUpsertSheet(existing: region)
+                        : null,
                   ),
                   const Icon(Icons.chevron_right_rounded),
                 ],
@@ -391,9 +429,17 @@ class _RegionUpsertSheetState extends ConsumerState<_RegionUpsertSheet> {
   };
 
   Future<void> _pickParent() async {
+    final scope = ref.read(adminRegionScopeProvider).value;
+    final restricted = scope != null && !scope.unrestricted;
+    final roots = restricted
+        ? await ref.read(adminScopeRootsProvider.future)
+        : const <Region>[];
+    if (!mounted) return;
     final picked = await RegionPickerSheet.show(
       context,
       selectedRegionId: _parentRegionId,
+      roots: restricted ? roots : null,
+      allowedIds: restricted ? scope!.regionIds : null,
     );
     if (picked == null || !mounted) return;
     final lang = Localizations.localeOf(context).languageCode;

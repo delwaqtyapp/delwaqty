@@ -251,17 +251,34 @@ class _PlatformIntelligenceDashboardState
   Widget _buildScopeRow(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
-    final scopeRegion = ref.watch(adminScopeRegionProvider);
+    final rawScopeRegion = ref.watch(adminScopeRegionProvider);
+    // 373: scope-gate the selector. Owner/country are unrestricted; scoped
+    // admins browse only their assigned subtree(s).
+    final adminScope = ref.watch(adminRegionScopeProvider).value;
+    final restricted = adminScope != null && !adminScope.unrestricted;
+    final rootsAsync = restricted
+        ? ref.watch(adminScopeRootsProvider)
+        : const AsyncData<List<Region>>(<Region>[]);
+    final scopeRegion =
+        restricted &&
+            rawScopeRegion != null &&
+            !adminScope!.covers(rawScopeRegion)
+        ? null
+        : rawScopeRegion;
     final activeRegionAsync = scopeRegion != null
         ? ref.watch(regionByIdProvider(scopeRegion))
         : const AsyncData<Region?>(null);
     final subRegionsAsync = scopeRegion != null
         ? ref.watch(regionChildrenProvider(scopeRegion))
-        : ref.watch(governoratesProvider);
+        : (restricted ? rootsAsync : ref.watch(governoratesProvider));
     final adminsAsync = ref.watch(adminsListProvider);
 
     final activeRegion = activeRegionAsync.value;
-    final subRegions = subRegionsAsync.value ?? const <Region>[];
+    final subRegions = restricted
+        ? (subRegionsAsync.value ?? const <Region>[])
+              .where((r) => adminScope!.covers(r.id))
+              .toList()
+        : subRegionsAsync.value ?? const <Region>[];
     final childRegionIds = subRegions.map((r) => r.id).toSet();
 
     final allRegionalAdmins = (adminsAsync.value ?? const <AdminAccount>[])
@@ -302,6 +319,10 @@ class _PlatformIntelligenceDashboardState
                     final picked = await RegionPickerSheet.show(
                       context,
                       selectedRegionId: scopeRegion,
+                      roots: restricted
+                          ? (rootsAsync.value ?? const <Region>[])
+                          : null,
+                      allowedIds: restricted ? adminScope!.regionIds : null,
                     );
                     if (!mounted) return;
                     if (picked == null) return;

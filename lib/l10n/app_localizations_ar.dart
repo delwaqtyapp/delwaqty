@@ -8012,4 +8012,76 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get appInvitationsFooter =>
       'تحميل التطبيق لا يمنح صلاحيات جديدة. الدخول مرتبط باعتماد حسابك الحالي. قد تحتاج إلى السماح بالتثبيت على أندرويد.';
+
+  @override
+  String get adminProviderPricing => 'تسعير مقدمي الخدمة';
+
+  @override
+  String get adminProviderPricingDesc =>
+      'تحديد أسعار الساعة والأسعار الثابتة لمقدمي الخدمات المنزلية وأسعار الفئات الافتراضية';
+
+  @override
+  String get providerPricingTabProviders => 'مقدمو الخدمة';
+
+  @override
+  String get providerPricingTabCategories => 'أسعار الفئات';
+
+  @override
+  String get providerPricingSearchHint => 'ابحث بالاسم أو المدينة';
+
+  @override
+  String get providerPricingAllCategories => 'كل الفئات';
+
+  @override
+  String get providerPricingHourly => 'سعر الساعة';
+
+  @override
+  String get providerPricingFixedMin => 'سعر ثابت من';
+
+  @override
+  String get providerPricingFixedMax => 'سعر ثابت إلى';
+
+  @override
+  String get providerPricingNote => 'ملاحظة (اختياري)';
+
+  @override
+  String get providerPricingCustom => 'مخصص';
+
+  @override
+  String get providerPricingCategoryDefault => 'افتراضي الفئة';
+
+  @override
+  String get providerPricingPlatformDefault => 'افتراضي المنصة';
+
+  @override
+  String get providerPricingNoFixed => 'بدون سعر ثابت';
+
+  @override
+  String get providerPricingEditTitle => 'تعديل التسعير';
+
+  @override
+  String get providerPricingSaved => 'تم تحديث الأسعار';
+
+  @override
+  String get providerPricingFailed => 'تعذر تحديث الأسعار';
+
+  @override
+  String get providerPricingEmpty => 'لا يوجد مقدمو خدمة في نطاقك';
+
+  @override
+  String get providerPricingReadOnlyHint =>
+      'أسعار الفئات الافتراضية يغيّرها المالك أو مشرفو الدولة فقط';
+
+  @override
+  String get providerPricingLeaveEmpty => 'اتركه فارغًا لاستخدام الافتراضي';
+
+  @override
+  String get providerMyPricing => 'أسعاري';
+
+  @override
+  String get providerMyPricingAdminNote =>
+      'الأسعار تحددها الإدارة. لطلب تعديل تواصل مع الدعم.';
+
+  @override
+  String get providerMyPricingEmpty => 'لا توجد ملفات خدمة بعد';
 }

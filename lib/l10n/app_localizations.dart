@@ -15313,6 +15313,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Downloading an app does not grant a role. Access follows your current account approval. Android installation permission may be required.'**
   String get appInvitationsFooter;
+
+  /// No description provided for @adminProviderPricing.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider Pricing'**
+  String get adminProviderPricing;
+
+  /// No description provided for @adminProviderPricingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Set hourly and fixed rates for home-service providers and category defaults'**
+  String get adminProviderPricingDesc;
+
+  /// No description provided for @providerPricingTabProviders.
+  ///
+  /// In en, this message translates to:
+  /// **'Providers'**
+  String get providerPricingTabProviders;
+
+  /// No description provided for @providerPricingTabCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Category defaults'**
+  String get providerPricingTabCategories;
+
+  /// No description provided for @providerPricingSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name or city'**
+  String get providerPricingSearchHint;
+
+  /// No description provided for @providerPricingAllCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'All categories'**
+  String get providerPricingAllCategories;
+
+  /// No description provided for @providerPricingHourly.
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly rate'**
+  String get providerPricingHourly;
+
+  /// No description provided for @providerPricingFixedMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed price from'**
+  String get providerPricingFixedMin;
+
+  /// No description provided for @providerPricingFixedMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed price to'**
+  String get providerPricingFixedMax;
+
+  /// No description provided for @providerPricingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get providerPricingNote;
+
+  /// No description provided for @providerPricingCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get providerPricingCustom;
+
+  /// No description provided for @providerPricingCategoryDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Category default'**
+  String get providerPricingCategoryDefault;
+
+  /// No description provided for @providerPricingPlatformDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform default'**
+  String get providerPricingPlatformDefault;
+
+  /// No description provided for @providerPricingNoFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'No fixed price'**
+  String get providerPricingNoFixed;
+
+  /// No description provided for @providerPricingEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit pricing'**
+  String get providerPricingEditTitle;
+
+  /// No description provided for @providerPricingSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing updated'**
+  String get providerPricingSaved;
+
+  /// No description provided for @providerPricingFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update pricing'**
+  String get providerPricingFailed;
+
+  /// No description provided for @providerPricingEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No providers in your scope'**
+  String get providerPricingEmpty;
+
+  /// No description provided for @providerPricingReadOnlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Category defaults can be changed by the owner or country admins only'**
+  String get providerPricingReadOnlyHint;
+
+  /// No description provided for @providerPricingLeaveEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty to use the default'**
+  String get providerPricingLeaveEmpty;
+
+  /// No description provided for @providerMyPricing.
+  ///
+  /// In en, this message translates to:
+  /// **'My pricing'**
+  String get providerMyPricing;
+
+  /// No description provided for @providerMyPricingAdminNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices are set by the administration. Contact support to request a change.'**
+  String get providerMyPricingAdminNote;
+
+  /// No description provided for @providerMyPricingEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No service profiles yet'**
+  String get providerMyPricingEmpty;
 }
 
 class _AppLocalizationsDelegate

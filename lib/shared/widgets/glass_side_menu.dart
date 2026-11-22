@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/core/module/feature_registry.dart';
-import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -38,8 +36,6 @@ class GlassSideMenuController {
 
     final l10n = AppLocalizations.of(context);
     final authState = ref.read(authStateProvider);
-    final themeMode = ref.read(themeModeProvider);
-    final locale = ref.read(localeProvider);
     final entries = drawerEntries ?? FeatureRegistry.instance.allDrawerEntries;
 
     final overlay = Overlay.of(context, rootOverlay: true);
@@ -49,8 +45,6 @@ class GlassSideMenuController {
       builder: (_) => GlassSideMenuOverlay(
         authState: authState,
         l10n: l10n,
-        themeMode: themeMode,
-        locale: locale,
         ref: ref,
         drawerEntries: entries,
         anchor: anchor,
@@ -71,8 +65,6 @@ class GlassSideMenuOverlay extends StatefulWidget {
     super.key,
     required this.authState,
     required this.l10n,
-    required this.themeMode,
-    required this.locale,
     required this.ref,
     required this.drawerEntries,
     this.anchor,
@@ -81,8 +73,6 @@ class GlassSideMenuOverlay extends StatefulWidget {
 
   final AuthState authState;
   final AppLocalizations l10n;
-  final ThemeMode themeMode;
-  final Locale locale;
   final WidgetRef ref;
   final List drawerEntries;
   final Rect? anchor;
@@ -174,8 +164,6 @@ class _GlassSideMenuOverlayState extends State<GlassSideMenuOverlay>
             child: GlassMenuPanel(
               authState: widget.authState,
               l10n: widget.l10n,
-              themeMode: widget.themeMode,
-              locale: widget.locale,
               ref: widget.ref,
               drawerEntries: widget.drawerEntries,
               width: panelWidth,

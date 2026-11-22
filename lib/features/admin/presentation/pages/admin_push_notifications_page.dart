@@ -448,6 +448,8 @@ class _AdminPushNotificationsPageState
       case NotificationType.topupApproved:
       case NotificationType.adminTopup:
         return Icons.payment_rounded;
+      case NotificationType.otaUpdate:
+        return Icons.system_update_alt_rounded;
     }
   }
 

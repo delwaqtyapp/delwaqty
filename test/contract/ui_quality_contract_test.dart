@@ -137,7 +137,6 @@ void main() {
         'wallet_balance.dart',
         // A language selector must show each language in its own script.
         'register_page.dart',
-        'quick_settings_card.dart',
         // Role names sent in a notification payload, not rendered strings.
         'chat_call_alert_service.dart',
       };

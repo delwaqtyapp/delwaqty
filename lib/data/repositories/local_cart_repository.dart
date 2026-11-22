@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart';
 import 'package:delwaqty/features/customer/commerce/domain/repositories/cart_repository.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 
 final localCartRepositoryProvider = Provider<LocalCartRepository>((ref) {
   // Namespace the persisted cart per account (reviewer #41): a shared

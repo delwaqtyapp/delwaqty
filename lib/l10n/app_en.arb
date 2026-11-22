@@ -2770,6 +2770,86 @@
   "@posErrInvalidQty": {
     "description": "POS: posErrInvalidQty"
   },
+  "posScanBarcode": "Scan barcode",
+  "@posScanBarcode": {
+    "description": "POS: posScanBarcode"
+  },
+  "posSearchHint": "Search name or barcode",
+  "@posSearchHint": {
+    "description": "POS: posSearchHint"
+  },
+  "posScanAdded": "Added to cart",
+  "@posScanAdded": {
+    "description": "POS: posScanAdded"
+  },
+  "posDrugFoundTitle": "Found in drug catalog",
+  "@posDrugFoundTitle": {
+    "description": "POS: posDrugFoundTitle"
+  },
+  "posDrugImportAdd": "Import & add",
+  "@posDrugImportAdd": {
+    "description": "POS: posDrugImportAdd"
+  },
+  "posQuickAddTitle": "New product for this barcode",
+  "@posQuickAddTitle": {
+    "description": "POS: posQuickAddTitle"
+  },
+  "posQuickAddCreate": "Create & add",
+  "@posQuickAddCreate": {
+    "description": "POS: posQuickAddCreate"
+  },
+  "barcodeFieldLabel": "Barcode",
+  "@barcodeFieldLabel": {
+    "description": "Product form: barcodeFieldLabel"
+  },
+  "barcodeFieldHint": "Type or scan the product barcode",
+  "@barcodeFieldHint": {
+    "description": "Product form: barcodeFieldHint"
+  },
+  "barcodeUniqueHint": "One barcode per product in this store",
+  "@barcodeUniqueHint": {
+    "description": "Product form: barcodeUniqueHint"
+  },
+  "barcodeScanToFill": "Scan to fill",
+  "@barcodeScanToFill": {
+    "description": "Product form: barcodeScanToFill"
+  },
+  "barcodeDuplicateError": "Another product in this store already uses this barcode",
+  "@barcodeDuplicateError": {
+    "description": "Product form: barcodeDuplicateError"
+  },
+  "scannerTitle": "Scan barcode",
+  "@scannerTitle": {
+    "description": "Scanner: scannerTitle"
+  },
+  "scannerTorch": "Flashlight",
+  "@scannerTorch": {
+    "description": "Scanner: scannerTorch"
+  },
+  "scannerEnterManually": "Type barcode manually",
+  "@scannerEnterManually": {
+    "description": "Scanner: scannerEnterManually"
+  },
+  "scannerManualHint": "Barcode number",
+  "@scannerManualHint": {
+    "description": "Scanner: scannerManualHint"
+  },
+  "scannerAimHint": "Point the camera at the product barcode",
+  "@scannerAimHint": {
+    "description": "Scanner: scannerAimHint"
+  },
+  "scannerPermissionNeeded": "Camera access is needed to scan barcodes. You can still type the barcode manually.",
+  "@scannerPermissionNeeded": {
+    "description": "Scanner: scannerPermissionNeeded"
+  },
+  "scannerGrantPermission": "Allow camera",
+  "@scannerGrantPermission": {
+    "description": "Scanner: scannerGrantPermission"
+  },
+  "scannerOpenSettings": "Open settings",
+  "@scannerOpenSettings": {
+    "description": "Scanner: scannerOpenSettings"
+  },
   "productModifierRequiredError": "Please select the required options first",
   "@productModifierRequiredError": {
     "description": "Shown when required product modifier groups have no selection"

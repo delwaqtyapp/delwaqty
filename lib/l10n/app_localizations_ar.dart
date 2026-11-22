@@ -8128,4 +8128,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get driverReviewHint => 'اكتب رأيك في الكابتن (اختياري)';
+
+  @override
+  String get providerPricingInvalidInput =>
+      'أدخل رقمًا صحيحًا ضمن الحدود المسموحة';
 }

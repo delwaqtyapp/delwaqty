@@ -8198,4 +8198,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get driverReviewHint => 'Write your review of the captain (optional)';
+
+  @override
+  String get providerPricingInvalidInput =>
+      'Enter a valid number within the allowed range';
 }

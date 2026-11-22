@@ -2887,5 +2887,6 @@
   },
   "rateDriverAfterCollection": "You can rate the driver once the cash is collected.",
   "cashCollectionStateError": "Could not load the collection state. Check the connection and retry.",
-  "driverReviewHint": "Write your review of the captain (optional)"
+  "driverReviewHint": "Write your review of the captain (optional)",
+  "providerPricingInvalidInput": "Enter a valid number within the allowed range"
 }

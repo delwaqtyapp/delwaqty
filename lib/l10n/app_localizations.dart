@@ -15523,6 +15523,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Write your review of the captain (optional)'**
   String get driverReviewHint;
+
+  /// No description provided for @providerPricingInvalidInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid number within the allowed range'**
+  String get providerPricingInvalidInput;
 }
 
 class _AppLocalizationsDelegate

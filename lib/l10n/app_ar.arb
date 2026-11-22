@@ -2803,5 +2803,6 @@
   "cashCollectedBody": "تم تسجيل تحصيل {amount}. تظهر في تسويتك.",
   "rateDriverAfterCollection": "يمكنك تقييم الكابتن بعد تحصيل المبلغ.",
   "cashCollectionStateError": "تعذر تحميل حالة التحصيل. تحقق من الاتصال وأعد المحاولة.",
-  "driverReviewHint": "اكتب رأيك في الكابتن (اختياري)"
+  "driverReviewHint": "اكتب رأيك في الكابتن (اختياري)",
+  "providerPricingInvalidInput": "أدخل رقمًا صحيحًا ضمن الحدود المسموحة"
 }

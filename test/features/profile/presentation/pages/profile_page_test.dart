@@ -224,6 +224,16 @@ void main() {
     await tester.pumpWidget(_buildTestApp(mockRepo, prefs));
     await tester.pump(const Duration(milliseconds: 800));
 
+    // The profile page is a lazily-built CustomScrollView and the appearance
+    // section sits below the fold since the account list grew; scroll it into
+    // view before asserting (finders miss unbuilt sliver children).
+    await tester.scrollUntilVisible(
+      find.byType(AppearanceSegmented<ThemeMode>),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+
     // No saved theme mode -> provider defaults to light; the subtitle shows the
     // current mode in addition to the matching segment label.
     expect(find.text('Light Mode'), findsNWidgets(2));

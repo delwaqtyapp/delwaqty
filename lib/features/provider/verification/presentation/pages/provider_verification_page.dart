@@ -150,54 +150,56 @@ class _ProviderVerificationPageState
                     ),
                   ),
                 ),
-              const SizedBox(height: 16),
-              ListTile(
-                title: Text(l10n.idCard),
-                subtitle: Text(
-                  _idCardFile?.name ??
-                      (idCard != null && idCard.isNotEmpty
-                          ? l10n.done
-                          : l10n.notUploaded),
-                ),
-                trailing: TextButton(
-                  onPressed: _busy ? null : () => _pick(true),
-                  child: Text(l10n.choose),
-                ),
-              ),
-              ListTile(
-                title: Text(l10n.profilePhoto),
-                subtitle: Text(
-                  _photoFile?.name ??
-                      (photo != null && photo.isNotEmpty
-                          ? l10n.done
-                          : l10n.notUploaded),
-                ),
-                trailing: TextButton(
-                  onPressed: _busy ? null : () => _pick(false),
-                  child: Text(l10n.choose),
-                ),
-              ),
-              const SizedBox(height: 16),
-              if (_error != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    _error!,
-                    style: const TextStyle(color: Colors.red),
+              if (!approved) ...[
+                const SizedBox(height: 16),
+                ListTile(
+                  title: Text(l10n.idCard),
+                  subtitle: Text(
+                    _idCardFile?.name ??
+                        (idCard != null && idCard.isNotEmpty
+                            ? l10n.done
+                            : l10n.notUploaded),
+                  ),
+                  trailing: TextButton(
+                    onPressed: _busy ? null : () => _pick(true),
+                    child: Text(l10n.choose),
                   ),
                 ),
-              ElevatedButton(
-                onPressed: _busy || submitted || approved
-                    ? null
-                    : () => _submit(rejected),
-                child: _busy
-                    ? const SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(rejected ? l10n.reapply : l10n.submit),
-              ),
+                ListTile(
+                  title: Text(l10n.profilePhoto),
+                  subtitle: Text(
+                    _photoFile?.name ??
+                        (photo != null && photo.isNotEmpty
+                            ? l10n.done
+                            : l10n.notUploaded),
+                  ),
+                  trailing: TextButton(
+                    onPressed: _busy ? null : () => _pick(false),
+                    child: Text(l10n.choose),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                if (_error != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Text(
+                      _error!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ElevatedButton(
+                  onPressed: _busy || submitted || approved
+                      ? null
+                      : () => _submit(rejected),
+                  child: _busy
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(rejected ? l10n.reapply : l10n.submit),
+                ),
+              ],
             ],
           );
         },

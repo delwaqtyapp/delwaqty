@@ -20,6 +20,7 @@ import 'package:delwaqty/services/logger/app_logger.dart';
 import 'package:delwaqty/services/push_notification/device_identity.dart';
 import 'package:delwaqty/services/realtime/realtime_channel_constants.dart';
 import 'package:delwaqty/services/realtime/realtime_service.dart';
+import 'package:delwaqty/services/ota/ota_update_dialog.dart';
 import 'package:delwaqty/shared/notifications/notification_route_resolver.dart';
 
 final pushNotificationServiceProvider = Provider<PushNotificationService>((
@@ -184,6 +185,13 @@ void _routeWhenReady(Map<String, dynamic> data, {int attempts = 0}) {
   }
   _pendingPushTap = null;
   final flavor = ProviderScope.containerOf(anyContext).read(appFlavorProvider);
+  // New-release notifications: open the OTA update dialog directly instead
+  // of routing (the dialog runs its own per-flavor manifest check, so a tap
+  // on a stale notification when already up to date is a no-op).
+  if ((data['type'] ?? '').toString() == 'ota_update') {
+    showOtaUpdateIfAvailable(flavor: flavor);
+    return;
+  }
   final context = activeNavigatorContext(flavor);
   if (context == null) return;
   final payload = NotificationPayload.fromMap(data);

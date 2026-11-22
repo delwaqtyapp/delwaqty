@@ -101,12 +101,19 @@ class RealtimeService {
   void dispose() {
     if (_disposed) return;
     _disposed = true;
-    for (final entry in _channels.entries) {
+    // Copy the entries and clear the map before unsubscribing: a channel's
+    // status callback removes itself from _channels on close, which would
+    // otherwise mutate the map mid-iteration (Crashlytics:
+    // ConcurrentModificationError on the provider app).
+    final entries = List<MapEntry<String, RealtimeChannel>>.from(
+      _channels.entries,
+    );
+    _channels.clear();
+    for (final entry in entries) {
       try {
         entry.value.unsubscribe();
       } catch (_) {}
     }
-    _channels.clear();
   }
 }
 

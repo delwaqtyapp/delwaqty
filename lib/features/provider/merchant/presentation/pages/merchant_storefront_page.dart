@@ -10,6 +10,7 @@ import 'package:delwaqty/features/customer/location/presentation/providers/locat
 import 'package:delwaqty/features/customer/location/presentation/widgets/smart_map_picker_sheet.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/shared/widgets/app_shell.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 
 class StorefrontData {
@@ -505,7 +506,14 @@ class _MerchantStorefrontPageState
           return Form(
             key: _formKey,
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                16,
+                16,
+                32 +
+                    kFloatingNavClearance +
+                    MediaQuery.paddingOf(context).bottom,
+              ),
               children: [
                 _SectionTitle(title: l10n.storeIdentity),
                 _field(_name, l10n.storeName, required: true),

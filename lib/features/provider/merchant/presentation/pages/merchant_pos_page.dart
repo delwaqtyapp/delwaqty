@@ -11,6 +11,7 @@ import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/shared/widgets/app_shell.dart';
 
 /// In-store cashier (POS): pick products, build a cart, and complete the
 /// sale through the server-priced pos_create_sale RPC (migration 201).
@@ -466,7 +467,14 @@ class _CartPanel extends StatelessWidget {
       children: [
         Expanded(
           child: ListView(
-            padding: const EdgeInsets.all(16),
+            // Extra bottom clearance keeps the payment dropdown and its popup
+            // menu above the shell's floating bottom nav (extendBody: true).
+            padding: EdgeInsets.fromLTRB(
+              16,
+              16,
+              16,
+              16 + kFloatingNavClearance + MediaQuery.paddingOf(context).bottom,
+            ),
             children: [
               Row(
                 children: [
@@ -589,7 +597,12 @@ class _CartPanel extends StatelessWidget {
         SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            padding: const EdgeInsets.fromLTRB(
+              16,
+              8,
+              16,
+              12 + kFloatingNavClearance,
+            ),
             child: Row(
               children: [
                 Expanded(

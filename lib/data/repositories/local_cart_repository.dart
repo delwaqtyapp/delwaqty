@@ -4,13 +4,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart';
 import 'package:delwaqty/features/customer/commerce/domain/repositories/cart_repository.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 
 final localCartRepositoryProvider = Provider<LocalCartRepository>((ref) {
-  return LocalCartRepository();
+  // Namespace the persisted cart per account (reviewer #41): a shared
+  // 'local_cart' key leaked one account's cart into the next login on the
+  // same device. Watching authState recreates the repository on account
+  // change, so the in-memory cache can never straddle two users.
+  final auth = ref.watch(authStateProvider);
+  final userId = auth is AuthAuthenticated ? auth.user.id : 'guest';
+  return LocalCartRepository(userId: userId);
 });
 
 class LocalCartRepository implements CartRepository {
-  static const String _cartKey = 'local_cart';
+  LocalCartRepository({required String userId})
+    : _cartKey = 'local_cart_$userId';
+
+  final String _cartKey;
 
   SharedPreferences? _prefs;
 
@@ -59,9 +69,19 @@ class LocalCartRepository implements CartRepository {
     } else if (_cart == null) {
       _cart = _createNewCart(merchantId, merchantName, item0);
     } else {
-      final existingIndex = _cart!.items.indexWhere(
-        (i) => i.productId == item0.productId,
-      );
+      // Merge key: product + variant + modifiers + instructions
+      // (reviewer #42). Two lines with different variants, modifier sets or
+      // special instructions are different cart lines, not quantity bumps.
+      bool sameLine(CartItem a, CartItem b) {
+        final am = List<String>.from(a.modifierOptionIds)..sort();
+        final bm = List<String>.from(b.modifierOptionIds)..sort();
+        return a.productId == b.productId &&
+            (a.variantName ?? '') == (b.variantName ?? '') &&
+            am.join(',') == bm.join(',') &&
+            (a.specialInstructions ?? '') == (b.specialInstructions ?? '');
+      }
+
+      final existingIndex = _cart!.items.indexWhere((i) => sameLine(i, item0));
       if (existingIndex >= 0) {
         final existing = _cart!.items[existingIndex];
         final updated = existing.copyWith(

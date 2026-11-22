@@ -405,7 +405,14 @@ class _VerificationCard extends StatelessWidget {
       builder: (context) => Dialog(
         child: InteractiveViewer(
           maxScale: 5,
-          child: Image.network(url, fit: BoxFit.contain),
+          child: Image.network(
+            url,
+            fit: BoxFit.contain,
+            errorBuilder: (_, _, _) => const Padding(
+              padding: EdgeInsets.all(24),
+              child: Icon(Icons.broken_image_outlined, size: 48),
+            ),
+          ),
         ),
       ),
     );

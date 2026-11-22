@@ -7,6 +7,7 @@ import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/services/ota/ota_update_dialog.dart';
 import 'package:delwaqty/services/ota/ota_update_manager.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class AboutPage extends ConsumerStatefulWidget {
   const AboutPage({super.key});
@@ -17,6 +18,17 @@ class AboutPage extends ConsumerStatefulWidget {
 
 class _AboutPageState extends ConsumerState<AboutPage> {
   bool _checking = false;
+  String _versionLabel = '';
+
+  @override
+  void initState() {
+    super.initState();
+    PackageInfo.fromPlatform().then((info) {
+      if (mounted) {
+        setState(() => _versionLabel = '${info.version}+${info.buildNumber}');
+      }
+    });
+  }
 
   Future<void> _checkForUpdate() async {
     if (_checking) return;
@@ -150,7 +162,9 @@ class _AboutPageState extends ConsumerState<AboutPage> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    l10n.version,
+                    _versionLabel.isEmpty
+                        ? l10n.version
+                        : '${l10n.version.split(' ').first} $_versionLabel',
                     style: context.textTheme.labelMedium?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,

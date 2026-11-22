@@ -34,17 +34,15 @@ class _AdminRegionsManagementPageState
 
   Region? get _currentParent => _crumbs.isEmpty ? null : _crumbs.last;
 
-  // 373: scope-gate region editing. Owner/country unrestricted; scoped
-  // admins see only their assigned roots and can edit/add only inside their
-  // covered subtree. Server-side scope is enforced by admin_upsert_region.
+  // 373: scope-gate region editing. Owner/country unrestricted.
+  //  374 review (#44): scoped admins are READ-ONLY here — no edit/add
+  // affordances at all. Server-side scope stays enforced by
+  // admin_upsert_region; this is the UI contract only.
   bool _canEditRegion(AdminRegionScope? scope, Region region) =>
-      scope == null || scope.unrestricted || scope.covers(region.id);
+      scope == null || scope.unrestricted;
 
   bool _canAddUnder(AdminRegionScope? scope, Region? parent) {
-    if (scope == null || scope.unrestricted) return true;
-    // Scoped admins cannot create governorates (root level), only
-    // sub-regions inside their coverage.
-    return parent != null && scope.covers(parent.id);
+    return scope == null || scope.unrestricted;
   }
 
   Future<void> _openUpsertSheet({Region? existing, Region? parent}) async {

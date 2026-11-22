@@ -281,6 +281,9 @@ class _DriverInfoCard extends StatelessWidget {
               backgroundImage: ride.driverPhoto != null
                   ? NetworkImage(ride.driverPhoto!)
                   : null,
+              onBackgroundImageError: ride.driverPhoto != null
+                  ? (_, _) {}
+                  : null,
               child: ride.driverPhoto == null
                   ? const Icon(Icons.person_rounded)
                   : null,

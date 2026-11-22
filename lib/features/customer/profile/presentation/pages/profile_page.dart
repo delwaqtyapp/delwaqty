@@ -77,7 +77,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   const SizedBox(height: 18),
                   AnimatedFadeIn(
                     delay: const Duration(milliseconds: 70),
-                    child: _buildAccountSection(context, isProvider, l10n),
+                    child: _buildAccountSection(
+                      context,
+                      isProvider,
+                      isDriver,
+                      l10n,
+                    ),
                   ),
                   const SizedBox(height: 18),
                   AnimatedFadeIn(
@@ -737,6 +742,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget _buildAccountSection(
     BuildContext context,
     bool isProvider,
+    bool isDriver,
     AppLocalizations l10n,
   ) {
     final primary = context.colorScheme.primary;
@@ -749,25 +755,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           title: l10n.privacySecurity,
           onTap: () => context.push('/settings/privacy-security'),
         ),
-        if (isProvider)
+        if (!isProvider && !isDriver)
           _SectionTile(
-            icon: Icons.schedule_rounded,
+            icon: Icons.event_note_outlined,
             color: primary,
-            title: l10n.availability,
-            onTap: () => context.push('/provider-availability'),
+            title: l10n.myBookings,
+            onTap: () => context.push('/home-services/my-bookings'),
           ),
-        _SectionTile(
-          icon: Icons.event_note_outlined,
-          color: primary,
-          title: l10n.myBookings,
-          onTap: () => context.push('/home-services/my-bookings'),
-        ),
-        _SectionTile(
-          icon: Icons.notifications_outlined,
-          color: primary,
-          title: l10n.notifications,
-          onTap: () => context.push('/notifications'),
-        ),
+        if (!isProvider)
+          _SectionTile(
+            icon: Icons.notifications_outlined,
+            color: primary,
+            title: l10n.notifications,
+            onTap: () => context.push('/notifications'),
+          ),
       ],
     );
   }

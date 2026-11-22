@@ -82,7 +82,7 @@ BEGIN
                             'plan', p_plan, 'pro', v_pro, 'expires_at', v_expires);
 END;
 $function$
-
+;
 GRANT EXECUTE ON FUNCTION public.cashier_license_issue(uuid, text, integer, boolean) TO authenticated;
 
 CREATE OR REPLACE FUNCTION public.cashier_apply_moh_prices(p_merchant_id uuid)
@@ -119,7 +119,7 @@ BEGIN
   RETURN jsonb_build_object('ok', true, 'updated', v_count);
 END;
 $function$
-
+;
 CREATE OR REPLACE FUNCTION public.pos_insurance_statement(p_merchant_id uuid, p_company_id uuid, p_from timestamp with time zone, p_to timestamp with time zone)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -161,7 +161,7 @@ BEGIN
                AND s.created_at >= p_from AND s.created_at < p_to));
 END;
 $function$
-
+;
 CREATE OR REPLACE FUNCTION public.cashier_shortage_list(p_merchant_id uuid, p_default_level integer DEFAULT 3)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -189,7 +189,7 @@ BEGIN
                AND p.stock_quantity <= COALESCE(p.reorder_level, p_default_level)));
 END;
 $function$
-
+;
 CREATE OR REPLACE FUNCTION public.cashier_sync_push(p_merchant_id uuid, p_ops jsonb)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -546,7 +546,7 @@ BEGIN
   RETURN jsonb_build_object('ok', true, 'results', v_results);
 END;
 $function$
-
+;
 CREATE OR REPLACE FUNCTION public.cashier_device_link(p_license_key text, p_device_id text)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -582,7 +582,7 @@ BEGIN
                        WHERE p.merchant_id = v_merchant.id AND p.is_available));
 END;
 $function$
-
+;
 CREATE OR REPLACE FUNCTION public.cashier_license_validate(p_license_key text, p_device_id text)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -621,8 +621,7 @@ BEGIN
     'expires_at', v_l.expires_at, 'merchant_id', v_l.merchant_id);
 END;
 $function$
-
-
+;
 -- PostgREST CRUD on the insurance tables is merchant PRO surface too.
 DROP POLICY pos_insurance_companies_owner ON public.pos_insurance_companies;
 CREATE POLICY pos_insurance_companies_owner ON public.pos_insurance_companies FOR ALL TO authenticated

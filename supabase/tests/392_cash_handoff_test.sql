@@ -12,7 +12,7 @@ begin;
 create temporary table zz_cash_ctx(
   c uuid, x uuid, du uuid, drv uuid, merch uuid,
   o1 uuid, o2 uuid, o3 uuid, o4 uuid, o5 uuid, o6 uuid, o7 uuid, o8 uuid, o9 uuid, o10 uuid,
-  r1 uuid, r2 uuid, r3 uuid, r5 uuid, r6 uuid, r7 uuid, r8 uuid, r9 uuid, r10 uuid, r11 uuid, r12 uuid,
+  r1 uuid, r2 uuid, r3 uuid, r5 uuid, r6 uuid, r7 uuid, r8 uuid, r9 uuid, r10 uuid, r11 uuid, r12 uuid, r13 uuid,
   sp uuid, sb1 uuid, sb2 uuid
 );
 insert into zz_cash_ctx
@@ -21,7 +21,7 @@ select gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(
        gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(),
        gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(),
        gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(),
-       gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid();
+       gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid();
 
 -- cash_collected_by references auth.users, so the fixture needs both sides.
 insert into auth.users(id,email)
@@ -100,6 +100,10 @@ insert into public.orders(id,user_id,merchant_id,driver_id,status,payment_status
 select o9,c,merch,drv,'delivered','paid','cash',90,15,105,NULL from zz_cash_ctx;
 insert into public.rides(id,rider_id,driver_id,order_id,merchant_id,service_type,ride_type,status,payment_status,payment_method,fare,cash_collected_at,completed_at,pickup_latitude,pickup_longitude,dropoff_latitude,dropoff_longitude)
 select r11,c,drv,o9,merch,'food_delivery','motorcycle','completed','paid','cash',15,NULL,now()-interval '1 day',0,0,0.001,0.001 from zz_cash_ctx;
+
+-- r13: stamp present, collected_by NULL — replay must not invent authorship.
+insert into public.rides(id,rider_id,driver_id,service_type,ride_type,status,payment_status,payment_method,fare,cash_collected_at,cash_collected_by,completed_at,pickup_latitude,pickup_longitude,dropoff_latitude,dropoff_longitude)
+select r13,c,drv,'courier','motorcycle','completed','paid','cash',22,'2026-11-20 10:00+00'::timestamptz,NULL,now()-interval '3 days',0,0,0.001,0.001 from zz_cash_ctx;
 
 -- o10/r12: reverse-direction bad partner — completed cash ride whose linked
 -- order was refunded (#73 reverse).
@@ -273,6 +277,9 @@ begin
     'partner ride stamp healed from the order reference';
   assert (select count(*) from public.audit_log where action='CASH_COLLECTED' and resource='ride' and resource_id=t.r10::text)=1,
     'partner ride audit healed';
+  assert (select (after->>'amount')::numeric from public.audit_log
+          where action='CASH_COLLECTED' and resource='ride' and resource_id=t.r10::text)=115,
+    'already-paid partner ride audit amount is the order total, not the fare';
   r:=public.confirm_cash_collection('ride',t.r11);
   assert r->>'ok'='true' and r->>'code'='ALREADY_COLLECTED', 'paid ride replays: '||r::text;
   assert (select cash_collected_at from public.rides where id=t.r11) is not null, 'ride stamp healed';
@@ -280,6 +287,19 @@ begin
     'partner order stamp healed from the ride reference';
   assert (select count(*) from public.audit_log where action='CASH_COLLECTED' and resource='order' and resource_id=t.o9::text)=1,
     'partner order audit healed';
+  assert (select (after->>'amount')::numeric from public.audit_log
+          where action='CASH_COLLECTED' and resource='order' and resource_id=t.o9::text)=105,
+    'already-paid partner order audit amount is the order total';
+
+  -- ── collected_by is never invented: stamp present + by NULL stays NULL.
+  r:=public.confirm_cash_collection('ride',t.r13);
+  assert r->>'ok'='true' and r->>'code'='ALREADY_COLLECTED', 'stamped ride replays: '||r::text;
+  assert (select cash_collected_at from public.rides where id=t.r13)='2026-11-20 10:00+00'::timestamptz,
+    'existing stamp untouched';
+  assert (select cash_collected_by from public.rides where id=t.r13) is null,
+    'unknown historical collector stays NULL';
+  assert (select count(*) from public.audit_log where action='CASH_COLLECTED' and resource='ride' and resource_id=t.r13::text)=1,
+    'audit row healed for the stamped ride';
 
   -- ── #83: paid non-cash and refunded service bookings are refused.
   r:=public.confirm_cash_collection('service_booking',t.sb1);

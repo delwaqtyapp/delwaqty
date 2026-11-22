@@ -25,7 +25,11 @@
 --   4. Replays heal: an ALREADY_COLLECTED response still runs the partner
 --      sync and the audit postcondition, so a paid source with an
 --      uncollected linked target converges instead of staying split.
---   5. Audit rule (owner): exactly one CASH_COLLECTED audit_log row per
+--   5. collected_by is never invented: healing fills it from the current
+--      caller ONLY when the stamp itself is healed in the same call. A row
+--      whose stamp exists but whose collected_by is NULL keeps NULL — the
+--      historical collector is unknown and stays unknown.
+--   6. Audit rule (owner): exactly one CASH_COLLECTED audit_log row per
 --      resource, the partner included, and the amount is always what the
 --      customer handed over — the order total — on both partners and both
 --      endpoints. Skipped partners (refunded/failed/non-cash) are surfaced
@@ -36,16 +40,26 @@
 --      orders from the linked ride's completed_at), leaving cancelled,
 --      incomplete and timestamp-less rows null, and writes system/backfill
 --      audit rows for the stamped rows only.
---   6. Both paths take locks in one canonical order — orders first, then
+--   7. Both paths take locks in one canonical order — orders first, then
 --      rides — so concurrent opposite-reference calls serialize on the
 --      order row instead of deadlocking.
---   7. ride_ratings RLS and rate_ride require a completed ride, and a cash
+--   8. ride_ratings RLS and rate_ride require a completed ride, and a cash
 --      ride additionally requires the collection stamp; non-cash rides are
 --      unchanged.
---   8. New driver_cash_collection_state RPC feeds the captain app's
+--   9. New driver_cash_collection_state RPC feeds the captain app's
 --      "تم التحصيل" card (collectable amount, collected flag) without
 --      widening rides/orders RLS; its collected flag is the same stamp rule
 --      the RLS uses.
+--
+-- Staging note: prod has never applied any revision of 392, so this file is
+-- still the single source of truth for the whole change. Staging received
+-- earlier revisions via the Management API query endpoint (which records no
+-- schema_migrations row); each revision is re-applied there in full, so
+-- staging matches this file. The scoped reconciliation UPDATE near the
+-- backfill repairs audit rows those earlier staging revisions wrote with
+-- the ride fare instead of the collected order total; it is a no-op on
+-- prod, where no CASH_COLLECTED rows exist. Applying this file again
+-- through the CLI is safe: every statement is idempotent.
 
 CREATE OR REPLACE FUNCTION public._audit_cash_collection(p_resource text, p_resource_id uuid, p_amount numeric)
  RETURNS void
@@ -234,7 +248,7 @@ BEGIN
                  cash_collected_by = COALESCE(cash_collected_by, v_uid)
            WHERE id = v_r.id;
         END IF;
-        PERFORM public._audit_cash_collection('ride', v_r.id, v_r.fare);
+        PERFORM public._audit_cash_collection('ride', v_r.id, v_amount);
       ELSE
         v_warnings := v_warnings || jsonb_build_object(
           'resource', 'ride', 'id', v_r.id,
@@ -416,49 +430,74 @@ $function$
 -- rows that actually completed the handoff are stamped — completed rides
 -- (from their real completed_at) and delivered orders (from the linked
 -- ride's completed_at). Cancelled, incomplete, and timestamp-less rows stay
--- null; a later replay heals them. Audit rows are written for the stamped
--- rows only, marked system/backfill, with the collected amount (the order
--- total where one is linked).
-UPDATE public.rides
-   SET cash_collected_at = completed_at
- WHERE payment_method = 'cash'
-   AND payment_status = 'paid'
-   AND status = 'completed'
-   AND completed_at IS NOT NULL
-   AND cash_collected_at IS NULL;
+-- null; a later replay heals them. collected_by stays NULL on backfilled
+-- rows: the historical collector is unknown and is not invented. Audit rows
+-- are written ONLY for the rows this backfill actually stamps (captured via
+-- RETURNING), marked system/backfill, with the collected amount (the order
+-- total where one is linked). Rows already stamped — by live pre-392
+-- collections or by a re-applied earlier revision — get nothing.
+CREATE TEMPORARY TABLE zz_392_bf_rides(id uuid PRIMARY KEY, amount numeric);
+CREATE TEMPORARY TABLE zz_392_bf_orders(id uuid PRIMARY KEY, amount numeric);
 
-UPDATE public.orders o
-   SET cash_collected_at = r.completed_at
-  FROM (SELECT order_id, min(completed_at) AS completed_at
-          FROM public.rides
-         WHERE status = 'completed' AND completed_at IS NOT NULL
-         GROUP BY order_id) r
- WHERE r.order_id = o.id
-   AND o.payment_method = 'cash'
-   AND o.payment_status = 'paid'
-   AND o.status = 'delivered'
-   AND o.cash_collected_at IS NULL;
+WITH stamped AS (
+  UPDATE public.rides r
+     SET cash_collected_at = r.completed_at
+   WHERE r.payment_method = 'cash'
+     AND r.payment_status = 'paid'
+     AND r.status = 'completed'
+     AND r.completed_at IS NOT NULL
+     AND r.cash_collected_at IS NULL
+   RETURNING r.id, r.fare, r.order_id
+)
+INSERT INTO zz_392_bf_rides (id, amount)
+SELECT s.id, COALESCE(o.total_amount, s.fare)
+  FROM stamped s
+  LEFT JOIN public.orders o ON o.id = s.order_id;
+
+WITH stamped AS (
+  UPDATE public.orders o
+     SET cash_collected_at = r.completed_at
+    FROM (SELECT order_id, min(completed_at) AS completed_at
+            FROM public.rides
+           WHERE status = 'completed' AND completed_at IS NOT NULL
+           GROUP BY order_id) r
+   WHERE r.order_id = o.id
+     AND o.payment_method = 'cash'
+     AND o.payment_status = 'paid'
+     AND o.status = 'delivered'
+     AND o.cash_collected_at IS NULL
+   RETURNING o.id, o.total_amount
+)
+INSERT INTO zz_392_bf_orders (id, amount)
+SELECT id, total_amount FROM stamped;
 
 INSERT INTO public.audit_log (actor, actor_role, scope, action, resource, resource_id, after, reason)
-SELECT NULL, 'system', 'GLOBAL', 'CASH_COLLECTED', 'ride', r.id::text,
-       jsonb_build_object('amount', COALESCE(o.total_amount, r.fare), 'backfill', true),
+SELECT NULL, 'system', 'GLOBAL', 'CASH_COLLECTED', 'ride', b.id::text,
+       jsonb_build_object('amount', b.amount, 'backfill', true),
        'backfill_392'
+  FROM zz_392_bf_rides b;
+
+INSERT INTO public.audit_log (actor, actor_role, scope, action, resource, resource_id, after, reason)
+SELECT NULL, 'system', 'GLOBAL', 'CASH_COLLECTED', 'order', b.id::text,
+       jsonb_build_object('amount', b.amount, 'backfill', true),
+       'backfill_392'
+  FROM zz_392_bf_orders b;
+
+DROP TABLE zz_392_bf_rides;
+DROP TABLE zz_392_bf_orders;
+
+-- Reconciliation (staging only; a no-op on prod): earlier 392 revisions
+-- wrote CASH_COLLECTED audit rows for order-linked rides with the ride
+-- fare. The collected amount is the order total, so correct those rows in
+-- place. Rows written by this revision already carry the right amount.
+UPDATE public.audit_log a
+   SET after = jsonb_set(a.after, '{amount}', to_jsonb(o.total_amount))
   FROM public.rides r
-  LEFT JOIN public.orders o ON o.id = r.order_id
- WHERE r.payment_method = 'cash' AND r.payment_status = 'paid'
-   AND r.cash_collected_at IS NOT NULL
-   AND NOT EXISTS (SELECT 1 FROM public.audit_log a
-                    WHERE a.action = 'CASH_COLLECTED' AND a.resource = 'ride' AND a.resource_id = r.id::text);
-
-INSERT INTO public.audit_log (actor, actor_role, scope, action, resource, resource_id, after, reason)
-SELECT NULL, 'system', 'GLOBAL', 'CASH_COLLECTED', 'order', o.id::text,
-       jsonb_build_object('amount', o.total_amount, 'backfill', true),
-       'backfill_392'
-  FROM public.orders o
- WHERE o.payment_method = 'cash' AND o.payment_status = 'paid'
-   AND o.cash_collected_at IS NOT NULL
-   AND NOT EXISTS (SELECT 1 FROM public.audit_log a
-                    WHERE a.action = 'CASH_COLLECTED' AND a.resource = 'order' AND a.resource_id = o.id::text);
+  JOIN public.orders o ON o.id = r.order_id
+ WHERE a.action = 'CASH_COLLECTED'
+   AND a.resource = 'ride'
+   AND a.resource_id = r.id::text
+   AND (a.after->>'amount')::numeric IS DISTINCT FROM o.total_amount;
 
 -- Captain app cash card: what to collect on this delivery and whether it is
 -- collected already. Assigned driver or owner only — same NOT_FOUND shape

@@ -1204,6 +1204,8 @@
   "bookingErrInvalidPrice": "أدخل سعرًا صالحًا أكبر من صفر",
   "bookingErrNotYours": "هذا الحجز غير مخصص لك",
   "bookingErrTerminal": "هذا الحجز مغلق بالفعل",
+  "myBookings": "حجوزاتي",
+  "noBookingsYet": "لا توجد حجوزات بعد",
   "escalationEscalate": "تصعيد",
   "escalationReason": "سبب التصعيد",
   "escalationReasonHint": "مطلوب. اشرح لماذا يجب تصعيد هذه الشكوى.",

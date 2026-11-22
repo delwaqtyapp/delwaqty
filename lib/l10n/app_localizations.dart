@@ -7208,6 +7208,18 @@ abstract class AppLocalizations {
   /// **'This booking is already closed'**
   String get bookingErrTerminal;
 
+  /// No description provided for @myBookings.
+  ///
+  /// In en, this message translates to:
+  /// **'My Bookings'**
+  String get myBookings;
+
+  /// No description provided for @noBookingsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No bookings yet'**
+  String get noBookingsYet;
+
   /// No description provided for @escalationEscalate.
   ///
   /// In en, this message translates to:

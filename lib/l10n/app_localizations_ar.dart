@@ -3725,6 +3725,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bookingErrTerminal => 'هذا الحجز مغلق بالفعل';
 
   @override
+  String get myBookings => 'حجوزاتي';
+
+  @override
+  String get noBookingsYet => 'لا توجد حجوزات بعد';
+
+  @override
   String get escalationEscalate => 'تصعيد';
 
   @override

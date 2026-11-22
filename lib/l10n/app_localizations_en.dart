@@ -3754,6 +3754,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookingErrTerminal => 'This booking is already closed';
 
   @override
+  String get myBookings => 'My Bookings';
+
+  @override
+  String get noBookingsYet => 'No bookings yet';
+
+  @override
   String get escalationEscalate => 'Escalate';
 
   @override

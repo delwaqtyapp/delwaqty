@@ -757,6 +757,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             onTap: () => context.push('/provider-availability'),
           ),
         _SectionTile(
+          icon: Icons.event_note_outlined,
+          color: primary,
+          title: l10n.myBookings,
+          onTap: () => context.push('/home-services/my-bookings'),
+        ),
+        _SectionTile(
           icon: Icons.notifications_outlined,
           color: primary,
           title: l10n.notifications,

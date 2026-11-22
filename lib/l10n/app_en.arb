@@ -1206,6 +1206,8 @@
   "bookingErrInvalidPrice": "Enter a valid price greater than zero",
   "bookingErrNotYours": "This booking isn't assigned to you",
   "bookingErrTerminal": "This booking is already closed",
+  "myBookings": "My Bookings",
+  "noBookingsYet": "No bookings yet",
   "escalationEscalate": "Escalate",
   "escalationReason": "Escalation Reason",
   "escalationReasonHint": "Required. Explain why this complaint must be escalated.",

@@ -5,6 +5,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_provider.dart';
 import 'package:delwaqty/features/customer/home_services/presentation/pages/home_services_page.dart';
+import 'package:delwaqty/features/customer/home_services/presentation/pages/my_service_bookings_page.dart';
 import 'package:delwaqty/features/customer/home_services/presentation/pages/service_booking_page.dart';
 import 'package:delwaqty/features/customer/home_services/presentation/pages/service_providers_page.dart';
 import 'package:delwaqty/features/customer/home_services/presentation/pages/service_reviews_page.dart';
@@ -34,6 +35,11 @@ class HomeServicesModule extends FeatureModule {
       path: '/home-services',
       name: 'home-services',
       builder: (context, state) => const HomeServicesPage(),
+    ),
+    GoRoute(
+      path: '/home-services/my-bookings',
+      name: 'my-service-bookings',
+      builder: (context, state) => const MyServiceBookingsPage(),
     ),
     GoRoute(
       path: '/home-services/category/:categoryType',

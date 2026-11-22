@@ -1396,6 +1396,8 @@
   "showingNProducts": "Showing {count} items",
   "noResultsInMerchant": "No results found",
   "discountPercent": "{percent}% off",
+  "platformCredit": "Delwaqty gift",
+  "platformCreditAutoApplied": "You have a Delwaqty gift of {amount} EGP. It is deducted automatically from this order.",
   "mostOrdered": "Most Ordered",
   "addedToCart": "Added to cart",
   "options": "Options",

@@ -7,6 +7,8 @@ import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart'
     as commerce;
 import 'package:delwaqty/features/customer/commerce/domain/entities/coupon.dart';
 import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
+import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/customer/location/presentation/widgets/smart_map_picker_sheet.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
@@ -250,7 +252,19 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           final deliveryFee =
               ref.watch(_merchantFeeProvider(cart.merchantId)).value ??
               cart.deliveryFee;
-          final orderTotal = cart.subtotal + deliveryFee - cart.discount;
+          // Migration 395: the delay-apology gift shows here as an
+          // automatic platform-credit discount. The server is authoritative
+          // at create_order; the provider mirrors min(available, amount due)
+          // for display only.
+          final dueBeforeCredit = cart.subtotal + deliveryFee - cart.discount;
+          final platformCredit = ref
+                  .watch(_platformCreditProvider(dueBeforeCredit))
+                  .value ??
+              0.0;
+          final creditApplied = dueBeforeCredit <= 0
+              ? 0.0
+              : platformCredit.clamp(0.0, dueBeforeCredit).toDouble();
+          final orderTotal = dueBeforeCredit - creditApplied;
 
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -452,6 +466,41 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   ],
                 ),
               ),
+              if (platformCredit > 0) ...[
+                const SizedBox(height: 16),
+                AnimatedFadeIn(
+                  delay: const Duration(milliseconds: 550),
+                  child: Card(
+                    elevation: 0,
+                    color: colorScheme.primaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.card_giftcard_rounded,
+                            color: colorScheme.onPrimaryContainer,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              l10n.platformCreditAutoApplied(
+                                creditApplied.toStringAsFixed(0),
+                              ),
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onPrimaryContainer,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 24),
               AnimatedFadeIn(
                 delay: const Duration(milliseconds: 600),
@@ -486,6 +535,13 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                             label: l10n.discount,
                             value:
                                 '-${cart.discount.toStringAsFixed(0)} ${l10n.egp}',
+                            color: colorScheme.primary,
+                          ),
+                        if (creditApplied > 0)
+                          _SummaryRow(
+                            label: l10n.platformCredit,
+                            value:
+                                '-${creditApplied.toStringAsFixed(0)} ${l10n.egp}',
                             color: colorScheme.primary,
                           ),
                         Divider(color: colorScheme.outlineVariant),
@@ -581,6 +637,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       await ref.read(cartProvider.notifier).clear();
 
       if (!mounted) return;
+      // The gift was spent server-side; drop the cached balance.
+      ref.invalidate(_platformCreditProvider);
       context.go('/market/order-completed/${order.id}');
     } catch (e) {
       if (!mounted) return;
@@ -616,6 +674,28 @@ final _savedAddressesProvider = FutureProvider<List<Map<String, dynamic>>>((
       .order('is_default', ascending: false)
       .order('created_at');
   return (rows as List<dynamic>).cast<Map<String, dynamic>>();
+});
+
+/// Spendable platform credit (migration 395): the delay-apology gift the
+/// server auto-applies as a discount inside create_order. Display-only
+/// mirror; a missing pre-395 backend must not break checkout. autoDispose
+/// keeps no stale balance after leaving checkout, ref.watch(authStateProvider)
+/// re-fetches when the signed-in user changes, and the family key is the
+/// amount due, so the server-side min(balance, due) is what renders.
+final _platformCreditProvider =
+    FutureProvider.autoDispose.family<double, double>((ref, amountDue) async {
+  final auth = ref.watch(authStateProvider);
+  if (auth is! AuthAuthenticated) return 0;
+  final client = Supabase.instance.client;
+  try {
+    final res = await client
+        .rpc('my_platform_credit', params: {'p_amount_due': amountDue});
+    final map = Map<String, dynamic>.from(res as Map);
+    if (map['ok'] != true) return 0;
+    return (map['applies'] as num?)?.toDouble() ?? 0;
+  } catch (_) {
+    return 0;
+  }
 });
 
 /// The local cart never stores the merchant's delivery fee, so the summary

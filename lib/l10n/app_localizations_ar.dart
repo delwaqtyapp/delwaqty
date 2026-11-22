@@ -4299,6 +4299,14 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get platformCredit => 'هدية دلوقتي';
+
+  @override
+  String platformCreditAutoApplied(Object amount) {
+    return 'عندك هدية من دلوقتي بقيمة $amount ج.م 🎁 هتنخصم تلقائي من الطلب ده';
+  }
+
+  @override
   String get mostOrdered => 'الأكثر مبيعاً';
 
   @override

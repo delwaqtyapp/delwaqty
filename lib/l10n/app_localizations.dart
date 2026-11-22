@@ -8306,6 +8306,18 @@ abstract class AppLocalizations {
   /// **'{percent}% off'**
   String discountPercent(Object percent);
 
+  /// No description provided for @platformCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Delwaqty gift'**
+  String get platformCredit;
+
+  /// No description provided for @platformCreditAutoApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'You have a Delwaqty gift of {amount} EGP. It is deducted automatically from this order.'**
+  String platformCreditAutoApplied(Object amount);
+
   /// No description provided for @mostOrdered.
   ///
   /// In en, this message translates to:

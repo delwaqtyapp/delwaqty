@@ -49,11 +49,14 @@ class SupabaseOrderDataSource {
       merchantId: row['merchant_id'] as String,
       merchantName: row['merchant_name'] as String? ?? '',
       items: orderItems,
+      // Migration 395: total_amount is now also net of the platform credit,
+      // so add it back when deriving the goods subtotal.
       subtotal:
           (row['total_amount'] as num).toDouble() -
           (row['delivery_fee'] as num? ?? 0).toDouble() -
           (row['tax'] as num? ?? 0).toDouble() +
-          (row['discount'] as num? ?? 0).toDouble(),
+          (row['discount'] as num? ?? 0).toDouble() +
+          (row['platform_credit_applied'] as num? ?? 0).toDouble(),
       deliveryFee: (row['delivery_fee'] as num? ?? 0).toDouble(),
       discount: (row['discount'] as num? ?? 0).toDouble(),
       total: (row['total_amount'] as num).toDouble(),

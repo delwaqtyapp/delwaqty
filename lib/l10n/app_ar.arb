@@ -2590,5 +2590,16 @@
       "hours": {}
     }
   },
-  "posCharge": "تحصيل"
+  "posCharge": "تحصيل",
+  "authBrandingMerchant": "إدارة محلك من مكان واحد",
+  "authBrandingDriver": "اشتغل بوقتك، كسبانك يومي",
+  "authBrandingAdmin": "لوحة تحكم دلوقتي",
+  "stepXOfY": "خطوة {current} من {total}",
+  "@stepXOfY": {
+    "description": "Register wizard progress",
+    "placeholders": {
+      "current": {},
+      "total": {}
+    }
+  }
 }

@@ -7725,4 +7725,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get posCharge => 'Charge';
+
+  @override
+  String get authBrandingMerchant => 'Run your shop from one place';
+
+  @override
+  String get authBrandingDriver => 'Work on your time, earn daily';
+
+  @override
+  String get authBrandingAdmin => 'Delwaqty control panel';
+
+  @override
+  String stepXOfY(Object current, Object total) {
+    return 'Step $current of $total';
+  }
 }

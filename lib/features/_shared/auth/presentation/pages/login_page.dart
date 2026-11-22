@@ -542,8 +542,16 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   Widget _buildSubtitle(AppLocalizations l10n) {
+    // Per-flavor AuthBranding (design batch 5.1): merchant/driver/admin
+    // were showing the customer tagline.
+    final subtitle = switch (ref.watch(appFlavorProvider)) {
+      AppFlavor.provider => l10n.authBrandingMerchant,
+      AppFlavor.driver => l10n.authBrandingDriver,
+      AppFlavor.admin => l10n.authBrandingAdmin,
+      AppFlavor.customer => l10n.welcomeSubtitle,
+    };
     return Text(
-      l10n.welcomeSubtitle,
+      subtitle,
       style: TextStyle(
         fontSize: 14,
         color: Colors.white.withValues(alpha: 0.5),

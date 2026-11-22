@@ -7663,4 +7663,18 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get posCharge => 'تحصيل';
+
+  @override
+  String get authBrandingMerchant => 'إدارة محلك من مكان واحد';
+
+  @override
+  String get authBrandingDriver => 'اشتغل بوقتك، كسبانك يومي';
+
+  @override
+  String get authBrandingAdmin => 'لوحة تحكم دلوقتي';
+
+  @override
+  String stepXOfY(Object current, Object total) {
+    return 'خطوة $current من $total';
+  }
 }

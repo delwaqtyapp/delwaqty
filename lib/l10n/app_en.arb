@@ -2649,5 +2649,16 @@
       "hours": {}
     }
   },
-  "posCharge": "Charge"
+  "posCharge": "Charge",
+  "authBrandingMerchant": "Run your shop from one place",
+  "authBrandingDriver": "Work on your time, earn daily",
+  "authBrandingAdmin": "Delwaqty control panel",
+  "stepXOfY": "Step {current} of {total}",
+  "@stepXOfY": {
+    "description": "Register wizard progress",
+    "placeholders": {
+      "current": {},
+      "total": {}
+    }
+  }
 }

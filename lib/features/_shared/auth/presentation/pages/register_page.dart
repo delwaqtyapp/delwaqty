@@ -506,38 +506,56 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       Icons.tune_rounded,
       Icons.reviews_outlined,
     ];
+    // Labeled progress on non-customer flavors only: the customer app's
+    // look is frozen by owner decision (design batch 5.1).
+    final showLabel = ref.watch(appFlavorProvider) != AppFlavor.customer;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 6),
-      child: Row(
+      child: Column(
         children: [
-          for (var i = 0; i < icons.length; i++) ...[
-            _StepDot(
-              icon: icons[i],
-              isActive: i <= _currentStep,
-              isCurrent: i == _currentStep,
-            ),
-            if (i < icons.length - 1)
-              Expanded(
-                child: Container(
-                  height: 2,
-                  margin: const EdgeInsets.symmetric(horizontal: 6),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(2),
-                    gradient: i < _currentStep
-                        ? const LinearGradient(
-                            colors: [
-                              AppColors.brandPurple,
-                              AppColors.brandCyan,
-                            ],
-                          )
-                        : null,
-                    color: i < _currentStep
-                        ? null
-                        : Colors.white.withValues(alpha: 0.1),
-                  ),
+          if (showLabel)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                l10n.stepXOfY('${_currentStep + 1}', '${icons.length}'),
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white.withValues(alpha: 0.6),
                 ),
               ),
-          ],
+            ),
+          Row(
+            children: [
+              for (var i = 0; i < icons.length; i++) ...[
+                _StepDot(
+                  icon: icons[i],
+                  isActive: i <= _currentStep,
+                  isCurrent: i == _currentStep,
+                ),
+                if (i < icons.length - 1)
+                  Expanded(
+                    child: Container(
+                      height: 2,
+                      margin: const EdgeInsets.symmetric(horizontal: 6),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(2),
+                        gradient: i < _currentStep
+                            ? const LinearGradient(
+                                colors: [
+                                  AppColors.brandPurple,
+                                  AppColors.brandCyan,
+                                ],
+                              )
+                            : null,
+                        color: i < _currentStep
+                            ? null
+                            : Colors.white.withValues(alpha: 0.1),
+                      ),
+                    ),
+                  ),
+              ],
+            ],
+          ),
         ],
       ),
     );

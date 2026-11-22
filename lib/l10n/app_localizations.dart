@@ -14683,6 +14683,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Charge'**
   String get posCharge;
+
+  /// No description provided for @authBrandingMerchant.
+  ///
+  /// In en, this message translates to:
+  /// **'Run your shop from one place'**
+  String get authBrandingMerchant;
+
+  /// No description provided for @authBrandingDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Work on your time, earn daily'**
+  String get authBrandingDriver;
+
+  /// No description provided for @authBrandingAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Delwaqty control panel'**
+  String get authBrandingAdmin;
+
+  /// Register wizard progress
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String stepXOfY(Object current, Object total);
 }
 
 class _AppLocalizationsDelegate

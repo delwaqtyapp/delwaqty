@@ -22,7 +22,14 @@ Future<Map<String, String>> androidMapsCertHeaders() async {
   }
   final cached = _cachedHeaders;
   if (cached != null) return cached;
-  final info = await PackageInfo.fromPlatform();
+  final PackageInfo info;
+  try {
+    info = await PackageInfo.fromPlatform();
+  } on Object {
+    // No platform binding (unit tests) or plugin missing: skip the headers
+    // rather than breaking the call site.
+    return const {};
+  }
   final headers = <String, String>{
     'X-Android-Package': info.packageName,
     'X-Android-Cert': kAndroidReleaseCertSha1,

@@ -62,7 +62,7 @@ class DriverRatingBar extends StatelessWidget {
             TextField(
               controller: controller,
               decoration: InputDecoration(
-                hintText: l10n.trackingUpdatesHint,
+                hintText: l10n.driverReviewHint,
                 border: const OutlineInputBorder(),
               ),
               maxLines: 2,

@@ -90,6 +90,8 @@ abstract interface class DeliveryRepository {
   Future<CashCollectionResult> confirmCashCollection(String rideId);
 
   /// The delivery ride linked to a commerce order, for the customer's
-  /// post-collection driver rating.
-  Future<OrderDeliveryRide?> getOrderDeliveryRide(String orderId);
+  /// post-collection driver rating. Streams realtime ride changes so the
+  /// rating card unlocks the moment the captain stamps the collection
+  /// (review #71), without waiting for a manual refresh.
+  Stream<OrderDeliveryRide?> watchOrderDeliveryRide(String orderId);
 }

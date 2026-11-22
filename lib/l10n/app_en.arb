@@ -2825,7 +2825,6 @@
     }
   },
   "rateDriverAfterCollection": "You can rate the driver once the cash is collected.",
-  "@rateDriverAfterCollection": {
-    "description": "ملاحظة انتظار التحصيل قبل التقييم"
-  }
+  "cashCollectionStateError": "Could not load the collection state. Check the connection and retry.",
+  "driverReviewHint": "Write your review of the captain (optional)"
 }

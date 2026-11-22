@@ -585,19 +585,26 @@ class SupabaseDeliveryDataSource {
 
   /// The delivery ride linked to a commerce order (latest non-cancelled),
   /// for the customer's post-collection driver rating.
-  Future<OrderDeliveryRide?> getOrderDeliveryRide(String orderId) async {
-    final row = await _client
+  /// Realtime stream of the delivery ride linked to a commerce order. The
+  /// customer's rating card listens to this, so it unlocks as soon as the
+  /// captain's "تم التحصيل" stamp lands — no manual refresh (review #71).
+  Stream<OrderDeliveryRide?> watchOrderDeliveryRide(String orderId) {
+    return _client
         .from('rides')
-        .select(
-          'id, driver_id, driver_name, status, payment_method, payment_status, cash_collected_at',
-        )
+        .stream(primaryKey: ['id'])
         .eq('order_id', orderId)
-        .neq('status', 'cancelled')
-        .order('created_at', ascending: false)
-        .limit(1)
-        .maybeSingle();
-    if (row == null) return null;
-    return OrderDeliveryRide.fromRow(row);
+        .map((rows) {
+          final eligible = rows
+              .where((r) => r['status'] != 'cancelled')
+              .toList()
+            ..sort(
+              (a, b) => (b['created_at'] as String? ?? '').compareTo(
+                a['created_at'] as String? ?? '',
+              ),
+            );
+          if (eligible.isEmpty) return null;
+          return OrderDeliveryRide.fromRow(eligible.first);
+        });
   }
 }
 

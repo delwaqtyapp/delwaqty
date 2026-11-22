@@ -7928,4 +7928,11 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get rateDriverAfterCollection =>
       'يمكنك تقييم الكابتن بعد تحصيل المبلغ.';
+
+  @override
+  String get cashCollectionStateError =>
+      'تعذر تحميل حالة التحصيل. تحقق من الاتصال وأعد المحاولة.';
+
+  @override
+  String get driverReviewHint => 'اكتب رأيك في الكابتن (اختياري)';
 }

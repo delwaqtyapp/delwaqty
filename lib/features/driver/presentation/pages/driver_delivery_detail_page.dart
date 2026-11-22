@@ -15,6 +15,7 @@ import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/geo_location.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/cash_collection.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_order.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
 import 'package:delwaqty/features/customer/driver/presentation/providers/dispatch_providers.dart';
@@ -132,20 +133,23 @@ class _DriverDeliveryDetailPageState
           .completeDelivery(order.id, driverId, recipientOtp: code);
     });
     if (!ok || !mounted) return;
-    // Cash handoff (migration 392): on a cash delivery the page stays open
-    // and the cash card takes over — the captain collects the money and taps
-    // "تم التحصيل" before leaving. Any doubt about the payment state falls
-    // back to the old pop-and-snackbar flow.
+    // Cash handoff (migration 392), FAIL CLOSED: only a confirmed non-cash
+    // delivery pops as done. On a cash delivery — or any doubt about the
+    // payment state (the state read failed or came back empty) — the page
+    // stays open and the cash card, or a retryable error card, drives what
+    // happens next. The captain never leaves a cash delivery without either
+    // collecting or consciously backing out of a visible uncollected state.
+    CashCollectionState? cash;
     try {
-      final cash = await ref
+      cash = await ref
           .read(deliveryRepositoryProvider)
           .getCashCollectionState(order.id);
-      if (cash != null && cash.isCash && !cash.collected) {
-        ref.invalidate(cashCollectionStateProvider(order.id));
-        return;
-      }
     } catch (_) {
-      // Fall through to the pre-392 completion flow.
+      cash = null;
+    }
+    if (cash == null || cash.isCash) {
+      ref.invalidate(cashCollectionStateProvider(order.id));
+      return;
     }
     // Batch 17 #5: confirm the completion with the earnings and return the
     // driver to the hub; previously the page just sat on "completed" and the
@@ -563,10 +567,13 @@ class _DriverDeliveryDetailPageState
                   const SizedBox(height: 16),
                   // Cash handoff: once delivered, the captain collects the
                   // cash here. The card flips to a collected confirmation.
+                  // Fail closed: if the collection state cannot be read, a
+                  // retryable card keeps the uncollected state visible
+                  // instead of silently showing nothing.
                   if (status == 'completed')
                     ref
                         .watch(cashCollectionStateProvider(order.id))
-                        .maybeWhen(
+                        .when(
                           data: (cash) =>
                               cash != null &&
                                   cash.isCash &&
@@ -582,7 +589,18 @@ class _DriverDeliveryDetailPageState
                                   ),
                                 )
                               : const SizedBox.shrink(),
-                          orElse: () => const SizedBox.shrink(),
+                          loading: () => const Padding(
+                            padding: EdgeInsets.only(bottom: 12),
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                          error: (_, __) => Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: CashCollectionRetryCard(
+                              onRetry: () => ref.invalidate(
+                                cashCollectionStateProvider(order.id),
+                              ),
+                            ),
+                          ),
                         ),
                   if (_busy) const Center(child: CircularProgressIndicator()),
                   if (status == 'searching' || status == 'requested')

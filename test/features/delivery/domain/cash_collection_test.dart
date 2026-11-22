@@ -54,10 +54,16 @@ void main() {
       cashCollectedAt: cashCollectedAt,
     );
 
-    test('cash ride waits for collection', () {
+    test('cash ride waits for the collection stamp', () {
       expect(ride().rateable, isFalse);
-      expect(ride(paymentStatus: 'paid').rateable, isTrue);
+      // The rule is the stamp, matching the ride_ratings RLS: a paid row
+      // without a stamp (historical, not yet healed) is NOT rateable.
+      expect(ride(paymentStatus: 'paid').rateable, isFalse);
       expect(ride(cashCollectedAt: DateTime(2026)).rateable, isTrue);
+      expect(
+        ride(paymentStatus: 'paid', cashCollectedAt: DateTime(2026)).rateable,
+        isTrue,
+      );
     });
 
     test('non-cash completion is unchanged', () {

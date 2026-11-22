@@ -123,3 +123,49 @@ class CashCollectionCard extends StatelessWidget {
     );
   }
 }
+
+/// Fail-closed fallback (migration 392): when the collection state cannot
+/// be read after the delivery completed, the captain sees this retryable
+/// card instead of the page silently showing nothing — an uncollected cash
+/// delivery never looks done.
+class CashCollectionRetryCard extends StatelessWidget {
+  const CashCollectionRetryCard({super.key, required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    return Card(
+      key: const ValueKey('cashCollectionRetryCard'),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.sync_problem_rounded, color: cs.error, size: 28),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    l10n.cashCollectionStateError,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton(
+              key: const ValueKey('cashCollectionRetry'),
+              onPressed: onRetry,
+              child: Text(l10n.retry),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

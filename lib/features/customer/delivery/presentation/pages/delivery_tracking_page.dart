@@ -656,4 +656,3 @@ class _ReceiptRow extends StatelessWidget {
     );
   }
 }
-

@@ -183,6 +183,6 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
       _dataSource.confirmCashCollection(rideId);
 
   @override
-  Future<OrderDeliveryRide?> getOrderDeliveryRide(String orderId) =>
-      _dataSource.getOrderDeliveryRide(orderId);
+  Stream<OrderDeliveryRide?> watchOrderDeliveryRide(String orderId) =>
+      _dataSource.watchOrderDeliveryRide(orderId);
 }

@@ -111,4 +111,42 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Arabic retry card shows the error and retries', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    var retries = 0;
+    await tester.pumpWidget(
+      RepaintBoundary(
+        key: const ValueKey('capture'),
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          locale: const Locale('ar'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          theme: ThemeData(fontFamily: 'Cairo'),
+          home: Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.all(16),
+              child: CashCollectionRetryCard(onRetry: () => retries++),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('تعذر تحميل حالة التحصيل. تحقق من الاتصال وأعد المحاولة.'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('cashCollectionRetry')));
+    expect(retries, 1);
+
+    await expectLater(
+      find.byKey(const ValueKey('capture')),
+      matchesGoldenFile('goldens/cash_collection_retry_ar.png'),
+    );
+    expect(tester.takeException(), isNull);
+  });
 }

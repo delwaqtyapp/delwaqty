@@ -39,10 +39,12 @@ final cashCollectionStateProvider =
     });
 
 /// The delivery ride linked to a commerce order, for the customer's
-/// post-collection driver rating (migration 392).
+/// post-collection driver rating (migration 392). A realtime stream, so the
+/// rating card unlocks the moment the captain stamps the cash collection —
+/// no stale "waiting for collection" state (review #71).
 final orderDeliveryRideProvider =
-    FutureProvider.family<OrderDeliveryRide?, String>((ref, orderId) {
-      return ref.watch(deliveryRepositoryProvider).getOrderDeliveryRide(orderId);
+    StreamProvider.family<OrderDeliveryRide?, String>((ref, orderId) {
+      return ref.watch(deliveryRepositoryProvider).watchOrderDeliveryRide(orderId);
     });
 
 final driverCapabilitiesProvider =

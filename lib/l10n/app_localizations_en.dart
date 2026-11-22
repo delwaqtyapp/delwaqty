@@ -7996,4 +7996,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get rateDriverAfterCollection =>
       'You can rate the driver once the cash is collected.';
+
+  @override
+  String get cashCollectionStateError =>
+      'Could not load the collection state. Check the connection and retry.';
+
+  @override
+  String get driverReviewHint => 'Write your review of the captain (optional)';
 }

@@ -80,7 +80,7 @@ class _OrderTrackingPageState extends ConsumerState<OrderTrackingPage>
                 // the cash, the customer rates the delivery driver here.
                 if (order.status == OrderStatus.delivered) ...[
                   const SizedBox(height: 24),
-                  _DriverRatingSection(orderId: order.id),
+                  DriverRatingSection(orderId: order.id),
                 ],
                 if (const {
                   OrderStatus.confirmed,
@@ -690,17 +690,17 @@ class _DriverSection extends StatelessWidget {
 /// carries no rating UI; the customer rates the actual linked delivery
 /// driver — stars plus a written comment — once the delivery is completed.
 /// Cash orders wait for the captain's "تم التحصيل" collection stamp.
-class _DriverRatingSection extends ConsumerStatefulWidget {
-  const _DriverRatingSection({required this.orderId});
+class DriverRatingSection extends ConsumerStatefulWidget {
+  const DriverRatingSection({super.key, required this.orderId});
 
   final String orderId;
 
   @override
-  ConsumerState<_DriverRatingSection> createState() =>
+  ConsumerState<DriverRatingSection> createState() =>
       _DriverRatingSectionState();
 }
 
-class _DriverRatingSectionState extends ConsumerState<_DriverRatingSection> {
+class _DriverRatingSectionState extends ConsumerState<DriverRatingSection> {
   int _rating = 0;
   bool _submitted = false;
   bool _submitting = false;

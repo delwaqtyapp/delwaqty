@@ -106,10 +106,11 @@ class OrderDeliveryRide {
   bool get isCompleted => status == 'completed';
 
   /// The customer rates the driver only once cash was collected; non-cash
-  /// deliveries stay rateable at completion, as before.
+  /// deliveries stay rateable at completion, as before. The rule is the
+  /// collection STAMP, the same one the ride_ratings RLS uses (migration
+  /// 392) — payment_status alone is not enough, because historical paid
+  /// rows may carry no stamp until the server replay/backfill heals them.
   bool get rateable =>
       isCompleted &&
-      (paymentMethod != 'cash' ||
-          paymentStatus == 'paid' ||
-          cashCollectedAt != null);
+      (paymentMethod != 'cash' || cashCollectedAt != null);
 }

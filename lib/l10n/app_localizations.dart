@@ -15140,11 +15140,23 @@ abstract class AppLocalizations {
   /// **'Collected {amount}. It shows in your settlement.'**
   String cashCollectedBody(String amount);
 
-  /// ملاحظة انتظار التحصيل قبل التقييم
+  /// No description provided for @rateDriverAfterCollection.
   ///
   /// In en, this message translates to:
   /// **'You can rate the driver once the cash is collected.'**
   String get rateDriverAfterCollection;
+
+  /// No description provided for @cashCollectionStateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the collection state. Check the connection and retry.'**
+  String get cashCollectionStateError;
+
+  /// No description provided for @driverReviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your review of the captain (optional)'**
+  String get driverReviewHint;
 }
 
 class _AppLocalizationsDelegate

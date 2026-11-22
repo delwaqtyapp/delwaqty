@@ -3800,6 +3800,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sanctionsManagement => 'Sanctions Management';
 
   @override
+  String get generalPenalties => 'General Penalties';
+
+  @override
+  String get generalPenaltiesSubtitle =>
+      'Penalties applied across the whole platform. Only the owner account can change them.';
+
+  @override
+  String get cancelSuspensionPenalty => 'Repeated cancellation penalty';
+
+  @override
+  String get cancelSuspensionPenaltyDescription =>
+      'Suspends the customer account after the third cancellation in the same month (allowance: 2).';
+
+  @override
+  String get editPenalty => 'Edit penalty';
+
+  @override
+  String get suspensionDaysLabel => 'Suspension duration (days)';
+
+  @override
+  String get penaltyChangeReasonHint => 'Reason for change (optional)';
+
+  @override
+  String get penaltyUpdated => 'Penalty updated';
+
+  @override
+  String get ownerOnlyPenalties =>
+      'The general penalties list is available to the owner account only.';
+
+  @override
+  String get invalidSuspensionDays => 'Duration must be between 1 and 365 days';
+
+  @override
   String get noSanctions => 'No sanctions yet';
 
   @override

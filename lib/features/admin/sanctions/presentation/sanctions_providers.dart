@@ -23,3 +23,9 @@ final activeSanctionsProvider = FutureProvider<List<Sanction>>((ref) async {
   final repo = ref.read(sanctionsRepositoryProvider);
   return repo.getSanctions(active: true);
 });
+
+/// Platform-wide cancellation penalty (days). Owner-editable.
+final cancelSuspensionDaysProvider = FutureProvider<int>((ref) async {
+  final repo = ref.read(sanctionsRepositoryProvider);
+  return repo.getCancelSuspensionDays();
+});

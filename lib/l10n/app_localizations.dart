@@ -7298,6 +7298,66 @@ abstract class AppLocalizations {
   /// **'Sanctions Management'**
   String get sanctionsManagement;
 
+  /// No description provided for @generalPenalties.
+  ///
+  /// In en, this message translates to:
+  /// **'General Penalties'**
+  String get generalPenalties;
+
+  /// No description provided for @generalPenaltiesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalties applied across the whole platform. Only the owner account can change them.'**
+  String get generalPenaltiesSubtitle;
+
+  /// No description provided for @cancelSuspensionPenalty.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeated cancellation penalty'**
+  String get cancelSuspensionPenalty;
+
+  /// No description provided for @cancelSuspensionPenaltyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspends the customer account after the third cancellation in the same month (allowance: 2).'**
+  String get cancelSuspensionPenaltyDescription;
+
+  /// No description provided for @editPenalty.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit penalty'**
+  String get editPenalty;
+
+  /// No description provided for @suspensionDaysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspension duration (days)'**
+  String get suspensionDaysLabel;
+
+  /// No description provided for @penaltyChangeReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for change (optional)'**
+  String get penaltyChangeReasonHint;
+
+  /// No description provided for @penaltyUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalty updated'**
+  String get penaltyUpdated;
+
+  /// No description provided for @ownerOnlyPenalties.
+  ///
+  /// In en, this message translates to:
+  /// **'The general penalties list is available to the owner account only.'**
+  String get ownerOnlyPenalties;
+
+  /// No description provided for @invalidSuspensionDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration must be between 1 and 365 days'**
+  String get invalidSuspensionDays;
+
   /// No description provided for @noSanctions.
   ///
   /// In en, this message translates to:

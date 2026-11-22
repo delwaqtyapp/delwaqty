@@ -1,6 +1,8 @@
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
 import 'package:delwaqty/features/admin/sanctions/presentation/sanctions_providers.dart';
 import 'package:delwaqty/features/admin/sanctions/domain/entities/sanction.dart';
 import 'package:delwaqty/shared/widgets/glass_card.dart';
@@ -26,11 +28,18 @@ class _AdminSanctionsPageState extends ConsumerState<AdminSanctionsPage> {
     final sanctionsAsync = ref.watch(
       _showActiveOnly ? activeSanctionsProvider : sanctionsProvider,
     );
+    final isOwner = ref.watch(adminIsOwnerProvider).value ?? false;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.sanctionsManagement),
         actions: [
+          if (isOwner)
+            IconButton(
+              tooltip: l10n.generalPenalties,
+              icon: const Icon(Icons.policy_rounded),
+              onPressed: () => context.push('/admin/penalties-policy'),
+            ),
           Row(
             children: [
               Text(

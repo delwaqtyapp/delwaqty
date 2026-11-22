@@ -3769,6 +3769,39 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sanctionsManagement => 'إدارة العقوبات';
 
   @override
+  String get generalPenalties => 'العقوبات العامة';
+
+  @override
+  String get generalPenaltiesSubtitle =>
+      'عقوبات بتتطبق على مستوى المنصة كلها. تعديلها متاح لحساب المالك فقط.';
+
+  @override
+  String get cancelSuspensionPenalty => 'عقوبة الإلغاء المتكرر';
+
+  @override
+  String get cancelSuspensionPenaltyDescription =>
+      'إيقاف حساب العميل بعد ثالث إلغاء في نفس الشهر (السماحية: إلغاءان).';
+
+  @override
+  String get editPenalty => 'تعديل العقوبة';
+
+  @override
+  String get suspensionDaysLabel => 'مدة الإيقاف (بالأيام)';
+
+  @override
+  String get penaltyChangeReasonHint => 'سبب التغيير (اختياري)';
+
+  @override
+  String get penaltyUpdated => 'تم تحديث العقوبة';
+
+  @override
+  String get ownerOnlyPenalties =>
+      'قايمة العقوبات العامة متاحة لحساب المالك فقط.';
+
+  @override
+  String get invalidSuspensionDays => 'المدة لازم تكون بين 1 و 365 يوم';
+
+  @override
   String get noSanctions => 'لا توجد عقوبات بعد';
 
   @override

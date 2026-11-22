@@ -433,7 +433,7 @@ class _AdminProviderPricingPageState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '${_fmt(effectiveHourly)} ${l10n.currencySymbol}/${l10n.perHour}',
+                          '${_fmt(effectiveHourly)} ${l10n.currencySymbol}${l10n.perHour}',
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
                                 color: scheme.primary,
@@ -550,7 +550,7 @@ class _AdminProviderPricingPageState
           ),
           subtitle: Text(
             hourly != null
-                ? '${_fmt(hourly)} ${l10n.currencySymbol}/${l10n.perHour}'
+                ? '${_fmt(hourly)} ${l10n.currencySymbol}${l10n.perHour}'
                 : l10n.providerPricingPlatformDefault,
           ),
           trailing: Row(

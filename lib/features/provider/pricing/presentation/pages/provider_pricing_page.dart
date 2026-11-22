@@ -146,7 +146,7 @@ class ProviderPricingPage extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                '${_fmt(hourly)} ${l10n.currencySymbol}/${l10n.perHour}',
+                '${_fmt(hourly)} ${l10n.currencySymbol}${l10n.perHour}',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: scheme.primary,
                   fontWeight: FontWeight.w700,

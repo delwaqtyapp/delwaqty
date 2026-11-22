@@ -211,7 +211,11 @@ class _MerchantProductModifiersPageState
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(l10n.delete),
-        content: Text((group['name_ar'] ?? group['name'] ?? '').toString()),
+        content: Text(
+          ((group['name_ar'] ?? '') as String).isNotEmpty
+              ? group['name_ar'] as String
+              : (group['name'] ?? '').toString(),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),

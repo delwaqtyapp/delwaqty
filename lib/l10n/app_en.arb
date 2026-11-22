@@ -2620,6 +2620,14 @@
   "decline": "Decline",
   "offerTimedOut": "Request timed out. It will be offered to another driver.",
   "wentOfflineLocation": "Location updates stopped, so you were set offline. Go online again when you are back.",
+  "deliveryCompletedSuccess": "Delivery completed.",
+  "deliveryCompletedEarnings": "Delivery completed. You earned {amount}.",
+  "@deliveryCompletedEarnings": {
+    "description": "Shown to the driver after completing a delivery",
+    "placeholders": {
+      "amount": {}
+    }
+  },
   "pickupLabel": "Pickup",
   "dropoffLabel": "Dropoff",
   "secondsUnit": "sec",

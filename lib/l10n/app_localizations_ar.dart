@@ -7640,6 +7640,14 @@ class AppLocalizationsAr extends AppLocalizations {
       'توقفت تحديثات الموقع، فتم إيقاف استقبال الطلبات. اضغط متصل للعودة.';
 
   @override
+  String get deliveryCompletedSuccess => 'تم إتمام التوصيل.';
+
+  @override
+  String deliveryCompletedEarnings(Object amount) {
+    return 'تم إتمام التوصيل. ربحت $amount.';
+  }
+
+  @override
   String get pickupLabel => 'الاستلام';
 
   @override

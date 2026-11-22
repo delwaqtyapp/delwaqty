@@ -2561,6 +2561,14 @@
   "decline": "رفض",
   "offerTimedOut": "انتهت مهلة الطلب. سيتم عرضه على كابتن آخر.",
   "wentOfflineLocation": "توقفت تحديثات الموقع، فتم إيقاف استقبال الطلبات. اضغط متصل للعودة.",
+  "deliveryCompletedSuccess": "تم إتمام التوصيل.",
+  "deliveryCompletedEarnings": "تم إتمام التوصيل. ربحت {amount}.",
+  "@deliveryCompletedEarnings": {
+    "description": "تظهر للكابتن بعد إتمام التوصيل",
+    "placeholders": {
+      "amount": {}
+    }
+  },
   "pickupLabel": "الاستلام",
   "dropoffLabel": "التسليم",
   "secondsUnit": "ثانية",

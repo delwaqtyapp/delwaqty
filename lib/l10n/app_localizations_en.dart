@@ -7703,6 +7703,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Location updates stopped, so you were set offline. Go online again when you are back.';
 
   @override
+  String get deliveryCompletedSuccess => 'Delivery completed.';
+
+  @override
+  String deliveryCompletedEarnings(Object amount) {
+    return 'Delivery completed. You earned $amount.';
+  }
+
+  @override
   String get pickupLabel => 'Pickup';
 
   @override

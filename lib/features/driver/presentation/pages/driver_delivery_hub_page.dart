@@ -118,6 +118,7 @@ class _DeliveryHubBody extends ConsumerStatefulWidget {
 
 class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
   bool _offerShowing = false;
+  String? _pushedDeliveryId;
 
   String get _driverId => widget.profile.id;
 
@@ -135,7 +136,13 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
       if (order != null &&
           order.status != 'completed' &&
           order.status != 'cancelled') {
-        context.push('/driver/delivery/${order.id}');
+        // Batch 17 #5: don't stack a second detail page for the same order
+        // when the stream re-emits while it is already open.
+        if (_pushedDeliveryId == order.id) return;
+        _pushedDeliveryId = order.id;
+        context.push('/driver/delivery/${order.id}').then((_) {
+          if (_pushedDeliveryId == order.id) _pushedDeliveryId = null;
+        });
       }
     });
 

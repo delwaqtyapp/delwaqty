@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -37,17 +38,19 @@ class _DriverDeliveryDetailPageState
     extends ConsumerState<DriverDeliveryDetailPage> {
   bool _busy = false;
 
-  Future<void> _run(Future<void> Function() action) async {
-    if (_busy) return;
+  Future<bool> _run(Future<void> Function() action) async {
+    if (_busy) return false;
     setState(() => _busy = true);
     try {
       await action();
       if (mounted) ref.invalidate(deliveryOrderByIdProvider(widget.id));
+      return true;
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
+      return false;
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -116,17 +119,31 @@ class _DriverDeliveryDetailPageState
     );
   }
 
-  Future<void> _confirmAndComplete(String orderId, String driverId) async {
+  Future<void> _confirmAndComplete(DeliveryOrder order, String driverId) async {
     final code = await showDialog<String>(
       context: context,
       builder: (_) => const DeliveryHandoffInputDialog(pickup: false),
     );
     if (code == null || code.length != 6) return;
-    await _run(() async {
+    final ok = await _run(() async {
       await ref
           .read(deliveryRepositoryProvider)
-          .completeDelivery(orderId, driverId, recipientOtp: code);
+          .completeDelivery(order.id, driverId, recipientOtp: code);
     });
+    if (!ok || !mounted) return;
+    // Batch 17 #5: confirm the completion with the earnings and return the
+    // driver to the hub; previously the page just sat on "completed" and the
+    // driver had to back out with no feedback.
+    final l10n = AppLocalizations.of(context);
+    final fare = order.fare;
+    final message = fare == null
+        ? l10n.deliveryCompletedSuccess
+        : l10n.deliveryCompletedEarnings(
+            '${fare.toStringAsFixed(0)} ${order.currency}',
+          );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+    context.pop();
   }
 
   String? _resolveCustomerPhone(DeliveryOrder order) {
@@ -540,7 +557,7 @@ class _DriverDeliveryDetailPageState
                     FilledButton(
                       onPressed: _busy
                           ? null
-                          : () => _confirmAndComplete(order.id, driverId),
+                          : () => _confirmAndComplete(order, driverId),
                       child: Text(l10n.completeDelivery),
                     ),
                   if (canCancel) ...[

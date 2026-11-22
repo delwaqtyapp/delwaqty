@@ -14648,6 +14648,18 @@ abstract class AppLocalizations {
   /// **'Location updates stopped, so you were set offline. Go online again when you are back.'**
   String get wentOfflineLocation;
 
+  /// No description provided for @deliveryCompletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery completed.'**
+  String get deliveryCompletedSuccess;
+
+  /// Shown to the driver after completing a delivery
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery completed. You earned {amount}.'**
+  String deliveryCompletedEarnings(Object amount);
+
   /// No description provided for @pickupLabel.
   ///
   /// In en, this message translates to:

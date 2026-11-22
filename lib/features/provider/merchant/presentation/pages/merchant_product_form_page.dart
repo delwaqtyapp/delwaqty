@@ -145,6 +145,14 @@ class _MerchantProductFormPageState
       appBar: AppBar(
         title: Text(title),
         actions: [
+          if (_isEditing)
+            IconButton(
+              tooltip: l10n.modifiersManage,
+              icon: const Icon(Icons.tune),
+              onPressed: () => context.push(
+                '/merchant-dashboard/products/${widget.productId}/modifiers',
+              ),
+            ),
           if (_isSaving) const AppLoaderCircular(size: 20, strokeWidth: 2),
         ],
       ),

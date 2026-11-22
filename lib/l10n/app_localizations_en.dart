@@ -7871,4 +7871,34 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get productModifierRequiredError =>
       'Please select the required options first';
+
+  @override
+  String get modifiersManage => 'Modifiers';
+
+  @override
+  String get modifierAddGroup => 'Add group';
+
+  @override
+  String get modifierAddOption => 'Add option';
+
+  @override
+  String get modifierGroupTitle => 'Modifier group';
+
+  @override
+  String get modifierOptionTitle => 'Modifier option';
+
+  @override
+  String get modifierNameEn => 'Name (English)';
+
+  @override
+  String get modifierNameAr => 'Name (Arabic)';
+
+  @override
+  String get modifierPriceAdjustment => 'Price adjustment';
+
+  @override
+  String get modifierMaxSelections => 'Max selections (0 = unlimited)';
+
+  @override
+  String get modifierEmptyGroups => 'No modifier groups yet';
 }

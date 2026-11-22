@@ -2733,5 +2733,45 @@
   "productModifierRequiredError": "Please select the required options first",
   "@productModifierRequiredError": {
     "description": "Shown when required product modifier groups have no selection"
+  },
+  "modifiersManage": "Modifiers",
+  "@modifiersManage": {
+    "description": "Merchant modifiers: modifiersManage"
+  },
+  "modifierAddGroup": "Add group",
+  "@modifierAddGroup": {
+    "description": "Merchant modifiers: modifierAddGroup"
+  },
+  "modifierAddOption": "Add option",
+  "@modifierAddOption": {
+    "description": "Merchant modifiers: modifierAddOption"
+  },
+  "modifierGroupTitle": "Modifier group",
+  "@modifierGroupTitle": {
+    "description": "Merchant modifiers: modifierGroupTitle"
+  },
+  "modifierOptionTitle": "Modifier option",
+  "@modifierOptionTitle": {
+    "description": "Merchant modifiers: modifierOptionTitle"
+  },
+  "modifierNameEn": "Name (English)",
+  "@modifierNameEn": {
+    "description": "Merchant modifiers: modifierNameEn"
+  },
+  "modifierNameAr": "Name (Arabic)",
+  "@modifierNameAr": {
+    "description": "Merchant modifiers: modifierNameAr"
+  },
+  "modifierPriceAdjustment": "Price adjustment",
+  "@modifierPriceAdjustment": {
+    "description": "Merchant modifiers: modifierPriceAdjustment"
+  },
+  "modifierMaxSelections": "Max selections (0 = unlimited)",
+  "@modifierMaxSelections": {
+    "description": "Merchant modifiers: modifierMaxSelections"
+  },
+  "modifierEmptyGroups": "No modifier groups yet",
+  "@modifierEmptyGroups": {
+    "description": "Merchant modifiers: modifierEmptyGroups"
   }
 }

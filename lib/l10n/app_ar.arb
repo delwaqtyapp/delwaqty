@@ -2674,5 +2674,45 @@
   "productModifierRequiredError": "يرجى اختيار الخيارات المطلوبة أولاً",
   "@productModifierRequiredError": {
     "description": "Shown when required product modifier groups have no selection"
+  },
+  "modifiersManage": "الإضافات",
+  "@modifiersManage": {
+    "description": "Merchant modifiers: modifiersManage"
+  },
+  "modifierAddGroup": "إضافة مجموعة",
+  "@modifierAddGroup": {
+    "description": "Merchant modifiers: modifierAddGroup"
+  },
+  "modifierAddOption": "إضافة خيار",
+  "@modifierAddOption": {
+    "description": "Merchant modifiers: modifierAddOption"
+  },
+  "modifierGroupTitle": "مجموعة الإضافات",
+  "@modifierGroupTitle": {
+    "description": "Merchant modifiers: modifierGroupTitle"
+  },
+  "modifierOptionTitle": "خيار الإضافة",
+  "@modifierOptionTitle": {
+    "description": "Merchant modifiers: modifierOptionTitle"
+  },
+  "modifierNameEn": "الاسم (إنجليزي)",
+  "@modifierNameEn": {
+    "description": "Merchant modifiers: modifierNameEn"
+  },
+  "modifierNameAr": "الاسم (عربي)",
+  "@modifierNameAr": {
+    "description": "Merchant modifiers: modifierNameAr"
+  },
+  "modifierPriceAdjustment": "تعديل السعر",
+  "@modifierPriceAdjustment": {
+    "description": "Merchant modifiers: modifierPriceAdjustment"
+  },
+  "modifierMaxSelections": "أقصى عدد للاختيار (0 = بلا حد)",
+  "@modifierMaxSelections": {
+    "description": "Merchant modifiers: modifierMaxSelections"
+  },
+  "modifierEmptyGroups": "لا توجد مجموعات إضافات بعد",
+  "@modifierEmptyGroups": {
+    "description": "Merchant modifiers: modifierEmptyGroups"
   }
 }

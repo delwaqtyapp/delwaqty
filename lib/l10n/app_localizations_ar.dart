@@ -7805,4 +7805,34 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get productModifierRequiredError =>
       'يرجى اختيار الخيارات المطلوبة أولاً';
+
+  @override
+  String get modifiersManage => 'الإضافات';
+
+  @override
+  String get modifierAddGroup => 'إضافة مجموعة';
+
+  @override
+  String get modifierAddOption => 'إضافة خيار';
+
+  @override
+  String get modifierGroupTitle => 'مجموعة الإضافات';
+
+  @override
+  String get modifierOptionTitle => 'خيار الإضافة';
+
+  @override
+  String get modifierNameEn => 'الاسم (إنجليزي)';
+
+  @override
+  String get modifierNameAr => 'الاسم (عربي)';
+
+  @override
+  String get modifierPriceAdjustment => 'تعديل السعر';
+
+  @override
+  String get modifierMaxSelections => 'أقصى عدد للاختيار (0 = بلا حد)';
+
+  @override
+  String get modifierEmptyGroups => 'لا توجد مجموعات إضافات بعد';
 }

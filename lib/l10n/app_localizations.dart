@@ -14929,6 +14929,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please select the required options first'**
   String get productModifierRequiredError;
+
+  /// Merchant modifiers: modifiersManage
+  ///
+  /// In en, this message translates to:
+  /// **'Modifiers'**
+  String get modifiersManage;
+
+  /// Merchant modifiers: modifierAddGroup
+  ///
+  /// In en, this message translates to:
+  /// **'Add group'**
+  String get modifierAddGroup;
+
+  /// Merchant modifiers: modifierAddOption
+  ///
+  /// In en, this message translates to:
+  /// **'Add option'**
+  String get modifierAddOption;
+
+  /// Merchant modifiers: modifierGroupTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Modifier group'**
+  String get modifierGroupTitle;
+
+  /// Merchant modifiers: modifierOptionTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Modifier option'**
+  String get modifierOptionTitle;
+
+  /// Merchant modifiers: modifierNameEn
+  ///
+  /// In en, this message translates to:
+  /// **'Name (English)'**
+  String get modifierNameEn;
+
+  /// Merchant modifiers: modifierNameAr
+  ///
+  /// In en, this message translates to:
+  /// **'Name (Arabic)'**
+  String get modifierNameAr;
+
+  /// Merchant modifiers: modifierPriceAdjustment
+  ///
+  /// In en, this message translates to:
+  /// **'Price adjustment'**
+  String get modifierPriceAdjustment;
+
+  /// Merchant modifiers: modifierMaxSelections
+  ///
+  /// In en, this message translates to:
+  /// **'Max selections (0 = unlimited)'**
+  String get modifierMaxSelections;
+
+  /// Merchant modifiers: modifierEmptyGroups
+  ///
+  /// In en, this message translates to:
+  /// **'No modifier groups yet'**
+  String get modifierEmptyGroups;
 }
 
 class _AppLocalizationsDelegate

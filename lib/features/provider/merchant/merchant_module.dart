@@ -14,6 +14,7 @@ import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_inventory_page.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_storefront_page.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_product_form_page.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_product_modifiers_page.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_offers_page.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_branches_page.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_reservations_page.dart';
@@ -96,6 +97,12 @@ class MerchantModule extends FeatureModule {
                   path: ':id/edit',
                   builder: (context, state) => MerchantProductFormPage(
                     productId: state.pathParameters['id'],
+                  ),
+                ),
+                GoRoute(
+                  path: ':id/modifiers',
+                  builder: (context, state) => MerchantProductModifiersPage(
+                    productId: state.pathParameters['id']!,
                   ),
                 ),
               ],

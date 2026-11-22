@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/config/config_validator.dart';
 import 'package:delwaqty/core/bootstrap/startup_error_page.dart';
+import 'package:delwaqty/core/bootstrap/backend_bootstrap.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/widgets/auth_scope_gate.dart';
 import 'package:delwaqty/core/theme/app_theme.dart';
 import 'package:delwaqty/features/admin/admin_web/presentation/pages/admin_web_gate.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -28,7 +30,13 @@ void main() async {
     url: const String.fromEnvironment('SUPABASE_URL'),
     publishableKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
   );
-  runApp(const ProviderScope(child: AdminWebApp()));
+  runApp(
+    AuthScopeGate(
+      bootstrap: BackendBootstrap()..complete(),
+      overrides: const [],
+      child: const AdminWebApp(),
+    ),
+  );
 }
 
 class AdminWebApp extends StatelessWidget {

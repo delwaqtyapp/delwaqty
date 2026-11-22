@@ -15,6 +15,7 @@ import 'package:delwaqty/config/config_validator.dart';
 import 'package:delwaqty/config/firebase_config.dart';
 import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/core/bootstrap/backend_bootstrap.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/widgets/auth_scope_gate.dart';
 import 'package:delwaqty/core/bootstrap/startup_error_page.dart';
 import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
 import 'package:delwaqty/data/datasources/local/hive_cache_service.dart';
@@ -103,7 +104,8 @@ void main() async {
   unawaited(_bootstrapBackends(backendBootstrap, connectivityService));
 
   runApp(
-    ProviderScope(
+    AuthScopeGate(
+      bootstrap: backendBootstrap,
       overrides: [
         isAdminAppProvider.overrideWithValue(true),
         appFlavorProvider.overrideWithValue(AppFlavor.admin),

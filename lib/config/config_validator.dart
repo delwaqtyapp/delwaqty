@@ -25,8 +25,11 @@ class ConfigValidationException implements Exception {
 /// and prevents the app from starting.
 abstract final class ConfigValidator {
   static final _urlPattern = RegExp(r'^https://[a-zA-Z0-9.-]+\.supabase\.co$');
+  // Accepts both legacy anon JWTs (eyJ...) and the newer publishable keys
+  // (sb_publishable_...); Supabase initializes with `publishableKey:` which
+  // takes either.
   static final _jwtPattern = RegExp(
-    r'^eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$',
+    r'^(eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+|sb_publishable_[A-Za-z0-9_-]+)$',
   );
 
   /// Validates all configuration and returns a [ValidationResult].
@@ -49,7 +52,7 @@ abstract final class ConfigValidator {
     } else if (!_jwtPattern.hasMatch(AppConfig.supabaseAnonKey)) {
       errors.add(
         'SUPABASE_ANON_KEY has invalid format. Expected a JWT token '
-        '(eyJ...)',
+        '(eyJ...) or a publishable key (sb_publishable_...)',
       );
     }
 

@@ -21,7 +21,6 @@ import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_reviews_page.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/pages/provider_banners_page.dart';
 import 'package:delwaqty/features/provider/availability/presentation/pages/provider_availability_page.dart';
-import 'package:delwaqty/features/provider/pricing/presentation/pages/provider_pricing_page.dart';
 import 'package:delwaqty/features/provider/verification/presentation/pages/provider_verification_page.dart';
 import 'package:delwaqty/features/provider/documents/presentation/pages/provider_documents_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -155,12 +154,6 @@ class MerchantModule extends FeatureModule {
       onTap: (ctx, _) => ctx.push('/provider-availability'),
     ),
     DrawerEntry(
-      id: 'provider-pricing',
-      label: (ctx) => AppLocalizations.of(ctx).providerMyPricing,
-      icon: Icons.payments_outlined,
-      onTap: (ctx, _) => ctx.push('/provider-pricing'),
-    ),
-    DrawerEntry(
       id: 'provider-financial-center',
       label: (ctx) => AppLocalizations.of(ctx).financialCenter,
       icon: Icons.account_balance_wallet_outlined,
@@ -189,10 +182,6 @@ class MerchantModule extends FeatureModule {
     GoRoute(
       path: '/provider-availability',
       builder: (context, state) => const ProviderAvailabilityPage(),
-    ),
-    GoRoute(
-      path: '/provider-pricing',
-      builder: (context, state) => const ProviderPricingPage(),
     ),
     GoRoute(
       path: '/provider-verification',

@@ -7973,4 +7973,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get appInvitationsFooter =>
       'Downloading an app does not grant a role. Access follows your current account approval. Android installation permission may be required.';
+
+  @override
+  String get closesNextDay => 'Closes next day';
+
+  @override
+  String get open24Hours => 'Open 24 hours';
 }

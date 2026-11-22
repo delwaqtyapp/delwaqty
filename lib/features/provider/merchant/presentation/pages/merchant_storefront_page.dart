@@ -772,36 +772,56 @@ class _MerchantStorefrontPageState
             title: Text(dayNames[_hours[i].day]),
             subtitle: _hours[i].closed
                 ? null
-                : Row(
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: _timeField(
-                          value: _hours[i].open,
-                          onChanged: (v) => setState(() {
-                            _hours[i] = _hours[i].copyWith(
-                              open: v,
-                              closed: false,
-                            );
-                            _hoursDirty = true;
-                          }),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _timeField(
+                              value: _hours[i].open,
+                              onChanged: (v) => setState(() {
+                                _hours[i] = _hours[i].copyWith(
+                                  open: v,
+                                  closed: false,
+                                );
+                                _hoursDirty = true;
+                              }),
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            child: Text('—'),
+                          ),
+                          Expanded(
+                            child: _timeField(
+                              value: _hours[i].close,
+                              onChanged: (v) => setState(() {
+                                _hours[i] = _hours[i].copyWith(
+                                  close: v,
+                                  closed: false,
+                                );
+                                _hoursDirty = true;
+                              }),
+                            ),
+                          ),
+                        ],
+                      ),
+                      // close <= open is valid: equal times mean open 24
+                      // hours, a close before the open is an overnight
+                      // window that ends on the next calendar day.
+                      if (_windowNote(_hours[i], l10n) != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            _windowNote(_hours[i], l10n)!,
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: AppColors.brandPurple,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
                         ),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: Text('—'),
-                      ),
-                      Expanded(
-                        child: _timeField(
-                          value: _hours[i].close,
-                          onChanged: (v) => setState(() {
-                            _hours[i] = _hours[i].copyWith(
-                              close: v,
-                              closed: false,
-                            );
-                            _hoursDirty = true;
-                          }),
-                        ),
-                      ),
                     ],
                   ),
             onChanged: (open) => setState(() {
@@ -837,6 +857,15 @@ class _MerchantStorefrontPageState
             : null,
       ),
     );
+  }
+
+  /// Overnight / 24h caption for one schedule row, or null for a plain
+  /// same-day window. HH:MM strings compare lexicographically.
+  String? _windowNote(WorkingHoursDay day, AppLocalizations l10n) {
+    if (day.closed) return null;
+    if (day.open == day.close) return l10n.open24Hours;
+    if (day.close.compareTo(day.open) < 0) return l10n.closesNextDay;
+    return null;
   }
 
   TimeOfDay _parseTimeOfDay(String hhmm) {

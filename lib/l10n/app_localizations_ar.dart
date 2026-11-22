@@ -7905,4 +7905,10 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get appInvitationsFooter =>
       'تحميل التطبيق لا يمنح صلاحيات جديدة. الدخول مرتبط باعتماد حسابك الحالي. قد تحتاج إلى السماح بالتثبيت على أندرويد.';
+
+  @override
+  String get closesNextDay => 'يغلق اليوم التالي';
+
+  @override
+  String get open24Hours => 'مفتوح 24 ساعة';
 }

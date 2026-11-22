@@ -69,15 +69,19 @@ void main() {
         'merchant_storefront_page.dart',
       );
       expect(page, contains('provider_set_working_hours'));
-      // Invalid input must be rejected server-side.
-      final rpc =
-          RegExp(
-            r'CREATE OR REPLACE FUNCTION public\.provider_set_working_hours[\s\S]*?\$\$;',
-          ).firstMatch(sql)?.group(0) ??
-          '';
-      expect(rpc, contains('Invalid day of week'));
-      expect(rpc, contains('Invalid time format'));
-      expect(rpc, contains('must be after opening time'));
+      // Invalid input must be rejected server-side. Assert against the
+      // LATEST definition (migration 398); the concatenated `sql` also
+      // holds the superseded baseline and archive definitions.
+      final latest = File('supabase/migrations/398_working_hours_overnight.sql')
+          .readAsStringSync();
+      expect(latest, contains('provider_set_working_hours'));
+      expect(latest, contains('Invalid day of week'));
+      expect(latest, contains('Invalid time format'));
+      // Overnight windows (close before open, e.g. 12:00-01:00) and 24h
+      // windows (open == close) are valid since migration 398, so the old
+      // close-after-open rejection must be gone from the live definition.
+      expect(latest, isNot(contains('must be after opening time')));
+      expect(latest, contains('working_hours_open_at'));
     });
   });
 

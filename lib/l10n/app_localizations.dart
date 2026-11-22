@@ -15109,6 +15109,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Downloading an app does not grant a role. Access follows your current account approval. Android installation permission may be required.'**
   String get appInvitationsFooter;
+
+  /// No description provided for @closesNextDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Closes next day'**
+  String get closesNextDay;
+
+  /// No description provided for @open24Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Open 24 hours'**
+  String get open24Hours;
 }
 
 class _AppLocalizationsDelegate

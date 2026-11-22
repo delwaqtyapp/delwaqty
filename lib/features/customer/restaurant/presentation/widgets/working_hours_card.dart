@@ -82,7 +82,7 @@ class WorkingHoursCard extends StatelessWidget {
                             ),
                           )
                         : Text(
-                            '${hour.openTime} - ${hour.closeTime}',
+                            _windowText(hour, l10n),
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontWeight: isToday
                                   ? FontWeight.bold
@@ -116,5 +116,21 @@ class WorkingHoursCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Same-day windows render unchanged; overnight and 24h windows are
+  /// called out so "12:00 - 01:00" is not read as a mistake.
+  String _windowText(WorkingHours hour, AppLocalizations l10n) {
+    final open = hour.openTime.length >= 5
+        ? hour.openTime.substring(0, 5)
+        : hour.openTime;
+    final close = hour.closeTime.length >= 5
+        ? hour.closeTime.substring(0, 5)
+        : hour.closeTime;
+    if (open == close) return l10n.open24Hours;
+    if (close.compareTo(open) < 0) {
+      return '$open - $close (${l10n.closesNextDay})';
+    }
+    return '$open - $close';
   }
 }

@@ -7688,6 +7688,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please choose a delivery location on the map';
 
   @override
+  String get checkoutDeliveryOutOfZone =>
+      'This store doesn\'t deliver to this address. Please pick a closer delivery address';
+
+  @override
   String get checkoutAccountSuspended =>
       'Your account cannot place orders right now';
 

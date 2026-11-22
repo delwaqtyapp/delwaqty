@@ -142,7 +142,7 @@ String appErrorMessage(AppLocalizations l10n, Object? error) {
 String checkoutErrorMessage(AppLocalizations l10n, Object? error) {
   final raw = (_readStringField(error, 'message') ?? error.toString());
   final match = RegExp(
-    r'(INSUFFICIENT_STOCK|PRODUCT_UNAVAILABLE|PRODUCT_NOT_FOUND|MERCHANT_NOT_FOUND|EMPTY_CART|TOO_MANY_ITEMS|INVALID_QUANTITY|BELOW_MIN_ORDER|COUPON_[A-Z_]+|MISSING_DELIVERY_LOCATION|ACCOUNT_SUSPENDED|INVALID_PAYMENT_METHOD|REQUIRED_MODIFIER_MISSING|MODIFIER_MAX_EXCEEDED)\b\s*([^\n]*)',
+    r'(INSUFFICIENT_STOCK|PRODUCT_UNAVAILABLE|PRODUCT_NOT_FOUND|MERCHANT_NOT_FOUND|EMPTY_CART|TOO_MANY_ITEMS|INVALID_QUANTITY|BELOW_MIN_ORDER|COUPON_[A-Z_]+|MISSING_DELIVERY_LOCATION|DELIVERY_OUT_OF_ZONE|ACCOUNT_SUSPENDED|INVALID_PAYMENT_METHOD|REQUIRED_MODIFIER_MISSING|MODIFIER_MAX_EXCEEDED)\b\s*([^\n]*)',
   ).firstMatch(raw);
   if (match == null) return appErrorMessage(l10n, error);
   final code = match.group(1)!;
@@ -165,6 +165,8 @@ String checkoutErrorMessage(AppLocalizations l10n, Object? error) {
       return l10n.checkoutBelowMinOrder(detail);
     case 'MISSING_DELIVERY_LOCATION':
       return l10n.checkoutMissingDeliveryLocation;
+    case 'DELIVERY_OUT_OF_ZONE':
+      return l10n.checkoutDeliveryOutOfZone;
     case 'ACCOUNT_SUSPENDED':
       return l10n.checkoutAccountSuspended;
     case 'REQUIRED_MODIFIER_MISSING':

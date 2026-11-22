@@ -7626,6 +7626,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'يرجى اختيار موقع التوصيل على الخريطة';
 
   @override
+  String get checkoutDeliveryOutOfZone =>
+      'هذا المتجر لا يوصّل إلى هذا العنوان. يرجى اختيار عنوان توصيل أقرب';
+
+  @override
   String get checkoutAccountSuspended => 'حسابك لا يمكنه إتمام الطلبات حالياً';
 
   @override

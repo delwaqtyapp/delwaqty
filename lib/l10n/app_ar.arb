@@ -2531,6 +2531,7 @@
     "description": "Checkout RPC error mapping"
   },
   "checkoutMissingDeliveryLocation": "يرجى اختيار موقع التوصيل على الخريطة",
+  "checkoutDeliveryOutOfZone": "هذا المتجر لا يوصّل إلى هذا العنوان. يرجى اختيار عنوان توصيل أقرب",
   "@checkoutMissingDeliveryLocation": {
     "description": "Checkout RPC error mapping"
   },

@@ -14630,6 +14630,12 @@ abstract class AppLocalizations {
   /// **'Please choose a delivery location on the map'**
   String get checkoutMissingDeliveryLocation;
 
+  /// No description provided for @checkoutDeliveryOutOfZone.
+  ///
+  /// In en, this message translates to:
+  /// **'This store doesn\'t deliver to this address. Please pick a closer delivery address'**
+  String get checkoutDeliveryOutOfZone;
+
   /// Checkout RPC error mapping
   ///
   /// In en, this message translates to:

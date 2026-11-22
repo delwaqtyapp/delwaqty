@@ -2590,6 +2590,7 @@
     "description": "Checkout RPC error mapping"
   },
   "checkoutMissingDeliveryLocation": "Please choose a delivery location on the map",
+  "checkoutDeliveryOutOfZone": "This store doesn't deliver to this address. Please pick a closer delivery address",
   "@checkoutMissingDeliveryLocation": {
     "description": "Checkout RPC error mapping"
   },

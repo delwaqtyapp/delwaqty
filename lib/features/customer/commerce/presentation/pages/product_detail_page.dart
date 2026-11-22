@@ -353,12 +353,12 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                           children: [
                             IconButton(
                               tooltip: l10n.decrease,
-                              onPressed: _quantity > 1
+                              onPressed: product.isAvailable && _quantity > 1
                                   ? () => setState(() => _quantity--)
                                   : null,
                               icon: Icon(
                                 Icons.remove_circle_outline,
-                                color: _quantity > 1
+                                color: product.isAvailable && _quantity > 1
                                     ? context.colorScheme.primary
                                     : context.colorScheme.onSurfaceVariant
                                           .withValues(alpha: 0.4),
@@ -376,10 +376,15 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                             ),
                             IconButton(
                               tooltip: l10n.add,
-                              onPressed: () => setState(() => _quantity++),
+                              onPressed: product.isAvailable
+                                  ? () => setState(() => _quantity++)
+                                  : null,
                               icon: Icon(
                                 Icons.add_circle_outline,
-                                color: context.colorScheme.primary,
+                                color: product.isAvailable
+                                    ? context.colorScheme.primary
+                                    : context.colorScheme.onSurfaceVariant
+                                          .withValues(alpha: 0.4),
                               ),
                             ),
                           ],

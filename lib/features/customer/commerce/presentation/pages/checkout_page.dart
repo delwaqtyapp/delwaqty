@@ -71,8 +71,10 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     final l10n = AppLocalizations.of(context);
     final labelController = TextEditingController();
     final addressController = TextEditingController();
+    // Batch 23 #2: do NOT prefill the address with the reverse-geocoded
+    // name - the user types their own address text; the geocoded string is
+    // the fallback only when they leave the field empty.
     UserLocation? loc = _deliveryLocation;
-    if (loc != null) addressController.text = loc.detailedAddress;
     try {
       final saved = await showDialog<bool>(
         context: context,
@@ -159,8 +161,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       });
       if (!mounted) return;
       ref.invalidate(_savedAddressesProvider);
+      final labelText = labelController.text.trim();
       setState(() {
-        _addressController.text = addressText;
+        _addressController.text = labelText.isNotEmpty
+            ? '$labelText - $addressText'
+            : addressText;
         _deliveryLocation = loc;
         _addressPrefilled = true;
       });
@@ -196,8 +201,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       final lat = (def['latitude'] as num?)?.toDouble();
       final lng = (def['longitude'] as num?)?.toDouble();
       final addr = (def['address'] as String?) ?? '';
+      final lbl = (def['label'] as String?)?.trim() ?? '';
       if (lat != null && lng != null && addr.isNotEmpty) {
-        _addressController.text = addr;
+        _addressController.text = lbl.isNotEmpty ? '$lbl - $addr' : addr;
         _deliveryLocation = UserLocation(
           latitude: lat,
           longitude: lng,
@@ -295,7 +301,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                             ? null
                             : (_) => setState(() {
                                 final addr = (a['address'] as String?) ?? '';
-                                _addressController.text = addr;
+                                final lbl =
+                                    (a['label'] as String?)?.trim() ?? '';
+                                _addressController.text = lbl.isNotEmpty
+                                    ? '$lbl - $addr'
+                                    : addr;
                                 _deliveryLocation = UserLocation(
                                   latitude: lat,
                                   longitude: lng,

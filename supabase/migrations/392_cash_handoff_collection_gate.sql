@@ -55,11 +55,11 @@
 -- still the single source of truth for the whole change. Staging received
 -- earlier revisions via the Management API query endpoint (which records no
 -- schema_migrations row); each revision is re-applied there in full, so
--- staging matches this file. The scoped reconciliation UPDATE near the
--- backfill repairs audit rows those earlier staging revisions wrote with
--- the ride fare instead of the collected order total; it is a no-op on
--- prod, where no CASH_COLLECTED rows exist. Applying this file again
--- through the CLI is safe: every statement is idempotent.
+-- staging matches this file. Applying it again through the CLI is safe:
+-- every statement is idempotent, and the whole file runs in one
+-- transaction.
+
+begin;
 
 CREATE OR REPLACE FUNCTION public._audit_cash_collection(p_resource text, p_resource_id uuid, p_amount numeric)
  RETURNS void
@@ -395,10 +395,14 @@ BEGIN
       RETURN jsonb_build_object('ok', false, 'code', 'INVALID_STATUS', 'current_status', v_pay_status);
     END IF;
     IF v_pay_status = 'paid' THEN
+      -- Heal a missing stamp only; collected_by is filled from the current
+      -- caller only when the stamp is healed in the same call. A stamped
+      -- booking with a NULL collector keeps NULL — never invented.
       UPDATE public.service_bookings
-         SET cash_collected_at = COALESCE(cash_collected_at, updated_at, now()),
+         SET cash_collected_at = COALESCE(updated_at, now()),
              cash_collected_by = COALESCE(cash_collected_by, v_uid)
-       WHERE id = p_reference_id;
+       WHERE id = p_reference_id
+         AND cash_collected_at IS NULL;
       PERFORM public._audit_cash_collection('service_booking', p_reference_id, NULL);
       RETURN jsonb_build_object('ok', true, 'code', 'ALREADY_COLLECTED', 'reference_id', p_reference_id);
     END IF;
@@ -436,8 +440,11 @@ $function$
 -- RETURNING), marked system/backfill, with the collected amount (the order
 -- total where one is linked). Rows already stamped — by live pre-392
 -- collections or by a re-applied earlier revision — get nothing.
-CREATE TEMPORARY TABLE zz_392_bf_rides(id uuid PRIMARY KEY, amount numeric);
-CREATE TEMPORARY TABLE zz_392_bf_orders(id uuid PRIMARY KEY, amount numeric);
+CREATE TEMPORARY TABLE IF NOT EXISTS pg_temp.zz_392_bf_rides(id uuid PRIMARY KEY, amount numeric) ON COMMIT DROP;
+CREATE TEMPORARY TABLE IF NOT EXISTS pg_temp.zz_392_bf_orders(id uuid PRIMARY KEY, amount numeric) ON COMMIT DROP;
+-- Belt and braces for a re-apply inside one session.
+DELETE FROM pg_temp.zz_392_bf_rides;
+DELETE FROM pg_temp.zz_392_bf_orders;
 
 WITH stamped AS (
   UPDATE public.rides r
@@ -449,7 +456,7 @@ WITH stamped AS (
      AND r.cash_collected_at IS NULL
    RETURNING r.id, r.fare, r.order_id
 )
-INSERT INTO zz_392_bf_rides (id, amount)
+INSERT INTO pg_temp.zz_392_bf_rides (id, amount)
 SELECT s.id, COALESCE(o.total_amount, s.fare)
   FROM stamped s
   LEFT JOIN public.orders o ON o.id = s.order_id;
@@ -468,36 +475,32 @@ WITH stamped AS (
      AND o.cash_collected_at IS NULL
    RETURNING o.id, o.total_amount
 )
-INSERT INTO zz_392_bf_orders (id, amount)
+INSERT INTO pg_temp.zz_392_bf_orders (id, amount)
 SELECT id, total_amount FROM stamped;
 
+-- A stamped row with a pre-existing CASH_COLLECTED audit keeps that row:
+-- exactly one audit per resource, however the row got stamped (#94).
 INSERT INTO public.audit_log (actor, actor_role, scope, action, resource, resource_id, after, reason)
 SELECT NULL, 'system', 'GLOBAL', 'CASH_COLLECTED', 'ride', b.id::text,
        jsonb_build_object('amount', b.amount, 'backfill', true),
        'backfill_392'
-  FROM zz_392_bf_rides b;
+  FROM pg_temp.zz_392_bf_rides b
+ WHERE NOT EXISTS (SELECT 1 FROM public.audit_log a
+                    WHERE a.action = 'CASH_COLLECTED' AND a.resource = 'ride' AND a.resource_id = b.id::text);
 
 INSERT INTO public.audit_log (actor, actor_role, scope, action, resource, resource_id, after, reason)
 SELECT NULL, 'system', 'GLOBAL', 'CASH_COLLECTED', 'order', b.id::text,
        jsonb_build_object('amount', b.amount, 'backfill', true),
        'backfill_392'
-  FROM zz_392_bf_orders b;
+  FROM pg_temp.zz_392_bf_orders b
+ WHERE NOT EXISTS (SELECT 1 FROM public.audit_log a
+                    WHERE a.action = 'CASH_COLLECTED' AND a.resource = 'order' AND a.resource_id = b.id::text);
 
-DROP TABLE zz_392_bf_rides;
-DROP TABLE zz_392_bf_orders;
-
--- Reconciliation (staging only; a no-op on prod): earlier 392 revisions
--- wrote CASH_COLLECTED audit rows for order-linked rides with the ride
--- fare. The collected amount is the order total, so correct those rows in
--- place. Rows written by this revision already carry the right amount.
-UPDATE public.audit_log a
-   SET after = jsonb_set(a.after, '{amount}', to_jsonb(o.total_amount))
-  FROM public.rides r
-  JOIN public.orders o ON o.id = r.order_id
- WHERE a.action = 'CASH_COLLECTED'
-   AND a.resource = 'ride'
-   AND a.resource_id = r.id::text
-   AND (a.after->>'amount')::numeric IS DISTINCT FROM o.total_amount;
+-- A staging-only repair for audit rows written by earlier 392 review
+-- revisions lives in supabase/tests/392_staging_audit_repair.sql. It is
+-- deliberately NOT part of this migration: prod has no such rows (verified
+-- zero on 2026-11-23), and a blind rewrite could destroy legitimate
+-- historical evidence (e.g. amounts captured before a refund).
 
 -- Captain app cash card: what to collect on this delivery and whether it is
 -- collected already. Assigned driver or owner only — same NOT_FOUND shape
@@ -618,3 +621,5 @@ BEGIN
 END;
 $function$
 ;
+
+commit;

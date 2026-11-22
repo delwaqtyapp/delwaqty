@@ -13,7 +13,7 @@ create temporary table zz_cash_ctx(
   c uuid, x uuid, du uuid, drv uuid, merch uuid,
   o1 uuid, o2 uuid, o3 uuid, o4 uuid, o5 uuid, o6 uuid, o7 uuid, o8 uuid, o9 uuid, o10 uuid,
   r1 uuid, r2 uuid, r3 uuid, r5 uuid, r6 uuid, r7 uuid, r8 uuid, r9 uuid, r10 uuid, r11 uuid, r12 uuid, r13 uuid,
-  sp uuid, sb1 uuid, sb2 uuid
+  sp uuid, sb1 uuid, sb2 uuid, sb3 uuid
 );
 insert into zz_cash_ctx
 select gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(),
@@ -21,7 +21,8 @@ select gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(
        gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(),
        gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(),
        gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(),
-       gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid();
+       gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(),
+       gen_random_uuid();
 
 -- cash_collected_by references auth.users, so the fixture needs both sides.
 insert into auth.users(id,email)
@@ -123,6 +124,13 @@ select sb2,c,sp,'zz-cash-provider','plumbing','pending',current_date,'11:00','ca
 -- states with an update (runs as postgres, the client-writes guard allows it).
 update public.service_bookings set status='completed', payment_status='paid' where id=(select sb1 from zz_cash_ctx);
 update public.service_bookings set status='completed', payment_status='refunded' where id=(select sb2 from zz_cash_ctx);
+-- sb3: paid cash booking, stamp present, collector NULL (security LOW:
+-- replay must not invent the collector).
+insert into public.service_bookings(id,user_id,provider_id,provider_name,category_type,status,scheduled_date,scheduled_time,payment_method,payment_status)
+select sb3,c,sp,'zz-cash-provider','plumbing','pending',current_date,'12:00','cash','unpaid' from zz_cash_ctx;
+update public.service_bookings set status='completed', payment_status='paid',
+  cash_collected_at='2026-11-20 08:00+00'::timestamptz, cash_collected_by=NULL
+ where id=(select sb3 from zz_cash_ctx);
 
 -- Full settlement-ledger snapshot: collection must never add rows.
 create temporary table zz_cash_ledger_snap as
@@ -313,6 +321,14 @@ begin
     'refunded cash booking refused: '||r::text;
   assert (select payment_status from public.service_bookings where id=t.sb2)='refunded',
     'refunded booking not resurrected';
+
+  -- ── Security LOW: stamped booking + NULL collector stays NULL on replay.
+  r:=public.confirm_cash_collection('service_booking',t.sb3);
+  assert r->>'ok'='true' and r->>'code'='ALREADY_COLLECTED', 'stamped booking replays: '||r::text;
+  assert (select cash_collected_at from public.service_bookings where id=t.sb3)='2026-11-20 08:00+00'::timestamptz,
+    'booking stamp untouched';
+  assert (select cash_collected_by from public.service_bookings where id=t.sb3) is null,
+    'booking collector not invented';
 end $$;
 
 -- ── Rating gate (RLS): cash ride is rateable only after collection.
@@ -390,6 +406,140 @@ begin
     'rating allowed after collection';
 end $$;
 reset role;
+
+
+-- ── Backfill combinations (#94): the migration's backfill statements run
+-- verbatim inside this rollback transaction over fixed-id fixtures.
+do $$
+declare
+  t record;
+begin
+  select * into t from zz_cash_ctx;
+
+  -- A: paid cash pair, both stamps null → both stamped, one audit each,
+  --    amount = order total on both.
+  insert into public.orders(id,user_id,merchant_id,driver_id,status,payment_status,payment_method,subtotal,delivery_fee,total_amount,cash_collected_at)
+  values ('bbbb3920-0000-4000-8000-0000000000a1',t.c,t.merch,t.drv,'delivered','paid','cash',100,15,115,NULL);
+  insert into public.rides(id,rider_id,driver_id,order_id,merchant_id,service_type,ride_type,status,payment_status,payment_method,fare,cash_collected_at,completed_at,pickup_latitude,pickup_longitude,dropoff_latitude,dropoff_longitude)
+  values ('bbbb3920-0000-4000-8000-0000000000a2',t.c,t.drv,'bbbb3920-0000-4000-8000-0000000000a1',t.merch,'food_delivery','motorcycle','completed','paid','cash',15,NULL,'2026-11-19 12:00+00',0,0,0.001,0.001);
+
+  -- B: null stamp but a CASH_COLLECTED audit already exists → stamped, and
+  --    the pre-existing audit is the only one afterwards.
+  insert into public.rides(id,rider_id,driver_id,service_type,ride_type,status,payment_status,payment_method,fare,cash_collected_at,completed_at,pickup_latitude,pickup_longitude,dropoff_latitude,dropoff_longitude)
+  values ('bbbb3920-0000-4000-8000-0000000000b1',t.c,t.drv,'courier','motorcycle','completed','paid','cash',40,NULL,'2026-11-19 13:00+00',0,0,0.001,0.001);
+  insert into public.audit_log(actor,actor_role,scope,action,resource,resource_id,after)
+  values (t.du,'driver','GLOBAL','CASH_COLLECTED','ride','bbbb3920-0000-4000-8000-0000000000b1',jsonb_build_object('amount',40));
+
+  -- C: cancelled paid cash ride → untouched.
+  insert into public.rides(id,rider_id,driver_id,service_type,ride_type,status,payment_status,payment_method,fare,cash_collected_at,completed_at,pickup_latitude,pickup_longitude,dropoff_latitude,dropoff_longitude)
+  values ('bbbb3920-0000-4000-8000-0000000000c1',t.c,t.drv,'courier','motorcycle','cancelled','paid','cash',30,NULL,NULL,0,0,0.001,0.001);
+
+  -- D: completed but no completed_at → stamp stays null, no audit.
+  insert into public.rides(id,rider_id,driver_id,service_type,ride_type,status,payment_status,payment_method,fare,cash_collected_at,completed_at,pickup_latitude,pickup_longitude,dropoff_latitude,dropoff_longitude)
+  values ('bbbb3920-0000-4000-8000-0000000000d1',t.c,t.drv,'courier','motorcycle','completed','paid','cash',25,NULL,NULL,0,0,0.001,0.001);
+
+  -- E: stamp already present (live pre-392 collection), no audit → the
+  --    backfill neither re-stamps nor audits it.
+  insert into public.rides(id,rider_id,driver_id,service_type,ride_type,status,payment_status,payment_method,fare,cash_collected_at,completed_at,pickup_latitude,pickup_longitude,dropoff_latitude,dropoff_longitude)
+  values ('bbbb3920-0000-4000-8000-0000000000e1',t.c,t.drv,'courier','motorcycle','completed','paid','cash',18,'2026-11-18 09:00+00','2026-11-18 09:00+00',0,0,0.001,0.001);
+
+  -- F: delivered paid cash order whose only linked ride has no
+  --    completed_at → order stamp stays null, no audit.
+  insert into public.orders(id,user_id,merchant_id,driver_id,status,payment_status,payment_method,subtotal,delivery_fee,total_amount,cash_collected_at)
+  values ('bbbb3920-0000-4000-8000-0000000000f1',t.c,t.merch,t.drv,'delivered','paid','cash',50,15,65,NULL);
+  insert into public.rides(id,rider_id,driver_id,order_id,merchant_id,service_type,ride_type,status,payment_status,payment_method,fare,cash_collected_at,completed_at,pickup_latitude,pickup_longitude,dropoff_latitude,dropoff_longitude)
+  values ('bbbb3920-0000-4000-8000-0000000000f2',t.c,t.drv,'bbbb3920-0000-4000-8000-0000000000f1',t.merch,'food_delivery','motorcycle','completed','paid','cash',15,NULL,NULL,0,0,0.001,0.001);
+end $$;
+
+-- The migration's backfill block, verbatim (temp tables are this
+-- transaction's own; everything rolls back).
+CREATE TEMPORARY TABLE IF NOT EXISTS pg_temp.zz_392_bf_rides(id uuid PRIMARY KEY, amount numeric) ON COMMIT DROP;
+CREATE TEMPORARY TABLE IF NOT EXISTS pg_temp.zz_392_bf_orders(id uuid PRIMARY KEY, amount numeric) ON COMMIT DROP;
+DELETE FROM pg_temp.zz_392_bf_rides;
+DELETE FROM pg_temp.zz_392_bf_orders;
+
+WITH stamped AS (
+  UPDATE public.rides r
+     SET cash_collected_at = r.completed_at
+   WHERE r.payment_method = 'cash'
+     AND r.payment_status = 'paid'
+     AND r.status = 'completed'
+     AND r.completed_at IS NOT NULL
+     AND r.cash_collected_at IS NULL
+   RETURNING r.id, r.fare, r.order_id
+)
+INSERT INTO pg_temp.zz_392_bf_rides (id, amount)
+SELECT s.id, COALESCE(o.total_amount, s.fare)
+  FROM stamped s
+  LEFT JOIN public.orders o ON o.id = s.order_id;
+
+WITH stamped AS (
+  UPDATE public.orders o
+     SET cash_collected_at = r.completed_at
+    FROM (SELECT order_id, min(completed_at) AS completed_at
+            FROM public.rides
+           WHERE status = 'completed' AND completed_at IS NOT NULL
+           GROUP BY order_id) r
+   WHERE r.order_id = o.id
+     AND o.payment_method = 'cash'
+     AND o.payment_status = 'paid'
+     AND o.status = 'delivered'
+     AND o.cash_collected_at IS NULL
+   RETURNING o.id, o.total_amount
+)
+INSERT INTO pg_temp.zz_392_bf_orders (id, amount)
+SELECT id, total_amount FROM stamped;
+
+INSERT INTO public.audit_log (actor, actor_role, scope, action, resource, resource_id, after, reason)
+SELECT NULL, 'system', 'GLOBAL', 'CASH_COLLECTED', 'ride', b.id::text,
+       jsonb_build_object('amount', b.amount, 'backfill', true),
+       'backfill_392'
+  FROM pg_temp.zz_392_bf_rides b
+ WHERE NOT EXISTS (SELECT 1 FROM public.audit_log a
+                    WHERE a.action = 'CASH_COLLECTED' AND a.resource = 'ride' AND a.resource_id = b.id::text);
+
+INSERT INTO public.audit_log (actor, actor_role, scope, action, resource, resource_id, after, reason)
+SELECT NULL, 'system', 'GLOBAL', 'CASH_COLLECTED', 'order', b.id::text,
+       jsonb_build_object('amount', b.amount, 'backfill', true),
+       'backfill_392'
+  FROM pg_temp.zz_392_bf_orders b
+ WHERE NOT EXISTS (SELECT 1 FROM public.audit_log a
+                    WHERE a.action = 'CASH_COLLECTED' AND a.resource = 'order' AND a.resource_id = b.id::text);
+
+do $$
+begin
+  -- A: both partners stamped from the real completed_at; one audit each at
+  --    the order total.
+  assert (select cash_collected_at from public.rides where id='bbbb3920-0000-4000-8000-0000000000a2')='2026-11-19 12:00+00'::timestamptz,
+    'A: ride stamped from completed_at';
+  assert (select cash_collected_at from public.orders where id='bbbb3920-0000-4000-8000-0000000000a1')='2026-11-19 12:00+00'::timestamptz,
+    'A: order stamped from the linked ride completed_at';
+  assert (select count(*) from public.audit_log where action='CASH_COLLECTED' and resource='ride' and resource_id='bbbb3920-0000-4000-8000-0000000000a2')=1
+     and (select (after->>'amount')::numeric from public.audit_log where action='CASH_COLLECTED' and resource='ride' and resource_id='bbbb3920-0000-4000-8000-0000000000a2')=115,
+    'A: one ride audit at the order total';
+  assert (select count(*) from public.audit_log where action='CASH_COLLECTED' and resource='order' and resource_id='bbbb3920-0000-4000-8000-0000000000a1')=1
+     and (select (after->>'amount')::numeric from public.audit_log where action='CASH_COLLECTED' and resource='order' and resource_id='bbbb3920-0000-4000-8000-0000000000a1')=115,
+    'A: one order audit at the order total';
+
+  -- B: stamped, and the pre-existing audit is the only one (#94).
+  assert (select cash_collected_at from public.rides where id='bbbb3920-0000-4000-8000-0000000000b1')='2026-11-19 13:00+00'::timestamptz,
+    'B: ride stamped';
+  assert (select count(*) from public.audit_log where action='CASH_COLLECTED' and resource='ride' and resource_id='bbbb3920-0000-4000-8000-0000000000b1')=1,
+    'B: exactly one audit remains — the backfill did not duplicate it';
+  assert (select count(*) from public.audit_log where action='CASH_COLLECTED' and resource='ride' and resource_id='bbbb3920-0000-4000-8000-0000000000b1' and reason='backfill_392')=0,
+    'B: the surviving audit is the original, not a backfill row';
+
+  -- C/D/E/F: untouched combinations.
+  assert (select cash_collected_at from public.rides where id='bbbb3920-0000-4000-8000-0000000000c1') is null, 'C: cancelled ride untouched';
+  assert (select cash_collected_at from public.rides where id='bbbb3920-0000-4000-8000-0000000000d1') is null, 'D: no completed_at, no stamp';
+  assert (select cash_collected_at from public.rides where id='bbbb3920-0000-4000-8000-0000000000e1')='2026-11-18 09:00+00'::timestamptz, 'E: existing stamp untouched';
+  assert (select count(*) from public.audit_log where action='CASH_COLLECTED' and resource_id in
+    ('bbbb3920-0000-4000-8000-0000000000c1','bbbb3920-0000-4000-8000-0000000000d1','bbbb3920-0000-4000-8000-0000000000e1',
+     'bbbb3920-0000-4000-8000-0000000000f1','bbbb3920-0000-4000-8000-0000000000f2'))=0,
+    'C/D/E/F: no audit rows for unstamped or already-stamped rows';
+  assert (select cash_collected_at from public.orders where id='bbbb3920-0000-4000-8000-0000000000f1') is null,
+    'F: order without a completed linked ride stays null';
+end $$;
 
 -- ── Full ledger snapshot: no earnings/commission/merchant rows appeared.
 do $$

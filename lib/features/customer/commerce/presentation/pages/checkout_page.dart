@@ -266,8 +266,15 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
               : platformCredit.clamp(0.0, dueBeforeCredit).toDouble();
           final orderTotal = dueBeforeCredit - creditApplied;
 
-          return ListView(
-            padding: const EdgeInsets.all(16),
+          // 395: pull to refresh re-reads the gift balance (and the fee),
+          // so credit granted or spent elsewhere never stays stale here.
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(_platformCreditProvider);
+              ref.invalidate(_merchantFeeProvider(cart.merchantId));
+            },
+            child: ListView(
+              padding: const EdgeInsets.all(16),
             children: [
               AnimatedFadeIn(child: _SectionTitle(title: l10n.deliveryAddress)),
               const SizedBox(height: 8),
@@ -572,7 +579,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   ),
                 ),
               ),
-            ],
+              ],
+            ),
           );
         },
         loading: () => Center(child: AppLoader.circular()),

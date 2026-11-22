@@ -10,7 +10,7 @@ import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/features/customer/restaurant/restaurant_module.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/entities/branch.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/entities/working_hours.dart';
-import 'package:delwaqty/features/customer/restaurant/domain/services/working_hours_status.dart';
+import 'package:delwaqty/features/customer/restaurant/presentation/widgets/open_status_badge.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/entities/restaurant_settings.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/entities/offer.dart';
 import 'package:delwaqty/features/customer/restaurant/presentation/widgets/working_hours_card.dart';
@@ -130,14 +130,10 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
     final hoursAsync = ref.watch(_hoursProvider(widget.merchantId));
     final offersAsync = ref.watch(_offersProvider(widget.merchantId));
 
-    // Effective open state: the store's manual flag AND, when a weekly
-    // schedule exists, the schedule right now (overnight windows included).
-    // Mirrors public.working_hours_open_at used by checkout (migration 398).
-    final hours = hoursAsync.value;
-    final scheduleOpen = hours == null
-        ? null
-        : workingHoursOpenAt(hours, DateTime.now());
-    final effectiveOpen = merchant.isOpenNow && (scheduleOpen ?? true);
+    // The badge combines the manual flag with the weekly schedule
+    // (overnight windows included) and refreshes itself across boundaries;
+    // see OpenStatusBadge. While hours load, the manual flag decides.
+    final hours = hoursAsync.value ?? const <WorkingHours>[];
 
     return RefreshIndicator(
       onRefresh: _onRefresh,
@@ -153,7 +149,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
                 children: [
                   AnimatedFadeIn(
                     delay: const Duration(milliseconds: 100),
-                    child: _buildHeader(theme, l10n, merchant, effectiveOpen),
+                    child: _buildHeader(theme, l10n, merchant, hours),
                   ),
                   const SizedBox(height: 16),
                   settingsAsync.when(
@@ -393,7 +389,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
     ThemeData theme,
     AppLocalizations l10n,
     Merchant merchant,
-    bool effectiveOpen,
+    List<WorkingHours> hours,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -402,24 +398,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
           children: [
             RatingStars(rating: merchant.rating, count: merchant.ratingCount),
             const Spacer(),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: effectiveOpen
-                    ? AppColors.successLight.withValues(alpha: 0.1)
-                    : AppColors.errorLight.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                effectiveOpen ? l10n.open : l10n.closed,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: effectiveOpen
-                      ? AppColors.successLight
-                      : AppColors.errorLight,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+            OpenStatusBadge(manualOpen: merchant.isOpenNow, hours: hours),
           ],
         ),
         if (merchant.description != null &&

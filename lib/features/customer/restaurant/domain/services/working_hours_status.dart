@@ -1,4 +1,15 @@
+import 'package:timezone/data/latest.dart' as tzdata;
+import 'package:timezone/timezone.dart' as tz;
 import 'package:delwaqty/features/customer/restaurant/domain/entities/working_hours.dart';
+
+bool _tzReady = false;
+tz.Location _cairo() {
+  if (!_tzReady) {
+    tzdata.initializeTimeZones();
+    _tzReady = true;
+  }
+  return tz.getLocation('Africa/Cairo');
+}
 
 /// Schedule-only open/closed answer for one moment, mirroring
 /// `public.working_hours_open_at` (migration 398) so the customer app and
@@ -15,15 +26,18 @@ import 'package:delwaqty/features/customer/restaurant/domain/entities/working_ho
 /// Returns null when no schedule exists at all (the schedule does not
 /// constrain the store), true/false otherwise.
 ///
-/// [localNow] must be a local DateTime in the store's timezone (Egypt), the
-/// same basis the SQL function computes with Africa/Cairo.
-bool? workingHoursOpenAt(List<WorkingHours> hours, DateTime localNow) {
+/// [at] is an absolute instant in any timezone (typically `DateTime.now()`
+/// on the device); it is converted to Africa/Cairo, the same basis the SQL
+/// function uses, so a device set to a foreign timezone agrees with
+/// checkout.
+bool? workingHoursOpenAt(List<WorkingHours> hours, DateTime at) {
   if (hours.isEmpty) return null;
+  final cairoNow = tz.TZDateTime.from(at, _cairo());
 
-  // DateTime.weekday is Mon=1..Sun=7; the apps store Sun=0..Sat=6.
-  final today = localNow.weekday % 7;
+  // weekday is Mon=1..Sun=7; the apps store Sun=0..Sat=6.
+  final today = cairoNow.weekday % 7;
   final yesterday = (today + 6) % 7;
-  final t = localNow.hour * 60 + localNow.minute;
+  final t = cairoNow.hour * 3600 + cairoNow.minute * 60 + cairoNow.second;
 
   var open = false;
   for (final h in hours) {
@@ -48,14 +62,17 @@ bool? workingHoursOpenAt(List<WorkingHours> hours, DateTime localNow) {
   return open;
 }
 
-/// Parses "HH:MM" or "HH:MM:SS" into minutes since midnight.
+/// Parses "HH:MM" or "HH:MM:SS" into seconds since midnight, so legacy
+/// rows with nonzero seconds compare exactly like the SQL time values.
 int? _minutes(String hhmm) {
   final parts = hhmm.split(':');
   if (parts.length < 2) return null;
   final h = int.tryParse(parts[0]);
   final m = int.tryParse(parts[1]);
+  final sec = parts.length > 2 ? (int.tryParse(parts[2]) ?? 0) : 0;
   if (h == null || m == null || h < 0 || h > 23 || m < 0 || m > 59) {
     return null;
   }
-  return h * 60 + m;
+  if (sec < 0 || sec > 59) return null;
+  return h * 3600 + m * 60 + sec;
 }

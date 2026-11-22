@@ -8,6 +8,7 @@ import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
 import 'package:delwaqty/features/customer/location/presentation/widgets/smart_map_picker_sheet.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/widgets/schedule_window_note.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/app_shell.dart';
@@ -810,18 +811,11 @@ class _MerchantStorefrontPageState
                       // close <= open is valid: equal times mean open 24
                       // hours, a close before the open is an overnight
                       // window that ends on the next calendar day.
-                      if (_windowNote(_hours[i], l10n) != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(
-                            _windowNote(_hours[i], l10n)!,
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(
-                                  color: AppColors.brandPurple,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
-                        ),
+                      ScheduleWindowNote(
+                        open: _hours[i].open,
+                        close: _hours[i].close,
+                        closed: _hours[i].closed,
+                      ),
                     ],
                   ),
             onChanged: (open) => setState(() {
@@ -857,15 +851,6 @@ class _MerchantStorefrontPageState
             : null,
       ),
     );
-  }
-
-  /// Overnight / 24h caption for one schedule row, or null for a plain
-  /// same-day window. HH:MM strings compare lexicographically.
-  String? _windowNote(WorkingHoursDay day, AppLocalizations l10n) {
-    if (day.closed) return null;
-    if (day.open == day.close) return l10n.open24Hours;
-    if (day.close.compareTo(day.open) < 0) return l10n.closesNextDay;
-    return null;
   }
 
   TimeOfDay _parseTimeOfDay(String hhmm) {

@@ -97,6 +97,45 @@ begin
   exception when others then if sqlerrm<>'MERCHANT_CLOSED' then raise; end if; end;
   r := public.create_order(t.store3,jsonb_build_array(jsonb_build_object('product_id',t.product3,'quantity',1)),'zz-test-address',0.001,0.001,'cash',null,null,'zz-test-398-order');
   assert r->>'ok'='true', 'always-24h store takes orders';
+
+  -- Schedule-less store keeps the manual-flag-only behavior at any time.
+  insert into public.merchants(id,owner_user_id,name,type,status,is_open)
+  values(gen_random_uuid(),t.merchant_user,'zz-test-398-nosched','restaurant','active',true)
+  returning id into m;
+  insert into public.products(id,merchant_id,name,price,is_available,stock_quantity)
+  values(gen_random_uuid(),m,'zz-test-398-product2',25,true,100)
+  returning id into sched_store; -- reuse var as product id
+  begin
+    perform public.create_order(m,jsonb_build_array(jsonb_build_object('product_id',sched_store,'quantity',1)),'zz-test-address',0.001,0.001,'cash',null,null,'zz-test-398-nosched-open');
+  exception when others then
+    raise exception 'TEST_FAIL_NOSCHED_OPEN: %', sqlerrm;
+  end;
+  update public.merchants set is_open=false where id=m;
+  begin
+    perform public.create_order(m,jsonb_build_array(jsonb_build_object('product_id',sched_store,'quantity',1)),'zz-test-address',0.001,0.001);
+    raise exception 'TEST_FAIL_NOSCHED_CLOSED_ACCEPTED';
+  exception when others then if sqlerrm<>'MERCHANT_CLOSED' then raise; end if; end;
+
+  -- Grants: authenticated may call it, anon may not.
+  assert has_function_privilege('authenticated','public.working_hours_open_at(uuid,timestamp with time zone)','EXECUTE'),
+    'authenticated execute granted';
+  assert not has_function_privilege('anon','public.working_hours_open_at(uuid,timestamp with time zone)','EXECUTE'),
+    'anon execute revoked';
+
+  -- A rejected writer call preserves the previously stored rows.
+  perform set_config('request.jwt.claim.sub',t.writer_user::text,true);
+  r := public.provider_set_working_hours(jsonb_build_array(
+    jsonb_build_object('day',2,'open','10:00','close','22:00','closed',false)));
+  assert r->>'ok'='true', 'baseline schedule stored';
+  begin
+    perform public.provider_set_working_hours(jsonb_build_array(
+      jsonb_build_object('day',2,'open','11:00','close','23:00','closed',false),
+      jsonb_build_object('day',9,'open','11:00','close','23:00','closed',false)));
+    raise exception 'TEST_FAIL_INVALID_WRITER_ACCEPTED';
+  exception when others then if sqlerrm not like 'Invalid day of week%' then raise; end if; end;
+  assert exists(select 1 from public.working_hours
+    where merchant_id=t.sched_store and day_of_week=2 and open_time='10:00' and close_time='22:00'),
+    'rejected writer call preserved old rows';
 end $test$;
 select 'PASS398: overnight spill, midnight and 24h edges, closed-day rollover, same-day parity, writer validation, checkout wiring' result;
 rollback;

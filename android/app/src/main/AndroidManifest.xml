@@ -7,10 +7,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <!-- A driver marked online streams GPS; without background location the
-         stream dies as soon as the app is backgrounded and the driver stays
-         dispatchable with a stale position. -->
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+    <!-- ACCESS_BACKGROUND_LOCATION lives in the driver flavor manifest only:
+         an online driver streams GPS and needs it; customer/provider/admin
+         must not request background location (Play rejection risk). -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>

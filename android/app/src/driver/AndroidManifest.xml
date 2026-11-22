@@ -1,4 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Driver-only: an online driver streams GPS; without background
+         location the stream dies as soon as the app is backgrounded and the
+         driver stays dispatchable with a stale position. Play requires a
+         Permissions Declaration Form + demo video for this. -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
     <application
         android:label="@string/app_name">
         <activity

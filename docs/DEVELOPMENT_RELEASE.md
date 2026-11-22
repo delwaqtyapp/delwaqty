@@ -15,13 +15,22 @@ start at visible version 1.0.0 with any unused code above the dev builds.
    template's `version: N`, `versionName: 1.0.0` in sync.
 2. Push a complete commit. Wait for **all** CI/CD jobs, including Test and
    Analyze & Format, to pass. Apply the normal code-review gate.
-3. With gh authenticated, run `python3 tool/publish_development.py RUN_ID`.
+3. After reviewer GO, dispatch the **Publish development** workflow on master
+   with `ci_run` set to the green CI/CD run ID. This is the only supported
+   publisher; its concurrency group queues overlapping publishes without
+   cancelling an active one. Local execution is refused.
    The script refuses a partial/failed CI run, downloads its four APKs,
-   checks the established signing certificate, writes per-channel SHA-256,
+   cryptographically verifies every APK with Android `apksigner verify`,
+   compares the complete signer set to the established certificate, enforces
+   the prior latest release build floor for all four channels, writes SHA-256,
    and verifies every uploaded APK and manifest by downloading them again.
 4. The only release is `development`, titled `Development build`. APK asset
    names contain the internal build code so caches cannot confuse two builds.
-   Upload APKs before replacing `versions.json`; remove old APKs afterward.
+   Upload APKs before replacing `versions.json`; retain all prior development APK generations for the entire lifetime of
+   the development tag. Never overwrite an existing APK name with new bytes.
+   Retain old numbered releases for seven days after the rolling release first
+   goes live, then remove them. This protects old links and in-flight downloads
+   during the transition. Only the development release is marked latest.
    The manifest records the exact source commit. The stable tag points to the
    initial development release, not necessarily the newest APK source.
 5. Do not create a version announcement for every fix. OTA already checks
@@ -33,6 +42,8 @@ An old installed client can still discover `development` through the existing
 GitHub latest-release API and use the same manifest schema. It may briefly see
 cached metadata; retrying later remains safe because APK SHA-256 is enforced.
 No release process may lower the code or bypass the signing/checksum checks.
+A repeated publish of the same code is permitted only for the exact same
+manifest and APK bytes, so interrupted publishing can be retried safely.
 
 ## First Play release
 

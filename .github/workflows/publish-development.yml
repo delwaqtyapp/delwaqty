@@ -1,0 +1,31 @@
+name: Publish development
+on:
+  workflow_dispatch:
+    inputs:
+      ci_run:
+        description: 'Fully green CI/CD run ID for current master (reviewer GO required)'
+        required: true
+        type: string
+# This is the only supported publisher. Queue, never cancel, overlapping runs.
+concurrency:
+  group: delwaqty-development-publisher
+  cancel-in-progress: false
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Publisher regression tests
+        run: python3 -m unittest discover -s tool -p test_publish_development.py
+      - name: Publish signed, verified APKs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CI_RUN: ${{ inputs.ci_run }}
+        run: python3 tool/publish_development.py "$CI_RUN"

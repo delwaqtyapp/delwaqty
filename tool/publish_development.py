@@ -1,53 +1,57 @@
 #!/usr/bin/env python3
-"""Publish a CI-verified build to the single development release.
+"""Publish through the serialized Publish development GitHub workflow only.
 
-Requires gh authentication. Never builds locally or sends notifications.
-Upload APKs first and replace versions.json last. Old build assets are removed
-only after all newly uploaded assets have passed round-trip SHA-256 checks.
+APKs are cryptographically verified by Android apksigner. Immutable assets from
+all development generations remain available for clients with cached manifests.
 """
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
-import struct
+import shutil
 import subprocess
 import tempfile
 
 REPO = 'delwaqtyapp/delwaqty'
 SIGNER = 'ad4e2f47be742f3c08bd5e97223b3e7fcc366ad958691995e6dbd52a4a77dc55'
 FLAVORS = ('customer', 'admin', 'driver', 'provider')
+WORKFLOW = f'{REPO}/.github/workflows/publish-development.yml@refs/heads/master'
 
 
 def gh(*args):
     return subprocess.check_output(['gh', *args], text=True).strip()
 
 
-def cert_fingerprint(path):
-    data = path.read_bytes()
-    end = data.rfind(b'PK\x05\x06')
-    if end < 0:
-        raise ValueError('APK ZIP directory missing')
-    central = struct.unpack_from('<I', data, end + 16)[0]
-    if data[central - 16:central] != b'APK Sig Block 42':
-        raise ValueError('APK v2 signing block missing')
-    size = struct.unpack_from('<Q', data, central - 24)[0]
-    pos = central - size
-    while pos < central - 24:
-        length = struct.unpack_from('<Q', data, pos)[0]
-        if length < 4:
-            raise ValueError('Malformed signing block')
-        if struct.unpack_from('<I', data, pos + 8)[0] == 0x7109871a:
-            # Length-prefixed signers, signer, signed data, digests, certificates.
-            cursor = pos + 12 + 12
-            digests = struct.unpack_from('<I', data, cursor)[0]
-            cursor += 4 + digests
-            cursor += 4  # certificates sequence length
-            cert_length = struct.unpack_from('<I', data, cursor)[0]
-            cursor += 4
-            return hashlib.sha256(data[cursor:cursor + cert_length]).hexdigest()
-        pos += length + 8
-    raise ValueError('No APK v2 signer found')
+def apksigner_path():
+    direct = shutil.which('apksigner')
+    if direct:
+        return direct
+    for variable in ('ANDROID_HOME', 'ANDROID_SDK_ROOT'):
+        home = os.environ.get(variable)
+        if not home:
+            continue
+        paths = list((Path(home) / 'build-tools').glob('*/apksigner'))
+        if paths:
+            return str(sorted(paths, key=lambda p: tuple(
+                int(n) for n in re.findall(r'\d+', p.parent.name)))[-1])
+    raise SystemExit('Android apksigner is required; no certificate-only fallback')
+
+
+def verify_apk(path, executable):
+    # A certificate extracted from an APK is NOT evidence of a valid signature.
+    # apksigner validates the actual APK bytes and returns nonzero on tampering.
+    result = subprocess.run(
+        [executable, 'verify', '--verbose', '--print-certs', str(path)],
+        text=True, capture_output=True, check=True,
+    )
+    signers = re.findall(
+        r'^Signer #\d+ certificate SHA-256 digest:\s*([0-9a-fA-F]{64})\s*$',
+        result.stdout, re.M,
+    )
+    if not signers or {s.lower() for s in signers} != {SIGNER}:
+        raise SystemExit('APK has a missing or unapproved signer')
 
 
 def digest(path):
@@ -58,21 +62,50 @@ def digest(path):
     return value.hexdigest()
 
 
+def validate_floor(build, manifest, allow_same=False):
+    channels = manifest.get('channels', {})
+    if set(channels) != set(FLAVORS):
+        raise SystemExit('Prior manifest must contain all four build floors')
+    for channel in channels.values():
+        floor = channel.get('version')
+        if (not isinstance(floor, int) or isinstance(floor, bool)
+                or build < floor or (build == floor and not allow_same)):
+            raise SystemExit('Build code must exceed every prior latest build')
+
+
+def release_manifest(release):
+    matches = [a for a in release['assets'] if a['name'] == 'versions.json']
+    if len(matches) != 1:
+        raise SystemExit('Prior published release has no unambiguous manifest')
+    return json.loads(gh('api', f'repos/{REPO}/releases/assets/{matches[0]["id"]}',
+                         '-H', 'Accept: application/octet-stream'))
+
+
+def require_current_master(sha):
+    if gh('api', f'repos/{REPO}/commits/master', '--jq', '.sha') != sha:
+        raise SystemExit('Refusing stale CI commit: master moved')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('run', help='Fully green CI/CD run ID')
     args = parser.parse_args()
+    # The supported execution path has a cross-run concurrency lock. Do not
+    # run this script locally: an OS-only lock cannot serialize other machines.
+    if (os.environ.get('GITHUB_ACTIONS') != 'true'
+            or os.environ.get('GITHUB_WORKFLOW_REF') != WORKFLOW
+            or os.environ.get('GITHUB_REF') != 'refs/heads/master'):
+        raise SystemExit('Use the serialized Publish development workflow on master')
+    executable = apksigner_path()
     run = json.loads(gh('run', 'view', args.run, '-R', REPO, '--json',
                         'headSha,status,conclusion,jobs,workflowName'))
     required = {'Analyze & Format', 'Test'} | {f'Build APK ({f})' for f in FLAVORS}
     jobs = {job['name']: job['conclusion'] for job in run['jobs']}
     if (run['workflowName'] != 'CI/CD' or run['status'] != 'completed'
-            or run['conclusion'] != 'success'
-            or not required.issubset(jobs)
+            or run['conclusion'] != 'success' or not required.issubset(jobs)
             or any(value != 'success' for value in jobs.values())):
-        raise SystemExit('Refusing publish: entire expected CI/CD run must be green')
-    if gh('api', f'repos/{REPO}/commits/master', '--jq', '.sha') != run['headSha']:
-        raise SystemExit('Refusing stale build: CI commit is not current master')
+        raise SystemExit('Entire expected CI/CD run must be green')
+    require_current_master(run['headSha'])
     pubspec = gh('api', f'repos/{REPO}/contents/pubspec.yaml?ref={run["headSha"]}',
                  '-H', 'Accept: application/vnd.github.raw+json')
     match = re.search(r'^version:\s*([\d.]+)\+(\d+)\s*$', pubspec, re.M)
@@ -82,15 +115,12 @@ def main():
     tag = 'development'
     releases = json.loads(gh('api', f'repos/{REPO}/releases?per_page=100'))
     release = next((r for r in releases if r['tag_name'] == tag), None)
-    old = None
-    if release and not release['draft']:
-        assets = release['assets']
-        old_manifests = [a for a in assets if a['name'] == 'versions.json']
-        if old_manifests:
-            old = json.loads(gh('api', f'repos/{REPO}/releases/assets/{old_manifests[0]["id"]}',
-                                '-H', 'Accept: application/octet-stream'))
-            if any(c['version'] > build for c in old['channels'].values()):
-                raise SystemExit('Refusing non-increasing build code')
+    latest = json.loads(gh('api', f'repos/{REPO}/releases/latest'))
+    latest_manifest = release_manifest(latest)
+    validate_floor(build, latest_manifest, allow_same=latest['tag_name'] == tag)
+    old = release_manifest(release) if release and not release['draft'] else None
+    if old:
+        validate_floor(build, old, allow_same=True)
     with tempfile.TemporaryDirectory(prefix='delwaqty-development-') as temp:
         root = Path(temp)
         gh('run', 'download', args.run, '-R', REPO, '-p', '*-release-*', '-D', temp)
@@ -98,33 +128,38 @@ def main():
         apks = []
         for flavor in FLAVORS:
             candidates = list(root.glob(f'**/app-{flavor}-release.apk'))
-            if len(candidates) != 1 or cert_fingerprint(candidates[0]) != SIGNER:
-                raise SystemExit(f'Refusing invalid or ambiguous signer: {flavor}')
+            if len(candidates) != 1:
+                raise SystemExit(f'Ambiguous APK: {flavor}')
+            verify_apk(candidates[0], executable)
             name = f'delwaqty-{flavor}-{build}.apk'
             target = root / name
             candidates[0].rename(target)
-            apks.append(str(target))
+            apks.append(target)
             manifest['channels'][flavor] = {
                 'version': build, 'versionName': version, 'apk': name,
                 'sha256': digest(target), 'notes': 'تحسينات وإصلاحات نسخة التطوير',
             }
         if old and any(c['version'] == build for c in old['channels'].values()):
             if old != manifest:
-                raise SystemExit('Refusing a different payload at an existing build code')
+                raise SystemExit('Different payload at an existing build code')
         manifest_path = root / 'versions.json'
         manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
         if release is None:
             gh('release', 'create', tag, '-R', REPO, '--draft', '--target', run['headSha'],
-               '--title', 'Development build', '--notes',
-               'Current development build. Visible app version: 1.0.0. Internal build codes increase for OTA updates.')
-        # New immutable APK names first. A failed upload leaves the old manifest intact.
-        gh('release', 'upload', tag, '-R', REPO, *apks, '--clobber')
+               '--title', 'Development build', '--notes', 'Current development build.')
+        existing_names = {a['name'] for a in release['assets']} if release else set()
         check = root / 'verify'
         check.mkdir()
-        for flavor, config in manifest['channels'].items():
-            gh('release', 'download', tag, '-R', REPO, '-p', config['apk'], '-D', str(check))
-            if digest(check / config['apk']) != config['sha256']:
-                raise SystemExit(f'Round-trip checksum failed: {flavor}')
+        # Never replace an immutable APK, even on retry. Verify existing bytes.
+        for apk in apks:
+            if apk.name not in existing_names:
+                gh('release', 'upload', tag, '-R', REPO, str(apk))
+            gh('release', 'download', tag, '-R', REPO, '-p', apk.name, '-D', str(check))
+            if digest(check / apk.name) != digest(apk):
+                raise SystemExit(f'Round-trip checksum failed: {apk.name}')
+            verify_apk(check / apk.name, executable)
+        # Recheck after downloads; a new master must get its own successful CI.
+        require_current_master(run['headSha'])
         gh('release', 'upload', tag, '-R', REPO, str(manifest_path), '--clobber')
         gh('release', 'download', tag, '-R', REPO, '-p', 'versions.json', '-D', str(check))
         if json.loads((check / 'versions.json').read_text()) != manifest:
@@ -132,11 +167,9 @@ def main():
         gh('release', 'edit', tag, '-R', REPO, '--draft=false', '--prerelease=false', '--latest',
            '--title', 'Development build', '--notes',
            f'Current development build. Visible app version: 1.0.0. Source commit: {run["headSha"]}.')
+        # Keep ALL development APK generations while this tag is active.
+        # Older clients can retain old manifests for an unbounded time.
         current = json.loads(gh('release', 'view', tag, '-R', REPO, '--json', 'url,assets'))
-        keep = {'versions.json'} | {Path(p).name for p in apks}
-        for asset in current['assets']:
-            if asset['name'] not in keep:
-                gh('release', 'delete-asset', tag, asset['name'], '-R', REPO, '--yes')
         print(json.dumps({'url': current['url'], 'commit': run['headSha'],
                           'build': build, 'sha256': {f: c['sha256'] for f, c in manifest['channels'].items()}}, indent=2))
 

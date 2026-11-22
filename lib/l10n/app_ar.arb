@@ -1360,6 +1360,8 @@
   "showingNProducts": "عرض {count} منتج",
   "noResultsInMerchant": "لا توجد نتائج",
   "discountPercent": "خصم {percent}%",
+  "platformCredit": "هدية دلوقتي",
+  "platformCreditAutoApplied": "عندك هدية من دلوقتي بقيمة {amount} ج.م 🎁 هتنخصم تلقائي من الطلب ده",
   "mostOrdered": "الأكثر مبيعاً",
   "addedToCart": "تمت الإضافة إلى السلة",
   "options": "الخيارات",

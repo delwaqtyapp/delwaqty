@@ -4223,6 +4223,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get platformCredit => 'Delwaqty gift';
+
+  @override
+  String platformCreditAutoApplied(Object amount) {
+    return 'You have a Delwaqty gift of $amount EGP. It is deducted automatically from this order.';
+  }
+
+  @override
   String get mostOrdered => 'Most Ordered';
 
   @override

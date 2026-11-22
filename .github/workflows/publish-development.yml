@@ -24,6 +24,10 @@ jobs:
           python-version: '3.12'
       - name: Publisher regression tests
         run: python3 -m unittest discover -s tool -p test_publish_development.py
+      - name: Pin verified Android signature tool
+        run: |
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'build-tools;35.0.0'
+          echo "APKSIGNER=$ANDROID_HOME/build-tools/35.0.0/apksigner" >> "$GITHUB_ENV"
       - name: Publish signed, verified APKs
         env:
           GH_TOKEN: ${{ github.token }}

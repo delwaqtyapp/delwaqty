@@ -18,6 +18,15 @@ REPO = 'delwaqtyapp/delwaqty'
 SIGNER = 'ad4e2f47be742f3c08bd5e97223b3e7fcc366ad958691995e6dbd52a4a77dc55'
 FLAVORS = ('customer', 'admin', 'driver', 'provider')
 WORKFLOW = f'{REPO}/.github/workflows/publish-development.yml@refs/heads/master'
+# Reviewed one-time reuse of the complete green auth-cutover CI artifacts.
+REUSE_SOURCE = 'c54f633eb26c3f8aaea783fa2e12149ed58eb650'
+REUSE_HASHES = {
+    'customer': '9a333f59edf49d11a3c1c66373904783236c4cf1b5643901bdd66bf40c086226',
+    'admin': 'ccc15e8afa53c90e489fe5377af9fde6c5ed87f52b659ace05b207672ff7f565',
+    'driver': '603094dbe40b81faf9cbdaa024be319c0e4f7d99c409a3fb8bd27e3db0a5b8f2',
+    'provider': 'fe366738e63884ea45119112cd9b3c1b8b5cfb4939356ee71ebf41360eae4255',
+}
+PUBLISHER_FILES = {'.github/workflows/publish-development.yml', 'tool/publish_development.py'}
 
 
 def gh(*args):
@@ -25,6 +34,11 @@ def gh(*args):
 
 
 def apksigner_path():
+    pinned = os.environ.get('APKSIGNER')
+    if pinned:
+        if not Path(pinned).is_file():
+            raise SystemExit('Pinned Android apksigner is missing')
+        return pinned
     direct = shutil.which('apksigner')
     if direct:
         return direct
@@ -51,7 +65,7 @@ def verify_apk(path, executable):
         result.stdout, re.M,
     )
     if not signers or {s.lower() for s in signers} != {SIGNER}:
-        raise SystemExit('APK has a missing or unapproved signer')
+        raise SystemExit(f'APK signer validation failed with {executable}:\n{result.stdout}\n{result.stderr}')
 
 
 def digest(path):
@@ -105,7 +119,17 @@ def main():
             or run['conclusion'] != 'success' or not required.issubset(jobs)
             or any(value != 'success' for value in jobs.values())):
         raise SystemExit('Entire expected CI/CD run must be green')
-    require_current_master(run['headSha'])
+    publisher_sha = os.environ['GITHUB_SHA']
+    require_current_master(publisher_sha)
+    reuse = run['headSha'] != publisher_sha
+    if reuse:
+        if run['headSha'] != REUSE_SOURCE or args.run != '45059792149':
+            raise SystemExit('Only the reviewed c54 auth-cutover artifacts may be reused')
+        comparison = json.loads(gh('api', f'repos/{REPO}/compare/{REUSE_SOURCE}...{publisher_sha}'))
+        files = comparison.get('files', [])
+        if (comparison.get('status') != 'ahead' or not files or len(files) > 2
+                or any(f['filename'] not in PUBLISHER_FILES or f['status'] != 'modified' for f in files)):
+            raise SystemExit('Artifact reuse requires a publisher-only diff')
     pubspec = gh('api', f'repos/{REPO}/contents/pubspec.yaml?ref={run["headSha"]}',
                  '-H', 'Accept: application/vnd.github.raw+json')
     match = re.search(r'^version:\s*([\d.]+)\+(\d+)\s*$', pubspec, re.M)
@@ -131,6 +155,8 @@ def main():
             if len(candidates) != 1:
                 raise SystemExit(f'Ambiguous APK: {flavor}')
             verify_apk(candidates[0], executable)
+            if reuse and digest(candidates[0]) != REUSE_HASHES[flavor]:
+                raise SystemExit(f'Reused artifact hash mismatch: {flavor}')
             name = f'delwaqty-{flavor}-{build}.apk'
             target = root / name
             candidates[0].rename(target)
@@ -159,7 +185,7 @@ def main():
                 raise SystemExit(f'Round-trip checksum failed: {apk.name}')
             verify_apk(check / apk.name, executable)
         # Recheck after downloads; a new master must get its own successful CI.
-        require_current_master(run['headSha'])
+        require_current_master(publisher_sha)
         gh('release', 'upload', tag, '-R', REPO, str(manifest_path), '--clobber')
         gh('release', 'download', tag, '-R', REPO, '-p', 'versions.json', '-D', str(check))
         if json.loads((check / 'versions.json').read_text()) != manifest:

@@ -7695,6 +7695,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get decline => 'Decline';
 
   @override
+  String get offerTimedOut =>
+      'Request timed out. It will be offered to another driver.';
+
+  @override
+  String get wentOfflineLocation =>
+      'Location updates stopped, so you were set offline. Go online again when you are back.';
+
+  @override
   String get pickupLabel => 'Pickup';
 
   @override

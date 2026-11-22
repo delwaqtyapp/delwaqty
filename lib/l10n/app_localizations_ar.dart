@@ -7633,6 +7633,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get decline => 'رفض';
 
   @override
+  String get offerTimedOut => 'انتهت مهلة الطلب. سيتم عرضه على كابتن آخر.';
+
+  @override
+  String get wentOfflineLocation =>
+      'توقفت تحديثات الموقع، فتم إيقاف استقبال الطلبات. اضغط متصل للعودة.';
+
+  @override
   String get pickupLabel => 'الاستلام';
 
   @override

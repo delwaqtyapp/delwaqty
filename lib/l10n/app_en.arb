@@ -2618,6 +2618,8 @@
     }
   },
   "decline": "Decline",
+  "offerTimedOut": "Request timed out. It will be offered to another driver.",
+  "wentOfflineLocation": "Location updates stopped, so you were set offline. Go online again when you are back.",
   "pickupLabel": "Pickup",
   "dropoffLabel": "Dropoff",
   "secondsUnit": "sec",

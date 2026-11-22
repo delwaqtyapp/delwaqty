@@ -139,6 +139,17 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
       }
     });
 
+    // Batch 17 #2: a failed presence renewal flips the driver offline inside
+    // DriverOnlineNotifier. Surface it instead of the toggle silently going
+    // dark (was reported as "offer expiry sets driver offline").
+    ref.listen<AsyncValue<bool>>(driverOnlineProvider(_driverId), (prev, next) {
+      final wasOnline = prev?.value ?? false;
+      if (wasOnline && next.hasError) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.wentOfflineLocation)));
+      }
+    });
+
     if (online) {
       ref.listen<AsyncValue<List<RideOffer>>>(
         deliveryOffersProvider(_driverId),
@@ -270,6 +281,10 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
       } catch (e) {
         debugPrint('Failed to reject delivery request: $e');
       }
+    } else {
+      // Batch 17 #2: the countdown expired (non-dismissible sheet pops null).
+      // Tell the driver instead of silently returning to the radar.
+      messenger.showSnackBar(SnackBar(content: Text(l10n.offerTimedOut)));
     }
   }
 

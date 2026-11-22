@@ -14636,6 +14636,18 @@ abstract class AppLocalizations {
   /// **'Decline'**
   String get decline;
 
+  /// No description provided for @offerTimedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Request timed out. It will be offered to another driver.'**
+  String get offerTimedOut;
+
+  /// No description provided for @wentOfflineLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location updates stopped, so you were set offline. Go online again when you are back.'**
+  String get wentOfflineLocation;
+
   /// No description provided for @pickupLabel.
   ///
   /// In en, this message translates to:

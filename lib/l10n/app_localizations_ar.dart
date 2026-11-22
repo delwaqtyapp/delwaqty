@@ -8098,4 +8098,34 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get open24Hours => 'مفتوح 24 ساعة';
+
+  @override
+  String get cashToCollectTitle => 'مبلغ مطلوب تحصيله';
+
+  @override
+  String cashToCollectBody(String amount) {
+    return 'تم تسليم الطلب. حصّل $amount من العميل ثم أكّد.';
+  }
+
+  @override
+  String get collectCashCta => 'تم التحصيل';
+
+  @override
+  String get cashCollectedTitle => 'تم تحصيل المبلغ';
+
+  @override
+  String cashCollectedBody(String amount) {
+    return 'تم تسجيل تحصيل $amount. تظهر في تسويتك.';
+  }
+
+  @override
+  String get rateDriverAfterCollection =>
+      'يمكنك تقييم الكابتن بعد تحصيل المبلغ.';
+
+  @override
+  String get cashCollectionStateError =>
+      'تعذر تحميل حالة التحصيل. تحقق من الاتصال وأعد المحاولة.';
+
+  @override
+  String get driverReviewHint => 'اكتب رأيك في الكابتن (اختياري)';
 }

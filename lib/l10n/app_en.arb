@@ -2854,5 +2854,38 @@
   "providerMyPricingAdminNote": "Prices are set by the administration. Contact support to request a change.",
   "providerMyPricingEmpty": "No service profiles yet",
   "closesNextDay": "Closes next day",
-  "open24Hours": "Open 24 hours"
+  "open24Hours": "Open 24 hours",
+  "cashToCollectTitle": "Cash to collect",
+  "@cashToCollectTitle": {
+    "description": "عنوان بطاقة التحصيل في تطبيق الكابتن"
+  },
+  "cashToCollectBody": "Delivered. Collect {amount} from the customer, then confirm.",
+  "@cashToCollectBody": {
+    "description": "جسم بطاقة التحصيل",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "collectCashCta": "Cash collected",
+  "@collectCashCta": {
+    "description": "زر تم التحصيل"
+  },
+  "cashCollectedTitle": "Cash collected",
+  "@cashCollectedTitle": {
+    "description": "تأكيد التحصيل"
+  },
+  "cashCollectedBody": "Collected {amount}. It shows in your settlement.",
+  "@cashCollectedBody": {
+    "description": "تأكيد تفاصيل التحصيل",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "rateDriverAfterCollection": "You can rate the driver once the cash is collected.",
+  "cashCollectionStateError": "Could not load the collection state. Check the connection and retry.",
+  "driverReviewHint": "Write your review of the captain (optional)"
 }

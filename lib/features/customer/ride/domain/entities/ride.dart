@@ -55,6 +55,7 @@ abstract class Ride with _$Ride {
     String? promoCode,
     @Default('cash') String paymentMethod,
     @Default('pending') String paymentStatus,
+    DateTime? cashCollectedAt,
     String? pickupOtp,
     @Default('EGP') String currency,
     double? distance,

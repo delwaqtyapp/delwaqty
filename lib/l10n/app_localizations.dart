@@ -15475,6 +15475,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open 24 hours'**
   String get open24Hours;
+
+  /// عنوان بطاقة التحصيل في تطبيق الكابتن
+  ///
+  /// In en, this message translates to:
+  /// **'Cash to collect'**
+  String get cashToCollectTitle;
+
+  /// جسم بطاقة التحصيل
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered. Collect {amount} from the customer, then confirm.'**
+  String cashToCollectBody(String amount);
+
+  /// زر تم التحصيل
+  ///
+  /// In en, this message translates to:
+  /// **'Cash collected'**
+  String get collectCashCta;
+
+  /// تأكيد التحصيل
+  ///
+  /// In en, this message translates to:
+  /// **'Cash collected'**
+  String get cashCollectedTitle;
+
+  /// تأكيد تفاصيل التحصيل
+  ///
+  /// In en, this message translates to:
+  /// **'Collected {amount}. It shows in your settlement.'**
+  String cashCollectedBody(String amount);
+
+  /// No description provided for @rateDriverAfterCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'You can rate the driver once the cash is collected.'**
+  String get rateDriverAfterCollection;
+
+  /// No description provided for @cashCollectionStateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the collection state. Check the connection and retry.'**
+  String get cashCollectionStateError;
+
+  /// No description provided for @driverReviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your review of the captain (optional)'**
+  String get driverReviewHint;
 }
 
 class _AppLocalizationsDelegate

@@ -2795,5 +2795,13 @@
   "providerMyPricingAdminNote": "الأسعار تحددها الإدارة. لطلب تعديل تواصل مع الدعم.",
   "providerMyPricingEmpty": "لا توجد ملفات خدمة بعد",
   "closesNextDay": "يغلق اليوم التالي",
-  "open24Hours": "مفتوح 24 ساعة"
+  "open24Hours": "مفتوح 24 ساعة",
+  "cashToCollectTitle": "مبلغ مطلوب تحصيله",
+  "cashToCollectBody": "تم تسليم الطلب. حصّل {amount} من العميل ثم أكّد.",
+  "collectCashCta": "تم التحصيل",
+  "cashCollectedTitle": "تم تحصيل المبلغ",
+  "cashCollectedBody": "تم تسجيل تحصيل {amount}. تظهر في تسويتك.",
+  "rateDriverAfterCollection": "يمكنك تقييم الكابتن بعد تحصيل المبلغ.",
+  "cashCollectionStateError": "تعذر تحميل حالة التحصيل. تحقق من الاتصال وأعد المحاولة.",
+  "driverReviewHint": "اكتب رأيك في الكابتن (اختياري)"
 }

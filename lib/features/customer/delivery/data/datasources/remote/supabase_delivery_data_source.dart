@@ -2,6 +2,7 @@ import 'package:delwaqty/core/utils/rpc_result.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/cash_collection.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_order.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/merchant_profile.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/driver_capability.dart';
@@ -550,6 +551,60 @@ class SupabaseDeliveryDataSource {
       'stars': stars,
       'comment': ?comment,
     }, onConflict: 'ride_id,rater_id');
+  }
+
+  // ── Cash handoff (migration 392) ──
+
+  /// What the assigned captain should collect on this delivery. Returns null
+  /// when the server hides the ride (not the assigned driver) — the caller
+  /// simply does not render the cash card.
+  Future<CashCollectionState?> getCashCollectionState(String rideId) async {
+    final data = await _client.rpc(
+      'driver_cash_collection_state',
+      params: {'p_ride_id': rideId},
+    );
+    final map = Map<String, dynamic>.from(data as Map);
+    if (map['ok'] != true) return null;
+    return CashCollectionState.fromJson(map);
+  }
+
+  /// The captain's "تم التحصيل" tap. The server stamps the ride and the
+  /// linked commerce order atomically; a replay answers ALREADY_COLLECTED.
+  Future<CashCollectionResult> confirmCashCollection(String rideId) async {
+    final data = await _client.rpc(
+      'confirm_cash_collection',
+      params: {'p_reference_type': 'ride', 'p_reference_id': rideId},
+    );
+    final map = Map<String, dynamic>.from(data as Map);
+    final result = CashCollectionResult.fromJson(map);
+    if (!result.ok) {
+      throw DeliveryException(result.code);
+    }
+    return result;
+  }
+
+  /// The delivery ride linked to a commerce order (latest non-cancelled),
+  /// for the customer's post-collection driver rating.
+  /// Realtime stream of the delivery ride linked to a commerce order. The
+  /// customer's rating card listens to this, so it unlocks as soon as the
+  /// captain's "تم التحصيل" stamp lands — no manual refresh (review #71).
+  Stream<OrderDeliveryRide?> watchOrderDeliveryRide(String orderId) {
+    return _client
+        .from('rides')
+        .stream(primaryKey: ['id'])
+        .eq('order_id', orderId)
+        .map((rows) {
+          final eligible = rows
+              .where((r) => r['status'] != 'cancelled')
+              .toList()
+            ..sort(
+              (a, b) => (b['created_at'] as String? ?? '').compareTo(
+                a['created_at'] as String? ?? '',
+              ),
+            );
+          if (eligible.isEmpty) return null;
+          return OrderDeliveryRide.fromRow(eligible.first);
+        });
   }
 }
 

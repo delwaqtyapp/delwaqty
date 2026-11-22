@@ -8168,4 +8168,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get open24Hours => 'Open 24 hours';
+
+  @override
+  String get cashToCollectTitle => 'Cash to collect';
+
+  @override
+  String cashToCollectBody(String amount) {
+    return 'Delivered. Collect $amount from the customer, then confirm.';
+  }
+
+  @override
+  String get collectCashCta => 'Cash collected';
+
+  @override
+  String get cashCollectedTitle => 'Cash collected';
+
+  @override
+  String cashCollectedBody(String amount) {
+    return 'Collected $amount. It shows in your settlement.';
+  }
+
+  @override
+  String get rateDriverAfterCollection =>
+      'You can rate the driver once the cash is collected.';
+
+  @override
+  String get cashCollectionStateError =>
+      'Could not load the collection state. Check the connection and retry.';
+
+  @override
+  String get driverReviewHint => 'Write your review of the captain (optional)';
 }

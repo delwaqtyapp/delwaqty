@@ -29,8 +29,8 @@ BEGIN
     ON CONFLICT(id) DO NOTHING;
 
   -- merchant owned by someone else (owner not needed for these checks)
-  INSERT INTO public.merchants(id, owner_user_id, name)
-    VALUES (merch, other, 'Fixture Merchant');
+  INSERT INTO public.merchants(id, owner_user_id, name, status)
+    VALUES (merch, other, 'Fixture Merchant', 'active');
 
   INSERT INTO public.orders(id, user_id, merchant_id, status, subtotal, total_amount) VALUES
     (ord_delivered, buyer, merch, 'delivered', 10, 10),
@@ -52,6 +52,10 @@ BEGIN
   INSERT INTO public.rides(id, rider_id, driver_id, status, payment_status, cash_collected_at, cash_collected_by,
       pickup_latitude, pickup_longitude, dropoff_latitude, dropoff_longitude)
     VALUES (ride_id, buyer, drv, 'completed', 'paid', now(), drv, 30.0, 31.0, 30.1, 31.1);
+
+  -- New bookings are normalized to pending, even for privileged inserts.
+  -- Advance the intended completed fixture before switching to the buyer.
+  UPDATE public.service_bookings SET status = 'completed' WHERE id = bk_completed;
 
   PERFORM set_config('request.jwt.claim.sub', buyer::text, true);
   PERFORM set_config('role','authenticated',true);
@@ -80,6 +84,7 @@ BEGIN
 
   -- 4. buyer can edit their own review's rating...
   UPDATE public.reviews SET rating = 4, comment = 'revised' WHERE id = rev;
+  IF NOT FOUND THEN RAISE EXCEPTION 'own review is not visible for editing'; END IF;
 
   -- 5. ...but CANNOT reassign it to another user (trigger).
   v_blocked := false;

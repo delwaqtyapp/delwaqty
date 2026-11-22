@@ -3783,6 +3783,13 @@ class AppLocalizationsAr extends AppLocalizations {
       'إيقاف حساب العميل بعد ثالث إلغاء في نفس الشهر (السماحية: إلغاءان).';
 
   @override
+  String get refusalSuspensionPenalty => 'عقوبة رفض الاستلام المتكرر';
+
+  @override
+  String get refusalSuspensionPenaltyDescription =>
+      'إيقاف حساب العميل بعد ثالث رفض استلام في نفس الشهر (السماحية: تحذيران).';
+
+  @override
   String get editPenalty => 'تعديل العقوبة';
 
   @override

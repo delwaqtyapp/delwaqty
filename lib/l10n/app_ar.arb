@@ -1223,6 +1223,8 @@
   "generalPenaltiesSubtitle": "عقوبات بتتطبق على مستوى المنصة كلها. تعديلها متاح لحساب المالك فقط.",
   "cancelSuspensionPenalty": "عقوبة الإلغاء المتكرر",
   "cancelSuspensionPenaltyDescription": "إيقاف حساب العميل بعد ثالث إلغاء في نفس الشهر (السماحية: إلغاءان).",
+  "refusalSuspensionPenalty": "عقوبة رفض الاستلام المتكرر",
+  "refusalSuspensionPenaltyDescription": "إيقاف حساب العميل بعد ثالث رفض استلام في نفس الشهر (السماحية: تحذيران).",
   "editPenalty": "تعديل العقوبة",
   "suspensionDaysLabel": "مدة الإيقاف (بالأيام)",
   "penaltyChangeReasonHint": "سبب التغيير (اختياري)",

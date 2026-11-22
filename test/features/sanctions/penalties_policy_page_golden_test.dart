@@ -22,6 +22,7 @@ void main() {
     WidgetTester tester, {
     required bool isOwner,
     int days = 7,
+    int refusalDays = 4,
     bool settle = true,
   }) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -35,6 +36,9 @@ void main() {
           overrides: [
             adminIsOwnerProvider.overrideWith((ref) async => isOwner),
             cancelSuspensionDaysProvider.overrideWith((ref) async => days),
+            refusalSuspensionDaysProvider.overrideWith(
+              (ref) async => refusalDays,
+            ),
           ],
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
@@ -59,11 +63,13 @@ void main() {
   testWidgets('owner sees the general penalties list in Arabic', (
     tester,
   ) async {
-    await pumpPage(tester, isOwner: true, days: 7);
+    await pumpPage(tester, isOwner: true, days: 7, refusalDays: 4);
 
     expect(find.text('العقوبات العامة'), findsWidgets);
     expect(find.text('عقوبة الإلغاء المتكرر'), findsOneWidget);
+    expect(find.text('عقوبة رفض الاستلام المتكرر'), findsOneWidget);
     expect(find.textContaining('7'), findsWidgets);
+    expect(find.textContaining('4'), findsWidgets);
 
     await expectLater(
       find.byKey(const ValueKey('capture')),
@@ -74,10 +80,11 @@ void main() {
   testWidgets('owner edit dialog in Arabic', (tester) async {
     await pumpPage(tester, isOwner: true, days: 7);
 
-    await tester.tap(find.byIcon(Icons.edit_rounded));
+    await tester.tap(find.byIcon(Icons.edit_rounded).first);
     await tester.pumpAndSettle();
 
     expect(find.text('تعديل العقوبة'), findsOneWidget);
+    expect(find.text('عقوبة الإلغاء المتكرر'), findsWidgets);
     expect(find.text('مدة الإيقاف (بالأيام)'), findsOneWidget);
     expect(find.text('حفظ'), findsOneWidget);
 

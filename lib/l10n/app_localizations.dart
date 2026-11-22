@@ -7322,6 +7322,18 @@ abstract class AppLocalizations {
   /// **'Suspends the customer account after the third cancellation in the same month (allowance: 2).'**
   String get cancelSuspensionPenaltyDescription;
 
+  /// No description provided for @refusalSuspensionPenalty.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeated delivery refusal penalty'**
+  String get refusalSuspensionPenalty;
+
+  /// No description provided for @refusalSuspensionPenaltyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspends the customer account after the third delivery refusal in the same month (allowance: 2 warnings).'**
+  String get refusalSuspensionPenaltyDescription;
+
   /// No description provided for @editPenalty.
   ///
   /// In en, this message translates to:

@@ -3814,6 +3814,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Suspends the customer account after the third cancellation in the same month (allowance: 2).';
 
   @override
+  String get refusalSuspensionPenalty => 'Repeated delivery refusal penalty';
+
+  @override
+  String get refusalSuspensionPenaltyDescription =>
+      'Suspends the customer account after the third delivery refusal in the same month (allowance: 2 warnings).';
+
+  @override
   String get editPenalty => 'Edit penalty';
 
   @override

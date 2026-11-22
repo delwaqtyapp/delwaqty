@@ -29,3 +29,9 @@ final cancelSuspensionDaysProvider = FutureProvider<int>((ref) async {
   final repo = ref.read(sanctionsRepositoryProvider);
   return repo.getCancelSuspensionDays();
 });
+
+/// Platform-wide refusal penalty (days). Owner-editable.
+final refusalSuspensionDaysProvider = FutureProvider<int>((ref) async {
+  final repo = ref.read(sanctionsRepositoryProvider);
+  return repo.getRefusalSuspensionDays();
+});

@@ -153,5 +153,108 @@ begin
     'owner can shorten the period';
 end $test$;
 
-select 'PASS393: owner-only setter, scoped-admin/customer negatives, trigger guard, audit, default 5, 2nd cancel free, 3rd cancel configured suspension + support message' as result;
+-- Refusal suspension: same owner-only config treatment (393, owner follow-up).
+create temporary table _t393b(cust_c uuid, driver_u uuid, driver_id uuid, order_c uuid, order_d uuid, order_old uuid);
+insert into _t393b select gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), null, null, null;
+insert into auth.users(id,email,raw_user_meta_data)
+select cust_c,'zz-test-393-cust-c@example.invalid','{"full_name":"zz-test-393-cust-c","user_type":"customer"}'::jsonb from _t393b union all
+select driver_u,'zz-test-393-driver@example.invalid','{"full_name":"zz-test-393-driver","user_type":"driver"}'::jsonb from _t393b;
+update public.users set role='customer',user_type='customer',verification_status='approved' where id=(select cust_c from _t393b);
+insert into public.drivers(id,user_id,full_name,is_active,is_verified,verification_status)
+select driver_id,driver_u,'zz-test-393-driver',true,true,'verified' from _t393b;
+insert into public.orders(id,user_id,merchant_id,driver_id,status,subtotal,total_amount)
+select g.new_id,cust_c,store,driver_id,'delivering',0,0 from _t393b, _t393, (select gen_random_uuid() as new_id) g;
+update _t393b set order_c=(select id from public.orders where user_id=(select cust_c from _t393b));
+insert into public.orders(user_id,merchant_id,driver_id,status,subtotal,total_amount)
+select cust_c,store,driver_id,'delivering',0,0 from _t393b, _t393;
+update _t393b set order_d=(select id from public.orders where user_id=(select cust_c from _t393b) and id<>(select order_c from _t393b));
+insert into public.orders(user_id,merchant_id,status,subtotal,total_amount)
+select cust_c,store,'cancelled',0,0 from _t393b, _t393;
+update _t393b set order_old=(select id from public.orders where user_id=(select cust_c from _t393b) and id not in (select order_c from _t393b union all select order_d from _t393b));
+
+do $test$
+declare
+  b record;
+  r jsonb;
+  v_days int;
+  v_admin uuid;
+  v_owner uuid;
+begin
+  select * into b from _t393b;
+  select admin_id, owner_id into v_admin, v_owner from _t393;
+
+  -- Default stays 5.
+  assert (select refusal_suspension_days from public.platform_settings where id='default') = 5,
+    'default refusal suspension is 5 days';
+
+  -- Negative: scoped admin cannot set refusal duration via RPC or directly.
+  perform set_config('request.jwt.claim.sub', v_admin::text, true);
+  begin
+    perform public.set_refusal_suspension_days(9);
+    raise exception 'TEST_FAIL_SCOPED_ADMIN_REFUSAL_SETTER_ACCEPTED';
+  exception when others then
+    if sqlerrm <> 'Only the platform owner can change the refusal suspension duration' then raise; end if;
+  end;
+  begin
+    update public.platform_settings set refusal_suspension_days = 9 where id = 'default';
+    raise exception 'TEST_FAIL_SCOPED_ADMIN_REFUSAL_DIRECT_UPDATE_ACCEPTED';
+  exception when others then
+    if sqlerrm <> 'Only the platform owner can change the refusal suspension duration' then raise; end if;
+  end;
+  assert (select refusal_suspension_days from public.platform_settings where id='default') = 5,
+    'blocked refusal update left value unchanged';
+
+  -- Owner shortens refusal suspension to 4 days, audited.
+  perform set_config('request.jwt.claim.sub', v_owner::text, true);
+  v_days := public.set_refusal_suspension_days(4, 'zz-test-393 refusal shorten');
+  assert v_days = 4, 'refusal setter returns new value';
+  assert exists(
+    select 1 from public.activity_logs
+    where action = 'PENALTY_CONFIG_CHANGED'
+      and resource = 'platform_settings' and resource_id = 'default'
+      and details->>'field' = 'refusal_suspension_days'
+      and details->>'old_value' = '5' and details->>'new_value' = '4'),
+    'refusal config change audited';
+
+  -- Warning path quotes the CONFIGURED duration: 2nd monthly refusal.
+  -- (The prior refusal references an older order: one report per order.)
+  insert into public.refusal_events(user_id, order_id)
+  select b.cust_c, b.order_old;
+  perform set_config('request.jwt.claim.sub', b.driver_u::text, true);
+  r := public.report_delivery_refusal(b.order_d, 'zz-test-393 refusal warn');
+  assert r->>'action' = 'warning' and r->>'refusal_count' = '2',
+    '2nd monthly refusal warns';
+  assert exists(
+    select 1 from public.notifications
+    where user_id = b.cust_c and data->>'event' = 'refusal_warning'
+      and body like '%4 يوم%'),
+    'warning message carries configured duration';
+
+  -- 3rd monthly refusal suspends for the CONFIGURED 4 days.
+  r := public.report_delivery_refusal(b.order_c, 'zz-test-393 refusal final');
+  assert r->>'action' = 'account_suspended' and r->>'suspension_days' = '4'
+     and r->>'order_cancelled' = 'false',
+    '3rd monthly refusal suspends for configured days, order stays';
+  assert exists(
+    select 1 from public.sanctions
+    where target_user_id = b.cust_c and sanction_type = 'suspension'
+      and duration_days = 4
+      and end_date between now() + interval '3 days' and now() + interval '5 days'),
+    'refusal sanction carries configured duration';
+  assert exists(
+    select 1 from public.notifications
+    where user_id = b.cust_c and type = 'account'
+      and data->>'event' = 'refusal_suspension'
+      and data->>'duration_days' = '4'
+      and title like '%4 يوم%'),
+    'refusal suspension notification carries configured days';
+
+  -- Owner restores the default.
+  perform set_config('request.jwt.claim.sub', v_owner::text, true);
+  v_days := public.set_refusal_suspension_days(5, 'zz-test-393 refusal restore');
+  assert (select refusal_suspension_days from public.platform_settings where id='default') = 5,
+    'owner restored refusal default';
+end $test$;
+
+select 'PASS393: owner-only setters, scoped-admin/customer negatives, trigger guards, audit, defaults 5, 2nd cancel free, 3rd cancel configured suspension + support message, refusal warning/3rd-refusal configured suspension' as result;
 rollback;

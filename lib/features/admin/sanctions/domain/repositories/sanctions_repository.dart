@@ -18,4 +18,6 @@ abstract class SanctionsRepository {
   });
   Future<int> getCancelSuspensionDays();
   Future<int> setCancelSuspensionDays(int days, {String? reason});
+  Future<int> getRefusalSuspensionDays();
+  Future<int> setRefusalSuspensionDays(int days, {String? reason});
 }

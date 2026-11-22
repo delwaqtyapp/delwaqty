@@ -12,7 +12,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 
 /// Platform-wide penalties list ("قايمة العقوبات العامة").
-/// Owner-only: the server RPC and the table guard both reject non-owner
+/// Owner-only: the server RPCs and the table guard both reject non-owner
 /// writes; this page additionally hides the editor from scoped admins.
 class AdminPenaltiesPolicyPage extends ConsumerWidget {
   const AdminPenaltiesPolicyPage({super.key});
@@ -21,7 +21,8 @@ class AdminPenaltiesPolicyPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final isOwner = ref.watch(adminIsOwnerProvider).value ?? false;
-    final daysAsync = ref.watch(cancelSuspensionDaysProvider);
+    final cancelDaysAsync = ref.watch(cancelSuspensionDaysProvider);
+    final refusalDaysAsync = ref.watch(refusalSuspensionDaysProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -30,7 +31,10 @@ class AdminPenaltiesPolicyPage extends ConsumerWidget {
           IconButton(
             tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh_rounded),
-            onPressed: () => ref.invalidate(cancelSuspensionDaysProvider),
+            onPressed: () {
+              ref.invalidate(cancelSuspensionDaysProvider);
+              ref.invalidate(refusalSuspensionDaysProvider);
+            },
           ),
         ],
       ),
@@ -40,75 +44,121 @@ class AdminPenaltiesPolicyPage extends ConsumerWidget {
               title: l10n.generalPenalties,
               message: l10n.ownerOnlyPenalties,
             )
-          : daysAsync.when(
-              loading: () => const Center(child: AppLoaderCircular()),
-              error: (e, _) => PremiumEmptyState(
-                icon: Icons.error_outline,
-                title: l10n.error,
-                message: appErrorText(context, e),
-              ),
-              data: (days) {
-                return ListView(
-                  padding: const EdgeInsets.all(12),
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 8,
-                      ),
-                      child: Text(
-                        l10n.generalPenaltiesSubtitle,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ),
-                    AnimatedFadeIn(
-                      child: GlassCard(
-                        child: ListTile(
-                          leading: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: AppColors.warningLight.withValues(
-                                alpha: 0.15,
-                              ),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.block_rounded,
-                              color: AppColors.warningLight,
-                            ),
-                          ),
-                          title: Text(
-                            l10n.cancelSuspensionPenalty,
-                            maxLines: 1,
-                          ),
-                          subtitle: Text(
-                            '${l10n.cancelSuspensionPenaltyDescription}\n'
-                            '${l10n.duration}: $days ${l10n.days}',
-                          ),
-                          isThreeLine: true,
-                          trailing: IconButton(
-                            tooltip: l10n.editPenalty,
-                            icon: const Icon(Icons.edit_rounded),
-                            onPressed: () => _showEditDialog(
-                              context,
-                              ref,
-                              currentDays: days,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
+          : _buildOwnerList(context, ref, cancelDaysAsync, refusalDaysAsync),
+    );
+  }
+
+  Widget _buildOwnerList(
+    BuildContext context,
+    WidgetRef ref,
+    AsyncValue<int> cancelDaysAsync,
+    AsyncValue<int> refusalDaysAsync,
+  ) {
+    final l10n = AppLocalizations.of(context);
+    if (cancelDaysAsync.isLoading || refusalDaysAsync.isLoading) {
+      return const Center(child: AppLoaderCircular());
+    }
+    final error = cancelDaysAsync.error ?? refusalDaysAsync.error;
+    if (error != null) {
+      return PremiumEmptyState(
+        icon: Icons.error_outline,
+        title: l10n.error,
+        message: appErrorText(context, error),
+      );
+    }
+    final cancelDays = cancelDaysAsync.value ?? 5;
+    final refusalDays = refusalDaysAsync.value ?? 5;
+
+    return ListView(
+      padding: const EdgeInsets.all(12),
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          child: Text(
+            l10n.generalPenaltiesSubtitle,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ),
+        AnimatedFadeIn(
+          child: _penaltyCard(
+            context,
+            ref,
+            icon: Icons.cancel_outlined,
+            title: l10n.cancelSuspensionPenalty,
+            description: l10n.cancelSuspensionPenaltyDescription,
+            days: cancelDays,
+            onSave: (days, reason) => ref
+                .read(sanctionsRepositoryProvider)
+                .setCancelSuspensionDays(days, reason: reason),
+            onSaved: () => ref.invalidate(cancelSuspensionDaysProvider),
+          ),
+        ),
+        const SizedBox(height: 8),
+        AnimatedFadeIn(
+          child: _penaltyCard(
+            context,
+            ref,
+            icon: Icons.block_rounded,
+            title: l10n.refusalSuspensionPenalty,
+            description: l10n.refusalSuspensionPenaltyDescription,
+            days: refusalDays,
+            onSave: (days, reason) => ref
+                .read(sanctionsRepositoryProvider)
+                .setRefusalSuspensionDays(days, reason: reason),
+            onSaved: () => ref.invalidate(refusalSuspensionDaysProvider),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _penaltyCard(
+    BuildContext context,
+    WidgetRef ref, {
+    required IconData icon,
+    required String title,
+    required String description,
+    required int days,
+    required Future<int> Function(int days, String reason) onSave,
+    required VoidCallback onSaved,
+  }) {
+    final l10n = AppLocalizations.of(context);
+    return GlassCard(
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.warningLight.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: AppColors.warningLight),
+        ),
+        title: Text(title, maxLines: 1),
+        subtitle: Text('$description\n${l10n.duration}: $days ${l10n.days}'),
+        isThreeLine: true,
+        trailing: IconButton(
+          tooltip: l10n.editPenalty,
+          icon: const Icon(Icons.edit_rounded),
+          onPressed: () => _showEditDialog(
+            context,
+            ref,
+            title: title,
+            currentDays: days,
+            onSave: onSave,
+            onSaved: onSaved,
+          ),
+        ),
+      ),
     );
   }
 
   Future<void> _showEditDialog(
     BuildContext context,
     WidgetRef ref, {
+    required String title,
     required int currentDays,
+    required Future<int> Function(int days, String reason) onSave,
+    required VoidCallback onSaved,
   }) async {
     final l10n = AppLocalizations.of(context);
     final daysController = TextEditingController(text: '$currentDays');
@@ -124,10 +174,7 @@ class AdminPenaltiesPolicyPage extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                l10n.cancelSuspensionPenalty,
-                style: Theme.of(ctx).textTheme.bodyMedium,
-              ),
+              Text(title, style: Theme.of(ctx).textTheme.bodyMedium),
               const SizedBox(height: 12),
               TextFormField(
                 controller: daysController,
@@ -172,17 +219,13 @@ class AdminPenaltiesPolicyPage extends ConsumerWidget {
               if (!(formKey.currentState?.validate() ?? false)) return;
               final days = int.parse(daysController.text);
               try {
-                final repo = ref.read(sanctionsRepositoryProvider);
-                await repo.setCancelSuspensionDays(
-                  days,
-                  reason: reasonController.text,
-                );
+                await onSave(days, reasonController.text);
                 if (ctx.mounted) Navigator.of(ctx).pop(true);
               } catch (e) {
                 if (ctx.mounted) {
-                  ScaffoldMessenger.of(ctx).showSnackBar(
-                    SnackBar(content: Text(appErrorText(ctx, e))),
-                  );
+                  ScaffoldMessenger.of(
+                    ctx,
+                  ).showSnackBar(SnackBar(content: Text(appErrorText(ctx, e))));
                 }
               }
             },
@@ -193,10 +236,9 @@ class AdminPenaltiesPolicyPage extends ConsumerWidget {
     );
 
     if (saved == true && context.mounted) {
-      ref.invalidate(cancelSuspensionDaysProvider);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.penaltyUpdated)));
+      onSaved();
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.penaltyUpdated)));
     }
   }
 }

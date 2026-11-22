@@ -1225,6 +1225,8 @@
   "generalPenaltiesSubtitle": "Penalties applied across the whole platform. Only the owner account can change them.",
   "cancelSuspensionPenalty": "Repeated cancellation penalty",
   "cancelSuspensionPenaltyDescription": "Suspends the customer account after the third cancellation in the same month (allowance: 2).",
+  "refusalSuspensionPenalty": "Repeated delivery refusal penalty",
+  "refusalSuspensionPenaltyDescription": "Suspends the customer account after the third delivery refusal in the same month (allowance: 2 warnings).",
   "editPenalty": "Edit penalty",
   "suspensionDaysLabel": "Suspension duration (days)",
   "penaltyChangeReasonHint": "Reason for change (optional)",

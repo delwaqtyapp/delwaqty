@@ -96,4 +96,57 @@ void main() {
       );
     });
   });
+
+  group('SanctionsRepositoryImpl refusal suspension config', () {
+    test('getRefusalSuspensionDays returns the configured duration', () async {
+      when(
+        () => mockDataSource.getRefusalSuspensionDays(),
+      ).thenAnswer((_) async => 4);
+
+      final result = await repository.getRefusalSuspensionDays();
+
+      expect(result, 4);
+      verify(() => mockDataSource.getRefusalSuspensionDays()).called(1);
+    });
+
+    test('setRefusalSuspensionDays delegates with days and reason', () async {
+      when(
+        () => mockDataSource.setRefusalSuspensionDays(
+          any(),
+          reason: any(named: 'reason'),
+        ),
+      ).thenAnswer((_) async => 3);
+
+      final result = await repository.setRefusalSuspensionDays(
+        3,
+        reason: 'shorten after review',
+      );
+
+      expect(result, 3);
+      verify(
+        () => mockDataSource.setRefusalSuspensionDays(
+          3,
+          reason: 'shorten after review',
+        ),
+      ).called(1);
+    });
+
+    test('wraps owner-only rejection in ServerException', () async {
+      when(
+        () => mockDataSource.setRefusalSuspensionDays(
+          any(),
+          reason: any(named: 'reason'),
+        ),
+      ).thenThrow(
+        Exception(
+          'Only the platform owner can change the refusal suspension duration',
+        ),
+      );
+
+      expect(
+        () => repository.setRefusalSuspensionDays(9),
+        throwsA(isA<ServerException>()),
+      );
+    });
+  });
 }

@@ -2817,5 +2817,17 @@
   "providerMyPricing": "My pricing",
   "providerMyPricingAdminNote": "Prices are set by the administration. Contact support to request a change.",
   "providerMyPricingEmpty": "No service profiles yet",
-  "providerPricingInvalidInput": "Enter a valid number within the allowed range"
+  "providerPricingInvalidInput": "Enter a valid number within the allowed range",
+  "providerPricingShowingOf": "Showing {shown} of {total}",
+  "@providerPricingShowingOf": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "providerPricingLoadMore": "Load more"
 }

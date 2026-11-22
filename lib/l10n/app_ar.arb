@@ -2758,5 +2758,17 @@
   "providerMyPricing": "أسعاري",
   "providerMyPricingAdminNote": "الأسعار تحددها الإدارة. لطلب تعديل تواصل مع الدعم.",
   "providerMyPricingEmpty": "لا توجد ملفات خدمة بعد",
-  "providerPricingInvalidInput": "أدخل رقمًا صحيحًا ضمن الحدود المسموحة"
+  "providerPricingInvalidInput": "أدخل رقمًا صحيحًا ضمن الحدود المسموحة",
+  "providerPricingShowingOf": "عرض {shown} من {total}",
+  "@providerPricingShowingOf": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "providerPricingLoadMore": "تحميل المزيد"
 }

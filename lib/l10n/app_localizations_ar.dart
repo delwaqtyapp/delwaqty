@@ -7981,4 +7981,12 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get providerPricingInvalidInput =>
       'أدخل رقمًا صحيحًا ضمن الحدود المسموحة';
+
+  @override
+  String providerPricingShowingOf(int shown, int total) {
+    return 'عرض $shown من $total';
+  }
+
+  @override
+  String get providerPricingLoadMore => 'تحميل المزيد';
 }

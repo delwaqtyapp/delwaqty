@@ -15253,6 +15253,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a valid number within the allowed range'**
   String get providerPricingInvalidInput;
+
+  /// No description provided for @providerPricingShowingOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing {shown} of {total}'**
+  String providerPricingShowingOf(int shown, int total);
+
+  /// No description provided for @providerPricingLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get providerPricingLoadMore;
 }
 
 class _AppLocalizationsDelegate

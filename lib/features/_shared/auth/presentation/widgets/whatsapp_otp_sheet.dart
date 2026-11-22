@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -5,24 +7,40 @@ import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class WhatsAppOtpSheet extends StatefulWidget {
-  const WhatsAppOtpSheet({super.key, required this.phone});
+  const WhatsAppOtpSheet({
+    super.key,
+    required this.phone,
+    this.purpose = 'register',
+    this.client,
+  });
 
   final String phone;
+  final String purpose;
+  final SupabaseClient? client;
 
   static Future<bool> show(
     BuildContext context, {
     required String phone,
   }) async {
-    final result = await showModalBottomSheet<bool>(
+    return await showChallenge(context, phone: phone) != null;
+  }
+
+  /// Returns the private challenge only after the webhook confirms ownership.
+  /// Password reset passes it to the server's one-time consume endpoint.
+  static Future<String?> showChallenge(
+    BuildContext context, {
+    required String phone,
+    String purpose = 'register',
+  }) {
+    return showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       backgroundColor: const Color(0xFF140D24),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      builder: (_) => WhatsAppOtpSheet(phone: phone),
+      builder: (_) => WhatsAppOtpSheet(phone: phone, purpose: purpose),
     );
-    return result == true;
   }
 
   @override
@@ -30,10 +48,13 @@ class WhatsAppOtpSheet extends StatefulWidget {
 }
 
 class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet> {
-  final TextEditingController _codeController = TextEditingController();
+  Timer? _pollTimer;
   bool _loadingRequest = true;
   bool _verifying = false;
+  bool _statusInFlight = false;
+  bool _completed = false;
   String? _otpCode;
+  String? _challenge;
   String _whatsappNumber = '+201000000000';
   String? _errorText;
 
@@ -45,19 +66,20 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet> {
 
   @override
   void dispose() {
-    _codeController.dispose();
+    _pollTimer?.cancel();
     super.dispose();
   }
 
   Future<void> _requestOtp() async {
+    _pollTimer?.cancel();
     setState(() {
       _loadingRequest = true;
       _errorText = null;
     });
     try {
-      final raw = await Supabase.instance.client.rpc(
+      final raw = await (widget.client ?? Supabase.instance.client).rpc(
         'request_whatsapp_otp',
-        params: {'p_phone': widget.phone.trim(), 'p_purpose': 'register'},
+        params: {'p_phone': widget.phone.trim(), 'p_purpose': widget.purpose},
       );
       if (!mounted) return;
       final map = raw is Map
@@ -65,15 +87,21 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet> {
           : <String, dynamic>{};
       final ok = map['ok'] == true;
       final otp = (map['otp_code'] as String?)?.trim();
+      final challenge = (map['challenge'] as String?)?.trim();
       final supportNumber =
           (map['whatsapp_number'] as String?)?.trim() ?? '+201000000000';
-      if (ok && otp != null && otp.isNotEmpty) {
+      if (ok &&
+          otp != null &&
+          otp.isNotEmpty &&
+          challenge != null &&
+          challenge.isNotEmpty) {
         setState(() {
           _otpCode = otp;
+          _challenge = challenge;
           _whatsappNumber = supportNumber;
-          _codeController.text = otp;
           _loadingRequest = false;
         });
+        _startPolling();
       } else {
         setState(() {
           _loadingRequest = false;
@@ -90,7 +118,7 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet> {
   }
 
   Future<void> _openWhatsApp() async {
-    final code = (_otpCode ?? _codeController.text).trim();
+    final code = (_otpCode ?? '').trim();
     final cleanNumber = _whatsappNumber.replaceAll(RegExp(r'[^0-9]'), '');
     final uri = Uri.parse(
       'https://wa.me/$cleanNumber?text=${Uri.encodeComponent("Verify Delwaqty OTP: $code")}',
@@ -100,40 +128,69 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet> {
     } catch (_) {}
   }
 
+  /// The webhook is the only path that can mark a code verified, so the
+  /// sheet polls [whatsapp_otp_status] until Meta confirms the user sent
+  /// the code from their own WhatsApp number.
+  void _startPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      unawaited(_checkStatus());
+    });
+  }
+
+  Future<bool> _checkStatus() async {
+    if (_statusInFlight || _completed || _challenge == null) return false;
+    _statusInFlight = true;
+    try {
+      final raw = await (widget.client ?? Supabase.instance.client).rpc(
+        'whatsapp_otp_status',
+        params: {
+          'p_phone': widget.phone.trim(),
+          'p_purpose': widget.purpose,
+          'p_challenge': _challenge,
+        },
+      );
+      if (!mounted || _completed) return false;
+      final map = raw is Map
+          ? Map<String, dynamic>.from(raw)
+          : <String, dynamic>{};
+      final status = map['status'] as String?;
+      if (status == 'verified') {
+        _completed = true;
+        _pollTimer?.cancel();
+        Navigator.of(context).pop(_challenge);
+        return true;
+      }
+      if (status == 'expired') {
+        _pollTimer?.cancel();
+        setState(
+          () => _errorText = AppLocalizations.of(context).invalidOtpCode,
+        );
+        return false;
+      }
+      return false;
+    } catch (_) {
+      return false;
+    } finally {
+      _statusInFlight = false;
+    }
+  }
+
+  /// Manual tap on "verify": the code alone proves nothing (the app showed
+  /// it), so this just checks whether the webhook already confirmed the
+  /// WhatsApp round-trip.
   Future<void> _verifyOtp() async {
     final l10n = AppLocalizations.of(context);
-    final code = _codeController.text.trim();
-    if (code.length < 4) {
-      setState(() => _errorText = l10n.invalidOtpCode);
-      return;
-    }
     setState(() {
       _verifying = true;
       _errorText = null;
     });
-    try {
-      final raw = await Supabase.instance.client.rpc(
-        'verify_whatsapp_otp',
-        params: {'p_phone': widget.phone.trim(), 'p_otp_code': code},
-      );
-      if (!mounted) return;
-      final map = raw is Map
-          ? Map<String, dynamic>.from(raw)
-          : <String, dynamic>{};
-      final verified = map['ok'] == true && map['verified'] == true;
-      if (verified) {
-        Navigator.of(context).pop(true);
-      } else {
-        setState(() {
-          _verifying = false;
-          _errorText = l10n.invalidOtpCode;
-        });
-      }
-    } catch (e) {
-      if (!mounted) return;
+    final ok = await _checkStatus();
+    if (!mounted) return;
+    if (!ok) {
       setState(() {
         _verifying = false;
-        _errorText = appErrorText(context, e);
+        _errorText = l10n.invalidOtpCode;
       });
     }
   }
@@ -206,7 +263,7 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet> {
                 ),
                 IconButton(
                   tooltip: l10n.cancel,
-                  onPressed: () => Navigator.of(context).pop(false),
+                  onPressed: () => Navigator.of(context).pop(),
                   icon: Icon(
                     Icons.close_rounded,
                     color: Colors.white.withValues(alpha: 0.7),
@@ -281,48 +338,6 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet> {
                 ),
               ),
               const SizedBox(height: 14),
-              TextField(
-                controller: _codeController,
-                keyboardType: TextInputType.number,
-                maxLength: 6,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 6,
-                ),
-                decoration: InputDecoration(
-                  counterText: '',
-                  hintText: l10n.enterOtpCode,
-                  hintStyle: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.4),
-                    fontSize: 14,
-                    letterSpacing: 0,
-                  ),
-                  filled: true,
-                  fillColor: Colors.white.withValues(alpha: 0.08),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(
-                      color: Colors.white.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(
-                      color: Colors.white.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(
-                      color: whatsappGreen,
-                      width: 1.6,
-                    ),
-                  ),
-                ),
-              ),
               if (_errorText != null) ...[
                 const SizedBox(height: 8),
                 Text(

@@ -55,8 +55,8 @@ final adminAllRoomsProvider = FutureProvider<List<ChatRoom>>((ref) async {
   final authState = ref.watch(authStateProvider);
   final user = authState is AuthAuthenticated ? authState.user : null;
   if (user == null) return [];
-  // Auto-purge expired (closed >7 days ago) chats first.
-  await repo.purgeExpiredChats();
+  // 376: purge moved to the nightly purge-expired-chats cron (owner/service
+  // only); screen loads no longer trigger it.
   // Admins see all active rooms
   return repo.getActiveRooms();
 });

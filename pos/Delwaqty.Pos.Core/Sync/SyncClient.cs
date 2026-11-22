@@ -47,6 +47,18 @@ namespace Delwaqty.Pos.Core.Sync
                 ",\"p_device_id\":" + JsonString(deviceId) + "}");
         }
 
+        /// <summary>
+        /// Activation + platform linking in one call (migration 343): binds the
+        /// device to the license on first contact and returns the merchant
+        /// profile/config the app needs to set itself up.
+        /// </summary>
+        public Task<string> DeviceLink(string licenseKey, string deviceId)
+        {
+            return RpcAsync("cashier_device_link",
+                "{\"p_license_key\":" + JsonString(licenseKey) +
+                ",\"p_device_id\":" + JsonString(deviceId) + "}");
+        }
+
         public Task<string> PushOps(string merchantId, string opsArrayJson)
         {
             return RpcAsync("cashier_sync_push",

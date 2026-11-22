@@ -7905,4 +7905,27 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get appInvitationsFooter =>
       'تحميل التطبيق لا يمنح صلاحيات جديدة. الدخول مرتبط باعتماد حسابك الحالي. قد تحتاج إلى السماح بالتثبيت على أندرويد.';
+
+  @override
+  String get cashToCollectTitle => 'مبلغ مطلوب تحصيله';
+
+  @override
+  String cashToCollectBody(String amount) {
+    return 'تم تسليم الطلب. حصّل $amount من العميل ثم أكّد.';
+  }
+
+  @override
+  String get collectCashCta => 'تم التحصيل';
+
+  @override
+  String get cashCollectedTitle => 'تم تحصيل المبلغ';
+
+  @override
+  String cashCollectedBody(String amount) {
+    return 'تم تسجيل تحصيل $amount. تظهر في تسويتك.';
+  }
+
+  @override
+  String get rateDriverAfterCollection =>
+      'يمكنك تقييم الكابتن بعد تحصيل المبلغ.';
 }

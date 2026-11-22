@@ -2793,5 +2793,39 @@
   "appInvitationDownloading": "Downloading securely...",
   "appInvitationInstallReady": "The verified download is ready. Follow the installation prompt.",
   "appInvitationDownloadFailed": "Download could not start. Check your connection and installation permission, then retry.",
-  "appInvitationsFooter": "Downloading an app does not grant a role. Access follows your current account approval. Android installation permission may be required."
+  "appInvitationsFooter": "Downloading an app does not grant a role. Access follows your current account approval. Android installation permission may be required.",
+  "cashToCollectTitle": "Cash to collect",
+  "@cashToCollectTitle": {
+    "description": "عنوان بطاقة التحصيل في تطبيق الكابتن"
+  },
+  "cashToCollectBody": "Delivered. Collect {amount} from the customer, then confirm.",
+  "@cashToCollectBody": {
+    "description": "جسم بطاقة التحصيل",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "collectCashCta": "Cash collected",
+  "@collectCashCta": {
+    "description": "زر تم التحصيل"
+  },
+  "cashCollectedTitle": "Cash collected",
+  "@cashCollectedTitle": {
+    "description": "تأكيد التحصيل"
+  },
+  "cashCollectedBody": "Collected {amount}. It shows in your settlement.",
+  "@cashCollectedBody": {
+    "description": "تأكيد تفاصيل التحصيل",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "rateDriverAfterCollection": "You can rate the driver once the cash is collected.",
+  "@rateDriverAfterCollection": {
+    "description": "ملاحظة انتظار التحصيل قبل التقييم"
+  }
 }

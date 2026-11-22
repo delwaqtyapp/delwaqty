@@ -15109,6 +15109,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Downloading an app does not grant a role. Access follows your current account approval. Android installation permission may be required.'**
   String get appInvitationsFooter;
+
+  /// عنوان بطاقة التحصيل في تطبيق الكابتن
+  ///
+  /// In en, this message translates to:
+  /// **'Cash to collect'**
+  String get cashToCollectTitle;
+
+  /// جسم بطاقة التحصيل
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered. Collect {amount} from the customer, then confirm.'**
+  String cashToCollectBody(String amount);
+
+  /// زر تم التحصيل
+  ///
+  /// In en, this message translates to:
+  /// **'Cash collected'**
+  String get collectCashCta;
+
+  /// تأكيد التحصيل
+  ///
+  /// In en, this message translates to:
+  /// **'Cash collected'**
+  String get cashCollectedTitle;
+
+  /// تأكيد تفاصيل التحصيل
+  ///
+  /// In en, this message translates to:
+  /// **'Collected {amount}. It shows in your settlement.'**
+  String cashCollectedBody(String amount);
+
+  /// ملاحظة انتظار التحصيل قبل التقييم
+  ///
+  /// In en, this message translates to:
+  /// **'You can rate the driver once the cash is collected.'**
+  String get rateDriverAfterCollection;
 }
 
 class _AppLocalizationsDelegate

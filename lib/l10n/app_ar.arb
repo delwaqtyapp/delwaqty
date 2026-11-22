@@ -2734,5 +2734,11 @@
   "appInvitationDownloading": "جارٍ التحميل الآمن...",
   "appInvitationInstallReady": "التحميل الموثّق جاهز. اتبع رسالة التثبيت.",
   "appInvitationDownloadFailed": "تعذّر بدء التحميل. راجع اتصالك وإذن تثبيت التطبيقات ثم حاول مرة أخرى.",
-  "appInvitationsFooter": "تحميل التطبيق لا يمنح صلاحيات جديدة. الدخول مرتبط باعتماد حسابك الحالي. قد تحتاج إلى السماح بالتثبيت على أندرويد."
+  "appInvitationsFooter": "تحميل التطبيق لا يمنح صلاحيات جديدة. الدخول مرتبط باعتماد حسابك الحالي. قد تحتاج إلى السماح بالتثبيت على أندرويد.",
+  "cashToCollectTitle": "مبلغ مطلوب تحصيله",
+  "cashToCollectBody": "تم تسليم الطلب. حصّل {amount} من العميل ثم أكّد.",
+  "collectCashCta": "تم التحصيل",
+  "cashCollectedTitle": "تم تحصيل المبلغ",
+  "cashCollectedBody": "تم تسجيل تحصيل {amount}. تظهر في تسويتك.",
+  "rateDriverAfterCollection": "يمكنك تقييم الكابتن بعد تحصيل المبلغ."
 }

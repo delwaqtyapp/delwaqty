@@ -1,4 +1,5 @@
 import 'package:delwaqty/features/customer/delivery/data/datasources/remote/supabase_delivery_data_source.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/cash_collection.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_order.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/merchant_profile.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/driver_capability.dart';
@@ -172,4 +173,16 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
     int stars, {
     String? comment,
   }) => _dataSource.rateDelivery(rideId, driverId, stars, comment: comment);
+
+  @override
+  Future<CashCollectionState?> getCashCollectionState(String rideId) =>
+      _dataSource.getCashCollectionState(rideId);
+
+  @override
+  Future<CashCollectionResult> confirmCashCollection(String rideId) =>
+      _dataSource.confirmCashCollection(rideId);
+
+  @override
+  Future<OrderDeliveryRide?> getOrderDeliveryRide(String orderId) =>
+      _dataSource.getOrderDeliveryRide(orderId);
 }

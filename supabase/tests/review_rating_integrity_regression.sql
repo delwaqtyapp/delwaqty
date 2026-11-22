@@ -47,9 +47,11 @@ BEGIN
   INSERT INTO public.drivers(id, user_id, full_name, status, is_verified, is_active, accepts_deliveries, current_latitude, current_longitude)
     VALUES (drv, drv, 'Fixture Driver', 'online', true, true, true, 30, 31);
 
-  INSERT INTO public.rides(id, rider_id, driver_id, status,
+  -- Migration 392 gates rating on cash collection, so this fixture ride is
+  -- already collected (a completed cash handoff).
+  INSERT INTO public.rides(id, rider_id, driver_id, status, payment_status, cash_collected_at, cash_collected_by,
       pickup_latitude, pickup_longitude, dropoff_latitude, dropoff_longitude)
-    VALUES (ride_id, buyer, drv, 'completed', 30.0, 31.0, 30.1, 31.1);
+    VALUES (ride_id, buyer, drv, 'completed', 'paid', now(), drv, 30.0, 31.0, 30.1, 31.1);
 
   PERFORM set_config('request.jwt.claim.sub', buyer::text, true);
   PERFORM set_config('role','authenticated',true);

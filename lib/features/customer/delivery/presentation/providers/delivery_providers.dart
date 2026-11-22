@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/customer/delivery/data/datasources/remote/supabase_delivery_data_source.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/cash_collection.dart';
 import 'package:delwaqty/features/customer/delivery/data/repositories/delivery_repository_impl.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_order.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/driver_capability.dart';
@@ -30,6 +31,19 @@ final deliveryOrderByIdProvider = FutureProvider.family<DeliveryOrder?, String>(
     return ref.watch(deliveryRepositoryProvider).getDeliveryOrderById(id);
   },
 );
+
+/// Cash-handoff state for the captain's "تم التحصيل" card (migration 392).
+final cashCollectionStateProvider =
+    FutureProvider.family<CashCollectionState?, String>((ref, rideId) {
+      return ref.watch(deliveryRepositoryProvider).getCashCollectionState(rideId);
+    });
+
+/// The delivery ride linked to a commerce order, for the customer's
+/// post-collection driver rating (migration 392).
+final orderDeliveryRideProvider =
+    FutureProvider.family<OrderDeliveryRide?, String>((ref, orderId) {
+      return ref.watch(deliveryRepositoryProvider).getOrderDeliveryRide(orderId);
+    });
 
 final driverCapabilitiesProvider =
     FutureProvider.family<DriverCapability, String>((ref, driverId) {

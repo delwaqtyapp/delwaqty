@@ -17,8 +17,8 @@ import 'package:delwaqty/features/customer/ride/presentation/widgets/ride_map.da
 import 'package:delwaqty/features/customer/ride/domain/entities/ride.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/driver_rating_bar.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
-import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class DeliveryTrackingPage extends ConsumerStatefulWidget {
@@ -82,10 +82,15 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
         data: (ride) =>
             _TrackingBody(ride: ride, deliveryId: widget.deliveryId),
       ),
+      // Rating opens once the delivery is completed — and, for cash
+      // deliveries, only after the captain collected the cash (migration
+      // 392). Non-cash completion is unchanged.
       bottomNavigationBar:
           rideAsync.value != null &&
-              rideAsync.value!.status == RideStatus.completed
-          ? _RatingBar(
+              rideAsync.value!.status == RideStatus.completed &&
+              (rideAsync.value!.paymentMethod != 'cash' ||
+                  rideAsync.value!.paymentStatus == 'paid')
+          ? DriverRatingBar(
               rating: _rating,
               onRatingChanged: (r) => setState(() => _rating = r),
               controller: _commentController,
@@ -652,76 +657,3 @@ class _ReceiptRow extends StatelessWidget {
   }
 }
 
-class _RatingBar extends StatelessWidget {
-  const _RatingBar({
-    required this.rating,
-    required this.onRatingChanged,
-    required this.controller,
-    required this.onSubmit,
-  });
-
-  final int rating;
-  final ValueChanged<int> onRatingChanged;
-  final TextEditingController controller;
-  final VoidCallback onSubmit;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.onSurface
-                .withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(5, (i) {
-                final star = i + 1;
-                return IconButton(
-                  tooltip: l10n.rateDriver,
-                  icon: Icon(
-                    star <= rating
-                        ? Icons.star_rounded
-                        : Icons.star_outline_rounded,
-                    color: star <= rating ? AppColors.rating : null,
-                    size: 36,
-                  ),
-                  onPressed: () => onRatingChanged(star),
-                );
-              }),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: controller,
-              decoration: InputDecoration(
-                hintText: l10n.trackingUpdatesHint,
-                border: const OutlineInputBorder(),
-              ),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: rating > 0 ? onSubmit : null,
-                child: Text(l10n.submit),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

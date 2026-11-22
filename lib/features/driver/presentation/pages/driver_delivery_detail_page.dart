@@ -20,6 +20,7 @@ import 'package:delwaqty/features/customer/delivery/presentation/providers/deliv
 import 'package:delwaqty/features/customer/driver/presentation/providers/dispatch_providers.dart';
 import 'package:delwaqty/features/customer/ride/presentation/widgets/ride_map.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
+import 'package:delwaqty/features/driver/presentation/widgets/cash_collection_card.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/services/maps/maps_service.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
@@ -131,6 +132,21 @@ class _DriverDeliveryDetailPageState
           .completeDelivery(order.id, driverId, recipientOtp: code);
     });
     if (!ok || !mounted) return;
+    // Cash handoff (migration 392): on a cash delivery the page stays open
+    // and the cash card takes over — the captain collects the money and taps
+    // "تم التحصيل" before leaving. Any doubt about the payment state falls
+    // back to the old pop-and-snackbar flow.
+    try {
+      final cash = await ref
+          .read(deliveryRepositoryProvider)
+          .getCashCollectionState(order.id);
+      if (cash != null && cash.isCash && !cash.collected) {
+        ref.invalidate(cashCollectionStateProvider(order.id));
+        return;
+      }
+    } catch (_) {
+      // Fall through to the pre-392 completion flow.
+    }
     // Batch 17 #5: confirm the completion with the earnings and return the
     // driver to the hub; previously the page just sat on "completed" and the
     // driver had to back out with no feedback.
@@ -151,6 +167,20 @@ class _DriverDeliveryDetailPageState
     ref.invalidate(driverEarningsProvider(driverId));
     context.pop();
     messenger.showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _confirmCollection(DeliveryOrder order, String driverId) async {
+    final ok = await _run(() async {
+      await ref
+          .read(deliveryRepositoryProvider)
+          .confirmCashCollection(order.id);
+    });
+    if (!ok || !mounted) return;
+    ref.invalidate(cashCollectionStateProvider(order.id));
+    ref.invalidate(driverStatsProvider(driverId));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context).cashCollectedTitle)),
+    );
   }
 
   String? _resolveCustomerPhone(DeliveryOrder order) {
@@ -531,6 +561,29 @@ class _DriverDeliveryDetailPageState
                     ),
                   ),
                   const SizedBox(height: 16),
+                  // Cash handoff: once delivered, the captain collects the
+                  // cash here. The card flips to a collected confirmation.
+                  if (status == 'completed')
+                    ref
+                        .watch(cashCollectionStateProvider(order.id))
+                        .maybeWhen(
+                          data: (cash) =>
+                              cash != null &&
+                                  cash.isCash &&
+                                  order.status == 'completed'
+                              ? Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: CashCollectionCard(
+                                    state: cash,
+                                    busy: _busy,
+                                    onCollect: () =>
+                                        _confirmCollection(order, driverId),
+                                    onDone: () => context.pop(),
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
+                          orElse: () => const SizedBox.shrink(),
+                        ),
                   if (_busy) const Center(child: CircularProgressIndicator()),
                   if (status == 'searching' || status == 'requested')
                     FilledButton(

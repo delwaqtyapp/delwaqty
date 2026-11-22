@@ -2,6 +2,7 @@ import 'package:delwaqty/core/utils/rpc_result.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/cash_collection.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_order.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/merchant_profile.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/driver_capability.dart';
@@ -550,6 +551,53 @@ class SupabaseDeliveryDataSource {
       'stars': stars,
       'comment': ?comment,
     }, onConflict: 'ride_id,rater_id');
+  }
+
+  // ── Cash handoff (migration 392) ──
+
+  /// What the assigned captain should collect on this delivery. Returns null
+  /// when the server hides the ride (not the assigned driver) — the caller
+  /// simply does not render the cash card.
+  Future<CashCollectionState?> getCashCollectionState(String rideId) async {
+    final data = await _client.rpc(
+      'driver_cash_collection_state',
+      params: {'p_ride_id': rideId},
+    );
+    final map = Map<String, dynamic>.from(data as Map);
+    if (map['ok'] != true) return null;
+    return CashCollectionState.fromJson(map);
+  }
+
+  /// The captain's "تم التحصيل" tap. The server stamps the ride and the
+  /// linked commerce order atomically; a replay answers ALREADY_COLLECTED.
+  Future<CashCollectionResult> confirmCashCollection(String rideId) async {
+    final data = await _client.rpc(
+      'confirm_cash_collection',
+      params: {'p_reference_type': 'ride', 'p_reference_id': rideId},
+    );
+    final map = Map<String, dynamic>.from(data as Map);
+    final result = CashCollectionResult.fromJson(map);
+    if (!result.ok) {
+      throw DeliveryException(result.code);
+    }
+    return result;
+  }
+
+  /// The delivery ride linked to a commerce order (latest non-cancelled),
+  /// for the customer's post-collection driver rating.
+  Future<OrderDeliveryRide?> getOrderDeliveryRide(String orderId) async {
+    final row = await _client
+        .from('rides')
+        .select(
+          'id, driver_id, driver_name, status, payment_method, payment_status, cash_collected_at',
+        )
+        .eq('order_id', orderId)
+        .neq('status', 'cancelled')
+        .order('created_at', ascending: false)
+        .limit(1)
+        .maybeSingle();
+    if (row == null) return null;
+    return OrderDeliveryRide.fromRow(row);
   }
 }
 

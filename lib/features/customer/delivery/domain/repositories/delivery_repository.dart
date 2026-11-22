@@ -1,3 +1,4 @@
+import 'package:delwaqty/features/customer/delivery/domain/entities/cash_collection.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_order.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/merchant_profile.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/driver_capability.dart';
@@ -79,4 +80,16 @@ abstract interface class DeliveryRepository {
     int stars, {
     String? comment,
   });
+
+  /// Cash handoff (migration 392): what the captain should collect on this
+  /// delivery and whether it is collected. Answers only the assigned driver.
+  Future<CashCollectionState?> getCashCollectionState(String rideId);
+
+  /// The captain's "تم التحصيل" tap: marks the cash collected and syncs the
+  /// linked commerce order. Idempotent on the server.
+  Future<CashCollectionResult> confirmCashCollection(String rideId);
+
+  /// The delivery ride linked to a commerce order, for the customer's
+  /// post-collection driver rating.
+  Future<OrderDeliveryRide?> getOrderDeliveryRide(String orderId);
 }

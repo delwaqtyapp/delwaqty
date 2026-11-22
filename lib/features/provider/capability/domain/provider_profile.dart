@@ -2,6 +2,9 @@ import 'package:delwaqty/core/module/shell_customization.dart';
 import 'package:delwaqty/features/provider/capability/domain/provider_capability.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
+/// Whether the account type is known yet.
+enum ProviderProfileStatus { loading, failed, ready }
+
 /// Operating-experience families. Categories in the same family share every
 /// flow and differ only by labels.
 enum ProviderFamily {
@@ -50,6 +53,11 @@ const Map<String, ProviderCapability> kDrawerEntryCapability = {
 /// Route prefix -> capability required to open it. Used by the router guard
 /// so a hidden surface cannot be reached by a stale deep link or notification.
 const Map<String, ProviderCapability> kRouteCapability = {
+  '/provider-availability': ProviderCapability.availability,
+  '/provider-financial-center': ProviderCapability.financial,
+  '/merchant-dashboard/reviews': ProviderCapability.reviews,
+  '/provider-documents': ProviderCapability.documents,
+  '/provider-verification': ProviderCapability.verification,
   '/provider-orders': ProviderCapability.orders,
   '/merchant-dashboard/orders': ProviderCapability.orders,
   '/provider-products': ProviderCapability.catalog,
@@ -75,6 +83,7 @@ class ProviderProfile {
     required this.category,
     required this.capabilities,
     required this.tabs,
+    this.status = ProviderProfileStatus.ready,
   });
 
   factory ProviderProfile.forCategory(ProviderCategory category) {
@@ -87,14 +96,28 @@ class ProviderProfile {
     );
   }
 
-  /// Shown while the account type is still loading: no type-specific tab
-  /// appears and then vanishes.
-  factory ProviderProfile.neutral() => const ProviderProfile._(
+  /// Account type still loading: only the dashboard and financial tabs, and
+  /// the route guard fails closed (see [allowsRoute]).
+  factory ProviderProfile.loading() => const ProviderProfile._(
     family: ProviderFamily.unknown,
     category: ProviderCategory.unknown,
     capabilities: {},
     tabs: [ProviderTabIds.dashboard, ProviderTabIds.financial],
+    status: ProviderProfileStatus.loading,
   );
+
+  /// Account type lookup failed: same closed surface as loading; the
+  /// dashboard shows a retry.
+  factory ProviderProfile.failed() => const ProviderProfile._(
+    family: ProviderFamily.unknown,
+    category: ProviderCategory.unknown,
+    capabilities: {},
+    tabs: [ProviderTabIds.dashboard, ProviderTabIds.financial],
+    status: ProviderProfileStatus.failed,
+  );
+
+  /// Kept for existing callers: same as [loading].
+  factory ProviderProfile.neutral() => ProviderProfile.loading();
 
   final ProviderFamily family;
   final ProviderCategory category;
@@ -102,8 +125,12 @@ class ProviderProfile {
 
   /// Ordered bottom-tab module ids.
   final List<String> tabs;
+  final ProviderProfileStatus status;
 
-  bool get isNeutral => capabilities.isEmpty;
+  bool get isReady => status == ProviderProfileStatus.ready;
+  bool get isLoading => status == ProviderProfileStatus.loading;
+  bool get hasFailed => status == ProviderProfileStatus.failed;
+  bool get isNeutral => !isReady;
 
   bool has(ProviderCapability c) => capabilities.contains(c);
 
@@ -129,12 +156,24 @@ class ProviderProfile {
     return isNeutral ? id == 'provider-support' : has(needed);
   }
 
-  /// True when [location] is not blocked for this profile. Unknown paths are
-  /// allowed (the guard only blocks surfaces it knows are gated).
+  /// True when [location] may be opened by this profile.
+  ///
+  /// Fails closed: until the account type is known, only the dashboard root,
+  /// the financial center and shared (non-provider) routes open. Once known,
+  /// gated surfaces need their capability; unknown paths stay allowed.
   bool allowsRoute(String location) {
-    if (isNeutral) return true;
+    final path = Uri.tryParse(location)?.path ?? location;
+    if (!isReady) {
+      if (path == '/merchant-dashboard') return true;
+      if (path == '/provider-financial-center' ||
+          path.startsWith('/provider-financial-center/')) {
+        return true;
+      }
+      return !(path.startsWith('/provider-') ||
+          path.startsWith('/merchant-dashboard/'));
+    }
     for (final entry in kRouteCapability.entries) {
-      if (location == entry.key || location.startsWith('${entry.key}/')) {
+      if (path == entry.key || path.startsWith('${entry.key}/')) {
         return has(entry.value);
       }
     }
@@ -185,12 +224,7 @@ class ProviderProfile {
           ProviderTabIds.financial,
         ];
       case ProviderFamily.unknown:
-        return const [
-          ProviderTabIds.dashboard,
-          ProviderTabIds.orders,
-          ProviderTabIds.products,
-          ProviderTabIds.financial,
-        ];
+        return const [ProviderTabIds.dashboard, ProviderTabIds.financial];
     }
   }
 

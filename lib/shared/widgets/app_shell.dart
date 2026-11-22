@@ -192,17 +192,12 @@ class AppShell extends ConsumerWidget {
     final visible = visibleNav(navModules, config);
     final l10n = AppLocalizations.of(context);
 
-    // When the open branch is hidden for this account (type switched, stale
-    // deep link), fall back to the first visible tab.
+    // A branch that is open but has no tab (the owner opening My services
+    // from the dashboard) shows no selected pill. Access to hidden surfaces
+    // is decided by the router guard, not here.
     final currentVisible = visible.indexWhere(
       (e) => e.key == navigationShell.currentIndex,
     );
-    if (currentVisible < 0 && visible.isNotEmpty) {
-      final target = visible.first.key;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        navigationShell.goBranch(target);
-      });
-    }
 
     return PopScope(
       canPop: false,
@@ -231,7 +226,7 @@ class AppShell extends ConsumerWidget {
           child: navigationShell,
         ),
         bottomNavigationBar: _TransparentBottomNav(
-          selectedIndex: currentVisible < 0 ? 0 : currentVisible,
+          selectedIndex: currentVisible,
           onDestinationSelected: (i) => _onTap(visible[i].key),
           navModules: [for (final e in visible) e.value],
           labelOverride: (m) => config?.labelFor?.call(m.id, l10n),

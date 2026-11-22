@@ -2,6 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/core/auth/platform_capabilities.dart';
 import 'package:delwaqty/core/module/shell_customization.dart';
+import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/provider/services/presentation/providers/provider_service_providers.dart';
 import 'package:delwaqty/features/provider/capability/domain/provider_capability.dart';
 import 'package:delwaqty/features/provider/capability/domain/provider_profile.dart';
 
@@ -50,39 +53,51 @@ class ProviderProfilesState {
   final List<ProviderBusinessProfile> profiles;
 }
 
+/// The authenticated account id. Every identity-dependent provider below
+/// watches this, so signing out of account A and into account B can never
+/// serve A's cached profile, tabs, services or bookings.
+final providerUidProvider = Provider<String?>((ref) {
+  final auth = ref.watch(authStateProvider);
+  if (auth is AuthAuthenticated) {
+    final id = auth.user.id;
+    return id.isEmpty ? null : id;
+  }
+  return null;
+});
+
 final providerProfilesProvider = FutureProvider<ProviderProfilesState>((
   ref,
 ) async {
-  final client = ref.watch(supabaseClientProvider);
-  final uid = client.auth.currentUser?.id;
-  if (uid == null || uid.isEmpty) {
+  final uid = ref.watch(providerUidProvider);
+  if (uid == null) {
     return const ProviderProfilesState();
   }
-  try {
-    final raw = await client.rpc('get_my_provider_profiles');
-    if (raw is Map) {
-      final map = Map<String, dynamic>.from(raw);
-      final listRaw = map['profiles'];
-      final profiles = listRaw is List
-          ? listRaw
-                .whereType<Map>()
-                .map(
-                  (e) => ProviderBusinessProfile.fromJson(
-                    Map<String, dynamic>.from(e),
-                  ),
-                )
-                .toList()
-          : <ProviderBusinessProfile>[];
-      return ProviderProfilesState(
-        isOwner: map['is_owner'] == true,
-        activeCategory:
-            (map['active_category'] as String?)?.trim().isNotEmpty == true
-            ? (map['active_category'] as String).trim()
-            : 'restaurant',
-        profiles: profiles,
-      );
-    }
-  } catch (_) {}
+  final client = ref.watch(supabaseClientProvider);
+  // Errors propagate: a failed lookup must NOT look like "no profiles",
+  // otherwise the provider app would guess a category.
+  final raw = await client.rpc('get_my_provider_profiles');
+  if (raw is Map) {
+    final map = Map<String, dynamic>.from(raw);
+    final listRaw = map['profiles'];
+    final profiles = listRaw is List
+        ? listRaw
+              .whereType<Map>()
+              .map(
+                (e) => ProviderBusinessProfile.fromJson(
+                  Map<String, dynamic>.from(e),
+                ),
+              )
+              .toList()
+        : <ProviderBusinessProfile>[];
+    return ProviderProfilesState(
+      isOwner: map['is_owner'] == true,
+      activeCategory:
+          (map['active_category'] as String?)?.trim().isNotEmpty == true
+          ? (map['active_category'] as String).trim()
+          : 'restaurant',
+      profiles: profiles,
+    );
+  }
   return const ProviderProfilesState();
 });
 
@@ -92,9 +107,9 @@ final providerProfilesProvider = FutureProvider<ProviderProfilesState>((
 /// (for full platform evaluation) and approved multi-service providers can
 /// switch seamlessly between verticals in one app.
 final providerRawCategoryProvider = FutureProvider<String>((ref) async {
+  final uid = ref.watch(providerUidProvider);
+  if (uid == null) return 'unknown';
   final client = ref.watch(supabaseClientProvider);
-  final uid = client.auth.currentUser?.id;
-  if (uid == null || uid.isEmpty) return 'unknown';
 
   final profilesState = await ref.watch(providerProfilesProvider.future);
   if (profilesState.profiles.isNotEmpty &&
@@ -131,6 +146,8 @@ final providerRawCategoryProvider = FutureProvider<String>((ref) async {
       .from('service_providers')
       .select('category_type')
       .eq('user_id', uid)
+      .order('created_at')
+      .limit(1)
       .maybeSingle();
   if (sp != null && sp['category_type'] is String) {
     return sp['category_type'] as String;
@@ -167,9 +184,36 @@ final providerCapabilitiesProvider = Provider<Set<ProviderCapability>>((ref) {
 /// flashes and disappears.
 final providerProfileProvider = Provider<ProviderProfile>((ref) {
   final raw = ref.watch(providerRawCategoryProvider);
+  if (raw.hasError && raw.value == null) return ProviderProfile.failed();
   final value = raw.value;
-  if (value == null) return ProviderProfile.neutral();
+  if (value == null) return ProviderProfile.loading();
   return ProviderProfile.forCategory(ProviderCategory.normalize(value));
+});
+
+/// The service_providers row of the SELECTED approved business profile (not
+/// "the first row by created_at"). `null` when the active profile is not a
+/// service profile or has no provisioned service row.
+final providerSelectedServiceProviderIdProvider = FutureProvider<String?>((
+  ref,
+) async {
+  final uid = ref.watch(providerUidProvider);
+  if (uid == null) return null;
+  final state = await ref.watch(providerProfilesProvider.future);
+  if (state.profiles.isEmpty) {
+    // Legacy account without business profiles: single service row.
+    return ref
+        .watch(providerServiceRepositoryProvider)
+        .legacyServiceProviderId();
+  }
+  final active = state.activeCategory.toLowerCase();
+  for (final p in state.profiles) {
+    if (p.categoryType.toLowerCase() == active &&
+        (p.isApproved || state.isOwner) &&
+        (p.serviceProviderId ?? '').isNotEmpty) {
+      return p.serviceProviderId;
+    }
+  }
+  return null;
 });
 
 /// Shell configuration derived from [providerProfileProvider]. The provider

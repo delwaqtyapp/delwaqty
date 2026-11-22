@@ -1,26 +1,26 @@
 {
   "channels": {
     "customer": {
-      "version": 6,
-      "versionName": "1.0.5+6",
+      "version": 7,
+      "versionName": "1.0.6+7",
       "apk": "delwaqty-customer.apk",
       "notes": "تفعيل خرائط جوجل داخل التطبيق وتحسينات الأمان"
     },
     "admin": {
-      "version": 6,
-      "versionName": "1.0.5+6",
+      "version": 7,
+      "versionName": "1.0.6+7",
       "apk": "delwaqty-admin.apk",
       "notes": "تفعيل خرائط جوجل داخل التطبيق وتحسينات الأمان"
     },
     "driver": {
-      "version": 6,
-      "versionName": "1.0.5+6",
+      "version": 7,
+      "versionName": "1.0.6+7",
       "apk": "delwaqty-driver.apk",
       "notes": "تفعيل خرائط جوجل داخل التطبيق وتحسينات الأمان"
     },
     "provider": {
-      "version": 6,
-      "versionName": "1.0.5+6",
+      "version": 7,
+      "versionName": "1.0.6+7",
       "apk": "delwaqty-provider.apk",
       "notes": "تفعيل خرائط جوجل داخل التطبيق وتحسينات الأمان"
     }

@@ -8045,4 +8045,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get providerMyPricingEmpty => 'No service profiles yet';
+
+  @override
+  String get providerPricingInvalidInput =>
+      'Enter a valid number within the allowed range';
 }

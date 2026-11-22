@@ -189,11 +189,26 @@ class _AdminProviderPricingPageState
     final hourly = _parseRate(result['hourly']);
     final min = _parseRate(result['fixed_min']);
     final max = _parseRate(result['fixed_max']);
-    if (!_validRates(hourly, min, max)) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.providerPricingFailed)));
+    // Blank means "clear this override"; a non-blank value that does not
+    // parse is an input error, not a clear.
+    final invalid = [
+      result['hourly'],
+      result['fixed_min'],
+      result['fixed_max'],
+    ].any((v) => v != null && v.isNotEmpty && double.tryParse(v) == null);
+    if (invalid || !_validRates(hourly, min, max)) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.providerPricingInvalidInput)));
       return;
     }
+    // Explicit intended triple: blank fields are cleared via p_clear_fields
+    // so a partial edit never wipes its siblings server-side.
+    final clearFields = <String>[
+      if ((result['hourly'] ?? '').isEmpty) 'hourly_rate',
+      if ((result['fixed_min'] ?? '').isEmpty) 'fixed_price_min',
+      if ((result['fixed_max'] ?? '').isEmpty) 'fixed_price_max',
+    ];
     await _save(() async {
       final client = ref.read(supabaseClientProvider);
       await client.rpc(
@@ -203,6 +218,7 @@ class _AdminProviderPricingPageState
           'p_hourly_rate': hourly,
           'p_fixed_price_min': min,
           'p_fixed_price_max': max,
+          'p_clear_fields': clearFields,
           'p_note': (result['note']?.isEmpty ?? true) ? null : result['note'],
         },
       );

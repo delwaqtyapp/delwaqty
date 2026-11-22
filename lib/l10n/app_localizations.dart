@@ -15247,6 +15247,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No service profiles yet'**
   String get providerMyPricingEmpty;
+
+  /// No description provided for @providerPricingInvalidInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid number within the allowed range'**
+  String get providerPricingInvalidInput;
 }
 
 class _AppLocalizationsDelegate

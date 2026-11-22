@@ -7977,4 +7977,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get providerMyPricingEmpty => 'لا توجد ملفات خدمة بعد';
+
+  @override
+  String get providerPricingInvalidInput =>
+      'أدخل رقمًا صحيحًا ضمن الحدود المسموحة';
 }

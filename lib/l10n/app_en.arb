@@ -2816,5 +2816,6 @@
   "providerPricingLeaveEmpty": "Leave empty to use the default",
   "providerMyPricing": "My pricing",
   "providerMyPricingAdminNote": "Prices are set by the administration. Contact support to request a change.",
-  "providerMyPricingEmpty": "No service profiles yet"
+  "providerMyPricingEmpty": "No service profiles yet",
+  "providerPricingInvalidInput": "Enter a valid number within the allowed range"
 }

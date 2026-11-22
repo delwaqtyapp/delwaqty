@@ -84,6 +84,8 @@ class _MerchantProductModifiersPageState
       text: '${(group?['max_selections'] as num?)?.toInt() ?? 1}',
     );
     var required = group?['is_required'] == true;
+    var saving = false;
+    String? errorText;
     final saved = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
@@ -111,41 +113,90 @@ class _MerchantProductModifiersPageState
                 contentPadding: EdgeInsets.zero,
                 title: Text(l10n.posModifierRequired),
                 value: required,
-                onChanged: (v) => setDialogState(() => required = v),
+                onChanged: saving
+                    ? null
+                    : (v) => setDialogState(() => required = v),
               ),
+              if (errorText != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Text(
+                      errorText!,
+                      style: const TextStyle(color: AppColors.errorLight),
+                    ),
+                  ),
+                ),
             ],
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
+              onPressed: saving
+                  ? null
+                  : () => Navigator.of(dialogContext).pop(false),
               child: Text(l10n.cancel),
             ),
             FilledButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(l10n.save),
+              onPressed: saving
+                  ? null
+                  : () async {
+                      final name = nameCtrl.text.trim();
+                      final nameAr = nameArCtrl.text.trim();
+                      final maxSel = int.tryParse(maxCtrl.text.trim());
+                      if ((name.isEmpty && nameAr.isEmpty) ||
+                          maxSel == null ||
+                          maxSel < 1) {
+                        setDialogState(() => errorText = l10n.requiredField);
+                        return;
+                      }
+                      setDialogState(() {
+                        saving = true;
+                        errorText = null;
+                      });
+                      try {
+                        final client = Supabase.instance.client;
+                        final row = {
+                          'name': name,
+                          'name_ar': nameAr,
+                          'is_required': required,
+                          'max_selections': maxSel,
+                        };
+                        if (group == null) {
+                          row['product_id'] = widget.productId;
+                          row['sort_order'] = _groups.length;
+                          await client
+                              .from('product_modifier_groups')
+                              .insert(row);
+                        } else {
+                          await client
+                              .from('product_modifier_groups')
+                              .update(row)
+                              .eq('id', group['id'] as String);
+                        }
+                        if (dialogContext.mounted) {
+                          Navigator.of(dialogContext).pop(true);
+                        }
+                      } catch (_) {
+                        setDialogState(() {
+                          saving = false;
+                          errorText = l10n.productSaveFailed;
+                        });
+                      }
+                    },
+              child: saving
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(l10n.save),
             ),
           ],
         ),
       ),
     );
     if (saved != true || !mounted) return;
-    final client = Supabase.instance.client;
-    final row = {
-      'name': nameCtrl.text.trim(),
-      'name_ar': nameArCtrl.text.trim(),
-      'is_required': required,
-      'max_selections': int.tryParse(maxCtrl.text.trim()) ?? 0,
-    };
-    if (group == null) {
-      row['product_id'] = widget.productId;
-      row['sort_order'] = _groups.length;
-      await client.from('product_modifier_groups').insert(row);
-    } else {
-      await client
-          .from('product_modifier_groups')
-          .update(row)
-          .eq('id', group['id'] as String);
-    }
     await _load();
   }
 
@@ -172,15 +223,23 @@ class _MerchantProductModifiersPageState
       ),
     );
     if (confirmed != true || !mounted) return;
-    final client = Supabase.instance.client;
-    await client
-        .from('product_modifier_options')
-        .delete()
-        .eq('group_id', group['id'] as String);
-    await client
-        .from('product_modifier_groups')
-        .delete()
-        .eq('id', group['id'] as String);
+    try {
+      final client = Supabase.instance.client;
+      await client
+          .from('product_modifier_options')
+          .delete()
+          .eq('group_id', group['id'] as String);
+      await client
+          .from('product_modifier_groups')
+          .delete()
+          .eq('id', group['id'] as String);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.deleteFailed)));
+      }
+      return;
+    }
     await _load();
   }
 
@@ -196,69 +255,128 @@ class _MerchantProductModifiersPageState
     final priceCtrl = TextEditingController(
       text: '${(option?['price_adjustment'] as num?)?.toDouble() ?? 0}',
     );
+    var saving = false;
+    String? errorText;
     final saved = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.modifierOptionTitle),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameCtrl,
-              decoration: InputDecoration(labelText: l10n.modifierNameEn),
-            ),
-            TextField(
-              controller: nameArCtrl,
-              decoration: InputDecoration(labelText: l10n.modifierNameAr),
-            ),
-            TextField(
-              controller: priceCtrl,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(l10n.modifierOptionTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameCtrl,
+                decoration: InputDecoration(labelText: l10n.modifierNameEn),
               ),
-              decoration: InputDecoration(
-                labelText: l10n.modifierPriceAdjustment,
+              TextField(
+                controller: nameArCtrl,
+                decoration: InputDecoration(labelText: l10n.modifierNameAr),
               ),
+              TextField(
+                controller: priceCtrl,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(
+                  labelText: l10n.modifierPriceAdjustment,
+                ),
+              ),
+              if (errorText != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Text(
+                      errorText!,
+                      style: const TextStyle(color: AppColors.errorLight),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: saving
+                  ? null
+                  : () => Navigator.of(dialogContext).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: saving
+                  ? null
+                  : () async {
+                      final name = nameCtrl.text.trim();
+                      final nameAr = nameArCtrl.text.trim();
+                      final price = double.tryParse(priceCtrl.text.trim());
+                      if ((name.isEmpty && nameAr.isEmpty) || price == null) {
+                        setDialogState(() => errorText = l10n.requiredField);
+                        return;
+                      }
+                      setDialogState(() {
+                        saving = true;
+                        errorText = null;
+                      });
+                      try {
+                        final client = Supabase.instance.client;
+                        final row = {
+                          'name': name,
+                          'name_ar': nameAr,
+                          'price_adjustment': price,
+                        };
+                        if (option == null) {
+                          row['group_id'] = group['id'] as String;
+                          row['sort_order'] =
+                              (_options[group['id']] ?? const []).length;
+                          await client
+                              .from('product_modifier_options')
+                              .insert(row);
+                        } else {
+                          await client
+                              .from('product_modifier_options')
+                              .update(row)
+                              .eq('id', option['id'] as String);
+                        }
+                        if (dialogContext.mounted) {
+                          Navigator.of(dialogContext).pop(true);
+                        }
+                      } catch (_) {
+                        setDialogState(() {
+                          saving = false;
+                          errorText = l10n.productSaveFailed;
+                        });
+                      }
+                    },
+              child: saving
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(l10n.save),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.save),
-          ),
-        ],
       ),
     );
     if (saved != true || !mounted) return;
-    final client = Supabase.instance.client;
-    final row = {
-      'name': nameCtrl.text.trim(),
-      'name_ar': nameArCtrl.text.trim(),
-      'price_adjustment': double.tryParse(priceCtrl.text.trim()) ?? 0,
-    };
-    if (option == null) {
-      row['group_id'] = group['id'] as String;
-      row['sort_order'] = (_options[group['id']] ?? const []).length;
-      await client.from('product_modifier_options').insert(row);
-    } else {
-      await client
-          .from('product_modifier_options')
-          .update(row)
-          .eq('id', option['id'] as String);
-    }
     await _load();
   }
 
   Future<void> _deleteOption(Map<String, dynamic> option) async {
-    await Supabase.instance.client
-        .from('product_modifier_options')
-        .delete()
-        .eq('id', option['id'] as String);
+    final l10n = AppLocalizations.of(context);
+    try {
+      await Supabase.instance.client
+          .from('product_modifier_options')
+          .delete()
+          .eq('id', option['id'] as String);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.deleteFailed)));
+      }
+      return;
+    }
     await _load();
   }
 
@@ -267,10 +385,14 @@ class _MerchantProductModifiersPageState
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.modifiersManage)),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _editGroup(),
-        icon: const Icon(Icons.add),
-        label: Text(l10n.modifierAddGroup),
+      floatingActionButton: Padding(
+        // Keep the FAB above the shell's floating bottom navigation bar.
+        padding: const EdgeInsets.only(bottom: 96),
+        child: FloatingActionButton.extended(
+          onPressed: () => _editGroup(),
+          icon: const Icon(Icons.add),
+          label: Text(l10n.modifierAddGroup),
+        ),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())

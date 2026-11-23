@@ -113,7 +113,12 @@ AS $function$
   );
 $function$;
 
-REVOKE ALL ON FUNCTION public._cashier_has_pro(uuid) FROM PUBLIC, anon, authenticated;
+-- #130: authenticated keeps EXECUTE here: the RLS policies
+-- pos_insurance_companies_owner / pos_insurance_sales_owner evaluate
+-- _cashier_has_pro as the invoking role. It is a boolean predicate only
+-- (no status/code detail), so the LOW oracle concern does not apply to it.
+REVOKE ALL ON FUNCTION public._cashier_has_pro(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public._cashier_has_pro(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public._cashier_has_pro(uuid) TO service_role;
 
 CREATE OR REPLACE FUNCTION public.cashier_sync_push(p_merchant_id uuid, p_ops jsonb)

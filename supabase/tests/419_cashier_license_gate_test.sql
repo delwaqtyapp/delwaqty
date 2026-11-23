@@ -39,9 +39,9 @@ BEGIN
   BEGIN PERFORM public.cashier_license_gate(m); v_err := 'NO_ERROR';
   EXCEPTION WHEN OTHERS THEN v_err := SQLERRM; END;
   ASSERT v_err ILIKE '%permission denied%', '419: authenticated called gate: ' || v_err;
-  BEGIN PERFORM public._cashier_has_pro(m); v_err := 'NO_ERROR';
-  EXCEPTION WHEN OTHERS THEN v_err := SQLERRM; END;
-  ASSERT v_err ILIKE '%permission denied%', '419: authenticated called has_pro: ' || v_err;
+  -- _cashier_has_pro intentionally stays callable by authenticated (RLS
+  -- policies evaluate it as the invoking role, #130); boolean only.
+  ASSERT public._cashier_has_pro(m) IS NOT NULL, '419: has_pro not callable by authenticated';
   PERFORM set_config('request.jwt.claim.sub', u::text, true);
 
   -- no license: gated op refused per-op with LICENSE_REQUIRED (no raise)
@@ -134,6 +134,68 @@ BEGIN
   BEGIN v_r := public.cashier_daily_close(m, gen_random_uuid(), 0); v_err := 'NO_ERROR';
   EXCEPTION WHEN OTHERS THEN v_err := SQLERRM; END;
   ASSERT v_err = 'LICENSE_SUSPENDED', '419: daily_close not locked: ' || v_err;
+
+  -- #130: RLS policies evaluate _cashier_has_pro as the invoking role, so
+  -- authenticated EXECUTE must stay. Real-role CRUD on the insured tables:
+  -- eligible PRO owner succeeds; locked, unlicensed and non-owner denied.
+  PERFORM set_config('role','none',true);
+  DECLARE
+    m3 uuid := gen_random_uuid(); u3 uuid := gen_random_uuid();
+    v_comp uuid := gen_random_uuid(); v_n integer;
+  BEGIN
+    INSERT INTO auth.users(id,email) VALUES (u3,u3::text||'@x.i');
+    INSERT INTO public.users(id,email,role) VALUES (u3,u3::text||'@x.i','merchant') ON CONFLICT(id) DO NOTHING;
+    INSERT INTO public.merchants(id,owner_user_id,name,type) VALUES (m3,u3,'419c','grocery');
+    INSERT INTO public.cashier_licenses(merchant_id,license_key,plan,status,grace_days,pro)
+    VALUES (m3,'419-P1','core_annual','active',7,true);
+    PERFORM set_config('role','authenticated',true);
+    PERFORM set_config('request.jwt.claim.sub', u3::text, true);
+    -- eligible PRO owner: full CRUD on both tables
+    INSERT INTO public.pos_insurance_companies(id,merchant_id,name) VALUES (v_comp,m3,'419 InsureCo');
+    GET DIAGNOSTICS v_n = ROW_COUNT; ASSERT v_n = 1, '419: owner company insert denied';
+    UPDATE public.pos_insurance_companies SET notes='x' WHERE id=v_comp;
+    GET DIAGNOSTICS v_n = ROW_COUNT; ASSERT v_n = 1, '419: owner company update denied';
+    INSERT INTO public.pos_insurance_sales(merchant_id,company_id,total,company_share,patient_share,client_op_id)
+    VALUES (m3,v_comp,10,6,4,gen_random_uuid());
+    GET DIAGNOSTICS v_n = ROW_COUNT; ASSERT v_n = 1, '419: owner insurance sale insert denied';
+    UPDATE public.pos_insurance_sales SET patient_share=5 WHERE company_id=v_comp;
+    GET DIAGNOSTICS v_n = ROW_COUNT; ASSERT v_n = 1, '419: owner insurance sale update denied';
+    DELETE FROM public.pos_insurance_sales WHERE company_id=v_comp;
+    GET DIAGNOSTICS v_n = ROW_COUNT; ASSERT v_n = 1, '419: owner insurance sale delete denied';
+    ASSERT (SELECT count(*) FROM public.pos_insurance_companies WHERE id=v_comp) = 1, '419: owner company select denied';
+    DELETE FROM public.pos_insurance_companies WHERE id=v_comp;
+    GET DIAGNOSTICS v_n = ROW_COUNT; ASSERT v_n = 1, '419: owner company delete denied';
+    -- locked (suspended) owner: invisible and read-only-denied
+    PERFORM set_config('role','none',true);
+    UPDATE public.cashier_licenses SET status='suspended' WHERE merchant_id=m3;
+    PERFORM set_config('role','authenticated',true);
+    BEGIN
+      INSERT INTO public.pos_insurance_companies(merchant_id,name) VALUES (m3,'nope');
+      v_err := 'NO_ERROR';
+    EXCEPTION WHEN OTHERS THEN v_err := SQLERRM; END;
+    ASSERT v_err ILIKE '%row-level security%' OR v_err ILIKE '%row security%' OR v_err ILIKE '%policy%',
+      '419: locked owner inserted company: ' || COALESCE(v_err,'');
+    -- unlicensed owner: denied
+    PERFORM set_config('role','none',true);
+    DELETE FROM public.cashier_licenses WHERE merchant_id=m3;
+    PERFORM set_config('role','authenticated',true);
+    ASSERT (SELECT count(*) FROM public.pos_insurance_companies WHERE merchant_id=m3) = 0,
+      '419: unlicensed owner read companies';
+    -- non-owner with a valid PRO license elsewhere: still denied on m3
+    PERFORM set_config('role','none',true);
+    INSERT INTO public.cashier_licenses(merchant_id,license_key,plan,status,grace_days,pro)
+    VALUES (m3,'419-P2','core_annual','active',7,true);
+    PERFORM set_config('role','authenticated',true);
+    PERFORM set_config('request.jwt.claim.sub', other::text, true);
+    ASSERT (SELECT count(*) FROM public.pos_insurance_companies WHERE merchant_id=m3) = 0,
+      '419: non-owner read companies';
+    BEGIN
+      INSERT INTO public.pos_insurance_companies(merchant_id,name) VALUES (m3,'nope');
+      v_err := 'NO_ERROR';
+    EXCEPTION WHEN OTHERS THEN v_err := SQLERRM; END;
+    ASSERT v_err ILIKE '%row-level security%' OR v_err ILIKE '%row security%' OR v_err ILIKE '%policy%',
+      '419: non-owner inserted company: ' || COALESCE(v_err,'');
+  END;
 
   -- suspension stays per-license (no cascade trigger exists)
   ASSERT NOT EXISTS (SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace

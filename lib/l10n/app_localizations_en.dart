@@ -3805,6 +3805,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get suggestionResolutionNote => 'Resolution note';
 
   @override
+  String get suggestionFromApp => 'From app';
+
+  @override
+  String get suggestionAppCustomer => 'Customer';
+
+  @override
+  String get suggestionAppDriver => 'Captain';
+
+  @override
+  String get suggestionAppProvider => 'Provider';
+
+  @override
+  String get suggestionAppAdmin => 'Admin';
+
+  @override
+  String get suggestionLinkedUrl => 'Linked issue or task (https link)';
+
+  @override
+  String get suggestionOpenLink => 'Open link';
+
+  @override
+  String get suggestionLinkInvalid =>
+      'Enter a valid https link or leave it empty';
+
+  @override
   String get adminSuggestionsTitle => 'User Suggestions';
 
   @override

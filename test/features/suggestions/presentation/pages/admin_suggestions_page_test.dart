@@ -39,6 +39,12 @@ Widget _buildApp(SuggestionsRepository repo) {
   );
 }
 
+void _tallScreen(WidgetTester tester) {
+  tester.view.physicalSize = const Size(800, 2000);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(_suggestion('fb', 'fallback'));
@@ -46,6 +52,7 @@ void main() {
 
   testWidgets('delayed-response filter switch: stale page cannot append '
       'into the new filter (#147)', (tester) async {
+    _tallScreen(tester);
     final repo = _MockSuggestionsRepository();
     final stalePage = Completer<List<Suggestion>>();
     final calls = <({String? status, int offset})>[];
@@ -53,6 +60,7 @@ void main() {
     when(
       () => repo.adminListSuggestions(
         status: any(named: 'status'),
+        appRole: any(named: 'appRole'),
         limit: any(named: 'limit'),
         offset: any(named: 'offset'),
       ),
@@ -72,7 +80,7 @@ void main() {
 
     // Switch the filter while the 'all' response is still pending.
     // (No pumpAndSettle: the loading spinner animates indefinitely.)
-    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    await tester.tap(find.byType(DropdownButtonFormField<String>).first);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
     await tester.tap(find.text('New').last); // 'pending' status label
@@ -92,6 +100,7 @@ void main() {
 
   testWidgets('refresh after triage fetches fresh data, never a cached '
       'page (#147)', (tester) async {
+    _tallScreen(tester);
     final repo = _MockSuggestionsRepository();
     var serverRows = [_suggestion('s1', 'queue row')];
     var listCalls = 0;
@@ -99,6 +108,7 @@ void main() {
     when(
       () => repo.adminListSuggestions(
         status: any(named: 'status'),
+        appRole: any(named: 'appRole'),
         limit: any(named: 'limit'),
         offset: any(named: 'offset'),
       ),
@@ -147,5 +157,74 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
     expect(listCalls, greaterThan(2));
+  });
+
+  testWidgets('app filter is passed to the server and a changed https link '
+      'is saved, an http link is rejected', (tester) async {
+    _tallScreen(tester);
+    final repo = _MockSuggestionsRepository();
+    final apps = <String?>[];
+    when(
+      () => repo.adminListSuggestions(
+        status: any(named: 'status'),
+        appRole: any(named: 'appRole'),
+        limit: any(named: 'limit'),
+        offset: any(named: 'offset'),
+      ),
+    ).thenAnswer((invocation) async {
+      apps.add(invocation.namedArguments[#appRole] as String?);
+      return [_suggestion('s1', 'a row')];
+    });
+    when(
+      () => repo.adminUpdateSuggestionStatus(
+        any(),
+        any(),
+        resolutionNote: any(named: 'resolutionNote'),
+      ),
+    ).thenAnswer((_) async {});
+    when(() => repo.adminSetSuggestionLink(any(), any()))
+        .thenAnswer((_) async {});
+
+    await tester.pumpWidget(_buildApp(repo));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(apps, [null]);
+
+    await tester.tap(find.byType(DropdownButtonFormField<String>).last);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tap(find.text('Captain').last);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(apps.last, 'driver');
+
+    await tester.tap(find.text('a row'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    final linkField = find.widgetWithText(
+      TextField,
+      'Linked issue or task (https link)',
+    );
+    await tester.enterText(linkField, 'http://insecure.example/1');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    verifyNever(() => repo.adminSetSuggestionLink(any(), any()));
+    verifyNever(
+      () => repo.adminUpdateSuggestionStatus(
+        any(),
+        any(),
+        resolutionNote: any(named: 'resolutionNote'),
+      ),
+    );
+
+    await tester.enterText(linkField, 'https://github.com/x/y/issues/9');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 800));
+    verify(
+      () =>
+          repo.adminSetSuggestionLink('s1', 'https://github.com/x/y/issues/9'),
+    ).called(1);
   });
 }

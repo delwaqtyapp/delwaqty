@@ -29,11 +29,13 @@ class SuggestionsRepositoryImpl implements SuggestionsRepository {
   @override
   Future<List<Suggestion>> adminListSuggestions({
     String? status,
+    String? appRole,
     int limit = 100,
     int offset = 0,
   }) {
     return _dataSource.adminListSuggestions(
       status: status,
+      appRole: appRole,
       limit: limit,
       offset: offset,
     );
@@ -50,5 +52,10 @@ class SuggestionsRepositoryImpl implements SuggestionsRepository {
       status,
       resolutionNote: resolutionNote,
     );
+  }
+
+  @override
+  Future<void> adminSetSuggestionLink(String id, String? url) {
+    return _dataSource.adminSetSuggestionLink(id, url);
   }
 }

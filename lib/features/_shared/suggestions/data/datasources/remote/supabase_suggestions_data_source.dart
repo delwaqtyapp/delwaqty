@@ -39,12 +39,18 @@ class SupabaseSuggestionsDataSource {
 
   Future<List<Suggestion>> adminListSuggestions({
     String? status,
+    String? appRole,
     int limit = 100,
     int offset = 0,
   }) async {
     final rows = await _client.rpc(
       'admin_list_suggestions',
-      params: {'p_status': status, 'p_limit': limit, 'p_offset': offset},
+      params: {
+        'p_status': status,
+        'p_limit': limit,
+        'p_offset': offset,
+        'p_app_role': appRole,
+      },
     );
     return (rows as List<dynamic>)
         .map((r) => Suggestion.fromJson(Map<String, dynamic>.from(r as Map)))
@@ -63,6 +69,13 @@ class SupabaseSuggestionsDataSource {
         'p_status': status,
         'p_resolution_note': resolutionNote,
       },
+    );
+  }
+
+  Future<void> adminSetSuggestionLink(String id, String? url) async {
+    await _client.rpc(
+      'admin_set_suggestion_link',
+      params: {'p_suggestion_id': id, 'p_linked_url': url},
     );
   }
 }

@@ -3773,6 +3773,30 @@ class AppLocalizationsAr extends AppLocalizations {
   String get suggestionResolutionNote => 'ملاحظة الرد';
 
   @override
+  String get suggestionFromApp => 'من تطبيق';
+
+  @override
+  String get suggestionAppCustomer => 'العميل';
+
+  @override
+  String get suggestionAppDriver => 'الكابتن';
+
+  @override
+  String get suggestionAppProvider => 'المزود';
+
+  @override
+  String get suggestionAppAdmin => 'الإدارة';
+
+  @override
+  String get suggestionLinkedUrl => 'رابط المهمة أو الـ issue (https)';
+
+  @override
+  String get suggestionOpenLink => 'افتح الرابط';
+
+  @override
+  String get suggestionLinkInvalid => 'اكتب رابط https صحيح أو سيبه فاضي';
+
+  @override
   String get adminSuggestionsTitle => 'اقتراحات المستخدمين';
 
   @override

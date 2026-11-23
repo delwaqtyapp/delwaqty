@@ -8,6 +8,7 @@ class Suggestion {
     required this.description,
     this.status = 'pending',
     this.resolutionNote,
+    this.linkedUrl,
     required this.createdAt,
     this.updatedAt,
   });
@@ -22,6 +23,7 @@ class Suggestion {
       description: (json['description'] as String?) ?? '',
       status: (json['status'] as String?) ?? 'pending',
       resolutionNote: json['resolution_note'] as String?,
+      linkedUrl: json['linked_url'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
@@ -37,6 +39,9 @@ class Suggestion {
   final String description;
   final String status;
   final String? resolutionNote;
+
+  /// Admin-only link to the issue or task this suggestion became.
+  final String? linkedUrl;
   final DateTime createdAt;
   final DateTime? updatedAt;
 
@@ -52,6 +57,7 @@ class Suggestion {
     'description': description,
     'status': status,
     'resolution_note': resolutionNote,
+    'linked_url': linkedUrl,
     'created_at': createdAt.toIso8601String(),
     'updated_at': updatedAt?.toIso8601String(),
   };

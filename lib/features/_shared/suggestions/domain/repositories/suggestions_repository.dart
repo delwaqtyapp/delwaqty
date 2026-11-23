@@ -14,6 +14,7 @@ abstract class SuggestionsRepository {
 
   Future<List<Suggestion>> adminListSuggestions({
     String? status,
+    String? appRole,
     int limit = 100,
     int offset = 0,
   });
@@ -25,4 +26,7 @@ abstract class SuggestionsRepository {
     String status, {
     String? resolutionNote,
   });
+
+  /// Sets the issue/task link (https only); null or blank clears it.
+  Future<void> adminSetSuggestionLink(String id, String? url);
 }

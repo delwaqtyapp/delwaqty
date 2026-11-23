@@ -896,6 +896,12 @@ abstract class AppLocalizations {
   /// **'Seafood'**
   String get seafood;
 
+  /// No description provided for @pharmacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Pharmacy'**
+  String get pharmacy;
+
   /// No description provided for @bakery.
   ///
   /// In en, this message translates to:
@@ -1681,6 +1687,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manage items'**
   String get provManageItems;
+
+  /// No description provided for @provTabMedicines.
+  ///
+  /// In en, this message translates to:
+  /// **'Medicines'**
+  String get provTabMedicines;
+
+  /// No description provided for @provManageMedicines.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage medicines'**
+  String get provManageMedicines;
 
   /// No description provided for @provTabTableBookings.
   ///
@@ -5579,7 +5597,7 @@ abstract class AppLocalizations {
   /// No description provided for @placeDescriptionHint.
   ///
   /// In en, this message translates to:
-  /// **'Example: Next to the supermarket, building 5, apartment 3'**
+  /// **'Example: Near the pharmacy, building 5, apartment 3'**
   String get placeDescriptionHint;
 
   /// No description provided for @customerPhone.
@@ -6017,7 +6035,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutDescription.
   ///
   /// In en, this message translates to:
-  /// **'Delwaqty is your all-in-one services and delivery platform. We connect you with the best restaurants and stores in your area for fast and reliable service.'**
+  /// **'Delwaqty is your all-in-one services and delivery platform. We connect you with the best restaurants, pharmacies, and stores in your area for fast and reliable service.'**
   String get aboutDescription;
 
   /// No description provided for @supportEmailAddress.
@@ -6371,7 +6389,7 @@ abstract class AppLocalizations {
   /// No description provided for @tosSection2Body.
   ///
   /// In en, this message translates to:
-  /// **'Delwaqty provides an on-demand platform connecting users with local restaurants, stores, and delivery providers for food delivery, order delivery, and delivery services. We act as an intermediary between customers and service providers and do not directly provide delivery services ourselves.'**
+  /// **'Delwaqty provides an on-demand platform connecting users with local restaurants, pharmacies, stores, and delivery providers for food delivery, order delivery, and delivery services. We act as an intermediary between customers and service providers and do not directly provide delivery services ourselves.'**
   String get tosSection2Body;
 
   /// No description provided for @tosSection3Title.
@@ -6793,6 +6811,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Grocery'**
   String get typeGrocery;
+
+  /// No description provided for @typePharmacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Pharmacy'**
+  String get typePharmacy;
 
   /// No description provided for @typeFlowers.
   ///
@@ -7315,6 +7339,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resolution note'**
   String get suggestionResolutionNote;
+
+  /// No description provided for @suggestionFromApp.
+  ///
+  /// In en, this message translates to:
+  /// **'From app'**
+  String get suggestionFromApp;
+
+  /// No description provided for @suggestionAppCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer'**
+  String get suggestionAppCustomer;
+
+  /// No description provided for @suggestionAppDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Captain'**
+  String get suggestionAppDriver;
+
+  /// No description provided for @suggestionAppProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get suggestionAppProvider;
+
+  /// No description provided for @suggestionAppAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get suggestionAppAdmin;
+
+  /// No description provided for @suggestionLinkedUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked issue or task (https link)'**
+  String get suggestionLinkedUrl;
+
+  /// No description provided for @suggestionOpenLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Open link'**
+  String get suggestionOpenLink;
+
+  /// No description provided for @suggestionLinkInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid https link or leave it empty'**
+  String get suggestionLinkInvalid;
 
   /// No description provided for @adminSuggestionsTitle.
   ///
@@ -8467,6 +8539,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Preparation Time'**
   String get preparationTime;
+
+  /// No description provided for @dosageForm.
+  ///
+  /// In en, this message translates to:
+  /// **'Dosage Form'**
+  String get dosageForm;
+
+  /// No description provided for @activeIngredient.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Ingredient'**
+  String get activeIngredient;
+
+  /// No description provided for @prescriptionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Prescription Required'**
+  String get prescriptionRequired;
 
   /// No description provided for @warnings.
   ///
@@ -9637,6 +9727,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Restaurants'**
   String get commissionCategoryRestaurant;
+
+  /// No description provided for @commissionCategoryPharmacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Pharmacies'**
+  String get commissionCategoryPharmacy;
 
   /// No description provided for @commissionCategoryGrocery.
   ///
@@ -14699,7 +14795,7 @@ abstract class AppLocalizations {
   /// No description provided for @searchHintDelivery.
   ///
   /// In en, this message translates to:
-  /// **'Search food or fast delivery...'**
+  /// **'Search pharmacy or fast delivery...'**
   String get searchHintDelivery;
 
   /// No description provided for @orderNowFast.
@@ -15038,6 +15134,42 @@ abstract class AppLocalizations {
   /// **'No sellable products yet'**
   String get posNoProducts;
 
+  /// No description provided for @drugImportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Drug Catalog'**
+  String get drugImportTitle;
+
+  /// No description provided for @drugImportSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search drugs by name or ingredient...'**
+  String get drugImportSearchHint;
+
+  /// No description provided for @drugImportAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock it'**
+  String get drugImportAction;
+
+  /// No description provided for @drugImportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to your products'**
+  String get drugImportSuccess;
+
+  /// No description provided for @drugImportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed'**
+  String get drugImportFailed;
+
+  /// No description provided for @drugImportInvalidPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid price'**
+  String get drugImportInvalidPrice;
+
   /// Unit-price suffix on a cart line, e.g. '25 EGP each'
   ///
   /// In en, this message translates to:
@@ -15349,6 +15481,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Added to cart'**
   String get posScanAdded;
+
+  /// POS: posDrugFoundTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Found in drug catalog'**
+  String get posDrugFoundTitle;
+
+  /// POS: posDrugImportAdd
+  ///
+  /// In en, this message translates to:
+  /// **'Import & add'**
+  String get posDrugImportAdd;
 
   /// POS: posQuickAddTitle
   ///
@@ -16051,132 +16195,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Admin management'**
   String get adminManagement;
-
-  /// No description provided for @customerTourStep1Title.
-  ///
-  /// In en, this message translates to:
-  /// **'Explore everything around you'**
-  String get customerTourStep1Title;
-
-  /// No description provided for @customerTourStep1Body.
-  ///
-  /// In en, this message translates to:
-  /// **'Restaurants, markets, home services and more, all from the main screen in front of you.'**
-  String get customerTourStep1Body;
-
-  /// No description provided for @customerTourStep2Title.
-  ///
-  /// In en, this message translates to:
-  /// **'Ask for anything'**
-  String get customerTourStep2Title;
-
-  /// No description provided for @customerTourStep2Body.
-  ///
-  /// In en, this message translates to:
-  /// **'Need something from any store? Write what you want and the nearest captain will buy it and bring it to you.'**
-  String get customerTourStep2Body;
-
-  /// No description provided for @customerTourStep3Title.
-  ///
-  /// In en, this message translates to:
-  /// **'Track your order live'**
-  String get customerTourStep3Title;
-
-  /// No description provided for @customerTourStep3Body.
-  ///
-  /// In en, this message translates to:
-  /// **'Follow your order on the map and get a notification at every step until it reaches your door.'**
-  String get customerTourStep3Body;
-
-  /// No description provided for @customerTourStep4Title.
-  ///
-  /// In en, this message translates to:
-  /// **'Your wallet and rewards'**
-  String get customerTourStep4Title;
-
-  /// No description provided for @customerTourStep4Body.
-  ///
-  /// In en, this message translates to:
-  /// **'Keep an eye on your wallet balance and collect reward points with every order.'**
-  String get customerTourStep4Body;
-
-  /// No description provided for @customerTourStep5Title.
-  ///
-  /// In en, this message translates to:
-  /// **'Menu and notifications'**
-  String get customerTourStep5Title;
-
-  /// No description provided for @customerTourStep5Body.
-  ///
-  /// In en, this message translates to:
-  /// **'From the side menu you reach your orders, profile and complaints, and the bell keeps you up to date.'**
-  String get customerTourStep5Body;
-
-  /// No description provided for @merchantGuideStep1Title.
-  ///
-  /// In en, this message translates to:
-  /// **'Open your products'**
-  String get merchantGuideStep1Title;
-
-  /// No description provided for @merchantGuideStep1Body.
-  ///
-  /// In en, this message translates to:
-  /// **'From your dashboard, open the products screen to see and manage everything you sell.'**
-  String get merchantGuideStep1Body;
-
-  /// No description provided for @merchantGuideStep2Title.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap the add button'**
-  String get merchantGuideStep2Title;
-
-  /// No description provided for @merchantGuideStep2Body.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap the + button to start adding a new product to your catalog.'**
-  String get merchantGuideStep2Body;
-
-  /// No description provided for @merchantGuideStep3Title.
-  ///
-  /// In en, this message translates to:
-  /// **'A real photo and a clear name'**
-  String get merchantGuideStep3Title;
-
-  /// No description provided for @merchantGuideStep3Body.
-  ///
-  /// In en, this message translates to:
-  /// **'Add a real photo, a clear name and a short description so customers buy faster.'**
-  String get merchantGuideStep3Body;
-
-  /// No description provided for @merchantGuideStep4Title.
-  ///
-  /// In en, this message translates to:
-  /// **'Price and stock'**
-  String get merchantGuideStep4Title;
-
-  /// No description provided for @merchantGuideStep4Body.
-  ///
-  /// In en, this message translates to:
-  /// **'Set the right price and keep the quantity up to date so customers always see what is available.'**
-  String get merchantGuideStep4Body;
-
-  /// No description provided for @merchantGuideStep5Title.
-  ///
-  /// In en, this message translates to:
-  /// **'Save and start selling'**
-  String get merchantGuideStep5Title;
-
-  /// No description provided for @merchantGuideStep5Body.
-  ///
-  /// In en, this message translates to:
-  /// **'Once you save, the product is in your catalog and customers see it whenever it\'s available - you can edit or pause it anytime.'**
-  String get merchantGuideStep5Body;
-
-  /// No description provided for @merchantGuideOpenTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'How to add products'**
-  String get merchantGuideOpenTooltip;
 }
 
 class _AppLocalizationsDelegate

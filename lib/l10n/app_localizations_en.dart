@@ -425,7 +425,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get seafood => 'Seafood';
 
   @override
-  @override
   String get bakery => 'Bakery';
 
   @override
@@ -835,8 +834,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get provManageItems => 'Manage items';
 
-  @override
-  @override
   @override
   String get provTabTableBookings => 'Table bookings';
 
@@ -3530,7 +3527,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get typeGrocery => 'Grocery';
 
   @override
-  @override
   String get typeFlowers => 'Flowers';
 
   @override
@@ -4421,9 +4417,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get preparationTime => 'Preparation Time';
 
   @override
-  @override
-  @override
-  @override
   String get warnings => 'Warnings';
 
   @override
@@ -5036,7 +5029,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get commissionCategoryRestaurant => 'Restaurants';
 
-  @override
   @override
   String get commissionCategoryGrocery => 'Groceries';
 
@@ -7917,12 +7909,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get posNoProducts => 'No sellable products yet';
 
   @override
-  @override
-  @override
-  @override
-  @override
-  @override
-  @override
   String get each => 'each';
 
   @override
@@ -8120,8 +8106,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get posScanAdded => 'Added to cart';
 
-  @override
-  @override
   @override
   String get posQuickAddTitle => 'New product for this barcode';
 

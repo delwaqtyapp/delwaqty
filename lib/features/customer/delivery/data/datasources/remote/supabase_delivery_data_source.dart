@@ -20,15 +20,24 @@ final supabaseDeliveryDataSourceProvider = Provider<SupabaseDeliveryDataSource>(
 class SupabaseDeliveryDataSource {
   SupabaseDeliveryDataSource(this._client);
 
-  /// Delivery service types the platform currently serves. Anything else
-  /// (rides, or retired types such as the pre-purge pharmacy delivery) must
+  /// Delivery service types the platform currently serves: every type in
+  /// the rides.service_type check constraint (000_baseline) except 'ride'
+  /// and the retired 'pharmacy_delivery' (the constraint drops it in the
+  /// DB cleanup migration). Anything else, including unknown types, must
   /// never surface as an offerable or active delivery on the driver app.
-  static const Set<String> _supportedDeliveryServiceTypes = {
+  static const Set<String> supportedDeliveryServiceTypes = {
     'food_delivery',
     'grocery_delivery',
+    'marketplace_delivery',
+    'courier',
     'package_delivery',
     'document_delivery',
+    'flower_delivery',
+    'retail_delivery',
   };
+
+  static bool isSupportedDeliveryServiceType(String? serviceType) =>
+      supportedDeliveryServiceTypes.contains(serviceType);
 
   final SupabaseClient _client;
 
@@ -214,8 +223,8 @@ class SupabaseDeliveryDataSource {
                 .maybeSingle();
             if (rideRow == null) continue;
             if (rideRow['status'] != 'searching') continue;
-            if (!_supportedDeliveryServiceTypes.contains(
-              rideRow['service_type'],
+            if (!isSupportedDeliveryServiceType(
+              rideRow['service_type'] as String?,
             )) {
               continue;
             }
@@ -237,7 +246,7 @@ class SupabaseDeliveryDataSource {
             final s = r['status'] as String?;
             final st = r['service_type'] as String?;
             return (s == 'matched' || s == 'arrived' || s == 'inTrip') &&
-                _supportedDeliveryServiceTypes.contains(st);
+                isSupportedDeliveryServiceType(st);
           }).toList();
           if (active.isEmpty) return null;
           active.sort(
@@ -254,7 +263,7 @@ class SupabaseDeliveryDataSource {
         .from('rides')
         .select()
         .eq('driver_id', driverId)
-        .inFilter('service_type', _supportedDeliveryServiceTypes.toList())
+        .inFilter('service_type', supportedDeliveryServiceTypes.toList())
         .inFilter('status', ['matched', 'arrived', 'inTrip'])
         .order('created_at', ascending: false)
         .limit(1)

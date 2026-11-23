@@ -7190,6 +7190,12 @@ abstract class AppLocalizations {
   /// **'Suggestions'**
   String get suggestions;
 
+  /// No description provided for @suggestionsProfileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your ideas to improve the platform'**
+  String get suggestionsProfileSubtitle;
+
   /// No description provided for @newSuggestion.
   ///
   /// In en, this message translates to:
@@ -7309,12 +7315,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resolution note'**
   String get suggestionResolutionNote;
-
-  /// No description provided for @suggestionsProfileSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Share your ideas to improve the platform'**
-  String get suggestionsProfileSubtitle;
 
   /// No description provided for @adminSuggestionsTitle.
   ///

@@ -96,3 +96,13 @@ abstract class Merchant with _$Merchant {
   factory Merchant.fromJson(Map<String, dynamic> json) =>
       _$MerchantFromJson(json);
 }
+
+/// True when a serialized merchant payload carries a currently supported
+/// type. Retired or unknown types (e.g. pre-purge pharmacy caches) return
+/// false so callers drop the payload instead of decoding a retired merchant
+/// into a generic one.
+bool isSupportedMerchantJson(Map<String, dynamic> json) {
+  final raw = (json['type'] as String?)?.trim();
+  if (raw == null || raw.isEmpty) return false;
+  return MerchantType.values.any((t) => t.name == raw);
+}

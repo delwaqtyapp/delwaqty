@@ -83,8 +83,11 @@ class _AdminUsersWebPageState extends State<AdminUsersWebPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    // Narrow phones get tighter padding so the header and content keep
+    // usable width at large text scales.
+    final padding = MediaQuery.sizeOf(context).width < 600 ? 16.0 : 32.0;
     return Padding(
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -140,9 +143,22 @@ class _AdminUsersWebPageState extends State<AdminUsersWebPage> {
                   return AdminLoadingState(label: l10n.adminLoadingLiveStats);
                 }
                 if (snap.hasError) {
-                  return AdminErrorState(
-                    message: appErrorText(context, snap.error!),
-                    onRetry: _refresh,
+                  // Scrollable so a tall error state never overflows
+                  // vertically on small screens.
+                  return LayoutBuilder(
+                    builder: (context, constraints) =>
+                        SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight,
+                            ),
+                            child: AdminErrorState(
+                              message: appErrorText(context, snap.error!),
+                              onRetry: _refresh,
+                            ),
+                          ),
+                        ),
                   );
                 }
                 final users = _applyFilters(snap.data ?? const []);

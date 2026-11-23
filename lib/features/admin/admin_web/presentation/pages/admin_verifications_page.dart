@@ -164,8 +164,9 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final padding = MediaQuery.sizeOf(context).width < 600 ? 16.0 : 32.0;
     return Padding(
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -264,8 +265,14 @@ class _VerificationCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
+      // Stacked layout: the identity block keeps the full width and the
+      // action buttons sit on their own line below, so the card never
+      // overflows horizontally at narrow widths.
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            children: [
           CircleAvatar(
             radius: 28,
             backgroundColor: AppColors.brandPurple.withValues(alpha: 0.1),
@@ -304,7 +311,9 @@ class _VerificationCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Row(
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -324,7 +333,6 @@ class _VerificationCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
                     if (idCardUrl != null)
                       GestureDetector(
                         onTap: () => _showDocument(context, idCardUrl),
@@ -353,14 +361,19 @@ class _VerificationCard extends StatelessWidget {
               ],
             ),
           ),
-          if (isProcessing)
-            const SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          else
-            Row(
+        ],
+          ),
+          const SizedBox(height: 12),
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: isProcessing
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
               children: [
                 OutlinedButton(
                   onPressed: onReject,
@@ -386,6 +399,7 @@ class _VerificationCard extends StatelessWidget {
                 ),
               ],
             ),
+          ),
         ],
       ),
     );

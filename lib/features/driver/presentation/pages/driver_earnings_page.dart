@@ -134,34 +134,61 @@ class _EarningsBody extends ConsumerWidget {
               return Column(
                 children: earnings.map((e) {
                   final positive = e.amount >= 0;
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: CircleAvatar(
-                      backgroundColor: positive
-                          ? AppColors.successLight.withValues(alpha: 0.15)
-                          : Theme.of(context).colorScheme.error
-                                .withValues(alpha: 0.15),
-                      child: Icon(
-                        positive
-                            ? Icons.arrow_downward_rounded
-                            : Icons.arrow_upward_rounded,
-                        color: positive
-                            ? AppColors.successLight
-                            : Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                    title: Text(_typeLabel(l10n, e.type)),
-                    subtitle: Text(
-                      '${e.createdAt.year}-${e.createdAt.month.toString().padLeft(2, '0')}-${e.createdAt.day.toString().padLeft(2, '0')}',
-                    ),
-                    trailing: Text(
-                      '${positive ? '+' : ''}${l10n.amountWithCurrency(e.amount.toStringAsFixed(0), l10n.currencySymbol)}',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: positive
-                            ? AppColors.successLight
-                            : Theme.of(context).colorScheme.error,
-                      ),
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: positive
+                                  ? AppColors.successLight.withValues(
+                                      alpha: 0.15,
+                                    )
+                                  : Theme.of(context).colorScheme.error
+                                        .withValues(alpha: 0.15),
+                              child: Icon(
+                                positive
+                                    ? Icons.arrow_downward_rounded
+                                    : Icons.arrow_upward_rounded,
+                                color: positive
+                                    ? AppColors.successLight
+                                    : Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                children: [
+                                  Text(_typeLabel(l10n, e.type)),
+                                  Text(
+                                    '${e.createdAt.year}-${e.createdAt.month.toString().padLeft(2, '0')}-${e.createdAt.day.toString().padLeft(2, '0')}',
+                                    style: AppTextStyles.bodySmall,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        // The amount sits on its own line under the text
+                        // so it never squeezes the title column.
+                        Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: Text(
+                            '${positive ? '+' : ''}${l10n.amountWithCurrency(e.amount.toStringAsFixed(0), l10n.currencySymbol)}',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: positive
+                                  ? AppColors.successLight
+                                  : Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 }).toList(),

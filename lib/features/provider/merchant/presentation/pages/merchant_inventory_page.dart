@@ -192,7 +192,8 @@ class _SummaryChip extends StatelessWidget {
             style: AppTextStyles.labelSmall.copyWith(
               color: color.withValues(alpha: 0.85),
             ),
-            maxLines: 1,
+            textAlign: TextAlign.center,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
         ],
@@ -344,65 +345,86 @@ class _StockTileState extends ConsumerState<_StockTile> {
                     .withValues(alpha: 0.4),
         ),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: item.imageUrl != null && item.imageUrl!.isNotEmpty
-                ? Image.network(
-                    item.imageUrl!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) =>
-                        Icon(Icons.inventory_2_outlined, color: statusColor),
-                  )
-                : Icon(Icons.inventory_2_outlined, color: statusColor),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.productName,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  '$statusLabel · ${l10n.availableLabel} ${item.availableQuantity}',
-                  style: AppTextStyles.labelSmall.copyWith(color: statusColor),
-                ),
-              ],
-            ),
-          ),
-          _StepButton(
-            icon: Icons.remove,
-            enabled: !_busy && item.stockQuantity > 0,
-            onTap: () => _apply(-1),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              '${item.stockQuantity}',
-              style: AppTextStyles.titleMedium.copyWith(
-                fontWeight: FontWeight.w800,
+                child: item.imageUrl != null && item.imageUrl!.isNotEmpty
+                    ? Image.network(
+                        item.imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => Icon(
+                          Icons.inventory_2_outlined,
+                          color: statusColor,
+                        ),
+                      )
+                    : Icon(Icons.inventory_2_outlined, color: statusColor),
               ),
-            ),
+              const SizedBox(width: 12),
+              // The name and status get the full remaining width; the
+              // action controls moved to their own line below.
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.productName,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      '$statusLabel · ${l10n.availableLabel} ${item.availableQuantity}',
+                      style: AppTextStyles.labelSmall.copyWith(
+                        color: statusColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          _StepButton(icon: Icons.add, enabled: !_busy, onTap: () => _apply(1)),
-          IconButton(
-            tooltip: l10n.edit,
-            onPressed: _busy ? null : _editExact,
-            icon: const Icon(Icons.edit_outlined, size: 20),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              _StepButton(
+                icon: Icons.remove,
+                enabled: !_busy && item.stockQuantity > 0,
+                onTap: () => _apply(-1),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  '${item.stockQuantity}',
+                  style: AppTextStyles.titleMedium.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              _StepButton(
+                icon: Icons.add,
+                enabled: !_busy,
+                onTap: () => _apply(1),
+              ),
+              IconButton(
+                tooltip: l10n.edit,
+                onPressed: _busy ? null : _editExact,
+                icon: const Icon(Icons.edit_outlined, size: 20),
+              ),
+            ],
           ),
         ],
       ),

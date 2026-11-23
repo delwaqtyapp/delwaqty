@@ -94,14 +94,16 @@ class _AdminRegionScopePageState extends ConsumerState<AdminRegionScopePage> {
         ? null
         : ref.watch(adminRegionAssignmentsProvider(_selectedAdminId));
 
+    final l10n = AppLocalizations.of(context);
+    final padding = MediaQuery.sizeOf(context).width < 600 ? 16.0 : 32.0;
     return Padding(
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Region Scope',
-            style: TextStyle(
+          Text(
+            l10n.adminRegionScopeTitle,
+            style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
               color: Color(0xFF1A1035),
@@ -109,42 +111,52 @@ class _AdminRegionScopePageState extends ConsumerState<AdminRegionScopePage> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Assign region scope to admin-tier users at any level '
-            '(governorate, markaz, district, village, …). An admin with no '
-            'assignments is global.',
+            l10n.adminRegionScopeSubtitle,
             style: TextStyle(color: Colors.grey[600]),
           ),
           const SizedBox(height: 24),
           Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(
-                  width: 300,
-                  child: _UsersPanel(
-                    usersAsync: usersAsync,
-                    selectedAdminId: _selectedAdminId,
-                    onSelect: _selectAdmin,
-                    onRetry: () => ref.invalidate(adminTierUsersProvider),
-                  ),
-                ),
-                const SizedBox(width: 24),
-                Expanded(
-                  child: _AssignmentsPanel(
-                    selectedAdminId: _selectedAdminId,
-                    assignmentsAsync: assignmentsAsync,
-                    pendingRegionId: _pendingRegionId,
-                    pendingScope: _pendingScope,
-                    saving: _saving,
-                    onPendingRegionChanged: (value) =>
-                        setState(() => _pendingRegionId = value),
-                    onPendingScopeChanged: (value) =>
-                        setState(() => _pendingScope = value),
-                    onAdd: _addAssignment,
-                    onRemove: _removeAssignment,
-                  ),
-                ),
-              ],
+            // Under ~600px the panels stack vertically instead of
+            // squeezing the fixed 300px users panel beside the gap.
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final usersPanel = _UsersPanel(
+                  usersAsync: usersAsync,
+                  selectedAdminId: _selectedAdminId,
+                  onSelect: _selectAdmin,
+                  onRetry: () => ref.invalidate(adminTierUsersProvider),
+                );
+                final assignmentsPanel = _AssignmentsPanel(
+                  selectedAdminId: _selectedAdminId,
+                  assignmentsAsync: assignmentsAsync,
+                  pendingRegionId: _pendingRegionId,
+                  pendingScope: _pendingScope,
+                  saving: _saving,
+                  onPendingRegionChanged: (value) =>
+                      setState(() => _pendingRegionId = value),
+                  onPendingScopeChanged: (value) =>
+                      setState(() => _pendingScope = value),
+                  onAdd: _addAssignment,
+                  onRemove: _removeAssignment,
+                );
+                if (constraints.maxWidth < 600) {
+                  return Column(
+                    children: [
+                      Expanded(child: usersPanel),
+                      const SizedBox(height: 16),
+                      Expanded(child: assignmentsPanel),
+                    ],
+                  );
+                }
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(width: 300, child: usersPanel),
+                    const SizedBox(width: 24),
+                    Expanded(child: assignmentsPanel),
+                  ],
+                );
+              },
             ),
           ),
         ],

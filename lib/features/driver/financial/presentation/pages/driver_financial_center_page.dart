@@ -172,10 +172,39 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                   : Column(
                       children: s.recentTransactions
                           .map(
-                            (t) => ListTile(
-                              title: Text(t.description),
-                              subtitle: Text(t.type),
-                              trailing: Text(t.amount.toStringAsFixed(2)),
+                            (t) => Card(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(t.description),
+                                    Text(
+                                      t.type,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    // The amount sits on its own line so
+                                    // it never squeezes the description.
+                                    Align(
+                                      alignment:
+                                          AlignmentDirectional.centerEnd,
+                                      child: Text(
+                                        t.amount.toStringAsFixed(2),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           )
                           .toList(),
@@ -197,16 +226,47 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                   : Column(
                       children: list
                           .map(
-                            (t) => ListTile(
-                              title: Text(
-                                '${t.amount.toStringAsFixed(2)} ${t.currency}',
+                            (t) => Card(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${t.amount.toStringAsFixed(2)} ${t.currency}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${t.status} · ${t.paymentMethod}',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall,
+                                    ),
+                                    // The rejection reason takes the full
+                                    // width below; an unbounded trailing
+                                    // Text crashed the tile layout.
+                                    if (t.rejectionReason != null &&
+                                        t.rejectionReason!.isNotEmpty)
+                                      Text(
+                                        t.rejectionReason!,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.error,
+                                            ),
+                                      ),
+                                  ],
+                                ),
                               ),
-                              subtitle: Text(
-                                '${t.status} · ${t.paymentMethod}',
-                              ),
-                              trailing: t.rejectionReason != null
-                                  ? Text(t.rejectionReason!)
-                                  : null,
                             ),
                           )
                           .toList(),

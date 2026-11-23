@@ -17,8 +17,9 @@ class AdminOverviewPage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final statsAsync = ref.watch(adminOverviewStatsProvider);
 
+    final padding = MediaQuery.sizeOf(context).width < 600 ? 16.0 : 32.0;
     return Padding(
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -109,6 +110,8 @@ class _StatsGrid extends StatelessWidget {
   int _crossAxisCount(double width) {
     if (width > 1200) return 5;
     if (width > 800) return 3;
+    // A single column keeps the KPI value readable on phones.
+    if (width < 480) return 1;
     return 2;
   }
 }

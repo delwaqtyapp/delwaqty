@@ -88,22 +88,40 @@ class _ClientPricedTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final pct = (alert.clientPricedRatio * 100).toStringAsFixed(1);
     return GlassCard(
-      child: ListTile(
-        leading: const Icon(Icons.point_of_sale_rounded),
-        title: Text(alert.merchantName),
-        subtitle: Text(
-          l10n.clientPricedRatioLabel(
-            alert.clientPricedLines,
-            alert.totalLines,
-            pct,
-          ),
-        ),
-        trailing: Text(
-          '$pct%',
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.error,
-            fontWeight: FontWeight.bold,
-          ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            const Icon(Icons.point_of_sale_rounded),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(alert.merchantName),
+                  Text(
+                    // Generated signature is (lines, pct, total).
+                    l10n.clientPricedRatioLabel(
+                      alert.clientPricedLines,
+                      pct,
+                      alert.totalLines,
+                    ),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '$pct%',
+              maxLines: 1,
+              softWrap: false,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -118,16 +136,35 @@ class _InsuranceMismatchTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
-      child: ListTile(
-        leading: const Icon(Icons.health_and_safety_outlined),
-        title: Text(mismatch.merchantName),
-        subtitle: Text(
-          l10n.claimedVsServer(
-            mismatch.claimedTotal.toStringAsFixed(2),
-            mismatch.serverTotal.toStringAsFixed(2),
-          ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            const Icon(Icons.health_and_safety_outlined),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(mismatch.merchantName),
+                  Text(
+                    l10n.claimedVsServer(
+                      mismatch.claimedTotal.toStringAsFixed(2),
+                      mismatch.serverTotal.toStringAsFixed(2),
+                    ),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '#${mismatch.insuranceSaleId}',
+              maxLines: 1,
+              softWrap: false,
+            ),
+          ],
         ),
-        trailing: Text('#${mismatch.insuranceSaleId}'),
       ),
     );
   }

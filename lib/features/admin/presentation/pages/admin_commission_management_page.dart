@@ -364,36 +364,44 @@ class _RuleRow extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(
+      // Stacked: the rate keeps its own line and the effective-date text
+      // takes the full width below, so neither starves the other.
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 8,
-            height: 8,
-            margin: const EdgeInsetsDirectional.only(end: 8),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isActive ? Colors.green : scheme.outlineVariant,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              '$rate%',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: isActive ? scheme.onSurface : scheme.onSurfaceVariant,
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                margin: const EdgeInsetsDirectional.only(end: 8),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isActive ? Colors.green : scheme.outlineVariant,
+                ),
               ),
-            ),
+              Text(
+                '$rate%',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: isActive ? scheme.onSurface : scheme.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
-          Text(
-            [
-              '${l10n.commissionEffectiveFrom} ${_formatDate(effectiveFrom)}',
-              if (effectiveTo != null)
-                '→ ${_formatDate(effectiveTo)}'
-              else
-                l10n.commissionNoExpiry,
-            ].join(' '),
-            style: Theme.of(context).textTheme.bodySmall
-                ?.copyWith(color: scheme.onSurfaceVariant),
+          Padding(
+            padding: const EdgeInsetsDirectional.only(start: 16),
+            child: Text(
+              [
+                '${l10n.commissionEffectiveFrom} ${_formatDate(effectiveFrom)}',
+                if (effectiveTo != null)
+                  '→ ${_formatDate(effectiveTo)}'
+                else
+                  l10n.commissionNoExpiry,
+              ].join(' '),
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: scheme.onSurfaceVariant),
+            ),
           ),
         ],
       ),

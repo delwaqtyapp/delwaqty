@@ -83,7 +83,9 @@ class _RevenueOverviewSection extends StatelessWidget {
           child: GlassCard(
             borderRadius: 20,
             child: Container(
-              height: 140,
+              // Content-driven height: a fixed height clips the revenue
+              // figure at large text scales.
+              padding: const EdgeInsets.symmetric(vertical: 20),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 gradient: const LinearGradient(
@@ -374,32 +376,65 @@ class _TopMerchantsSection extends StatelessWidget {
                       final revenue =
                           (m['total_revenue'] as num?)?.toDouble() ?? 0;
                       final deliveries = m['total_deliveries'] as int? ?? 0;
-                      return ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Theme.of(context)
-                              .colorScheme
-                              .primaryContainer,
-                          child: Text(
-                            name.isNotEmpty ? name[0].toUpperCase() : '?',
-                            style: TextStyle(
-                              color: Theme.of(context)
+                      // Name keeps the flexible share (2 lines, ellipsis);
+                      // the amount scales down on its own bounded slot.
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: Theme.of(context)
                                   .colorScheme
-                                  .onPrimaryContainer,
-                              fontWeight: FontWeight.bold,
+                                  .primaryContainer,
+                              child: Text(
+                                name.isNotEmpty ? name[0].toUpperCase() : '?',
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        title: Text(name, style: AppTextStyles.bodyLarge),
-                        subtitle: Text(
-                          '$deliveries ${l10n.orders}',
-                          style: AppTextStyles.bodySmall,
-                        ),
-                        trailing: Text(
-                          '${l10n.currencySymbol} ${revenue.toStringAsFixed(2)}',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    name,
+                                    style: AppTextStyles.bodyLarge,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    '$deliveries ${l10n.orders}',
+                                    style: AppTextStyles.bodySmall,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              flex: 2,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  '${l10n.currencySymbol} ${revenue.toStringAsFixed(2)}',
+                                  maxLines: 1,
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     }).toList(),
@@ -473,29 +508,62 @@ class _DriverPerformanceSection extends StatelessWidget {
                       final revenue =
                           (d['total_revenue'] as num?)?.toDouble() ?? 0;
                       final rating = (d['rating'] as num?)?.toDouble() ?? 0;
-                      return ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Theme.of(context)
-                              .colorScheme
-                              .tertiaryContainer,
-                          child: Icon(
-                            Icons.person_rounded,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onTertiaryContainer,
-                          ),
+                      // Name keeps the flexible share (2 lines, ellipsis);
+                      // the amount scales down on its own bounded slot.
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
                         ),
-                        title: Text(name, style: AppTextStyles.bodyLarge),
-                        subtitle: Text(
-                          '$completed ${l10n.orders} • ⭐ ${rating.toStringAsFixed(1)}',
-                          style: AppTextStyles.bodySmall,
-                        ),
-                        trailing: Text(
-                          '${l10n.currencySymbol} ${revenue.toStringAsFixed(2)}',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .tertiaryContainer,
+                              child: Icon(
+                                Icons.person_rounded,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onTertiaryContainer,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    name,
+                                    style: AppTextStyles.bodyLarge,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    '$completed ${l10n.orders} • ⭐ ${rating.toStringAsFixed(1)}',
+                                    style: AppTextStyles.bodySmall,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              flex: 2,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  '${l10n.currencySymbol} ${revenue.toStringAsFixed(2)}',
+                                  maxLines: 1,
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     }).toList(),

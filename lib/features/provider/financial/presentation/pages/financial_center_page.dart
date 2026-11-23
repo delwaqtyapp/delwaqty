@@ -356,56 +356,101 @@ class FinancialCenterPage extends ConsumerWidget {
                         );
                         return Card(
                           margin: const EdgeInsets.only(bottom: 8),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: statusColor.withValues(
-                                alpha: 0.12,
-                              ),
-                              child: Icon(
-                                Icons.receipt_rounded,
-                                color: statusColor,
-                              ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
                             ),
-                            title: Text(
-                              '${t.amount.toStringAsFixed(2)} ${l10n.currencySymbol}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            subtitle: Column(
+                            child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  '${_localizedMethod(l10n, t.paymentMethod)} · $statusText',
-                                ),
-                                if (t.rejectionReason != null &&
-                                    t.rejectionReason!.isNotEmpty)
-                                  Text(
-                                    t.rejectionReason!,
-                                    style: const TextStyle(
-                                      color: AppColors.errorLight,
-                                      fontSize: 12,
+                                Row(
+                                  children: [
+                                    CircleAvatar(
+                                      backgroundColor: statusColor.withValues(
+                                        alpha: 0.12,
+                                      ),
+                                      child: Icon(
+                                        Icons.receipt_rounded,
+                                        color: statusColor,
+                                      ),
                                     ),
-                                  ),
-                              ],
-                            ),
-                            trailing: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: statusColor.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                              child: Text(
-                                statusText,
-                                style: TextStyle(
-                                  color: statusColor,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            _localizedMethod(
+                                              l10n,
+                                              t.paymentMethod,
+                                            ),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyLarge,
+                                          ),
+                                          if (t.rejectionReason != null &&
+                                              t.rejectionReason!.isNotEmpty)
+                                            Text(
+                                              t.rejectionReason!,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodySmall
+                                                  ?.copyWith(
+                                                    color:
+                                                        AppColors.errorLight,
+                                                  ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
+                                const SizedBox(height: 4),
+                                // Amount and status sit on their own line
+                                // under the text so neither squeezes it.
+                                Align(
+                                  alignment: AlignmentDirectional.centerEnd,
+                                  child: Wrap(
+                                    spacing: 8,
+                                    runSpacing: 4,
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
+                                    children: [
+                                      Text(
+                                        '${t.amount.toStringAsFixed(2)} ${l10n.currencySymbol}',
+                                        style: TextStyle(
+                                          color: statusColor,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: statusColor.withValues(
+                                            alpha: 0.12,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            999,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          statusText,
+                                          style: TextStyle(
+                                            color: statusColor,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         );

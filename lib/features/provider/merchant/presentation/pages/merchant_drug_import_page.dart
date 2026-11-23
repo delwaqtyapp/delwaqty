@@ -201,21 +201,37 @@ class _MerchantDrugImportPageState
                       d['strength'],
                       d['dosage_form'],
                     ].whereType<String>().join(' · ');
-                    return ListTile(
-                      title: Text(
-                        (d['name_en'] ?? '').toString(),
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                    // Stacked layout: the name/subtitle use the full width
+                    // and the import action sits on its own line below, so
+                    // long drug names are never squeezed beside the button.
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
                       ),
-                      subtitle: Text(
-                        [
-                          if ((d['name_ar'] ?? '').toString().isNotEmpty)
-                            d['name_ar'],
-                          if (subtitle.isNotEmpty) subtitle,
-                        ].join(' — '),
-                      ),
-                      trailing: FilledButton.tonal(
-                        onPressed: () => _importDialog(d),
-                        child: Text(l10n.drugImportAction),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            (d['name_en'] ?? '').toString(),
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          Text(
+                            [
+                              if ((d['name_ar'] ?? '').toString().isNotEmpty)
+                                d['name_ar'],
+                              if (subtitle.isNotEmpty) subtitle,
+                            ].join(' — '),
+                          ),
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: AlignmentDirectional.centerEnd,
+                            child: FilledButton.tonal(
+                              onPressed: () => _importDialog(d),
+                              child: Text(l10n.drugImportAction),
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   },

@@ -77,11 +77,44 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
   Widget _buildFilters(ColorScheme cs, AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-      child: Row(
-        children: [
-          Expanded(
-            child: DropdownButtonFormField<String>(
-              initialValue: _statusFilter,
+      // On narrow screens the two dropdowns stack full-width instead of
+      // overflowing; wide screens keep them side by side.
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const gap = 8.0;
+          const refreshWidth = 48.0;
+          final sideBySide = constraints.maxWidth >= 360;
+          final fieldWidth = sideBySide
+              ? (constraints.maxWidth - refreshWidth - gap * 2) / 2
+              : constraints.maxWidth;
+          return Wrap(
+            spacing: gap,
+            runSpacing: gap,
+            children: [
+              SizedBox(
+                width: fieldWidth,
+                child: _statusDropdown(l10n),
+              ),
+              SizedBox(
+                width: fieldWidth,
+                child: _typeDropdown(l10n),
+              ),
+              IconButton(
+                tooltip: l10n.refresh,
+                icon: const Icon(Icons.refresh_rounded),
+                onPressed: () => ref.invalidate(complaintsProvider),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _statusDropdown(AppLocalizations l10n) {
+    return DropdownButtonFormField<String>(
+      initialValue: _statusFilter,
+      isExpanded: true,
               decoration: InputDecoration(
                 labelText: l10n.status,
                 isDense: true,
@@ -111,12 +144,13 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
                       )
                       .toList(),
               onChanged: (v) => setState(() => _statusFilter = v!),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: DropdownButtonFormField<String>(
-              initialValue: _typeFilter,
+    );
+  }
+
+  Widget _typeDropdown(AppLocalizations l10n) {
+    return DropdownButtonFormField<String>(
+      initialValue: _typeFilter,
+      isExpanded: true,
               decoration: InputDecoration(
                 labelText: l10n.type,
                 isDense: true,
@@ -138,16 +172,6 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
                       )
                       .toList(),
               onChanged: (v) => setState(() => _typeFilter = v!),
-            ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            tooltip: l10n.refresh,
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: () => ref.invalidate(complaintsProvider),
-          ),
-        ],
-      ),
     );
   }
 
@@ -202,6 +226,8 @@ String _complaintTypeLabel(AppLocalizations l10n, String type) {
   switch (type) {
     case 'all':
       return l10n.all;
+    case 'delivery':
+      return l10n.delivery;
     case 'driver':
       return l10n.driver;
     case 'merchant':

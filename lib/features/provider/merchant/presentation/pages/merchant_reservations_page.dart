@@ -90,6 +90,10 @@ class _MerchantReservationsPageState
           ],
           bottom: mode == ReservationsMode.both
               ? TabBar(
+                  // Long Arabic tab labels must scroll instead of
+                  // clipping at narrow widths.
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
                   tabs: [
                     Tab(text: l10n.tableReservationsTitle),
                     Tab(text: l10n.serviceBookingsTitle),
@@ -513,32 +517,45 @@ class _ReservationCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.sm),
-            Row(
+            // Wrap: on narrow screens the date/time drops under the
+            // party size instead of overflowing right.
+            Wrap(
+              spacing: AppSpacing.lg,
+              runSpacing: 4,
               children: [
-                Icon(
-                  Icons.people_outline,
-                  size: 16,
-                  color: theme.colorScheme.onSurfaceVariant,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.people_outline,
+                      size: 16,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      l10n.guestsCount(reservation.partySize),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  l10n.guestsCount(reservation.partySize),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.lg),
-                Icon(
-                  Icons.calendar_today_outlined,
-                  size: 16,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '$dateStr · $timeStr',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.calendar_today_outlined,
+                      size: 16,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$dateStr · $timeStr',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

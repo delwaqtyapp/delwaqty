@@ -114,10 +114,14 @@ class _AdminRegionsManagementPageState
             ref.watch(adminRegionScopeProvider).value,
             _currentParent,
           )
-          ? FloatingActionButton.extended(
-              onPressed: () => _openUpsertSheet(parent: _currentParent),
-              icon: const Icon(Icons.add_location_alt_rounded),
-              label: Text(l10n.addSubRegion),
+          // FittedBox scales the extended FAB down on narrow screens so
+          // a long localized label never clips at the screen edge.
+          ? FittedBox(
+              child: FloatingActionButton.extended(
+                onPressed: () => _openUpsertSheet(parent: _currentParent),
+                icon: const Icon(Icons.add_location_alt_rounded),
+                label: Text(l10n.addSubRegion),
+              ),
             )
           : null,
       body: Column(

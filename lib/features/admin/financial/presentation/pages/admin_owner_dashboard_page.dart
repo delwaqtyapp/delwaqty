@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
+import 'package:delwaqty/features/admin/presentation/widgets/intelligence_stat_grid.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
@@ -42,7 +43,7 @@ class AdminOwnerDashboardPage extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _SectionTitle('Platform Collections (all regions)'),
+              _SectionTitle(l10n.platformCollectionsAllRegions),
               const SizedBox(height: 12),
               collections.when(
                 loading: () => const Center(
@@ -62,7 +63,7 @@ class AdminOwnerDashboardPage extends ConsumerWidget {
                     _CollectionsSection(data: data, cs: cs, l10n: l10n),
               ),
               const SizedBox(height: 24),
-              const _SectionTitle('Platform Settlements (all regions)'),
+              _SectionTitle(l10n.platformSettlementsAllRegions),
               const SizedBox(height: 12),
               settlements.when(
                 loading: () => const Center(
@@ -121,15 +122,15 @@ class _CollectionsSection extends StatelessWidget {
 
     final cards = [
       _Stat(l10n.total, fmt(summary['total']), const Color(0xFF5B3DF0)),
-      _Stat('Settled', fmt(summary['settled']), const Color(0xFF34C759)),
+      _Stat(l10n.settled, fmt(summary['settled']), const Color(0xFF34C759)),
       _Stat(
-        'Outstanding',
+        l10n.outstanding,
         fmt(summary['outstanding']),
         const Color(0xFFFF3B30),
       ),
-      _Stat('Today', fmt(summary['today']), const Color(0xFF00C7BE)),
-      _Stat('Week', fmt(summary['week']), const Color(0xFFFF9500)),
-      _Stat('Month', fmt(summary['month']), const Color(0xFFAF52DE)),
+      _Stat(l10n.today, fmt(summary['today']), const Color(0xFF00C7BE)),
+      _Stat(l10n.weeklyEarnings, fmt(summary['week']), const Color(0xFFFF9500)),
+      _Stat(l10n.monthlyEarnings, fmt(summary['month']), const Color(0xFFAF52DE)),
     ];
 
     return Column(
@@ -229,16 +230,16 @@ class _SettlementsSection extends StatelessWidget {
 
     final cards = [
       _Stat(l10n.total, fmt(summary['total']), const Color(0xFF5B3DF0)),
-      _Stat('Pending', fmt(summary['pending']), const Color(0xFFFF9500)),
+      _Stat(l10n.pending, fmt(summary['pending']), const Color(0xFFFF9500)),
       _Stat(
-        'Under Review',
+        l10n.underReview,
         fmt(summary['under_review']),
         const Color(0xFF00C7BE),
       ),
-      _Stat('Approved', fmt(summary['approved']), const Color(0xFF34C759)),
-      _Stat('Rejected', fmt(summary['rejected']), const Color(0xFFFF3B30)),
+      _Stat(l10n.approved, fmt(summary['approved']), const Color(0xFF34C759)),
+      _Stat(l10n.rejected, fmt(summary['rejected']), const Color(0xFFFF3B30)),
       _Stat(
-        'Outstanding',
+        l10n.outstanding,
         fmt(summary['outstanding']),
         const Color(0xFFAF52DE),
       ),
@@ -332,68 +333,19 @@ class _StatGrid extends StatelessWidget {
   final List<_Stat> cards;
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final cross = constraints.maxWidth > 600 ? 6 : 2;
-        return GridView.count(
-          crossAxisCount: cross,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: 1.6,
-          children: cards
-              .map(
-                (item) => PremiumCard(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: item.color.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(
-                          Icons.account_balance_wallet_rounded,
-                          color: item.color,
-                          size: 16,
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              item.value,
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            item.label,
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              )
-              .toList(),
-        );
-      },
+    // Shared responsive grid: content-driven tile heights, so the metric
+    // tiles never clip at narrow widths or large text scales.
+    return IntelligenceStatGrid(
+      wideColumns: 6,
+      stats: [
+        for (final item in cards)
+          IntelligenceStat(
+            title: item.label,
+            value: item.value,
+            icon: Icons.account_balance_wallet_rounded,
+            color: item.color,
+          ),
+      ],
     );
   }
 }

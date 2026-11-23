@@ -1,4 +1,14 @@
--- 395 (v4): the late-delivery apology gift becomes spendable platform credit.
+-- 395 (v6): the late-delivery apology gift becomes spendable platform credit.
+-- v6 (owner decision 2026-11-23, relayed via Instinct): each customer
+-- receives at most TWO delay-apology credits per calendar month
+-- (Africa/Cairo), counting only captain-apology grants (driver_delay_events
+-- rows with apology_amount > 0 on that customer's orders). The cap is
+-- decided inside _driver_delay_redispatch while holding the customer's
+-- platform credit account row lock, so concurrent redispatches for one
+-- customer serialize and cannot overrun it. An over-cap event grants
+-- nothing, records apology_amount 0, and the redispatch/handoff proceeds
+-- normally. The cap lives in platform_settings.customer_apology_monthly_cap
+-- (default 2).
 -- v3 review changes: settlement NETS the gift into the driver remittance
 -- (owner decision: driver remits pre-credit goods minus the gift, merchant
 -- still receives full goods, residuals are platform payables recorded on
@@ -154,6 +164,11 @@ alter table public.platform_subsidies
 alter table public.platform_credit_accounts enable row level security;
 alter table public.platform_credit_ledger enable row level security;
 alter table public.platform_subsidies enable row level security;
+
+-- v6: monthly cap on customer apology credits (calendar month,
+-- Africa/Cairo). Owner-tunable; default 2 per the 2026-11-23 decision.
+alter table public.platform_settings
+  add column if not exists customer_apology_monthly_cap integer not null default 2;
 
 -- ---------------------------------------------------------------------------
 -- Credit helpers (server-only; every mutation holds the account row lock)
@@ -641,6 +656,9 @@ declare
   v_short text;
   v_prior_apologies int;
   v_reason text;
+  v_granted numeric;
+  v_cap int;
+  v_month_grants int;
 begin
   select * into v_ride from public.rides where id = p_ride_id for update;
   if not found then
@@ -660,6 +678,7 @@ begin
 
   select * into v_cfg from public._settlement_settings();
   v_allowance := greatest(coalesce(v_cfg.driver_delay_monthly_allowance, 3), 0);
+  v_cap := greatest(coalesce(v_cfg.customer_apology_monthly_cap, 2), 0);
   -- 188: the compensation is a GIFT of 7% of the order value (owner spec
   -- 2026-11-21), platform-funded, replacing the flat-EGP credit; the old
   -- delay_apology_discount_egp setting is deprecated and ignored.
@@ -705,38 +724,71 @@ begin
      and order_id = v_ride.order_id
      and apology_amount > 0;
 
-  insert into public.driver_delay_events
-    (ride_id, order_id, driver_id, reported_by, reason,
-     within_allowance, monthly_count, apology_amount)
-  values
-    (p_ride_id, v_ride.order_id, v_driver_id, p_reported_by, v_reason,
-     v_within, v_count,
-     case when v_prior_apologies = 0 then v_apology else 0 end);
-
-  -- Customer apology: wallet credit funded from the platform ops share of
-  -- the order (see header) + Egyptian-Arabic apology naming the breakdown.
+  -- Customer apology: platform credit (see header) + Egyptian-Arabic
+  -- apology naming the breakdown. v6: the grant is capped per customer per
+  -- calendar month (Africa/Cairo); an over-cap event grants nothing and
+  -- the handoff proceeds normally. The event row below records what was
+  -- actually granted.
+  v_granted := 0;
   if v_ride.order_id is not null and v_prior_apologies = 0 then
     select user_id into v_customer from public.orders where id = v_ride.order_id;
     if v_customer is not null then
       if v_apology > 0 then
-        -- 395: the gift now lives in the customer's platform credit account
-        -- (its own locked ledger, unreachable by generic wallet debits) and
-        -- is auto-applied as a discount at checkout.
-        perform public._platform_credit_grant(v_customer, v_apology, v_ride.order_id);
+        -- 395: the gift lives in the customer's platform credit account
+        -- (its own locked ledger, unreachable by generic wallet debits).
+        -- v6: the monthly cap is decided while holding that same account
+        -- row lock, so concurrent redispatches for one customer serialize
+        -- here and cannot overrun the cap. The count reads only
+        -- captain-apology grants (events that actually granted credit).
+        insert into public.platform_credit_accounts (user_id, balance)
+        values (v_customer, 0)
+        on conflict (user_id) do nothing;
+        perform 1 from public.platform_credit_accounts
+         where user_id = v_customer for update;
+        select count(*) into v_month_grants
+          from public.driver_delay_events dde
+          join public.orders o on o.id = dde.order_id
+         where o.user_id = v_customer
+           and dde.apology_amount > 0
+           and dde.created_at >= date_trunc('month', now() at time zone 'Africa/Cairo') at time zone 'Africa/Cairo';
+        -- v6: two concurrent delay events for the SAME order both pass the
+        -- early v_prior_apologies check before either commits; serialized
+        -- here on the account row lock, the second must see the first event's
+        -- committed grant. Recheck the ledger inside the lock so only one
+        -- event per order records a positive grant and consumes a monthly
+        -- slot. _platform_credit_grant keeps its own order-id dedup as
+        -- defense in depth.
+        if exists (select 1 from public.platform_credit_ledger l
+                   where l.order_id = v_ride.order_id
+                     and l.kind = 'grant') then
+          v_granted := 0;
+        elsif v_month_grants < v_cap then
+          perform public._platform_credit_grant(v_customer, v_apology, v_ride.order_id);
+          v_granted := v_apology;
+        end if;
       end if;
       insert into public.notifications (user_id, title, body, type, data, send_push)
       values (v_customer,
               'نعتذر عن التأخير 🙏',
               'طلبك رقم ' || v_short || ' اتأخر بسبب عطل فني عند الكابتن السابق. المطعم ملوش أي ذنب، والموضوع مش مقصود مننا. كابتن تاني في الطريق لطلبك دلوقتي' ||
-                case when v_apology > 0
-                     then '، وأضفنا ' || trim(to_char(v_apology, 'FM999990.##')) || ' جنيه (٧٪ من قيمة طلبك) هدية مننا في رصيد هداياك، هتنخصم تلقائي من طلبك الجاي 🎁'
+                case when v_granted > 0
+                     then '، وأضفنا ' || trim(to_char(v_granted, 'FM999990.##')) || ' جنيه (٧٪ من قيمة طلبك) هدية مننا في رصيد هداياك، هتنخصم تلقائي من طلبك الجاي 🎁'
                      else '.' end,
               'order',
               jsonb_build_object('order_id', v_ride.order_id, 'event', 'driver_delay_apology',
-                                 'apology_amount', v_apology),
+                                 'apology_amount', v_granted,
+                                 'monthly_cap', v_cap,
+                                 'monthly_grants', coalesce(v_month_grants, 0)),
               true);
     end if;
   end if;
+
+  insert into public.driver_delay_events
+    (ride_id, order_id, driver_id, reported_by, reason,
+     within_allowance, monthly_count, apology_amount)
+  values
+    (p_ride_id, v_ride.order_id, v_driver_id, p_reported_by, v_reason,
+     v_within, v_count, v_granted);
 
   -- The late driver is excused: no deduction either way. Beyond the monthly
   -- allowance the event is flagged for ops (no automatic penalty - owner to
@@ -788,7 +840,9 @@ begin
     'offered', v_offered,
     'within_allowance', v_within,
     'monthly_count', v_count,
-    'apology_amount', case when v_prior_apologies = 0 then v_apology else 0 end);
+    'apology_amount', v_granted,
+    'monthly_cap', v_cap,
+    'monthly_grants', coalesce(v_month_grants, 0));
 end;
 $function$
 ;
@@ -1630,3 +1684,16 @@ revoke all on function public.mark_platform_payable_settled(uuid, text, text) fr
 grant execute on function public.mark_platform_payable_settled(uuid, text, text) to authenticated, postgres, service_role;
 revoke all on function public.my_platform_credit(numeric) from public, anon;
 grant execute on function public.my_platform_credit(numeric) to authenticated, postgres, service_role;
+
+-- The four replaced internals are SECURITY DEFINER helpers: clients must
+-- reach them only through their wrapper RPCs, never directly. baseline had
+-- already locked down _driver_delay_redispatch; lock the rest the same way
+-- and keep postgres/service_role (cron sweep, definer callers run as owner).
+revoke all on function public._driver_delay_redispatch(uuid, text, text) from public, anon, authenticated;
+grant execute on function public._driver_delay_redispatch(uuid, text, text) to postgres, service_role;
+revoke all on function public._record_delivery_earnings(uuid) from public, anon, authenticated;
+grant execute on function public._record_delivery_earnings(uuid) to postgres, service_role;
+revoke all on function public._record_order_settlement(uuid) from public, anon, authenticated;
+grant execute on function public._record_order_settlement(uuid) to postgres, service_role;
+revoke all on function public._settlement_escalation_sweep() from public, anon, authenticated;
+grant execute on function public._settlement_escalation_sweep() to postgres, service_role;

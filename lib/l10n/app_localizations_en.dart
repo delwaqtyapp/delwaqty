@@ -8371,4 +8371,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get whatsappLaunchUnavailable =>
       'WhatsApp could not open. Copy the code and send it manually.';
+
+  @override
+  String get whatsappNotConfigured =>
+      'WhatsApp verification is not available yet. You can still sign in with Google.';
 }

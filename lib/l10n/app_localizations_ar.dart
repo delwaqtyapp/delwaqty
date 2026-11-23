@@ -8301,4 +8301,8 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get whatsappLaunchUnavailable =>
       'تعذر فتح واتساب. انسخ الرمز وأرسله يدويا.';
+
+  @override
+  String get whatsappNotConfigured =>
+      'تفعيل واتساب غير متاح حاليا. يمكنك تسجيل الدخول بحساب جوجل.';
 }

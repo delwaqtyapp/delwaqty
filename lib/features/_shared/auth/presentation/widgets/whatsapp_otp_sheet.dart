@@ -12,7 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
-enum _OtpPhase { loading, active, expired, requestFailed }
+enum _OtpPhase { loading, active, expired, requestFailed, unconfigured }
 
 class WhatsAppOtpSheet extends StatefulWidget {
   const WhatsAppOtpSheet({
@@ -121,6 +121,13 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
       final map = raw is Map
           ? Map<String, dynamic>.from(raw)
           : <String, dynamic>{};
+      if (map['code'] == 'WHATSAPP_NOT_CONFIGURED') {
+        setState(() {
+          _phase = _OtpPhase.unconfigured;
+          _errorText = AppLocalizations.of(context).whatsappNotConfigured;
+        });
+        return;
+      }
       final ok = map['ok'] == true;
       final otp = (map['otp_code'] as String?)?.trim();
       final challenge = (map['challenge'] as String?)?.trim();
@@ -406,7 +413,12 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
                     child: CircularProgressIndicator(color: whatsappGreen),
                   ),
                 )
-              else if (_phase == _OtpPhase.requestFailed) ...[
+              else if (_phase == _OtpPhase.unconfigured) ...[
+                Text(
+                  l10n.whatsappNotConfigured,
+                  style: AppTextStyles.bodyMedium.copyWith(color: Colors.white),
+                ),
+              ] else if (_phase == _OtpPhase.requestFailed) ...[
                 if (_errorText != null)
                   Text(
                     _errorText!,

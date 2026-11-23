@@ -15829,6 +15829,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'WhatsApp could not open. Copy the code and send it manually.'**
   String get whatsappLaunchUnavailable;
+
+  /// No description provided for @whatsappNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp verification is not available yet. You can still sign in with Google.'**
+  String get whatsappNotConfigured;
 }
 
 class _AppLocalizationsDelegate

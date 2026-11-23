@@ -2945,5 +2945,6 @@
   "otaUpdateNow": "تحديث الآن",
   "otaInstall": "تثبيت",
   "otaRetry": "حاول مرة أخرى",
-  "whatsappLaunchUnavailable": "تعذر فتح واتساب. انسخ الرمز وأرسله يدويا."
+  "whatsappLaunchUnavailable": "تعذر فتح واتساب. انسخ الرمز وأرسله يدويا.",
+  "whatsappNotConfigured": "تفعيل واتساب غير متاح حاليا. يمكنك تسجيل الدخول بحساب جوجل."
 }

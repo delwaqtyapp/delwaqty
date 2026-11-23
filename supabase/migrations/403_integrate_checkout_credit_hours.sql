@@ -558,20 +558,72 @@ END;
 $function$
 ;
 
--- Fail the deployment transaction if a final function differs from the composed preview.
+
+-- Fail closed until a dedicated platform WhatsApp number is configured.
+CREATE OR REPLACE FUNCTION public.request_whatsapp_otp(p_phone text, p_purpose text DEFAULT 'register'::text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_norm text := public._normalize_egypt_phone(p_phone);
+  v_otp text;
+  v_support_phone text;
+  v_recent int;
+  v_challenge uuid := gen_random_uuid();
+begin
+  -- Egyptian mobile only, canonical shape (same rule the signup hook
+  -- enforces): no proof can ever be requested for a non-Egyptian or
+  -- malformed number.
+  if v_norm !~ '^\+201[0-9]{9}$' then
+    return jsonb_build_object('ok', false, 'code', 'INVALID_PHONE');
+  end if;
+
+  select nullif(btrim(support_phone), '') into v_support_phone
+    from public.platform_settings where id='default';
+  if v_support_phone is null or v_support_phone !~ '^\+201[0-9]{9}$' then
+    return jsonb_build_object('ok', false, 'code', 'WHATSAPP_NOT_CONFIGURED');
+  end if;
+
+  select count(*) into v_recent
+    from public.whatsapp_otp_verifications
+   where phone = v_norm
+     and created_at > now() - interval '10 minutes';
+  if v_recent >= 3 then
+    return jsonb_build_object('ok', false, 'code', 'RATE_LIMITED');
+  end if;
+
+  update public.whatsapp_otp_verifications
+     set expires_at = now()
+   where phone = v_norm
+     and expires_at > now()
+     and verified = false;
+
+  v_otp := lpad((floor(random() * 900000) + 100000)::int::text, 6, '0');
+
+  insert into public.whatsapp_otp_verifications (phone, otp_code, purpose, verified, expires_at, challenge)
+  values (v_norm, v_otp, coalesce(nullif(btrim(p_purpose), ''), 'register'), false, now() + interval '10 minutes', v_challenge);
+
+
+  return jsonb_build_object(
+    'ok', true,
+    'phone', v_norm,
+    'otp_code', v_otp,
+    'challenge', v_challenge,
+    'whatsapp_number', v_support_phone,
+    'expires_in_seconds', 600
+  );
+end;
+$function$
+;
+
 DO $verify403$
 BEGIN
-  IF md5(pg_get_functiondef('public._finalize_order_cancel(uuid,text,text,boolean,boolean,boolean,text)'::regprocedure)) <> '531924418b20c3b27e3e41dbca184bfe' THEN
-    RAISE EXCEPTION '403 definition mismatch: _finalize_order_cancel';
-  END IF;
-  IF md5(pg_get_functiondef('public._provision_business_target(uuid,text,text)'::regprocedure)) <> '6a5c26fe8d1769ef5e924a7993b0ae96' THEN
-    RAISE EXCEPTION '403 definition mismatch: _provision_business_target';
-  END IF;
-  IF md5(pg_get_functiondef('public.cancel_order(uuid,text)'::regprocedure)) <> 'fe7c451dbffecebaa5e237bb9566d40b' THEN
-    RAISE EXCEPTION '403 definition mismatch: cancel_order';
-  END IF;
-  IF md5(pg_get_functiondef('public.create_order(uuid,jsonb,text,numeric,numeric,text,text,text,text)'::regprocedure)) <> 'f7c19454adb885b5e542823d26933512' THEN
-    RAISE EXCEPTION '403 definition mismatch: create_order';
-  END IF;
+  IF md5(pg_get_functiondef('public._finalize_order_cancel(uuid,text,text,boolean,boolean,boolean,text)'::regprocedure)) <> '531924418b20c3b27e3e41dbca184bfe' THEN RAISE EXCEPTION '403 definition mismatch: _finalize_order_cancel'; END IF;
+  IF md5(pg_get_functiondef('public._provision_business_target(uuid,text,text)'::regprocedure)) <> '6a5c26fe8d1769ef5e924a7993b0ae96' THEN RAISE EXCEPTION '403 definition mismatch: _provision_business_target'; END IF;
+  IF md5(pg_get_functiondef('public.cancel_order(uuid,text)'::regprocedure)) <> 'fe7c451dbffecebaa5e237bb9566d40b' THEN RAISE EXCEPTION '403 definition mismatch: cancel_order'; END IF;
+  IF md5(pg_get_functiondef('public.create_order(uuid,jsonb,text,numeric,numeric,text,text,text,text)'::regprocedure)) <> 'f7c19454adb885b5e542823d26933512' THEN RAISE EXCEPTION '403 definition mismatch: create_order'; END IF;
+  IF md5(pg_get_functiondef('public.request_whatsapp_otp(text,text)'::regprocedure)) <> 'b11340bf61ad20e0a89b0dcde0ce7ccf' THEN RAISE EXCEPTION '403 definition mismatch: request_whatsapp_otp'; END IF;
 END;
 $verify403$;

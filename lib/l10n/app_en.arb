@@ -1997,6 +1997,7 @@
   "userApproved": "User approved successfully",
   "userRejected": "User rejected",
   "adminAssigned": "Admin assigned",
+  "auditCommissionRateUpdated": "Commission rate updated",
   "roleUpdated": "Role updated",
   "addCategory": "Add category",
   "deleteCategory": "Delete category",
@@ -3051,7 +3052,7 @@
   "graceRemainingLabel": "Remaining",
   "revokeSanctionConfirm": "Revoke {type} for {role}?",
   "adminRegionScopeTitle": "Region Scope",
+  "adminRegionSelectUser": "Select an admin user to manage scope",
   "adminRegionScopeSubtitle": "Assign region scope to admin-tier users at any level (governorate, markaz, district, village, ...). An admin with no assignments is global.",
-  "roleUpdated": "Role updated",
   "adminManagement": "Admin management"
 }

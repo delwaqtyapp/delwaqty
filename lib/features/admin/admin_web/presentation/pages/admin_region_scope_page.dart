@@ -392,7 +392,7 @@ class _AssignmentsPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     if (selectedAdminId == null) {
-      return const _EmptyPanel(message: 'Select an admin user to manage scope');
+      return _EmptyPanel(message: l10n.adminRegionSelectUser);
     }
     final assignments =
         assignmentsAsync?.value ?? const <AdminRegionAssignment>[];

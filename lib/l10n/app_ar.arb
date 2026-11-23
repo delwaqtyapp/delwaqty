@@ -1997,6 +1997,7 @@
   "userApproved": "تمت الموافقة على المستخدم بنجاح",
   "userRejected": "تم رفض المستخدم",
   "adminAssigned": "تم تعيين المشرف",
+  "auditCommissionRateUpdated": "تحديث نسبة العمولة",
   "roleUpdated": "تم تحديث الدور",
   "addCategory": "إضافة فئة",
   "deleteCategory": "حذف الفئة",
@@ -2967,7 +2968,7 @@
   "graceRemainingLabel": "المتبقي",
   "revokeSanctionConfirm": "إلغاء {type} لـ{role}؟",
   "adminRegionScopeTitle": "نطاق المناطق",
+  "adminRegionSelectUser": "اختر مشرفاً لإدارة نطاقه",
   "adminRegionScopeSubtitle": "عيّن نطاق المناطق للمشرفين على أي مستوى (محافظة، مركز، حي، قرية، ...). المشرف بدون تعيينات يكون عاما.",
-  "roleUpdated": "تم تحديث الدور",
   "adminManagement": "إدارة المشرفين"
 }

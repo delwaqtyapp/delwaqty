@@ -370,7 +370,8 @@ class _AdminProfilePageState extends ConsumerState<AdminManagementProfilePage> {
           flex: 2,
           child: Text(label, style: const TextStyle(color: Colors.grey)),
         ),
-        Expanded(flex: 3, child: Text(value)),
+        // Emails wrap cleanly after the '@' instead of mid-word.
+        Expanded(flex: 3, child: Text(value.replaceAll('@', '@\u200B'))),
       ],
     ),
   );

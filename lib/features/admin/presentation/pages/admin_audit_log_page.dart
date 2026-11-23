@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -132,15 +133,18 @@ class _LogTile extends StatelessWidget {
           child: Icon(_icon(log.action), size: 18, color: color),
         ),
         title: Text(
-          log.action,
+          _actionLabel(AppLocalizations.of(context), log.action),
           style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(log.resource, style: const TextStyle(fontSize: 11)),
+            Text(_humanize(log.resource), style: const TextStyle(fontSize: 11)),
             Text(
-              log.timestamp.toIso8601String().split('.').first,
+              intl.DateFormat('yyyy/MM/dd HH:mm')
+                  .format(log.timestamp.toLocal()),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 10),
             ),
           ],
@@ -155,6 +159,22 @@ class _LogTile extends StatelessWidget {
       ),
     );
   }
+
+  // Localized label for known audit actions; unknown keys are
+  // humanized so a raw snake_case code never shows in Arabic.
+  static String _actionLabel(AppLocalizations l10n, String action) {
+    switch (action) {
+      case 'commission_rate_updated':
+        return l10n.auditCommissionRateUpdated;
+      case 'role_updated':
+        return l10n.roleUpdated;
+      default:
+        return _humanize(action);
+    }
+  }
+
+  static String _humanize(String raw) =>
+      raw.replaceAll('/', ' › ').replaceAll('_', ' ').trim();
 
   static bool _isDestructive(String action) {
     final a = action.toLowerCase();

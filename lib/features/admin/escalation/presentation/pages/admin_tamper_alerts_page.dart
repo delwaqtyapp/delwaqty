@@ -86,7 +86,12 @@ class _ClientPricedTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pct = (alert.clientPricedRatio * 100).toStringAsFixed(1);
+    // Compute the percent from the same two numbers shown in the row
+    // so the admin never sees contradictory figures.
+    final ratio = alert.totalLines > 0
+        ? alert.clientPricedLines / alert.totalLines
+        : alert.clientPricedRatio;
+    final pct = (ratio * 100).toStringAsFixed(1);
     return GlassCard(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

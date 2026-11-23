@@ -6216,6 +6216,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminAssigned => 'Admin assigned';
 
   @override
+  String get auditCommissionRateUpdated => 'Commission rate updated';
+
+  @override
   String get roleUpdated => 'Role updated';
 
   @override
@@ -8439,6 +8442,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminRegionScopeTitle => 'Region Scope';
+
+  @override
+  String get adminRegionSelectUser => 'Select an admin user to manage scope';
 
   @override
   String get adminRegionScopeSubtitle =>

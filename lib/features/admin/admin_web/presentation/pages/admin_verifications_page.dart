@@ -325,7 +325,10 @@ class _VerificationCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            role.toString().toUpperCase(),
+                            _roleLabel(
+                              AppLocalizations.of(context),
+                              role.toString(),
+                            ),
                             style: TextStyle(
                               color: _roleColor(role),
                               fontSize: 11,
@@ -404,6 +407,15 @@ class _VerificationCard extends StatelessWidget {
       ),
     );
   }
+
+  // Localized role chip: never show raw backend codes in Arabic.
+  String _roleLabel(AppLocalizations l10n, String role) => switch (role) {
+    'customer' => l10n.customer,
+    'merchant' => l10n.merchant,
+    'driver' || 'delivery' => l10n.driver,
+    'provider' => l10n.provider,
+    _ => role,
+  };
 
   Color _roleColor(String role) => switch (role) {
     'merchant' => const Color(0xFF8B5CF6),

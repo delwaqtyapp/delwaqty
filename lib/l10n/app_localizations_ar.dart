@@ -6178,6 +6178,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminAssigned => 'تم تعيين المشرف';
 
   @override
+  String get auditCommissionRateUpdated => 'تحديث نسبة العمولة';
+
+  @override
   String get roleUpdated => 'تم تحديث الدور';
 
   @override
@@ -8367,6 +8370,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get adminRegionScopeTitle => 'نطاق المناطق';
+
+  @override
+  String get adminRegionSelectUser => 'اختر مشرفاً لإدارة نطاقه';
 
   @override
   String get adminRegionScopeSubtitle =>

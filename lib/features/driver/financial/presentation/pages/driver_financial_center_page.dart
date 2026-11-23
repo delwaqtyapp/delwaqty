@@ -67,7 +67,12 @@ class DriverFinancialCenterPage extends ConsumerWidget {
             16,
             16,
             16,
-            16 + kFloatingNavClearance + MediaQuery.paddingOf(context).bottom,
+            // Clear the floating top-up pill (and the shell's floating
+            // nav) so the last rows are never hidden underneath it.
+            16 +
+                120 +
+                kFloatingNavClearance +
+                MediaQuery.paddingOf(context).bottom,
           ),
           children: [
             summary.when(

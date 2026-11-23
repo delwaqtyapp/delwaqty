@@ -11912,6 +11912,12 @@ abstract class AppLocalizations {
   /// **'Admin assigned'**
   String get adminAssigned;
 
+  /// No description provided for @auditCommissionRateUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Commission rate updated'**
+  String get auditCommissionRateUpdated;
+
   /// No description provided for @roleUpdated.
   ///
   /// In en, this message translates to:
@@ -15955,6 +15961,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Region Scope'**
   String get adminRegionScopeTitle;
+
+  /// No description provided for @adminRegionSelectUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an admin user to manage scope'**
+  String get adminRegionSelectUser;
 
   /// No description provided for @adminRegionScopeSubtitle.
   ///

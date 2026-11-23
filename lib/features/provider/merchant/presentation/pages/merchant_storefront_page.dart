@@ -834,22 +834,31 @@ class WorkingHoursDayCard extends StatelessWidget {
             ),
             if (!day.closed) ...[
               const SizedBox(height: 4),
-              Row(
-                children: [
-                  Expanded(
-                    child: _HoursTimeField(
-                      value: day.open,
-                      onChanged: onOpenChanged,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _HoursTimeField(
-                      value: day.close,
-                      onChanged: onCloseChanged,
-                    ),
-                  ),
-                ],
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  // At narrow widths / large text scales the two fields
+                  // stack so the full HH:MM is never cut off.
+                  final open = _HoursTimeField(
+                    value: day.open,
+                    onChanged: onOpenChanged,
+                  );
+                  final close = _HoursTimeField(
+                    value: day.close,
+                    onChanged: onCloseChanged,
+                  );
+                  if (constraints.maxWidth < 360) {
+                    return Column(
+                      children: [open, const SizedBox(height: 8), close],
+                    );
+                  }
+                  return Row(
+                    children: [
+                      Expanded(child: open),
+                      const SizedBox(width: 12),
+                      Expanded(child: close),
+                    ],
+                  );
+                },
               ),
               // close <= open is valid: equal times mean open 24
               // hours, a close before the open is an overnight

@@ -24,7 +24,7 @@ STEP 16 transforms the admin dashboard from a basic stat-card view into a **prod
 - Service performance by category
 - Delivery intelligence
 - Provider intelligence
-- Merchant/Restaurant/Pharmacy intelligence
+- Merchant/Restaurant intelligence
 - Financial center (revenue, commissions, settlements, wallets, ledger)
 - Operational alerts
 - Full security matrix (8 roles)
@@ -51,7 +51,6 @@ STEP 16 transforms the admin dashboard from a basic stat-card view into a **prod
 |------|-------|
 | food | 5 |
 | grocery | 2 |
-| pharmacy | 1 |
 | bakery | 1 |
 
 ### 2.3 Service Categories (8)
@@ -94,7 +93,6 @@ STEP 16 transforms the admin dashboard from a basic stat-card view into a **prod
 | delivery | food | 0.07 | EGP | true |
 | delivery | grocery | 0.07 | EGP | true |
 | delivery | package | 0.07 | EGP | true |
-| delivery | pharmacy | 0.07 | EGP | true |
 | provider | plumbing | 0.07 | EGP | true |
 | provider | electrical | 0.07 | EGP | true |
 | provider | carpentry | 0.07 | EGP | true |
@@ -106,9 +104,8 @@ STEP 16 transforms the admin dashboard from a basic stat-card view into a **prod
 | restaurant | food | 0.03 | EGP | true |
 | restaurant | grocery | 0.03 | EGP | true |
 | restaurant | bakery | 0.03 | EGP | true |
-| pharmacy | pharmacy | 0.03 | EGP | true |
 
-**Note:** The original prompt specified 7% driver/provider + 3% restaurant/pharmacy. The actual DB has ALL delivery types at 7%, ALL provider types at 7%, restaurants at 3%, pharmacies at 3%. This is consistent.
+**Note:** The original prompt specified 7% driver/provider + 3% restaurant. The actual DB has ALL delivery types at 7%, ALL provider types at 7%, restaurants at 3%. This is consistent.
 
 ### 2.6 Regions
 

@@ -46,12 +46,11 @@ idx_coupons_code            idx_drivers_is_active
 |------|--------|------|------|
 | Food | طعام | restaurant | 1 |
 | Grocery | بقالة | shopping_basket | 2 |
-| Pharmacy | صيدلية | local_pharmacy | 3 |
-| Electronics | إلكترونيات | devices | 4 |
-| Furniture | أثاث | chair | 5 |
-| Fashion | أزياء | checkroom | 6 |
-| Flowers | زهور | local_florist | 7 |
-| Bakery | مخبوزات | bakery_dining | 8 |
+| Electronics | إلكترونيات | devices | 3 |
+| Furniture | أثاث | chair | 4 |
+| Fashion | أزياء | checkroom | 5 |
+| Flowers | زهور | local_florist | 6 |
+| Bakery | مخبوزات | bakery_dining | 7 |
 
 ### Platform Settings (1 row)
 - App name: "Delwaqty"

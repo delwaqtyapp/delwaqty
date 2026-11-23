@@ -136,7 +136,7 @@
 - Dispatch: `/root/Projects/delwaqty/supabase/migrations/008_dispatch_engine.sql`
 - Unified delivery: `/root/Projects/delwaqty/supabase/migrations/011_unified_delivery_platform.sql`
 
-### 1.10 Merchants, Restaurants, Pharmacy
+### 1.10 Merchants, Restaurants, Stores
 
 | Table | Created | Extended By | Key Columns |
 |-------|---------|-------------|-------------|

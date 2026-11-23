@@ -90,10 +90,7 @@ Register → Initialize → Activate → [Running] → Deactivate → Dispose
 | **Optional Engines** | AI (recommendations), Analytics (ordering patterns) |
 | **Permissions** | `merchant.create`, `order.create`, `delivery.track` |
 
-### Ride Plugin
-
-| Aspect | Detail |
-|--------|--------|
+--------|--------|
 | **Capabilities** | Ride request, driver matching, real-time tracking, fare calculation |
 | **Required Engines** | Identity, Mobility, Maps, Payments, Notifications |
 | **Optional Engines** | AI (route optimization), Analytics (demand prediction) |

@@ -8,7 +8,7 @@
 
 ## Summary
 
-Built a **generic, merchant-type-agnostic Commerce Engine** that powers Food, Grocery, Pharmacy, Electronics, Furniture, Fashion, Flowers, Bakery, and any future merchant type — all through a single domain model.
+Built a **generic, merchant-type-agnostic Commerce Engine** that powers Food, Grocery, Electronics, Furniture, Fashion, Flowers, Bakery, and any future merchant type — all through a single domain model.
 
 Every screen, widget, and repository is **type-agnostic**. MerchantType is a data flag, not a code branch.
 
@@ -18,7 +18,7 @@ Every screen, widget, and repository is **type-agnostic**. MerchantType is a dat
 
 | Entity | Purpose |
 |---|---|
-| `Merchant` | Any vendor (restaurant, pharmacy, store, etc.) with type, location, rating, capabilities |
+| `Merchant` | Any vendor (restaurant, grocery, store, etc.) with type, location, rating, capabilities |
 | `Product` | Any sellable item with variants |
 | `ProductVariant` | Size/color options for products |
 | `CatalogCategory` | Merchant-specific menu/product categories |
@@ -31,7 +31,7 @@ Every screen, widget, and repository is **type-agnostic**. MerchantType is a dat
 | `Money` | Currency-aware money value |
 | `GeoLocation` | Lat/lng with address |
 | `ImageSet` | Thumbnail/medium/large image variants |
-| `MerchantType` | enum: restaurant, grocery, pharmacy, flowers, bakery, electronics, furniture, fashion, home, other |
+| `MerchantType` | enum: restaurant, grocery, flowers, bakery, electronics, furniture, fashion, home, other |
 
 ---
 
@@ -52,7 +52,7 @@ Every screen, widget, and repository is **type-agnostic**. MerchantType is a dat
 
 ## Mock Implementations (8)
 
-Full mock implementations with sample data for 5 merchants (Al Baik, Tamimi Markets, Nahdi Pharmacy, Jarir Bookstore, IKEA) and 8 products.
+Full mock implementations with sample data for 5 merchants (Al Baik, Tamimi Markets, Jarir Bookstore, IKEA) and 8 products.
 
 ---
 
@@ -132,7 +132,7 @@ enum ModuleCapability {
 
 ## Key Design Decisions
 
-1. **Zero merchant-type branching** — All screens display the same UI for restaurants, pharmacies, electronics stores, etc. The `MerchantType` enum drives icons/labels only.
+1. **Zero merchant-type branching** — All screens display the same UI for restaurants, grocery stores, electronics stores, etc. The `MerchantType` enum drives icons/labels only.
 
 2. **Single cart for entire platform** — CartRepository is platform-wide. Switching merchants clears the cart (real-world behavior).
 

@@ -105,7 +105,7 @@ Responsive split-layout admin page:
 ## Commission Verification
 
 - 7% for delivery/service providers (driver/provider commission_rules)
-- 3% for restaurants/pharmacies (merchant commission_rules)
+- 3% for restaurants (merchant commission_rules)
 - Commission snapshots are idempotent (ON CONFLICT DO NOTHING)
 - Revenue aggregation by category and account_type working
 

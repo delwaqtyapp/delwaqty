@@ -73,7 +73,7 @@ Comprehensive debt inventory:
 Complete module registry with:
 - **12 active modules** (registered in module_registry.dart)
 - **37 planned modules** across 4 categories:
-  - Commerce verticals (6): Restaurants, Grocery, Pharmacy, Electronics, Furniture, Fashion
+  - Commerce verticals (5): Restaurants, Grocery, Electronics, Furniture, Fashion
   - Service verticals (5): Ride, Home Services, Medical, Travel, Education
   - Platform features (11): Wallet, Payments, AI, Search, Chat, Maps, Reviews, Favorites, Coupons, Loyalty
   - Admin features (7): Dashboard, Users, Merchants, Orders, Analytics, Reports, Security

@@ -6,19 +6,38 @@
 -- deliberately narrower: no order/ride links, no respondent, no
 -- escalation, no attachments, no chat rooms, no sanctions hooks.
 --
--- - suggestions table with RLS: a user inserts/reads/updates only their
---   own rows; admins (is_admin()) have full access. Suggestions are
+-- v2 (reviews #142/#143/#144 + security):
+-- - No client INSERT at all: the INSERT grant and the user INSERT policy
+--   are gone, so rows are created ONLY by submit_suggestion (SECURITY
+--   DEFINER). A client cannot forge status, admin_notes, reviewed_* or a
+--   backdated created_at (this also covers the complaints BEFORE INSERT
+--   fixup trigger's job, which RPC-only creation makes unnecessary).
+-- - submit_suggestion takes a per-user advisory xact lock before the
+--   rate-limit count, so overlapping sessions cannot both pass the
+--   count; created_at stays server-owned.
+-- - Guard block covers suggestions_guard_admin_fields() too.
+-- - admin_notes / reviewed_at / reviewed_by are internal: authenticated
+--   SELECT is column-granted and excludes them; users see their own rows
+--   with resolution_note only. Admins read full rows via
+--   admin_list_suggestions (definer-owned, not column-limited).
+-- - submit_suggestion pre-checks the 120/2000 length limits for clean
+--   22023 errors; admin_update_suggestion_status sets resolution_note
+--   unconditionally so an admin can clear it; app_role is display-only
+--   (the client states which app it is; it grants no permission).
+--
+-- - suggestions table with RLS: a user reads/updates only their own
+--   rows; admins (is_admin()) have full access. Suggestions are
 --   platform-wide ideas, so there is no regional scoping (unlike 411
 --   complaints scoping, which protected case data, not ideas).
 -- - suggestions_guard_admin_fields trigger: non-admin clients can edit
 --   their own text but never the handling fields.
--- - submit_suggestion RPC (SECURITY DEFINER): validated submit with a
---   10-per-24h per-user rate limit.
--- - admin_list_suggestions / admin_update_suggestion_status RPCs
---   (SECURITY DEFINER, is_admin() gated): admin app list + triage.
+-- - submit_suggestion RPC: validated submit, 10-per-24h per-user rate
+--   limit, serialized per user.
+-- - admin_list_suggestions / admin_update_suggestion_status RPCs:
+--   is_admin() gated admin list + triage.
 --
 -- Guard: fresh objects only. Aborts without mutation if the table or any
--- of the three functions already exists.
+-- of the functions already exists.
 
 BEGIN;
 
@@ -29,8 +48,9 @@ BEGIN
   END IF;
   IF to_regprocedure('public.submit_suggestion(text,text,text,text)') IS NOT NULL
      OR to_regprocedure('public.admin_list_suggestions(text,integer,integer)') IS NOT NULL
-     OR to_regprocedure('public.admin_update_suggestion_status(uuid,text,text)') IS NOT NULL THEN
-    RAISE EXCEPTION 'suggestions RPCs already exist; aborting';
+     OR to_regprocedure('public.admin_update_suggestion_status(uuid,text,text)') IS NOT NULL
+     OR to_regprocedure('public.suggestions_guard_admin_fields()') IS NOT NULL THEN
+    RAISE EXCEPTION 'suggestions functions already exist; aborting';
   END IF;
 END
 $g$;
@@ -65,8 +85,8 @@ CREATE INDEX idx_suggestions_created ON public.suggestions USING btree (created_
 
 ALTER TABLE public.suggestions ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "users insert own suggestions" ON public.suggestions AS PERMISSIVE
-  FOR INSERT TO public WITH CHECK (user_id = auth.uid());
+-- No user INSERT policy on purpose: creation goes through
+-- submit_suggestion only (review #142 / security).
 CREATE POLICY "users select own suggestions" ON public.suggestions AS PERMISSIVE
   FOR SELECT TO public USING (user_id = auth.uid());
 CREATE POLICY "users update own suggestions" ON public.suggestions AS PERMISSIVE
@@ -115,8 +135,10 @@ CREATE TRIGGER suggestions_set_updated_at
   BEFORE UPDATE ON public.suggestions
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
--- Submit RPC: validated insert on behalf of the caller, with a light
--- rate limit (10 suggestions per user per rolling 24h).
+-- Submit RPC: validated insert on behalf of the caller. app_role is
+-- display-only (which app the idea came from); it grants no permission.
+-- Rate limit: 10 per user per rolling 24h, serialized per user by an
+-- advisory xact lock so overlapping sessions cannot both pass the count.
 CREATE OR REPLACE FUNCTION public.submit_suggestion(
   p_subject text,
   p_description text,
@@ -133,24 +155,31 @@ DECLARE
   v_id uuid;
 BEGIN
   IF v_uid IS NULL THEN
-    RAISE EXCEPTION 'not authenticated';
+    RAISE EXCEPTION 'not authenticated' USING ERRCODE = '28000';
   END IF;
   IF p_subject IS NULL OR char_length(btrim(p_subject)) = 0 THEN
-    RAISE EXCEPTION 'subject is required';
+    RAISE EXCEPTION 'subject is required' USING ERRCODE = '22023';
+  END IF;
+  IF char_length(btrim(p_subject)) > 120 THEN
+    RAISE EXCEPTION 'subject too long (max 120)' USING ERRCODE = '22023';
   END IF;
   IF p_description IS NULL OR char_length(btrim(p_description)) = 0 THEN
-    RAISE EXCEPTION 'description is required';
+    RAISE EXCEPTION 'description is required' USING ERRCODE = '22023';
+  END IF;
+  IF char_length(btrim(p_description)) > 2000 THEN
+    RAISE EXCEPTION 'description too long (max 2000)' USING ERRCODE = '22023';
   END IF;
   IF p_category IS NULL OR p_category NOT IN ('general','app','feature','payment','other') THEN
-    RAISE EXCEPTION 'invalid category';
+    RAISE EXCEPTION 'invalid category' USING ERRCODE = '22023';
   END IF;
   IF p_app_role IS NULL OR p_app_role NOT IN ('customer','driver','provider','admin') THEN
-    RAISE EXCEPTION 'invalid app_role';
+    RAISE EXCEPTION 'invalid app_role' USING ERRCODE = '22023';
   END IF;
+  PERFORM pg_advisory_xact_lock(hashtext('submit_suggestion'), hashtext(v_uid::text));
   IF (SELECT count(*) FROM public.suggestions s
        WHERE s.user_id = v_uid
          AND s.created_at > now() - interval '24 hours') >= 10 THEN
-    RAISE EXCEPTION 'too many suggestions; please try again later';
+    RAISE EXCEPTION 'too many suggestions; please try again later' USING ERRCODE = 'P0001';
   END IF;
   INSERT INTO public.suggestions (user_id, app_role, category, subject, description)
   VALUES (v_uid, p_app_role, p_category, btrim(p_subject), btrim(p_description))
@@ -159,7 +188,7 @@ BEGIN
 END;
 $function$;
 
--- Admin list RPC: full rows, newest first.
+-- Admin list RPC: full rows (including internal admin_notes), newest first.
 CREATE OR REPLACE FUNCTION public.admin_list_suggestions(
   p_status text DEFAULT NULL::text,
   p_limit integer DEFAULT 100,
@@ -172,10 +201,10 @@ CREATE OR REPLACE FUNCTION public.admin_list_suggestions(
 AS $function$
 BEGIN
   IF NOT public.is_admin() THEN
-    RAISE EXCEPTION 'admin only';
+    RAISE EXCEPTION 'admin only' USING ERRCODE = '42501';
   END IF;
   IF p_status IS NOT NULL AND p_status NOT IN ('pending','reviewing','accepted','rejected','implemented') THEN
-    RAISE EXCEPTION 'invalid status';
+    RAISE EXCEPTION 'invalid status' USING ERRCODE = '22023';
   END IF;
   RETURN QUERY
     SELECT s.* FROM public.suggestions s
@@ -186,7 +215,8 @@ BEGIN
 END;
 $function$;
 
--- Admin triage RPC: set status + optional resolution note.
+-- Admin triage RPC: set status; resolution_note is set unconditionally so
+-- passing NULL clears a previous note. Stamps reviewed_at/reviewed_by.
 CREATE OR REPLACE FUNCTION public.admin_update_suggestion_status(
   p_suggestion_id uuid,
   p_status text,
@@ -199,25 +229,34 @@ CREATE OR REPLACE FUNCTION public.admin_update_suggestion_status(
 AS $function$
 BEGIN
   IF NOT public.is_admin() THEN
-    RAISE EXCEPTION 'admin only';
+    RAISE EXCEPTION 'admin only' USING ERRCODE = '42501';
   END IF;
   IF p_status IS NULL OR p_status NOT IN ('pending','reviewing','accepted','rejected','implemented') THEN
-    RAISE EXCEPTION 'invalid status';
+    RAISE EXCEPTION 'invalid status' USING ERRCODE = '22023';
   END IF;
   UPDATE public.suggestions
      SET status = p_status,
-         resolution_note = COALESCE(p_resolution_note, resolution_note),
+         resolution_note = p_resolution_note,
          reviewed_at = now(),
          reviewed_by = auth.uid()
    WHERE id = p_suggestion_id;
   IF NOT FOUND THEN
-    RAISE EXCEPTION 'suggestion not found';
+    RAISE EXCEPTION 'suggestion not found' USING ERRCODE = 'P0002';
   END IF;
 END;
 $function$;
 
--- Table grants mirror complaints (RLS does the real gating).
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.suggestions TO authenticated;
+-- Table grants. Default privileges (000_baseline) would hand anon and
+-- authenticated table-level rights on every new table; strip them first,
+-- then grant exactly what each role needs. SELECT for authenticated is
+-- column-granted: internal handling fields (admin_notes, reviewed_at,
+-- reviewed_by) stay server-side; users see resolution_note only. No
+-- INSERT for authenticated (RPC-only creation). UPDATE/DELETE are
+-- RLS-gated.
+REVOKE ALL ON TABLE public.suggestions FROM PUBLIC, anon, authenticated;
+GRANT SELECT (id, user_id, app_role, category, subject, description, status, resolution_note, created_at, updated_at)
+  ON TABLE public.suggestions TO authenticated;
+GRANT UPDATE, DELETE ON TABLE public.suggestions TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.suggestions TO postgres;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.suggestions TO service_role;
 
@@ -243,8 +282,8 @@ BEGIN
     RAISE EXCEPTION 'suggestions functions missing after create';
   END IF;
   IF (SELECT count(*) FROM pg_policies
-       WHERE schemaname = 'public' AND tablename = 'suggestions') <> 7 THEN
-    RAISE EXCEPTION 'expected 7 RLS policies on suggestions';
+       WHERE schemaname = 'public' AND tablename = 'suggestions') <> 6 THEN
+    RAISE EXCEPTION 'expected 6 RLS policies on suggestions';
   END IF;
 END
 $v$;

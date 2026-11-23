@@ -74,6 +74,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/lottie/
+    - assets/lottie/roles/
     - assets/logo app/logo.webp
     - assets/branding/
     - assets/egypt/

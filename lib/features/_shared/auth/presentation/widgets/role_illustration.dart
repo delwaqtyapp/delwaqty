@@ -1,13 +1,15 @@
 import 'package:delwaqty/core/theme/app_colors.dart';
 
 import 'dart:math' as math;
+import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 enum RoleCardIcon { customer, merchant, delivery, provider }
 
-/// Lightweight original vector scenes. One short selection animation, no loop.
-class RoleIllustration extends StatelessWidget {
+/// Original native scenes; ticks only while visible, foreground and allowed.
+class RoleIllustration extends StatefulWidget {
   const RoleIllustration({
     super.key,
     required this.role,
@@ -17,35 +19,144 @@ class RoleIllustration extends StatelessWidget {
   final RoleCardIcon role;
   final Color color;
   final bool selected;
+  @override
+  State<RoleIllustration> createState() => _RoleIllustrationState();
+}
+
+class _RoleIllustrationState extends State<RoleIllustration>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+  late final AnimationController _clock;
+  Timer? _visibilityCheck;
+  bool _foreground = true;
 
   @override
-  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
-    tween: Tween(begin: 0, end: selected ? 1 : 0),
-    duration: MediaQuery.disableAnimationsOf(context)
-        ? Duration.zero
-        : const Duration(milliseconds: 420),
-    curve: Curves.easeOutCubic,
-    builder: (context, value, child) => Transform.translate(
-      offset: Offset(0, -3 * math.sin(value * math.pi)),
-      child: CustomPaint(
-        size: const Size(100, 88),
-        painter: _ScenePainter(role, color, value),
-      ),
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _clock = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 12),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _visibilityCheck?.cancel();
+    if (!MediaQuery.disableAnimationsOf(context) &&
+        TickerMode.valuesOf(context).enabled) {
+      _visibilityCheck = Timer.periodic(
+        const Duration(milliseconds: 600),
+        (_) => _syncClock(),
+      );
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _syncClock();
+    });
+  }
+
+  void _syncClock() {
+    if (!mounted) return;
+    final box = context.findRenderObject();
+    var visible = false;
+    if (box is RenderBox && box.hasSize && box.attached) {
+      final rect = box.localToGlobal(Offset.zero) & box.size;
+      visible = rect.overlaps(Offset.zero & MediaQuery.sizeOf(context));
+    }
+    final enabled =
+        visible &&
+        _foreground &&
+        TickerMode.valuesOf(context).enabled &&
+        !MediaQuery.disableAnimationsOf(context) &&
+        (ModalRoute.of(context)?.isCurrent ?? true);
+    if (enabled && !_clock.isAnimating) _clock.repeat();
+    if (!enabled && _clock.isAnimating) _clock.stop();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _foreground = state == AppLifecycleState.resumed;
+    _syncClock();
+  }
+
+  @override
+  void dispose() {
+    _visibilityCheck?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    _clock.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => RepaintBoundary(
+    child: AnimatedBuilder(
+      animation: _clock,
+      builder: (context, child) {
+        final scene = (_clock.value * 4).floor() % 4;
+        final asset = switch (widget.role) {
+          RoleCardIcon.delivery => 'scooter',
+          RoleCardIcon.customer => 'shopper',
+          RoleCardIcon.merchant when scene == 2 => 'market',
+          _ => null,
+        };
+        if (asset == null) {
+          return CustomPaint(
+            size: const Size(100, 88),
+            painter: _ScenePainter(widget.role, widget.color, _clock),
+          );
+        }
+        return SizedBox(
+          width: 100,
+          height: 88,
+          child: ClipRect(
+            child: Transform.scale(
+              scale: asset == 'shopper'
+                  ? 1.35
+                  : asset == 'scooter'
+                  ? 1.15
+                  : 1,
+              child: Lottie.asset(
+                'assets/lottie/roles/$asset.lottie',
+                controller: _ScenePhase(_clock),
+                animate: false,
+                fit: BoxFit.contain,
+                frameRate: const FrameRate(24),
+                errorBuilder: (context, error, stackTrace) => CustomPaint(
+                  size: const Size(100, 88),
+                  painter: _ScenePainter(widget.role, widget.color, _clock),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     ),
   );
 }
 
+class _ScenePhase extends Animation<double>
+    with AnimationWithParentMixin<double> {
+  _ScenePhase(this.parent);
+  @override
+  final Animation<double> parent;
+  @override
+  double get value => (parent.value * 4) % 1;
+}
+
 class _ScenePainter extends CustomPainter {
-  const _ScenePainter(this.role, this.color, this.progress);
+  _ScenePainter(this.role, this.color, this.clock) : super(repaint: clock);
   final RoleCardIcon role;
   final Color color;
-  final double progress;
+  final Animation<double> clock;
   static const ink = AppColors.roleSceneInk;
   static const skin = AppColors.roleSceneSkin;
 
   @override
   void paint(Canvas c, Size size) {
     c.scale(size.width / 100, size.height / 88);
+    final progress = clock.value;
+    final phase = progress * math.pi * 12;
+    final scene = (progress * 4).floor() % 4;
     void fill(Path p, Color col) => c.drawPath(p, Paint()..color = col);
     void line(Path p, Color col, [double width = 2.5]) => c.drawPath(
       p,
@@ -95,6 +206,25 @@ class _ScenePainter extends CustomPainter {
     );
     switch (role) {
       case RoleCardIcon.customer:
+        // Walking shopper: gentle horizontal walk, alternating legs, market stall.
+        rect(6, 28, 20, 24, pale, 3);
+        rect(4, 25, 24, 6, color.withValues(alpha: .3), 2);
+        circle(12, 37, 3, color);
+        circle(21, 37, 3, deep);
+        c.save();
+        c.translate(
+          math.sin(progress * math.pi * 2) * 5,
+          math.sin(phase).abs() * -1.5,
+        );
+        line(
+          Path()
+            ..moveTo(44, 66)
+            ..lineTo(42 + math.sin(phase) * 5, 79)
+            ..moveTo(56, 66)
+            ..lineTo(58 - math.sin(phase) * 5, 79),
+          ink,
+          5,
+        );
         // Shopper, blue jacket, two shopping bags.
         rect(33, 43, 32, 31, color, 10);
         fill(
@@ -154,6 +284,7 @@ class _ScenePainter extends CustomPainter {
           Colors.white.withValues(alpha: .6),
           1.5,
         );
+        c.restore();
       case RoleCardIcon.merchant:
         // Shopfront with striped canopy and welcoming owner.
         rect(19, 30, 63, 47, Colors.white, 6);
@@ -191,7 +322,64 @@ class _ScenePainter extends CustomPainter {
         rect(54, 59, 18, 17, color, 5);
         rect(59, 59, 8, 17, Colors.white, 2);
         rect(50, 72, 25, 5, deep, 2);
+        // Counter changes: butcher, dairy, produce and bakery.
+        rect(22, 60, 27, 15, deep, 3);
+        switch (scene) {
+          case 0:
+            c.drawOval(
+              const Rect.fromLTWH(26, 61, 18, 10),
+              Paint()..color = AppColors.roleSceneAccent1,
+            );
+            line(
+              Path()
+                ..moveTo(32, 64)
+                ..lineTo(37, 68),
+              Colors.white,
+              2,
+            );
+          case 1:
+            rect(26, 62, 7, 11, Colors.white, 2);
+            rect(36, 62, 7, 11, Colors.white, 2);
+            rect(27, 59, 5, 4, color, 1);
+            rect(37, 59, 5, 4, color, 1);
+          case 2:
+            circle(29, 66, 4, AppColors.roleSceneAccent2);
+            circle(38, 66, 4, AppColors.roleSceneAccent3);
+            circle(34, 61, 4, AppColors.roleSceneAccent4);
+          case 3:
+            c.drawOval(
+              const Rect.fromLTWH(25, 62, 20, 10),
+              Paint()..color = AppColors.roleSceneAccent5,
+            );
+        }
+        line(
+          Path()
+            ..moveTo(68, 62)
+            ..lineTo(74, 57 + math.sin(phase) * 3),
+          skin,
+          4,
+        );
       case RoleCardIcon.delivery:
+        // Road markers slide and wheels rotate as the captain rides.
+        line(
+          Path()
+            ..moveTo(7, 81)
+            ..lineTo(93, 81),
+          color.withValues(alpha: .18),
+          2,
+        );
+        for (var n = 0; n < 4; n++) {
+          final x = ((n * 28 - progress * 420) % 112) - 6;
+          line(
+            Path()
+              ..moveTo(x, 84)
+              ..lineTo(x + 12, 84),
+            color.withValues(alpha: .4),
+            1.6,
+          );
+        }
+        c.save();
+        c.translate(0, math.sin(phase) * .8);
         // Delivery captain on a scooter, parcel box, helmet and wheels.
         rect(7, 35, 23, 20, color);
         line(
@@ -271,7 +459,115 @@ class _ScenePainter extends CustomPainter {
           color.withValues(alpha: .45),
           2,
         );
+        for (final x in [28.0, 77.0]) {
+          final dx = math.cos(phase * 2) * 4;
+          final dy = math.sin(phase * 2) * 4;
+          line(
+            Path()
+              ..moveTo(x - dx, 70 - dy)
+              ..lineTo(x + dx, 70 + dy),
+            color,
+            1.5,
+          );
+        }
+        c.restore();
       case RoleCardIcon.provider:
+        if (scene != 0) {
+          // Shared professional silhouette with distinct working scenes.
+          rect(33, 43, 30, 32, color, 9);
+          rect(45, 35, 10, 12, skin, 3);
+          circle(50, 28, 12, skin);
+          fill(
+            Path()
+              ..moveTo(38, 29)
+              ..cubicTo(31, 9, 65, 9, 63, 29)
+              ..lineTo(57, 22)
+              ..lineTo(42, 23)
+              ..close(),
+            ink,
+          );
+          switch (scene) {
+            case 1:
+              // Carpenter hammering a wooden workbench.
+              rect(15, 67, 69, 6, AppColors.roleSceneAccent6, 2);
+              rect(21, 73, 5, 9, deep, 1);
+              rect(75, 73, 5, 9, deep, 1);
+              rect(62, 60, 14, 7, AppColors.roleSceneAccent7, 1);
+              final lift = math.sin(phase * 2) * 5;
+              line(
+                Path()
+                  ..moveTo(59, 49)
+                  ..lineTo(68, 52 + lift),
+                skin,
+                5,
+              );
+              line(
+                Path()
+                  ..moveTo(69, 59 + lift)
+                  ..lineTo(69, 44 + lift),
+                ink,
+                3,
+              );
+              rect(63, 41 + lift, 13, 5, deep, 1);
+            case 2:
+              // Electrician with a safe illustrative lightning panel.
+              rect(65, 35, 21, 34, deep);
+              fill(
+                Path()
+                  ..moveTo(77, 41)
+                  ..lineTo(70, 53)
+                  ..lineTo(77, 53)
+                  ..lineTo(72, 63)
+                  ..lineTo(82, 50)
+                  ..lineTo(76, 50)
+                  ..close(),
+                AppColors.roleSceneAccent8,
+              );
+              line(
+                Path()
+                  ..moveTo(60, 50)
+                  ..lineTo(70, 56 + math.sin(phase) * 2),
+                skin,
+                5,
+              );
+              fill(
+                Path()
+                  ..moveTo(36, 24)
+                  ..quadraticBezierTo(50, 5, 64, 24)
+                  ..close(),
+                color,
+              );
+            case 3:
+              // Teacher pointing at a board with simple lesson marks.
+              rect(4, 26, 30, 35, deep, 3);
+              line(
+                Path()
+                  ..moveTo(10, 35)
+                  ..lineTo(27, 35)
+                  ..moveTo(10, 43)
+                  ..lineTo(23, 43)
+                  ..moveTo(10, 51)
+                  ..lineTo(27, 51),
+                Colors.white.withValues(alpha: .8),
+                2,
+              );
+              line(
+                Path()
+                  ..moveTo(37, 48)
+                  ..lineTo(27, 45 + math.sin(phase) * 3),
+                skin,
+                5,
+              );
+              line(
+                Path()
+                  ..moveTo(28, 44)
+                  ..lineTo(19, 35),
+                ink,
+                1.5,
+              );
+          }
+          break;
+        }
         // Professional in a white coat, plus cross and tool badges.
         rect(29, 44, 42, 33, Colors.white, 10);
         fill(
@@ -344,5 +640,5 @@ class _ScenePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_ScenePainter old) =>
-      old.role != role || old.color != color || old.progress != progress;
+      old.role != role || old.color != color || old.clock != clock;
 }

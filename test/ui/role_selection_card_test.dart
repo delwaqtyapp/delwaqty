@@ -142,7 +142,7 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 700));
     expect(tester.takeException(), isNull);
     final cards = find.byType(RoleSelectionCard);
     expect(cards, findsNWidgets(4));
@@ -160,12 +160,28 @@ void main() {
       File('${Directory.systemTemp.path}/role-tiles-real-widget.png')
           .writeAsBytesSync(data!.buffer.asUint8List());
     });
+    for (var frame = 0; frame < 48; frame++) {
+      await tester.pump(const Duration(milliseconds: 250));
+      await tester.runAsync(() async {
+        await Future<void>.delayed(const Duration(milliseconds: 15));
+        final boundary =
+            capture.currentContext!.findRenderObject()!
+                as RenderRepaintBoundary;
+        final image = await boundary.toImage();
+        final data = await image.toByteData(format: ui.ImageByteFormat.png);
+        final dir = Directory('${Directory.systemTemp.path}/role-frames')
+          ..createSync(recursive: true);
+        File('${dir.path}/frame-${frame.toString().padLeft(3, '0')}.png')
+            .writeAsBytesSync(data!.buffer.asUint8List());
+      });
+    }
     await tester.tap(cards.at(1));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 700));
     expect(selected, 1);
     expect(tester.takeException(), isNull);
     rebuild(() => scale = 1.6);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 700));
     expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
   });
 }

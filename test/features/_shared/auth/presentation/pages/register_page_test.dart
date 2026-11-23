@@ -67,6 +67,10 @@ Widget _buildTestApp({List<ServiceCategory>? catalog, String locale = 'en'}) {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: Locale(locale),
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(disableAnimations: true),
+        child: child!,
+      ),
       home: const RegisterPage(),
     ),
   );

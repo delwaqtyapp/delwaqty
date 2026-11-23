@@ -46,9 +46,8 @@ class _NewSuggestionPageState extends ConsumerState<NewSuggestionPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                validator: (v) => v == null || v.trim().isEmpty
-                    ? l10n.requiredField
-                    : null,
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? l10n.requiredField : null,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
@@ -59,15 +58,14 @@ class _NewSuggestionPageState extends ConsumerState<NewSuggestionPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                items:
-                    ['general', 'app', 'feature', 'payment', 'other']
-                        .map(
-                          (s) => DropdownMenuItem(
-                            value: s,
-                            child: Text(suggestionCategoryLabel(l10n, s)),
-                          ),
-                        )
-                        .toList(),
+                items: ['general', 'app', 'feature', 'payment', 'other']
+                    .map(
+                      (s) => DropdownMenuItem(
+                        value: s,
+                        child: Text(suggestionCategoryLabel(l10n, s)),
+                      ),
+                    )
+                    .toList(),
                 onChanged: (v) => setState(() => _category = v!),
               ),
               const SizedBox(height: 16),
@@ -81,9 +79,8 @@ class _NewSuggestionPageState extends ConsumerState<NewSuggestionPage> {
                   ),
                 ),
                 maxLines: 5,
-                validator: (v) => v == null || v.trim().isEmpty
-                    ? l10n.requiredField
-                    : null,
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? l10n.requiredField : null,
               ),
               const SizedBox(height: 24),
               SizedBox(

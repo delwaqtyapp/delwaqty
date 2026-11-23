@@ -111,10 +111,7 @@ class _MySuggestionsPageState extends ConsumerState<MySuggestionsPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              suggestion.subject,
-              style: Theme.of(ctx).textTheme.titleLarge,
-            ),
+            Text(suggestion.subject, style: Theme.of(ctx).textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(
               suggestion.description,

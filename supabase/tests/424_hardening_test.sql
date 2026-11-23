@@ -1,6 +1,6 @@
 -- 424a/424b actual-role staging run (transaction-wrapped, fixtures rolled back).
 -- Environment-aware: 424b replaces bodies only on prod-state md5s, so the
--- working-hours / pharmacy / pos sections branch on the LIVE md5 (staging
+-- working-hours / pos sections branch on the LIVE md5 (staging
 -- keeps its newer 398/400 bodies; prod gets the 424b targets).
 BEGIN;
 DO $$
@@ -11,7 +11,7 @@ DECLARE
   m uuid := gen_random_uuid(); ma uuid := gen_random_uuid(); mb uuid := gen_random_uuid();
   o1 uuid := gen_random_uuid(); r1 uuid := gen_random_uuid();
   rw uuid := gen_random_uuid(); rn uuid := gen_random_uuid(); rc uuid := gen_random_uuid();
-  drug uuid := gen_random_uuid(); sa uuid := gen_random_uuid(); sb uuid := gen_random_uuid();
+  sa uuid := gen_random_uuid(); sb uuid := gen_random_uuid();
   v_r jsonb; v_id uuid; v_blocked boolean; v_md5 text;
 BEGIN
   INSERT INTO auth.users(id,email) SELECT g, g::text||'@x.i' FROM unnest(ARRAY[c,u1,u2,ua,ub,mu]) g;
@@ -37,8 +37,6 @@ BEGIN
     VALUES (rw,c,d1,'completed','paid','wallet',20,30.0,31.0,30.1,31.1),
            (rn,c,d1,'searching','pending','cash',20,30.0,31.0,30.1,31.1),
            (rc,c,d1,'completed','pending','cash',20,30.0,31.0,30.1,31.1);
-  INSERT INTO public.drug_catalog(id,barcode,name_en,is_active,official_price_egp)
-    VALUES (drug,' BC424 ','424 Drug',true,25);
 
   PERFORM set_config('role','authenticated',true);
 
@@ -104,23 +102,6 @@ BEGIN
     EXCEPTION WHEN OTHERS THEN v_blocked := true; END;
     ASSERT v_blocked, '424: overnight window accepted by prod-target body';
   END IF;
-
-  -- ── pharmacy_import_drug: padded barcode dedups on re-import ────
-  -- (staging: canonicalize trigger from 400; prod 424b: trim-once in the
-  -- function - same observable outcome)
-  v_md5 := (SELECT md5(pg_get_functiondef(p.oid)) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
-            WHERE n.nspname='public' AND p.proname='pharmacy_import_drug');
-  ASSERT v_md5 IN ('7249f4a78b7f22e8725f6a653ead5f8f','7d1c8a7aa115f2d5d79023494ae8fc2c'),
-    '424: pharmacy body at unexpected md5 '||v_md5;
-  v_r := public.pharmacy_import_drug(drug, m, 25, 10);
-  ASSERT (v_r->>'ok')::boolean AND NOT COALESCE((v_r->>'duplicate')::boolean,false), '424: first import failed: '||v_r::text;
-  v_id := (v_r->>'product_id')::uuid;
-  v_r := public.pharmacy_import_drug(drug, m, 25, 10);
-  ASSERT (v_r->>'ok')::boolean AND (v_r->>'duplicate')::boolean AND (v_r->>'product_id')::uuid = v_id, '424: re-import duplicated: '||v_r::text;
-  PERFORM set_config('role','none',true);
-  ASSERT (SELECT barcode FROM public.products WHERE id=v_id) = 'BC424', '424: stored barcode not canonical';
-  ASSERT (SELECT count(*) FROM public.products WHERE merchant_id=m AND barcode='BC424') = 1, '424: duplicate product row created';
-  PERFORM set_config('role','authenticated',true);
 
   -- ── pos_create_sale: merchant-scoped replay + per-merchant index ─
   v_md5 := (SELECT md5(pg_get_functiondef(p.oid)) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace

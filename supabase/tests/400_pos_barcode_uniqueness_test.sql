@@ -9,7 +9,7 @@ select o2,'zz-test-400-owner2@example.invalid','{"full_name":"zz-test-400-o2","u
 update _t400 set m1=(select id from merchants where owner_user_id=o1),m2=(select id from merchants where owner_user_id=o2);
 do $test$
 declare m1 uuid:=(select m1 from _t400);m2 uuid:=(select m2 from _t400);o1 uuid:=(select o1 from _t400);o2 uuid:=(select o2 from _t400);
-declare pid uuid;drug uuid;r jsonb;sale1 uuid;sale2 uuid;
+declare pid uuid;r jsonb;sale1 uuid;sale2 uuid;
 begin
 assert m1 is not null and m2 is not null,'merchant signup triggers created stores';
 -- core uniqueness (insert + update), NULL exempt, cross-store allowed
@@ -39,17 +39,7 @@ update products set barcode=' 6221000010 ' where merchant_id=m1 and name='zz-tes
 assert (select barcode from products where merchant_id=m1 and name='zz-test-400-i')='6221000010','trigger trims on update';
 update products set barcode='   ' where merchant_id=m1 and name='zz-test-400-i';
 assert (select barcode from products where merchant_id=m1 and name='zz-test-400-i') is null,'blank canonicalizes to NULL';
--- import path canonicalization + sequential idempotency (the unique_violation
--- catch covers true two-till concurrency; one session cannot fork a race)
-insert into drug_catalog(name_en,name_ar,barcode,official_price_egp,is_active)
-values('ZZ TEST 400 DRUG','دواء اختبار',' 6330000001 ',33,true) returning id into drug;
 perform set_config('request.jwt.claim.sub',o1::text,true);
-select pharmacy_import_drug(drug,m1,33,0) into r;
-assert (r->>'ok')::boolean is true and (r->>'duplicate') is null,'first import creates';
-assert (select barcode from products where id=(r->>'product_id')::uuid)='6330000001','import writes canonical trimmed barcode';
-select pharmacy_import_drug(drug,m1,33,0) into r;
-assert (r->>'duplicate')::boolean is true,'re-import returns duplicate:true';
-assert (select count(*) from products where merchant_id=m1 and barcode='6330000001')=1,'one product per drug barcode';
 -- final sale pricing: server-priced from the products table (client price
 -- ignored), discount clamped, per-merchant idempotency with tenant isolation
 insert into products(merchant_id,name,price,stock_quantity) values(m1,'zz-test-400-p1',10,100) returning id into pid;

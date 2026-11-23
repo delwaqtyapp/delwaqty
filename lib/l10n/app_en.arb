@@ -281,6 +281,28 @@
   "itemCount": "{count, plural, =0{No items} =1{1 item} other{{count} items}}",
   "itemCountOther": "items",
   "egp": "EGP",
+  "provTabCashier": "Cashier",
+  "provTabMenu": "Menu",
+  "provManageMenu": "Manage menu",
+  "provTabItems": "Items",
+  "provManageItems": "Manage items",
+  "provTabMedicines": "Medicines",
+  "provManageMedicines": "Manage medicines",
+  "provTabTableBookings": "Table bookings",
+  "provTabJobs": "Jobs",
+  "provServiceRequests": "Service requests",
+  "provTabLessonRequests": "Lesson requests",
+  "provTabAppointments": "Appointments",
+  "provTabMyServices": "My services",
+  "provTabMyLessons": "My lessons",
+  "provMyServicesPrices": "My services & prices",
+  "provMyLessonsPrices": "My lessons & prices",
+  "provPricesAdminManaged": "Prices are set by the admin team. Contact support to change them.",
+  "provEmptyServices": "No services are registered on your account yet",
+  "provEmptyLessons": "No lessons are registered on your account yet",
+  "provHourlyRate": "Hourly rate",
+  "provFixedPrice": "Fixed price",
+  "provPriceNotSet": "Price not set by admin yet",
   "searchRestaurants": "Search restaurants...",
   "searchProducts": "Search products...",
   "filters": "Filters",
@@ -1221,6 +1243,18 @@
   "escalationOwnerQueue": "Owner queue",
   "sanctions": "Sanctions",
   "sanctionsManagement": "Sanctions Management",
+  "generalPenalties": "General Penalties",
+  "generalPenaltiesSubtitle": "Penalties applied across the whole platform. Only the owner account can change them.",
+  "cancelSuspensionPenalty": "Repeated cancellation penalty",
+  "cancelSuspensionPenaltyDescription": "Suspends the customer account after the third cancellation in the same month (allowance: 2).",
+  "refusalSuspensionPenalty": "Repeated delivery refusal penalty",
+  "refusalSuspensionPenaltyDescription": "Suspends the customer account after the third delivery refusal in the same month (allowance: 2 warnings).",
+  "editPenalty": "Edit penalty",
+  "suspensionDaysLabel": "Suspension duration (days)",
+  "penaltyChangeReasonHint": "Reason for change (optional)",
+  "penaltyUpdated": "Penalty updated",
+  "ownerOnlyPenalties": "The general penalties list is available to the owner account only.",
+  "invalidSuspensionDays": "Duration must be between 1 and 365 days",
   "noSanctions": "No sanctions yet",
   "noSanctionsDescription": "Sanctions will appear here once issued.",
   "activeOnly": "Active only",
@@ -1362,6 +1396,8 @@
   "showingNProducts": "Showing {count} items",
   "noResultsInMerchant": "No results found",
   "discountPercent": "{percent}% off",
+  "platformCredit": "Delwaqty gift",
+  "platformCreditAutoApplied": "You have a Delwaqty gift of {amount} EGP. It is deducted automatically from this order.",
   "mostOrdered": "Most Ordered",
   "addedToCart": "Added to cart",
   "options": "Options",
@@ -1408,13 +1444,13 @@
   "selectAccountType": "Choose your account type",
   "accountTypeDescription": "Select how you will use Delwaqty",
   "userTypeCustomer": "Customer",
-  "userTypeCustomerDesc": "Order from stores, restaurants and services",
+  "userTypeCustomerDesc": "Order your food now",
   "userTypeMerchant": "Merchant",
-  "userTypeMerchantDesc": "Sell your products on the platform",
+  "userTypeMerchantDesc": "Sell your products with Delwaqty",
   "userTypeDriver": "Delivery Driver",
-  "userTypeDriverDesc": "Deliver orders to customers",
+  "userTypeDriverDesc": "Deliver orders and earn with Delwaqty",
   "userTypeProvider": "Service Provider",
-  "userTypeProviderDesc": "Offer your services to customers",
+  "userTypeProviderDesc": "Offer your services professionally",
   "uploadIdCard": "Upload National ID",
   "uploadIdCardHint": "A clear photo of your national ID",
   "uploadTradeLicense": "Upload Trade License",
@@ -1961,6 +1997,10 @@
   "userApproved": "User approved successfully",
   "userRejected": "User rejected",
   "adminAssigned": "Admin assigned",
+  "auditResourceServiceCategory": "Service category",
+  "auditCommissionRateUpdated": "Commission rate updated",
+  "walletTxCredit": "Credit",
+  "walletTxDebit": "Debit",
   "roleUpdated": "Role updated",
   "addCategory": "Add category",
   "deleteCategory": "Delete category",
@@ -2275,6 +2315,40 @@
   "enterOtpCode": "Enter 6-digit verification code",
   "verifyAndActivateAccount": "Verify & Activate Account",
   "resendWhatsAppCode": "Resend Code",
+  "whatsappYourCodeLabel": "Your verification code",
+  "copyOtpCode": "Copy code",
+  "otpCodeCopied": "Code copied",
+  "whatsappWaitingAuto": "Waiting for WhatsApp confirmation. This screen updates automatically once your message arrives.",
+  "otpExpiresIn": "Code expires in {time}",
+  "@otpExpiresIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "otpExpiredTitle": "Code expired",
+  "otpExpiredBody": "Codes last 10 minutes. Get a fresh one - it takes seconds.",
+  "requestNewOtpCode": "Get a new code",
+  "otpNotConfirmedYet": "Not confirmed yet. Make sure you sent the message from your WhatsApp ({phone}), then give it a few seconds.",
+  "@otpNotConfirmedYet": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "wrongPhoneNumberHint": "Wrong number? Close this and go back to edit it.",
+  "resendOtpAvailableIn": "Resend available in {time}",
+  "@resendOtpAvailableIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "retryRequest": "Try again",
+  "iSentItCheckNow": "I've sent it - check now",
   "phoneOrEmailOrUsername": "Phone Number or Username",
   "phoneOptionalEmailHint": "Email (Optional - auto-generated from phone if left blank)",
   "whatsappVerifiedSuccess": "Phone number verified via WhatsApp successfully!",
@@ -2606,6 +2680,14 @@
     }
   },
   "checkoutCouponInvalid": "This coupon cannot be used for this order",
+  "checkoutWalletNotAvailable": "Wallet payment is not available yet. Please pay cash on delivery, InstaPay or Vodafone Cash.",
+  "@checkoutWalletNotAvailable": {
+    "description": "Checkout RPC error mapping"
+  },
+  "checkoutCardNotAvailable": "Card payment is not available yet. Please pay cash on delivery, InstaPay or Vodafone Cash.",
+  "@checkoutCardNotAvailable": {
+    "description": "Checkout RPC error mapping"
+  },
   "@checkoutCouponInvalid": {
     "description": "Checkout RPC error mapping"
   },
@@ -2734,6 +2816,86 @@
   "@posErrInvalidQty": {
     "description": "POS: posErrInvalidQty"
   },
+  "posScanBarcode": "Scan barcode",
+  "@posScanBarcode": {
+    "description": "POS: posScanBarcode"
+  },
+  "posSearchHint": "Search name or barcode",
+  "@posSearchHint": {
+    "description": "POS: posSearchHint"
+  },
+  "posScanAdded": "Added to cart",
+  "@posScanAdded": {
+    "description": "POS: posScanAdded"
+  },
+  "posDrugFoundTitle": "Found in drug catalog",
+  "@posDrugFoundTitle": {
+    "description": "POS: posDrugFoundTitle"
+  },
+  "posDrugImportAdd": "Import & add",
+  "@posDrugImportAdd": {
+    "description": "POS: posDrugImportAdd"
+  },
+  "posQuickAddTitle": "New product for this barcode",
+  "@posQuickAddTitle": {
+    "description": "POS: posQuickAddTitle"
+  },
+  "posQuickAddCreate": "Create & add",
+  "@posQuickAddCreate": {
+    "description": "POS: posQuickAddCreate"
+  },
+  "barcodeFieldLabel": "Barcode",
+  "@barcodeFieldLabel": {
+    "description": "Product form: barcodeFieldLabel"
+  },
+  "barcodeFieldHint": "Type or scan the product barcode",
+  "@barcodeFieldHint": {
+    "description": "Product form: barcodeFieldHint"
+  },
+  "barcodeUniqueHint": "One barcode per product in this store",
+  "@barcodeUniqueHint": {
+    "description": "Product form: barcodeUniqueHint"
+  },
+  "barcodeScanToFill": "Scan to fill",
+  "@barcodeScanToFill": {
+    "description": "Product form: barcodeScanToFill"
+  },
+  "barcodeDuplicateError": "Another product in this store already uses this barcode",
+  "@barcodeDuplicateError": {
+    "description": "Product form: barcodeDuplicateError"
+  },
+  "scannerTitle": "Scan barcode",
+  "@scannerTitle": {
+    "description": "Scanner: scannerTitle"
+  },
+  "scannerTorch": "Flashlight",
+  "@scannerTorch": {
+    "description": "Scanner: scannerTorch"
+  },
+  "scannerEnterManually": "Type barcode manually",
+  "@scannerEnterManually": {
+    "description": "Scanner: scannerEnterManually"
+  },
+  "scannerManualHint": "Barcode number",
+  "@scannerManualHint": {
+    "description": "Scanner: scannerManualHint"
+  },
+  "scannerAimHint": "Point the camera at the product barcode",
+  "@scannerAimHint": {
+    "description": "Scanner: scannerAimHint"
+  },
+  "scannerPermissionNeeded": "Camera access is needed to scan barcodes. You can still type the barcode manually.",
+  "@scannerPermissionNeeded": {
+    "description": "Scanner: scannerPermissionNeeded"
+  },
+  "scannerGrantPermission": "Allow camera",
+  "@scannerGrantPermission": {
+    "description": "Scanner: scannerGrantPermission"
+  },
+  "scannerOpenSettings": "Open settings",
+  "@scannerOpenSettings": {
+    "description": "Scanner: scannerOpenSettings"
+  },
   "productModifierRequiredError": "Please select the required options first",
   "@productModifierRequiredError": {
     "description": "Shown when required product modifier groups have no selection"
@@ -2793,5 +2955,115 @@
   "appInvitationDownloading": "Downloading securely...",
   "appInvitationInstallReady": "The verified download is ready. Follow the installation prompt.",
   "appInvitationDownloadFailed": "Download could not start. Check your connection and installation permission, then retry.",
-  "appInvitationsFooter": "Downloading an app does not grant a role. Access follows your current account approval. Android installation permission may be required."
+  "appInvitationsFooter": "Downloading an app does not grant a role. Access follows your current account approval. Android installation permission may be required.",
+  "adminProviderPricing": "Provider Pricing",
+  "adminProviderPricingDesc": "Set hourly and fixed rates for home-service providers and category defaults",
+  "providerPricingTabProviders": "Providers",
+  "providerPricingTabCategories": "Category defaults",
+  "providerPricingSearchHint": "Search by name or city",
+  "providerPricingAllCategories": "All categories",
+  "providerPricingHourly": "Hourly rate",
+  "providerPricingFixedMin": "Fixed price from",
+  "providerPricingFixedMax": "Fixed price to",
+  "providerPricingNote": "Note (optional)",
+  "providerPricingCustom": "Custom",
+  "providerPricingCategoryDefault": "Category default",
+  "providerPricingPlatformDefault": "Platform default",
+  "providerPricingNoFixed": "No fixed price",
+  "providerPricingEditTitle": "Edit pricing",
+  "providerPricingSaved": "Pricing updated",
+  "providerPricingFailed": "Could not update pricing",
+  "providerPricingEmpty": "No providers in your scope",
+  "providerPricingReadOnlyHint": "Category defaults can be changed by the owner or country admins only",
+  "providerPricingLeaveEmpty": "Leave empty to use the default",
+  "providerMyPricing": "My pricing",
+  "providerMyPricingAdminNote": "Prices are set by the administration. Contact support to request a change.",
+  "providerMyPricingEmpty": "No service profiles yet",
+  "closesNextDay": "Closes next day",
+  "open24Hours": "Open 24 hours",
+  "cashToCollectTitle": "Cash to collect",
+  "@cashToCollectTitle": {
+    "description": "عنوان بطاقة التحصيل في تطبيق الكابتن"
+  },
+  "cashToCollectBody": "Delivered. Collect {amount} from the customer, then confirm.",
+  "@cashToCollectBody": {
+    "description": "جسم بطاقة التحصيل",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "collectCashCta": "Cash collected",
+  "@collectCashCta": {
+    "description": "زر تم التحصيل"
+  },
+  "cashCollectedTitle": "Cash collected",
+  "@cashCollectedTitle": {
+    "description": "تأكيد التحصيل"
+  },
+  "cashCollectedBody": "Collected {amount}. It shows in your settlement.",
+  "@cashCollectedBody": {
+    "description": "تأكيد تفاصيل التحصيل",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "rateDriverAfterCollection": "You can rate the driver once the cash is collected.",
+  "cashCollectionStateError": "Could not load the collection state. Check the connection and retry.",
+  "driverReviewHint": "Write your review of the captain (optional)",
+  "providerPricingInvalidInput": "Enter a valid number within the allowed range",
+  "providerPricingShowingOf": "Showing {shown} of {total}",
+  "@providerPricingShowingOf": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "providerPricingLoadMore": "Load more",
+  "otaTitle": "A new update is available",
+  "otaIntro": "New improvements are ready to install.",
+  "otaIntroHint": "The update will be downloaded and installed without reinstalling the app.",
+  "otaDownloading": "Downloading…",
+  "otaReadyTitle": "The update is ready to install",
+  "otaReadyBody": "The update has been downloaded. Tap Install to finish.",
+  "otaPermissionBody": "Allow Delwaqty to install updates in the settings screen, then come back. The installation will continue by itself and the download is kept.",
+  "otaDownloadFailed": "Could not download the update. Check your connection and try again.",
+  "otaInstallFailed": "Could not start the installation. Tap Install to try again.",
+  "otaChecksumFailed": "The downloaded update could not be verified. Tap Update now to download it again.",
+  "otaLater": "Later",
+  "otaUpdateNow": "Update now",
+  "otaInstall": "Install",
+  "otaRetry": "Try again",
+  "whatsappLaunchUnavailable": "WhatsApp could not open. Copy the code and send it manually.",
+  "whatsappNotConfigured": "WhatsApp verification is not available yet. You can still sign in with Google.",
+  "approved": "Approved",
+  "settled": "Settled",
+  "collected": "Collected",
+  "outstanding": "Outstanding",
+  "underReview": "Under Review",
+  "failed": "Failed",
+  "reconciliation": "Reconciliation",
+  "totalCollected": "Total Collected",
+  "approvedSettlements": "Approved Settlements",
+  "closingOutstanding": "Closing Outstanding",
+  "collectionLedger": "Collection Ledger",
+  "noCollections": "No collections",
+  "noCollectionsYet": "No received top-ups in this region yet.",
+  "platformCollectionsAllRegions": "Platform Collections (all regions)",
+  "platformSettlementsAllRegions": "Platform Settlements (all regions)",
+  "graceLimitLabel": "Limit",
+  "graceUsedLabel": "Used",
+  "graceRemainingLabel": "Remaining",
+  "revokeSanctionConfirm": "Revoke {type} for {role}?",
+  "adminRegionScopeTitle": "Region Scope",
+  "adminRegionSelectUser": "Select an admin user to manage scope",
+  "adminRegionScopeSubtitle": "Assign region scope to admin-tier users at any level (governorate, markaz, district, village, ...). An admin with no assignments is global.",
+  "adminManagement": "Admin management"
 }

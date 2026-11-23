@@ -52,14 +52,18 @@ class NavPillButton extends StatelessWidget {
               if (showLabel) const SizedBox(width: 8),
             ],
             if (showLabel)
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isSelected
+                        ? colorScheme.primary
+                        : colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
           ],

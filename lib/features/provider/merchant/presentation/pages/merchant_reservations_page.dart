@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
+import 'package:delwaqty/features/provider/services/presentation/providers/provider_service_providers.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/customer/restaurant/restaurant_module.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/entities/reservation.dart';
@@ -30,28 +31,26 @@ final _reservationsProvider = FutureProvider<List<Reservation>>((ref) async {
   return repo.getReservations(merchantId, status: status);
 });
 
-final _serviceBookingsProvider = FutureProvider<List<Map<String, dynamic>>>((
-  ref,
-) async {
-  SupabaseClient client;
-  try {
-    client = ref.watch(supabaseClientProvider);
-  } catch (_) {
-    client = Supabase.instance.client;
-  }
-  final spIdRaw = await client.rpc('resolve_my_service_provider');
-  final spId = spIdRaw as String? ?? '';
-  if (spId.isEmpty) return const <Map<String, dynamic>>[];
-  final res = await client
-      .from('service_bookings')
-      .select()
-      .eq('provider_id', spId)
-      .order('created_at', ascending: false);
-  return (res as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
-});
+final _serviceBookingsProvider = providerServiceBookingsProvider;
+
+/// Which reservation lists the page shows.
+enum ReservationsMode { both, tables, services }
 
 class MerchantReservationsPage extends ConsumerStatefulWidget {
-  const MerchantReservationsPage({super.key});
+  const MerchantReservationsPage({
+    super.key,
+    this.mode = ReservationsMode.both,
+    this.title,
+    this.showBack = true,
+  });
+
+  final ReservationsMode mode;
+
+  /// Optional per-account-type title (see ProviderLabels).
+  final String? title;
+
+  /// False when the page is a bottom-tab root.
+  final bool showBack;
 
   @override
   ConsumerState<MerchantReservationsPage> createState() =>
@@ -63,14 +62,22 @@ class _MerchantReservationsPageState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final reservationsAsync = ref.watch(_reservationsProvider);
-    final serviceBookingsAsync = ref.watch(_serviceBookingsProvider);
+    final mode = widget.mode;
+    final showTables = mode != ReservationsMode.services;
+    final showServices = mode != ReservationsMode.tables;
+    final reservationsAsync = showTables
+        ? ref.watch(_reservationsProvider)
+        : const AsyncValue<List<Reservation>>.data([]);
+    final serviceBookingsAsync = showServices
+        ? ref.watch(_serviceBookingsProvider)
+        : const AsyncValue<List<Map<String, dynamic>>>.data([]);
 
     return DefaultTabController(
-      length: 2,
+      length: (showTables ? 1 : 0) + (showServices ? 1 : 0),
       child: Scaffold(
         appBar: AppBar(
-          title: Text(l10n.reservations),
+          automaticallyImplyLeading: widget.showBack,
+          title: Text(widget.title ?? l10n.reservations),
           actions: [
             IconButton(
               tooltip: l10n.refresh,
@@ -81,15 +88,24 @@ class _MerchantReservationsPageState
               },
             ),
           ],
-          bottom: TabBar(
-            tabs: [
-              Tab(text: l10n.tableReservationsTitle),
-              Tab(text: l10n.serviceBookingsTitle),
-            ],
-          ),
+          bottom: mode == ReservationsMode.both
+              ? TabBar(
+                  // Long Arabic tab labels must scroll instead of
+                  // clipping at narrow widths.
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  tabs: [
+                    Tab(text: l10n.tableReservationsTitle),
+                    Tab(text: l10n.serviceBookingsTitle),
+                  ],
+                )
+              : null,
         ),
         body: TabBarView(
-          children: [
+          physics: mode == ReservationsMode.both
+              ? null
+              : const NeverScrollableScrollPhysics(),
+          children: _pick([
             Column(
               children: [
                 _buildFilterChips(ref, l10n),
@@ -215,10 +231,21 @@ class _MerchantReservationsPageState
                 );
               },
             ),
-          ],
+          ]),
         ),
       ),
     );
+  }
+
+  List<Widget> _pick(List<Widget> both) {
+    switch (widget.mode) {
+      case ReservationsMode.both:
+        return both;
+      case ReservationsMode.tables:
+        return [both.first];
+      case ReservationsMode.services:
+        return [both.last];
+    }
   }
 
   Widget _buildFilterChips(WidgetRef ref, AppLocalizations l10n) {
@@ -490,32 +517,45 @@ class _ReservationCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.sm),
-            Row(
+            // Wrap: on narrow screens the date/time drops under the
+            // party size instead of overflowing right.
+            Wrap(
+              spacing: AppSpacing.lg,
+              runSpacing: 4,
               children: [
-                Icon(
-                  Icons.people_outline,
-                  size: 16,
-                  color: theme.colorScheme.onSurfaceVariant,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.people_outline,
+                      size: 16,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      l10n.guestsCount(reservation.partySize),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  l10n.guestsCount(reservation.partySize),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.lg),
-                Icon(
-                  Icons.calendar_today_outlined,
-                  size: 16,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '$dateStr · $timeStr',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.calendar_today_outlined,
+                      size: 16,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$dateStr · $timeStr',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

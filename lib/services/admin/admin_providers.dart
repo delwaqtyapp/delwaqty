@@ -5,6 +5,7 @@ import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 import 'package:delwaqty/data/repositories/admin_repository.dart';
 import 'package:delwaqty/services/admin/admin_service.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // ─── Repository & Service Providers ────────────────────────
 
@@ -176,6 +177,29 @@ final commissionRulesProvider = FutureProvider<Map<String, dynamic>>((
   final response = await client.rpc('list_commission_rules');
   return Map<String, dynamic>.from(response as Map);
 });
+
+// ─── Provider Pricing (397) ──────────────────────────────────
+
+/// Signed-in user id, streamed so dependents rebuild on account switch.
+/// The pricing providers below watch it: a switch refetches under the new
+/// account instead of showing the previous account's data.
+final adminAuthUidProvider = StreamProvider.autoDispose<String?>((ref) {
+  return Supabase.instance.client.auth.onAuthStateChange.map(
+    (event) => event.session?.user.id,
+  );
+});
+
+final categoryPricingProvider =
+    FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
+      ref.watch(adminAuthUidProvider);
+      final client = ref.watch(supabaseClientProvider);
+      final response = await client.rpc('admin_list_category_pricing');
+      return Map<String, dynamic>.from(response as Map);
+    });
+
+// The paginated provider-pricing list is fetched imperatively by
+// AdminProviderPricingPage (fixed page size, increasing offset) and
+// cleared/refetched on account switch via adminAuthUidProvider.
 
 // ─── Pending Approval Requests (052) ───────────────────────
 

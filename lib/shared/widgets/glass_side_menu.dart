@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/core/module/shell_customization.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/core/module/feature_registry.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
@@ -36,7 +37,12 @@ class GlassSideMenuController {
 
     final l10n = AppLocalizations.of(context);
     final authState = ref.read(authStateProvider);
-    final entries = drawerEntries ?? FeatureRegistry.instance.allDrawerEntries;
+    final drawerFilter = ref.read(drawerEntryFilterProvider);
+    final allEntries =
+        drawerEntries ?? FeatureRegistry.instance.allDrawerEntries;
+    final entries = drawerFilter == null
+        ? allEntries
+        : allEntries.where((e) => drawerFilter(e.id)).toList();
 
     final overlay = Overlay.of(context, rootOverlay: true);
 

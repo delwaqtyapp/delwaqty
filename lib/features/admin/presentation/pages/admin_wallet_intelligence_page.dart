@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/admin/presentation/providers/platform_intelligence_providers.dart';
+import 'package:delwaqty/features/admin/presentation/widgets/intelligence_stat_grid.dart';
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
@@ -90,54 +91,35 @@ class AdminWalletIntelligencePage extends ConsumerWidget {
     AppLocalizations l10n,
     ColorScheme cs,
   ) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth > 900
-            ? 4
-            : constraints.maxWidth > 600
-            ? 4
-            : 2;
-        return GridView.count(
-          crossAxisCount: crossAxisCount,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: 1.4,
-          children: [
-            _SummaryCard(
-              title: l10n.wallet,
-              value: data.walletCount.toString(),
-              icon: Icons.account_balance_wallet_outlined,
-              color: const Color(0xFFAF52DE),
-              cs: cs,
-            ),
-            _SummaryCard(
-              title: l10n.transactions,
-              value: data.totalTransactions.toString(),
-              icon: Icons.receipt_long_rounded,
-              color: const Color(0xFF4A90D9),
-              cs: cs,
-            ),
-            _SummaryCard(
-              title: l10n.totalLiability,
-              value:
-                  '${l10n.currencySymbol} ${data.totalLiability.toStringAsFixed(0)}',
-              icon: Icons.account_balance_outlined,
-              color: const Color(0xFFFF3B30),
-              cs: cs,
-            ),
-            _SummaryCard(
-              title: l10n.availableBalance,
-              value:
-                  '${l10n.currencySymbol} ${data.avgBalance.toStringAsFixed(0)}',
-              icon: Icons.savings_outlined,
-              color: const Color(0xFF34C759),
-              cs: cs,
-            ),
-          ],
-        );
-      },
+    return IntelligenceStatGrid(
+      wideColumns: 4,
+      stats: [
+        IntelligenceStat(
+          title: l10n.wallet,
+          value: data.walletCount.toString(),
+          icon: Icons.account_balance_wallet_outlined,
+          color: const Color(0xFFAF52DE),
+        ),
+        IntelligenceStat(
+          title: l10n.transactions,
+          value: data.totalTransactions.toString(),
+          icon: Icons.receipt_long_rounded,
+          color: const Color(0xFF4A90D9),
+        ),
+        IntelligenceStat(
+          title: l10n.totalLiability,
+          value:
+              '${l10n.currencySymbol} ${data.totalLiability.toStringAsFixed(0)}',
+          icon: Icons.account_balance_outlined,
+          color: const Color(0xFFFF3B30),
+        ),
+        IntelligenceStat(
+          title: l10n.availableBalance,
+          value: '${l10n.currencySymbol} ${data.avgBalance.toStringAsFixed(0)}',
+          icon: Icons.savings_outlined,
+          color: const Color(0xFF34C759),
+        ),
+      ],
     );
   }
 
@@ -174,64 +156,6 @@ class AdminWalletIntelligencePage extends ConsumerWidget {
           ),
         );
       }),
-    );
-  }
-}
-
-class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.color,
-    required this.cs,
-  });
-
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color color;
-  final ColorScheme cs;
-
-  @override
-  Widget build(BuildContext context) {
-    return PremiumCard(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  value,
-                  style: Theme.of(context).textTheme.titleLarge
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.labelSmall
-                    ?.copyWith(color: cs.onSurfaceVariant),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }

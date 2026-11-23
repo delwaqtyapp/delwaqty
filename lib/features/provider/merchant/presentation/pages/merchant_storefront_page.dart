@@ -8,6 +8,8 @@ import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
 import 'package:delwaqty/features/customer/location/presentation/widgets/smart_map_picker_sheet.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/widgets/schedule_window_note.dart';
+import 'package:delwaqty/features/provider/capability/presentation/widgets/provider_category_picker.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/app_shell.dart';
@@ -193,17 +195,10 @@ class MerchantStorefrontPage extends ConsumerStatefulWidget {
 
 class _MerchantStorefrontPageState
     extends ConsumerState<MerchantStorefrontPage> {
-  static const _storeCategories = <String>[
-    'restaurant',
-    'grocery',
-    'pharmacy',
-    'bakery',
-    'cafe',
-    'electronics',
-    'fashion',
-    'home_services',
-    'other',
-  ];
+  /// Shop types plus every service category (generic for the provider
+  /// role): a doctor, nurse, teacher or barber storefront keeps its real
+  /// type. DB keys unchanged.
+  static const _storeCategories = kStorefrontProviderCategories;
 
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
@@ -251,9 +246,9 @@ class _MerchantStorefrontPageState
     if (_hydrated) return;
     _hydrated = true;
     _name.text = data.name;
-    _storeType = _storeCategories.contains(data.type)
-        ? data.type
-        : 'restaurant';
+    // Preserve the account's real type even when it is outside the known
+    // list: coercing it to a shop type silently re-labelled professionals.
+    _storeType = data.type.trim().isNotEmpty ? data.type : 'restaurant';
     _description.text = data.description ?? '';
     _phone.text = data.phone ?? '';
     _address.text = data.address ?? '';
@@ -268,28 +263,8 @@ class _MerchantStorefrontPageState
         : '${data.deliveryTimeMin}';
   }
 
-  String _categoryLabel(AppLocalizations l10n, String category) {
-    switch (category) {
-      case 'restaurant':
-        return l10n.restaurant;
-      case 'grocery':
-        return l10n.grocery;
-      case 'pharmacy':
-        return l10n.pharmacy;
-      case 'bakery':
-        return l10n.bakery;
-      case 'cafe':
-        return l10n.cafe;
-      case 'electronics':
-        return l10n.electronics;
-      case 'fashion':
-        return l10n.fashion;
-      case 'home_services':
-        return l10n.homeServices;
-      default:
-        return l10n.other;
-    }
-  }
+  String _categoryLabel(AppLocalizations l10n, String category) =>
+      providerCategoryLabel(l10n, category);
 
   Future<void> _pickAndUploadPhoto({required bool isLogo}) async {
     if (_uploadingLogo || _uploadingCover) return;
@@ -527,14 +502,21 @@ class _MerchantStorefrontPageState
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    items: _storeCategories
-                        .map(
-                          (cat) => DropdownMenuItem<String>(
-                            value: cat,
-                            child: Text(_categoryLabel(l10n, cat)),
-                          ),
-                        )
-                        .toList(),
+                    items:
+                        [
+                              ..._storeCategories,
+                              // A preserved out-of-list type must also be an item,
+                              // or the dropdown assertion fires.
+                              if (!_storeCategories.contains(_storeType))
+                                _storeType,
+                            ]
+                            .map(
+                              (cat) => DropdownMenuItem<String>(
+                                value: cat,
+                                child: Text(_categoryLabel(l10n, cat)),
+                              ),
+                            )
+                            .toList(),
                     onChanged: (v) {
                       if (v != null) setState(() => _storeType = v);
                     },
@@ -765,50 +747,21 @@ class _MerchantStorefrontPageState
     ];
     return [
       for (var i = 0; i < _hours.length; i++)
-        Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: SwitchListTile(
-            value: !_hours[i].closed,
-            title: Text(dayNames[_hours[i].day]),
-            subtitle: _hours[i].closed
-                ? null
-                : Row(
-                    children: [
-                      Expanded(
-                        child: _timeField(
-                          value: _hours[i].open,
-                          onChanged: (v) => setState(() {
-                            _hours[i] = _hours[i].copyWith(
-                              open: v,
-                              closed: false,
-                            );
-                            _hoursDirty = true;
-                          }),
-                        ),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: Text('—'),
-                      ),
-                      Expanded(
-                        child: _timeField(
-                          value: _hours[i].close,
-                          onChanged: (v) => setState(() {
-                            _hours[i] = _hours[i].copyWith(
-                              close: v,
-                              closed: false,
-                            );
-                            _hoursDirty = true;
-                          }),
-                        ),
-                      ),
-                    ],
-                  ),
-            onChanged: (open) => setState(() {
-              _hours[i] = _hours[i].copyWith(closed: !open);
-              _hoursDirty = true;
-            }),
-          ),
+        WorkingHoursDayCard(
+          dayName: dayNames[_hours[i].day],
+          day: _hours[i],
+          onToggle: (open) => setState(() {
+            _hours[i] = _hours[i].copyWith(closed: !open);
+            _hoursDirty = true;
+          }),
+          onOpenChanged: (v) => setState(() {
+            _hours[i] = _hours[i].copyWith(open: v, closed: false);
+            _hoursDirty = true;
+          }),
+          onCloseChanged: (v) => setState(() {
+            _hours[i] = _hours[i].copyWith(close: v, closed: false);
+            _hoursDirty = true;
+          }),
         ),
     ];
   }
@@ -838,18 +791,106 @@ class _MerchantStorefrontPageState
       ),
     );
   }
+}
 
-  TimeOfDay _parseTimeOfDay(String hhmm) {
+/// One day of the weekly schedule: the day name and its toggle on the
+/// first line, the open/close fields on a full-width row below it, so
+/// the values stay visible at narrow widths and large text scales.
+class WorkingHoursDayCard extends StatelessWidget {
+  const WorkingHoursDayCard({
+    super.key,
+    required this.dayName,
+    required this.day,
+    required this.onToggle,
+    required this.onOpenChanged,
+    required this.onCloseChanged,
+  });
+
+  final String dayName;
+  final WorkingHoursDay day;
+  final ValueChanged<bool> onToggle;
+  final ValueChanged<String> onOpenChanged;
+  final ValueChanged<String> onCloseChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    dayName,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ),
+                Switch(value: !day.closed, onChanged: onToggle),
+              ],
+            ),
+            if (!day.closed) ...[
+              const SizedBox(height: 4),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  // At narrow widths / large text scales the two fields
+                  // stack so the full HH:MM is never cut off.
+                  final open = _HoursTimeField(
+                    value: day.open,
+                    onChanged: onOpenChanged,
+                  );
+                  final close = _HoursTimeField(
+                    value: day.close,
+                    onChanged: onCloseChanged,
+                  );
+                  if (constraints.maxWidth < 360) {
+                    return Column(
+                      children: [open, const SizedBox(height: 8), close],
+                    );
+                  }
+                  return Row(
+                    children: [
+                      Expanded(child: open),
+                      const SizedBox(width: 12),
+                      Expanded(child: close),
+                    ],
+                  );
+                },
+              ),
+              // close <= open is valid: equal times mean open 24
+              // hours, a close before the open is an overnight
+              // window that ends on the next calendar day.
+              ScheduleWindowNote(
+                open: day.open,
+                close: day.close,
+                closed: day.closed,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HoursTimeField extends StatelessWidget {
+  const _HoursTimeField({required this.value, required this.onChanged});
+
+  final String value;
+  final ValueChanged<String> onChanged;
+
+  static TimeOfDay _parse(String hhmm) {
     final parts = hhmm.split(':');
     final h = parts.isNotEmpty ? (int.tryParse(parts[0]) ?? 9) : 9;
     final m = parts.length > 1 ? (int.tryParse(parts[1]) ?? 0) : 0;
     return TimeOfDay(hour: h.clamp(0, 23), minute: m.clamp(0, 59));
   }
 
-  Widget _timeField({
-    required String value,
-    required ValueChanged<String> onChanged,
-  }) {
+  @override
+  Widget build(BuildContext context) {
     return TextFormField(
       key: ValueKey(value),
       readOnly: true,
@@ -867,9 +908,9 @@ class _MerchantStorefrontPageState
       onTap: () async {
         final picked = await showTimePicker(
           context: context,
-          initialTime: _parseTimeOfDay(value),
+          initialTime: _parse(value),
         );
-        if (picked != null && mounted) {
+        if (picked != null && context.mounted) {
           final formatted =
               '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
           onChanged(formatted);

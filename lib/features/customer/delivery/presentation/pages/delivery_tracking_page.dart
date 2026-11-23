@@ -1,3 +1,4 @@
+import 'package:delwaqty/shared/widgets/readable_fit_text.dart';
 import 'package:delwaqty/shared/widgets/delivery_handoff_button.dart';
 import 'package:delwaqty/shared/widgets/delivery_incident_dialog.dart';
 
@@ -17,8 +18,8 @@ import 'package:delwaqty/features/customer/ride/presentation/widgets/ride_map.da
 import 'package:delwaqty/features/customer/ride/domain/entities/ride.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/driver_rating_bar.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
-import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class DeliveryTrackingPage extends ConsumerStatefulWidget {
@@ -82,10 +83,16 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
         data: (ride) =>
             _TrackingBody(ride: ride, deliveryId: widget.deliveryId),
       ),
+      // Rating opens once the delivery is completed — and, for cash
+      // deliveries, only after the captain's collection stamp lands
+      // (migration 392), the same rule the ride_ratings RLS uses. Non-cash
+      // completion is unchanged.
       bottomNavigationBar:
           rideAsync.value != null &&
-              rideAsync.value!.status == RideStatus.completed
-          ? _RatingBar(
+              rideAsync.value!.status == RideStatus.completed &&
+              (rideAsync.value!.paymentMethod != 'cash' ||
+                  rideAsync.value!.cashCollectedAt != null)
+          ? DriverRatingBar(
               rating: _rating,
               onRatingChanged: (r) => setState(() => _rating = r),
               controller: _commentController,
@@ -584,21 +591,21 @@ class _ReceiptCard extends StatelessWidget {
               label: l10n.deliveryFee,
               value: l10n.amountWithCurrency(
                 (ride.baseFare ?? 0).toStringAsFixed(2),
-                ride.currency,
+                _localizedCurrency(l10n, ride.currency),
               ),
             ),
             if (ride.discountAmount > 0)
               _ReceiptRow(
                 label: l10n.offers,
                 value:
-                    '-${l10n.amountWithCurrency(ride.discountAmount.toStringAsFixed(2), ride.currency)}',
+                    '-${l10n.amountWithCurrency(ride.discountAmount.toStringAsFixed(2), _localizedCurrency(l10n, ride.currency))}',
               ),
             const Divider(),
             _ReceiptRow(
               label: l10n.subtotal,
               value: l10n.amountWithCurrency(
                 (ride.fare ?? 0).toStringAsFixed(2),
-                ride.currency,
+                _localizedCurrency(l10n, ride.currency),
               ),
               bold: true,
             ),
@@ -624,26 +631,27 @@ class _ReceiptRow extends StatelessWidget {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
+      // Money stays fully readable: the label wraps, the amount scales
+      // down on its own bounded slot instead of ellipsizing.
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Flexible(
+          Expanded(
+            flex: 3,
             child: Text(
               label,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: bold ? FontWeight.bold : FontWeight.normal,
               ),
-              overflow: TextOverflow.ellipsis,
             ),
           ),
           const SizedBox(width: 8),
           Flexible(
-            child: Text(
+            flex: 2,
+            child: ReadableFitText(
               value,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: bold ? FontWeight.bold : FontWeight.normal,
               ),
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -652,76 +660,5 @@ class _ReceiptRow extends StatelessWidget {
   }
 }
 
-class _RatingBar extends StatelessWidget {
-  const _RatingBar({
-    required this.rating,
-    required this.onRatingChanged,
-    required this.controller,
-    required this.onSubmit,
-  });
-
-  final int rating;
-  final ValueChanged<int> onRatingChanged;
-  final TextEditingController controller;
-  final VoidCallback onSubmit;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.onSurface
-                .withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(5, (i) {
-                final star = i + 1;
-                return IconButton(
-                  tooltip: l10n.rateDriver,
-                  icon: Icon(
-                    star <= rating
-                        ? Icons.star_rounded
-                        : Icons.star_outline_rounded,
-                    color: star <= rating ? AppColors.rating : null,
-                    size: 36,
-                  ),
-                  onPressed: () => onRatingChanged(star),
-                );
-              }),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: controller,
-              decoration: InputDecoration(
-                hintText: l10n.trackingUpdatesHint,
-                border: const OutlineInputBorder(),
-              ),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: rating > 0 ? onSubmit : null,
-                child: Text(l10n.submit),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+String _localizedCurrency(AppLocalizations l10n, String code) =>
+    code == 'EGP' ? l10n.egp : code;

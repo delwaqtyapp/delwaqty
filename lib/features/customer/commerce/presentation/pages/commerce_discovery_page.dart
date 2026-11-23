@@ -279,7 +279,9 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
                         ),
                         const SizedBox(height: 8),
                         SizedBox(
-                          height: 250,
+                          // Grow with the text scale so the card content
+                          // below the image never clips.
+                          height: 250 * _textScaleFactor(context),
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
                             itemCount: filteredFeatured.length,
@@ -405,7 +407,9 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
                       crossAxisCount: ResponsiveGrid.columns(context),
                       mainAxisSpacing: 12,
                       crossAxisSpacing: 12,
-                      childAspectRatio: 0.74,
+                      // Taller cells at large text scales so the card
+                      // content below the image never clips.
+                      childAspectRatio: 0.74 / _textScaleFactor(context),
                     ),
                     itemCount: filtered.length,
                     itemBuilder: (context, index) {
@@ -651,7 +655,12 @@ class _MostRequestedCard extends StatelessWidget {
             top: 10,
             left: 12,
             right: 12,
-            child: Row(
+            // Wrap: the badges drop to a second line instead of
+            // overflowing the card at large text scales.
+            child: Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              alignment: WrapAlignment.spaceBetween,
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -670,17 +679,21 @@ class _MostRequestedCard extends StatelessWidget {
                     children: [
                       Text(typeEmoji, style: const TextStyle(fontSize: 12)),
                       const SizedBox(width: 4),
-                      Text(
-                        typeLabel,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 160),
+                        child: Text(
+                          typeLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Spacer(),
                 if (merchant.isOpenNow)
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -699,7 +712,6 @@ class _MostRequestedCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                if (merchant.isOpenNow) const SizedBox(width: 6),
                 if (merchant.isVerified)
                   const SizedBox(
                     width: 24,
@@ -739,7 +751,9 @@ class _MostRequestedCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 6),
-                Row(
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -890,3 +904,6 @@ class _ImageFallback extends StatelessWidget {
     );
   }
 }
+
+double _textScaleFactor(BuildContext context) =>
+    MediaQuery.textScalerOf(context).scale(1.0).clamp(1.0, 1.8);

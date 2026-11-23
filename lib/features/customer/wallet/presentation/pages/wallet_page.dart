@@ -293,25 +293,33 @@ class _TransactionTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    _formatDate(transaction.createdAt),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Text(
+                      _formatDate(transaction.createdAt),
+                      maxLines: 1,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
             Flexible(
-              child: Text(
-                '${isCredit ? '+' : '-'}${l10n.amountWithCurrency(transaction.amount.toStringAsFixed(2), l10n.currencySymbol)}',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: isCredit
-                      ? AppColors.successLight
-                      : theme.colorScheme.error,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  '${isCredit ? '+' : '-'}${l10n.amountWithCurrency(transaction.amount.toStringAsFixed(2), l10n.currencySymbol)}',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: isCredit
+                        ? AppColors.successLight
+                        : theme.colorScheme.error,
+                  ),
+                  maxLines: 1,
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

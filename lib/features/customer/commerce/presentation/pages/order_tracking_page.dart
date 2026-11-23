@@ -1,10 +1,14 @@
+import 'package:delwaqty/shared/widgets/readable_fit_text.dart';
 import 'package:delwaqty/shared/widgets/delivery_handoff_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/order.dart';
+import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/driver_rating_bar.dart';
 
 final _orderFutureProvider = FutureProvider.family<Order?, String>((
   ref,
@@ -73,6 +77,12 @@ class _OrderTrackingPageState extends ConsumerState<OrderTrackingPage>
                   DeliveryHandoffButton(orderId: order.id, pickup: false),
                 const SizedBox(height: 24),
                 _EstimatedArrivalSection(order: order),
+                // Cash handoff (migration 392): after the captain collected
+                // the cash, the customer rates the delivery driver here.
+                if (order.status == OrderStatus.delivered) ...[
+                  const SizedBox(height: 24),
+                  DriverRatingSection(orderId: order.id),
+                ],
                 if (const {
                   OrderStatus.confirmed,
                   OrderStatus.preparing,
@@ -431,18 +441,22 @@ class _OrderDetailsCard extends StatelessWidget {
                 (item) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
+                        flex: 3,
                         child: Text(
                           '${item.quantity}x ${item.productName}',
                           style: textTheme.bodyMedium,
                         ),
                       ),
-                      Text(
-                        '${item.totalPrice.toStringAsFixed(2)} ${l10n.egp}',
-                        style: textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
+                      const SizedBox(width: 8),
+                      Flexible(
+                        flex: 2,
+                        child: ReadableFitText(
+                          '${item.totalPrice.toStringAsFixed(2)} ${l10n.egp}',
+                          style: textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ],
@@ -499,19 +513,27 @@ class _PriceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Label keeps the flexible share; the value scales down on its own
+    // bounded slot so the two never collide at large text scales.
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: textTheme.bodyMedium?.copyWith(
-            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+        Expanded(
+          flex: 3,
+          child: Text(
+            label,
+            style: textTheme.bodyMedium?.copyWith(
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
         ),
-        Text(
-          value,
-          style: textTheme.bodyMedium?.copyWith(
-            fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+        const SizedBox(width: 8),
+        Flexible(
+          flex: 2,
+          child: ReadableFitText(
+            value,
+            style: textTheme.bodyMedium?.copyWith(
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+            ),
           ),
         ),
       ],
@@ -673,6 +695,143 @@ class _DriverSection extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Post-delivery driver rating (migration 392). The commerce order itself
+/// carries no rating UI; the customer rates the actual linked delivery
+/// driver — stars plus a written comment — once the delivery is completed.
+/// Cash orders wait for the captain's "تم التحصيل" collection stamp.
+class DriverRatingSection extends ConsumerStatefulWidget {
+  const DriverRatingSection({super.key, required this.orderId});
+
+  final String orderId;
+
+  @override
+  ConsumerState<DriverRatingSection> createState() =>
+      _DriverRatingSectionState();
+}
+
+class _DriverRatingSectionState extends ConsumerState<DriverRatingSection> {
+  int _rating = 0;
+  bool _submitted = false;
+  bool _submitting = false;
+  final _commentController = TextEditingController();
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit(String rideId, String driverId) async {
+    if (_rating == 0 || _submitting) return;
+    setState(() => _submitting = true);
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
+    try {
+      await ref
+          .read(deliveryRepositoryProvider)
+          .rateDelivery(
+            rideId,
+            driverId,
+            _rating,
+            comment: _commentController.text.isEmpty
+                ? null
+                : _commentController.text,
+          );
+      if (mounted) setState(() => _submitted = true);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.success)));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final rideAsync = ref.watch(orderDeliveryRideProvider(widget.orderId));
+    return rideAsync.maybeWhen(
+      data: (ride) {
+        if (ride == null || !ride.isCompleted || ride.driverId == null) {
+          return const SizedBox.shrink();
+        }
+        if (!ride.rateable) {
+          // Cash order awaiting the captain's collection stamp.
+          return AnimatedFadeIn(
+            delay: const Duration(milliseconds: 200),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    const Icon(Icons.payments_outlined),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(l10n.rateDriverAfterCollection)),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+        if (_submitted) {
+          return AnimatedFadeIn(
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.check_circle_rounded,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(l10n.reviewSubmitted)),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+        return AnimatedFadeIn(
+          delay: const Duration(milliseconds: 200),
+          child: Card(
+            key: const ValueKey('driverRatingCard'),
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: Text(
+                    l10n.rateDriverPrompt,
+                    style: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                if (ride.driverName != null && ride.driverName!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                    child: Text(
+                      ride.driverName!,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                DriverRatingBar(
+                  rating: _rating,
+                  onRatingChanged: (r) => setState(() => _rating = r),
+                  controller: _commentController,
+                  onSubmit: () => _submit(ride.id, ride.driverId!),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      orElse: () => const SizedBox.shrink(),
     );
   }
 }

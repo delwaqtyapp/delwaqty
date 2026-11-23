@@ -277,6 +277,28 @@
   "itemCount": "{count, plural, =0{لا منتجات} other{{count} منتج}}",
   "itemCountOther": "منتجات",
   "egp": "ج.م",
+  "provTabCashier": "الكاشير",
+  "provTabMenu": "المنيو",
+  "provManageMenu": "إدارة المنيو",
+  "provTabItems": "الأصناف",
+  "provManageItems": "إدارة الأصناف",
+  "provTabMedicines": "الأدوية",
+  "provManageMedicines": "إدارة الأدوية",
+  "provTabTableBookings": "حجز الطاولات",
+  "provTabJobs": "الطلبات",
+  "provServiceRequests": "طلبات الخدمة",
+  "provTabLessonRequests": "طلبات الدروس",
+  "provTabAppointments": "المواعيد",
+  "provTabMyServices": "خدماتي",
+  "provTabMyLessons": "دروسي",
+  "provMyServicesPrices": "خدماتي وأسعارها",
+  "provMyLessonsPrices": "دروسي وأسعارها",
+  "provPricesAdminManaged": "الأسعار بتتحدد من الإدارة. لو محتاج تعديل كلم الدعم.",
+  "provEmptyServices": "لسه مفيش خدمات متسجلة على حسابك",
+  "provEmptyLessons": "لسه مفيش دروس متسجلة على حسابك",
+  "provHourlyRate": "سعر الساعة",
+  "provFixedPrice": "السعر الثابت",
+  "provPriceNotSet": "السعر لسه ما اتحددش من الإدارة",
   "searchRestaurants": "ابحث عن مطاعم...",
   "searchProducts": "ابحث عن منتجات...",
   "filters": "الفلاتر",
@@ -1219,6 +1241,18 @@
   "escalationOwnerQueue": "قائمة المالك",
   "sanctions": "العقوبات",
   "sanctionsManagement": "إدارة العقوبات",
+  "generalPenalties": "العقوبات العامة",
+  "generalPenaltiesSubtitle": "عقوبات بتتطبق على مستوى المنصة كلها. تعديلها متاح لحساب المالك فقط.",
+  "cancelSuspensionPenalty": "عقوبة الإلغاء المتكرر",
+  "cancelSuspensionPenaltyDescription": "إيقاف حساب العميل بعد ثالث إلغاء في نفس الشهر (السماحية: إلغاءان).",
+  "refusalSuspensionPenalty": "عقوبة رفض الاستلام المتكرر",
+  "refusalSuspensionPenaltyDescription": "إيقاف حساب العميل بعد ثالث رفض استلام في نفس الشهر (السماحية: تحذيران).",
+  "editPenalty": "تعديل العقوبة",
+  "suspensionDaysLabel": "مدة الإيقاف (بالأيام)",
+  "penaltyChangeReasonHint": "سبب التغيير (اختياري)",
+  "penaltyUpdated": "تم تحديث العقوبة",
+  "ownerOnlyPenalties": "قايمة العقوبات العامة متاحة لحساب المالك فقط.",
+  "invalidSuspensionDays": "المدة لازم تكون بين 1 و 365 يوم",
   "noSanctions": "لا توجد عقوبات بعد",
   "noSanctionsDescription": "ستظهر العقوبات هنا بعد إصدارها.",
   "activeOnly": "النشطة فقط",
@@ -1360,6 +1394,8 @@
   "showingNProducts": "عرض {count} منتج",
   "noResultsInMerchant": "لا توجد نتائج",
   "discountPercent": "خصم {percent}%",
+  "platformCredit": "هدية دلوقتي",
+  "platformCreditAutoApplied": "عندك هدية من دلوقتي بقيمة {amount} ج.م هتنخصم تلقائي من الطلب ده",
   "mostOrdered": "الأكثر مبيعاً",
   "addedToCart": "تمت الإضافة إلى السلة",
   "options": "الخيارات",
@@ -1406,13 +1442,13 @@
   "selectAccountType": "اختر نوع الحساب",
   "accountTypeDescription": "حدد كيف ستستخدم دلوقتي",
   "userTypeCustomer": "عميل",
-  "userTypeCustomerDesc": "اطلب من المتاجر والمطاعم والخدمات",
+  "userTypeCustomerDesc": "اطلب أكلك دلوقتي",
   "userTypeMerchant": "تاجر",
-  "userTypeMerchantDesc": "بع منتجاتك على المنصة",
+  "userTypeMerchantDesc": "بيع منتجاتك مع دلوقتي",
   "userTypeDriver": "مندوب توصيل",
-  "userTypeDriverDesc": "وصّل الطلبات للعملاء",
+  "userTypeDriverDesc": "وصّل طلباتك واكسب مع دلوقتي",
   "userTypeProvider": "مقدم خدمة",
-  "userTypeProviderDesc": "قدم خدماتك للعملاء",
+  "userTypeProviderDesc": "قدّم خدماتك باحترافية",
   "uploadIdCard": "رفع البطاقة الشخصية",
   "uploadIdCardHint": "صورة واضحة للبطاقة الشخصية",
   "uploadTradeLicense": "رفع الرخصة التجارية",
@@ -1961,6 +1997,10 @@
   "userApproved": "تمت الموافقة على المستخدم بنجاح",
   "userRejected": "تم رفض المستخدم",
   "adminAssigned": "تم تعيين المشرف",
+  "auditResourceServiceCategory": "فئة الخدمة",
+  "auditCommissionRateUpdated": "تحديث نسبة العمولة",
+  "walletTxCredit": "إيداع",
+  "walletTxDebit": "خصم",
   "roleUpdated": "تم تحديث الدور",
   "addCategory": "إضافة فئة",
   "deleteCategory": "حذف الفئة",
@@ -2268,6 +2308,40 @@
   "enterOtpCode": "أدخل كود التفعيل المكون من 6 أرقام",
   "verifyAndActivateAccount": "تأكيد وتفعيل الحساب",
   "resendWhatsAppCode": "إعادة إرسال الكود",
+  "whatsappYourCodeLabel": "رمز التحقق الخاص بك",
+  "copyOtpCode": "نسخ الرمز",
+  "otpCodeCopied": "تم نسخ الرمز",
+  "whatsappWaitingAuto": "بانتظار تأكيد واتساب. ستتحدث هذه الشاشة تلقائيًا فور وصول رسالتك.",
+  "otpExpiresIn": "تنتهي صلاحية الرمز خلال {time}",
+  "@otpExpiresIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "otpExpiredTitle": "انتهت صلاحية الرمز",
+  "otpExpiredBody": "الرمز صالح لمدة 10 دقائق. اطلب رمزًا جديدًا - يستغرق ثوانٍ.",
+  "requestNewOtpCode": "احصل على رمز جديد",
+  "otpNotConfirmedYet": "لم يصل التأكيد بعد. تأكد أنك أرسلت الرسالة من واتساب الخاص بك ({phone}) ثم انتظر ثواني.",
+  "@otpNotConfirmedYet": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "wrongPhoneNumberHint": "الرقم غير صحيح؟ أغلق هذه النافذة وارجع لتعديله.",
+  "resendOtpAvailableIn": "يمكنك إعادة الإرسال خلال {time}",
+  "@resendOtpAvailableIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "retryRequest": "حاول مرة أخرى",
+  "iSentItCheckNow": "أرسلتها - تحقق الآن",
   "phoneOrEmailOrUsername": "رقم الهاتف أو اسم المستخدم",
   "phoneOptionalEmailHint": "البريد الإلكتروني (اختياري - يتم توليده تلقائيًا من رقم الهاتف)",
   "whatsappVerifiedSuccess": "تم التحقق من رقم الهاتف عبر واتساب بنجاح!",
@@ -2547,6 +2621,14 @@
     }
   },
   "checkoutCouponInvalid": "لا يمكن استخدام هذه القسيمة لهذا الطلب",
+  "checkoutWalletNotAvailable": "الدفع بالمحفظة غير متاح حالياً. برجاء الدفع كاش عند الاستلام أو إنستاباي أو فودافون كاش.",
+  "@checkoutWalletNotAvailable": {
+    "description": "Checkout RPC error mapping"
+  },
+  "checkoutCardNotAvailable": "الدفع بالبطاقة غير متاح حالياً. برجاء الدفع كاش عند الاستلام أو إنستاباي أو فودافون كاش.",
+  "@checkoutCardNotAvailable": {
+    "description": "Checkout RPC error mapping"
+  },
   "@checkoutCouponInvalid": {
     "description": "Checkout RPC error mapping"
   },
@@ -2675,6 +2757,86 @@
   "@posErrInvalidQty": {
     "description": "POS: posErrInvalidQty"
   },
+  "posScanBarcode": "مسح الباركود",
+  "@posScanBarcode": {
+    "description": "POS: posScanBarcode"
+  },
+  "posSearchHint": "ابحث بالاسم أو الباركود",
+  "@posSearchHint": {
+    "description": "POS: posSearchHint"
+  },
+  "posScanAdded": "تمت الإضافة إلى السلة",
+  "@posScanAdded": {
+    "description": "POS: posScanAdded"
+  },
+  "posDrugFoundTitle": "موجود في كتالوج الأدوية",
+  "@posDrugFoundTitle": {
+    "description": "POS: posDrugFoundTitle"
+  },
+  "posDrugImportAdd": "استيراد وإضافة",
+  "@posDrugImportAdd": {
+    "description": "POS: posDrugImportAdd"
+  },
+  "posQuickAddTitle": "منتج جديد لهذا الباركود",
+  "@posQuickAddTitle": {
+    "description": "POS: posQuickAddTitle"
+  },
+  "posQuickAddCreate": "إنشاء وإضافة",
+  "@posQuickAddCreate": {
+    "description": "POS: posQuickAddCreate"
+  },
+  "barcodeFieldLabel": "الباركود",
+  "@barcodeFieldLabel": {
+    "description": "Product form: barcodeFieldLabel"
+  },
+  "barcodeFieldHint": "اكتب أو امسح باركود المنتج",
+  "@barcodeFieldHint": {
+    "description": "Product form: barcodeFieldHint"
+  },
+  "barcodeUniqueHint": "باركود واحد لكل منتج في هذا المحل",
+  "@barcodeUniqueHint": {
+    "description": "Product form: barcodeUniqueHint"
+  },
+  "barcodeScanToFill": "امسح لملء الحقل",
+  "@barcodeScanToFill": {
+    "description": "Product form: barcodeScanToFill"
+  },
+  "barcodeDuplicateError": "منتج آخر في هذا المحل يستخدم نفس الباركود",
+  "@barcodeDuplicateError": {
+    "description": "Product form: barcodeDuplicateError"
+  },
+  "scannerTitle": "مسح الباركود",
+  "@scannerTitle": {
+    "description": "Scanner: scannerTitle"
+  },
+  "scannerTorch": "الفلاش",
+  "@scannerTorch": {
+    "description": "Scanner: scannerTorch"
+  },
+  "scannerEnterManually": "إدخال الباركود يدويًا",
+  "@scannerEnterManually": {
+    "description": "Scanner: scannerEnterManually"
+  },
+  "scannerManualHint": "رقم الباركود",
+  "@scannerManualHint": {
+    "description": "Scanner: scannerManualHint"
+  },
+  "scannerAimHint": "وجّه الكاميرا نحو باركود المنتج",
+  "@scannerAimHint": {
+    "description": "Scanner: scannerAimHint"
+  },
+  "scannerPermissionNeeded": "نحتاج إذن الكاميرا لمسح الباركود. يمكنك أيضًا إدخال الباركود يدويًا.",
+  "@scannerPermissionNeeded": {
+    "description": "Scanner: scannerPermissionNeeded"
+  },
+  "scannerGrantPermission": "السماح بالكاميرا",
+  "@scannerGrantPermission": {
+    "description": "Scanner: scannerGrantPermission"
+  },
+  "scannerOpenSettings": "فتح الإعدادات",
+  "@scannerOpenSettings": {
+    "description": "Scanner: scannerOpenSettings"
+  },
   "productModifierRequiredError": "يرجى اختيار الخيارات المطلوبة أولاً",
   "@productModifierRequiredError": {
     "description": "Shown when required product modifier groups have no selection"
@@ -2734,5 +2896,90 @@
   "appInvitationDownloading": "جارٍ التحميل الآمن...",
   "appInvitationInstallReady": "التحميل الموثّق جاهز. اتبع رسالة التثبيت.",
   "appInvitationDownloadFailed": "تعذّر بدء التحميل. راجع اتصالك وإذن تثبيت التطبيقات ثم حاول مرة أخرى.",
-  "appInvitationsFooter": "تحميل التطبيق لا يمنح صلاحيات جديدة. الدخول مرتبط باعتماد حسابك الحالي. قد تحتاج إلى السماح بالتثبيت على أندرويد."
+  "appInvitationsFooter": "تحميل التطبيق لا يمنح صلاحيات جديدة. الدخول مرتبط باعتماد حسابك الحالي. قد تحتاج إلى السماح بالتثبيت على أندرويد.",
+  "adminProviderPricing": "تسعير مقدمي الخدمة",
+  "adminProviderPricingDesc": "تحديد أسعار الساعة والأسعار الثابتة لمقدمي الخدمات المنزلية وأسعار الفئات الافتراضية",
+  "providerPricingTabProviders": "مقدمو الخدمة",
+  "providerPricingTabCategories": "أسعار الفئات",
+  "providerPricingSearchHint": "ابحث بالاسم أو المدينة",
+  "providerPricingAllCategories": "كل الفئات",
+  "providerPricingHourly": "سعر الساعة",
+  "providerPricingFixedMin": "سعر ثابت من",
+  "providerPricingFixedMax": "سعر ثابت إلى",
+  "providerPricingNote": "ملاحظة (اختياري)",
+  "providerPricingCustom": "مخصص",
+  "providerPricingCategoryDefault": "افتراضي الفئة",
+  "providerPricingPlatformDefault": "افتراضي المنصة",
+  "providerPricingNoFixed": "بدون سعر ثابت",
+  "providerPricingEditTitle": "تعديل التسعير",
+  "providerPricingSaved": "تم تحديث الأسعار",
+  "providerPricingFailed": "تعذر تحديث الأسعار",
+  "providerPricingEmpty": "لا يوجد مقدمو خدمة في نطاقك",
+  "providerPricingReadOnlyHint": "أسعار الفئات الافتراضية يغيّرها المالك أو مشرفو الدولة فقط",
+  "providerPricingLeaveEmpty": "اتركه فارغًا لاستخدام الافتراضي",
+  "providerMyPricing": "أسعاري",
+  "providerMyPricingAdminNote": "الأسعار تحددها الإدارة. لطلب تعديل تواصل مع الدعم.",
+  "providerMyPricingEmpty": "لا توجد ملفات خدمة بعد",
+  "closesNextDay": "يغلق اليوم التالي",
+  "open24Hours": "مفتوح 24 ساعة",
+  "cashToCollectTitle": "مبلغ مطلوب تحصيله",
+  "cashToCollectBody": "تم تسليم الطلب. حصّل {amount} من العميل ثم أكّد.",
+  "collectCashCta": "تم التحصيل",
+  "cashCollectedTitle": "تم تحصيل المبلغ",
+  "cashCollectedBody": "تم تسجيل تحصيل {amount}. تظهر في تسويتك.",
+  "rateDriverAfterCollection": "يمكنك تقييم الكابتن بعد تحصيل المبلغ.",
+  "cashCollectionStateError": "تعذر تحميل حالة التحصيل. تحقق من الاتصال وأعد المحاولة.",
+  "driverReviewHint": "اكتب رأيك في الكابتن (اختياري)",
+  "providerPricingInvalidInput": "أدخل رقمًا صحيحًا ضمن الحدود المسموحة",
+  "providerPricingShowingOf": "عرض {shown} من {total}",
+  "@providerPricingShowingOf": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "providerPricingLoadMore": "تحميل المزيد",
+  "otaTitle": "يتوفر تحديث جديد",
+  "otaIntro": "تحسينات جديدة جاهزة للتطبيق.",
+  "otaIntroHint": "سيتم تنزيل التحديث وتثبيته مباشرة دون إعادة تثبيت التطبيق.",
+  "otaDownloading": "جاري تحميل التحديث…",
+  "otaReadyTitle": "التحديث جاهز للتثبيت",
+  "otaReadyBody": "تم تحميل التحديث. اضغط تثبيت لإكمال التحديث.",
+  "otaPermissionBody": "اسمح لدلوقتي بتثبيت التحديثات من شاشة الإعدادات ثم ارجع للتطبيق. سيكمل التثبيت تلقائيًا والملف المحمّل محفوظ.",
+  "otaDownloadFailed": "تعذر تحميل التحديث. تأكد من الاتصال بالإنترنت ثم أعد المحاولة.",
+  "otaInstallFailed": "تعذر بدء التثبيت. اضغط تثبيت للمحاولة مرة أخرى.",
+  "otaChecksumFailed": "تعذر التحقق من التحديث المحمّل. اضغط تحديث الآن لتحميله مرة أخرى.",
+  "otaLater": "لاحقًا",
+  "otaUpdateNow": "تحديث الآن",
+  "otaInstall": "تثبيت",
+  "otaRetry": "حاول مرة أخرى",
+  "whatsappLaunchUnavailable": "تعذر فتح واتساب. انسخ الرمز وأرسله يدويا.",
+  "whatsappNotConfigured": "تفعيل واتساب غير متاح حاليا. يمكنك تسجيل الدخول بحساب جوجل.",
+  "approved": "معتمدة",
+  "settled": "مسددة",
+  "collected": "محصلة",
+  "outstanding": "مستحق",
+  "underReview": "قيد المراجعة",
+  "failed": "فشل",
+  "reconciliation": "التسوية",
+  "totalCollected": "إجمالي المحصَّل",
+  "approvedSettlements": "التسويات المعتمدة",
+  "closingOutstanding": "المستحق الختامي",
+  "collectionLedger": "سجل التحصيلات",
+  "noCollections": "لا توجد تحصيلات",
+  "noCollectionsYet": "لا توجد تعبئات مستلمة في هذه المنطقة بعد.",
+  "platformCollectionsAllRegions": "تحصيلات المنصة (كل المناطق)",
+  "platformSettlementsAllRegions": "تسويات المنصة (كل المناطق)",
+  "graceLimitLabel": "الحد",
+  "graceUsedLabel": "المستخدم",
+  "graceRemainingLabel": "المتبقي",
+  "revokeSanctionConfirm": "إلغاء {type} لـ{role}؟",
+  "adminRegionScopeTitle": "نطاق المناطق",
+  "adminRegionSelectUser": "اختر مشرفاً لإدارة نطاقه",
+  "adminRegionScopeSubtitle": "عيّن نطاق المناطق للمشرفين على أي مستوى (محافظة، مركز، حي، قرية، ...). المشرف بدون تعيينات يكون عاما.",
+  "adminManagement": "إدارة المشرفين"
 }

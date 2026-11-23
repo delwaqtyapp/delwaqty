@@ -57,4 +57,52 @@ class SupabaseSanctionsDataSource {
       params: {'p_sanction_id': sanctionId, 'p_reason': reason},
     );
   }
+
+  /// Platform-wide penalty policy: days a customer account is suspended
+  /// after the 3rd cancellation in one Cairo calendar month.
+  Future<int> getCancelSuspensionDays() async {
+    final row = await _client
+        .from('platform_settings')
+        .select('cancel_suspension_days')
+        .eq('id', 'default')
+        .single();
+    return (row['cancel_suspension_days'] as num?)?.toInt() ?? 5;
+  }
+
+  /// Owner-only on the server: set_cancel_suspension_days rejects non-owner
+  /// callers, and every change is audited.
+  Future<int> setCancelSuspensionDays(int days, {String? reason}) async {
+    final result = await _client.rpc(
+      'set_cancel_suspension_days',
+      params: {
+        'p_days': days,
+        if (reason != null && reason.trim().isNotEmpty) 'p_reason': reason,
+      },
+    );
+    return (result as num).toInt();
+  }
+
+  /// Platform-wide penalty policy: days a customer account is suspended
+  /// after the 3rd delivery refusal in one Cairo calendar month.
+  Future<int> getRefusalSuspensionDays() async {
+    final row = await _client
+        .from('platform_settings')
+        .select('refusal_suspension_days')
+        .eq('id', 'default')
+        .single();
+    return (row['refusal_suspension_days'] as num?)?.toInt() ?? 5;
+  }
+
+  /// Owner-only on the server: set_refusal_suspension_days rejects non-owner
+  /// callers, and every change is audited.
+  Future<int> setRefusalSuspensionDays(int days, {String? reason}) async {
+    final result = await _client.rpc(
+      'set_refusal_suspension_days',
+      params: {
+        'p_days': days,
+        if (reason != null && reason.trim().isNotEmpty) 'p_reason': reason,
+      },
+    );
+    return (result as num).toInt();
+  }
 }

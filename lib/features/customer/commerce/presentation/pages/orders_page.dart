@@ -159,13 +159,18 @@ class _OrderCard extends StatelessWidget {
                     style: textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(width: 8),
-                _StatusChip(label: statusLabel, color: statusColor),
               ],
+            ),
+            const SizedBox(height: 8),
+            // Status chip on its own line so the merchant name keeps
+            // the full width.
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: _StatusChip(label: statusLabel, color: statusColor),
             ),
             const SizedBox(height: 14),
             Row(

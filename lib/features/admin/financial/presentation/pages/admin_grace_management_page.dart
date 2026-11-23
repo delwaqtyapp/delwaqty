@@ -138,15 +138,15 @@ class _AdminGraceManagementPageState
                     Row(
                       children: [
                         _Stat(
-                          label: l10n.graceLabel,
+                          label: l10n.graceLimitLabel,
                           value: account.graceLimit.toString(),
                         ),
                         _Stat(
-                          label: l10n.graceLabel,
+                          label: l10n.graceUsedLabel,
                           value: account.graceUsed.toString(),
                         ),
                         _Stat(
-                          label: l10n.graceLabel,
+                          label: l10n.graceRemainingLabel,
                           value: account.remaining.toString(),
                           color: cs.primary,
                         ),

@@ -1,6 +1,9 @@
+import 'package:delwaqty/shared/widgets/readable_fit_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/features/provider/capability/domain/provider_profile.dart';
+import 'package:delwaqty/features/provider/capability/presentation/widgets/provider_category_picker.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/core/utils/bidi_text.dart';
 import 'package:go_router/go_router.dart';
@@ -183,7 +186,7 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
                             alpha: 0.12,
                           ),
                           child: Icon(
-                            p.categoryType == 'home_services'
+                            _isServiceCategory(p.categoryType)
                                 ? Icons.handyman_rounded
                                 : Icons.storefront_rounded,
                             color: AppColors.brandPurple,
@@ -263,42 +266,17 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
     return cat == 'pharmacy';
   }
 
-  String _categoryLabel(AppLocalizations l10n, String category) {
-    switch (category) {
-      case 'restaurant':
-        return l10n.restaurant;
-      case 'grocery':
-        return l10n.grocery;
-      case 'pharmacy':
-        return l10n.pharmacy;
-      case 'bakery':
-        return l10n.bakery;
-      case 'cafe':
-        return l10n.cafe;
-      case 'electronics':
-        return l10n.electronics;
-      case 'fashion':
-        return l10n.fashion;
-      case 'home_services':
-        return l10n.homeServices;
-      default:
-        return l10n.other;
-    }
-  }
+  bool _isServiceCategory(String category) =>
+      isServiceProviderCategory(category);
+
+  String _categoryLabel(AppLocalizations l10n, String category) =>
+      providerCategoryLabel(l10n, category);
 
   Future<void> _openRequestServiceDialog(
     BuildContext context,
     AppLocalizations l10n,
   ) async {
-    const categories = [
-      'restaurant',
-      'grocery',
-      'pharmacy',
-      'bakery',
-      'home_services',
-      'electronics',
-      'fashion',
-    ];
+    const categories = kRequestableProviderCategories;
     String selectedCat = 'grocery';
     final nameCtrl = TextEditingController();
 
@@ -316,23 +294,11 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
                 style: Theme.of(ctx).textTheme.bodySmall,
               ),
               const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                initialValue: selectedCat,
-                decoration: InputDecoration(
-                  labelText: l10n.storeCategoryLabel,
-                  border: const OutlineInputBorder(),
-                ),
-                items: categories
-                    .map(
-                      (c) => DropdownMenuItem(
-                        value: c,
-                        child: Text(_categoryLabel(l10n, c)),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (v) {
-                  if (v != null) setDlgState(() => selectedCat = v);
-                },
+              ProviderCategoryPickerField(
+                l10n: l10n,
+                categories: categories,
+                value: selectedCat,
+                onChanged: (v) => setDlgState(() => selectedCat = v),
               ),
               const SizedBox(height: 12),
               TextField(
@@ -387,6 +353,26 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final profileGate = ref.watch(providerProfileProvider);
+    if (!profileGate.isReady) {
+      return Scaffold(
+        appBar: AppBar(title: Text(l10n.merchantDashboard)),
+        body: profileGate.hasFailed
+            ? Center(
+                child: PremiumEmptyState(
+                  icon: Icons.error_outline_rounded,
+                  title: l10n.error,
+                  message: l10n.errorLoading,
+                  actionLabel: l10n.retry,
+                  onAction: () {
+                    ref.invalidate(providerProfilesProvider);
+                    ref.invalidate(providerRawCategoryProvider);
+                  },
+                ),
+              )
+            : const Center(child: CircularProgressIndicator()),
+      );
+    }
     final statsAsync = ref.watch(_statsProvider);
     final availabilityAsync = ref.watch(providerAvailabilityProvider);
     final storefrontAsync = ref.watch(storefrontProvider);
@@ -527,59 +513,65 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
 
   Widget _buildStatsGrid(BuildContext context, MerchantStats stats) {
     final l10n = AppLocalizations.of(context);
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
-      childAspectRatio: 1.5,
-      children: [
-        _StatCard(
-          title: l10n.todayOrders,
-          value: stats.todayOrders.toString(),
-          icon: Icons.shopping_bag_outlined,
-          color: AppColors.infoLight,
-          onTap: () => context.push('/merchant-dashboard/orders'),
-        ),
-        _StatCard(
-          title: l10n.revenue,
-          value:
-              '${stats.todayRevenue.toStringAsFixed(0)} ${l10n.currencySymbol}',
-          icon: Icons.payments_outlined,
-          color: AppColors.successLight,
-          onTap: () => context.push('/provider-financial-center'),
-        ),
-        _StatCard(
-          title: l10n.pending,
-          value: stats.pendingOrders.toString(),
-          icon: Icons.pending_actions_rounded,
-          color: stats.pendingOrders > 0
-              ? AppColors.warningLight
-              : AppColors.brandPurple,
-          highlight: stats.pendingOrders > 0,
-          onTap: () => context.push('/merchant-dashboard/orders'),
-        ),
-        _StatCard(
-          title: l10n.rating,
-          value: stats.averageRating.toStringAsFixed(1),
-          icon: Icons.star_rounded,
-          color: AppColors.rating,
-          onTap: () => context.push('/merchant-dashboard/reviews'),
-        ),
-      ],
+    // Content-driven tile heights via Wrap: a fixed grid aspect ratio
+    // clips values and labels at large text scales.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final tileWidth = (constraints.maxWidth - 12) / 2;
+        Widget tile(Widget child) => SizedBox(width: tileWidth, child: child);
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            _StatCard(
+              title: l10n.todayOrders,
+              value: stats.todayOrders.toString(),
+              icon: Icons.shopping_bag_outlined,
+              color: AppColors.infoLight,
+              onTap: () => context.push('/merchant-dashboard/orders'),
+            ),
+            _StatCard(
+              title: l10n.revenue,
+              value:
+                  '${stats.todayRevenue.toStringAsFixed(0)} ${l10n.currencySymbol}',
+              icon: Icons.payments_outlined,
+              color: AppColors.successLight,
+              onTap: () => context.push('/provider-financial-center'),
+            ),
+            _StatCard(
+              title: l10n.pending,
+              value: stats.pendingOrders.toString(),
+              icon: Icons.pending_actions_rounded,
+              color: stats.pendingOrders > 0
+                  ? AppColors.warningLight
+                  : AppColors.brandPurple,
+              highlight: stats.pendingOrders > 0,
+              onTap: () => context.push('/merchant-dashboard/orders'),
+            ),
+            _StatCard(
+              title: l10n.rating,
+              value: stats.averageRating.toStringAsFixed(1),
+              icon: Icons.star_rounded,
+              color: AppColors.rating,
+              onTap: () => context.push('/merchant-dashboard/reviews'),
+            ),
+          ].map(tile).toList(),
+        );
+      },
     );
   }
 
   Widget _buildQuickActionsGrid(BuildContext context, MerchantStats? stats) {
     final l10n = AppLocalizations.of(context);
     final caps = ref.watch(providerCapabilitiesProvider);
+    final profile = ref.watch(providerProfileProvider);
+    final lang = AppLocalizations.of(context);
     final pendingCount = stats?.pendingOrders ?? 0;
 
     final items = <_QuickActionItem>[
       if (caps.contains(ProviderCapability.orders))
         _QuickActionItem(
-          title: l10n.viewOrders,
+          title: profile.label(ProviderLabel.viewOrders, lang),
           icon: Icons.receipt_long_rounded,
           color: AppColors.infoLight,
           badgeCount: pendingCount,
@@ -587,38 +579,39 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
         ),
       if (caps.contains(ProviderCapability.catalog))
         _QuickActionItem(
-          title: l10n.manageProducts,
+          title: profile.label(ProviderLabel.manageProducts, lang),
           icon: Icons.inventory_2_rounded,
           color: AppColors.brandPurple,
           onTap: () => context.push('/merchant-dashboard/products'),
         ),
-      if (caps.contains(ProviderCapability.catalog) && _isPharmacyWorkspace())
+      if (caps.contains(ProviderCapability.drugCatalog))
         _QuickActionItem(
           title: l10n.drugImportTitle,
           icon: Icons.medication_rounded,
           color: AppColors.infoLight,
           onTap: () => context.push('/merchant-dashboard/drugs'),
         ),
-      if (caps.contains(ProviderCapability.catalog))
+      if (caps.contains(ProviderCapability.cashier))
         _QuickActionItem(
           title: l10n.posCashier,
           icon: Icons.point_of_sale_rounded,
           color: AppColors.brandCyan,
           onTap: () => context.push('/merchant-dashboard/pos'),
         ),
-      if (caps.contains(ProviderCapability.catalog))
+      if (caps.contains(ProviderCapability.inventory))
         _QuickActionItem(
           title: l10n.inventory,
           icon: Icons.warehouse_rounded,
           color: AppColors.brandViolet,
           onTap: () => context.push('/merchant-dashboard/inventory'),
         ),
-      _QuickActionItem(
-        title: l10n.storefront,
-        icon: Icons.storefront_rounded,
-        color: AppColors.successLight,
-        onTap: () => context.push('/merchant-dashboard/storefront'),
-      ),
+      if (caps.contains(ProviderCapability.storefront))
+        _QuickActionItem(
+          title: l10n.storefront,
+          icon: Icons.storefront_rounded,
+          color: AppColors.successLight,
+          onTap: () => context.push('/merchant-dashboard/storefront'),
+        ),
       if (caps.contains(ProviderCapability.offers))
         _QuickActionItem(
           title: l10n.createOffer,
@@ -626,12 +619,13 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
           color: AppColors.warningLight,
           onTap: () => context.push('/merchant-dashboard/offers'),
         ),
-      _QuickActionItem(
-        title: l10n.adminBannersTitle,
-        icon: Icons.view_carousel_rounded,
-        color: AppColors.brandViolet,
-        onTap: () => context.push('/merchant-dashboard/banners'),
-      ),
+      if (caps.contains(ProviderCapability.banners))
+        _QuickActionItem(
+          title: l10n.adminBannersTitle,
+          icon: Icons.view_carousel_rounded,
+          color: AppColors.brandViolet,
+          onTap: () => context.push('/merchant-dashboard/banners'),
+        ),
       if (caps.contains(ProviderCapability.branches))
         _QuickActionItem(
           title: l10n.branches,
@@ -639,13 +633,21 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
           color: Colors.teal,
           onTap: () => context.push('/merchant-dashboard/branches'),
         ),
-      if (caps.contains(ProviderCapability.bookings) ||
-          caps.contains(ProviderCapability.orders))
+      if (caps.contains(ProviderCapability.bookings))
         _QuickActionItem(
-          title: l10n.reservations,
+          title: profile.label(ProviderLabel.bookingsTitle, lang),
           icon: Icons.calendar_month_rounded,
           color: Colors.indigo,
-          onTap: () => context.push('/merchant-dashboard/reservations'),
+          onTap: () => profile.bookingsAreServiceJobs
+              ? context.go('/provider-bookings')
+              : context.push('/merchant-dashboard/reservations'),
+        ),
+      if (caps.contains(ProviderCapability.services))
+        _QuickActionItem(
+          title: profile.label(ProviderLabel.myServicesTitle, lang),
+          icon: Icons.handyman_rounded,
+          color: Colors.teal,
+          onTap: () => context.go('/provider-services'),
         ),
       if (caps.contains(ProviderCapability.reviews))
         _QuickActionItem(
@@ -683,17 +685,23 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
         ),
     ];
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: items.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 10,
-        childAspectRatio: 2.35,
-      ),
-      itemBuilder: (context, index) => _QuickActionCard(item: items[index]),
+    // Content-driven tile heights via Wrap: a fixed grid aspect ratio
+    // clips the two-line action labels at large text scales.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final tileWidth = (constraints.maxWidth - 10) / 2;
+        return Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            for (final item in items)
+              SizedBox(
+                width: tileWidth,
+                child: _QuickActionCard(item: item),
+              ),
+          ],
+        );
+      },
     );
   }
 }
@@ -774,9 +782,12 @@ class _StoreHeroCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Row(
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        if (category.isNotEmpty) ...[
+                        if (category.isNotEmpty)
                           InkWell(
                             onTap: onSwitchWorkspace,
                             borderRadius: BorderRadius.circular(999),
@@ -792,12 +803,19 @@ class _StoreHeroCard extends StatelessWidget {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
-                                    category,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
+                                  ConstrainedBox(
+                                    constraints: const BoxConstraints(
+                                      maxWidth: 160,
+                                    ),
+                                    child: Text(
+                                      category,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 4),
@@ -810,14 +828,11 @@ class _StoreHeroCard extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
-                        ],
                         const Icon(
                           Icons.star_rounded,
                           color: Colors.amber,
                           size: 16,
                         ),
-                        const SizedBox(width: 3),
                         Text(
                           rating.toStringAsFixed(1),
                           style: const TextStyle(
@@ -1023,10 +1038,8 @@ class _StatCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    ReadableFitText(
                       value,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -1034,7 +1047,7 @@ class _StatCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       title,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,

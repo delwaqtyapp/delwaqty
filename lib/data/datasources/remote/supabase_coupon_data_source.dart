@@ -88,23 +88,11 @@ class SupabaseCouponDataSource {
     return coupon;
   }
 
-  Future<void> incrementUsage(String code) async {
-    await _client
-        // The live function signature is increment_coupon_usage(p_coupon_code).
-        // The app was sending "coupon_code", so every redemption failed with
-        // PGRST202 and silently fell through to the non-atomic read/modify
-        // write below — which means limited-use coupons never incremented.
-        .rpc('increment_coupon_usage', params: {'p_coupon_code': code})
-        .catchError((_) async {
-          final coupon = await getCouponByCode(code);
-          if (coupon != null && coupon.usedCount != null) {
-            await _client
-                .from('coupons')
-                .update({'used_count': coupon.usedCount! + 1})
-                .eq('id', coupon.id);
-          }
-        });
-  }
+  // incrementUsage was removed (review #123): coupon usage is consumed only
+  // inside the server checkout transaction (create_order -> redeem_coupon).
+  // increment_coupon_usage keeps EXECUTE restricted to postgres/service_role
+  // (migration 218); the app must not call it, and its raw {success: bool}
+  // payload must never be consumed client-side.
 
   Future<List<Coupon>> getMerchantCoupons(String merchantId) async {
     final data = await _client

@@ -77,11 +77,15 @@ class OtaCheckResult {
     required this.current,
     required this.latest,
     required this.needsUpdate,
+    this.channel,
+    this.releaseTag,
   });
 
   final int current;
   final int latest;
   final bool needsUpdate;
+  final OtaChannelConfig? channel;
+  final String? releaseTag;
 }
 
 const _otaMethodChannel = MethodChannel('com.delwaqty.app/ota');
@@ -140,7 +144,8 @@ Future<OtaManifest?> fetchOtaManifestForTag(String tag) async {
 Future<OtaCheckResult> checkForOtaUpdate(AppFlavor flavor) async {
   final packageInfo = await PackageInfo.fromPlatform();
   final current = int.tryParse(packageInfo.buildNumber) ?? 0;
-  final manifest = await fetchOtaManifest();
+  final tag = await _fetchLatestTag();
+  final manifest = tag == null ? null : await fetchOtaManifestForTag(tag);
   if (manifest == null) {
     return OtaCheckResult(
       current: current,
@@ -154,25 +159,46 @@ Future<OtaCheckResult> checkForOtaUpdate(AppFlavor flavor) async {
     current: current,
     latest: latest,
     needsUpdate: latest > current,
+    channel: channel,
+    releaseTag: tag,
   );
 }
 
-/// Downloads the latest APK for [flavor] into app cache, then asks the native
-/// side to launch Android's package installer. Returns the download file's
-/// size, or null on failure — the second element surfaces the native error
-/// code (e.g. `needs_install_permission`) when installation could not start.
+/// Result of [downloadLatestApk]: either a verified APK on disk or an error
+/// code (`missing_checksum`, `checksum_mismatch`, or null for a plain
+/// network failure).
+final Map<String, String> _verifiedArtifactHashes = {};
+
+class OtaDownloadResult {
+  const OtaDownloadResult({this.file, this.error});
+
+  final File? file;
+  final String? error;
+
+  bool get ok => file != null;
+}
+
+/// Downloads the latest APK for [flavor] into the app cache and verifies its
+/// SHA-256. It does NOT start the installer, so the caller can keep the file
+/// and offer an "Install" button. An already-downloaded, verified file is
+/// reused instead of being fetched again.
 ///
 /// [onProgress] reports the actual download fraction (0..1) as chunks arrive.
-Future<(int?, String?)> downloadAndInstallLatest(
+Future<OtaDownloadResult> downloadLatestApk(
   AppFlavor flavor, {
   void Function(double fraction)? onProgress,
+  OtaCheckResult? offered,
 }) async {
   try {
-    final tag = await _fetchLatestTag();
-    if (tag == null) return (null, null);
-    final manifest = await fetchOtaManifestForTag(tag);
-    final channel = manifest?.forFlavor(flavor);
-    if (channel == null || channel.apk.isEmpty) return (null, null);
+    final tag = offered?.releaseTag ?? await _fetchLatestTag();
+    if (tag == null) return const OtaDownloadResult();
+    final manifest = offered?.channel == null
+        ? await fetchOtaManifestForTag(tag)
+        : null;
+    final channel = offered?.channel ?? manifest?.forFlavor(flavor);
+    if (channel == null || channel.apk.isEmpty) {
+      return const OtaDownloadResult();
+    }
 
     final dir = await getApplicationCacheDirectory();
     final target = File('${dir.path}/${channel.apk}');
@@ -181,32 +207,49 @@ Future<(int?, String?)> downloadAndInstallLatest(
       // A release without a published digest cannot be trusted: installing
       // it would let anyone who can poison the CDN or the release asset run
       // code inside this app.
-      return (null, 'missing_checksum');
+      return const OtaDownloadResult(error: 'missing_checksum');
     }
     if (!target.existsSync() || target.lengthSync() == 0) {
       final uri = Uri.parse('$kOtaDownloadBaseUrl$tag/${channel.apk}');
-      final streamed = await http.Client()
-          .send(http.Request('GET', uri))
-          .timeout(const Duration(seconds: 30));
-      if (streamed.statusCode != 200) {
-        unawaited(streamed.stream.drain<void>());
-        return (null, null);
-      }
-
-      final total = streamed.contentLength;
-      final sink = target.openWrite();
-      var received = 0;
+      final client = http.Client();
       try {
-        await for (final chunk in streamed.stream) {
-          sink.add(chunk);
-          received += chunk.length;
-          if (total != null && total > 0 && onProgress != null) {
-            onProgress((received / total).clamp(0.0, 1.0));
-          }
+        final streamed = await client
+            .send(http.Request('GET', uri))
+            .timeout(const Duration(seconds: 30));
+        if (streamed.statusCode != 200) {
+          return const OtaDownloadResult();
         }
+
+        // Write to a temp file and rename, so an interrupted download is never
+        // mistaken for a finished one on the next attempt.
+        final partial = File('${target.path}.part');
+        final total = streamed.contentLength;
+        final sink = partial.openWrite();
+        var received = 0;
+        try {
+          await streamed.stream
+              .timeout(const Duration(seconds: 30))
+              .forEach((chunk) {
+                sink.add(chunk);
+                received += chunk.length;
+                if (total != null && total > 0 && onProgress != null) {
+                  onProgress((received / total).clamp(0.0, 1.0));
+                }
+              })
+              .timeout(
+                const Duration(minutes: 5),
+                onTimeout: () {
+                  client.close();
+                  throw TimeoutException('APK download timed out');
+                },
+              );
+        } finally {
+          await sink.flush();
+          await sink.close();
+        }
+        await partial.rename(target.path);
       } finally {
-        await sink.flush();
-        await sink.close();
+        client.close();
       }
     }
 
@@ -217,20 +260,64 @@ Future<(int?, String?)> downloadAndInstallLatest(
           await target.delete();
         } catch (_) {}
       }
-      return (null, 'checksum_mismatch');
+      return const OtaDownloadResult(error: 'checksum_mismatch');
     }
 
-    final size = target.lengthSync();
     onProgress?.call(1.0);
-    try {
-      await _otaMethodChannel.invokeMethod('installApk', {'path': target.path});
-    } on PlatformException catch (e) {
-      return (null, e.code);
-    }
-    return (size, null);
+    _verifiedArtifactHashes[target.path] = expectedHash;
+    return OtaDownloadResult(file: target);
   } catch (_) {
-    return (null, null);
+    return const OtaDownloadResult();
   }
+}
+
+/// Whether Android currently lets this app install packages
+/// ("install unknown apps"). Assumed true if the platform cannot answer.
+Future<bool> canRequestPackageInstalls() async {
+  try {
+    final allowed = await _otaMethodChannel.invokeMethod<bool>(
+      'canRequestPackageInstalls',
+    );
+    return allowed ?? true;
+  } catch (_) {
+    return true;
+  }
+}
+
+/// Asks the native side to launch Android's package installer for an
+/// already-downloaded [file]. Returns null on success or the native error
+/// code. `needs_install_permission` means the system settings page for
+/// "install unknown apps" was opened; wait for the user to come back and call
+/// this again, the file is kept.
+Future<String?> installDownloadedApk(File file) async {
+  try {
+    final expected = _verifiedArtifactHashes[file.path];
+    if (!await file.exists()) return 'artifact_missing';
+    if (expected == null || !await verifyArtifactChecksum(file, expected)) {
+      if (await file.exists()) await file.delete();
+      return 'artifact_invalid';
+    }
+    await _otaMethodChannel.invokeMethod('installApk', {'path': file.path});
+    return null;
+  } on PlatformException catch (e) {
+    return e.code;
+  } catch (_) {
+    return 'install_failed';
+  }
+}
+
+/// Convenience: download then install in one go. Returns the file size, or
+/// null on failure with the error code as the second element.
+Future<(int?, String?)> downloadAndInstallLatest(
+  AppFlavor flavor, {
+  void Function(double fraction)? onProgress,
+}) async {
+  final download = await downloadLatestApk(flavor, onProgress: onProgress);
+  final file = download.file;
+  if (file == null) return (null, download.error);
+  final error = await installDownloadedApk(file);
+  if (error != null) return (null, error);
+  return (file.lengthSync(), null);
 }
 
 /// Streams [file] through SHA-256 and compares it with [expected].

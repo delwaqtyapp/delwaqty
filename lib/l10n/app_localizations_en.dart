@@ -823,6 +823,75 @@ class AppLocalizationsEn extends AppLocalizations {
   String get egp => 'EGP';
 
   @override
+  String get provTabCashier => 'Cashier';
+
+  @override
+  String get provTabMenu => 'Menu';
+
+  @override
+  String get provManageMenu => 'Manage menu';
+
+  @override
+  String get provTabItems => 'Items';
+
+  @override
+  String get provManageItems => 'Manage items';
+
+  @override
+  String get provTabMedicines => 'Medicines';
+
+  @override
+  String get provManageMedicines => 'Manage medicines';
+
+  @override
+  String get provTabTableBookings => 'Table bookings';
+
+  @override
+  String get provTabJobs => 'Jobs';
+
+  @override
+  String get provServiceRequests => 'Service requests';
+
+  @override
+  String get provTabLessonRequests => 'Lesson requests';
+
+  @override
+  String get provTabAppointments => 'Appointments';
+
+  @override
+  String get provTabMyServices => 'My services';
+
+  @override
+  String get provTabMyLessons => 'My lessons';
+
+  @override
+  String get provMyServicesPrices => 'My services & prices';
+
+  @override
+  String get provMyLessonsPrices => 'My lessons & prices';
+
+  @override
+  String get provPricesAdminManaged =>
+      'Prices are set by the admin team. Contact support to change them.';
+
+  @override
+  String get provEmptyServices =>
+      'No services are registered on your account yet';
+
+  @override
+  String get provEmptyLessons =>
+      'No lessons are registered on your account yet';
+
+  @override
+  String get provHourlyRate => 'Hourly rate';
+
+  @override
+  String get provFixedPrice => 'Fixed price';
+
+  @override
+  String get provPriceNotSet => 'Price not set by admin yet';
+
+  @override
   String get searchRestaurants => 'Search restaurants...';
 
   @override
@@ -3800,6 +3869,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sanctionsManagement => 'Sanctions Management';
 
   @override
+  String get generalPenalties => 'General Penalties';
+
+  @override
+  String get generalPenaltiesSubtitle =>
+      'Penalties applied across the whole platform. Only the owner account can change them.';
+
+  @override
+  String get cancelSuspensionPenalty => 'Repeated cancellation penalty';
+
+  @override
+  String get cancelSuspensionPenaltyDescription =>
+      'Suspends the customer account after the third cancellation in the same month (allowance: 2).';
+
+  @override
+  String get refusalSuspensionPenalty => 'Repeated delivery refusal penalty';
+
+  @override
+  String get refusalSuspensionPenaltyDescription =>
+      'Suspends the customer account after the third delivery refusal in the same month (allowance: 2 warnings).';
+
+  @override
+  String get editPenalty => 'Edit penalty';
+
+  @override
+  String get suspensionDaysLabel => 'Suspension duration (days)';
+
+  @override
+  String get penaltyChangeReasonHint => 'Reason for change (optional)';
+
+  @override
+  String get penaltyUpdated => 'Penalty updated';
+
+  @override
+  String get ownerOnlyPenalties =>
+      'The general penalties list is available to the owner account only.';
+
+  @override
+  String get invalidSuspensionDays => 'Duration must be between 1 and 365 days';
+
+  @override
   String get noSanctions => 'No sanctions yet';
 
   @override
@@ -4223,6 +4332,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get platformCredit => 'Delwaqty gift';
+
+  @override
+  String platformCreditAutoApplied(Object amount) {
+    return 'You have a Delwaqty gift of $amount EGP. It is deducted automatically from this order.';
+  }
+
+  @override
   String get mostOrdered => 'Most Ordered';
 
   @override
@@ -4375,26 +4492,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userTypeCustomer => 'Customer';
 
   @override
-  String get userTypeCustomerDesc =>
-      'Order from stores, restaurants and services';
+  String get userTypeCustomerDesc => 'Order your food now';
 
   @override
   String get userTypeMerchant => 'Merchant';
 
   @override
-  String get userTypeMerchantDesc => 'Sell your products on the platform';
+  String get userTypeMerchantDesc => 'Sell your products with Delwaqty';
 
   @override
   String get userTypeDriver => 'Delivery Driver';
 
   @override
-  String get userTypeDriverDesc => 'Deliver orders to customers';
+  String get userTypeDriverDesc => 'Deliver orders and earn with Delwaqty';
 
   @override
   String get userTypeProvider => 'Service Provider';
 
   @override
-  String get userTypeProviderDesc => 'Offer your services to customers';
+  String get userTypeProviderDesc => 'Offer your services professionally';
 
   @override
   String get uploadIdCard => 'Upload National ID';
@@ -6100,6 +6216,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminAssigned => 'Admin assigned';
 
   @override
+  String get auditResourceServiceCategory => 'Service category';
+
+  @override
+  String get auditCommissionRateUpdated => 'Commission rate updated';
+
+  @override
+  String get walletTxCredit => 'Credit';
+
+  @override
+  String get walletTxDebit => 'Debit';
+
+  @override
   String get roleUpdated => 'Role updated';
 
   @override
@@ -7051,6 +7179,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resendWhatsAppCode => 'Resend Code';
 
   @override
+  String get whatsappYourCodeLabel => 'Your verification code';
+
+  @override
+  String get copyOtpCode => 'Copy code';
+
+  @override
+  String get otpCodeCopied => 'Code copied';
+
+  @override
+  String get whatsappWaitingAuto =>
+      'Waiting for WhatsApp confirmation. This screen updates automatically once your message arrives.';
+
+  @override
+  String otpExpiresIn(String time) {
+    return 'Code expires in $time';
+  }
+
+  @override
+  String get otpExpiredTitle => 'Code expired';
+
+  @override
+  String get otpExpiredBody =>
+      'Codes last 10 minutes. Get a fresh one - it takes seconds.';
+
+  @override
+  String get requestNewOtpCode => 'Get a new code';
+
+  @override
+  String otpNotConfirmedYet(String phone) {
+    return 'Not confirmed yet. Make sure you sent the message from your WhatsApp ($phone), then give it a few seconds.';
+  }
+
+  @override
+  String get wrongPhoneNumberHint =>
+      'Wrong number? Close this and go back to edit it.';
+
+  @override
+  String resendOtpAvailableIn(String time) {
+    return 'Resend available in $time';
+  }
+
+  @override
+  String get retryRequest => 'Try again';
+
+  @override
+  String get iSentItCheckNow => 'I\'ve sent it - check now';
+
+  @override
   String get phoneOrEmailOrUsername => 'Phone Number or Username';
 
   @override
@@ -7756,6 +7932,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'This coupon cannot be used for this order';
 
   @override
+  String get checkoutWalletNotAvailable =>
+      'Wallet payment is not available yet. Please pay cash on delivery, InstaPay or Vodafone Cash.';
+
+  @override
+  String get checkoutCardNotAvailable =>
+      'Card payment is not available yet. Please pay cash on delivery, InstaPay or Vodafone Cash.';
+
+  @override
   String get checkoutMissingDeliveryLocation =>
       'Please choose a delivery location on the map';
 
@@ -7885,6 +8069,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String get posErrInvalidQty => 'Invalid quantity for one of the items';
 
   @override
+  String get posScanBarcode => 'Scan barcode';
+
+  @override
+  String get posSearchHint => 'Search name or barcode';
+
+  @override
+  String get posScanAdded => 'Added to cart';
+
+  @override
+  String get posDrugFoundTitle => 'Found in drug catalog';
+
+  @override
+  String get posDrugImportAdd => 'Import & add';
+
+  @override
+  String get posQuickAddTitle => 'New product for this barcode';
+
+  @override
+  String get posQuickAddCreate => 'Create & add';
+
+  @override
+  String get barcodeFieldLabel => 'Barcode';
+
+  @override
+  String get barcodeFieldHint => 'Type or scan the product barcode';
+
+  @override
+  String get barcodeUniqueHint => 'One barcode per product in this store';
+
+  @override
+  String get barcodeScanToFill => 'Scan to fill';
+
+  @override
+  String get barcodeDuplicateError =>
+      'Another product in this store already uses this barcode';
+
+  @override
+  String get scannerTitle => 'Scan barcode';
+
+  @override
+  String get scannerTorch => 'Flashlight';
+
+  @override
+  String get scannerEnterManually => 'Type barcode manually';
+
+  @override
+  String get scannerManualHint => 'Barcode number';
+
+  @override
+  String get scannerAimHint => 'Point the camera at the product barcode';
+
+  @override
+  String get scannerPermissionNeeded =>
+      'Camera access is needed to scan barcodes. You can still type the barcode manually.';
+
+  @override
+  String get scannerGrantPermission => 'Allow camera';
+
+  @override
+  String get scannerOpenSettings => 'Open settings';
+
+  @override
   String get productModifierRequiredError =>
       'Please select the required options first';
 
@@ -7973,4 +8219,254 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get appInvitationsFooter =>
       'Downloading an app does not grant a role. Access follows your current account approval. Android installation permission may be required.';
+
+  @override
+  String get adminProviderPricing => 'Provider Pricing';
+
+  @override
+  String get adminProviderPricingDesc =>
+      'Set hourly and fixed rates for home-service providers and category defaults';
+
+  @override
+  String get providerPricingTabProviders => 'Providers';
+
+  @override
+  String get providerPricingTabCategories => 'Category defaults';
+
+  @override
+  String get providerPricingSearchHint => 'Search by name or city';
+
+  @override
+  String get providerPricingAllCategories => 'All categories';
+
+  @override
+  String get providerPricingHourly => 'Hourly rate';
+
+  @override
+  String get providerPricingFixedMin => 'Fixed price from';
+
+  @override
+  String get providerPricingFixedMax => 'Fixed price to';
+
+  @override
+  String get providerPricingNote => 'Note (optional)';
+
+  @override
+  String get providerPricingCustom => 'Custom';
+
+  @override
+  String get providerPricingCategoryDefault => 'Category default';
+
+  @override
+  String get providerPricingPlatformDefault => 'Platform default';
+
+  @override
+  String get providerPricingNoFixed => 'No fixed price';
+
+  @override
+  String get providerPricingEditTitle => 'Edit pricing';
+
+  @override
+  String get providerPricingSaved => 'Pricing updated';
+
+  @override
+  String get providerPricingFailed => 'Could not update pricing';
+
+  @override
+  String get providerPricingEmpty => 'No providers in your scope';
+
+  @override
+  String get providerPricingReadOnlyHint =>
+      'Category defaults can be changed by the owner or country admins only';
+
+  @override
+  String get providerPricingLeaveEmpty => 'Leave empty to use the default';
+
+  @override
+  String get providerMyPricing => 'My pricing';
+
+  @override
+  String get providerMyPricingAdminNote =>
+      'Prices are set by the administration. Contact support to request a change.';
+
+  @override
+  String get providerMyPricingEmpty => 'No service profiles yet';
+
+  @override
+  String get closesNextDay => 'Closes next day';
+
+  @override
+  String get open24Hours => 'Open 24 hours';
+
+  @override
+  String get cashToCollectTitle => 'Cash to collect';
+
+  @override
+  String cashToCollectBody(String amount) {
+    return 'Delivered. Collect $amount from the customer, then confirm.';
+  }
+
+  @override
+  String get collectCashCta => 'Cash collected';
+
+  @override
+  String get cashCollectedTitle => 'Cash collected';
+
+  @override
+  String cashCollectedBody(String amount) {
+    return 'Collected $amount. It shows in your settlement.';
+  }
+
+  @override
+  String get rateDriverAfterCollection =>
+      'You can rate the driver once the cash is collected.';
+
+  @override
+  String get cashCollectionStateError =>
+      'Could not load the collection state. Check the connection and retry.';
+
+  @override
+  String get driverReviewHint => 'Write your review of the captain (optional)';
+
+  @override
+  String get providerPricingInvalidInput =>
+      'Enter a valid number within the allowed range';
+
+  @override
+  String providerPricingShowingOf(int shown, int total) {
+    return 'Showing $shown of $total';
+  }
+
+  @override
+  String get providerPricingLoadMore => 'Load more';
+
+  @override
+  String get otaTitle => 'A new update is available';
+
+  @override
+  String get otaIntro => 'New improvements are ready to install.';
+
+  @override
+  String get otaIntroHint =>
+      'The update will be downloaded and installed without reinstalling the app.';
+
+  @override
+  String get otaDownloading => 'Downloading…';
+
+  @override
+  String get otaReadyTitle => 'The update is ready to install';
+
+  @override
+  String get otaReadyBody =>
+      'The update has been downloaded. Tap Install to finish.';
+
+  @override
+  String get otaPermissionBody =>
+      'Allow Delwaqty to install updates in the settings screen, then come back. The installation will continue by itself and the download is kept.';
+
+  @override
+  String get otaDownloadFailed =>
+      'Could not download the update. Check your connection and try again.';
+
+  @override
+  String get otaInstallFailed =>
+      'Could not start the installation. Tap Install to try again.';
+
+  @override
+  String get otaChecksumFailed =>
+      'The downloaded update could not be verified. Tap Update now to download it again.';
+
+  @override
+  String get otaLater => 'Later';
+
+  @override
+  String get otaUpdateNow => 'Update now';
+
+  @override
+  String get otaInstall => 'Install';
+
+  @override
+  String get otaRetry => 'Try again';
+
+  @override
+  String get whatsappLaunchUnavailable =>
+      'WhatsApp could not open. Copy the code and send it manually.';
+
+  @override
+  String get whatsappNotConfigured =>
+      'WhatsApp verification is not available yet. You can still sign in with Google.';
+
+  @override
+  String get approved => 'Approved';
+
+  @override
+  String get settled => 'Settled';
+
+  @override
+  String get collected => 'Collected';
+
+  @override
+  String get outstanding => 'Outstanding';
+
+  @override
+  String get underReview => 'Under Review';
+
+  @override
+  String get failed => 'Failed';
+
+  @override
+  String get reconciliation => 'Reconciliation';
+
+  @override
+  String get totalCollected => 'Total Collected';
+
+  @override
+  String get approvedSettlements => 'Approved Settlements';
+
+  @override
+  String get closingOutstanding => 'Closing Outstanding';
+
+  @override
+  String get collectionLedger => 'Collection Ledger';
+
+  @override
+  String get noCollections => 'No collections';
+
+  @override
+  String get noCollectionsYet => 'No received top-ups in this region yet.';
+
+  @override
+  String get platformCollectionsAllRegions =>
+      'Platform Collections (all regions)';
+
+  @override
+  String get platformSettlementsAllRegions =>
+      'Platform Settlements (all regions)';
+
+  @override
+  String get graceLimitLabel => 'Limit';
+
+  @override
+  String get graceUsedLabel => 'Used';
+
+  @override
+  String get graceRemainingLabel => 'Remaining';
+
+  @override
+  String revokeSanctionConfirm(Object role, Object type) {
+    return 'Revoke $type for $role?';
+  }
+
+  @override
+  String get adminRegionScopeTitle => 'Region Scope';
+
+  @override
+  String get adminRegionSelectUser => 'Select an admin user to manage scope';
+
+  @override
+  String get adminRegionScopeSubtitle =>
+      'Assign region scope to admin-tier users at any level (governorate, markaz, district, village, ...). An admin with no assignments is global.';
+
+  @override
+  String get adminManagement => 'Admin management';
 }

@@ -645,8 +645,10 @@ class _LoginPageState extends ConsumerState<LoginPage>
             ),
           ),
           const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            spacing: 12,
+            runSpacing: 12,
             children: [
               Row(
                 children: [
@@ -713,8 +715,11 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   Widget _buildRegisterLink(AppLocalizations l10n) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 4,
+      runSpacing: 8,
       children: [
         Text(
           l10n.dontHaveAccount,

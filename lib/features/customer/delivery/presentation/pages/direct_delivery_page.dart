@@ -524,46 +524,53 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
             const SizedBox(height: 4),
           ],
 
-          Row(
+          Column(
             children: [
-              Expanded(
-                flex: 3,
-                child: TextField(
-                  controller: _itemNameController,
-                  decoration: InputDecoration(
-                    hintText: l10n.itemName,
-                    border: const OutlineInputBorder(),
-                    isDense: true,
-                  ),
+              TextField(
+                controller: _itemNameController,
+                decoration: InputDecoration(
+                  hintText: l10n.itemName,
+                  border: const OutlineInputBorder(),
+                  isDense: true,
                 ),
               ),
-              const SizedBox(width: 6),
-              SizedBox(
-                width: 48,
-                child: TextField(
-                  controller: _itemQtyController,
-                  focusNode: _qtyFocusNode,
-                  keyboardType: const TextInputType.numberWithOptions(),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(4),
-                  ],
-                  decoration: const InputDecoration(
-                    hintText: '1',
-                    border: OutlineInputBorder(),
-                    isDense: true,
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 6,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 48,
+                    child: TextField(
+                      controller: _itemQtyController,
+                      focusNode: _qtyFocusNode,
+                      keyboardType: const TextInputType.numberWithOptions(),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(4),
+                      ],
+                      decoration: const InputDecoration(
+                        hintText: '1',
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(width: 6),
-              _buildUnitSelector(l10n, cs),
-              const SizedBox(width: 4),
-              IconButton.filled(
-                tooltip: l10n.addItem,
-                onPressed: _addItem,
-                icon: const Icon(Icons.add_rounded, size: 20),
-                constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                  const SizedBox(width: 6),
+                  _buildUnitSelector(l10n, cs),
+                  const SizedBox(width: 4),
+                  IconButton.filled(
+                    tooltip: l10n.addItem,
+                    onPressed: _addItem,
+                    icon: const Icon(Icons.add_rounded, size: 20),
+                    constraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

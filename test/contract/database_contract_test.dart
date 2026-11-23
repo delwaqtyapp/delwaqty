@@ -366,12 +366,22 @@ void main() {
     String latestDefining(String marker) {
       // Application order is numeric by migration prefix, not file path:
       // migrations_archive/ holds 001-214, migrations/ holds 000 + 215+.
-      int numOf(File f) => int.parse(f.path.split('/').last.split('_').first);
+      int numOf(File f) {
+        // Versions may carry a split suffix (424a/424b); order by the
+        // numeric prefix, which is what this helper needs.
+        final token = f.path.split('/').last.split('_').first;
+        return int.parse(RegExp(r'^(\d+)').firstMatch(token)!.group(1)!);
+      }
+
       final hits =
           migrationFiles
               .where((f) => f.readAsStringSync().contains(marker))
               .toList()
-            ..sort((a, b) => numOf(a).compareTo(numOf(b)));
+            ..sort((a, b) {
+              final c = numOf(a).compareTo(numOf(b));
+              if (c != 0) return c;
+              return a.path.compareTo(b.path);
+            });
       expect(hits, isNotEmpty, reason: '$marker not found in migrations');
       return hits.last.readAsStringSync();
     }
@@ -410,12 +420,22 @@ void main() {
   });
 
   String latestDefining221(String marker) {
-    int numOf(File f) => int.parse(f.path.split('/').last.split('_').first);
+    int numOf(File f) {
+      // Versions may carry a split suffix (424a/424b); order by the numeric
+      // prefix, which is what this helper needs.
+      final token = f.path.split('/').last.split('_').first;
+      return int.parse(RegExp(r'^(\d+)').firstMatch(token)!.group(1)!);
+    }
+
     final hits =
         migrationFiles
             .where((f) => f.readAsStringSync().contains(marker))
             .toList()
-          ..sort((a, b) => numOf(a).compareTo(numOf(b)));
+          ..sort((a, b) {
+            final c = numOf(a).compareTo(numOf(b));
+            if (c != 0) return c;
+            return a.path.compareTo(b.path);
+          });
     expect(hits, isNotEmpty, reason: '$marker not found in migrations');
     return hits.last.readAsStringSync();
   }

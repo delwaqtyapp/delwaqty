@@ -9,6 +9,39 @@ import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
+import 'package:delwaqty/features/admin/presentation/widgets/intelligence_stat_grid.dart';
+
+/// Localized label for a ledger reference type (`order`, `ride`,
+/// `service_booking`, `delivery`, or a service-category code).
+String _referenceTypeLabel(AppLocalizations l10n, String type) {
+  switch (type) {
+    case 'order':
+      return l10n.orders;
+    case 'ride':
+    case 'delivery':
+      return l10n.delivery;
+    case 'service_booking':
+      return l10n.serviceBookingType;
+    default:
+      return localizedCategoryTypeLabel(type, l10n);
+  }
+}
+
+/// Localized label for a ledger status code.
+String _ledgerStatusLabel(AppLocalizations l10n, String status) {
+  switch (status.toLowerCase()) {
+    case 'completed':
+      return l10n.completed;
+    case 'pending':
+      return l10n.pending;
+    case 'cancelled':
+      return l10n.cancelled;
+    case 'failed':
+      return l10n.failed;
+    default:
+      return status;
+  }
+}
 
 class AdminTransactionLedgerPage extends ConsumerStatefulWidget {
   const AdminTransactionLedgerPage({super.key});
@@ -107,13 +140,8 @@ class _AdminTransactionLedgerPageState
     AppLocalizations l10n,
     ColorScheme cs,
   ) {
-    final typeLabels = <String?, String>{
-      null: l10n.all,
-      'order': l10n.orders,
-      'ride': l10n.delivery,
-      'service_booking': l10n.serviceBookingType,
-      'delivery': l10n.delivery,
-    };
+    String typeLabel(String? type) =>
+        type == null ? l10n.all : _referenceTypeLabel(l10n, type);
 
     return AnimatedFadeIn(
       child: Container(
@@ -134,7 +162,7 @@ class _AdminTransactionLedgerPageState
                     return DropdownMenuItem<String?>(
                       value: type,
                       child: Text(
-                        typeLabels[type] ?? l10n.all,
+                        typeLabel(type),
                         style: AppTextStyles.bodyMedium,
                       ),
                     );
@@ -276,7 +304,12 @@ class _LedgerItemTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          // Wrap: the chips and date drop to a second line on narrow
+          // screens instead of overflowing right.
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -285,14 +318,13 @@ class _LedgerItemTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  item.referenceType,
+                  _referenceTypeLabel(l10n, item.referenceType),
                   style: AppTextStyles.labelSmall.copyWith(
                     color: AppColors.brandPurple,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
@@ -300,14 +332,13 @@ class _LedgerItemTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  item.status,
+                  _ledgerStatusLabel(l10n, item.status),
                   style: AppTextStyles.labelSmall.copyWith(
                     color: statusColor,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-              const Spacer(),
               Text(
                 dateStr,
                 style: AppTextStyles.labelSmall.copyWith(
@@ -317,7 +348,11 @@ class _LedgerItemTile extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Row(
+          // Wrap: each labeled amount keeps its label above its value and
+          // wraps to the next line instead of concatenating.
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
             children: [
               _AmountColumn(
                 label: l10n.amount,
@@ -325,38 +360,22 @@ class _LedgerItemTile extends StatelessWidget {
                     '${item.grossAmount.toStringAsFixed(2)} ${item.currency}',
                 cs: cs,
               ),
-              const SizedBox(width: 12),
               _AmountColumn(
-                label: l10n.commissionLabel,
+                label: l10n.commissionRate,
                 value: '${item.commissionRate.toStringAsFixed(0)}%',
                 cs: cs,
                 isSmall: true,
               ),
-              const SizedBox(width: 12),
               _AmountColumn(
-                label: l10n.netLabel,
+                label: l10n.commissionLabel,
                 value:
                     '${item.commissionAmount.toStringAsFixed(2)} ${item.currency}',
                 cs: cs,
               ),
-              const Spacer(),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    l10n.netLabel,
-                    style: AppTextStyles.labelSmall.copyWith(
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                  Text(
-                    '${item.netAmount.toStringAsFixed(2)} ${item.currency}',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.brandPurple,
-                    ),
-                  ),
-                ],
+              _AmountColumn(
+                label: l10n.netLabel,
+                value: '${item.netAmount.toStringAsFixed(2)} ${item.currency}',
+                cs: cs,
               ),
             ],
           ),

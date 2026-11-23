@@ -1205,6 +1205,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  mobile_scanner:
+    dependency: "direct main"
+    description:
+      name: mobile_scanner
+      sha256: "175c62fc813c2bd762757359a2088f8cbdb72020cf85d4cd27fc4d3fe59be058"
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.5.0"
   mocktail:
     dependency: "direct dev"
     description:
@@ -1795,7 +1803,7 @@ packages:
     source: hosted
     version: "2.1.6"
   timezone:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: timezone
       sha256: "981d1020d6ef8fe1e7b3de5054e5b25579ae7c403d7734adc508ffc47668e9cb"

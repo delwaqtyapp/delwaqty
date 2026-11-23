@@ -52,6 +52,11 @@ final _homeServiceCategoriesProvider = FutureProvider<List<ServiceCategory>>((
 const _stripHeight = 124.0;
 const _tileLabelHeight = 32.0;
 
+/// Scale fixed strip/label heights with the text scale so two-line
+/// Arabic tile labels are never cropped vertically.
+double _scaledStripHeight(BuildContext context, double base) =>
+    base * MediaQuery.textScalerOf(context).scale(1.0).clamp(1.0, 1.8);
+
 void _precacheImageUrls(BuildContext context, Iterable<String> urls) {
   for (final url in urls) {
     if (url.isEmpty) continue;
@@ -265,7 +270,14 @@ class _EgyptHeroState extends State<_EgyptHero>
     final topInset = MediaQuery.paddingOf(context).top;
     final contentCoreH = math.max(topButtonSize, 68.0) + zoneGap + 48.0 + 8.0;
     final contentH = topInset + 2 + contentCoreH;
-    final heroH = math.max(heroImageH, contentH);
+    // Reserve the location badge's strip below the hero content so the
+    // search bar never overlaps the delivery address at large text
+    // scales; the badge itself anchors to the hero's bottom edge.
+    final textScale = MediaQuery.textScalerOf(context)
+        .scale(1.0)
+        .clamp(1.0, 1.8);
+    final badgeReserve = 40.0 * textScale + 4.0;
+    final heroH = math.max(heroImageH, contentH + badgeReserve);
 
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
@@ -302,12 +314,7 @@ class _EgyptHeroState extends State<_EgyptHero>
             Align(
               alignment: AlignmentDirectional.bottomStart,
               child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  horizontalPadding,
-                  0,
-                  12,
-                  (heroH - heroImageH) + 12,
-                ),
+                padding: EdgeInsets.fromLTRB(horizontalPadding, 0, 12, 12),
                 child: _buildLocationBadge(
                   context,
                   height: 28,
@@ -317,7 +324,13 @@ class _EgyptHeroState extends State<_EgyptHero>
             ),
             SafeArea(
               bottom: false,
-              child: Center(
+              // Top-anchor when the content (not the image) sets the hero
+              // height, so the search bar stays clear of the location
+              // badge anchored at the hero's bottom edge.
+              child: Align(
+                alignment: heroH > heroImageH
+                    ? Alignment.topCenter
+                    : Alignment.center,
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 600),
                   child: Padding(
@@ -1637,7 +1650,16 @@ class _DirectOrderButtonState extends State<_DirectOrderButton>
         duration: const Duration(milliseconds: 120),
         curve: Curves.easeOut,
         child: Container(
-          height: 76,
+          // Height grows with the text scale: the two-line Arabic
+          // title/subtitle must not clip at large text scales. A fixed
+          // (scaled) height is required because the CTA sits in an
+          // unbounded-height slot in the hero stack.
+          height:
+              84 *
+              MediaQuery.textScalerOf(context)
+                  .scale(1.0)
+                  .clamp(1.0, 1.8)
+                  .toDouble(),
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
@@ -1709,7 +1731,10 @@ class _DirectOrderButtonState extends State<_DirectOrderButton>
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
                     child: Row(
                       children: [
                         SizedBox(
@@ -1804,7 +1829,7 @@ class _DirectOrderButtonState extends State<_DirectOrderButton>
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
-                                maxLines: 1,
+                                maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ],
@@ -1889,7 +1914,7 @@ class _CompactCategories extends ConsumerWidget {
           categoriesAsync.when(
             skipLoadingOnRefresh: true,
             skipLoadingOnReload: true,
-            loading: () => _shimmerStrip(),
+            loading: () => _shimmerStrip(context),
             error: (_, _) => _buildStrip(
               context,
               _mergeItems(const <PlatformCategory>[], dbServices),
@@ -1948,9 +1973,9 @@ class _CompactCategories extends ConsumerWidget {
     return items.isEmpty ? _allDefaultServiceItems : items;
   }
 
-  Widget _shimmerStrip() {
+  Widget _shimmerStrip(BuildContext context) {
     return SizedBox(
-      height: _stripHeight,
+      height: _scaledStripHeight(context, _stripHeight),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const ClampingScrollPhysics(),
@@ -1964,7 +1989,7 @@ class _CompactCategories extends ConsumerWidget {
 
   Widget _buildStrip(BuildContext context, List<_TileItem> items) {
     return SizedBox(
-      height: _stripHeight,
+      height: _scaledStripHeight(context, _stripHeight),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const ClampingScrollPhysics(),
@@ -2024,7 +2049,7 @@ class _CompactCategories extends ConsumerWidget {
             ),
             const SizedBox(height: 6),
             SizedBox(
-              height: _tileLabelHeight,
+              height: _scaledStripHeight(context, _tileLabelHeight),
               child: Center(
                 child: Text(
                   category.displayName(
@@ -2070,7 +2095,7 @@ class _CompactCategories extends ConsumerWidget {
             ),
             const SizedBox(height: 6),
             SizedBox(
-              height: _tileLabelHeight,
+              height: _scaledStripHeight(context, _tileLabelHeight),
               child: Center(
                 child: Text(
                   label,
@@ -2157,7 +2182,14 @@ class _DiscoveryTabsState extends ConsumerState<_DiscoveryTabs> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
-        height: 44,
+        // Height grows with the text scale so the Arabic tab labels
+        // never chop inside the pill.
+        height:
+            44 *
+            MediaQuery.textScalerOf(context)
+                .scale(1.0)
+                .clamp(1.0, 1.8)
+                .toDouble(),
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
           color: cs.surfaceContainerHighest.withValues(alpha: 0.45),
@@ -2222,6 +2254,8 @@ class _DiscoveryTabsState extends ConsumerState<_DiscoveryTabs> {
                       fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
                       fontSize: 13,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.visible,
                   ),
                 ),
               ),
@@ -2355,7 +2389,7 @@ class _DiscoveryContent extends ConsumerWidget {
         rating: provider.rating,
         ratingCount: provider.ratingCount,
         subtitle: provider.hourlyRate != null
-            ? '${provider.hourlyRate!.toStringAsFixed(0)} ${AppLocalizations.of(context).currencySymbol}/${AppLocalizations.of(context).perHour}'
+            ? '${provider.hourlyRate!.toStringAsFixed(0)} ${AppLocalizations.of(context).currencySymbol}${AppLocalizations.of(context).perHour}'
             : null,
         onTap: () => context.push(
           '/home-services/category/${provider.categoryType.name}',

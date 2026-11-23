@@ -15,6 +15,7 @@ import 'package:delwaqty/features/admin/support_chat/presentation/pages/chat_per
 import 'package:delwaqty/features/admin/presentation/pages/admin_drivers_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_audit_log_page.dart';
 import 'package:delwaqty/features/admin/sanctions/presentation/pages/admin_sanctions_page.dart';
+import 'package:delwaqty/features/admin/sanctions/presentation/pages/admin_penalties_policy_page.dart';
 import 'package:delwaqty/features/admin/location_tracking/presentation/pages/admin_live_tracking_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_analytics_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/service_performance_page.dart';
@@ -34,6 +35,7 @@ import 'package:delwaqty/features/admin/member_management/presentation/pages/mem
 import 'package:delwaqty/features/admin/member_management/presentation/pages/member_detail_page.dart';
 import 'package:delwaqty/features/admin/admin_shell.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_commission_management_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_provider_pricing_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_approvals_center_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_quick_actions_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_profile_page.dart';
@@ -179,6 +181,11 @@ class AdminModule extends FeatureModule {
               _adminPage(const AdminSanctionsPage()),
         ),
         GoRoute(
+          path: 'penalties-policy',
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminPenaltiesPolicyPage()),
+        ),
+        GoRoute(
           path: 'live-tracking',
           pageBuilder: (context, state) =>
               _adminPage(const AdminLiveTrackingPage()),
@@ -207,6 +214,11 @@ class AdminModule extends FeatureModule {
           path: 'commissions',
           pageBuilder: (context, state) =>
               _adminPage(const AdminCommissionManagementPage()),
+        ),
+        GoRoute(
+          path: 'provider-pricing',
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminProviderPricingPage()),
         ),
         GoRoute(
           path: 'approvals',

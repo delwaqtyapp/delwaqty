@@ -83,8 +83,11 @@ class _AdminUsersWebPageState extends State<AdminUsersWebPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    // Narrow phones get tighter padding so the header and content keep
+    // usable width at large text scales.
+    final padding = MediaQuery.sizeOf(context).width < 600 ? 16.0 : 32.0;
     return Padding(
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -140,9 +143,21 @@ class _AdminUsersWebPageState extends State<AdminUsersWebPage> {
                   return AdminLoadingState(label: l10n.adminLoadingLiveStats);
                 }
                 if (snap.hasError) {
-                  return AdminErrorState(
-                    message: appErrorText(context, snap.error!),
-                    onRetry: _refresh,
+                  // Scrollable so a tall error state never overflows
+                  // vertically on small screens.
+                  return LayoutBuilder(
+                    builder: (context, constraints) => SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
+                        ),
+                        child: AdminErrorState(
+                          message: appErrorText(context, snap.error!),
+                          onRetry: _refresh,
+                        ),
+                      ),
+                    ),
                   );
                 }
                 final users = _applyFilters(snap.data ?? const []);
@@ -221,22 +236,31 @@ class _UserRow extends StatelessWidget {
         ),
       ),
       title: Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
-      subtitle: Text(
-        [
-          if (email.isNotEmpty) email,
-          if (phone.isNotEmpty) phone,
-          if (created != null)
-            '${l10n.joinedDate}: ${created.toLocal().toString().substring(0, 10)}',
-        ].join(' • '),
-      ),
-      trailing: Row(
+      // Chips wrap below so name and contact line keep the full width.
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          _Chip(label: shownRole, color: AppColors.brandPurple),
-          const SizedBox(width: 8),
-          _Chip(
-            label: status == 'active' ? l10n.active : status,
-            color: status == 'active' ? Colors.green : Colors.red,
+          Text(
+            [
+              if (email.isNotEmpty) email,
+              if (phone.isNotEmpty) phone,
+              if (created != null)
+                '${l10n.joinedDate}: ${created.toLocal().toString().substring(0, 10)}',
+            ].join(' • '),
+          ),
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: Wrap(
+              spacing: 8,
+              children: [
+                _Chip(label: shownRole, color: AppColors.brandPurple),
+                _Chip(
+                  label: status == 'active' ? l10n.active : status,
+                  color: status == 'active' ? Colors.green : Colors.red,
+                ),
+              ],
+            ),
           ),
         ],
       ),

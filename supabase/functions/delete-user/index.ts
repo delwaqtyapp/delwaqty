@@ -85,15 +85,21 @@ Deno.serve(async (req: Request) => {
     const url = new URL(req.url);
     const targetId = url.searchParams.get("userId") ?? callerId;
     if (targetId !== callerId) {
-      const { data: callerRow, error: roleError } = await admin
-        .from("users")
-        .select("role")
-        .eq("id", callerId)
-        .single();
-      if (roleError || callerRow?.role !== "admin") {
-        return json({ error: "Admin required to delete other users" }, 403);
-      }
+      // Cross-account deletion belongs to delete_member_account's approved
+      // lifecycle, never this permanent self-service purge endpoint.
+      return json({ error: "Use the member deletion approval workflow", code: "APPROVAL_WORKFLOW_REQUIRED" }, 403);
     }
+
+    // Eligibility preflight MUST precede every Storage API call. Mirror the
+    // transactional function's guards so rejected admin/missing targets keep
+    // their objects. Fail closed on lookup errors.
+    const { data: target, error: targetError } = await admin.from("users")
+      .select("id").eq("id", targetId).maybeSingle();
+    if (targetError) throw new Error("Deletion eligibility lookup failed");
+    if (!target) return json({ error: "Member not found" }, 404);
+    const { data: isActiveAdmin, error: eligibilityError } = await admin.rpc("_is_active_admin_uid", { p_uid: targetId });
+    if (eligibilityError) throw new Error("Deletion eligibility check failed");
+    if (isActiveAdmin !== false) return json({ error: "Admins are managed through the admin lifecycle" }, 403);
 
     // 2. Purge storage objects through the Storage API.
     let storageRemoved = 0;

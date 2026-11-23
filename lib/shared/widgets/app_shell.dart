@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/core/module/feature_registry.dart';
+import 'package:delwaqty/core/module/shell_customization.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
@@ -31,6 +32,25 @@ class AppShell extends ConsumerWidget {
       index,
       initialLocation: index == navigationShell.currentIndex,
     );
+  }
+
+  /// Nav modules visible for this app/account, as (branch index, module).
+  /// Branch indices follow the registry's priority order, so hiding a tab
+  /// never shifts which branch another tab opens.
+  static List<MapEntry<int, FeatureModule>> visibleNav(
+    List<FeatureModule> navModules,
+    ShellNavConfig? config,
+  ) {
+    final all = [
+      for (var i = 0; i < navModules.length; i++) MapEntry(i, navModules[i]),
+    ];
+    if (config == null) return all;
+    final byId = {for (final e in all) e.value.id: e};
+    final visible = [
+      for (final id in config.visibleModuleIds)
+        if (byId[id] != null) byId[id]!,
+    ];
+    return visible.isEmpty ? all : visible;
   }
 
   void _handlePop(BuildContext context, WidgetRef ref) {
@@ -168,6 +188,16 @@ class AppShell extends ConsumerWidget {
     final cs = theme.colorScheme;
     final registry = FeatureRegistry.instance;
     final navModules = registry.navModules;
+    final config = ref.watch(shellNavConfigProvider);
+    final visible = visibleNav(navModules, config);
+    final l10n = AppLocalizations.of(context);
+
+    // A branch that is open but has no tab (the owner opening My services
+    // from the dashboard) shows no selected pill. Access to hidden surfaces
+    // is decided by the router guard, not here.
+    final currentVisible = visible.indexWhere(
+      (e) => e.key == navigationShell.currentIndex,
+    );
 
     return PopScope(
       canPop: false,
@@ -196,9 +226,10 @@ class AppShell extends ConsumerWidget {
           child: navigationShell,
         ),
         bottomNavigationBar: _TransparentBottomNav(
-          selectedIndex: navigationShell.currentIndex,
-          onDestinationSelected: _onTap,
-          navModules: navModules,
+          selectedIndex: currentVisible,
+          onDestinationSelected: (i) => _onTap(visible[i].key),
+          navModules: [for (final e in visible) e.value],
+          labelOverride: (m) => config?.labelFor?.call(m.id, l10n),
           colorScheme: cs,
         ),
       ),
@@ -212,7 +243,10 @@ class _TransparentBottomNav extends StatelessWidget {
     required this.onDestinationSelected,
     required this.navModules,
     required this.colorScheme,
+    this.labelOverride,
   });
+
+  final String? Function(FeatureModule module)? labelOverride;
 
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
@@ -263,14 +297,18 @@ class _TransparentBottomNav extends StatelessWidget {
                   children: List.generate(navModules.length, (index) {
                     final module = navModules[index];
                     final isSelected = index == selectedIndex;
-                    return NavPillButton(
+                    final pill = NavPillButton(
                       icon: module.icon!,
-                      label: module.name(context),
+                      label:
+                          labelOverride?.call(module) ?? module.name(context),
                       isSelected: isSelected,
                       labelVisible: false,
                       onTap: () => onDestinationSelected(index),
                       colorScheme: colorScheme,
                     );
+                    // Only the selected pill may shrink (its label ellipsizes);
+                    // the other icons keep their natural size.
+                    return isSelected ? Flexible(child: pill) : pill;
                   }),
                 ),
               ),

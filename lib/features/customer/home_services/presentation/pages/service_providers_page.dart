@@ -358,7 +358,7 @@ class _ProviderCard extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
                         child: Text(
-                          '${provider.hourlyRate!.toStringAsFixed(0)} ${AppLocalizations.of(context).currencySymbol}/${AppLocalizations.of(context).perHour}',
+                          '${provider.hourlyRate!.toStringAsFixed(0)} ${AppLocalizations.of(context).currencySymbol}${AppLocalizations.of(context).perHour}',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: cs.primary,
                             fontWeight: FontWeight.w600,

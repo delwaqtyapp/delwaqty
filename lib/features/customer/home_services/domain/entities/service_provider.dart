@@ -40,9 +40,18 @@ abstract class ServiceProvider with _$ServiceProvider {
       ratingCount: (json['rating_count'] as num?)?.toInt() ?? 0,
       isVerified: json['is_verified'] as bool? ?? false,
       isAvailable: json['is_available'] as bool? ?? false,
-      hourlyRate: (json['hourly_rate'] as num?)?.toDouble(),
-      fixedPriceMin: (json['fixed_price_min'] as num?)?.toDouble(),
-      fixedPriceMax: (json['fixed_price_max'] as num?)?.toDouble(),
+      // 397: rows read through service_providers_with_effective_pricing
+      // carry the resolved values; fall back to the raw columns for any
+      // other source. The displayed price is always the booking truth.
+      hourlyRate:
+          (json['effective_hourly_rate'] as num?)?.toDouble() ??
+          (json['hourly_rate'] as num?)?.toDouble(),
+      fixedPriceMin:
+          (json['effective_fixed_price_min'] as num?)?.toDouble() ??
+          (json['fixed_price_min'] as num?)?.toDouble(),
+      fixedPriceMax:
+          (json['effective_fixed_price_max'] as num?)?.toDouble() ??
+          (json['fixed_price_max'] as num?)?.toDouble(),
       city: json['city'] as String?,
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),

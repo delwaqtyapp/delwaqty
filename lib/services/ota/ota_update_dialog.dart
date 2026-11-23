@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/core/router/admin_router.dart';
 import 'package:delwaqty/core/router/app_router.dart';
@@ -6,6 +9,8 @@ import 'package:delwaqty/driver/app_router.dart';
 import 'package:delwaqty/gen/assets.gen.dart';
 import 'package:delwaqty/provider/app_router.dart';
 import 'package:delwaqty/services/ota/ota_update_manager.dart';
+
+final Set<AppFlavor> _openUpdateFlavors = {};
 
 /// Shows a single update dialog when a newer build is available for the
 /// running flavor. Returns true if a dialog (update / failure) was shown.
@@ -17,6 +22,7 @@ Future<bool> showOtaUpdateIfAvailable({
   required AppFlavor flavor,
   bool force = false,
 }) async {
+  if (_openUpdateFlavors.contains(flavor)) return false;
   final result = await checkForOtaUpdate(flavor);
   if (!result.needsUpdate && !force) return false;
 
@@ -28,12 +34,17 @@ Future<bool> showOtaUpdateIfAvailable({
   if (navCtx != null && !navCtx.mounted) return false;
 
   final dialogContext = navCtx ?? context!;
-  await showDialog<void>(
-    context: dialogContext,
-    barrierDismissible: false,
-    builder: (_) => _OtaUpdateDialog(flavor: flavor, result: result),
-  );
-  return true;
+  if (!_openUpdateFlavors.add(flavor)) return false;
+  try {
+    await showDialog<void>(
+      context: dialogContext,
+      barrierDismissible: false,
+      builder: (_) => OtaUpdateDialog(flavor: flavor, result: result),
+    );
+    return true;
+  } finally {
+    _openUpdateFlavors.remove(flavor);
+  }
 }
 
 /// Shows the update dialog for an ALREADY-verified [result] (the caller has
@@ -50,7 +61,7 @@ Future<void> showUpdateAvailableAndDownload({
   await showDialog<void>(
     context: dialogContext,
     barrierDismissible: false,
-    builder: (_) => _OtaUpdateDialog(flavor: flavor, result: result),
+    builder: (_) => OtaUpdateDialog(flavor: flavor, result: result),
   );
 }
 
@@ -67,67 +78,145 @@ NavigatorState? _navigatorFor(AppFlavor flavor) {
   }
 }
 
-class _OtaUpdateDialog extends StatefulWidget {
-  const _OtaUpdateDialog({required this.flavor, required this.result});
+/// Platform calls the dialog needs, injectable so the flow can be tested.
+class OtaUpdateActions {
+  const OtaUpdateActions({
+    required this.download,
+    required this.canInstall,
+    required this.install,
+  });
+
+  factory OtaUpdateActions.forFlavor(
+    AppFlavor flavor, {
+    OtaCheckResult? offered,
+  }) => OtaUpdateActions(
+    download: (onProgress) =>
+        downloadLatestApk(flavor, onProgress: onProgress, offered: offered),
+    canInstall: canRequestPackageInstalls,
+    install: installDownloadedApk,
+  );
+
+  final Future<OtaDownloadResult> Function(void Function(double) onProgress)
+  download;
+  final Future<bool> Function() canInstall;
+
+  /// Returns null on success, else the native error code.
+  final Future<String?> Function(File file) install;
+}
+
+enum OtaDialogStep {
+  idle,
+  downloading,
+  ready,
+  awaitingPermission,
+  downloadFailed,
+  installFailed,
+  checksumFailed,
+}
+
+/// The update notice. It stays on screen until the new version is installed
+/// (the OS then restarts the app): after the download it offers "Install" for
+/// the file already on disk, and after the user grants "install unknown apps"
+/// it resumes the install by itself when the app returns to the foreground.
+class OtaUpdateDialog extends StatefulWidget {
+  const OtaUpdateDialog({
+    super.key,
+    required this.flavor,
+    required this.result,
+    this.actions,
+  });
 
   final AppFlavor flavor;
   final OtaCheckResult result;
+  final OtaUpdateActions? actions;
 
   @override
-  State<_OtaUpdateDialog> createState() => _OtaUpdateDialogState();
+  State<OtaUpdateDialog> createState() => _OtaUpdateDialogState();
 }
 
-class _OtaUpdateDialogState extends State<_OtaUpdateDialog> {
-  bool _downloading = false;
+class _OtaUpdateDialogState extends State<OtaUpdateDialog>
+    with WidgetsBindingObserver {
+  late final OtaUpdateActions _actions =
+      widget.actions ??
+      OtaUpdateActions.forFlavor(widget.flavor, offered: widget.result);
+  OtaDialogStep _step = OtaDialogStep.idle;
   double _progress = 0;
-  bool _downloadFailed = false;
-  String? _downloadError;
+  File? _file;
+  bool _installing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed &&
+        _step == OtaDialogStep.awaitingPermission &&
+        _file != null) {
+      _resumeAfterPermission();
+    }
+  }
+
+  Future<void> _resumeAfterPermission() async {
+    final allowed = await _actions.canInstall();
+    if (!mounted || _step != OtaDialogStep.awaitingPermission) return;
+    // Still not allowed: keep the calm instructions, no error.
+    if (allowed) await _install();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final busy = _step == OtaDialogStep.downloading;
 
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest
-                  .withValues(alpha: 0.5),
-              shape: BoxShape.circle,
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(18),
-              child: Image(
-                image: Assets.egypt.delwaqtyLogoMark.provider(),
-                width: 36,
-                height: 36,
-                fit: BoxFit.contain,
+    return PopScope(
+      canPop: false,
+      child: AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                shape: BoxShape.circle,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: Image(
+                  image: Assets.egypt.delwaqtyLogoMark.provider(),
+                  width: 36,
+                  height: 36,
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              isAr ? 'يتوفر تحديث جديد' : 'A new update is available',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                _step == OtaDialogStep.ready ||
+                        _step == OtaDialogStep.awaitingPermission ||
+                        _step == OtaDialogStep.installFailed
+                    ? l10n.otaReadyTitle
+                    : l10n.otaTitle,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
-          ),
-        ],
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest
-                  .withValues(alpha: 0.5),
-              shape: BoxShape.circle,
-            ),
-            child: ClipRRect(
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
               borderRadius: BorderRadius.circular(22),
               child: Image(
                 image: Assets.egypt.delwaqtyLogoMark.provider(),
@@ -136,127 +225,136 @@ class _OtaUpdateDialogState extends State<_OtaUpdateDialog> {
                 fit: BoxFit.contain,
               ),
             ),
-          ),
-          const SizedBox(height: 14),
-          if (_downloading) ...[
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest
-                    .withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.cloud_download_rounded,
-                          size: 20,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            isAr ? 'جاري تحميل التحديث…' : 'Downloading…',
-                          ),
-                        ),
-                        Text(
-                          '${(_progress * 100).clamp(0, 100).round()}%',
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: LinearProgressIndicator(
-                        value: _progress,
-                        minHeight: 8,
-                        backgroundColor: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
+            const SizedBox(height: 14),
+            if (busy)
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.cloud_download_rounded,
+                        size: 20,
+                        color: scheme.primary,
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ] else if (_downloadFailed) ...[
-            Text(
-              isAr
-                  ? _downloadError == 'needs_install_permission'
-                        ? 'أكّد السماح بالتثبيت من مصادر غير معروفة في الخطوة التالية ثم أعد المحاولة.'
-                        : 'تعذر تحميل التحديث. تأكد من الاتصال بالإنترنت ثم أعد المحاولة.'
-                  : _downloadError == 'needs_install_permission'
-                  ? 'Allow installing from unknown sources in the next step, then retry.'
-                  : 'Could not download the update. Check your connection and try again.',
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
-          ] else ...[
-            Text(
-              isAr
-                  ? 'تحسينات جديدة جاهزة للتطبيق.'
-                  : 'New improvements are ready to install.',
-            ),
-            const SizedBox(height: 8),
-            Text(
-              isAr
-                  ? 'سيتم تنزيل التحديث وتثبيته مباشرة دون إعادة تثبيت التطبيق.'
-                  : 'The update will be downloaded and installed without reinstalling the app.',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(l10n.otaDownloading)),
+                      Text('${(_progress * 100).clamp(0, 100).round()}%'),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  LinearProgressIndicator(value: _progress, minHeight: 8),
+                ],
+              )
+            else
+              ..._body(l10n, scheme),
           ],
+        ),
+        actions: [
+          if (_step == OtaDialogStep.idle ||
+              _step == OtaDialogStep.downloadFailed ||
+              _step == OtaDialogStep.installFailed ||
+              _step == OtaDialogStep.awaitingPermission ||
+              _step == OtaDialogStep.checksumFailed)
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(l10n.otaLater),
+            ),
+          if (_step == OtaDialogStep.idle ||
+              _step == OtaDialogStep.checksumFailed)
+            FilledButton(
+              onPressed: _startUpdate,
+              child: Text(l10n.otaUpdateNow),
+            ),
+          if (_step == OtaDialogStep.downloadFailed)
+            FilledButton(onPressed: _startUpdate, child: Text(l10n.otaRetry)),
+          if (_step == OtaDialogStep.ready ||
+              _step == OtaDialogStep.awaitingPermission ||
+              _step == OtaDialogStep.installFailed)
+            FilledButton(
+              onPressed: _installing ? null : _install,
+              child: Text(l10n.otaInstall),
+            ),
         ],
       ),
-      actions: [
-        if (!_downloadFailed) ...[
-          TextButton(
-            onPressed: _downloading ? null : () => Navigator.of(context).pop(),
-            child: Text(isAr ? 'لاحقًا' : 'Later'),
-          ),
-        ] else ...[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(isAr ? 'إغلاق' : 'Close'),
-          ),
-        ],
-        if (!_downloading && !_downloadFailed)
-          FilledButton(
-            onPressed: _startUpdate,
-            child: Text(isAr ? 'تحديث الآن' : 'Update now'),
-          ),
-      ],
     );
+  }
+
+  List<Widget> _body(AppLocalizations l10n, ColorScheme scheme) {
+    switch (_step) {
+      case OtaDialogStep.ready:
+        return [Text(l10n.otaReadyBody)];
+      case OtaDialogStep.awaitingPermission:
+        return [Text(l10n.otaPermissionBody)];
+      case OtaDialogStep.downloadFailed:
+        return [
+          Text(l10n.otaDownloadFailed, style: TextStyle(color: scheme.error)),
+        ];
+      case OtaDialogStep.installFailed:
+        return [
+          Text(l10n.otaInstallFailed, style: TextStyle(color: scheme.error)),
+        ];
+      case OtaDialogStep.checksumFailed:
+        return [
+          Text(l10n.otaChecksumFailed, style: TextStyle(color: scheme.error)),
+        ];
+      case OtaDialogStep.idle:
+      case OtaDialogStep.downloading:
+        return [
+          Text(l10n.otaIntro),
+          const SizedBox(height: 8),
+          Text(l10n.otaIntroHint, style: Theme.of(context).textTheme.bodySmall),
+        ];
+    }
   }
 
   Future<void> _startUpdate() async {
     setState(() {
-      _downloading = true;
-      _downloadFailed = false;
+      _step = OtaDialogStep.downloading;
+      _progress = 0;
     });
-    final result = await downloadAndInstallLatest(
-      widget.flavor,
-      onProgress: (f) => setState(() => _progress = f),
-    );
-    final success = result.$1 != null;
+    final download = await _actions.download((f) {
+      if (mounted) setState(() => _progress = f);
+    });
     if (!mounted) return;
-    setState(() {
-      _downloading = false;
-      _downloadFailed = !success;
-      _downloadError = result.$2;
-    });
-    if (success) {
-      Navigator.of(context).pop();
+    final file = download.file;
+    if (file == null) {
+      setState(() {
+        _step = download.error == 'checksum_mismatch'
+            ? OtaDialogStep.checksumFailed
+            : OtaDialogStep.downloadFailed;
+      });
+      return;
     }
+    _file = file;
+    setState(() => _step = OtaDialogStep.ready);
+    await _install();
+  }
+
+  /// Installs the file that is already on disk. Never downloads again.
+  Future<void> _install() async {
+    final file = _file;
+    if (file == null || _installing) return;
+    _installing = true;
+    setState(() {});
+    final error = await _actions.install(file);
+    _installing = false;
+    if (!mounted) return;
+    if (error == 'artifact_missing' || error == 'artifact_invalid') {
+      _file = null;
+      await _startUpdate();
+      return;
+    }
+    setState(() {
+      if (error == null) {
+        // The system installer is open. Keep the notice and its Install
+        // button: it only goes away when the new version replaces this one.
+        _step = OtaDialogStep.ready;
+      } else if (error == 'needs_install_permission') {
+        _step = OtaDialogStep.awaitingPermission;
+      } else {
+        _step = OtaDialogStep.installFailed;
+      }
+    });
   }
 }

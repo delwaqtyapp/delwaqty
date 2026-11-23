@@ -23,12 +23,14 @@ class AppAdmin extends ConsumerStatefulWidget {
   ConsumerState<AppAdmin> createState() => _AppAdminState();
 }
 
-class _AppAdminState extends ConsumerState<AppAdmin> {
+class _AppAdminState extends ConsumerState<AppAdmin>
+    with WidgetsBindingObserver {
   late final AuthStateNotifier _authNotifier;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _authNotifier = ref.read(authStateProvider.notifier);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
@@ -63,6 +65,11 @@ class _AppAdminState extends ConsumerState<AppAdmin> {
     });
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) unawaited(_checkOtaUpdate());
+  }
+
   Future<void> _checkOtaUpdate() async {
     if (!mounted) return;
     await Future<void>.delayed(const Duration(seconds: 4));
@@ -77,6 +84,7 @@ class _AppAdminState extends ConsumerState<AppAdmin> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _authNotifier.stopAuthListener();
     super.dispose();
   }

@@ -1658,6 +1658,138 @@ abstract class AppLocalizations {
   /// **'EGP'**
   String get egp;
 
+  /// No description provided for @provTabCashier.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashier'**
+  String get provTabCashier;
+
+  /// No description provided for @provTabMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Menu'**
+  String get provTabMenu;
+
+  /// No description provided for @provManageMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage menu'**
+  String get provManageMenu;
+
+  /// No description provided for @provTabItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get provTabItems;
+
+  /// No description provided for @provManageItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage items'**
+  String get provManageItems;
+
+  /// No description provided for @provTabMedicines.
+  ///
+  /// In en, this message translates to:
+  /// **'Medicines'**
+  String get provTabMedicines;
+
+  /// No description provided for @provManageMedicines.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage medicines'**
+  String get provManageMedicines;
+
+  /// No description provided for @provTabTableBookings.
+  ///
+  /// In en, this message translates to:
+  /// **'Table bookings'**
+  String get provTabTableBookings;
+
+  /// No description provided for @provTabJobs.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs'**
+  String get provTabJobs;
+
+  /// No description provided for @provServiceRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Service requests'**
+  String get provServiceRequests;
+
+  /// No description provided for @provTabLessonRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson requests'**
+  String get provTabLessonRequests;
+
+  /// No description provided for @provTabAppointments.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointments'**
+  String get provTabAppointments;
+
+  /// No description provided for @provTabMyServices.
+  ///
+  /// In en, this message translates to:
+  /// **'My services'**
+  String get provTabMyServices;
+
+  /// No description provided for @provTabMyLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'My lessons'**
+  String get provTabMyLessons;
+
+  /// No description provided for @provMyServicesPrices.
+  ///
+  /// In en, this message translates to:
+  /// **'My services & prices'**
+  String get provMyServicesPrices;
+
+  /// No description provided for @provMyLessonsPrices.
+  ///
+  /// In en, this message translates to:
+  /// **'My lessons & prices'**
+  String get provMyLessonsPrices;
+
+  /// No description provided for @provPricesAdminManaged.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices are set by the admin team. Contact support to change them.'**
+  String get provPricesAdminManaged;
+
+  /// No description provided for @provEmptyServices.
+  ///
+  /// In en, this message translates to:
+  /// **'No services are registered on your account yet'**
+  String get provEmptyServices;
+
+  /// No description provided for @provEmptyLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'No lessons are registered on your account yet'**
+  String get provEmptyLessons;
+
+  /// No description provided for @provHourlyRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly rate'**
+  String get provHourlyRate;
+
+  /// No description provided for @provFixedPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed price'**
+  String get provFixedPrice;
+
+  /// No description provided for @provPriceNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Price not set by admin yet'**
+  String get provPriceNotSet;
+
   /// No description provided for @searchRestaurants.
   ///
   /// In en, this message translates to:
@@ -7298,6 +7430,78 @@ abstract class AppLocalizations {
   /// **'Sanctions Management'**
   String get sanctionsManagement;
 
+  /// No description provided for @generalPenalties.
+  ///
+  /// In en, this message translates to:
+  /// **'General Penalties'**
+  String get generalPenalties;
+
+  /// No description provided for @generalPenaltiesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalties applied across the whole platform. Only the owner account can change them.'**
+  String get generalPenaltiesSubtitle;
+
+  /// No description provided for @cancelSuspensionPenalty.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeated cancellation penalty'**
+  String get cancelSuspensionPenalty;
+
+  /// No description provided for @cancelSuspensionPenaltyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspends the customer account after the third cancellation in the same month (allowance: 2).'**
+  String get cancelSuspensionPenaltyDescription;
+
+  /// No description provided for @refusalSuspensionPenalty.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeated delivery refusal penalty'**
+  String get refusalSuspensionPenalty;
+
+  /// No description provided for @refusalSuspensionPenaltyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspends the customer account after the third delivery refusal in the same month (allowance: 2 warnings).'**
+  String get refusalSuspensionPenaltyDescription;
+
+  /// No description provided for @editPenalty.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit penalty'**
+  String get editPenalty;
+
+  /// No description provided for @suspensionDaysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspension duration (days)'**
+  String get suspensionDaysLabel;
+
+  /// No description provided for @penaltyChangeReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for change (optional)'**
+  String get penaltyChangeReasonHint;
+
+  /// No description provided for @penaltyUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalty updated'**
+  String get penaltyUpdated;
+
+  /// No description provided for @ownerOnlyPenalties.
+  ///
+  /// In en, this message translates to:
+  /// **'The general penalties list is available to the owner account only.'**
+  String get ownerOnlyPenalties;
+
+  /// No description provided for @invalidSuspensionDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration must be between 1 and 365 days'**
+  String get invalidSuspensionDays;
+
   /// No description provided for @noSanctions.
   ///
   /// In en, this message translates to:
@@ -8102,6 +8306,18 @@ abstract class AppLocalizations {
   /// **'{percent}% off'**
   String discountPercent(Object percent);
 
+  /// No description provided for @platformCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Delwaqty gift'**
+  String get platformCredit;
+
+  /// No description provided for @platformCreditAutoApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'You have a Delwaqty gift of {amount} EGP. It is deducted automatically from this order.'**
+  String platformCreditAutoApplied(Object amount);
+
   /// No description provided for @mostOrdered.
   ///
   /// In en, this message translates to:
@@ -8381,7 +8597,7 @@ abstract class AppLocalizations {
   /// No description provided for @userTypeCustomerDesc.
   ///
   /// In en, this message translates to:
-  /// **'Order from stores, restaurants and services'**
+  /// **'Order your food now'**
   String get userTypeCustomerDesc;
 
   /// No description provided for @userTypeMerchant.
@@ -8393,7 +8609,7 @@ abstract class AppLocalizations {
   /// No description provided for @userTypeMerchantDesc.
   ///
   /// In en, this message translates to:
-  /// **'Sell your products on the platform'**
+  /// **'Sell your products with Delwaqty'**
   String get userTypeMerchantDesc;
 
   /// No description provided for @userTypeDriver.
@@ -8405,7 +8621,7 @@ abstract class AppLocalizations {
   /// No description provided for @userTypeDriverDesc.
   ///
   /// In en, this message translates to:
-  /// **'Deliver orders to customers'**
+  /// **'Deliver orders and earn with Delwaqty'**
   String get userTypeDriverDesc;
 
   /// No description provided for @userTypeProvider.
@@ -8417,7 +8633,7 @@ abstract class AppLocalizations {
   /// No description provided for @userTypeProviderDesc.
   ///
   /// In en, this message translates to:
-  /// **'Offer your services to customers'**
+  /// **'Offer your services professionally'**
   String get userTypeProviderDesc;
 
   /// No description provided for @uploadIdCard.
@@ -11696,6 +11912,30 @@ abstract class AppLocalizations {
   /// **'Admin assigned'**
   String get adminAssigned;
 
+  /// No description provided for @auditResourceServiceCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Service category'**
+  String get auditResourceServiceCategory;
+
+  /// No description provided for @auditCommissionRateUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Commission rate updated'**
+  String get auditCommissionRateUpdated;
+
+  /// No description provided for @walletTxCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit'**
+  String get walletTxCredit;
+
+  /// No description provided for @walletTxDebit.
+  ///
+  /// In en, this message translates to:
+  /// **'Debit'**
+  String get walletTxDebit;
+
   /// No description provided for @roleUpdated.
   ///
   /// In en, this message translates to:
@@ -13472,6 +13712,84 @@ abstract class AppLocalizations {
   /// **'Resend Code'**
   String get resendWhatsAppCode;
 
+  /// No description provided for @whatsappYourCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your verification code'**
+  String get whatsappYourCodeLabel;
+
+  /// No description provided for @copyOtpCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy code'**
+  String get copyOtpCode;
+
+  /// No description provided for @otpCodeCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Code copied'**
+  String get otpCodeCopied;
+
+  /// No description provided for @whatsappWaitingAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for WhatsApp confirmation. This screen updates automatically once your message arrives.'**
+  String get whatsappWaitingAuto;
+
+  /// No description provided for @otpExpiresIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Code expires in {time}'**
+  String otpExpiresIn(String time);
+
+  /// No description provided for @otpExpiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Code expired'**
+  String get otpExpiredTitle;
+
+  /// No description provided for @otpExpiredBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Codes last 10 minutes. Get a fresh one - it takes seconds.'**
+  String get otpExpiredBody;
+
+  /// No description provided for @requestNewOtpCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Get a new code'**
+  String get requestNewOtpCode;
+
+  /// No description provided for @otpNotConfirmedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not confirmed yet. Make sure you sent the message from your WhatsApp ({phone}), then give it a few seconds.'**
+  String otpNotConfirmedYet(String phone);
+
+  /// No description provided for @wrongPhoneNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong number? Close this and go back to edit it.'**
+  String get wrongPhoneNumberHint;
+
+  /// No description provided for @resendOtpAvailableIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend available in {time}'**
+  String resendOtpAvailableIn(String time);
+
+  /// No description provided for @retryRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get retryRequest;
+
+  /// No description provided for @iSentItCheckNow.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve sent it - check now'**
+  String get iSentItCheckNow;
+
   /// No description provided for @phoneOrEmailOrUsername.
   ///
   /// In en, this message translates to:
@@ -14747,6 +15065,18 @@ abstract class AppLocalizations {
   /// Checkout RPC error mapping
   ///
   /// In en, this message translates to:
+  /// **'Wallet payment is not available yet. Please pay cash on delivery, InstaPay or Vodafone Cash.'**
+  String get checkoutWalletNotAvailable;
+
+  /// Checkout RPC error mapping
+  ///
+  /// In en, this message translates to:
+  /// **'Card payment is not available yet. Please pay cash on delivery, InstaPay or Vodafone Cash.'**
+  String get checkoutCardNotAvailable;
+
+  /// Checkout RPC error mapping
+  ///
+  /// In en, this message translates to:
   /// **'Please choose a delivery location on the map'**
   String get checkoutMissingDeliveryLocation;
 
@@ -14948,6 +15278,126 @@ abstract class AppLocalizations {
   /// **'Invalid quantity for one of the items'**
   String get posErrInvalidQty;
 
+  /// POS: posScanBarcode
+  ///
+  /// In en, this message translates to:
+  /// **'Scan barcode'**
+  String get posScanBarcode;
+
+  /// POS: posSearchHint
+  ///
+  /// In en, this message translates to:
+  /// **'Search name or barcode'**
+  String get posSearchHint;
+
+  /// POS: posScanAdded
+  ///
+  /// In en, this message translates to:
+  /// **'Added to cart'**
+  String get posScanAdded;
+
+  /// POS: posDrugFoundTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Found in drug catalog'**
+  String get posDrugFoundTitle;
+
+  /// POS: posDrugImportAdd
+  ///
+  /// In en, this message translates to:
+  /// **'Import & add'**
+  String get posDrugImportAdd;
+
+  /// POS: posQuickAddTitle
+  ///
+  /// In en, this message translates to:
+  /// **'New product for this barcode'**
+  String get posQuickAddTitle;
+
+  /// POS: posQuickAddCreate
+  ///
+  /// In en, this message translates to:
+  /// **'Create & add'**
+  String get posQuickAddCreate;
+
+  /// Product form: barcodeFieldLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode'**
+  String get barcodeFieldLabel;
+
+  /// Product form: barcodeFieldHint
+  ///
+  /// In en, this message translates to:
+  /// **'Type or scan the product barcode'**
+  String get barcodeFieldHint;
+
+  /// Product form: barcodeUniqueHint
+  ///
+  /// In en, this message translates to:
+  /// **'One barcode per product in this store'**
+  String get barcodeUniqueHint;
+
+  /// Product form: barcodeScanToFill
+  ///
+  /// In en, this message translates to:
+  /// **'Scan to fill'**
+  String get barcodeScanToFill;
+
+  /// Product form: barcodeDuplicateError
+  ///
+  /// In en, this message translates to:
+  /// **'Another product in this store already uses this barcode'**
+  String get barcodeDuplicateError;
+
+  /// Scanner: scannerTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Scan barcode'**
+  String get scannerTitle;
+
+  /// Scanner: scannerTorch
+  ///
+  /// In en, this message translates to:
+  /// **'Flashlight'**
+  String get scannerTorch;
+
+  /// Scanner: scannerEnterManually
+  ///
+  /// In en, this message translates to:
+  /// **'Type barcode manually'**
+  String get scannerEnterManually;
+
+  /// Scanner: scannerManualHint
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode number'**
+  String get scannerManualHint;
+
+  /// Scanner: scannerAimHint
+  ///
+  /// In en, this message translates to:
+  /// **'Point the camera at the product barcode'**
+  String get scannerAimHint;
+
+  /// Scanner: scannerPermissionNeeded
+  ///
+  /// In en, this message translates to:
+  /// **'Camera access is needed to scan barcodes. You can still type the barcode manually.'**
+  String get scannerPermissionNeeded;
+
+  /// Scanner: scannerGrantPermission
+  ///
+  /// In en, this message translates to:
+  /// **'Allow camera'**
+  String get scannerGrantPermission;
+
+  /// Scanner: scannerOpenSettings
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get scannerOpenSettings;
+
   /// Shown when required product modifier groups have no selection
   ///
   /// In en, this message translates to:
@@ -15109,6 +15559,456 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Downloading an app does not grant a role. Access follows your current account approval. Android installation permission may be required.'**
   String get appInvitationsFooter;
+
+  /// No description provided for @adminProviderPricing.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider Pricing'**
+  String get adminProviderPricing;
+
+  /// No description provided for @adminProviderPricingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Set hourly and fixed rates for home-service providers and category defaults'**
+  String get adminProviderPricingDesc;
+
+  /// No description provided for @providerPricingTabProviders.
+  ///
+  /// In en, this message translates to:
+  /// **'Providers'**
+  String get providerPricingTabProviders;
+
+  /// No description provided for @providerPricingTabCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Category defaults'**
+  String get providerPricingTabCategories;
+
+  /// No description provided for @providerPricingSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name or city'**
+  String get providerPricingSearchHint;
+
+  /// No description provided for @providerPricingAllCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'All categories'**
+  String get providerPricingAllCategories;
+
+  /// No description provided for @providerPricingHourly.
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly rate'**
+  String get providerPricingHourly;
+
+  /// No description provided for @providerPricingFixedMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed price from'**
+  String get providerPricingFixedMin;
+
+  /// No description provided for @providerPricingFixedMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed price to'**
+  String get providerPricingFixedMax;
+
+  /// No description provided for @providerPricingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get providerPricingNote;
+
+  /// No description provided for @providerPricingCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get providerPricingCustom;
+
+  /// No description provided for @providerPricingCategoryDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Category default'**
+  String get providerPricingCategoryDefault;
+
+  /// No description provided for @providerPricingPlatformDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform default'**
+  String get providerPricingPlatformDefault;
+
+  /// No description provided for @providerPricingNoFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'No fixed price'**
+  String get providerPricingNoFixed;
+
+  /// No description provided for @providerPricingEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit pricing'**
+  String get providerPricingEditTitle;
+
+  /// No description provided for @providerPricingSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing updated'**
+  String get providerPricingSaved;
+
+  /// No description provided for @providerPricingFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update pricing'**
+  String get providerPricingFailed;
+
+  /// No description provided for @providerPricingEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No providers in your scope'**
+  String get providerPricingEmpty;
+
+  /// No description provided for @providerPricingReadOnlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Category defaults can be changed by the owner or country admins only'**
+  String get providerPricingReadOnlyHint;
+
+  /// No description provided for @providerPricingLeaveEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty to use the default'**
+  String get providerPricingLeaveEmpty;
+
+  /// No description provided for @providerMyPricing.
+  ///
+  /// In en, this message translates to:
+  /// **'My pricing'**
+  String get providerMyPricing;
+
+  /// No description provided for @providerMyPricingAdminNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices are set by the administration. Contact support to request a change.'**
+  String get providerMyPricingAdminNote;
+
+  /// No description provided for @providerMyPricingEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No service profiles yet'**
+  String get providerMyPricingEmpty;
+
+  /// No description provided for @closesNextDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Closes next day'**
+  String get closesNextDay;
+
+  /// No description provided for @open24Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Open 24 hours'**
+  String get open24Hours;
+
+  /// عنوان بطاقة التحصيل في تطبيق الكابتن
+  ///
+  /// In en, this message translates to:
+  /// **'Cash to collect'**
+  String get cashToCollectTitle;
+
+  /// جسم بطاقة التحصيل
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered. Collect {amount} from the customer, then confirm.'**
+  String cashToCollectBody(String amount);
+
+  /// زر تم التحصيل
+  ///
+  /// In en, this message translates to:
+  /// **'Cash collected'**
+  String get collectCashCta;
+
+  /// تأكيد التحصيل
+  ///
+  /// In en, this message translates to:
+  /// **'Cash collected'**
+  String get cashCollectedTitle;
+
+  /// تأكيد تفاصيل التحصيل
+  ///
+  /// In en, this message translates to:
+  /// **'Collected {amount}. It shows in your settlement.'**
+  String cashCollectedBody(String amount);
+
+  /// No description provided for @rateDriverAfterCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'You can rate the driver once the cash is collected.'**
+  String get rateDriverAfterCollection;
+
+  /// No description provided for @cashCollectionStateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the collection state. Check the connection and retry.'**
+  String get cashCollectionStateError;
+
+  /// No description provided for @driverReviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your review of the captain (optional)'**
+  String get driverReviewHint;
+
+  /// No description provided for @providerPricingInvalidInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid number within the allowed range'**
+  String get providerPricingInvalidInput;
+
+  /// No description provided for @providerPricingShowingOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing {shown} of {total}'**
+  String providerPricingShowingOf(int shown, int total);
+
+  /// No description provided for @providerPricingLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get providerPricingLoadMore;
+
+  /// No description provided for @otaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A new update is available'**
+  String get otaTitle;
+
+  /// No description provided for @otaIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'New improvements are ready to install.'**
+  String get otaIntro;
+
+  /// No description provided for @otaIntroHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The update will be downloaded and installed without reinstalling the app.'**
+  String get otaIntroHint;
+
+  /// No description provided for @otaDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading…'**
+  String get otaDownloading;
+
+  /// No description provided for @otaReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The update is ready to install'**
+  String get otaReadyTitle;
+
+  /// No description provided for @otaReadyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The update has been downloaded. Tap Install to finish.'**
+  String get otaReadyBody;
+
+  /// No description provided for @otaPermissionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Delwaqty to install updates in the settings screen, then come back. The installation will continue by itself and the download is kept.'**
+  String get otaPermissionBody;
+
+  /// No description provided for @otaDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not download the update. Check your connection and try again.'**
+  String get otaDownloadFailed;
+
+  /// No description provided for @otaInstallFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start the installation. Tap Install to try again.'**
+  String get otaInstallFailed;
+
+  /// No description provided for @otaChecksumFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The downloaded update could not be verified. Tap Update now to download it again.'**
+  String get otaChecksumFailed;
+
+  /// No description provided for @otaLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get otaLater;
+
+  /// No description provided for @otaUpdateNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Update now'**
+  String get otaUpdateNow;
+
+  /// No description provided for @otaInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Install'**
+  String get otaInstall;
+
+  /// No description provided for @otaRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get otaRetry;
+
+  /// No description provided for @whatsappLaunchUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp could not open. Copy the code and send it manually.'**
+  String get whatsappLaunchUnavailable;
+
+  /// No description provided for @whatsappNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp verification is not available yet. You can still sign in with Google.'**
+  String get whatsappNotConfigured;
+
+  /// No description provided for @approved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get approved;
+
+  /// No description provided for @settled.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled'**
+  String get settled;
+
+  /// No description provided for @collected.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected'**
+  String get collected;
+
+  /// No description provided for @outstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding'**
+  String get outstanding;
+
+  /// No description provided for @underReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Under Review'**
+  String get underReview;
+
+  /// No description provided for @failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get failed;
+
+  /// No description provided for @reconciliation.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconciliation'**
+  String get reconciliation;
+
+  /// No description provided for @totalCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Collected'**
+  String get totalCollected;
+
+  /// No description provided for @approvedSettlements.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved Settlements'**
+  String get approvedSettlements;
+
+  /// No description provided for @closingOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing Outstanding'**
+  String get closingOutstanding;
+
+  /// No description provided for @collectionLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection Ledger'**
+  String get collectionLedger;
+
+  /// No description provided for @noCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'No collections'**
+  String get noCollections;
+
+  /// No description provided for @noCollectionsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No received top-ups in this region yet.'**
+  String get noCollectionsYet;
+
+  /// No description provided for @platformCollectionsAllRegions.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Collections (all regions)'**
+  String get platformCollectionsAllRegions;
+
+  /// No description provided for @platformSettlementsAllRegions.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Settlements (all regions)'**
+  String get platformSettlementsAllRegions;
+
+  /// No description provided for @graceLimitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit'**
+  String get graceLimitLabel;
+
+  /// No description provided for @graceUsedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Used'**
+  String get graceUsedLabel;
+
+  /// No description provided for @graceRemainingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining'**
+  String get graceRemainingLabel;
+
+  /// No description provided for @revokeSanctionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke {type} for {role}?'**
+  String revokeSanctionConfirm(Object role, Object type);
+
+  /// No description provided for @adminRegionScopeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Region Scope'**
+  String get adminRegionScopeTitle;
+
+  /// No description provided for @adminRegionSelectUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an admin user to manage scope'**
+  String get adminRegionSelectUser;
+
+  /// No description provided for @adminRegionScopeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign region scope to admin-tier users at any level (governorate, markaz, district, village, ...). An admin with no assignments is global.'**
+  String get adminRegionScopeSubtitle;
+
+  /// No description provided for @adminManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin management'**
+  String get adminManagement;
 }
 
 class _AppLocalizationsDelegate

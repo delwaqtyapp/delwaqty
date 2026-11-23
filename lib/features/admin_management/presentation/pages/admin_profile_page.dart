@@ -267,20 +267,49 @@ class _AdminProfilePageState extends ConsumerState<AdminManagementProfilePage> {
                           return Column(
                             children: entries
                                 .map(
-                                  (e) => ListTile(
-                                    dense: true,
-                                    title: Text(e.action),
-                                    subtitle: Text(
-                                      '${e.resource}${e.resourceId != null ? ' • ${e.resourceId}' : ''}',
+                                  // Stacked lines: action, resource and
+                                  // timestamp each get the full width, so
+                                  // nothing is squeezed beside a trailing.
+                                  (e) => Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 6,
                                     ),
-                                    trailing: e.timestamp != null
-                                        ? Text(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          _auditActionLabel(loc, e.action),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                        ),
+                                        Text(
+                                          '${_auditResourceLabel(loc, e.resource)}${e.resourceId != null ? ' • ${e.resourceId}' : ''}',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall,
+                                        ),
+                                        if (e.timestamp != null)
+                                          Text(
                                             e.timestamp!
                                                 .toLocal()
                                                 .toString()
                                                 .split('.')[0],
-                                          )
-                                        : null,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurfaceVariant,
+                                                ),
+                                          ),
+                                      ],
+                                    ),
                                   ),
                                 )
                                 .toList(),
@@ -341,7 +370,8 @@ class _AdminProfilePageState extends ConsumerState<AdminManagementProfilePage> {
           flex: 2,
           child: Text(label, style: const TextStyle(color: Colors.grey)),
         ),
-        Expanded(flex: 3, child: Text(value)),
+        // Emails wrap cleanly after the '@' instead of mid-word.
+        Expanded(flex: 3, child: Text(value.replaceAll('@', '@\u200B'))),
       ],
     ),
   );
@@ -655,5 +685,23 @@ class _AdminProfilePageState extends ConsumerState<AdminManagementProfilePage> {
           ),
       loc.adminMgmtGrantedUpdated,
     );
+  }
+}
+
+String _auditActionLabel(AppLocalizations l10n, String action) {
+  switch (action) {
+    case 'role_updated':
+      return l10n.roleUpdated;
+    default:
+      return action.replaceAll('_', ' ');
+  }
+}
+
+String _auditResourceLabel(AppLocalizations l10n, String resource) {
+  switch (resource) {
+    case 'admin_management':
+      return l10n.adminManagement;
+    default:
+      return resource.replaceAll('_', ' ');
   }
 }

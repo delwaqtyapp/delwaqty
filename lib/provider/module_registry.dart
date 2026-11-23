@@ -36,6 +36,9 @@ void registerProviderModules() {
     MerchantModule(),
     ProviderOrdersNavModule(),
     ProviderProductsNavModule(),
+    ProviderBookingsNavModule(),
+    ProviderServicesNavModule(),
+    ProviderCashierNavModule(),
     FinancialModule(),
     SupportChatModule(),
   ]);

@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -175,6 +176,12 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
             '/admin/commissions',
           ),
           _ActionData(
+            l10n.adminProviderPricing,
+            Icons.handyman_outlined,
+            AppColors.brandTealDark,
+            '/admin/provider-pricing',
+          ),
+          _ActionData(
             l10n.adminTransactionLedger,
             Icons.menu_book_rounded,
             const Color(0xFFFF9500),
@@ -190,7 +197,7 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
           _ActionData(
             l10n.manageRegions,
             Icons.public_rounded,
-            const Color(0xFF0D9488),
+            AppColors.brandTealDark,
             '/admin/regions',
           ),
           _ActionData(

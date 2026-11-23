@@ -117,3 +117,36 @@ test('session revocation failure cannot report a successful reset', async () => 
   assert.equal((await response.json()).code, 'SESSION_REVOKE_FAILED');
   cors(response);
 });
+
+function deleteHandler({ exists = true, activeAdmin = false, eligibilityError = false } = {}) {
+  let handler;
+  const calls = [];
+  const source = fs.readFileSync('supabase/functions/delete-user/index.ts','utf8').replace(/^import \{ createClient \} from .*;\r?\n/m, '');
+  const chain = { select: () => chain, eq: () => chain, maybeSingle: async () => ({data: exists ? {id:'self'} : null,error:null}) };
+  const client = {
+    auth: {getUser: async () => ({data:{user:{id:'self'}},error:null})},
+    from: () => chain,
+    rpc: async (name) => {calls.push(name);return {data:activeAdmin,error:eligibilityError ? {message:'fixture'} : null};},
+    storage: {from: () => ({list: async () => {calls.push('storage.list');return {data:[],error:null};},remove: async () => {calls.push('storage.remove');return {error:null};}})},
+  };
+  vm.runInNewContext(stripTypeScriptTypes(source),{Request,Response,URL,Deno:{env:{get:()=> 'fixture'},serve: x => {handler=x;}},createClient:()=>client});
+  return {handler,calls};
+}
+for (const fixture of [
+  {name:'active admin', activeAdmin:true, status:403},
+  {name:'missing member', exists:false, status:404},
+  {name:'eligibility RPC error', eligibilityError:true, status:500},
+]) test(`delete-user ${fixture.name} cannot touch Storage`, async () => {
+  const {handler,calls} = deleteHandler(fixture);
+  const response=await handler(new Request('https://example.invalid',{method:'POST',headers:{Authorization:'Bearer fixture'}}));
+  assert.equal(response.status,fixture.status);
+  assert.equal(calls.some(x=>x.startsWith('storage.')),false);
+  assert.equal(calls.includes('delete_user_data'),false);
+});
+test('delete-user cross-account path must use approval lifecycle and never purge',async()=>{
+  const {handler,calls}=deleteHandler();
+  const response=await handler(new Request('https://example.invalid?userId=other',{method:'POST',headers:{Authorization:'Bearer fixture'}}));
+  assert.equal(response.status,403);
+  assert.equal((await response.json()).code,'APPROVAL_WORKFLOW_REQUIRED');
+  assert.deepEqual(calls,[]);
+});

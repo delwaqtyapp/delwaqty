@@ -23,6 +23,9 @@ import 'package:delwaqty/features/provider/merchant/presentation/pages/provider_
 import 'package:delwaqty/features/provider/availability/presentation/pages/provider_availability_page.dart';
 import 'package:delwaqty/features/provider/verification/presentation/pages/provider_verification_page.dart';
 import 'package:delwaqty/features/provider/documents/presentation/pages/provider_documents_page.dart';
+import 'package:delwaqty/features/provider/services/presentation/pages/provider_services_page.dart';
+import 'package:delwaqty/features/provider/capability/domain/provider_profile.dart';
+import 'package:delwaqty/features/provider/capability/presentation/providers/provider_capability_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 final merchantDashboardRepositoryImplProvider =
@@ -248,6 +251,114 @@ class ProviderProductsNavModule extends FeatureModule {
           builder: (context, state) => const MerchantProductsPage(),
         ),
       ],
+    );
+  }
+}
+
+/// Bookings tab for service-type accounts (home services, teachers,
+/// doctors): service jobs or appointments, never table reservations.
+class ProviderBookingsNavModule extends FeatureModule {
+  @override
+  String get id => 'provider-bookings-nav';
+
+  @override
+  String name(BuildContext context) =>
+      AppLocalizations.of(context).serviceBookingsTitle;
+
+  @override
+  IconData? get icon => Icons.event_note_rounded;
+
+  @override
+  bool get isNavModule => true;
+
+  @override
+  int get navPriority => 13;
+
+  @override
+  StatefulShellBranch? buildBranch() {
+    return StatefulShellBranch(
+      routes: [
+        GoRoute(
+          path: '/provider-bookings',
+          builder: (context, state) => const _ProviderBookingsTab(),
+        ),
+      ],
+    );
+  }
+}
+
+/// "My services and prices" tab for service-type accounts.
+class ProviderServicesNavModule extends FeatureModule {
+  @override
+  String get id => 'provider-services-nav';
+
+  @override
+  String name(BuildContext context) =>
+      AppLocalizations.of(context).serviceBookingsTitle;
+
+  @override
+  IconData? get icon => Icons.handyman_rounded;
+
+  @override
+  bool get isNavModule => true;
+
+  @override
+  int get navPriority => 16;
+
+  @override
+  StatefulShellBranch? buildBranch() {
+    return StatefulShellBranch(
+      routes: [
+        GoRoute(
+          path: '/provider-services',
+          builder: (context, state) => const ProviderServicesPage(),
+        ),
+      ],
+    );
+  }
+}
+
+/// Cashier tab for account types that sell at a counter.
+class ProviderCashierNavModule extends FeatureModule {
+  @override
+  String get id => 'provider-cashier-nav';
+
+  @override
+  String name(BuildContext context) => AppLocalizations.of(context).posCashier;
+
+  @override
+  IconData? get icon => Icons.point_of_sale_rounded;
+
+  @override
+  bool get isNavModule => true;
+
+  @override
+  int get navPriority => 17;
+
+  @override
+  StatefulShellBranch? buildBranch() {
+    return StatefulShellBranch(
+      routes: [
+        GoRoute(
+          path: '/provider-cashier',
+          builder: (context, state) => const MerchantPosPage(),
+        ),
+      ],
+    );
+  }
+}
+
+class _ProviderBookingsTab extends ConsumerWidget {
+  const _ProviderBookingsTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = ref.watch(providerProfileProvider);
+    final lang = AppLocalizations.of(context);
+    return MerchantReservationsPage(
+      mode: ReservationsMode.services,
+      showBack: false,
+      title: profile.label(ProviderLabel.bookingsTitle, lang),
     );
   }
 }

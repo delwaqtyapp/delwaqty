@@ -241,24 +241,25 @@ class PrivacySecurityPage extends ConsumerWidget {
           fontWeight: FontWeight.w600,
         ),
       ),
-      subtitle: subtitle != null
-          ? Text(
-              subtitle,
-              style: context.textTheme.bodySmall?.copyWith(
-                color: cs.onSurfaceVariant,
-              ),
+      subtitle: subtitle != null || trailingWidget != null
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (subtitle != null)
+                  Text(
+                    subtitle,
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                if (trailingWidget != null) ...[
+                  const SizedBox(height: 6),
+                  trailingWidget,
+                ],
+              ],
             )
           : null,
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (trailingWidget != null) ...[
-            trailingWidget,
-            const SizedBox(width: 6),
-          ],
-          Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
-        ],
-      ),
+      trailing: Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
       onTap: onTap,
     );
   }

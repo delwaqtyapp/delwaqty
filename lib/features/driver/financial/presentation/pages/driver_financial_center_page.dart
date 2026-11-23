@@ -11,6 +11,32 @@ import 'package:delwaqty/features/customer/driver/presentation/providers/dispatc
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/app_shell.dart';
 
+// Localized labels: raw backend codes never show in Arabic.
+String _localizedTxType(AppLocalizations l10n, String type) => switch (type) {
+  'credit' => l10n.walletTxCredit,
+  'debit' => l10n.walletTxDebit,
+  _ => type,
+};
+
+String _localizedTopupStatus(AppLocalizations l10n, String status) =>
+    switch (status) {
+      'pending' => l10n.pending,
+      'approved' => l10n.approved,
+      'rejected' => l10n.rejected,
+      _ => status,
+    };
+
+String _localizedMethod(AppLocalizations l10n, String method) =>
+    switch (method) {
+      'bank_transfer' => l10n.bankTransfer,
+      'wallet' => l10n.wallet,
+      'cash' => l10n.cash,
+      _ => method,
+    };
+
+String _localizedCurrency(AppLocalizations l10n, String currency) =>
+    currency == 'EGP' ? l10n.egp : currency;
+
 class DriverFinancialCenterPage extends ConsumerWidget {
   const DriverFinancialCenterPage({super.key});
 
@@ -45,10 +71,12 @@ class DriverFinancialCenterPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.financialCenter)),
-      floatingActionButton: Padding(
-        // Keep the FAB above the shell's floating bottom navigation bar.
-        padding: const EdgeInsets.only(bottom: 96),
-        child: FloatingActionButton.extended(
+      // Docked bottom bar: a floating pill overlaid metric cards at
+      // mid-scroll. It sits above the shell's floating nav (96) and
+      // never covers list content.
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 104),
+        child: FilledButton.icon(
           onPressed: () => context.push('/driver/financial-center/topup'),
           icon: const Icon(Icons.add),
           label: Text(l10n.topUp),
@@ -67,7 +95,12 @@ class DriverFinancialCenterPage extends ConsumerWidget {
             16,
             16,
             16,
-            16 + kFloatingNavClearance + MediaQuery.paddingOf(context).bottom,
+            // Clear the docked top-up bar and the shell's floating
+            // nav so the last rows are never hidden underneath them.
+            16 +
+                96 +
+                kFloatingNavClearance +
+                MediaQuery.paddingOf(context).bottom,
           ),
           children: [
             summary.when(
@@ -172,10 +205,37 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                   : Column(
                       children: s.recentTransactions
                           .map(
-                            (t) => ListTile(
-                              title: Text(t.description),
-                              subtitle: Text(t.type),
-                              trailing: Text(t.amount.toStringAsFixed(2)),
+                            (t) => Card(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(t.description),
+                                    Text(
+                                      _localizedTxType(l10n, t.type),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    // The amount sits on its own line so
+                                    // it never squeezes the description.
+                                    Align(
+                                      alignment: AlignmentDirectional.centerEnd,
+                                      child: Text(
+                                        t.amount.toStringAsFixed(2),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           )
                           .toList(),
@@ -197,16 +257,46 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                   : Column(
                       children: list
                           .map(
-                            (t) => ListTile(
-                              title: Text(
-                                '${t.amount.toStringAsFixed(2)} ${t.currency}',
+                            (t) => Card(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${t.amount.toStringAsFixed(2)} ${_localizedCurrency(l10n, t.currency)}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${_localizedTopupStatus(l10n, t.status)} · ${_localizedMethod(l10n, t.paymentMethod)}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall,
+                                    ),
+                                    // The rejection reason takes the full
+                                    // width below; an unbounded trailing
+                                    // Text crashed the tile layout.
+                                    if (t.rejectionReason != null &&
+                                        t.rejectionReason!.isNotEmpty)
+                                      Text(
+                                        t.rejectionReason!,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .error,
+                                            ),
+                                      ),
+                                  ],
+                                ),
                               ),
-                              subtitle: Text(
-                                '${t.status} · ${t.paymentMethod}',
-                              ),
-                              trailing: t.rejectionReason != null
-                                  ? Text(t.rejectionReason!)
-                                  : null,
                             ),
                           )
                           .toList(),

@@ -15,11 +15,13 @@ import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/geo_location.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/cash_collection.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_order.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
 import 'package:delwaqty/features/customer/driver/presentation/providers/dispatch_providers.dart';
 import 'package:delwaqty/features/customer/ride/presentation/widgets/ride_map.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
+import 'package:delwaqty/features/driver/presentation/widgets/cash_collection_card.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/services/maps/maps_service.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
@@ -131,6 +133,24 @@ class _DriverDeliveryDetailPageState
           .completeDelivery(order.id, driverId, recipientOtp: code);
     });
     if (!ok || !mounted) return;
+    // Cash handoff (migration 392), FAIL CLOSED: only a confirmed non-cash
+    // delivery pops as done. On a cash delivery — or any doubt about the
+    // payment state (the state read failed or came back empty) — the page
+    // stays open and the cash card, or a retryable error card, drives what
+    // happens next. The captain never leaves a cash delivery without either
+    // collecting or consciously backing out of a visible uncollected state.
+    CashCollectionState? cash;
+    try {
+      cash = await ref
+          .read(deliveryRepositoryProvider)
+          .getCashCollectionState(order.id);
+    } catch (_) {
+      cash = null;
+    }
+    if (cash == null || cash.isCash) {
+      ref.invalidate(cashCollectionStateProvider(order.id));
+      return;
+    }
     // Batch 17 #5: confirm the completion with the earnings and return the
     // driver to the hub; previously the page just sat on "completed" and the
     // driver had to back out with no feedback.
@@ -151,6 +171,20 @@ class _DriverDeliveryDetailPageState
     ref.invalidate(driverEarningsProvider(driverId));
     context.pop();
     messenger.showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _confirmCollection(DeliveryOrder order, String driverId) async {
+    final ok = await _run(() async {
+      await ref
+          .read(deliveryRepositoryProvider)
+          .confirmCashCollection(order.id);
+    });
+    if (!ok || !mounted) return;
+    ref.invalidate(cashCollectionStateProvider(order.id));
+    ref.invalidate(driverStatsProvider(driverId));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context).cashCollectedTitle)),
+    );
   }
 
   String? _resolveCustomerPhone(DeliveryOrder order) {
@@ -266,22 +300,22 @@ class _DriverDeliveryDetailPageState
     }
   }
 
+  // Stacked label-above-value: the fixed 120px label column squeezed
+  // long addresses into narrow fragments at large text scales.
   Widget _row(String label, String value) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 6),
-    child: Row(
+    child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.grey,
-              fontWeight: FontWeight.w600,
-            ),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.grey,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        Expanded(child: Text(value)),
+        const SizedBox(height: 2),
+        Text(value),
       ],
     ),
   );
@@ -510,7 +544,12 @@ class _DriverDeliveryDetailPageState
                           if (order.fare != null)
                             _row(
                               l10n.fare,
-                              '${order.fare!.toStringAsFixed(0)} ${order.currency}',
+                              l10n.amountWithCurrency(
+                                order.fare!.toStringAsFixed(0),
+                                order.currency == 'EGP'
+                                    ? l10n.egp
+                                    : order.currency,
+                              ),
                             ),
                           if (order.distance != null)
                             _row(
@@ -531,6 +570,24 @@ class _DriverDeliveryDetailPageState
                     ),
                   ),
                   const SizedBox(height: 16),
+                  // Cash handoff: once delivered, the captain collects the
+                  // cash here. The card flips to a collected confirmation.
+                  // Fail closed: if the collection state cannot be read, a
+                  // retryable card keeps the uncollected state visible
+                  // instead of silently showing nothing.
+                  if (status == 'completed')
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: CashCollectionSection(
+                        state: ref.watch(cashCollectionStateProvider(order.id)),
+                        busy: _busy,
+                        onCollect: () => _confirmCollection(order, driverId),
+                        onDone: () => context.pop(),
+                        onRetry: () => ref.invalidate(
+                          cashCollectionStateProvider(order.id),
+                        ),
+                      ),
+                    ),
                   if (_busy) const Center(child: CircularProgressIndicator()),
                   if (status == 'searching' || status == 'requested')
                     FilledButton(

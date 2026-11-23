@@ -816,6 +816,73 @@ class AppLocalizationsAr extends AppLocalizations {
   String get egp => 'ج.م';
 
   @override
+  String get provTabCashier => 'الكاشير';
+
+  @override
+  String get provTabMenu => 'المنيو';
+
+  @override
+  String get provManageMenu => 'إدارة المنيو';
+
+  @override
+  String get provTabItems => 'الأصناف';
+
+  @override
+  String get provManageItems => 'إدارة الأصناف';
+
+  @override
+  String get provTabMedicines => 'الأدوية';
+
+  @override
+  String get provManageMedicines => 'إدارة الأدوية';
+
+  @override
+  String get provTabTableBookings => 'حجز الطاولات';
+
+  @override
+  String get provTabJobs => 'الطلبات';
+
+  @override
+  String get provServiceRequests => 'طلبات الخدمة';
+
+  @override
+  String get provTabLessonRequests => 'طلبات الدروس';
+
+  @override
+  String get provTabAppointments => 'المواعيد';
+
+  @override
+  String get provTabMyServices => 'خدماتي';
+
+  @override
+  String get provTabMyLessons => 'دروسي';
+
+  @override
+  String get provMyServicesPrices => 'خدماتي وأسعارها';
+
+  @override
+  String get provMyLessonsPrices => 'دروسي وأسعارها';
+
+  @override
+  String get provPricesAdminManaged =>
+      'الأسعار بتتحدد من الإدارة. لو محتاج تعديل كلم الدعم.';
+
+  @override
+  String get provEmptyServices => 'لسه مفيش خدمات متسجلة على حسابك';
+
+  @override
+  String get provEmptyLessons => 'لسه مفيش دروس متسجلة على حسابك';
+
+  @override
+  String get provHourlyRate => 'سعر الساعة';
+
+  @override
+  String get provFixedPrice => 'السعر الثابت';
+
+  @override
+  String get provPriceNotSet => 'السعر لسه ما اتحددش من الإدارة';
+
+  @override
   String get searchRestaurants => 'ابحث عن مطاعم...';
 
   @override
@@ -3769,6 +3836,46 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sanctionsManagement => 'إدارة العقوبات';
 
   @override
+  String get generalPenalties => 'العقوبات العامة';
+
+  @override
+  String get generalPenaltiesSubtitle =>
+      'عقوبات بتتطبق على مستوى المنصة كلها. تعديلها متاح لحساب المالك فقط.';
+
+  @override
+  String get cancelSuspensionPenalty => 'عقوبة الإلغاء المتكرر';
+
+  @override
+  String get cancelSuspensionPenaltyDescription =>
+      'إيقاف حساب العميل بعد ثالث إلغاء في نفس الشهر (السماحية: إلغاءان).';
+
+  @override
+  String get refusalSuspensionPenalty => 'عقوبة رفض الاستلام المتكرر';
+
+  @override
+  String get refusalSuspensionPenaltyDescription =>
+      'إيقاف حساب العميل بعد ثالث رفض استلام في نفس الشهر (السماحية: تحذيران).';
+
+  @override
+  String get editPenalty => 'تعديل العقوبة';
+
+  @override
+  String get suspensionDaysLabel => 'مدة الإيقاف (بالأيام)';
+
+  @override
+  String get penaltyChangeReasonHint => 'سبب التغيير (اختياري)';
+
+  @override
+  String get penaltyUpdated => 'تم تحديث العقوبة';
+
+  @override
+  String get ownerOnlyPenalties =>
+      'قايمة العقوبات العامة متاحة لحساب المالك فقط.';
+
+  @override
+  String get invalidSuspensionDays => 'المدة لازم تكون بين 1 و 365 يوم';
+
+  @override
   String get noSanctions => 'لا توجد عقوبات بعد';
 
   @override
@@ -4192,6 +4299,14 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get platformCredit => 'هدية دلوقتي';
+
+  @override
+  String platformCreditAutoApplied(Object amount) {
+    return 'عندك هدية من دلوقتي بقيمة $amount ج.م هتنخصم تلقائي من الطلب ده';
+  }
+
+  @override
   String get mostOrdered => 'الأكثر مبيعاً';
 
   @override
@@ -4342,25 +4457,25 @@ class AppLocalizationsAr extends AppLocalizations {
   String get userTypeCustomer => 'عميل';
 
   @override
-  String get userTypeCustomerDesc => 'اطلب من المتاجر والمطاعم والخدمات';
+  String get userTypeCustomerDesc => 'اطلب أكلك دلوقتي';
 
   @override
   String get userTypeMerchant => 'تاجر';
 
   @override
-  String get userTypeMerchantDesc => 'بع منتجاتك على المنصة';
+  String get userTypeMerchantDesc => 'بيع منتجاتك مع دلوقتي';
 
   @override
   String get userTypeDriver => 'مندوب توصيل';
 
   @override
-  String get userTypeDriverDesc => 'وصّل الطلبات للعملاء';
+  String get userTypeDriverDesc => 'وصّل طلباتك واكسب مع دلوقتي';
 
   @override
   String get userTypeProvider => 'مقدم خدمة';
 
   @override
-  String get userTypeProviderDesc => 'قدم خدماتك للعملاء';
+  String get userTypeProviderDesc => 'قدّم خدماتك باحترافية';
 
   @override
   String get uploadIdCard => 'رفع البطاقة الشخصية';
@@ -6063,6 +6178,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminAssigned => 'تم تعيين المشرف';
 
   @override
+  String get auditResourceServiceCategory => 'فئة الخدمة';
+
+  @override
+  String get auditCommissionRateUpdated => 'تحديث نسبة العمولة';
+
+  @override
+  String get walletTxCredit => 'إيداع';
+
+  @override
+  String get walletTxDebit => 'خصم';
+
+  @override
   String get roleUpdated => 'تم تحديث الدور';
 
   @override
@@ -6997,6 +7124,54 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resendWhatsAppCode => 'إعادة إرسال الكود';
 
   @override
+  String get whatsappYourCodeLabel => 'رمز التحقق الخاص بك';
+
+  @override
+  String get copyOtpCode => 'نسخ الرمز';
+
+  @override
+  String get otpCodeCopied => 'تم نسخ الرمز';
+
+  @override
+  String get whatsappWaitingAuto =>
+      'بانتظار تأكيد واتساب. ستتحدث هذه الشاشة تلقائيًا فور وصول رسالتك.';
+
+  @override
+  String otpExpiresIn(String time) {
+    return 'تنتهي صلاحية الرمز خلال $time';
+  }
+
+  @override
+  String get otpExpiredTitle => 'انتهت صلاحية الرمز';
+
+  @override
+  String get otpExpiredBody =>
+      'الرمز صالح لمدة 10 دقائق. اطلب رمزًا جديدًا - يستغرق ثوانٍ.';
+
+  @override
+  String get requestNewOtpCode => 'احصل على رمز جديد';
+
+  @override
+  String otpNotConfirmedYet(String phone) {
+    return 'لم يصل التأكيد بعد. تأكد أنك أرسلت الرسالة من واتساب الخاص بك ($phone) ثم انتظر ثواني.';
+  }
+
+  @override
+  String get wrongPhoneNumberHint =>
+      'الرقم غير صحيح؟ أغلق هذه النافذة وارجع لتعديله.';
+
+  @override
+  String resendOtpAvailableIn(String time) {
+    return 'يمكنك إعادة الإرسال خلال $time';
+  }
+
+  @override
+  String get retryRequest => 'حاول مرة أخرى';
+
+  @override
+  String get iSentItCheckNow => 'أرسلتها - تحقق الآن';
+
+  @override
   String get phoneOrEmailOrUsername => 'رقم الهاتف أو اسم المستخدم';
 
   @override
@@ -7691,6 +7866,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get checkoutCouponInvalid => 'لا يمكن استخدام هذه القسيمة لهذا الطلب';
 
   @override
+  String get checkoutWalletNotAvailable =>
+      'الدفع بالمحفظة غير متاح حالياً. برجاء الدفع كاش عند الاستلام أو إنستاباي أو فودافون كاش.';
+
+  @override
+  String get checkoutCardNotAvailable =>
+      'الدفع بالبطاقة غير متاح حالياً. برجاء الدفع كاش عند الاستلام أو إنستاباي أو فودافون كاش.';
+
+  @override
   String get checkoutMissingDeliveryLocation =>
       'يرجى اختيار موقع التوصيل على الخريطة';
 
@@ -7817,6 +8000,68 @@ class AppLocalizationsAr extends AppLocalizations {
   String get posErrInvalidQty => 'الكمية غير صالحة لأحد الأصناف';
 
   @override
+  String get posScanBarcode => 'مسح الباركود';
+
+  @override
+  String get posSearchHint => 'ابحث بالاسم أو الباركود';
+
+  @override
+  String get posScanAdded => 'تمت الإضافة إلى السلة';
+
+  @override
+  String get posDrugFoundTitle => 'موجود في كتالوج الأدوية';
+
+  @override
+  String get posDrugImportAdd => 'استيراد وإضافة';
+
+  @override
+  String get posQuickAddTitle => 'منتج جديد لهذا الباركود';
+
+  @override
+  String get posQuickAddCreate => 'إنشاء وإضافة';
+
+  @override
+  String get barcodeFieldLabel => 'الباركود';
+
+  @override
+  String get barcodeFieldHint => 'اكتب أو امسح باركود المنتج';
+
+  @override
+  String get barcodeUniqueHint => 'باركود واحد لكل منتج في هذا المحل';
+
+  @override
+  String get barcodeScanToFill => 'امسح لملء الحقل';
+
+  @override
+  String get barcodeDuplicateError =>
+      'منتج آخر في هذا المحل يستخدم نفس الباركود';
+
+  @override
+  String get scannerTitle => 'مسح الباركود';
+
+  @override
+  String get scannerTorch => 'الفلاش';
+
+  @override
+  String get scannerEnterManually => 'إدخال الباركود يدويًا';
+
+  @override
+  String get scannerManualHint => 'رقم الباركود';
+
+  @override
+  String get scannerAimHint => 'وجّه الكاميرا نحو باركود المنتج';
+
+  @override
+  String get scannerPermissionNeeded =>
+      'نحتاج إذن الكاميرا لمسح الباركود. يمكنك أيضًا إدخال الباركود يدويًا.';
+
+  @override
+  String get scannerGrantPermission => 'السماح بالكاميرا';
+
+  @override
+  String get scannerOpenSettings => 'فتح الإعدادات';
+
+  @override
   String get productModifierRequiredError =>
       'يرجى اختيار الخيارات المطلوبة أولاً';
 
@@ -7905,4 +8150,251 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get appInvitationsFooter =>
       'تحميل التطبيق لا يمنح صلاحيات جديدة. الدخول مرتبط باعتماد حسابك الحالي. قد تحتاج إلى السماح بالتثبيت على أندرويد.';
+
+  @override
+  String get adminProviderPricing => 'تسعير مقدمي الخدمة';
+
+  @override
+  String get adminProviderPricingDesc =>
+      'تحديد أسعار الساعة والأسعار الثابتة لمقدمي الخدمات المنزلية وأسعار الفئات الافتراضية';
+
+  @override
+  String get providerPricingTabProviders => 'مقدمو الخدمة';
+
+  @override
+  String get providerPricingTabCategories => 'أسعار الفئات';
+
+  @override
+  String get providerPricingSearchHint => 'ابحث بالاسم أو المدينة';
+
+  @override
+  String get providerPricingAllCategories => 'كل الفئات';
+
+  @override
+  String get providerPricingHourly => 'سعر الساعة';
+
+  @override
+  String get providerPricingFixedMin => 'سعر ثابت من';
+
+  @override
+  String get providerPricingFixedMax => 'سعر ثابت إلى';
+
+  @override
+  String get providerPricingNote => 'ملاحظة (اختياري)';
+
+  @override
+  String get providerPricingCustom => 'مخصص';
+
+  @override
+  String get providerPricingCategoryDefault => 'افتراضي الفئة';
+
+  @override
+  String get providerPricingPlatformDefault => 'افتراضي المنصة';
+
+  @override
+  String get providerPricingNoFixed => 'بدون سعر ثابت';
+
+  @override
+  String get providerPricingEditTitle => 'تعديل التسعير';
+
+  @override
+  String get providerPricingSaved => 'تم تحديث الأسعار';
+
+  @override
+  String get providerPricingFailed => 'تعذر تحديث الأسعار';
+
+  @override
+  String get providerPricingEmpty => 'لا يوجد مقدمو خدمة في نطاقك';
+
+  @override
+  String get providerPricingReadOnlyHint =>
+      'أسعار الفئات الافتراضية يغيّرها المالك أو مشرفو الدولة فقط';
+
+  @override
+  String get providerPricingLeaveEmpty => 'اتركه فارغًا لاستخدام الافتراضي';
+
+  @override
+  String get providerMyPricing => 'أسعاري';
+
+  @override
+  String get providerMyPricingAdminNote =>
+      'الأسعار تحددها الإدارة. لطلب تعديل تواصل مع الدعم.';
+
+  @override
+  String get providerMyPricingEmpty => 'لا توجد ملفات خدمة بعد';
+
+  @override
+  String get closesNextDay => 'يغلق اليوم التالي';
+
+  @override
+  String get open24Hours => 'مفتوح 24 ساعة';
+
+  @override
+  String get cashToCollectTitle => 'مبلغ مطلوب تحصيله';
+
+  @override
+  String cashToCollectBody(String amount) {
+    return 'تم تسليم الطلب. حصّل $amount من العميل ثم أكّد.';
+  }
+
+  @override
+  String get collectCashCta => 'تم التحصيل';
+
+  @override
+  String get cashCollectedTitle => 'تم تحصيل المبلغ';
+
+  @override
+  String cashCollectedBody(String amount) {
+    return 'تم تسجيل تحصيل $amount. تظهر في تسويتك.';
+  }
+
+  @override
+  String get rateDriverAfterCollection =>
+      'يمكنك تقييم الكابتن بعد تحصيل المبلغ.';
+
+  @override
+  String get cashCollectionStateError =>
+      'تعذر تحميل حالة التحصيل. تحقق من الاتصال وأعد المحاولة.';
+
+  @override
+  String get driverReviewHint => 'اكتب رأيك في الكابتن (اختياري)';
+
+  @override
+  String get providerPricingInvalidInput =>
+      'أدخل رقمًا صحيحًا ضمن الحدود المسموحة';
+
+  @override
+  String providerPricingShowingOf(int shown, int total) {
+    return 'عرض $shown من $total';
+  }
+
+  @override
+  String get providerPricingLoadMore => 'تحميل المزيد';
+
+  @override
+  String get otaTitle => 'يتوفر تحديث جديد';
+
+  @override
+  String get otaIntro => 'تحسينات جديدة جاهزة للتطبيق.';
+
+  @override
+  String get otaIntroHint =>
+      'سيتم تنزيل التحديث وتثبيته مباشرة دون إعادة تثبيت التطبيق.';
+
+  @override
+  String get otaDownloading => 'جاري تحميل التحديث…';
+
+  @override
+  String get otaReadyTitle => 'التحديث جاهز للتثبيت';
+
+  @override
+  String get otaReadyBody => 'تم تحميل التحديث. اضغط تثبيت لإكمال التحديث.';
+
+  @override
+  String get otaPermissionBody =>
+      'اسمح لدلوقتي بتثبيت التحديثات من شاشة الإعدادات ثم ارجع للتطبيق. سيكمل التثبيت تلقائيًا والملف المحمّل محفوظ.';
+
+  @override
+  String get otaDownloadFailed =>
+      'تعذر تحميل التحديث. تأكد من الاتصال بالإنترنت ثم أعد المحاولة.';
+
+  @override
+  String get otaInstallFailed =>
+      'تعذر بدء التثبيت. اضغط تثبيت للمحاولة مرة أخرى.';
+
+  @override
+  String get otaChecksumFailed =>
+      'تعذر التحقق من التحديث المحمّل. اضغط تحديث الآن لتحميله مرة أخرى.';
+
+  @override
+  String get otaLater => 'لاحقًا';
+
+  @override
+  String get otaUpdateNow => 'تحديث الآن';
+
+  @override
+  String get otaInstall => 'تثبيت';
+
+  @override
+  String get otaRetry => 'حاول مرة أخرى';
+
+  @override
+  String get whatsappLaunchUnavailable =>
+      'تعذر فتح واتساب. انسخ الرمز وأرسله يدويا.';
+
+  @override
+  String get whatsappNotConfigured =>
+      'تفعيل واتساب غير متاح حاليا. يمكنك تسجيل الدخول بحساب جوجل.';
+
+  @override
+  String get approved => 'معتمدة';
+
+  @override
+  String get settled => 'مسددة';
+
+  @override
+  String get collected => 'محصلة';
+
+  @override
+  String get outstanding => 'مستحق';
+
+  @override
+  String get underReview => 'قيد المراجعة';
+
+  @override
+  String get failed => 'فشل';
+
+  @override
+  String get reconciliation => 'التسوية';
+
+  @override
+  String get totalCollected => 'إجمالي المحصَّل';
+
+  @override
+  String get approvedSettlements => 'التسويات المعتمدة';
+
+  @override
+  String get closingOutstanding => 'المستحق الختامي';
+
+  @override
+  String get collectionLedger => 'سجل التحصيلات';
+
+  @override
+  String get noCollections => 'لا توجد تحصيلات';
+
+  @override
+  String get noCollectionsYet => 'لا توجد تعبئات مستلمة في هذه المنطقة بعد.';
+
+  @override
+  String get platformCollectionsAllRegions => 'تحصيلات المنصة (كل المناطق)';
+
+  @override
+  String get platformSettlementsAllRegions => 'تسويات المنصة (كل المناطق)';
+
+  @override
+  String get graceLimitLabel => 'الحد';
+
+  @override
+  String get graceUsedLabel => 'المستخدم';
+
+  @override
+  String get graceRemainingLabel => 'المتبقي';
+
+  @override
+  String revokeSanctionConfirm(Object role, Object type) {
+    return 'إلغاء $type لـ$role؟';
+  }
+
+  @override
+  String get adminRegionScopeTitle => 'نطاق المناطق';
+
+  @override
+  String get adminRegionSelectUser => 'اختر مشرفاً لإدارة نطاقه';
+
+  @override
+  String get adminRegionScopeSubtitle =>
+      'عيّن نطاق المناطق للمشرفين على أي مستوى (محافظة، مركز، حي، قرية، ...). المشرف بدون تعيينات يكون عاما.';
+
+  @override
+  String get adminManagement => 'إدارة المشرفين';
 }

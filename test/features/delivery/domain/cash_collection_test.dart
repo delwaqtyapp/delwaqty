@@ -1,0 +1,91 @@
+import 'package:delwaqty/features/customer/delivery/domain/entities/cash_collection.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  group('CashCollectionState', () {
+    test('parses the driver_cash_collection_state RPC payload', () {
+      final state = CashCollectionState.fromJson({
+        'ok': true,
+        'ride_id': 'r1',
+        'order_id': 'o1',
+        'ride_status': 'completed',
+        'payment_method': 'cash',
+        'payment_status': 'pending',
+        'collected': false,
+        'amount': 115,
+        'currency': 'EGP',
+      });
+      expect(state.isCash, isTrue);
+      expect(state.collected, isFalse);
+      expect(state.amount, 115);
+      expect(state.orderId, 'o1');
+    });
+  });
+
+  group('CashCollectionResult', () {
+    test('COLLECTED and ALREADY_COLLECTED both mean collected', () {
+      expect(
+        CashCollectionResult(ok: true, code: 'COLLECTED').collected,
+        isTrue,
+      );
+      expect(
+        CashCollectionResult(ok: true, code: 'ALREADY_COLLECTED').collected,
+        isTrue,
+      );
+      expect(
+        CashCollectionResult(ok: false, code: 'NOT_FOUND').collected,
+        isFalse,
+      );
+    });
+
+    test('parses pair_warnings from the RPC payload', () {
+      final result = CashCollectionResult.fromJson({
+        'ok': true,
+        'code': 'COLLECTED',
+        'amount': 115,
+        'pair_warnings': [
+          {'resource': 'ride', 'id': 'r9', 'payment_status': 'refunded'},
+        ],
+      });
+      expect(result.pairWarnings, hasLength(1));
+      expect(result.pairWarnings.single['payment_status'], 'refunded');
+      expect(CashCollectionResult.fromJson({'ok': true}).pairWarnings, isEmpty);
+    });
+  });
+
+  group('OrderDeliveryRide.rateable', () {
+    OrderDeliveryRide ride({
+      String status = 'completed',
+      String paymentMethod = 'cash',
+      String paymentStatus = 'pending',
+      DateTime? cashCollectedAt,
+    }) => OrderDeliveryRide(
+      id: 'r1',
+      status: status,
+      driverId: 'd1',
+      paymentMethod: paymentMethod,
+      paymentStatus: paymentStatus,
+      cashCollectedAt: cashCollectedAt,
+    );
+
+    test('cash ride waits for the collection stamp', () {
+      expect(ride().rateable, isFalse);
+      // The rule is the stamp, matching the ride_ratings RLS: a paid row
+      // without a stamp (historical, not yet healed) is NOT rateable.
+      expect(ride(paymentStatus: 'paid').rateable, isFalse);
+      expect(ride(cashCollectedAt: DateTime(2026)).rateable, isTrue);
+      expect(
+        ride(paymentStatus: 'paid', cashCollectedAt: DateTime(2026)).rateable,
+        isTrue,
+      );
+    });
+
+    test('non-cash completion is unchanged', () {
+      expect(ride(paymentMethod: 'wallet').rateable, isTrue);
+    });
+
+    test('unfinished delivery is never rateable', () {
+      expect(ride(status: 'inTrip', paymentMethod: 'wallet').rateable, isFalse);
+    });
+  });
+}

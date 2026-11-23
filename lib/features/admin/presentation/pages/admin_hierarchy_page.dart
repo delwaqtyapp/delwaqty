@@ -196,10 +196,12 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
                 children: [
                   Icon(Icons.location_on_rounded, size: 16, color: cs.primary),
                   const SizedBox(width: 8),
-                  Text(
-                    regionName,
-                    style: Theme.of(context).textTheme.bodySmall
-                        ?.copyWith(color: cs.onSurfaceVariant),
+                  Expanded(
+                    child: Text(
+                      regionName,
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: cs.onSurfaceVariant),
+                    ),
                   ),
                 ],
               ),

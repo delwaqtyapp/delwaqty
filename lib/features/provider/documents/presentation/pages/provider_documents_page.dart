@@ -196,49 +196,67 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
                           )
                         : const Icon(Icons.upload_file_outlined),
                     title: Text(label),
-                    subtitle: !hasDoc
-                        ? Text(l10n.notUploaded)
-                        : Text(
-                            rejectionReason != null &&
-                                    rejectionReason.isNotEmpty
-                                ? '$localizedStatus — $rejectionReason'
-                                : localizedStatus,
-                          ),
-                    trailing: _busy && _busyKey == doc.key
-                        ? const SizedBox(
-                            height: 18,
-                            width: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (hasDoc)
-                                IconButton(
-                                  tooltip: l10n.viewDocumentTooltip,
-                                  icon: const Icon(Icons.visibility_outlined),
-                                  onPressed: _busy
-                                      ? null
-                                      : () => _view(fileUrl),
-                                ),
-                              if (hasDoc)
-                                IconButton(
-                                  tooltip: l10n.delete,
-                                  icon: const Icon(Icons.delete_outline),
-                                  onPressed: _busy
-                                      ? null
-                                      : () => _delete(doc.key, label),
-                                ),
-                              TextButton(
-                                onPressed: _busy
-                                    ? null
-                                    : () => _upload(doc.key, label),
-                                child: Text(
-                                  hasDoc ? l10n.replace : l10n.upload,
-                                ),
+                    // Title and reason get the full tile width; the actions
+                    // wrap onto their own line below so they never starve
+                    // the text at small widths or large text scales.
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        !hasDoc
+                            ? Text(l10n.notUploaded)
+                            : Text(
+                                rejectionReason != null &&
+                                        rejectionReason.isNotEmpty
+                                    ? '$localizedStatus — $rejectionReason'
+                                    : localizedStatus,
                               ),
-                            ],
-                          ),
+                        Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: _busy && _busyKey == doc.key
+                              ? const Padding(
+                                  padding: EdgeInsets.all(8),
+                                  child: SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                )
+                              : Wrap(
+                                  spacing: 4,
+                                  children: [
+                                    if (hasDoc)
+                                      IconButton(
+                                        tooltip: l10n.viewDocumentTooltip,
+                                        icon: const Icon(
+                                          Icons.visibility_outlined,
+                                        ),
+                                        onPressed: _busy
+                                            ? null
+                                            : () => _view(fileUrl),
+                                      ),
+                                    if (hasDoc)
+                                      IconButton(
+                                        tooltip: l10n.delete,
+                                        icon: const Icon(Icons.delete_outline),
+                                        onPressed: _busy
+                                            ? null
+                                            : () => _delete(doc.key, label),
+                                      ),
+                                    TextButton(
+                                      onPressed: _busy
+                                          ? null
+                                          : () => _upload(doc.key, label),
+                                      child: Text(
+                                        hasDoc ? l10n.replace : l10n.upload,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }),

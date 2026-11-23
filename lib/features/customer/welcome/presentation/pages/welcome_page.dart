@@ -103,7 +103,7 @@ class WelcomePage extends ConsumerWidget {
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    const Spacer(flex: 3),
+                    const SizedBox(height: 48),
                     AnimatedSlideIn(
                       delay: const Duration(milliseconds: 600),
                       child: _WelcomePrimaryButton(

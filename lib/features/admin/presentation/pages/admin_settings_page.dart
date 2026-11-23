@@ -172,27 +172,33 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
                       children: [
                         ListTile(
                           title: Text(l10n.adminLanguage),
-                          subtitle: Text(l10n.adminLanguageDesc),
-                          trailing: SegmentedButton<String>(
-                            segments: [
-                              ButtonSegment(
-                                value: 'ar',
-                                label: Text(l10n.arabicAbbreviation),
-                              ),
-                              ButtonSegment(
-                                value: 'en',
-                                label: Text(l10n.englishAbbreviation),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(l10n.adminLanguageDesc),
+                              const SizedBox(height: 8),
+                              SegmentedButton<String>(
+                                segments: [
+                                  ButtonSegment(
+                                    value: 'ar',
+                                    label: Text(l10n.arabicAbbreviation),
+                                  ),
+                                  ButtonSegment(
+                                    value: 'en',
+                                    label: Text(l10n.englishAbbreviation),
+                                  ),
+                                ],
+                                selected: {adminLocale.languageCode},
+                                onSelectionChanged: (selected) {
+                                  ref
+                                      .read(adminLocaleProvider.notifier)
+                                      .setAdminLocale(Locale(selected.first));
+                                },
+                                style: const ButtonStyle(
+                                  visualDensity: VisualDensity.compact,
+                                ),
                               ),
                             ],
-                            selected: {adminLocale.languageCode},
-                            onSelectionChanged: (selected) {
-                              ref
-                                  .read(adminLocaleProvider.notifier)
-                                  .setAdminLocale(Locale(selected.first));
-                            },
-                            style: const ButtonStyle(
-                              visualDensity: VisualDensity.compact,
-                            ),
                           ),
                         ),
                         const Divider(),
@@ -249,12 +255,14 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
                                   color: Color(0xFFD4AF37),
                                 ),
                                 const SizedBox(width: 6),
-                                Text(
-                                  l10n.ownerExclusiveControlBadge,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: Color(0xFFD4AF37),
+                                Flexible(
+                                  child: Text(
+                                    l10n.ownerExclusiveControlBadge,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFFD4AF37),
+                                    ),
                                   ),
                                 ),
                               ],

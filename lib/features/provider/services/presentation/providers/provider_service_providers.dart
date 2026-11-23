@@ -3,8 +3,7 @@ import 'package:delwaqty/features/provider/capability/presentation/providers/pro
 import 'package:delwaqty/features/provider/services/domain/provider_service_info.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 
-/// Reads the selected service profile's data. One place to swap the price
-/// source later (the admin pricing RPC `provider_get_my_pricing`).
+/// Reads the selected service profile and the same effective prices used by customers.
 abstract class ProviderServiceRepository {
   /// Single service row of a legacy account (no business profiles).
   Future<String?> legacyServiceProviderId();

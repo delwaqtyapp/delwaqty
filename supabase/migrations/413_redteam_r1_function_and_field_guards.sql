@@ -52,8 +52,10 @@ BEGIN
 END;
 $function$;
 
--- (2) anon holds no EXECUTE on either is_admin overload ------------------------
-REVOKE EXECUTE ON FUNCTION public.is_admin() FROM anon;
+-- (2) Keep zero-argument caller predicate available to anon RLS evaluation.
+-- It is false for anon and cannot disclose arbitrary identities. Only the
+-- supplied-identity overload loses anon access, matching the review scope.
+GRANT EXECUTE ON FUNCTION public.is_admin() TO anon;
 REVOKE EXECUTE ON FUNCTION public.is_admin(uid uuid) FROM anon;
 
 -- (3) merchants: guard settlement_model against direct client writes ----------

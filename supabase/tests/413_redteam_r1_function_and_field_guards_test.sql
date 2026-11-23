@@ -55,18 +55,16 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN v_err := SQLERRM; END;
   IF v_err IS NULL THEN RAISE EXCEPTION 'm413 t1: anon read admin effective permissions'; END IF;
 
-  -- ── (2) anon EXECUTE revoked on is_admin overloads ────────────────────────
-  IF has_function_privilege('anon', 'public.is_admin()', 'EXECUTE') THEN
-    RAISE EXCEPTION 'm413 t2: anon still has EXECUTE on is_admin()';
-  END IF;
-  IF has_function_privilege('anon', 'public.is_admin(uuid)', 'EXECUTE') THEN
-    RAISE EXCEPTION 'm413 t2: anon still has EXECUTE on is_admin(uuid)';
-  END IF;
-  v_err := NULL;
-  BEGIN PERFORM public.is_admin();
-  EXCEPTION WHEN OTHERS THEN v_err := SQLERRM; END;
-  IF v_err IS NULL THEN RAISE EXCEPTION 'm413 t2: anon called is_admin()'; END IF;
-
+  -- (2) anon caller predicate retained for RLS, supplied-id predicate revoked.
+  ASSERT has_function_privilege('anon','public.is_admin()','EXECUTE'),'anon RLS caller predicate required';
+  ASSERT NOT has_function_privilege('anon','public.is_admin(uuid)','EXECUTE'),'anon supplied-id predicate exposed';
+  PERFORM set_config('role','anon',true);
+  PERFORM set_config('request.jwt.claim.sub','',true);
+  ASSERT NOT coalesce(public.is_admin(),false),'anon admin predicate must be false';
+  PERFORM 1 FROM public.categories LIMIT 1;
+  PERFORM 1 FROM public.products LIMIT 1;
+  PERFORM 1 FROM public.service_providers LIMIT 1;
+  PERFORM set_config('role','authenticated',true);
   -- ── (3) merchants.settlement_model guard ──────────────────────────────────
   PERFORM set_config('role', 'authenticated', true);
   PERFORM set_config('request.jwt.claim.sub', v_merch_u::text, true);

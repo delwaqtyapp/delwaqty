@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 /// Contains semantic colors, surface variants, merchant type colors,
 /// order status colors, and core brand colors used throughout the app.
 abstract final class AppColors {
+  static const Color roleSceneInk = Color(0xFF25243C);
+  static const Color roleSceneSkin = Color(0xFFF5C7A5);
+  static const Color roleTileBorder = Color(0xFFE8E8F0);
+  static const Color roleTileChevron = Color(0xFFDFE1EC);
   // ---------------------------------------------------------------------------
   // Premium Brand Palette (V2)
   // ---------------------------------------------------------------------------

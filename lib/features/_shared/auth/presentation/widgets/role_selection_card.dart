@@ -1,3 +1,5 @@
+import 'package:delwaqty/core/theme/app_colors.dart';
+
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -52,7 +54,7 @@ class RoleSelectionCard extends StatelessWidget {
                   : Colors.white,
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                color: isSelected ? color : const Color(0xFFE8E8F0),
+                color: isSelected ? color : AppColors.roleTileBorder,
                 width: 2,
               ),
               boxShadow: isSelected
@@ -97,7 +99,7 @@ class RoleSelectionCard extends StatelessWidget {
                                 fontSize: 14.5,
                                 height: 1.4,
                                 fontWeight: FontWeight.w800,
-                                color: Color(0xFF1A1035),
+                                color: AppColors.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -110,7 +112,7 @@ class RoleSelectionCard extends StatelessWidget {
                                 fontSize: 11,
                                 height: 1.6,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF6B7280),
+                                color: AppColors.textMuted,
                               ),
                             ),
                           ],
@@ -130,7 +132,9 @@ class RoleSelectionCard extends StatelessWidget {
                           shape: BoxShape.circle,
                           color: isSelected ? color : Colors.transparent,
                           border: Border.all(
-                            color: isSelected ? color : const Color(0xFFDFE1EC),
+                            color: isSelected
+                                ? color
+                                : AppColors.roleTileChevron,
                             width: 2,
                           ),
                         ),

@@ -1,3 +1,5 @@
+import 'package:delwaqty/core/theme/app_colors.dart';
+
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -38,8 +40,8 @@ class _ScenePainter extends CustomPainter {
   final RoleCardIcon role;
   final Color color;
   final double progress;
-  static const ink = Color(0xFF25243C);
-  static const skin = Color(0xFFF5C7A5);
+  static const ink = AppColors.roleSceneInk;
+  static const skin = AppColors.roleSceneSkin;
 
   @override
   void paint(Canvas c, Size size) {

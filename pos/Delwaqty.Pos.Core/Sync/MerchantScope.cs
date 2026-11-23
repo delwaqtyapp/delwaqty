@@ -63,44 +63,74 @@ namespace Delwaqty.Pos.Core.Sync
         /// </summary>
         public static string LegacyFlatRepairReason(string rootDir)
         {
-            var outbox = Path.Combine(rootDir, "outbox.db");
-            if (File.Exists(outbox))
+            // Every check is READ-ONLY (SQLite Mode=ReadOnly + sqlite_master
+            // inspection): the detector never creates or modifies a file, so
+            // the repair promise "no file touched" is literally true.
+            // Any nonempty financial/inventory/history flat db triggers the
+            // repair state — an old pharmacy's stock or history must not pass
+            // clean just because no sale is pending right now.
+            string reason;
+            if ((reason = CheckFlatDb(rootDir, "outbox.db", "outbox", "synced = 0", "unsynced op(s)")) != null) return reason;
+            if ((reason = CheckFlatDb(rootDir, "pos.db", "outbox", "synced = 0", "unsynced op(s)")) != null) return reason;
+            if ((reason = CheckFlatDb(rootDir, "pos.db", "local_sales", null, "sales history")) != null) return reason;
+            if ((reason = CheckFlatDb(rootDir, "pos.db", "batches", null, "stock batches")) != null) return reason;
+            if ((reason = CheckFlatDb(rootDir, "sales.db", "local_sales", null, "sales history")) != null) return reason;
+            if ((reason = CheckFlatDb(rootDir, "batches.db", "batches", null, "stock batches")) != null) return reason;
+            if ((reason = CheckFlatDb(rootDir, "catalog.db", "catalog", null, "drug catalog")) != null) return reason;
+            if ((reason = CheckFlatDb(rootDir, "products.db", "products", null, "product catalog")) != null) return reason;
+            var shift = Path.Combine(rootDir, "shift.json");
+            if (File.Exists(shift))
             {
                 try
                 {
-                    using (var store = new OutboxStore(outbox))
-                    {
-                        var n = store.PendingCount();
-                        if (n > 0) return "legacy root outbox.db holds " + n + " unsynced op(s)";
-                    }
+                    if ((File.ReadAllText(shift) ?? "").Trim().Length > 0)
+                        return "legacy root shift.json holds open-shift state";
                 }
-                catch { return "legacy root outbox.db is unreadable"; }
-            }
-            var pos = Path.Combine(rootDir, "pos.db");
-            if (File.Exists(pos))
-            {
-                try
-                {
-                    using (var db = new PosLocalDb(pos, importLegacy: false))
-                    {
-                        var n = db.Outbox.PendingCount();
-                        if (n > 0) return "legacy root pos.db holds " + n + " unsynced op(s)";
-                    }
-                }
-                catch { return "legacy root pos.db is unreadable"; }
-            }
-            var sales = Path.Combine(rootDir, "sales.db");
-            if (File.Exists(sales))
-            {
-                try
-                {
-                    using (var log = new Sales.LocalSalesLog(sales))
-                        if (log.Recent(1).Count > 0)
-                            return "legacy root sales.db holds sales history";
-                }
-                catch { return "legacy root sales.db is unreadable"; }
+                catch { return "legacy root shift.json is unreadable"; }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Read-only row count of one table in one flat db. Returns a repair
+        /// reason when the file is unreadable (fail closed) or the count is
+        /// positive; null when the file/table is absent or empty.
+        /// </summary>
+        private static string CheckFlatDb(string rootDir, string fileName, string table,
+            string where, string what)
+        {
+            var path = Path.Combine(rootDir, fileName);
+            if (!File.Exists(path)) return null;
+            try
+            {
+                using (var db = new Microsoft.Data.Sqlite.SqliteConnection(
+                    "Data Source=" + path + ";Mode=ReadOnly"))
+                {
+                    db.Open();
+                    using (var cmd = db.CreateCommand())
+                    {
+                        cmd.CommandText =
+                            "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=$t;";
+                        cmd.Parameters.AddWithValue("$t", table);
+                        if (System.Convert.ToInt64(cmd.ExecuteScalar()) == 0)
+                            return null; // table absent: nothing of this kind inside
+                    }
+                    using (var cmd = db.CreateCommand())
+                    {
+                        // table/where are fixed literals from the caller — never user input.
+                        cmd.CommandText = "SELECT COUNT(*) FROM \"" + table + "\"" +
+                            (where != null ? " WHERE " + where : "") + ";";
+                        var n = System.Convert.ToInt64(cmd.ExecuteScalar());
+                        return n > 0
+                            ? "legacy root " + fileName + " holds " + n + " " + what
+                            : (string)null;
+                    }
+                }
+            }
+            catch
+            {
+                return "legacy root " + fileName + " is unreadable"; // fail closed
+            }
         }
 
         /// <summary>

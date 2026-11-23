@@ -43,7 +43,7 @@ namespace Delwaqty.Pos.Wpf
             // an unsynced queue must not vanish under a fresh scope. Enter
             // the visible repair state: no selling, no files touched, until
             // support runs a verified migration.
-            var repair = activation.LegacyRepairReason();
+            var repair = activation.LegacyRepairReason(state.MerchantId);
             if (repair != null)
             {
                 MessageBox.Show(

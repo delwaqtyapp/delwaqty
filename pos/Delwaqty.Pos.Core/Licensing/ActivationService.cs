@@ -163,12 +163,18 @@ namespace Delwaqty.Pos.Core.Licensing
             // payload after the key regenerates — their flat files stay at
             // the root for support to migrate manually.
             var legacyMerchant = TryReadLegacyMerchantId();
-            if (legacyMerchant == null)
+            if (legacyMerchant != null && legacyMerchant == parsed.State.MerchantId)
             {
-                // Upgrade completeness: unverifiable legacy flat data with an
-                // unsynced queue must NOT be abandoned under a fresh empty
-                // scope — refuse activation into a visible repair state and
-                // keep every file untouched (support migrates manually).
+                // Verified same owner: the normal migration path.
+                MerchantScope.MigrateLegacyRootData(_rootDir, newScope);
+            }
+            else
+            {
+                // Upgrade completeness: root flat data is checked REGARDLESS
+                // of the seal — unverifiable owner, or a verified owner who
+                // is NOT the merchant being activated. Either way the old
+                // data must not hide under the new scope: refuse into the
+                // visible repair state until support archives/migrates it.
                 var repair = MerchantScope.LegacyFlatRepairReason(_rootDir);
                 if (repair != null)
                 {
@@ -176,13 +182,11 @@ namespace Delwaqty.Pos.Core.Licensing
                     {
                         Ok = false,
                         Reason = "LEGACY_DATA_NEEDS_REPAIR",
-                        Error = repair,
+                        Error = (legacyMerchant != null
+                            ? "legacy data belongs to a different merchant (" + legacyMerchant + "); "
+                            : "legacy owner unverifiable; ") + repair,
                     };
                 }
-            }
-            else if (legacyMerchant == parsed.State.MerchantId)
-            {
-                MerchantScope.MigrateLegacyRootData(_rootDir, newScope);
             }
             _scopeDir = newScope;
             Directory.CreateDirectory(_scopeDir);
@@ -415,9 +419,16 @@ namespace Delwaqty.Pos.Core.Licensing
         /// verifiable legacy payload (DP1-era key intact) migrates normally
         /// and never triggers this.
         /// </summary>
-        public string LegacyRepairReason()
+        public string LegacyRepairReason(string activeMerchantId)
         {
-            if (TryReadLegacyMerchantId() != null) return null;
+            var legacyMerchant = TryReadLegacyMerchantId();
+            // Verified owner matching the ACTIVE merchant (or none chosen
+            // yet, e.g. pre-activation): the normal migration path handles
+            // it — no repair state. A verified DIFFERENT owner still blocks:
+            // that merchant's data needs archival, not a silent skip.
+            if (legacyMerchant != null &&
+                (activeMerchantId == null || legacyMerchant == activeMerchantId))
+                return null;
             return MerchantScope.LegacyFlatRepairReason(_rootDir);
         }
 

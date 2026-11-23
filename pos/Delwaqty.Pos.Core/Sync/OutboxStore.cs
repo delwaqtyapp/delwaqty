@@ -22,7 +22,17 @@ namespace Delwaqty.Pos.Core.Sync
         {
             _db = db;
             _ownsConnection = ownsConnection;
-            EnsureSchema();
+            try
+            {
+                EnsureSchema();
+            }
+            catch
+            {
+                // A corrupt/unreadable db throws here; release the handle we
+                // just opened or it stays locked on Windows (leaked connection).
+                if (_ownsConnection) _db.Dispose();
+                throw;
+            }
         }
 
         internal static SqliteConnection Open(string path)

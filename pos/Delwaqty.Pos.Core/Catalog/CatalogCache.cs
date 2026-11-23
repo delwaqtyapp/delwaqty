@@ -24,6 +24,8 @@ namespace Delwaqty.Pos.Core.Catalog
             // Dispose on Windows, breaking migrations (File.Move), teardown and any
             // second opener. Stores here are long-lived, so pooling buys nothing.
             _db = new SqliteConnection(cs);
+            try
+            {
             _db.Open();
             using (var cmd = _db.CreateCommand())
             {
@@ -34,6 +36,14 @@ namespace Delwaqty.Pos.Core.Catalog
                     " strength TEXT, category TEXT, search_norm TEXT, is_active INTEGER NOT NULL DEFAULT 1);" +
                     "CREATE INDEX IF NOT EXISTS catalog_norm ON catalog(search_norm);";
                 cmd.ExecuteNonQuery();
+            }
+            }
+            catch
+            {
+                // Corrupt/unreadable db: release the handle so the file is
+                // not left locked on Windows.
+                _db.Dispose();
+                throw;
             }
         }
 

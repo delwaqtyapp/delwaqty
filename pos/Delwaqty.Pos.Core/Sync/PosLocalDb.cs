@@ -44,18 +44,29 @@ namespace Delwaqty.Pos.Core.Sync
         public PosLocalDb(string path, bool importLegacy)
         {
             _db = OutboxStore.Open(path);
-            Outbox = new OutboxStore(_db, false);
-            Sales = new LocalSalesLog(_db, false);
-            Batches = new BatchStore(_db, false);
-            if (importLegacy)
+            try
             {
-                var dir = Path.GetDirectoryName(path);
-                if (!string.IsNullOrEmpty(dir))
+                Outbox = new OutboxStore(_db, false);
+                Sales = new LocalSalesLog(_db, false);
+                Batches = new BatchStore(_db, false);
+                if (importLegacy)
                 {
-                    ImportLegacyDb(dir, "outbox.db", "outbox", "op_id");
-                    ImportLegacyDb(dir, "sales.db", "local_sales", "op_id");
-                    ImportLegacyDb(dir, "batches.db", "batches", "id");
+                    var dir = Path.GetDirectoryName(path);
+                    if (!string.IsNullOrEmpty(dir))
+                    {
+                        ImportLegacyDb(dir, "outbox.db", "outbox", "op_id");
+                        ImportLegacyDb(dir, "sales.db", "local_sales", "op_id");
+                        ImportLegacyDb(dir, "batches.db", "batches", "id");
+                    }
                 }
+            }
+            catch
+            {
+                // Corrupt/unreadable db (e.g. fail-closed scope probe in
+                // MerchantScope): release the handle or the file stays locked
+                // on Windows and even support cannot move/delete it.
+                _db.Dispose();
+                throw;
             }
         }
 

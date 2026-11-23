@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -10,6 +12,17 @@ import 'package:delwaqty/features/_shared/auth/presentation/widgets/whatsapp_otp
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 void main() {
+  setUpAll(() async {
+    await (FontLoader('MaterialIcons')..addFont(
+          File(
+            '${File(Platform.resolvedExecutable).parent.parent.parent.path}/material_fonts/MaterialIcons-Regular.otf',
+          ).readAsBytes().then((bytes) => ByteData.sublistView(bytes)),
+        ))
+        .load();
+    await (FontLoader(
+      'Cairo',
+    )..addFont(rootBundle.load('assets/fonts/Cairo-400.ttf'))).load();
+  });
   testWidgets('Arabic mobile sheet scrolls without overflow', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
@@ -331,6 +344,10 @@ Future<void> _openSheet(
 }) async {
   await tester.pumpWidget(
     MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark().copyWith(
+        textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'Cairo'),
+      ),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: locale,
@@ -341,6 +358,7 @@ Future<void> _openSheet(
               showModalBottomSheet<String>(
                 context: context,
                 isScrollControlled: true,
+                backgroundColor: const Color(0xFF3B1DB0),
                 builder: (_) => WhatsAppOtpSheet(
                   phone: '+201000000001',
                   client: client,

@@ -493,7 +493,6 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
                                   color: Colors.white,
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: 4,
-                                  fontFamily: 'monospace',
                                 ),
                               ),
                             ],

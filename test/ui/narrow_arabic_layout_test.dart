@@ -52,9 +52,12 @@ import 'package:delwaqty/features/provider/documents/presentation/providers/prov
 import 'package:delwaqty/features/provider/financial/presentation/pages/financial_center_page.dart';
 import 'package:delwaqty/features/provider/financial/presentation/providers/financial_providers.dart';
 import 'package:delwaqty/features/provider/financial/domain/entities/financial_entities.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_audit_log_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_drivers_page.dart';
+import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_provider_intelligence_page.dart';
 import 'package:delwaqty/features/admin/presentation/providers/platform_intelligence_providers.dart';
+import 'package:delwaqty/services/admin/admin_providers.dart';
 import 'package:delwaqty/features/admin/presentation/widgets/intelligence_stat_grid.dart';
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
 
@@ -389,6 +392,34 @@ void main() {
       );
       expect(tester.takeException(), isNull);
       expect(find.text('12345'), findsOneWidget);
+    });
+  });
+
+  group('AdminAuditLogPage resource label (item 72)', () {
+    testWidgets('320 / 1.6x Arabic: known resource localizes, no raw code', (
+      tester,
+    ) async {
+      await pumpPage(
+        tester,
+        const AdminAuditLogPage(),
+        overrides: [
+          recentActivityProvider.overrideWith(
+            (ref) async => [
+              AdminActivityLog(
+                id: 'log1',
+                userId: 'admin1',
+                action: 'commission_rate_updated',
+                resource: 'service_category/plumbing',
+                timestamp: DateTime(2026, 11, 20, 14, 30),
+              ),
+            ],
+          ),
+        ],
+      );
+      expect(tester.takeException(), isNull);
+      // Localized "Service category" in Arabic, never the raw code.
+      expect(find.textContaining('فئة الخدمة'), findsOneWidget);
+      expect(find.textContaining('service_category'), findsNothing);
     });
   });
 }

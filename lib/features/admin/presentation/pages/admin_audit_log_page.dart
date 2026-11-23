@@ -139,7 +139,8 @@ class _LogTile extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(_humanize(log.resource), style: const TextStyle(fontSize: 11)),
+            Text(_resourceLabel(AppLocalizations.of(context), log.resource),
+              style: const TextStyle(fontSize: 11)),
             Text(
               intl.DateFormat('yyyy/MM/dd HH:mm')
                   .format(log.timestamp.toLocal()),

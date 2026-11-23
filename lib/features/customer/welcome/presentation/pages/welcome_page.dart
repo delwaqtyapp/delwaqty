@@ -29,9 +29,11 @@ class WelcomePage extends ConsumerWidget {
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Column(
+              child: SingleChildScrollView(
+                child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Spacer(flex: 2),
+                  const SizedBox(height: 32),
                   AnimatedFadeIn(
                     duration: const Duration(milliseconds: 1000),
                     child: Hero(
@@ -149,6 +151,7 @@ class WelcomePage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                 ],
+              ),
               ),
             ),
           ),

@@ -158,6 +158,8 @@ class _TransactionTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     _formatDate(transaction.createdAt),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -166,15 +168,18 @@ class _TransactionTile extends StatelessWidget {
               ),
             ),
             Flexible(
-              child: Text(
-                '${isCredit ? '+' : '-'}${l10n.amountWithCurrency(transaction.amount.toStringAsFixed(2), l10n.currencySymbol)}',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: isCredit
-                      ? AppColors.successLight
-                      : theme.colorScheme.error,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  '${isCredit ? '+' : '-'}${l10n.amountWithCurrency(transaction.amount.toStringAsFixed(2), l10n.currencySymbol)}',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: isCredit
+                        ? AppColors.successLight
+                        : theme.colorScheme.error,
+                  ),
+                  maxLines: 1,
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

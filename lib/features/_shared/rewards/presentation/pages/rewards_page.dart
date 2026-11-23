@@ -212,6 +212,7 @@ class _BenefitCode extends StatelessWidget {
           Expanded(
             child: SelectableText(
               code,
+              maxLines: 1,
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.2,

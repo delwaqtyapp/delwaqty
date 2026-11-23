@@ -16,8 +16,12 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/adaptive_tile_wrap.dart';
 
 Future<void> _loadCairo() async {
+  // Load exactly the same Cairo weights every other golden test in this
+  // repo loads (400/700): fonts registered through FontLoader live in the
+  // shared engine font collection, so extra weights here would change font
+  // resolution in unrelated golden tests running in the same process.
   final loader = FontLoader('Cairo');
-  for (final w in [300, 400, 500, 600, 700, 800, 900]) {
+  for (final w in [400, 700]) {
     loader.addFont(
       File('assets/fonts/Cairo-$w.ttf')
           .readAsBytes()

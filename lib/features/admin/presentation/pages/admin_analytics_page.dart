@@ -123,11 +123,17 @@ class _RevenueOverviewSection extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        '${l10n.revenueChart} • ${metrics.totalDeliveries} ${l10n.orders}',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimary
-                              .withValues(alpha: 0.7),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          '${l10n.revenueChart} • ${metrics.totalDeliveries} ${l10n.orders}',
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimary
+                                .withValues(alpha: 0.7),
+                          ),
                         ),
                       ),
                     ],

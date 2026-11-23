@@ -11,6 +11,32 @@ import 'package:delwaqty/features/customer/driver/presentation/providers/dispatc
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/app_shell.dart';
 
+// Localized labels: raw backend codes never show in Arabic.
+String _localizedTxType(AppLocalizations l10n, String type) => switch (type) {
+  'credit' => l10n.walletTxCredit,
+  'debit' => l10n.walletTxDebit,
+  _ => type,
+};
+
+String _localizedTopupStatus(AppLocalizations l10n, String status) =>
+    switch (status) {
+      'pending' => l10n.pending,
+      'approved' => l10n.approved,
+      'rejected' => l10n.rejected,
+      _ => status,
+    };
+
+String _localizedMethod(AppLocalizations l10n, String method) =>
+    switch (method) {
+      'bank_transfer' => l10n.bankTransfer,
+      'wallet' => l10n.wallet,
+      'cash' => l10n.cash,
+      _ => method,
+    };
+
+String _localizedCurrency(AppLocalizations l10n, String currency) =>
+    currency == 'EGP' ? l10n.egp : currency;
+
 class DriverFinancialCenterPage extends ConsumerWidget {
   const DriverFinancialCenterPage({super.key});
 
@@ -45,10 +71,12 @@ class DriverFinancialCenterPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.financialCenter)),
-      floatingActionButton: Padding(
-        // Keep the FAB above the shell's floating bottom navigation bar.
-        padding: const EdgeInsets.only(bottom: 96),
-        child: FloatingActionButton.extended(
+      // Docked bottom bar: a floating pill overlaid metric cards at
+      // mid-scroll. It sits above the shell's floating nav (96) and
+      // never covers list content.
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 104),
+        child: FilledButton.icon(
           onPressed: () => context.push('/driver/financial-center/topup'),
           icon: const Icon(Icons.add),
           label: Text(l10n.topUp),
@@ -67,10 +95,10 @@ class DriverFinancialCenterPage extends ConsumerWidget {
             16,
             16,
             16,
-            // Clear the floating top-up pill (and the shell's floating
-            // nav) so the last rows are never hidden underneath it.
+            // Clear the docked top-up bar and the shell's floating
+            // nav so the last rows are never hidden underneath them.
             16 +
-                120 +
+                96 +
                 kFloatingNavClearance +
                 MediaQuery.paddingOf(context).bottom,
           ),
@@ -188,7 +216,7 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                                   children: [
                                     Text(t.description),
                                     Text(
-                                      t.type,
+                                      _localizedTxType(l10n, t.type),
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodySmall,
@@ -239,13 +267,13 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      '${t.amount.toStringAsFixed(2)} ${t.currency}',
+                                      '${t.amount.toStringAsFixed(2)} ${_localizedCurrency(l10n, t.currency)}',
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                     Text(
-                                      '${t.status} · ${t.paymentMethod}',
+                                      '${_localizedTopupStatus(l10n, t.status)} · ${_localizedMethod(l10n, t.paymentMethod)}',
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodySmall,

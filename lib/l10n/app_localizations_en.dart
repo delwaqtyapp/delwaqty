@@ -6216,7 +6216,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminAssigned => 'Admin assigned';
 
   @override
+  String get auditResourceServiceCategory => 'Service category';
+
+  @override
   String get auditCommissionRateUpdated => 'Commission rate updated';
+
+  @override
+  String get walletTxCredit => 'Credit';
+
+  @override
+  String get walletTxDebit => 'Debit';
 
   @override
   String get roleUpdated => 'Role updated';

@@ -11912,11 +11912,29 @@ abstract class AppLocalizations {
   /// **'Admin assigned'**
   String get adminAssigned;
 
+  /// No description provided for @auditResourceServiceCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Service category'**
+  String get auditResourceServiceCategory;
+
   /// No description provided for @auditCommissionRateUpdated.
   ///
   /// In en, this message translates to:
   /// **'Commission rate updated'**
   String get auditCommissionRateUpdated;
+
+  /// No description provided for @walletTxCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit'**
+  String get walletTxCredit;
+
+  /// No description provided for @walletTxDebit.
+  ///
+  /// In en, this message translates to:
+  /// **'Debit'**
+  String get walletTxDebit;
 
   /// No description provided for @roleUpdated.
   ///

@@ -173,6 +173,18 @@ class _LogTile extends StatelessWidget {
     }
   }
 
+  // Known resource types are localized; the rest of the path (a
+  // category or entity name) is humanized.
+  static String _resourceLabel(AppLocalizations l10n, String resource) {
+    final parts = resource.split('/');
+    final typeLabel = switch (parts.first) {
+      'service_category' => l10n.auditResourceServiceCategory,
+      _ => _humanize(parts.first),
+    };
+    if (parts.length == 1) return typeLabel;
+    return [typeLabel, ...parts.skip(1).map(_humanize)].join(' › ');
+  }
+
   static String _humanize(String raw) =>
       raw.replaceAll('/', ' › ').replaceAll('_', ' ').trim();
 

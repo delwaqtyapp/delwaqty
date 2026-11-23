@@ -6178,7 +6178,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminAssigned => 'تم تعيين المشرف';
 
   @override
+  String get auditResourceServiceCategory => 'فئة الخدمة';
+
+  @override
   String get auditCommissionRateUpdated => 'تحديث نسبة العمولة';
+
+  @override
+  String get walletTxCredit => 'إيداع';
+
+  @override
+  String get walletTxDebit => 'خصم';
 
   @override
   String get roleUpdated => 'تم تحديث الدور';

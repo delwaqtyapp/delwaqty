@@ -15,6 +15,13 @@ import 'package:delwaqty/features/customer/home_services/presentation/pages/serv
 import 'package:delwaqty/features/customer/home_services/presentation/pages/service_reviews_page.dart';
 import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/order.dart';
+import 'package:delwaqty/features/customer/commerce/domain/repositories/order_repository.dart';
+import 'package:delwaqty/features/customer/commerce/presentation/pages/order_tracking_page.dart';
+import 'package:delwaqty/features/customer/commerce/presentation/pages/orders_page.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/cash_collection.dart';
+import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/review.dart';
 import 'package:delwaqty/features/customer/commerce/domain/repositories/review_repository.dart';
 import 'package:delwaqty/features/customer/restaurant/presentation/pages/restaurant_reviews_page.dart';
@@ -47,6 +54,7 @@ void main() {
     WidgetTester tester,
     Widget home, {
     List<Override> overrides = const [],
+    bool settle = true,
   }) async {
     tester.view.physicalSize = const Size(320, 640);
     tester.view.devicePixelRatio = 1.0;
@@ -68,8 +76,16 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    if (settle) {
+      await tester.pumpAndSettle();
+    } else {
+      // Pages with repeating pulse animations never settle.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+    }
   }
+
+  _registerOrderPageTests(pumpPage);
 
   group('ServiceReviewsPage SummaryCard histogram', () {
     testWidgets('320 / 1.6x Arabic: no overflow, 1000 stays on one line', (
@@ -500,4 +516,120 @@ class _FakeBookingRepository implements ServiceBookingRepository {
 class _FakeUserLocationNotifier extends UserLocationNotifier {
   @override
   Future<UserLocation?> build() async => null;
+}
+
+// ---------------------------------------------------------------------------
+// Items 35/37: customer order tracking price rows + orders list status chips
+// ---------------------------------------------------------------------------
+
+class _FakeOrderRepository implements OrderRepository {
+  _FakeOrderRepository({this.order, this.orders = const []});
+
+  final Order? order;
+  final List<Order> orders;
+
+  @override
+  Future<Order?> getOrderById(String id) async => order;
+
+  @override
+  Future<List<Order>> getOrders({
+    OrderStatus? status,
+    int limit = 20,
+    int offset = 0,
+  }) async => orders;
+
+  @override
+  Future<Order> createOrder({
+    required String merchantId,
+    required String merchantName,
+    required List<CartItem> items,
+    required double subtotal,
+    required double deliveryFee,
+    required double discount,
+    required double total,
+    String? deliveryAddress,
+    double? deliveryLatitude,
+    double? deliveryLongitude,
+    String? paymentMethod,
+    String? specialInstructions,
+    String? couponCode,
+    String? idempotencyKey,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<Order> cancelOrder({required String orderId, String? reason}) =>
+      throw UnimplementedError();
+}
+
+Order _trackingOrder() => Order(
+  id: 'o1',
+  merchantId: 'm1',
+  merchantName: 'مطعم الاختبار',
+  items: const [
+    OrderItem(
+      productId: 'p1',
+      productName: 'وجبة دجاج مشوي مع أرز بسمتي وخضار مشكلة إضافية',
+      quantity: 2,
+      unitPrice: 1234.5,
+      totalPrice: 2469.0,
+    ),
+  ],
+  subtotal: 2469.0,
+  deliveryFee: 25.0,
+  total: 2494.0,
+  status: OrderStatus.preparing,
+  createdAt: DateTime(2026, 1, 1),
+);
+
+void _registerOrderPageTests(
+  Future<void> Function(
+    WidgetTester tester,
+    Widget home, {
+    List<Override> overrides,
+    bool settle,
+  })
+  pumpPage,
+) {
+  group('OrderTrackingPage price rows (item 35)', () {
+    testWidgets('320 / 1.6x Arabic: amounts fully readable, no overflow', (
+      tester,
+    ) async {
+      await pumpPage(
+        tester,
+        const OrderTrackingPage(orderId: 'o1'),
+        settle: false,
+        overrides: [
+          orderRepositoryProvider.overrideWithValue(
+            _FakeOrderRepository(order: _trackingOrder()),
+          ),
+          orderDeliveryRideProvider.overrideWith(
+            (ref, orderId) => Stream<OrderDeliveryRide?>.value(null),
+          ),
+        ],
+      );
+      expect(tester.takeException(), isNull);
+      // Full amount, never ellipsized.
+      expect(find.textContaining('2469.00'), findsWidgets);
+      expect(find.textContaining('2494.00'), findsWidgets);
+    });
+  });
+
+  group('OrdersPage status chip (item 37)', () {
+    testWidgets('320 / 1.6x Arabic: status chip gets its own line', (
+      tester,
+    ) async {
+      await pumpPage(
+        tester,
+        const OrdersPage(),
+        settle: false,
+        overrides: [
+          orderRepositoryProvider.overrideWithValue(
+            _FakeOrderRepository(orders: [_trackingOrder()]),
+          ),
+        ],
+      );
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining('مطعم الاختبار'), findsWidgets);
+    });
+  });
 }

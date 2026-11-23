@@ -517,13 +517,17 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              Text(
-                                _otpCode!.split('').join(' '),
-                                textDirection: TextDirection.ltr,
-                                style: AppTextStyles.headlineSmall.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 4,
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  _otpCode!.split('').join(' '),
+                                  textDirection: TextDirection.ltr,
+                                  style: AppTextStyles.headlineSmall.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 4,
+                                  ),
                                 ),
                               ),
                             ],

@@ -190,10 +190,12 @@ class ServiceInfoCard extends StatelessWidget {
             for (final r in rows)
               Padding(
                 padding: const EdgeInsets.only(bottom: 6),
-                child: Row(
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  spacing: 12,
+                  runSpacing: 4,
                   children: [
                     Text(r.$1, style: theme.textTheme.bodyMedium),
-                    const Spacer(),
                     Text(
                       r.$2,
                       style: theme.textTheme.titleSmall?.copyWith(

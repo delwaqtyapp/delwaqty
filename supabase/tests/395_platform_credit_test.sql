@@ -1,12 +1,15 @@
--- Staging-only rollback suite for migration 395 v2 (delay-apology platform
+-- Staging-only rollback suite for migration 395 (delay-apology platform
 -- credit). Synthetic zz-test fixtures inside one rolled-back transaction.
 -- Covers the reviewer-required cases: dedicated locked balance unreachable
--- by both wallet_pay overloads, pre-credit settlement in both settlement
+-- by both wallet_pay overloads, net-at-settlement in both settlement
 -- models with subsidy ledger entries, full-credit and credit-above-goods,
 -- paid refund + retry, merchant reject + retry, idempotent replay,
--- coupon+gift stacking, sweep netting, and client lockdown. The two-session
--- concurrency case lives in 395_platform_credit_concurrency_staging.sql
--- (committed fixtures; cannot run inside this rollback).
+-- coupon+gift stacking, net-only sweep, client lockdown, and the
+-- admin payables path gated on global finance scope (owner/country only;
+-- list / settle-once / idempotent / denied principals / void excluded).
+-- The two-session concurrency case lives in
+-- 395_platform_credit_concurrency_staging.sql (committed fixtures; cannot
+-- run inside this rollback).
 begin;
 
 -- Deterministic commission rules (same pattern as settlement_system_regression).
@@ -59,6 +62,10 @@ do $$ declare
   t record; r jsonb; a jsonb;
   o1 uuid; o2 uuid; o3 uuid; o4 uuid; o5 uuid; o6 uuid; o7 uuid;
   v_ride uuid; v_count int; v_amt numeric; v_out numeric; v_ob uuid;
+  v_adm uuid := gen_random_uuid(); v_denied boolean;
+  v_country uuid := gen_random_uuid(); v_regional uuid := gen_random_uuid();
+  v_unassigned uuid := gen_random_uuid(); v_inactive uuid := gen_random_uuid();
+  v_uid uuid; v_oid uuid;
 begin
   select * into t from zz_ctx;
 
@@ -471,6 +478,152 @@ begin
       and status='netted_noncash'
       and remittance_reduction=0 and driver_payable=0 and merchant_payable=0),
     'I: non-cash subsidy recorded for accounting';
+
+  -- ============ J. Admin payables path (manual settlement) ============
+  -- H1's order (o1) carries driver_payable 15; H2's (o2) carries
+  -- driver_payable 15 + merchant_payable 50; I's (o4) has zero payables.
+  -- #97 access fixtures: owner, country admin (root region + descendants),
+  -- regional admin (child region), unassigned admin, inactive admin.
+  insert into auth.users(id,email)
+  select id, id::text||'@example.invalid' from (values
+    (v_adm),(v_country),(v_regional),(v_unassigned),(v_inactive)) x(id);
+  update public.users set role='owner', user_type='owner', verification_status='approved'
+   where id = v_adm;
+  update public.users set role='admin', user_type='admin', verification_status='approved'
+   where id in (v_country, v_regional, v_unassigned, v_inactive);
+  insert into public.regions (id, code, parent_region_id, country_code, type, name_ar, name_en, is_active)
+  values ('00000000-0000-0000-0000-000000000001','EG',null,'EG','country','مصر','Egypt',true),
+         ('00000000-0000-0000-0000-000000000101','EG-ALX','00000000-0000-0000-0000-000000000001','EG','governorate','الإسكندرية','Alexandria',true)
+  on conflict (id) do nothing;
+  insert into public.admin_management(admin_id, supervisor_id, is_active)
+  values (v_country, v_adm, true), (v_regional, v_adm, true),
+         (v_unassigned, v_adm, true), (v_inactive, v_adm, false);
+  insert into public.admin_region_assignments(admin_id, region_id, scope, created_by)
+  values (v_country, '00000000-0000-0000-0000-000000000001', 'descendants', v_adm),
+         (v_regional, '00000000-0000-0000-0000-000000000101', 'descendants', v_adm);
+
+  -- J1. Access matrix (#97): customer, regional, unassigned and inactive
+  -- admins are denied on BOTH RPCs and change nothing.
+  for v_uid in select unnest(array[t.c1, v_regional, v_unassigned, v_inactive]) loop
+    perform set_config('request.jwt.claim.sub', v_uid::text, true);
+    v_denied := false;
+    begin
+      perform 1 from public.admin_open_platform_payables(null) limit 1;
+    exception when others then
+      v_denied := position('Not authorized' in sqlerrm) > 0;
+    end;
+    assert v_denied, 'J1: read denied for ' || v_uid;
+    v_denied := false;
+    begin
+      r := public.mark_platform_payable_settled(o1, 'driver_payable', 'zz');
+    exception when others then
+      v_denied := position('Not authorized' in sqlerrm) > 0;
+    end;
+    assert v_denied, 'J1: settle denied for ' || v_uid;
+  end loop;
+  assert not exists(select 1 from public.platform_subsidies
+    where order_id=o1 and driver_payable_settled_at is not null),
+    'J1: denied calls changed nothing';
+
+  -- J2. Owner and country admin read the outstanding payables, per order,
+  -- with amounts; zero-payable rows are not listed.
+  perform set_config('request.jwt.claim.sub', v_adm::text, true);
+  assert exists(select 1 from public.admin_open_platform_payables(null)
+    where order_id=o1 and driver_payable=15 and merchant_payable=0),
+    'J2: owner reads payables';
+  perform set_config('request.jwt.claim.sub', v_country::text, true);
+  assert exists(select 1 from public.admin_open_platform_payables(null)
+    where order_id=o2 and driver_payable=15 and merchant_payable=50),
+    'J2: country admin reads payables';
+  assert not exists(select 1 from public.admin_open_platform_payables(null)
+    where order_id=o4),
+    'J2: zero-payable (non-cash) row not listed';
+  assert (select count(*) from public.admin_open_platform_payables(o2)) = 1,
+    'J2: per-order filter';
+
+  -- J3. Country admin settles: flips once, audits once with the reference,
+  -- result says settlement recorded / no money moved; repeat is idempotent.
+  r := public.mark_platform_payable_settled(o1, 'driver_payable', 'zz-transfer-114');
+  assert r->>'ok'='true' and (r->>'amount')::numeric=15
+     and r->>'already_settled'='false' and r->>'row_status'='settled'
+     and r->>'settlement_recorded'='true' and r->>'money_moved'='false'
+     and r->>'reference'='zz-transfer-114',
+    'J3: settle result records settlement, moves no money';
+  assert exists(select 1 from public.platform_subsidies
+    where order_id=o1 and status='settled' and settled_at is not null
+      and driver_payable_settled_at is not null),
+    'J3: row settled';
+  assert exists(select 1 from public.activity_logs
+    where action='PLATFORM_PAYABLE_SETTLED' and resource_id=o1::text
+      and details->>'reference'='zz-transfer-114'),
+    'J3: audit row carries the reference';
+  r := public.mark_platform_payable_settled(o1, 'driver_payable', 'duplicate');
+  assert r->>'ok'='true' and r->>'already_settled'='true'
+     and r->>'money_moved'='false', 'J3: repeat idempotent';
+  assert (select count(*) from public.activity_logs
+    where action='PLATFORM_PAYABLE_SETTLED' and resource_id=o1::text) = 1,
+    'J3: still one audit row';
+  assert not exists(select 1 from public.admin_open_platform_payables(o1)),
+    'J3: settled payable leaves the open list';
+
+  -- J4. Owner: a row with two payables settles per kind; the row stays open
+  -- until every positive payable on it is settled.
+  perform set_config('request.jwt.claim.sub', v_adm::text, true);
+  r := public.mark_platform_payable_settled(o2, 'driver_payable', null);
+  assert r->>'row_status'='netted', 'J4: partial settle keeps the row open';
+  assert exists(select 1 from public.platform_subsidies
+    where order_id=o2 and status='netted'
+      and driver_payable_settled_at is not null
+      and merchant_payable_settled_at is null),
+    'J4: driver kind settled, merchant kind open';
+  assert exists(select 1 from public.admin_open_platform_payables(o2)),
+    'J4: merchant payable still outstanding';
+  r := public.mark_platform_payable_settled(o2, 'merchant_payable', 'zz');
+  assert r->>'row_status'='settled', 'J4: fully settled';
+  assert exists(select 1 from public.platform_subsidies
+    where order_id=o2 and status='settled' and settled_at is not null
+      and merchant_payable_settled_at is not null),
+    'J4: row settled';
+  assert not exists(select 1 from public.admin_open_platform_payables(o2)),
+    'J4: nothing outstanding';
+
+  -- J5. Invalid kind, NULL kind (#98) and a missing/zero payable rejected.
+  v_denied := false;
+  begin
+    r := public.mark_platform_payable_settled(o2, 'remittance_reduction', null);
+  exception when others then v_denied := true;
+  end;
+  assert v_denied, 'J5: invalid kind rejected';
+  v_denied := false;
+  begin
+    r := public.mark_platform_payable_settled(o2, null, null);
+  exception when others then
+    v_denied := position('invalid payable kind' in sqlerrm) > 0;
+  end;
+  assert v_denied, 'J5: NULL kind rejected explicitly';
+  v_denied := false;
+  begin
+    r := public.mark_platform_payable_settled(o4, 'driver_payable', null);
+  exception when others then v_denied := true;
+  end;
+  assert v_denied, 'J5: zero payable rejected';
+
+  -- J6. Void subsidy rows are invisible to both RPCs (#98).
+  select o.id into v_oid from public.orders o
+   where o.user_id = t.c1
+     and not exists (select 1 from public.platform_subsidies ps where ps.order_id = o.id)
+   limit 1;
+  insert into public.platform_subsidies(order_id, kind, amount, settlement_model, reimburses, driver_payable, status)
+  values (v_oid, 'delay_apology_credit', 7, 'platform', 'driver', 7, 'void');
+  assert not exists(select 1 from public.admin_open_platform_payables(null) where order_id=v_oid),
+    'J6: void row not listed';
+  v_denied := false;
+  begin
+    r := public.mark_platform_payable_settled(v_oid, 'driver_payable', null);
+  exception when others then
+    v_denied := position('no settleable' in sqlerrm) > 0;
+  end;
+  assert v_denied, 'J6: void row rejected by the setter';
 end $$;
 
 -- ============ G. wallet_pay immiscibility (#68) ========================
@@ -559,5 +712,5 @@ do $$ declare t record; a jsonb; begin
     'G: own credit readable';
 end $$;
 
-select 'PASS v3: spend mechanics, one-grant-per-order, above-goods, full-total, remainder, cancel/reject restore + retry, paid refund + retry, coupon+gift, replay, net-at-settlement in both models + netted subsidy + payables, dispatch ceiling on net, sweep on net obligations, full-credit both models (goods extinguished, 13.95 earned, payables), non-cash netted_noncash, wallet_pay immiscibility, client lockdown' as result;
+select 'PASS v5: spend mechanics, one-grant-per-order, above-goods, full-total, remainder, cancel/reject restore + retry, paid refund + retry, coupon+gift, replay, net-at-settlement in both models + netted subsidy + payables, dispatch ceiling on net, sweep on net obligations, full-credit both models (goods extinguished, 13.95 earned, payables), non-cash netted_noncash, admin payables list + settle-once idempotent + per-kind partial settle + global-scope gate (owner/country OK; regional/unassigned/inactive/customer denied) + void excluded + NULL/invalid kind rejected, wallet_pay immiscibility, client lockdown' as result;
 rollback;

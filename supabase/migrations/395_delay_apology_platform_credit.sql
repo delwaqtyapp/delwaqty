@@ -1,10 +1,23 @@
--- 395 (v3): the late-delivery apology gift becomes spendable platform credit.
+-- 395 (v4): the late-delivery apology gift becomes spendable platform credit.
 -- v3 review changes: settlement NETS the gift into the driver remittance
 -- (owner decision: driver remits pre-credit goods minus the gift, merchant
 -- still receives full goods, residuals are platform payables recorded on
 -- platform_subsidies); create_order serializes same-key checkouts with an
 -- advisory lock before any pricing or mutation; the v1->v2 backfill is
 -- removed (v1 never reached production, staging is reset by the builder).
+-- v5 review changes: both payables RPCs are gated on
+-- _admin_write_scope(NULL) - the same global-finance scope the platform
+-- uses for global admin writes (owner or country-level admin; regional,
+-- unassigned and inactive admins denied); void subsidy rows are excluded
+-- from the list and the setter; NULL kind is rejected explicitly; the
+-- audit row and the result carry an optional settlement reference and the
+-- result states that no money moved.
+-- v4 review changes: launch-scope manual settlement of the platform
+-- payables through two admin-gated RPCs (admin_open_platform_payables and
+-- mark_platform_payable_settled; no automatic payouts); the nonnegative
+-- checks on the subsidy split columns are named constraints applied on the
+-- converge path too; and the baseline _settlement_escalation_sweep body is
+-- restored explicitly so a database that applied v2 converges.
 --
 -- v1 granted the gift as ordinary wallet credit and derived availability
 -- from reference strings in the wallet ledger. Review rejected that: the
@@ -29,15 +42,18 @@
 --     and captain earnings are identical to a no-credit order in both the
 --     direct and platform settlement models. The gap is booked in
 --     platform_subsidies (platform owes the driver the cash shortfall) and
---     netted in the escalation sweep so a credited order can never suspend
---     a captain over money the platform owes him.
+--     netted into the driver's goods obligation so a credited order can
+--     never suspend a captain over money the platform owes him.
 --   * Cancel/refund restores the spent credit exactly once
 --     (_platform_credit_restore, idempotent per order).
 --   * my_platform_credit(p_amount_due) returns the spendable balance and
 --     how much would apply to a given amount due, for the checkout screen.
---   * Backfill: any wallet credit stranded by v1 (reference_type
---     'delay_apology') is moved into the new account, debited back out of
---     the wallet (capped at the wallet balance) so it cannot be spent twice.
+--   * No backfill: v1 never reached production, so there is nothing to
+--     migrate; staging is reset by the builder.
+--   * Admin launch path: admin_open_platform_payables lists outstanding
+--     driver/merchant payables per order and mark_platform_payable_settled
+--     flips one payable kind to settled (per-kind settled_at, audit row,
+--     idempotent). Settlement itself is manual ops; nothing auto-pays.
 --
 -- No expiry: nothing in the schema expires the gift. No effect on merchant
 -- or driver payouts beyond the platform bearing the cost.
@@ -90,13 +106,17 @@ create table if not exists public.platform_subsidies (
   -- driver_payable is the platform's debt to him when the gift eats into
   -- his fare, merchant_payable the platform's debt to a direct-model
   -- merchant who must still receive full goods.
-  remittance_reduction numeric not null default 0 check (remittance_reduction >= 0),
-  driver_payable numeric not null default 0 check (driver_payable >= 0),
-  merchant_payable numeric not null default 0 check (merchant_payable >= 0),
+  remittance_reduction numeric not null default 0,
+  driver_payable numeric not null default 0,
+  merchant_payable numeric not null default 0,
   status text not null default 'netted'
     check (status in ('open', 'netted', 'netted_noncash', 'settled', 'void')),
   created_at timestamptz not null default now(),
   settled_at timestamptz,
+  -- Launch-scope manual settlement is tracked per payable kind: a row can
+  -- carry both a driver and a merchant payable, settled independently.
+  driver_payable_settled_at timestamptz,
+  merchant_payable_settled_at timestamptz,
   unique (order_id, kind)
 );
 
@@ -104,7 +124,27 @@ create table if not exists public.platform_subsidies (
 alter table public.platform_subsidies
   add column if not exists remittance_reduction numeric not null default 0,
   add column if not exists driver_payable numeric not null default 0,
-  add column if not exists merchant_payable numeric not null default 0;
+  add column if not exists merchant_payable numeric not null default 0,
+  add column if not exists driver_payable_settled_at timestamptz,
+  add column if not exists merchant_payable_settled_at timestamptz;
+-- The nonnegative guards are named constraints applied AFTER the converge
+-- block, so a database that gained these columns via ADD COLUMN (v2/v3)
+-- enforces exactly what a fresh create enforces.
+alter table public.platform_subsidies
+  drop constraint if exists platform_subsidies_remittance_reduction_nonneg;
+alter table public.platform_subsidies
+  add constraint platform_subsidies_remittance_reduction_nonneg
+  check (remittance_reduction >= 0);
+alter table public.platform_subsidies
+  drop constraint if exists platform_subsidies_driver_payable_nonneg;
+alter table public.platform_subsidies
+  add constraint platform_subsidies_driver_payable_nonneg
+  check (driver_payable >= 0);
+alter table public.platform_subsidies
+  drop constraint if exists platform_subsidies_merchant_payable_nonneg;
+alter table public.platform_subsidies
+  add constraint platform_subsidies_merchant_payable_nonneg
+  check (merchant_payable >= 0);
 alter table public.platform_subsidies
   drop constraint if exists platform_subsidies_status_check;
 alter table public.platform_subsidies
@@ -1239,6 +1279,166 @@ END;
 $function$
 ;
 -- ---------------------------------------------------------------------------
+-- Convergence: v2 made the escalation sweep subsidy-aware; v3 nets the
+-- gift into the goods obligation instead, so the sweep is the baseline
+-- body again. Restored explicitly here so a database that applied v2
+-- converges to baseline (verified: md5(prosrc) matches the baseline
+-- function on staging).
+-- ---------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION public._settlement_escalation_sweep()
+ RETURNS integer
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_cfg public.platform_settings;
+  ob RECORD;
+  v_count integer := 0;
+  v_driver RECORD;
+  v_amount numeric;
+  v_days integer;
+BEGIN
+  PERFORM set_config('app.escalation_rpc', 'true', true);
+  SELECT * INTO v_cfg FROM public._settlement_settings();
+  v_amount := COALESCE(v_cfg.settlement_suspension_amount, 1500);
+  v_days := COALESCE(v_cfg.settlement_suspension_days, 5);
+
+  -- 1) Overdue individual obligations -> ops complaint (unchanged behavior)
+  FOR ob IN
+    SELECT o.*, d.user_id AS driver_uid
+      FROM public.driver_obligations o
+      JOIN public.drivers d ON d.id = o.driver_id
+     WHERE o.status = 'open'
+       AND o.escalated_at IS NULL
+       AND o.due_at + make_interval(hours => COALESCE(v_cfg.settlement_escalation_hours, 24)) < now()
+  LOOP
+    INSERT INTO public.complaints
+      (order_id, ride_id, complainant_id, respondent_id, reporter_id,
+       complaint_type, category, subject, description, status, priority)
+    VALUES
+      (ob.order_id, ob.ride_id, ob.driver_uid, ob.driver_uid, ob.driver_uid,
+       'driver', 'settlement_overdue',
+       'مديونية كاش متأخرة',
+       'الكابتن متأخر عن توريد ' || ob.amount::text || ' ' || ob.currency ||
+         ' (نوع: ' || ob.kind || '، مستحق لـ ' || ob.owed_to || ') منذ ' ||
+         ob.due_at::date::text || '.',
+       'pending', 'high');
+    UPDATE public.driver_obligations SET escalated_at = now() WHERE id = ob.id;
+    v_count := v_count + 1;
+  END LOOP;
+
+  -- 2) Outstanding > suspension amount -> auto-suspend 5 days
+  FOR v_driver IN
+    SELECT o.driver_id, d.user_id AS driver_uid,
+           sum(o.amount) FILTER (WHERE o.status IN ('open','disputed')) AS outstanding
+      FROM public.driver_obligations o
+      JOIN public.drivers d ON d.id = o.driver_id
+     WHERE o.status IN ('open','disputed')
+     GROUP BY o.driver_id, d.user_id
+    HAVING sum(o.amount) FILTER (WHERE o.status IN ('open','disputed')) > v_amount
+  LOOP
+    -- Skip if already suspended for settlement and still within the window
+    IF EXISTS (
+      SELECT 1 FROM public.drivers d
+      WHERE d.id = v_driver.driver_id
+        AND d.settlement_suspended_until IS NOT NULL
+        AND d.settlement_suspended_until > now()
+    ) THEN
+      CONTINUE;
+    END IF;
+
+    UPDATE public.drivers
+       SET settlement_suspended_until = now() + make_interval(days => v_days),
+           is_online = false
+     WHERE id = v_driver.driver_id;
+    UPDATE public.users
+       SET account_status = 'suspended'
+     WHERE id = v_driver.driver_uid
+       AND account_status = 'active';
+
+    INSERT INTO public.notifications (user_id, title, body, type, data, priority)
+    VALUES (
+      v_driver.driver_uid,
+      'إيقاف مؤقت لمدة ' || v_days || ' أيام',
+      'تم إيقاف حسابك ' || v_days || ' أيام لأن المديونية غير الموردة تجاوزت ' ||
+        v_amount::text || ' جنيه. الإجمالي القائم: ' ||
+        COALESCE(v_driver.outstanding,0)::text || ' جنيه. قم بالتوريد لاستعادة حسابك.',
+      'settlement_suspension',
+      jsonb_build_object('driver_id', v_driver.driver_id,
+                         'outstanding', v_driver.outstanding,
+                         'suspended_days', v_days),
+      'high');
+    v_count := v_count + 1;
+
+    -- Ops audit trail (kept from previous behavior)
+    IF NOT EXISTS (
+      SELECT 1 FROM public.complaints c
+       WHERE c.respondent_id = v_driver.driver_uid
+         AND c.category = 'settlement_suspension_review'
+         AND c.status IN ('pending','investigating','escalated','open')
+    ) THEN
+      INSERT INTO public.complaints
+        (complainant_id, respondent_id, reporter_id, complaint_type, category,
+         subject, description, status, priority)
+      VALUES
+        (v_driver.driver_uid, v_driver.driver_uid, v_driver.driver_uid,
+         'driver', 'settlement_suspension_review',
+         'إيقاف كابتن لتجاوز حد التسوية',
+         'تم إيقاف الكابتن ' || v_days || ' أيام: مديونية غير موردة ' ||
+           COALESCE(v_driver.outstanding,0)::text || ' جنيه (الحد: ' || v_amount::text || ').',
+         'pending', 'urgent');
+      v_count := v_count + 1;
+    END IF;
+  END LOOP;
+
+  -- 3) Reactivate drivers whose suspension expired and balance is back in limit.
+  --    If still over the limit at expiry, extend the suspension another window.
+  FOR v_driver IN
+    SELECT d.id AS driver_id, d.user_id AS driver_uid, d.settlement_suspended_until,
+           COALESCE((SELECT sum(o.amount) FROM public.driver_obligations o
+                      WHERE o.driver_id = d.id AND o.status IN ('open','disputed')), 0) AS outstanding
+      FROM public.drivers d
+     WHERE d.settlement_suspended_until IS NOT NULL
+       AND d.settlement_suspended_until <= now()
+  LOOP
+    IF v_driver.outstanding > v_amount THEN
+      UPDATE public.drivers
+         SET settlement_suspended_until = now() + make_interval(days => v_days)
+       WHERE id = v_driver.driver_id;
+      v_count := v_count + 1;
+    ELSE
+      UPDATE public.drivers SET settlement_suspended_until = NULL WHERE id = v_driver.driver_id;
+      -- Do not revive a user suspended by ops for a different reason.
+      UPDATE public.users
+         SET account_status = 'active'
+       WHERE id = v_driver.driver_uid
+         AND account_status = 'suspended'
+         AND NOT EXISTS (
+           SELECT 1 FROM public.sanctions s
+            WHERE s.target_user_id = v_driver.driver_uid
+              AND s.is_active);
+      INSERT INTO public.notifications (user_id, title, body, type, data, priority)
+      VALUES (
+        v_driver.driver_uid,
+        'تمت استعادة حسابك',
+        'انتهت فترة الإيقاف ومديونيتك الحالية ' || v_driver.outstanding::text ||
+          ' جنيه ضمن الحد المسموح. يمكنك استقبال الطلبات من جديد.',
+        'settlement_reactivation',
+        jsonb_build_object('driver_id', v_driver.driver_id,
+                           'outstanding', v_driver.outstanding),
+        'high');
+      v_count := v_count + 1;
+    END IF;
+  END LOOP;
+
+  RETURN v_count;
+END;
+$function$
+;
+
+-- ---------------------------------------------------------------------------
 -- Customer-app read path for the checkout screen. v1's zero-argument
 -- my_platform_credit() is dropped so the two shapes cannot be confused.
 -- ---------------------------------------------------------------------------
@@ -1273,6 +1473,130 @@ end;
 $function$;
 
 -- ---------------------------------------------------------------------------
+-- Admin launch path for the platform payables (#67): manual settlement only.
+-- admin_open_platform_payables lists the outstanding driver/merchant
+-- payables per order; mark_platform_payable_settled flips one payable kind
+-- once (per-kind settled_at, audit row, idempotent). Nothing auto-pays.
+-- Both are global-finance scope (#97): owner or country-level admin, via
+-- _admin_write_scope(NULL). The optional note is the ops settlement
+-- reference (transfer id, receipt no) kept in the audit row; the result
+-- states explicitly that it records settlement and moves no money.
+-- ---------------------------------------------------------------------------
+
+create or replace function public.admin_open_platform_payables(p_order_id uuid default null)
+ returns table (
+   subsidy_id uuid,
+   order_id uuid,
+   kind text,
+   settlement_model text,
+   status text,
+   amount numeric,
+   remittance_reduction numeric,
+   driver_payable numeric,
+   merchant_payable numeric,
+   driver_payable_settled_at timestamptz,
+   merchant_payable_settled_at timestamptz,
+   created_at timestamptz,
+   settled_at timestamptz
+ )
+ language plpgsql
+ security definer
+ set search_path to 'public', 'pg_temp'
+as $function$
+begin
+  -- #97: platform payables are global finance scope - the same NULL-region
+  -- rule _admin_write_scope uses for global writes. Owner or country-level
+  -- admin only; regional, unassigned and inactive admins are denied.
+  if not public._admin_write_scope(null) then
+    raise exception 'Not authorized';
+  end if;
+  return query
+    select ps.id, ps.order_id, ps.kind, ps.settlement_model, ps.status,
+           ps.amount, ps.remittance_reduction,
+           ps.driver_payable, ps.merchant_payable,
+           ps.driver_payable_settled_at, ps.merchant_payable_settled_at,
+           ps.created_at, ps.settled_at
+      from public.platform_subsidies ps
+     where (p_order_id is null or ps.order_id = p_order_id)
+       and ps.status <> 'void'
+       -- Outstanding = a positive payable whose kind is not settled yet.
+       and ( (ps.driver_payable > 0 and ps.driver_payable_settled_at is null)
+          or (ps.merchant_payable > 0 and ps.merchant_payable_settled_at is null) )
+     order by ps.created_at desc;
+end;
+$function$;
+
+create or replace function public.mark_platform_payable_settled(
+  p_order_id uuid, p_kind text, p_note text default null)
+ returns jsonb
+ language plpgsql
+ security definer
+ set search_path to 'public', 'pg_temp'
+as $function$
+declare
+  v_sub public.platform_subsidies%rowtype;
+  v_amount numeric;
+  v_all_settled boolean;
+begin
+  -- #97: global finance scope, same as the read path above.
+  if not public._admin_write_scope(null) then
+    raise exception 'Not authorized';
+  end if;
+  if p_kind is null or p_kind not in ('driver_payable', 'merchant_payable') then
+    raise exception 'invalid payable kind: %', coalesce(p_kind, 'NULL');
+  end if;
+  select * into v_sub from public.platform_subsidies
+   where order_id = p_order_id and kind = 'delay_apology_credit'
+     and status <> 'void'
+   for update;
+  if not found then
+    raise exception 'no settleable platform subsidy recorded for order %', p_order_id;
+  end if;
+  v_amount := case p_kind
+                when 'driver_payable' then v_sub.driver_payable
+                else v_sub.merchant_payable end;
+  if v_amount <= 0 then
+    raise exception 'no % recorded for order %', p_kind, p_order_id;
+  end if;
+  -- Idempotent: an already-settled payable kind is a no-op, not an error,
+  -- and writes no second audit row.
+  if (p_kind = 'driver_payable' and v_sub.driver_payable_settled_at is not null)
+     or (p_kind = 'merchant_payable' and v_sub.merchant_payable_settled_at is not null) then
+    return jsonb_build_object('ok', true, 'order_id', p_order_id, 'kind', p_kind,
+                              'amount', v_amount, 'already_settled', true,
+                              'settlement_recorded', true, 'money_moved', false,
+                              'reference', p_note);
+  end if;
+  if p_kind = 'driver_payable' then
+    update public.platform_subsidies set driver_payable_settled_at = now()
+     where id = v_sub.id;
+  else
+    update public.platform_subsidies set merchant_payable_settled_at = now()
+     where id = v_sub.id;
+  end if;
+  -- The row itself settles once every positive payable on it is settled.
+  select (driver_payable <= 0 or driver_payable_settled_at is not null)
+     and (merchant_payable <= 0 or merchant_payable_settled_at is not null)
+    into v_all_settled
+    from public.platform_subsidies where id = v_sub.id;
+  if v_all_settled then
+    update public.platform_subsidies
+       set status = 'settled', settled_at = now()
+     where id = v_sub.id;
+  end if;
+  perform public.write_audit('PLATFORM_PAYABLE_SETTLED', 'orders', p_order_id::text,
+    jsonb_build_object('payable_kind', p_kind, 'amount', v_amount,
+                       'reference', p_note, 'money_moved', false, 'row_status',
+                       case when v_all_settled then 'settled' else v_sub.status end));
+  return jsonb_build_object('ok', true, 'order_id', p_order_id, 'kind', p_kind,
+                            'amount', v_amount, 'already_settled', false,
+                            'settlement_recorded', true, 'money_moved', false,
+                            'reference', p_note,
+                            'row_status', case when v_all_settled then 'settled' else v_sub.status end);
+end;
+$function$;
+
+-- ---------------------------------------------------------------------------
 -- Privileges
 -- ---------------------------------------------------------------------------
 
@@ -1289,5 +1613,9 @@ revoke all on function public._platform_credit_spend(uuid, uuid, numeric) from p
 grant execute on function public._platform_credit_spend(uuid, uuid, numeric) to postgres, service_role;
 revoke all on function public._platform_credit_restore(uuid, numeric, uuid) from public, anon, authenticated;
 grant execute on function public._platform_credit_restore(uuid, numeric, uuid) to postgres, service_role;
+revoke all on function public.admin_open_platform_payables(uuid) from public, anon;
+grant execute on function public.admin_open_platform_payables(uuid) to authenticated, postgres, service_role;
+revoke all on function public.mark_platform_payable_settled(uuid, text, text) from public, anon;
+grant execute on function public.mark_platform_payable_settled(uuid, text, text) to authenticated, postgres, service_role;
 revoke all on function public.my_platform_credit(numeric) from public, anon;
 grant execute on function public.my_platform_credit(numeric) to authenticated, postgres, service_role;

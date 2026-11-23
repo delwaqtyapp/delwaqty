@@ -46,11 +46,32 @@ class SupabaseCategoryDataSource {
           .order('sort_order');
       return (data as List)
           .map((row) => _fromRow(row as Map<String, dynamic>))
+          .where(_isSupportedCategory)
           .toList();
     } catch (e, stack) {
       _logger.e('Failed to get active categories', e, stack);
       rethrow;
     }
+  }
+
+  /// Customer-facing category boundary: retired categories (e.g. the
+  /// pre-purge pharmacy row) must never render on discovery surfaces even
+  /// while a legacy is_active row still exists in the database. The DB
+  /// cleanup migration deactivates the row; this is the client-side guard.
+  static bool _isSupportedCategory(PlatformCategory category) {
+    for (final value in [
+      category.id,
+      category.name,
+      category.nameEn,
+      category.nameAr,
+    ]) {
+      final v = value?.toLowerCase();
+      if (v == null) continue;
+      if (v.contains('pharmac') || v.contains('صيدل') || v.contains('drug')) {
+        return false;
+      }
+    }
+    return true;
   }
 
   Future<List<PlatformCategory>> getAllCategories() async {

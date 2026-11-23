@@ -69,7 +69,9 @@ abstract class Merchant with _$Merchant {
   const factory Merchant({
     required String id,
     required String name,
-    required MerchantType type,
+    // Rows or cached payloads written before a type was retired must decode
+    // without throwing; the data source filters retired types out entirely.
+    @JsonKey(unknownEnumValue: MerchantType.other) required MerchantType type,
     required double latitude,
     required double longitude,
     String? address,

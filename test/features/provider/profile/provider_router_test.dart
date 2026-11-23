@@ -153,7 +153,6 @@ void main() {
           '/pending-verification',
           '/merchant-dashboard/products',
           '/merchant-dashboard/pos',
-          '/merchant-dashboard/drugs',
           '/merchant-dashboard/reviews',
           '/merchant-dashboard/reservations',
         ]),
@@ -272,7 +271,6 @@ void main() {
       await expectBounces(tester, router, '/provider-cashier');
       await expectBounces(tester, router, '/provider-products');
       await expectBounces(tester, router, '/merchant-dashboard/pos');
-      await expectBounces(tester, router, '/merchant-dashboard/drugs');
       await expectBounces(tester, router, '/merchant-dashboard/products');
       await expectBounces(tester, router, '/provider-orders');
 
@@ -314,7 +312,6 @@ void main() {
       await expectStays(tester, router, '/provider-cashier');
       expect(find.text('route:/provider-cashier'), findsOneWidget);
       await expectBounces(tester, router, '/provider-services');
-      await expectBounces(tester, router, '/merchant-dashboard/drugs');
     });
 
     testWidgets('owner: every surface opens, including /provider-services', (
@@ -328,7 +325,6 @@ void main() {
       await expectStays(tester, router, '/provider-services');
       await expectStays(tester, router, '/provider-cashier');
       await expectStays(tester, router, '/provider-bookings');
-      await expectStays(tester, router, '/merchant-dashboard/drugs');
       await expectStays(tester, router, '/merchant-dashboard/reviews');
       expect(find.text('route:/merchant-dashboard/reviews'), findsOneWidget);
     });

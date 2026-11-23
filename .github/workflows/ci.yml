@@ -33,7 +33,9 @@ jobs:
         run: bash tool/design_guard.sh
 
       - name: Pharmacy purge guard
-        run: bash tool/pharmacy_purge_guard.sh
+        run: |
+          bash tool/pharmacy_purge_guard.sh --self-test
+          bash tool/pharmacy_purge_guard.sh
   test:
     name: Test
     runs-on: ubuntu-latest

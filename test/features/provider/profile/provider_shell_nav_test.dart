@@ -149,11 +149,7 @@ void main() {
     }
   });
 
-  for (final c in [
-    ('teacher', 1),
-    ('plumbing', 2),
-    ('restaurant', 2),
-  ]) {
+  for (final c in [('teacher', 1), ('plumbing', 2), ('restaurant', 2)]) {
     testWidgets('${c.$1}: selected tab shows its localized label', (
       tester,
     ) async {

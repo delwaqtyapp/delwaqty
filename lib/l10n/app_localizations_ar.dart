@@ -422,7 +422,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get seafood => 'مأكولات بحرية';
 
   @override
-
   @override
   String get bakery => 'المخبوزات';
 
@@ -830,9 +829,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get provManageItems => 'إدارة الأصناف';
 
   @override
-
   @override
-
   @override
   String get provTabTableBookings => 'حجز الطاولات';
 
@@ -3509,7 +3506,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get typeGrocery => 'بقالة';
 
   @override
-
   @override
   String get typeFlowers => 'زهور';
 
@@ -4390,11 +4386,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get preparationTime => 'وقت التحضير';
 
   @override
-
   @override
-
   @override
-
   @override
   String get warnings => 'تحذيرات';
 
@@ -5006,7 +4999,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commissionCategoryRestaurant => 'المطاعم';
 
   @override
-
   @override
   String get commissionCategoryGrocery => 'البقالة';
 
@@ -7860,17 +7852,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get posNoProducts => 'لا توجد منتجات قابلة للبيع بعد';
 
   @override
-
   @override
-
   @override
-
   @override
-
   @override
-
   @override
-
   @override
   String get each => 'للقطعة';
 
@@ -8064,9 +8050,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get posScanAdded => 'تمت الإضافة إلى السلة';
 
   @override
-
   @override
-
   @override
   String get posQuickAddTitle => 'منتج جديد لهذا الباركود';
 

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
@@ -24,46 +25,7 @@ class SupabaseMerchantDataSource {
 
   Map<String, dynamic> _rowToMap(dynamic row) => row as Map<String, dynamic>;
 
-  Merchant _fromRow(Map<String, dynamic> row) {
-    final rawType = (row['type'] as String? ?? 'other').trim().toLowerCase();
-    final normalizedType = switch (rawType) {
-      'food' || 'restaurants' || 'fast_food' => 'restaurant',
-      'super_market' || 'hypermarket' => 'supermarket',
-      'fruit' => 'fruits',
-      'vegetable' => 'vegetables',
-      'clothes' => 'clothing',
-      _ => rawType,
-    };
-    final type = MerchantType.values.firstWhere(
-      (t) => t.name.toLowerCase() == normalizedType,
-      orElse: () => MerchantType.other,
-    );
-    return Merchant(
-      id: row['id'] as String,
-      name: row['name'] as String,
-      type: type,
-      latitude: (row['latitude'] as num?)?.toDouble() ?? 0.0,
-      longitude: (row['longitude'] as num?)?.toDouble() ?? 0.0,
-      address: row['address'] as String?,
-      rating: (row['rating'] as num?)?.toDouble() ?? 0.0,
-      ratingCount:
-          (row['total_reviews'] as int?) ?? (row['total_orders'] as int?) ?? 0,
-      imageUrl: row['logo_url'] as String?,
-      description: row['description'] as String?,
-      isVerified: (row['status'] as String?) == 'active',
-      isFeatured: (row['is_featured'] as bool?) ?? false,
-      isOpenNow: (row['is_open'] as bool?) ?? false,
-      deliveryFee: (row['delivery_fee'] as num?)?.toDouble(),
-      minimumOrder: (row['min_order'] as num?)?.toDouble(),
-      estimatedDeliveryMinutes: (row['delivery_time_min'] as num?)?.toInt(),
-      deliveryAvailable: true,
-      pickupAvailable: true,
-      createdAt: DateTime.parse(row['created_at'] as String),
-      updatedAt: row['updated_at'] != null
-          ? DateTime.parse(row['updated_at'] as String)
-          : null,
-    );
-  }
+  Merchant? _fromRow(Map<String, dynamic> row) => parseMerchantRow(row);
 
   Future<List<Merchant>> getMerchants({
     MerchantType? type,
@@ -95,7 +57,10 @@ class SupabaseMerchantDataSource {
           .order('rating', ascending: false)
           .range(offset, offset + limit - 1);
 
-      return (data as List).map((row) => _fromRow(_rowToMap(row))).toList();
+      return (data as List)
+          .map((row) => _fromRow(_rowToMap(row)))
+          .whereType<Merchant>()
+          .toList();
     } catch (e, stack) {
       _logger.e('Failed to get merchants', e, stack);
       rethrow;
@@ -108,8 +73,11 @@ class SupabaseMerchantDataSource {
           .from(_tableName)
           .select()
           .eq('id', id)
+          .neq('type', 'pharmacy')
           .maybeSingle();
       if (data == null) return null;
+      // Fail closed: a retired/unsupported merchant type is not found,
+      // never a generic merchant.
       return _fromRow(_rowToMap(data));
     } catch (e, stack) {
       _logger.e('Failed to get merchant: $id', e, stack);
@@ -127,7 +95,10 @@ class SupabaseMerchantDataSource {
           .neq('type', 'pharmacy')
           .order('rating', ascending: false)
           .limit(10);
-      return (data as List).map((row) => _fromRow(_rowToMap(row))).toList();
+      return (data as List)
+          .map((row) => _fromRow(_rowToMap(row)))
+          .whereType<Merchant>()
+          .toList();
     } catch (e, stack) {
       _logger.e('Failed to get featured merchants', e, stack);
       rethrow;
@@ -140,9 +111,13 @@ class SupabaseMerchantDataSource {
           .from(_tableName)
           .select()
           .or('name.ilike.%$query%,description.ilike.%$query%')
+          .neq('type', 'pharmacy')
           .order('rating', ascending: false)
           .limit(20);
-      return (data as List).map((row) => _fromRow(_rowToMap(row))).toList();
+      return (data as List)
+          .map((row) => _fromRow(_rowToMap(row)))
+          .whereType<Merchant>()
+          .toList();
     } catch (e, stack) {
       _logger.e('Failed to search merchants: $query', e, stack);
       rethrow;
@@ -157,10 +132,64 @@ class SupabaseMerchantDataSource {
           .eq('type', type.name)
           .neq('type', 'pharmacy')
           .order('rating', ascending: false);
-      return (data as List).map((row) => _fromRow(_rowToMap(row))).toList();
+      return (data as List)
+          .map((row) => _fromRow(_rowToMap(row)))
+          .whereType<Merchant>()
+          .toList();
     } catch (e, stack) {
       _logger.e('Failed to get merchants by type: ${type.name}', e, stack);
       rethrow;
     }
   }
+}
+
+/// Parses one merchants-table row into a [Merchant], or returns null when
+/// the row's type is not a currently supported [MerchantType] (a retired
+/// type such as the pre-purge pharmacy row, or anything unrecognized).
+/// Customer surfaces must fail closed: never render a retired merchant as
+/// a generic one.
+@visibleForTesting
+Merchant? parseMerchantRow(Map<String, dynamic> row) {
+  final rawType = (row['type'] as String? ?? 'other').trim().toLowerCase();
+  final normalizedType = switch (rawType) {
+    'food' || 'restaurants' || 'fast_food' => 'restaurant',
+    'super_market' || 'hypermarket' => 'supermarket',
+    'fruit' => 'fruits',
+    'vegetable' => 'vegetables',
+    'clothes' => 'clothing',
+    _ => rawType,
+  };
+  MerchantType? type;
+  for (final t in MerchantType.values) {
+    if (t.name.toLowerCase() == normalizedType) {
+      type = t;
+      break;
+    }
+  }
+  if (type == null) return null;
+  return Merchant(
+    id: row['id'] as String,
+    name: row['name'] as String,
+    type: type,
+    latitude: (row['latitude'] as num?)?.toDouble() ?? 0.0,
+    longitude: (row['longitude'] as num?)?.toDouble() ?? 0.0,
+    address: row['address'] as String?,
+    rating: (row['rating'] as num?)?.toDouble() ?? 0.0,
+    ratingCount:
+        (row['total_reviews'] as int?) ?? (row['total_orders'] as int?) ?? 0,
+    imageUrl: row['logo_url'] as String?,
+    description: row['description'] as String?,
+    isVerified: (row['status'] as String?) == 'active',
+    isFeatured: (row['is_featured'] as bool?) ?? false,
+    isOpenNow: (row['is_open'] as bool?) ?? false,
+    deliveryFee: (row['delivery_fee'] as num?)?.toDouble(),
+    minimumOrder: (row['min_order'] as num?)?.toDouble(),
+    estimatedDeliveryMinutes: (row['delivery_time_min'] as num?)?.toInt(),
+    deliveryAvailable: true,
+    pickupAvailable: true,
+    createdAt: DateTime.parse(row['created_at'] as String),
+    updatedAt: row['updated_at'] != null
+        ? DateTime.parse(row['updated_at'] as String)
+        : null,
+  );
 }

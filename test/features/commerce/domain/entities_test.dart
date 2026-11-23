@@ -175,7 +175,7 @@ void main() {
     });
 
     test('MerchantType enum has all values', () {
-      expect(MerchantType.values.length, 30);
+      expect(MerchantType.values.length, 29);
       expect(MerchantType.restaurant.name, 'restaurant');
       expect(MerchantType.grocery.name, 'grocery');
       expect(MerchantType.supermarket.name, 'supermarket');

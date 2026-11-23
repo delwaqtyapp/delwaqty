@@ -20,6 +20,16 @@ final supabaseDeliveryDataSourceProvider = Provider<SupabaseDeliveryDataSource>(
 class SupabaseDeliveryDataSource {
   SupabaseDeliveryDataSource(this._client);
 
+  /// Delivery service types the platform currently serves. Anything else
+  /// (rides, or retired types such as the pre-purge pharmacy delivery) must
+  /// never surface as an offerable or active delivery on the driver app.
+  static const Set<String> _supportedDeliveryServiceTypes = {
+    'food_delivery',
+    'grocery_delivery',
+    'package_delivery',
+    'document_delivery',
+  };
+
   final SupabaseClient _client;
 
   Map<String, dynamic> _checkRpc(dynamic data) =>
@@ -204,7 +214,11 @@ class SupabaseDeliveryDataSource {
                 .maybeSingle();
             if (rideRow == null) continue;
             if (rideRow['status'] != 'searching') continue;
-            if (rideRow['service_type'] == 'ride') continue;
+            if (!_supportedDeliveryServiceTypes.contains(
+              rideRow['service_type'],
+            )) {
+              continue;
+            }
             offers.add(_offerFromRow(req, rideRow));
           }
           return offers;
@@ -223,7 +237,7 @@ class SupabaseDeliveryDataSource {
             final s = r['status'] as String?;
             final st = r['service_type'] as String?;
             return (s == 'matched' || s == 'arrived' || s == 'inTrip') &&
-                st != 'ride';
+                _supportedDeliveryServiceTypes.contains(st);
           }).toList();
           if (active.isEmpty) return null;
           active.sort(
@@ -240,7 +254,7 @@ class SupabaseDeliveryDataSource {
         .from('rides')
         .select()
         .eq('driver_id', driverId)
-        .neq('service_type', 'ride')
+        .inFilter('service_type', _supportedDeliveryServiceTypes.toList())
         .inFilter('status', ['matched', 'arrived', 'inTrip'])
         .order('created_at', ascending: false)
         .limit(1)

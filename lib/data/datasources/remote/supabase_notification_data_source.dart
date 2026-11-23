@@ -125,14 +125,11 @@ class SupabaseNotificationDataSource {
   }
 
   Future<int> getUnreadCount() async {
-    final userId = _client.auth.currentUser?.id;
-    if (userId == null) return 0;
-
     try {
+      // RLS scopes rows to the caller; no client-side user filter.
       final rows = await _client
           .from('notifications')
           .select('id, type, deep_link, data, audience')
-          .eq('user_id', userId)
           .eq('is_read', false);
 
       return (rows as List)
@@ -156,17 +153,23 @@ class SupabaseNotificationDataSource {
         .eq('id', id);
   }
 
-  Future<void> markAllAsRead() async {
-    final userId = _client.auth.currentUser?.id;
-    if (userId == null) return;
+  /// Bulk operations page through the visible rows in small batches.
+  ///
+  /// The previous implementation fetched every id and sent them all in a
+  /// single `in.(...)` filter. PostgREST caps a response at `max_rows`
+  /// (1000) and, much sooner, the request URI itself exceeds server limits
+  /// once a user has more than ~150 notifications, so "mark all read" and
+  /// "delete all" failed silently on any well-used account. Batching keeps
+  /// every request small and loops until nothing visible remains.
+  static const int _bulkFetchBatchSize = 200;
+  static const int _bulkMutationChunkSize = 50;
 
-    final rows = await _client
-        .from('notifications')
-        .select('id, type, deep_link, data, audience')
-        .eq('user_id', userId)
-        .eq('is_read', false);
+  /// Hard stop so a server that keeps returning the same rows cannot spin
+  /// the loop forever (200 batches x 200 rows = 40k notifications).
+  static const int _bulkMaxBatches = 200;
 
-    final matchingIds = (rows as List)
+  List<String> _visibleIds(List<dynamic> rows) {
+    return rows
         .cast<Map<String, dynamic>>()
         .where(
           (r) => NotificationChannels.isRowVisibleInContext(
@@ -176,14 +179,49 @@ class SupabaseNotificationDataSource {
         )
         .map((r) => r['id'] as String)
         .toList();
+  }
 
-    if (matchingIds.isEmpty) return;
-
-    await _client
+  Future<List<dynamic>> _fetchBulkBatch({required bool unreadOnly}) {
+    var query = _client
         .from('notifications')
-        .update({'is_read': true, 'read_at': DateTime.now().toIso8601String()})
-        .eq('user_id', userId)
-        .inFilter('id', matchingIds);
+        .select('id, type, deep_link, data, audience');
+    if (unreadOnly) {
+      query = query.eq('is_read', false);
+    }
+    // RLS scopes every row to the caller, so no client-side user filter is
+    // needed (and depending on auth.currentUser here made the whole action
+    // a silent no-op while the session was still restoring).
+    return query
+        .order('created_at', ascending: false)
+        .range(0, _bulkFetchBatchSize - 1);
+  }
+
+  Future<void> markAllAsRead() async {
+    for (var batch = 0; batch < _bulkMaxBatches; batch++) {
+      final rows = await _fetchBulkBatch(unreadOnly: true);
+      final matchingIds = _visibleIds(rows);
+      if (matchingIds.isEmpty) return;
+
+      final readAt = DateTime.now().toUtc().toIso8601String();
+      for (var i = 0; i < matchingIds.length; i += _bulkMutationChunkSize) {
+        final chunk = matchingIds.sublist(
+          i,
+          i + _bulkMutationChunkSize > matchingIds.length
+              ? matchingIds.length
+              : i + _bulkMutationChunkSize,
+        );
+        await _client
+            .from('notifications')
+            .update({'is_read': true, 'read_at': readAt})
+            .eq('is_read', false)
+            .inFilter('id', chunk);
+      }
+      // Marked rows no longer match `is_read = false`, so the next batch
+      // moves forward; an empty visible set ends the loop.
+    }
+    throw StateError(
+      'markAllAsRead exceeded the safety limit of $_bulkMaxBatches batches',
+    );
   }
 
   Future<void> deleteNotification(String id) async {
@@ -191,32 +229,26 @@ class SupabaseNotificationDataSource {
   }
 
   Future<void> clearAll() async {
-    final userId = _client.auth.currentUser?.id;
-    if (userId == null) return;
+    for (var batch = 0; batch < _bulkMaxBatches; batch++) {
+      final rows = await _fetchBulkBatch(unreadOnly: false);
+      final matchingIds = _visibleIds(rows);
+      if (matchingIds.isEmpty) return;
 
-    final rows = await _client
-        .from('notifications')
-        .select('id, type, deep_link, data, audience')
-        .eq('user_id', userId);
-
-    final matchingIds = (rows as List)
-        .cast<Map<String, dynamic>>()
-        .where(
-          (r) => NotificationChannels.isRowVisibleInContext(
-            r,
-            context: NotificationRouteResolver.appContext,
-          ),
-        )
-        .map((r) => r['id'] as String)
-        .toList();
-
-    if (matchingIds.isEmpty) return;
-
-    await _client
-        .from('notifications')
-        .delete()
-        .eq('user_id', userId)
-        .inFilter('id', matchingIds);
+      for (var i = 0; i < matchingIds.length; i += _bulkMutationChunkSize) {
+        final chunk = matchingIds.sublist(
+          i,
+          i + _bulkMutationChunkSize > matchingIds.length
+              ? matchingIds.length
+              : i + _bulkMutationChunkSize,
+        );
+        await _client.from('notifications').delete().inFilter('id', chunk);
+      }
+      // Deleted rows disappear from the next fetch, so the loop advances
+      // until nothing visible remains.
+    }
+    throw StateError(
+      'clearAll exceeded the safety limit of $_bulkMaxBatches batches',
+    );
   }
 
   Future<bool> existsByIdempotencyKey(String key) async {

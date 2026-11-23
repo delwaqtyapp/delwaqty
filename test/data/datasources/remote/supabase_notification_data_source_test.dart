@@ -158,4 +158,153 @@ void main() {
       expect(n.pushStatus, NotificationPushStatus.pending);
     });
   });
+
+  group('bulk operations', () {
+    late List<Map<String, dynamic>> serverRows;
+    late List<Uri> patchCalls;
+    late List<Uri> deleteCalls;
+
+    Set<String> parseInFilter(Uri uri) {
+      final raw = uri.queryParameters['id'] ?? '';
+      final inner = raw.replaceAll(RegExp(r'^in\.\(|\)$'), '');
+      return inner
+          .split(',')
+          .map((v) => v.trim().replaceAll(RegExp(r'^"|"$'), ''))
+          .where((v) => v.isNotEmpty)
+          .toSet();
+    }
+
+    Map<String, dynamic> unreadRow(
+      String id, {
+      String type = 'system',
+      String audience = 'customer',
+    }) => {
+      'id': id,
+      'type': type,
+      'deep_link': null,
+      'data': null,
+      'audience': audience,
+      'is_read': false,
+    };
+
+    setUp(() {
+      serverRows = [];
+      patchCalls = [];
+      deleteCalls = [];
+
+      when(() => httpClient.send(any())).thenAnswer((invocation) async {
+        final request = invocation.positionalArguments[0] as http.Request;
+        final uri = request.url;
+        Object body;
+        if (request.method == 'GET') {
+          Iterable<Map<String, dynamic>> result = serverRows;
+          if (uri.queryParameters['is_read'] == 'eq.false') {
+            result = result.where((r) => r['is_read'] == false);
+          }
+          final offset =
+              int.tryParse(uri.queryParameters['offset'] ?? '') ?? 0;
+          final limit = int.tryParse(uri.queryParameters['limit'] ?? '');
+          result = result.skip(offset);
+          if (limit != null) result = result.take(limit);
+          body = result.toList();
+        } else if (request.method == 'PATCH') {
+          patchCalls.add(uri);
+          final ids = parseInFilter(uri);
+          for (final row in serverRows) {
+            if (ids.contains(row['id'])) row['is_read'] = true;
+          }
+          body = <Map<String, dynamic>>[];
+        } else if (request.method == 'DELETE') {
+          deleteCalls.add(uri);
+          final ids = parseInFilter(uri);
+          serverRows.removeWhere((r) => ids.contains(r['id']));
+          body = <Map<String, dynamic>>[];
+        } else {
+          body = true;
+        }
+        return http.StreamedResponse(
+          Stream.value(utf8.encode(jsonEncode(body))),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+          request: request,
+        );
+      });
+    });
+
+    test('markAllAsRead marks every unread row across fetch batches', () async {
+      for (var i = 0; i < 250; i++) {
+        serverRows.add(unreadRow('n-$i'));
+      }
+
+      await dataSource.markAllAsRead();
+
+      expect(serverRows.every((r) => r['is_read'] == true), isTrue);
+      expect(patchCalls, isNotEmpty);
+      for (final call in patchCalls) {
+        expect(
+          parseInFilter(call).length,
+          lessThanOrEqualTo(50),
+          reason: 'each update must stay a small in-filter: $call',
+        );
+      }
+      final marked = patchCalls
+          .expand(parseInFilter)
+          .toSet();
+      expect(marked, hasLength(250));
+    });
+
+    test('markAllAsRead leaves notifications of other app contexts unread',
+        () async {
+      serverRows.add(unreadRow('mine-1'));
+      serverRows.add(
+        unreadRow('admin-1', type: 'admin_management', audience: 'admin'),
+      );
+
+      await dataSource.markAllAsRead();
+
+      expect(
+        serverRows.singleWhere((r) => r['id'] == 'mine-1')['is_read'],
+        isTrue,
+      );
+      expect(
+        serverRows.singleWhere((r) => r['id'] == 'admin-1')['is_read'],
+        isFalse,
+      );
+    });
+
+    test('markAllAsRead with no unread rows issues no update', () async {
+      await dataSource.markAllAsRead();
+      expect(patchCalls, isEmpty);
+    });
+
+    test('clearAll deletes every visible row in bounded chunks', () async {
+      for (var i = 0; i < 130; i++) {
+        serverRows.add(unreadRow('d-$i'));
+      }
+
+      await dataSource.clearAll();
+
+      expect(serverRows, isEmpty);
+      expect(deleteCalls, hasLength(3));
+      for (final call in deleteCalls) {
+        expect(
+          parseInFilter(call).length,
+          lessThanOrEqualTo(50),
+          reason: 'each delete must stay a small in-filter: $call',
+        );
+      }
+    });
+
+    test('clearAll keeps notifications of other app contexts', () async {
+      serverRows.add(unreadRow('mine-1'));
+      serverRows.add(
+        unreadRow('admin-1', type: 'admin_management', audience: 'admin'),
+      );
+
+      await dataSource.clearAll();
+
+      expect(serverRows, hasLength(1));
+      expect(serverRows.single['id'], 'admin-1');
+    });
+  });
 }

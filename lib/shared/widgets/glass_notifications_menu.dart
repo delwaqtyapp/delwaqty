@@ -217,6 +217,15 @@ class _GlassNotificationsPanel extends ConsumerWidget {
     ref.invalidate(notificationsProvider);
   }
 
+  void _showActionError() {
+    if (!hostContext.mounted) return;
+    ScaffoldMessenger.of(hostContext).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(hostContext).somethingWentWrong),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -332,7 +341,9 @@ class _GlassNotificationsPanel extends ConsumerWidget {
                                 .read(notificationRepositoryProvider)
                                 .markAllAsRead();
                             _invalidateAll(ref);
-                          } catch (_) {}
+                          } catch (_) {
+                            _showActionError();
+                          }
                         },
                       ),
                       IconButton(
@@ -345,7 +356,9 @@ class _GlassNotificationsPanel extends ConsumerWidget {
                                 .read(notificationRepositoryProvider)
                                 .clearAll();
                             _invalidateAll(ref);
-                          } catch (_) {}
+                          } catch (_) {
+                            _showActionError();
+                          }
                         },
                       ),
                     ],

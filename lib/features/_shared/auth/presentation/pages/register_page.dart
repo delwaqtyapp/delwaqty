@@ -780,7 +780,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           ),
           const SizedBox(height: 12),
           _PremiumUploadTile(
-            icon: RoleCardIcon.customer,
+            icon: Icons.person_outline_rounded,
             title: l10n.uploadProfilePhoto,
             hint: isMerchantOrProvider && !requireProviderDocs
                 ? l10n.providerDocumentsOptionalBadge

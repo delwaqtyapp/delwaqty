@@ -65,20 +65,19 @@ class DriverDashboardPage extends ConsumerWidget {
               child: FloatingNotificationCircleButton(size: 40),
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: l10n.settings,
-            onPressed: () => context.push('/settings/privacy-security'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.support_agent_rounded),
-            tooltip: l10n.support,
-            onPressed: () => context.push('/support'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.shield_outlined),
-            tooltip: l10n.deliveryAccess,
-            onPressed: () => context.push('/driver/access'),
+          PopupMenuButton<String>(
+            onSelected: (path) => context.push(path),
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: '/settings/privacy-security',
+                child: Text(l10n.settings),
+              ),
+              PopupMenuItem(value: '/support', child: Text(l10n.support)),
+              PopupMenuItem(
+                value: '/driver/access',
+                child: Text(l10n.deliveryAccess),
+              ),
+            ],
           ),
         ],
       ),
@@ -594,38 +593,53 @@ class _PerformanceGrid extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _MiniStat(
-                  label: l10n.completedTrips,
-                  value: '${performance.completedTrips}',
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _MiniStat(
-                  label: l10n.acceptanceRate,
-                  value: '${performance.acceptanceRate.toStringAsFixed(0)}%',
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _MiniStat(
-                  label: l10n.cancellationRate,
-                  value: '${performance.cancellationRate.toStringAsFixed(0)}%',
-                ),
-              ),
-              if (rating != null) ...[
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _MiniStat(
-                    label: l10n.rating,
-                    value: rating!.toStringAsFixed(1),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columns =
+                  constraints.maxWidth < 420 ||
+                      MediaQuery.textScalerOf(context).scale(1) > 1.3
+                  ? 2
+                  : 4;
+              final width =
+                  (constraints.maxWidth - 12 * (columns - 1)) / columns;
+              return Wrap(
+                spacing: 12,
+                runSpacing: 16,
+                children: [
+                  SizedBox(
+                    width: width,
+                    child: _MiniStat(
+                      label: l10n.completedTrips,
+                      value: '${performance.completedTrips}',
+                    ),
                   ),
-                ),
-              ],
-            ],
+                  SizedBox(
+                    width: width,
+                    child: _MiniStat(
+                      label: l10n.acceptanceRate,
+                      value:
+                          '${performance.acceptanceRate.toStringAsFixed(0)}%',
+                    ),
+                  ),
+                  SizedBox(
+                    width: width,
+                    child: _MiniStat(
+                      label: l10n.cancellationRate,
+                      value:
+                          '${performance.cancellationRate.toStringAsFixed(0)}%',
+                    ),
+                  ),
+                  if (rating != null)
+                    SizedBox(
+                      width: width,
+                      child: _MiniStat(
+                        label: l10n.rating,
+                        value: rating!.toStringAsFixed(1),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         ],
       ),

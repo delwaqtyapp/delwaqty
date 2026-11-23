@@ -6,7 +6,10 @@
 -- paid refund + retry, merchant reject + retry, idempotent replay,
 -- coupon+gift stacking, net-only sweep, client lockdown, and the
 -- admin payables path gated on global finance scope (owner/country only;
--- list / settle-once / idempotent / denied principals / void excluded).
+-- list / settle-once / idempotent / denied principals / void excluded),
+-- and the v6 monthly customer apology cap (2 per Cairo calendar month:
+-- last-month grants do not count, the third same-month redispatch grants
+-- nothing and still hands off, event/ledger/notification consistency).
 -- The two-session concurrency case lives in
 -- 395_platform_credit_concurrency_staging.sql (committed fixtures; cannot
 -- run inside this rollback).
@@ -61,6 +64,7 @@ where id=(select d1 from zz_ctx);
 do $$ declare
   t record; r jsonb; a jsonb;
   o1 uuid; o2 uuid; o3 uuid; o4 uuid; o5 uuid; o6 uuid; o7 uuid;
+  o8a uuid; o8b uuid; o8x uuid; o9a uuid; o9b uuid; o9c uuid;
   v_ride uuid; v_count int; v_amt numeric; v_out numeric; v_ob uuid;
   v_adm uuid := gen_random_uuid(); v_denied boolean;
   v_country uuid := gen_random_uuid(); v_regional uuid := gen_random_uuid();
@@ -636,6 +640,114 @@ begin
   values (v_oid2, 'delay_apology_credit', 7, 'platform', 'driver', 7, 'netted');
   perform set_config('app.zz_acl_oid', v_oid2::text, true);
   perform set_config('app.zz_acl_country', v_country::text, true);
+
+  -- ============ H. Monthly customer apology cap (v6) ==================
+  -- c8: a captain-apology grant LAST month must not count toward this
+  -- month's cap of 2; two fresh redispatches both grant. c9: two fresh
+  -- grants, the third redispatch grants nothing and still hands off.
+  -- Fixture helper inlined per order: create -> dispatch -> accept ->
+  -- _driver_delay_redispatch (the grant path under test).
+
+  perform set_config('request.jwt.claim.sub', t.c8::text, true);
+  r := public.create_order(t.store, jsonb_build_array(jsonb_build_object('product_id',t.product,'quantity',2)),
+        'zz-test-address', 30.001, 31.001);
+  assert r->>'ok' = 'true', format('H: c8 order x failed: %s', r);
+  o8x := (r->>'order_id')::uuid;
+  r := public.create_order(t.store, jsonb_build_array(jsonb_build_object('product_id',t.product,'quantity',2)),
+        'zz-test-address', 30.001, 31.001);
+  assert r->>'ok' = 'true', format('H: c8 order a failed: %s', r);
+  o8a := (r->>'order_id')::uuid;
+  r := public.create_order(t.store, jsonb_build_array(jsonb_build_object('product_id',t.product,'quantity',2)),
+        'zz-test-address', 30.001, 31.001);
+  assert r->>'ok' = 'true', format('H: c8 order b failed: %s', r);
+  o8b := (r->>'order_id')::uuid;
+  perform set_config('request.jwt.claim.sub', t.m::text, true);
+  perform public.merchant_dispatch_order_driver(o8x);
+  perform public.merchant_dispatch_order_driver(o8a);
+  perform public.merchant_dispatch_order_driver(o8b);
+
+  -- Last month's grant for c8 (different order, so no per-order replay).
+  insert into public.driver_delay_events
+    (ride_id, order_id, driver_id, reported_by, reason,
+     within_allowance, monthly_count, apology_amount, created_at)
+  select r2.id, o8x, t.d1, 'driver', 'zz last month', true, 1, 5,
+         (date_trunc('month', now() at time zone 'Africa/Cairo') at time zone 'Africa/Cairo') - interval '1 day'
+    from public.rides r2 where r2.order_id = o8x;
+
+  perform set_config('request.jwt.claim.sub', t.u1::text, true);
+  select id into v_ride from public.rides where order_id=o8a;
+  a := public.accept_ride_request(v_ride, t.d1);
+  assert a->>'success' = 'true', format('H: c8 accept a failed: %s', a);
+  a := public._driver_delay_redispatch(v_ride, 'zz سبب تجريبي', 'driver');
+  assert a->>'ok' = 'true', format('H: c8 redispatch a failed: %s', a);
+  assert (a->>'apology_amount')::numeric = 4.55,
+    'H: last month grant must not consume this month (c8 first)';
+  select id into v_ride from public.rides where order_id=o8b;
+  a := public.accept_ride_request(v_ride, t.d1);
+  assert a->>'success' = 'true', format('H: c8 accept b failed: %s', a);
+  a := public._driver_delay_redispatch(v_ride, 'zz سبب تجريبي', 'driver');
+  assert a->>'ok' = 'true' and (a->>'apology_amount')::numeric = 4.55,
+    'H: c8 second grant';
+  assert (select balance from public.platform_credit_accounts where user_id=t.c8) = 9.10,
+    'H: c8 balance 9.10 after two grants';
+  assert (select count(*) from public.platform_credit_ledger
+           where user_id=t.c8 and kind='grant' and order_id in (o8a, o8b)) = 2,
+    'H: c8 two apology grant ledger rows';
+
+  perform set_config('request.jwt.claim.sub', t.c9::text, true);
+  r := public.create_order(t.store, jsonb_build_array(jsonb_build_object('product_id',t.product,'quantity',2)),
+        'zz-test-address', 30.001, 31.001);
+  assert r->>'ok' = 'true', format('H: c9 order a failed: %s', r);
+  o9a := (r->>'order_id')::uuid;
+  r := public.create_order(t.store, jsonb_build_array(jsonb_build_object('product_id',t.product,'quantity',2)),
+        'zz-test-address', 30.001, 31.001);
+  assert r->>'ok' = 'true', format('H: c9 order b failed: %s', r);
+  o9b := (r->>'order_id')::uuid;
+  r := public.create_order(t.store, jsonb_build_array(jsonb_build_object('product_id',t.product,'quantity',2)),
+        'zz-test-address', 30.001, 31.001);
+  assert r->>'ok' = 'true', format('H: c9 order c failed: %s', r);
+  o9c := (r->>'order_id')::uuid;
+  perform set_config('request.jwt.claim.sub', t.m::text, true);
+  perform public.merchant_dispatch_order_driver(o9a);
+  perform public.merchant_dispatch_order_driver(o9b);
+  perform public.merchant_dispatch_order_driver(o9c);
+
+  perform set_config('request.jwt.claim.sub', t.u1::text, true);
+  select id into v_ride from public.rides where order_id=o9a;
+  a := public.accept_ride_request(v_ride, t.d1);
+  assert a->>'success' = 'true', format('H: c9 accept a failed: %s', a);
+  a := public._driver_delay_redispatch(v_ride, 'zz سبب تجريبي', 'driver');
+  assert a->>'ok' = 'true' and (a->>'apology_amount')::numeric = 4.55,
+    'H: c9 first grant';
+  select id into v_ride from public.rides where order_id=o9b;
+  a := public.accept_ride_request(v_ride, t.d1);
+  assert a->>'success' = 'true', format('H: c9 accept b failed: %s', a);
+  a := public._driver_delay_redispatch(v_ride, 'zz سبب تجريبي', 'driver');
+  assert a->>'ok' = 'true' and (a->>'apology_amount')::numeric = 4.55,
+    'H: c9 second grant';
+
+  -- Third redispatch in the same month: cap reached, nothing granted,
+  -- handoff still succeeds.
+  select id into v_ride from public.rides where order_id=o9c;
+  a := public.accept_ride_request(v_ride, t.d1);
+  assert a->>'success' = 'true', format('H: c9 accept c failed: %s', a);
+  a := public._driver_delay_redispatch(v_ride, 'zz سبب تجريبي', 'driver');
+  assert a->>'ok' = 'true', format('H: c9 third redispatch must still hand off: %s', a);
+  assert (a->>'apology_amount')::numeric = 0
+     and (a->>'monthly_grants')::int = 2 and (a->>'monthly_cap')::int = 2,
+    format('H: c9 third must be capped, got %s', a);
+  assert (select balance from public.platform_credit_accounts where user_id=t.c9) = 9.10,
+    'H: c9 balance unchanged after capped event';
+  assert (select count(*) from public.platform_credit_ledger
+           where user_id=t.c9 and kind='grant' and order_id in (o9a, o9b)) = 2
+     and not exists (select 1 from public.platform_credit_ledger
+           where user_id=t.c9 and kind='grant' and order_id = o9c),
+    'H: c9 still two apology grant ledger rows';
+  assert (select apology_amount from public.driver_delay_events where order_id=o9c) = 0,
+    'H: capped event row records apology_amount 0';
+  assert (select count(*) from public.notifications
+           where user_id=t.c9 and type='order' and body like '%هدية مننا%') = 2,
+    'H: c9 gift text only on the two actual grants';
 end $$;
 
 -- ============ J7. Real-role ACL checks (authenticated + anon) ===========
@@ -766,5 +878,5 @@ do $$ declare t record; a jsonb; begin
     'G: own credit readable';
 end $$;
 
-select 'PASS v5: spend mechanics, one-grant-per-order, above-goods, full-total, remainder, cancel/reject restore + retry, paid refund + retry, coupon+gift, replay, net-at-settlement in both models + netted subsidy + payables, dispatch ceiling on net, sweep on net obligations, full-credit both models (goods extinguished, 13.95 earned, payables), non-cash netted_noncash, admin payables list + settle-once idempotent + per-kind partial settle + global-scope gate (owner/country OK; regional/unassigned/inactive/customer denied) + void excluded + NULL/invalid kind rejected + real-role ACL (authenticated granted, anon denied) + original-reference replay, wallet_pay immiscibility, client lockdown' as result;
+select 'PASS v6: monthly apology cap (boundary + cap + handoff) / v5: spend mechanics, one-grant-per-order, above-goods, full-total, remainder, cancel/reject restore + retry, paid refund + retry, coupon+gift, replay, net-at-settlement in both models + netted subsidy + payables, dispatch ceiling on net, sweep on net obligations, full-credit both models (goods extinguished, 13.95 earned, payables), non-cash netted_noncash, admin payables list + settle-once idempotent + per-kind partial settle + global-scope gate (owner/country OK; regional/unassigned/inactive/customer denied) + void excluded + NULL/invalid kind rejected + real-role ACL (authenticated granted, anon denied) + original-reference replay, wallet_pay immiscibility, client lockdown' as result;
 rollback;

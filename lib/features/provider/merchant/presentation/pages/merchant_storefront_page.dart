@@ -8,6 +8,7 @@ import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
 import 'package:delwaqty/features/customer/location/presentation/widgets/smart_map_picker_sheet.dart';
+import 'package:delwaqty/features/provider/capability/presentation/widgets/provider_category_picker.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/app_shell.dart';
@@ -193,17 +194,10 @@ class MerchantStorefrontPage extends ConsumerStatefulWidget {
 
 class _MerchantStorefrontPageState
     extends ConsumerState<MerchantStorefrontPage> {
-  static const _storeCategories = <String>[
-    'restaurant',
-    'grocery',
-    'pharmacy',
-    'bakery',
-    'cafe',
-    'electronics',
-    'fashion',
-    'home_services',
-    'other',
-  ];
+  /// Shop types plus every service category (generic for the provider
+  /// role): a doctor, nurse, teacher or barber storefront keeps its real
+  /// type. DB keys unchanged.
+  static const _storeCategories = kStorefrontProviderCategories;
 
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
@@ -251,9 +245,9 @@ class _MerchantStorefrontPageState
     if (_hydrated) return;
     _hydrated = true;
     _name.text = data.name;
-    _storeType = _storeCategories.contains(data.type)
-        ? data.type
-        : 'restaurant';
+    // Preserve the account's real type even when it is outside the known
+    // list: coercing it to a shop type silently re-labelled professionals.
+    _storeType = data.type.trim().isNotEmpty ? data.type : 'restaurant';
     _description.text = data.description ?? '';
     _phone.text = data.phone ?? '';
     _address.text = data.address ?? '';
@@ -268,28 +262,8 @@ class _MerchantStorefrontPageState
         : '${data.deliveryTimeMin}';
   }
 
-  String _categoryLabel(AppLocalizations l10n, String category) {
-    switch (category) {
-      case 'restaurant':
-        return l10n.restaurant;
-      case 'grocery':
-        return l10n.grocery;
-      case 'pharmacy':
-        return l10n.pharmacy;
-      case 'bakery':
-        return l10n.bakery;
-      case 'cafe':
-        return l10n.cafe;
-      case 'electronics':
-        return l10n.electronics;
-      case 'fashion':
-        return l10n.fashion;
-      case 'home_services':
-        return l10n.homeServices;
-      default:
-        return l10n.other;
-    }
-  }
+  String _categoryLabel(AppLocalizations l10n, String category) =>
+      providerCategoryLabel(l10n, category);
 
   Future<void> _pickAndUploadPhoto({required bool isLogo}) async {
     if (_uploadingLogo || _uploadingCover) return;
@@ -527,7 +501,12 @@ class _MerchantStorefrontPageState
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    items: _storeCategories
+                    items: [
+                      ..._storeCategories,
+                      // A preserved out-of-list type must also be an item,
+                      // or the dropdown assertion fires.
+                      if (!_storeCategories.contains(_storeType)) _storeType,
+                    ]
                         .map(
                           (cat) => DropdownMenuItem<String>(
                             value: cat,

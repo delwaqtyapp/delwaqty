@@ -33,6 +33,38 @@ const List<String> kRequestableProviderCategories = [
   'applianceRepair',
 ];
 
+/// Storefront editor category list: every shop type plus every service
+/// category, generic for the provider role. A doctor, nurse, teacher or
+/// barber storefront keeps its real type here instead of being coerced to a
+/// restaurant or labelled "Other".
+const List<String> kStorefrontProviderCategories = [
+  'restaurant',
+  'grocery',
+  'pharmacy',
+  'bakery',
+  'cafe',
+  'electronics',
+  'fashion',
+  'home_services',
+  'teacher',
+  'doctor',
+  'nurse',
+  'barber',
+  'plumbing',
+  'electrical',
+  'carpentry',
+  'painting',
+  'cleaning',
+  'acMaintenance',
+  'pipeChange',
+  'plastering',
+  'carpetCleaning',
+  'dishRepair',
+  'pestControl',
+  'applianceRepair',
+  'other',
+];
+
 bool isServiceProviderCategory(String category) {
   final family = ProviderProfile.familyOf(ProviderCategory.normalize(category));
   return family == ProviderFamily.homeServices ||

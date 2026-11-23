@@ -86,6 +86,46 @@ namespace Delwaqty.Pos.Core.Sync
                 "{\"p_query\":" + JsonString(query) + ",\"p_limit\":" + limit + "}");
         }
 
+        /// <summary>PostgREST read. path is e.g. "drug_catalog?select=id,name_en&limit=1000".</summary>
+        public async Task<string> RestGetAsync(string pathAndQuery)
+        {
+            using (var req = new HttpRequestMessage(HttpMethod.Get, _baseUrl + "/rest/v1/" + pathAndQuery))
+            {
+                req.Headers.Add("apikey", _anonKey);
+                if (AccessToken != null)
+                    req.Headers.Authorization =
+                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AccessToken);
+                using (var res = await _http.SendAsync(req).ConfigureAwait(false))
+                {
+                    var text = await res.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    if (!res.IsSuccessStatusCode)
+                        throw new InvalidOperationException("GET " + pathAndQuery + " failed: " + (int)res.StatusCode + " " + text);
+                    return text;
+                }
+            }
+        }
+
+        /// <summary>PostgREST insert/update. Returns the representation when prefer is return=representation.</summary>
+        public async Task<string> RestWriteAsync(string method, string pathAndQuery, string bodyJson, string prefer)
+        {
+            using (var req = new HttpRequestMessage(new HttpMethod(method), _baseUrl + "/rest/v1/" + pathAndQuery))
+            {
+                req.Headers.Add("apikey", _anonKey);
+                if (AccessToken != null)
+                    req.Headers.Authorization =
+                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AccessToken);
+                if (prefer != null) req.Headers.Add("Prefer", prefer);
+                req.Content = new StringContent(bodyJson, Encoding.UTF8, "application/json");
+                using (var res = await _http.SendAsync(req).ConfigureAwait(false))
+                {
+                    var text = await res.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    if (!res.IsSuccessStatusCode)
+                        throw new InvalidOperationException(method + " " + pathAndQuery + " failed: " + (int)res.StatusCode + " " + text);
+                    return text;
+                }
+            }
+        }
+
         private static string JsonString(string s)
         {
             return s == null ? "null" : System.Text.Json.JsonSerializer.Serialize(s);

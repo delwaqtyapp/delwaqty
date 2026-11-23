@@ -34,8 +34,13 @@ namespace Delwaqty.Pos.Core.Sales
     /// </summary>
     public sealed class SaleBuilder
     {
+        // Must mirror the pos_sale_payments CHECK constraint exactly
+        // (migration 340, widened by 347): anything else fails server-side.
+        public static readonly IReadOnlyCollection<string> AllowedMethods =
+            new List<string> { "cash", "instapay", "vodafone_cash", "card", "deferred" };
+
         private static readonly HashSet<string> Methods =
-            new HashSet<string>(new[] { "cash", "card", "wallet", "deferred" });
+            new HashSet<string>(AllowedMethods);
 
         private readonly List<SaleLine> _lines = new List<SaleLine>();
         private readonly List<Payment> _payments = new List<Payment>();

@@ -3014,5 +3014,19 @@
       }
     }
   },
-  "providerPricingLoadMore": "Load more"
+  "providerPricingLoadMore": "Load more",
+  "otaTitle": "A new update is available",
+  "otaIntro": "New improvements are ready to install.",
+  "otaIntroHint": "The update will be downloaded and installed without reinstalling the app.",
+  "otaDownloading": "Downloading…",
+  "otaReadyTitle": "The update is ready to install",
+  "otaReadyBody": "The update has been downloaded. Tap Install to finish.",
+  "otaPermissionBody": "Allow Delwaqty to install updates in the settings screen, then come back. The installation will continue by itself and the download is kept.",
+  "otaDownloadFailed": "Could not download the update. Check your connection and try again.",
+  "otaInstallFailed": "Could not start the installation. Tap Install to try again.",
+  "otaChecksumFailed": "The downloaded update could not be verified. Tap Update now to download it again.",
+  "otaLater": "Later",
+  "otaUpdateNow": "Update now",
+  "otaInstall": "Install",
+  "otaRetry": "Try again"
 }

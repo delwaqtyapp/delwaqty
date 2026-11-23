@@ -60,7 +60,9 @@ class MainActivity : FlutterFragmentActivity() {
             }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, OTA_CHANNEL)
             .setMethodCallHandler { call, result ->
-                if (call.method == "installApk") {
+                if (call.method == "canRequestPackageInstalls") {
+                    result.success(packageManager.canRequestPackageInstalls())
+                } else if (call.method == "installApk") {
                     val path = call.argument<String>("path")
                     if (path == null) {
                         result.error("bad_args", "path required", null); return@setMethodCallHandler

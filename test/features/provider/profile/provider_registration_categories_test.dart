@@ -120,10 +120,7 @@ void main() {
       }
       // Home Services keeps its exact DB key.
       expect(kStorefrontProviderCategories, contains('home_services'));
-      expect(
-        kStorefrontProviderCategories,
-        isNot(contains('homeServices')),
-      );
+      expect(kStorefrontProviderCategories, isNot(contains('homeServices')));
     });
 
     Future<void> pumpStorefront(WidgetTester tester, String type) async {
@@ -135,7 +132,8 @@ void main() {
         ProviderScope(
           overrides: [
             storefrontProvider.overrideWith(
-              (ref) async => StorefrontData(id: 'm-1', name: 'Test', type: type),
+              (ref) async =>
+                  StorefrontData(id: 'm-1', name: 'Test', type: type),
             ),
             workingHoursProvider.overrideWith(
               (ref) async => <WorkingHoursDay>[],

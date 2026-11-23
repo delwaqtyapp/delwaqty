@@ -8381,7 +8381,7 @@ abstract class AppLocalizations {
   /// No description provided for @userTypeCustomerDesc.
   ///
   /// In en, this message translates to:
-  /// **'Order from stores, restaurants and services'**
+  /// **'Order your food now'**
   String get userTypeCustomerDesc;
 
   /// No description provided for @userTypeMerchant.
@@ -8393,7 +8393,7 @@ abstract class AppLocalizations {
   /// No description provided for @userTypeMerchantDesc.
   ///
   /// In en, this message translates to:
-  /// **'Sell your products on the platform'**
+  /// **'Sell your products with Delwaqty'**
   String get userTypeMerchantDesc;
 
   /// No description provided for @userTypeDriver.
@@ -8405,7 +8405,7 @@ abstract class AppLocalizations {
   /// No description provided for @userTypeDriverDesc.
   ///
   /// In en, this message translates to:
-  /// **'Deliver orders to customers'**
+  /// **'Deliver orders and earn with Delwaqty'**
   String get userTypeDriverDesc;
 
   /// No description provided for @userTypeProvider.
@@ -8417,7 +8417,7 @@ abstract class AppLocalizations {
   /// No description provided for @userTypeProviderDesc.
   ///
   /// In en, this message translates to:
-  /// **'Offer your services to customers'**
+  /// **'Offer your services professionally'**
   String get userTypeProviderDesc;
 
   /// No description provided for @uploadIdCard.

@@ -1,3 +1,5 @@
+import '../widgets/role_selection_card.dart';
+
 import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/core/router/post_auth_route.dart';
 
@@ -645,28 +647,28 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final roles = [
       (
         UserType.customer,
-        Icons.person_outline_rounded,
+        RoleCardIcon.customer,
         l10n.userTypeCustomer,
         l10n.userTypeCustomerDesc,
         const Color(0xFF4A90D9),
       ),
       (
         UserType.merchant,
-        Icons.store_outlined,
+        RoleCardIcon.merchant,
         l10n.userTypeMerchant,
         l10n.userTypeMerchantDesc,
         const Color(0xFF8B5CF6),
       ),
       (
         UserType.driver,
-        Icons.delivery_dining_outlined,
+        RoleCardIcon.delivery,
         l10n.userTypeDriver,
         l10n.userTypeDriverDesc,
         const Color(0xFFFF9500),
       ),
       (
         UserType.provider,
-        Icons.handyman_outlined,
+        RoleCardIcon.provider,
         l10n.userTypeProvider,
         l10n.userTypeProviderDesc,
         const Color(0xFF34C759),
@@ -687,37 +689,20 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: AnimatedFadeIn(
-                  delay: Duration(milliseconds: 100 + i * 70),
-                  child: _RolePremiumCard(
-                    icon: roles[i].$2,
-                    title: roles[i].$3,
-                    subtitle: roles[i].$4,
-                    color: roles[i].$5,
-                    isSelected: _selectedRole == roles[i].$1,
-                    onTap: () => setState(() => _selectedRole = roles[i].$1),
+              for (var j = i; j < i + 2 && j < roles.length; j++) ...[
+                if (j > i) const SizedBox(width: 14),
+                Expanded(
+                  child: RoleSelectionCard(
+                    entranceIndex: j,
+                    icon: roles[j].$2,
+                    title: roles[j].$3,
+                    subtitle: roles[j].$4,
+                    color: roles[j].$5,
+                    isSelected: _selectedRole == roles[j].$1,
+                    onTap: () => setState(() => _selectedRole = roles[j].$1),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              if (i + 1 < roles.length)
-                Expanded(
-                  child: AnimatedFadeIn(
-                    delay: Duration(milliseconds: 170 + i * 70),
-                    child: _RolePremiumCard(
-                      icon: roles[i + 1].$2,
-                      title: roles[i + 1].$3,
-                      subtitle: roles[i + 1].$4,
-                      color: roles[i + 1].$5,
-                      isSelected: _selectedRole == roles[i + 1].$1,
-                      onTap: () =>
-                          setState(() => _selectedRole = roles[i + 1].$1),
-                    ),
-                  ),
-                )
-              else
-                const Expanded(child: SizedBox()),
+              ],
             ],
           ),
           const SizedBox(height: 14),
@@ -795,7 +780,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           ),
           const SizedBox(height: 12),
           _PremiumUploadTile(
-            icon: Icons.person_outline_rounded,
+            icon: RoleCardIcon.customer,
             title: l10n.uploadProfilePhoto,
             hint: isMerchantOrProvider && !requireProviderDocs
                 ? l10n.providerDocumentsOptionalBadge
@@ -1439,119 +1424,6 @@ class _IconWell extends StatelessWidget {
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Icon(icon, color: color, size: 22),
-    );
-  }
-}
-
-class _RolePremiumCard extends StatelessWidget {
-  const _RolePremiumCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.color,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color color;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final chipStart = isSelected
-        ? Color.lerp(_kGold, color, 0.4)!
-        : color.withValues(alpha: 0.18);
-    final chipEnd = isSelected
-        ? Color.lerp(_kGold, color, 0.7)!
-        : color.withValues(alpha: 0.07);
-    return PressableScale(
-      scale: 0.97,
-      onTap: onTap,
-      child: Stack(
-        children: [
-          _GlassCard(
-            isSelected: isSelected,
-            padding: const EdgeInsets.all(14),
-            radius: 20,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: AlignmentDirectional.topStart,
-                      end: AlignmentDirectional.bottomEnd,
-                      colors: [chipStart, chipEnd],
-                    ),
-                    borderRadius: BorderRadius.circular(13),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: isSelected ? Colors.white : color,
-                    size: 22,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 10.5,
-                    color: Colors.white.withValues(alpha: 0.5),
-                    height: 1.35,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          if (isSelected)
-            Positioned(
-              top: 10,
-              right: 10,
-              child: AnimatedScale(
-                scale: 1,
-                duration: const Duration(milliseconds: 250),
-                child: Container(
-                  width: 22,
-                  height: 22,
-                  decoration: BoxDecoration(
-                    color: _kGold,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: _kGold.withValues(alpha: 0.5),
-                        blurRadius: 8,
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.check_rounded,
-                    color: Color(0xFF0A0614),
-                    size: 14,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
     );
   }
 }

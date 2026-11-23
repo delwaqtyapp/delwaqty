@@ -197,24 +197,9 @@ final categoryPricingProvider =
       return Map<String, dynamic>.from(response as Map);
     });
 
-final providerPricingProvider = FutureProvider.autoDispose
-    .family<
-      Map<String, dynamic>,
-      ({String? search, String? category, int limit})
-    >((ref, query) async {
-      ref.watch(adminAuthUidProvider);
-      final client = ref.watch(supabaseClientProvider);
-      final response = await client.rpc(
-        'admin_list_provider_pricing',
-        params: {
-          'p_search': query.search,
-          'p_category_type': query.category,
-          'p_limit': query.limit,
-          'p_offset': 0,
-        },
-      );
-      return Map<String, dynamic>.from(response as Map);
-    });
+// The paginated provider-pricing list is fetched imperatively by
+// AdminProviderPricingPage (fixed page size, increasing offset) and
+// cleared/refetched on account switch via adminAuthUidProvider.
 
 // ─── Pending Approval Requests (052) ───────────────────────
 

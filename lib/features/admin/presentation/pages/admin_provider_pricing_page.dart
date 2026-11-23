@@ -24,9 +24,87 @@ class _AdminProviderPricingPageState
     extends ConsumerState<AdminProviderPricingPage> {
   static const int _pageSize = 50;
   String _search = '';
-  int _limit = _pageSize;
   String? _category;
   bool _saving = false;
+
+  // Offset-paged provider list: fixed page size, pages appended.
+  List<Map<String, dynamic>> _items = [];
+  int _total = 0;
+  bool _loading = true;
+  bool _loadingMore = false;
+  Object? _error;
+  int _requestSeq = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _reload();
+  }
+
+  Future<Map<String, dynamic>> _fetchPage(int offset) async {
+    final client = ref.read(supabaseClientProvider);
+    final response = await client.rpc(
+      'admin_list_provider_pricing',
+      params: {
+        'p_search': _search.isEmpty ? null : _search,
+        'p_category_type': _category,
+        'p_limit': _pageSize,
+        'p_offset': offset,
+      },
+    );
+    return Map<String, dynamic>.from(response as Map);
+  }
+
+  Future<void> _reload() async {
+    final seq = ++_requestSeq;
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final data = await _fetchPage(0);
+      if (!mounted || seq != _requestSeq) return;
+      setState(() {
+        _items = (data['items'] as List? ?? [])
+            .map((e) => Map<String, dynamic>.from(e as Map))
+            .toList();
+        _total = (data['total'] as num?)?.toInt() ?? _items.length;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted || seq != _requestSeq) return;
+      setState(() {
+        _error = e;
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_loading || _loadingMore || _items.length >= _total) return;
+    final seq = _requestSeq;
+    setState(() => _loadingMore = true);
+    try {
+      final data = await _fetchPage(_items.length);
+      if (!mounted || seq != _requestSeq) return;
+      setState(() {
+        _items = [
+          ..._items,
+          ...(data['items'] as List? ?? []).map(
+            (e) => Map<String, dynamic>.from(e as Map),
+          ),
+        ];
+        _total = (data['total'] as num?)?.toInt() ?? _total;
+        _loadingMore = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loadingMore = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).errorLoading)),
+      );
+    }
+  }
 
   double? _numOrNull(Object? v) => v == null ? null : (v as num).toDouble();
 
@@ -57,8 +135,8 @@ class _AdminProviderPricingPageState
     try {
       await action();
       if (mounted) {
-        ref.invalidate(providerPricingProvider);
         ref.invalidate(categoryPricingProvider);
+        _reload();
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(l10n.providerPricingSaved)));
       }
@@ -282,8 +360,8 @@ class _AdminProviderPricingPageState
               tooltip: l10n.refresh,
               icon: const Icon(Icons.refresh),
               onPressed: () {
-                ref.invalidate(providerPricingProvider);
                 ref.invalidate(categoryPricingProvider);
+                _reload();
               },
             ),
           ],
@@ -296,14 +374,11 @@ class _AdminProviderPricingPageState
   }
 
   Widget _buildProvidersTab(AppLocalizations l10n) {
+    // Account switch clears and refetches under the new account.
+    ref.listen(adminAuthUidProvider, (prev, next) {
+      if (prev?.value != next.value) _reload();
+    });
     final categoriesAsync = ref.watch(categoryPricingProvider);
-    final providersAsync = ref.watch(
-      providerPricingProvider((
-        search: _search.isEmpty ? null : _search,
-        category: _category,
-        limit: _limit,
-      )),
-    );
 
     return Column(
       children: [
@@ -317,10 +392,10 @@ class _AdminProviderPricingPageState
                 borderRadius: BorderRadius.all(Radius.circular(12)),
               ),
             ),
-            onChanged: (v) => setState(() {
+            onChanged: (v) {
               _search = v.trim();
-              _limit = _pageSize;
-            }),
+              _reload();
+            },
           ),
         ),
         categoriesAsync.when(
@@ -360,75 +435,70 @@ class _AdminProviderPricingPageState
                       ),
                     ),
                 ],
-                onChanged: (v) => setState(() {
+                onChanged: (v) {
                   _category = v;
-                  _limit = _pageSize;
-                }),
+                  _reload();
+                },
               ),
             );
           },
         ),
         Expanded(
-          child: providersAsync.when(
-            skipLoadingOnReload: true,
-            loading: () => const Center(child: AppLoaderCircular()),
-            error: (e, _) => Center(
-              child: PremiumEmptyState(
-                icon: Icons.error_outline_rounded,
-                title: l10n.error,
-                message: l10n.errorLoading,
-                actionLabel: l10n.retry,
-                onAction: () => ref.invalidate(providerPricingProvider),
-              ),
-            ),
-            data: (data) {
-              final items = (data['items'] as List? ?? [])
-                  .map((e) => Map<String, dynamic>.from(e as Map))
-                  .toList();
-              if (items.isEmpty) {
-                return Center(
+          child: _loading
+              ? const Center(child: AppLoaderCircular())
+              : _error != null
+              ? Center(
+                  child: PremiumEmptyState(
+                    icon: Icons.error_outline_rounded,
+                    title: l10n.error,
+                    message: l10n.errorLoading,
+                    actionLabel: l10n.retry,
+                    onAction: _reload,
+                  ),
+                )
+              : _items.isEmpty
+              ? Center(
                   child: PremiumEmptyState(
                     icon: Icons.handyman_outlined,
                     title: l10n.adminProviderPricing,
                     message: l10n.providerPricingEmpty,
                   ),
-                );
-              }
-              final total = (data['total'] as num?)?.toInt() ?? items.length;
-              final hasMore = items.length < total;
-              return ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: items.length + 1,
-                itemBuilder: (context, i) {
-                  if (i < items.length) return _providerTile(items[i], l10n);
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Column(
-                      children: [
-                        Text(
-                          l10n.providerPricingShowingOf(items.length, total),
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        if (hasMore)
-                          TextButton(
-                            onPressed: providersAsync.isLoading
-                                ? null
-                                : () => setState(() => _limit += _pageSize),
-                            child: providersAsync.isLoading
-                                ? const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: AppLoaderCircular(),
-                                  )
-                                : Text(l10n.providerPricingLoadMore),
+                )
+              : ListView.builder(
+                  // Clear the floating bottom navigation bar.
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
+                  itemCount: _items.length + 1,
+                  itemBuilder: (context, i) {
+                    if (i < _items.length) {
+                      return _providerTile(_items[i], l10n);
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Column(
+                        children: [
+                          Text(
+                            l10n.providerPricingShowingOf(
+                              _items.length,
+                              _total,
+                            ),
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
-                      ],
-                    ),
-                  );
-                },
-              );
-            },
-          ),
+                          if (_items.length < _total)
+                            TextButton(
+                              onPressed: _loadingMore ? null : _loadMore,
+                              child: _loadingMore
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: AppLoaderCircular(),
+                                    )
+                                  : Text(l10n.providerPricingLoadMore),
+                            ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
         ),
       ],
     );

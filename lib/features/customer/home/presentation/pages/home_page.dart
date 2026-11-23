@@ -2355,7 +2355,7 @@ class _DiscoveryContent extends ConsumerWidget {
         rating: provider.rating,
         ratingCount: provider.ratingCount,
         subtitle: provider.hourlyRate != null
-            ? '${provider.hourlyRate!.toStringAsFixed(0)} ${AppLocalizations.of(context).currencySymbol}/${AppLocalizations.of(context).perHour}'
+            ? '${provider.hourlyRate!.toStringAsFixed(0)} ${AppLocalizations.of(context).currencySymbol}${AppLocalizations.of(context).perHour}'
             : null,
         onTap: () => context.push(
           '/home-services/category/${provider.categoryType.name}',

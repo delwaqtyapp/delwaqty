@@ -80,6 +80,11 @@ BEGIN
   RAISE EXCEPTION 'direct invalid weight accepted';
  EXCEPTION WHEN check_violation THEN NULL;
  END;
+ BEGIN
+  UPDATE public.drivers SET accepts_deliveries=NULL WHERE id=d;
+  RAISE EXCEPTION 'direct NULL toggle accepted';
+ EXCEPTION WHEN check_violation THEN NULL;
+ END;
  PERFORM set_config('request.jwt.claim.sub',gen_random_uuid()::text,true);
  a:=public.update_driver_capabilities(d,ARRAY['food'],true,15,20);
  ASSERT a->>'reason'='FORBIDDEN','foreign caller accepted';

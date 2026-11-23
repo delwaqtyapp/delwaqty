@@ -3,6 +3,14 @@
 -- No per-vehicle category exclusion exists in the current dispatcher: vehicle,
 -- distance and weight constraints are retained separately. No is_verified change.
 BEGIN;
+DO $$ DECLARE bad text; BEGIN
+ SELECT string_agg(id::text,',') INTO bad FROM public.drivers WHERE
+ (service_types IS NOT NULL AND cardinality(service_types)>0 AND NOT service_types <@ ARRAY['food','grocery','pharmacy','parcel']::text[])
+ OR accepts_deliveries IS NULL OR max_delivery_distance_km IS NULL OR max_delivery_distance_km<=0 OR max_delivery_distance_km>200
+ OR max_weight_kg IS NULL OR max_weight_kg<=0 OR max_weight_kg>1000;
+ IF bad IS NOT NULL THEN RAISE EXCEPTION 'INVALID_EXISTING_CAPABILITIES: %',bad; END IF;
+END $$;
+
 CREATE OR REPLACE FUNCTION public.complete_driver_onboarding(p_driver_id uuid)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -64,7 +72,7 @@ UPDATE public.drivers SET service_types=ARRAY['food','grocery','pharmacy','parce
 CREATE OR REPLACE FUNCTION public.driver_capability_bounds_guard()
 RETURNS trigger LANGUAGE plpgsql SECURITY INVOKER SET search_path TO public,pg_temp AS $$
 BEGIN
- IF NEW.service_types IS NULL OR NOT NEW.service_types <@ ARRAY['food','grocery','pharmacy','parcel']::text[]
+ IF NEW.accepts_deliveries IS NULL OR NEW.service_types IS NULL OR NOT NEW.service_types <@ ARRAY['food','grocery','pharmacy','parcel']::text[]
     OR (NEW.accepts_deliveries AND cardinality(NEW.service_types)=0)
     OR NEW.max_delivery_distance_km IS NULL OR NEW.max_delivery_distance_km<=0 OR NEW.max_delivery_distance_km>200
     OR NEW.max_weight_kg IS NULL OR NEW.max_weight_kg<=0 OR NEW.max_weight_kg>1000 THEN
@@ -72,6 +80,7 @@ BEGIN
  END IF;
  RETURN NEW;
 END $$;
+REVOKE ALL ON FUNCTION public.driver_capability_bounds_guard() FROM PUBLIC,anon,authenticated;
 DROP TRIGGER IF EXISTS driver_capability_bounds ON public.drivers;
 CREATE TRIGGER driver_capability_bounds BEFORE INSERT OR UPDATE OF service_types,accepts_deliveries,max_delivery_distance_km,max_weight_kg ON public.drivers FOR EACH ROW EXECUTE FUNCTION public.driver_capability_bounds_guard();
 COMMIT;

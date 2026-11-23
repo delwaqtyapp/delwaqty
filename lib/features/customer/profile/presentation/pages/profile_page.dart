@@ -513,13 +513,26 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
           ];
 
-    return Row(
-      children: [
-        for (int i = 0; i < items.length; i++) ...[
-          if (i > 0) const SizedBox(width: 10),
-          Expanded(child: _BentoActionTile(item: items[i])),
-        ],
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns =
+            constraints.maxWidth < 340 ||
+                MediaQuery.textScalerOf(context).scale(1) > 1.3
+            ? 2
+            : 3;
+        final width = (constraints.maxWidth - 10 * (columns - 1)) / columns;
+        return Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            for (final item in items)
+              SizedBox(
+                width: width,
+                child: _BentoActionTile(item: item),
+              ),
+          ],
+        );
+      },
     );
   }
 

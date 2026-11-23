@@ -94,7 +94,12 @@ CREATE OR REPLACE FUNCTION public._cashier_has_pro(p_merchant_id uuid)
  STABLE SECURITY DEFINER
  SET search_path TO 'public', 'pg_temp'
 AS $function$
-  SELECT EXISTS (
+  -- LOW (reviewer follow-up): keep authenticated EXECUTE (RLS dependency)
+  -- but answer only for the merchant's owner/scoped admin; other signed-in
+  -- callers get false instead of a license-eligibility oracle. service_role
+  -- and definer RPC callers carry no uid and pass through.
+  SELECT (auth.uid() IS NULL OR public.is_merchant_owner(p_merchant_id))
+     AND EXISTS (
     SELECT 1 FROM public.cashier_licenses l
     WHERE l.merchant_id = p_merchant_id
       AND l.pro

@@ -205,5 +205,5 @@ BEGIN
     '419: rejected cascade trigger still present';
 
 END $$;
-SELECT '419 v2 matrix passed' AS result;
+SELECT '419 license gate matrix passed' AS result;
 ROLLBACK;

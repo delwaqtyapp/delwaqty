@@ -65,12 +65,12 @@ Marketplace  Mobility          Home Services
 Restaurant Plugin
     ├── Requires: Identity, Commerce, Maps, Notifications, Payments
     ├── Optional: AI, Analytics
-    └── Forbidden: Ride Plugin, Pharmacy Plugin (no cross-plugin)
+    └── Forbidden: Courier Plugin, Grocery Plugin (no cross-plugin)
 
 Ride Plugin
     ├── Requires: Identity, Mobility, Maps, Payments, Notifications
     ├── Optional: AI, Analytics
-    └── Forbidden: Restaurant Plugin, Pharmacy Plugin (no cross-plugin)
+    └── Forbidden: Restaurant Plugin, Grocery Plugin (no cross-plugin)
 ```
 
 ---

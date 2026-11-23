@@ -195,9 +195,6 @@ abstract final class AppColors {
   /// Color representing grocery merchants.
   static const Color merchantGrocery = Color(0xFF2E7D32);
 
-  /// Color representing pharmacy merchants.
-  static const Color merchantPharmacy = Color(0xFF0277BD);
-
   /// Color representing electronics merchants.
   static const Color merchantElectronics = Color(0xFF512DA8);
 
@@ -228,9 +225,6 @@ abstract final class AppColors {
 
   /// Color representing the seafood service.
   static const Color serviceSeafood = Color(0xFF00838F);
-
-  /// Color representing the pharmacy service.
-  static const Color servicePharmacy = Color(0xFF0277BD);
 
   /// Color representing the bakery service.
   static const Color serviceBakery = Color(0xFFEF6C00);

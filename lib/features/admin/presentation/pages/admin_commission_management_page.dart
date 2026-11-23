@@ -34,7 +34,6 @@ class _AdminCommissionManagementPageState
       case 'service_category':
         return switch (key) {
           'restaurant' => l10n.commissionCategoryRestaurant,
-          'pharmacy' => l10n.commissionCategoryPharmacy,
           'grocery' => l10n.commissionCategoryGrocery,
           'marketplace' => l10n.commissionCategoryMarketplace,
           'plumbing' => l10n.commissionCategoryPlumbing,

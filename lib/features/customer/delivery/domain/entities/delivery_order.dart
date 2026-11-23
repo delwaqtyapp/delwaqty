@@ -3,19 +3,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'delivery_order.freezed.dart';
 part 'delivery_order.g.dart';
 
-enum DeliveryServiceType {
-  ride,
-  foodDelivery,
-  groceryDelivery,
-  pharmacyDelivery,
-  marketplaceDelivery,
-  courier,
-  packageDelivery,
-  documentDelivery,
-  flowerDelivery,
-  retailDelivery,
-}
-
 enum DeliveryPriority { standard, priority, express }
 
 @freezed

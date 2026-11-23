@@ -896,12 +896,6 @@ abstract class AppLocalizations {
   /// **'Seafood'**
   String get seafood;
 
-  /// No description provided for @pharmacy.
-  ///
-  /// In en, this message translates to:
-  /// **'Pharmacy'**
-  String get pharmacy;
-
   /// No description provided for @bakery.
   ///
   /// In en, this message translates to:
@@ -1687,18 +1681,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manage items'**
   String get provManageItems;
-
-  /// No description provided for @provTabMedicines.
-  ///
-  /// In en, this message translates to:
-  /// **'Medicines'**
-  String get provTabMedicines;
-
-  /// No description provided for @provManageMedicines.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage medicines'**
-  String get provManageMedicines;
 
   /// No description provided for @provTabTableBookings.
   ///
@@ -5597,7 +5579,7 @@ abstract class AppLocalizations {
   /// No description provided for @placeDescriptionHint.
   ///
   /// In en, this message translates to:
-  /// **'Example: Near the pharmacy, building 5, apartment 3'**
+  /// **'Example: Next to the supermarket, building 5, apartment 3'**
   String get placeDescriptionHint;
 
   /// No description provided for @customerPhone.
@@ -6035,7 +6017,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutDescription.
   ///
   /// In en, this message translates to:
-  /// **'Delwaqty is your all-in-one services and delivery platform. We connect you with the best restaurants, pharmacies, and stores in your area for fast and reliable service.'**
+  /// **'Delwaqty is your all-in-one services and delivery platform. We connect you with the best restaurants and stores in your area for fast and reliable service.'**
   String get aboutDescription;
 
   /// No description provided for @supportEmailAddress.
@@ -6389,7 +6371,7 @@ abstract class AppLocalizations {
   /// No description provided for @tosSection2Body.
   ///
   /// In en, this message translates to:
-  /// **'Delwaqty provides an on-demand platform connecting users with local restaurants, pharmacies, stores, and delivery providers for food delivery, order delivery, and delivery services. We act as an intermediary between customers and service providers and do not directly provide delivery services ourselves.'**
+  /// **'Delwaqty provides an on-demand platform connecting users with local restaurants, stores, and delivery providers for food delivery, order delivery, and delivery services. We act as an intermediary between customers and service providers and do not directly provide delivery services ourselves.'**
   String get tosSection2Body;
 
   /// No description provided for @tosSection3Title.
@@ -6811,12 +6793,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Grocery'**
   String get typeGrocery;
-
-  /// No description provided for @typePharmacy.
-  ///
-  /// In en, this message translates to:
-  /// **'Pharmacy'**
-  String get typePharmacy;
 
   /// No description provided for @typeFlowers.
   ///
@@ -8492,24 +8468,6 @@ abstract class AppLocalizations {
   /// **'Preparation Time'**
   String get preparationTime;
 
-  /// No description provided for @dosageForm.
-  ///
-  /// In en, this message translates to:
-  /// **'Dosage Form'**
-  String get dosageForm;
-
-  /// No description provided for @activeIngredient.
-  ///
-  /// In en, this message translates to:
-  /// **'Active Ingredient'**
-  String get activeIngredient;
-
-  /// No description provided for @prescriptionRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Prescription Required'**
-  String get prescriptionRequired;
-
   /// No description provided for @warnings.
   ///
   /// In en, this message translates to:
@@ -9679,12 +9637,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Restaurants'**
   String get commissionCategoryRestaurant;
-
-  /// No description provided for @commissionCategoryPharmacy.
-  ///
-  /// In en, this message translates to:
-  /// **'Pharmacies'**
-  String get commissionCategoryPharmacy;
 
   /// No description provided for @commissionCategoryGrocery.
   ///
@@ -14747,7 +14699,7 @@ abstract class AppLocalizations {
   /// No description provided for @searchHintDelivery.
   ///
   /// In en, this message translates to:
-  /// **'Search pharmacy or fast delivery...'**
+  /// **'Search food or fast delivery...'**
   String get searchHintDelivery;
 
   /// No description provided for @orderNowFast.
@@ -15086,42 +15038,6 @@ abstract class AppLocalizations {
   /// **'No sellable products yet'**
   String get posNoProducts;
 
-  /// No description provided for @drugImportTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Drug Catalog'**
-  String get drugImportTitle;
-
-  /// No description provided for @drugImportSearchHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Search drugs by name or ingredient...'**
-  String get drugImportSearchHint;
-
-  /// No description provided for @drugImportAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Stock it'**
-  String get drugImportAction;
-
-  /// No description provided for @drugImportSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Added to your products'**
-  String get drugImportSuccess;
-
-  /// No description provided for @drugImportFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Import failed'**
-  String get drugImportFailed;
-
-  /// No description provided for @drugImportInvalidPrice.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter a valid price'**
-  String get drugImportInvalidPrice;
-
   /// Unit-price suffix on a cart line, e.g. '25 EGP each'
   ///
   /// In en, this message translates to:
@@ -15433,18 +15349,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Added to cart'**
   String get posScanAdded;
-
-  /// POS: posDrugFoundTitle
-  ///
-  /// In en, this message translates to:
-  /// **'Found in drug catalog'**
-  String get posDrugFoundTitle;
-
-  /// POS: posDrugImportAdd
-  ///
-  /// In en, this message translates to:
-  /// **'Import & add'**
-  String get posDrugImportAdd;
 
   /// POS: posQuickAddTitle
   ///

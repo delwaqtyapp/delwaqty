@@ -414,39 +414,6 @@ class _ProductDetailBottomSheetState
             ),
           );
         }
-      case MerchantType.pharmacy:
-        if (tags.containsKey('dosage')) {
-          infoItems.add(
-            _InfoItem(
-              Icons.medication_outlined,
-              l10n.dosageForm,
-              tags['dosage']!,
-            ),
-          );
-        }
-        if (tags.containsKey('active_ingredient')) {
-          infoItems.add(
-            _InfoItem(
-              Icons.science_outlined,
-              l10n.activeIngredient,
-              tags['active_ingredient']!,
-            ),
-          );
-        }
-        if (tags['prescription'] == 'true') {
-          infoItems.add(
-            _InfoItem(Icons.receipt_outlined, l10n.prescriptionRequired, ''),
-          );
-        }
-        if (tags.containsKey('warnings')) {
-          infoItems.add(
-            _InfoItem(
-              Icons.warning_amber_outlined,
-              l10n.warnings,
-              tags['warnings']!,
-            ),
-          );
-        }
       case MerchantType.grocery:
         if (tags.containsKey('weight')) {
           infoItems.add(

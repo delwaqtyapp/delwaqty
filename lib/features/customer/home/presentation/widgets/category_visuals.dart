@@ -12,7 +12,6 @@ String merchantTypeLabel(MerchantType type, AppLocalizations l10n) =>
       MerchantType.fruits => l10n.typeFruits,
       MerchantType.meat => l10n.typeMeat,
       MerchantType.seafood => l10n.typeSeafood,
-      MerchantType.pharmacy => l10n.typePharmacy,
       MerchantType.bakery => l10n.typeBakery,
       MerchantType.sweets => l10n.typeSweets,
       MerchantType.flowers => l10n.typeFlowers,
@@ -45,7 +44,6 @@ Color merchantTypeColor(MerchantType type) => switch (type) {
   MerchantType.fruits => AppColors.serviceFruits,
   MerchantType.meat => AppColors.serviceMeat,
   MerchantType.seafood => AppColors.serviceSeafood,
-  MerchantType.pharmacy => AppColors.servicePharmacy,
   MerchantType.bakery => AppColors.serviceBakery,
   MerchantType.sweets => AppColors.serviceSweets,
   MerchantType.flowers => AppColors.serviceFlowers,
@@ -78,7 +76,6 @@ String merchantEmoji(MerchantType type) => switch (type) {
   MerchantType.fruits => '🥬',
   MerchantType.meat => '🥩',
   MerchantType.seafood => '🐟',
-  MerchantType.pharmacy => '💊',
   MerchantType.bakery => '🥐',
   MerchantType.sweets => '🍰',
   MerchantType.flowers => '💐',
@@ -118,8 +115,6 @@ MerchantType? categoryNameToMerchantType(String name) {
     return MerchantType.meat;
   if (lower.contains('سمك') || lower.contains('seafood'))
     return MerchantType.seafood;
-  if (lower.contains('صيدل') || lower.contains('pharmacy'))
-    return MerchantType.pharmacy;
   if (lower.contains('مخب') || lower.contains('bakery'))
     return MerchantType.bakery;
   if (lower.contains('حلوي') || lower.contains('sweet'))
@@ -186,7 +181,7 @@ MerchantType? categoryNameToMerchantType(String name) {
 }
 
 /// Daily/repeat demand priority used for the home grid and the all-services
-/// page: restaurants, grocery, vegetables & fruits, pharmacy, home services,
+/// page: restaurants, grocery, vegetables & fruits, home services,
 /// bakery, sweets first.
 List<MerchantType> get dailyDemandPriority => <MerchantType>[
   MerchantType.restaurant,
@@ -195,7 +190,6 @@ List<MerchantType> get dailyDemandPriority => <MerchantType>[
   MerchantType.fruits,
   MerchantType.butcher,
   MerchantType.dairy,
-  MerchantType.pharmacy,
   MerchantType.home,
   MerchantType.bakery,
   MerchantType.sweets,
@@ -310,7 +304,6 @@ IconData merchantCategoryIcon(String type) {
     MerchantType.fruits => Icons.eco_rounded,
     MerchantType.meat => Icons.kebab_dining_rounded,
     MerchantType.seafood => Icons.set_meal_rounded,
-    MerchantType.pharmacy => Icons.local_pharmacy_rounded,
     MerchantType.bakery => Icons.bakery_dining_rounded,
     MerchantType.sweets => Icons.cake_rounded,
     MerchantType.flowers => Icons.local_florist_rounded,
@@ -504,7 +497,6 @@ String defaultCategoryImageUrl(String typeOrName) {
     MerchantType.meat => 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=240&q=80',
     MerchantType.butcher => 'https://images.unsplash.com/photo-1551028150-64b9f398f678?auto=format&fit=crop&w=240&q=80',
     MerchantType.seafood => 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=240&q=80',
-    MerchantType.pharmacy => 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=240&q=80',
     MerchantType.bakery => 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=240&q=80',
     MerchantType.sweets => 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=240&q=80',
     MerchantType.flowers => 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=240&q=80',

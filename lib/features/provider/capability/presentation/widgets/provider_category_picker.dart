@@ -9,7 +9,6 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 const List<String> kRequestableProviderCategories = [
   'restaurant',
   'grocery',
-  'pharmacy',
   'bakery',
   'home_services',
   'electronics',
@@ -40,7 +39,6 @@ const List<String> kRequestableProviderCategories = [
 const List<String> kStorefrontProviderCategories = [
   'restaurant',
   'grocery',
-  'pharmacy',
   'bakery',
   'cafe',
   'electronics',
@@ -77,8 +75,6 @@ String providerCategoryLabel(AppLocalizations l10n, String category) {
       return l10n.restaurant;
     case 'grocery':
       return l10n.grocery;
-    case 'pharmacy':
-      return l10n.pharmacy;
     case 'bakery':
       return l10n.bakery;
     case 'cafe':

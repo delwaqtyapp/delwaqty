@@ -67,7 +67,6 @@ const _$MerchantTypeEnumMap = {
   MerchantType.fruits: 'fruits',
   MerchantType.meat: 'meat',
   MerchantType.seafood: 'seafood',
-  MerchantType.pharmacy: 'pharmacy',
   MerchantType.bakery: 'bakery',
   MerchantType.sweets: 'sweets',
   MerchantType.flowers: 'flowers',

@@ -81,7 +81,6 @@ void main() {
   const types = {
     'restaurant': 5,
     'grocery': 5,
-    'pharmacy': 5,
     'plumbing': 4,
     'teacher': 4,
     'doctor': 4,
@@ -151,7 +150,6 @@ void main() {
   });
 
   for (final c in [
-    ('pharmacy', 3),
     ('teacher', 1),
     ('plumbing', 2),
     ('restaurant', 2),
@@ -196,9 +194,9 @@ void main() {
     expect(find.text(ProviderTabIds.products), findsNothing);
   });
 
-  testWidgets('pharmacy cashier tab opens the cashier branch', (tester) async {
+  testWidgets('grocery cashier tab opens the cashier branch', (tester) async {
     phone(tester);
-    await tester.pumpWidget(app('pharmacy'));
+    await tester.pumpWidget(app('grocery'));
     await tester.pumpAndSettle();
     await tester.tap(find.byType(NavPillButton).at(3));
     await tester.pumpAndSettle();

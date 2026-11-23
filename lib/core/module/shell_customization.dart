@@ -5,7 +5,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 ///
 /// The customer and driver apps leave both providers at `null` and keep the
 /// static module list. The provider app overrides them so the bottom tabs and
-/// the side menu follow the signed-in account type (pharmacy, restaurant,
+/// the side menu follow the signed-in account type (restaurant,
 /// shop, home services, teacher...). This is a UX layer only; server-side
 /// authorization (RLS / RPC) stays the enforcement.
 class ShellNavConfig {

@@ -10,7 +10,6 @@ enum ProviderProfileStatus { loading, failed, ready }
 enum ProviderFamily {
   restaurant,
   retail,
-  pharmacy,
   homeServices,
   professional,
   owner,
@@ -63,7 +62,6 @@ const Map<String, ProviderCapability> kRouteCapability = {
   '/provider-products': ProviderCapability.catalog,
   '/merchant-dashboard/products': ProviderCapability.catalog,
   '/merchant-dashboard/inventory': ProviderCapability.inventory,
-  '/merchant-dashboard/drugs': ProviderCapability.drugCatalog,
   '/provider-cashier': ProviderCapability.cashier,
   '/merchant-dashboard/pos': ProviderCapability.cashier,
   '/merchant-dashboard/storefront': ProviderCapability.storefront,
@@ -137,7 +135,6 @@ class ProviderProfile {
   // Feature flags.
   bool get hasCashier => has(ProviderCapability.cashier);
   bool get hasBarcode => has(ProviderCapability.barcode);
-  bool get hasDrugCatalog => has(ProviderCapability.drugCatalog);
   bool get hasProducts => has(ProviderCapability.catalog);
   bool get hasInventory => has(ProviderCapability.inventory);
   bool get hasOrders => has(ProviderCapability.orders);
@@ -184,8 +181,6 @@ class ProviderProfile {
     switch (c) {
       case ProviderCategory.restaurant:
         return ProviderFamily.restaurant;
-      case ProviderCategory.pharmacy:
-        return ProviderFamily.pharmacy;
       case ProviderCategory.grocery:
       case ProviderCategory.marketplace:
       case ProviderCategory.retail:
@@ -206,7 +201,6 @@ class ProviderProfile {
     switch (f) {
       case ProviderFamily.restaurant:
       case ProviderFamily.retail:
-      case ProviderFamily.pharmacy:
       case ProviderFamily.owner:
         return const [
           ProviderTabIds.dashboard,
@@ -292,8 +286,6 @@ class ProviderLabels {
             return l.provTabMenu;
           case ProviderCategory.grocery:
             return l.provTabItems;
-          case ProviderCategory.pharmacy:
-            return l.provTabMedicines;
           default:
             return l.products;
         }
@@ -303,8 +295,6 @@ class ProviderLabels {
             return l.provManageMenu;
           case ProviderCategory.grocery:
             return l.provManageItems;
-          case ProviderCategory.pharmacy:
-            return l.provManageMedicines;
           default:
             return l.manageProducts;
         }

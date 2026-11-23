@@ -42,9 +42,9 @@ final _platformSamples = <PlatformCategory>[
   ),
   const PlatformCategory(
     id: '4',
-    name: 'pharmacy',
-    nameAr: 'صيدلية',
-    nameEn: 'Pharmacies',
+    name: 'sweets',
+    nameAr: 'حلويات',
+    nameEn: 'Sweets',
   ),
   const PlatformCategory(
     id: '5',

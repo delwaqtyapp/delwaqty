@@ -90,12 +90,6 @@ class _AdminDeliveriesPageState extends ConsumerState<AdminDeliveriesPage> {
                       cs: cs,
                     ),
                     _ServiceChip(
-                      label: l10n.pharmacy,
-                      selected: _serviceFilter == 'pharmacy',
-                      onTap: () => setState(() => _serviceFilter = 'pharmacy'),
-                      cs: cs,
-                    ),
-                    _ServiceChip(
                       label: l10n.parcel,
                       selected: _serviceFilter == 'parcel',
                       onTap: () => setState(() => _serviceFilter = 'parcel'),
@@ -287,7 +281,6 @@ class _DeliveryGlassTile extends StatelessWidget {
     final icon = switch (serviceType) {
       'food' => Icons.restaurant_rounded,
       'grocery' => Icons.shopping_basket_rounded,
-      'pharmacy' => Icons.medical_services_rounded,
       'direct_delivery' => Icons.inventory_2_rounded,
       _ => Icons.local_shipping_rounded,
     };
@@ -494,8 +487,6 @@ String _serviceTypeLabel(AppLocalizations l10n, String serviceType) {
       return l10n.food;
     case 'grocery':
       return l10n.grocery;
-    case 'pharmacy':
-      return l10n.pharmacy;
     case 'direct_delivery':
       return l10n.directDelivery;
     case 'delivery':

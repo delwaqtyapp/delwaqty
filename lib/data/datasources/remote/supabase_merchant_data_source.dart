@@ -74,7 +74,13 @@ class SupabaseMerchantDataSource {
     int offset = 0,
   }) async {
     try {
-      var query = _client.from(_tableName).select().eq('status', 'active');
+      // Only merchant types the platform serves may surface on any
+      // customer discovery surface; legacy rows of retired types stay hidden.
+      var query = _client
+          .from(_tableName)
+          .select()
+          .eq('status', 'active')
+          .neq('type', 'pharmacy');
 
       if (type != null) {
         query = query.eq('type', type.name);
@@ -118,6 +124,7 @@ class SupabaseMerchantDataSource {
           .select()
           .eq('status', 'active')
           .eq('is_featured', true)
+          .neq('type', 'pharmacy')
           .order('rating', ascending: false)
           .limit(10);
       return (data as List).map((row) => _fromRow(_rowToMap(row))).toList();
@@ -148,6 +155,7 @@ class SupabaseMerchantDataSource {
           .from(_tableName)
           .select()
           .eq('type', type.name)
+          .neq('type', 'pharmacy')
           .order('rating', ascending: false);
       return (data as List).map((row) => _fromRow(_rowToMap(row))).toList();
     } catch (e, stack) {

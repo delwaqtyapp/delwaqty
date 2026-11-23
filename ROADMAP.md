@@ -72,7 +72,7 @@
 - [x] M4: Dispatch engine + live trip lifecycle (driver offers, accept/arrive/OTP/start/complete/cancel, earnings + withdrawals, driver ride app, Realtime, no mock) (sprint 31)
 - [x] M5: Destination search & geocoding (provider-agnostic abstraction, Google Places provider, autocomplete/details/reverse/nearby, saved + recent, session tokens, debounce, caching, AR/EN) (sprint 32)
 - [x] M6: Complete driver platform (onboarding wizard, vehicle management, document management, enhanced dashboard, wallet breakdown, performance metrics, 9 new RPCs, realtime-ready) (sprint 33)
-- [x] M7: Delivery & Courier Platform (food, grocery, pharmacy, package — built on dispatch engine) (sprint 34)
+- [x] M7: Delivery & Courier Platform (food, grocery, package — built on dispatch engine) (sprint 34)
 - [x] M8: Safety (SOS, trusted contacts, live share, OTP pickup) (sprints 35-36)
 - [x] M9: Admin monitoring dashboard → **expanded to Management Platform** (complaints, sanctions, live tracking, support chat) (sprint 40)
 - [ ] M10: Payments integration
@@ -245,9 +245,9 @@ The customer home promo carousel reads `campaigns` scoped to the customer's regi
 ### Services Expansion (priority = demand frequency + speed + commission)
 - **Commerce categories ADDED (migration 080, 2026-09-17):** عطور، عطارة، البان، إكسسوارات حريمي، جزارة، خضراوات وفواكة (+6 MerchantType values: perfumes/spices/dairy/accessories/butcher/vegetables with l10n/colors/emoji/mappings).
 - **Booking services ADDED (migration 080, 2026-09-17):** تغيير أنبوبة (pipeChange)، نقاشة (plastering)، غسيل السجاد (carpetCleaning)، إصلاح الدش (dishRepair)، مدرسين (teacher)، حجز دكتور (doctor)، ممرض (nurse)، حجز حلاق (barber) (+8 ServiceCategoryType values + colors/icons). Each appears automatically in home-services with its own booking flow.
-- **All Services page (done 2026-09-17):** `/services` — two sections: commerce categories (→ `/market?type=X`) + booking services (→ `/home-services/category/:type`); every button opens its own service. Home grid: daily-demand categories first (بقالة، خضراوات وفواكة، مطاعم، صيدلية...), rest behind "عرض الكل".
+- **All Services page (done 2026-09-17):** `/services` — two sections: commerce categories (→ `/market?type=X`) + booking services (→ `/home-services/category/:type`); every button opens its own service. Home grid: daily-demand categories first (بقالة، خضراوات وفواكة، مطاعم...), rest behind "عرض الكل".
 - **Provider registration (done 2026-09-17):** provider role shows all 16 service chips; saved to SharedPreferences (`provider_services`) for the provider app onboarding.
-- **Phase 1 (launch):** مطاعم — سوبر ماركت وبقالة — صيدلية ومستلزمات طبية — مخبوزات وحلويات. Home grid shows the 6 daily-demand categories first (done client-side 2026-09-17); the rest sit behind "عرض الكل".
+- **Phase 1 (launch):** مطاعم — سوبر ماركت وبقالة — مخبوزات وحلويات. Home grid shows the 6 daily-demand categories first (done client-side 2026-09-17); the rest sit behind "عرض الكل".
 - **Phase 2:** خدمات المنازل (سباكة/كهرباء/تكييف/نجارة/صيانة) — مغاسل وتنظيف (استلام وتسليم) — خضار وفاكهة ولحوم — مستلزمات الأطفال — هدايا وزهور ومناسبات
 - **Phase 3:** مستلزمات السيارات (زيوت/فلاتر/بطاريات/إطارات/تغيير إطارات/ميكانيكي متنقل) — إلكترونيات — أثاث — حيوانات أليفة — مستلزمات المدارس والمكاتب
 - Integrated supermarket sections (خضار/لحوم/مياه/منظفات/أطفال) = `category_tags` on merchants + catalog structure (migration 023 column exists; needs product taxonomy)

@@ -425,7 +425,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get seafood => 'Seafood';
 
   @override
-  String get pharmacy => 'Pharmacy';
 
   @override
   String get bakery => 'Bakery';
@@ -838,10 +837,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get provManageItems => 'Manage items';
 
   @override
-  String get provTabMedicines => 'Medicines';
 
   @override
-  String get provManageMedicines => 'Manage medicines';
 
   @override
   String get provTabTableBookings => 'Table bookings';
@@ -2892,7 +2889,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get placeDescriptionHint =>
-      'Example: Near the pharmacy, building 5, apartment 3';
+      'Example: Next to the supermarket, building 5, apartment 3';
 
   @override
   String get customerPhone => 'Phone number';
@@ -3117,7 +3114,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutDescription =>
-      'Delwaqty is your all-in-one services and delivery platform. We connect you with the best restaurants, pharmacies, and stores in your area for fast and reliable service.';
+      'Delwaqty is your all-in-one services and delivery platform. We connect you with the best restaurants and stores in your area for fast and reliable service.';
 
   @override
   String get supportEmailAddress => 'support@delwaqty.com';
@@ -3299,7 +3296,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tosSection2Body =>
-      'Delwaqty provides an on-demand platform connecting users with local restaurants, pharmacies, stores, and delivery providers for food delivery, order delivery, and delivery services. We act as an intermediary between customers and service providers and do not directly provide delivery services ourselves.';
+      'Delwaqty provides an on-demand platform connecting users with local restaurants, stores, and delivery providers for food delivery, order delivery, and delivery services. We act as an intermediary between customers and service providers and do not directly provide delivery services ourselves.';
 
   @override
   String get tosSection3Title => '3. User Accounts';
@@ -3536,7 +3533,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get typeGrocery => 'Grocery';
 
   @override
-  String get typePharmacy => 'Pharmacy';
 
   @override
   String get typeFlowers => 'Flowers';
@@ -4429,13 +4425,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get preparationTime => 'Preparation Time';
 
   @override
-  String get dosageForm => 'Dosage Form';
 
   @override
-  String get activeIngredient => 'Active Ingredient';
 
   @override
-  String get prescriptionRequired => 'Prescription Required';
 
   @override
   String get warnings => 'Warnings';
@@ -5051,7 +5044,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commissionCategoryRestaurant => 'Restaurants';
 
   @override
-  String get commissionCategoryPharmacy => 'Pharmacies';
 
   @override
   String get commissionCategoryGrocery => 'Groceries';
@@ -7750,7 +7742,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchHintServices => 'Search services or repairs...';
 
   @override
-  String get searchHintDelivery => 'Search pharmacy or fast delivery...';
+  String get searchHintDelivery => 'Search food or fast delivery...';
 
   @override
   String get orderNowFast => 'Instant pickup & delivery anywhere';
@@ -7933,22 +7925,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get posNoProducts => 'No sellable products yet';
 
   @override
-  String get drugImportTitle => 'Drug Catalog';
 
   @override
-  String get drugImportSearchHint => 'Search drugs by name or ingredient...';
 
   @override
-  String get drugImportAction => 'Stock it';
 
   @override
-  String get drugImportSuccess => 'Added to your products';
 
   @override
-  String get drugImportFailed => 'Import failed';
 
   @override
-  String get drugImportInvalidPrice => 'Enter a valid price';
 
   @override
   String get each => 'each';
@@ -8149,10 +8135,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get posScanAdded => 'Added to cart';
 
   @override
-  String get posDrugFoundTitle => 'Found in drug catalog';
 
   @override
-  String get posDrugImportAdd => 'Import & add';
 
   @override
   String get posQuickAddTitle => 'New product for this barcode';

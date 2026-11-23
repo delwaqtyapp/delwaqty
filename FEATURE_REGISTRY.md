@@ -42,7 +42,6 @@
 |--------|-----------|-------------|----------|--------|
 | Restaurants | `lib/features/restaurants/` | Restaurant ordering, menus, delivery | High | 12+ |
 | Grocery | `lib/features/grocery/` | Grocery delivery, bulk ordering | High | 12+ |
-| Pharmacy | `lib/features/pharmacy/` | Medicine delivery, prescriptions | High | 12+ |
 | Electronics | `lib/features/electronics/` | Electronics marketplace | Medium | 14+ |
 | Furniture | `lib/features/furniture/` | Furniture marketplace | Medium | 14+ |
 | Fashion | `lib/features/fashion/` | Fashion marketplace | Medium | 14+ |
@@ -158,7 +157,6 @@ Core (always loaded)
 └── Commerce
     ├── Restaurants (planned)
     ├── Grocery (planned)
-    ├── Pharmacy (planned)
     └── Ride (planned)
         └── Maps (planned)
             └── Location (planned)

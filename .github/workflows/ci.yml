@@ -31,6 +31,9 @@ jobs:
 
       - name: Design token guard
         run: bash tool/design_guard.sh
+
+      - name: Pharmacy purge guard
+        run: bash tool/pharmacy_purge_guard.sh
   test:
     name: Test
     runs-on: ubuntu-latest

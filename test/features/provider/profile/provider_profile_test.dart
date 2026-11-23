@@ -15,7 +15,6 @@ void main() {
       'food': ProviderFamily.restaurant,
       'restaurant': ProviderFamily.restaurant,
       'cafe': ProviderFamily.restaurant,
-      'pharmacy': ProviderFamily.pharmacy,
       'grocery': ProviderFamily.retail,
       'supermarket': ProviderFamily.retail,
       'marketplace': ProviderFamily.retail,
@@ -84,8 +83,8 @@ void main() {
       }
     });
 
-    test('shops, grocery and pharmacy have the cashier with barcode', () {
-      for (final raw in ['grocery', 'electronics', 'bakery', 'pharmacy']) {
+    test('shops have the cashier with barcode', () {
+      for (final raw in ['grocery', 'electronics', 'bakery']) {
         final prof = p(raw);
         expect(prof.hasCashier, isTrue, reason: raw);
         expect(prof.hasBarcode, isTrue, reason: raw);
@@ -93,13 +92,6 @@ void main() {
         expect(prof.hasInventory, isTrue, reason: raw);
         expect(prof.hasServicesView, isFalse, reason: raw);
         expect(prof.hasBookings, isFalse, reason: raw);
-      }
-    });
-
-    test('only pharmacy has the drug catalog', () {
-      expect(p('pharmacy').hasDrugCatalog, isTrue);
-      for (final raw in ['restaurant', 'grocery', 'plumbing', 'teacher']) {
-        expect(p(raw).hasDrugCatalog, isFalse, reason: raw);
       }
     });
 
@@ -115,7 +107,7 @@ void main() {
     test('everyone keeps money, notifications and support', () {
       for (final raw in [
         'restaurant',
-        'pharmacy',
+        'bakery',
         'grocery',
         'plumbing',
         'teacher',
@@ -139,7 +131,7 @@ void main() {
 
   group('bottom tabs per type', () {
     test('shop-like families', () {
-      for (final raw in ['restaurant', 'grocery', 'pharmacy', 'fashion']) {
+      for (final raw in ['restaurant', 'grocery', 'supermarket', 'fashion']) {
         expect(p(raw).tabs, [
           ProviderTabIds.dashboard,
           ProviderTabIds.orders,
@@ -171,7 +163,7 @@ void main() {
     test('every tab id of every profile is a known module id', () {
       for (final raw in [
         'restaurant',
-        'pharmacy',
+        'grocery',
         'plumbing',
         'teacher',
         'zzz',
@@ -203,10 +195,8 @@ void main() {
       expect(plumber.allowsRoute('/provider-financial-center'), isTrue);
     });
 
-    test('shop cannot open services or drug import unless pharmacy', () {
+    test('shop cannot open services', () {
       expect(p('grocery').allowsRoute('/provider-services'), isFalse);
-      expect(p('grocery').allowsRoute('/merchant-dashboard/drugs'), isFalse);
-      expect(p('pharmacy').allowsRoute('/merchant-dashboard/drugs'), isTrue);
       expect(p('grocery').allowsRoute('/provider-cashier'), isTrue);
     });
 
@@ -238,10 +228,6 @@ void main() {
       );
       expect(p('grocery').label(ProviderLabel.tabProducts, L('ar')), 'الأصناف');
       expect(
-        p('pharmacy').label(ProviderLabel.tabProducts, L('en')),
-        'Medicines',
-      );
-      expect(
         p('fashion').label(ProviderLabel.tabProducts, L('en')),
         'Products',
       );
@@ -268,7 +254,7 @@ void main() {
       for (final raw in [
         'restaurant',
         'grocery',
-        'pharmacy',
+        'bakery',
         'plumbing',
         'teacher',
         'doctor',

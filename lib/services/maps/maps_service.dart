@@ -80,7 +80,7 @@ class NearbyPlace {
   /// Geographic location of the place.
   final GeoLocation location;
 
-  /// Category/type of the place (e.g. restaurant, pharmacy).
+  /// Category/type of the place (e.g. restaurant, grocery).
   final String type;
 
   /// Average user rating, if available.

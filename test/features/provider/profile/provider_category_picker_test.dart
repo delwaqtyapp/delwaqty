@@ -27,7 +27,6 @@ void main() {
       expect(providerCategoryLabel(l10n, 'barber'), 'Barber');
       expect(providerCategoryLabel(l10n, 'plumbing'), 'Plumbing');
       expect(providerCategoryLabel(l10n, 'restaurant'), 'Restaurant');
-      expect(providerCategoryLabel(l10n, 'pharmacy'), 'Pharmacy');
       expect(providerCategoryLabel(l10n, 'home_services'), 'Home Services');
     });
 
@@ -91,7 +90,6 @@ void main() {
       for (final c in [
         'restaurant',
         'grocery',
-        'pharmacy',
         'bakery',
         'electronics',
         'fashion',

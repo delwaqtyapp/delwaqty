@@ -40,7 +40,7 @@ Each service is a self-contained module:
 
 | Service | Status | Description |
 |---------|--------|-------------|
-| Commerce Engine | ✅ Built | Merchant-type agnostic marketplace for food, grocery, pharmacy, electronics, furniture, fashion |
+| Commerce Engine | ✅ Built | Merchant-type agnostic marketplace for food, grocery, electronics, furniture, fashion |
 | Auth & Identity | ✅ Built | Login, registration, password recovery, session management |
 | Expenses | ✅ Built | Personal expense tracking with categories |
 | Notifications | ✅ Built | In-app notification center with badge aggregation |
@@ -62,7 +62,7 @@ Each service is a self-contained module:
 ### Primary: Saudi Arabia
 - Arabic-first with full RTL support
 - SAR currency native
-- Saudi merchant types: restaurants (Al Baik, etc.), pharmacies (Nahdi), grocery (Tamimi), electronics (Jarir), furniture (IKEA), fashion
+- Saudi merchant types: restaurants (Al Baik, etc.), grocery (Tamimi), electronics (Jarir), furniture (IKEA), fashion
 - Local payment methods (Mada, STC Pay, Apple Pay)
 - Saudi phone number format validation
 
@@ -77,7 +77,7 @@ Each service is a self-contained module:
 Infrastructure investment always beats feature investment. A well-built module system scales infinitely. A single feature is disposable.
 
 ### 2. Type-Agnostic Commerce
-The commerce engine doesn't know or care if a merchant is a restaurant, pharmacy, or electronics store. MerchantType is a data flag, not a code branch.
+The commerce engine doesn't know or care if a merchant is a restaurant or an electronics store. MerchantType is a data flag, not a code branch.
 
 ### 3. Mock-First Development
 Every repository has a mock implementation. The app is fully functional without a backend. This enables parallel frontend/backend development.

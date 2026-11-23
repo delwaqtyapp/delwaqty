@@ -231,8 +231,6 @@ class _DriverDeliveryDetailPageState
         return l10n.food;
       case 'grocery_delivery':
         return l10n.grocery;
-      case 'pharmacy_delivery':
-        return l10n.pharmacy;
       case 'marketplace_delivery':
         return l10n.shopping;
       case 'courier':

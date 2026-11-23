@@ -94,19 +94,6 @@ void main() {
       expect(find.text('Restaurant'), findsOneWidget);
     });
 
-    testWidgets('displays type label for pharmacy', (tester) async {
-      await tester.pumpWidget(
-        wrapInApp(
-          MerchantCard(
-            merchant: buildMerchant(type: MerchantType.pharmacy),
-            onTap: () {},
-          ),
-        ),
-      );
-
-      expect(find.text('Pharmacy'), findsOneWidget);
-    });
-
     testWidgets('shows Open badge when isOpenNow', (tester) async {
       await tester.pumpWidget(
         wrapInApp(MerchantCard(merchant: buildMerchant(), onTap: () {})),
@@ -410,14 +397,6 @@ void main() {
       );
 
       expect(find.text('Grocery'), findsOneWidget);
-    });
-
-    testWidgets('displays correct label for pharmacy', (tester) async {
-      await tester.pumpWidget(
-        wrapInApp(const MerchantTypeChip(type: MerchantType.pharmacy)),
-      );
-
-      expect(find.text('Pharmacy'), findsOneWidget);
     });
 
     testWidgets('displays correct label for electronics', (tester) async {

@@ -68,7 +68,7 @@ Merchant-type agnostic commerce engine supports unlimited merchant types without
 
 | Strength | Evidence |
 |----------|----------|
-| Type-agnostic commerce | One codebase for restaurants, grocery, pharmacy, etc. |
+| Type-agnostic commerce | One codebase for restaurants, grocery, etc. |
 | Plugin architecture | New modules added without core changes |
 | UUID identification | Globally unique, offline-capable |
 | Soft delete | Data never permanently lost |

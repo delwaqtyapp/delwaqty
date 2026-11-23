@@ -16,8 +16,6 @@ enum MerchantType {
   meat,
   @JsonValue('seafood')
   seafood,
-  @JsonValue('pharmacy')
-  pharmacy,
   @JsonValue('bakery')
   bakery,
   @JsonValue('sweets')

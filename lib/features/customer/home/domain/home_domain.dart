@@ -26,7 +26,7 @@ final discoveryModeProvider = StateProvider<DiscoveryMode>(
   (_) => DiscoveryMode.nearby,
 );
 
-/// A discovery entry: either a marketplace merchant (restaurant, pharmacy,
+/// A discovery entry: either a marketplace merchant (restaurant,
 /// grocery...) or a real booking service provider (doctor, barber, nurse,
 /// teacher...). Both render as the same full-width list card under the
 /// "اكتشف بالقرب منك" section so every actual service in the app shows up.

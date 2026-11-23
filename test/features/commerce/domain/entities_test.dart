@@ -182,7 +182,6 @@ void main() {
       expect(MerchantType.fruits.name, 'fruits');
       expect(MerchantType.meat.name, 'meat');
       expect(MerchantType.seafood.name, 'seafood');
-      expect(MerchantType.pharmacy.name, 'pharmacy');
       expect(MerchantType.bakery.name, 'bakery');
       expect(MerchantType.sweets.name, 'sweets');
       expect(MerchantType.flowers.name, 'flowers');

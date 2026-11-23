@@ -43,6 +43,19 @@ BEGIN
     '423: duplicate retry deducted earnings twice';
   v_r := public.request_withdrawal(d1, 150, 'bank', '423-K1');
   ASSERT v_r->>'reason' = 'idempotency_conflict', '423: key+amount conflict not detected';
+  -- #132: keyed retry with a NULL amount must fail validation, not replay
+  v_r := public.request_withdrawal(d1, NULL, 'bank', '423-K1');
+  ASSERT v_r->>'reason' = 'invalid_amount', '423: NULL-amount keyed retry bypassed validation';
+  -- #132: sub-cent precision rejected (stored column is numeric(10,2))
+  v_r := public.request_withdrawal(d1, 10.123, 'bank', '423-KF');
+  ASSERT v_r->>'reason' = 'invalid_amount', '423: sub-cent amount not rejected';
+  -- #132: nonfinite and zero amounts rejected before anything else
+  v_r := public.request_withdrawal(d1, 'Infinity'::float8, 'bank', '423-KI');
+  ASSERT v_r->>'reason' = 'invalid_amount', '423: Infinity amount not rejected';
+  v_r := public.request_withdrawal(d1, 'NaN'::float8, 'bank', '423-KN');
+  ASSERT v_r->>'reason' = 'invalid_amount', '423: NaN amount not rejected';
+  v_r := public.request_withdrawal(d1, 0, 'bank', '423-KZ');
+  ASSERT v_r->>'reason' = 'invalid_amount', '423: zero amount not rejected';
   v_r := public.request_withdrawal(d1, 100, 'bank', '   ');
   ASSERT v_r->>'reason' = 'invalid_idempotency_key', '423: blank key accepted';
   v_r := public.request_withdrawal(d1, 100, 'bank', repeat('k',129));
@@ -71,7 +84,7 @@ BEGIN
   v_r := public.request_withdrawal(d2, 100000);
   ASSERT v_r->>'reason' = 'insufficient_balance', '423: over-balance not refused';
   v_r := public.request_withdrawal(d2, -5);
-  ASSERT v_r->>'reason' = 'insufficient_balance', '423: negative amount not refused';
+  ASSERT v_r->>'reason' = 'invalid_amount', '423: negative amount not refused';
 
   -- 3-arg compat: old positional call (no method, no key) still works
   v_r := public.request_withdrawal(d2, 50);
@@ -92,6 +105,33 @@ BEGIN
   ASSERT (SELECT p.pronargdefaults FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
           WHERE n.nspname='public' AND p.proname='request_withdrawal') = 2,
     '423: expected method+key defaulted';
+
+  -- #131: ACL proof. No PUBLIC/anon execute; intended roles only.
+  -- PUBLIC is not a real role for has_function_privilege on this build;
+  -- its grant shows up as an empty-grantee aclitem (=X/grantor) instead.
+  ASSERT NOT EXISTS (
+    SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='public' AND p.proname='request_withdrawal'
+      AND p.proacl::text ~ '(^|[{,])=X/'),
+    '423: PUBLIC still has EXECUTE';
+  ASSERT NOT has_function_privilege('anon',
+    'public.request_withdrawal(uuid,double precision,text,text)', 'EXECUTE'),
+    '423: anon still has EXECUTE';
+  ASSERT has_function_privilege('authenticated',
+    'public.request_withdrawal(uuid,double precision,text,text)', 'EXECUTE'),
+    '423: authenticated lost EXECUTE';
+  ASSERT has_function_privilege('service_role',
+    'public.request_withdrawal(uuid,double precision,text,text)', 'EXECUTE'),
+    '423: service_role lost EXECUTE';
+
+  -- #131: real anon-role call is refused by the ACL, not just the matrix
+  PERFORM set_config('role','anon',true);
+  PERFORM set_config('request.jwt.claim.sub','',true);
+  BEGIN
+    PERFORM public.request_withdrawal(d1, 100);
+    ASSERT false, '423: anon call not refused';
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
 
   PERFORM set_config('role','none',true);
 END $$;

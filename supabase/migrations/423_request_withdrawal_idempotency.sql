@@ -32,6 +32,12 @@
 --   SELECT driver_id, count(*) FROM public.withdrawal_requests
 --    WHERE status='pending' GROUP BY driver_id HAVING count(*) > 1;
 -- (Prod 2026-11-23: withdrawal_requests is empty; check passes.)
+--
+-- v2 (code-review #131/#132): explicit REVOKE FROM PUBLIC, anon on the new
+-- signature (the old form leaked PUBLIC execute); amount normalized and
+-- validated once (NULL / nonfinite / nonpositive / sub-cent rejected with
+-- invalid_amount) before the replay check, and the canonical 2dp value
+-- used for the replay comparison, request row, ledger and counter.
 
 BEGIN;
 
@@ -80,6 +86,7 @@ DECLARE
   v_balance numeric;
   v_id uuid;
   v_amount numeric;
+  v_req_amount numeric(10,2);
   v_status text;
 BEGIN
   IF auth.uid() IS NULL THEN
@@ -91,6 +98,21 @@ BEGIN
      AND (btrim(p_idempotency_key) = '' OR length(p_idempotency_key) > 128) THEN
     RETURN jsonb_build_object('success', false, 'reason', 'invalid_idempotency_key');
   END IF;
+
+  -- 423 v2 (#132): normalize and validate the amount ONCE, before the
+  -- idempotent replay below, so a keyed retry with a NULL or malformed
+  -- amount fails validation instead of bypassing the replay check.
+  -- The stored amount column is numeric(10,2); the canonical 2dp value is
+  -- used for the replay comparison, the request row, the ledger entry and
+  -- the balance counter, so a same-key retry always compares equal.
+  IF p_amount IS NULL OR p_amount::text IN ('NaN', 'Infinity', '-Infinity')
+     OR p_amount <= 0 THEN
+    RETURN jsonb_build_object('success', false, 'reason', 'invalid_amount');
+  END IF;
+  IF round(p_amount::numeric, 2) <> p_amount THEN
+    RETURN jsonb_build_object('success', false, 'reason', 'invalid_amount');
+  END IF;
+  v_req_amount := round(p_amount::numeric, 2);
 
   -- Lock the drivers row FOR UPDATE first, held for the whole
   -- check + insert (unchanged from the pre-423 body).
@@ -111,7 +133,7 @@ BEGIN
       FROM public.withdrawal_requests r
      WHERE r.driver_id = p_driver_id AND r.idempotency_key = p_idempotency_key;
     IF FOUND THEN
-      IF v_amount <> p_amount THEN
+      IF v_amount <> v_req_amount THEN
         RETURN jsonb_build_object('success', false, 'reason', 'idempotency_conflict',
                                   'withdrawal_id', v_id, 'amount', v_amount, 'status', v_status);
       END IF;
@@ -121,7 +143,7 @@ BEGIN
   END IF;
 
   SELECT COALESCE(SUM(amount), 0) INTO v_balance FROM public.driver_earnings WHERE driver_id = p_driver_id;
-  IF p_amount IS NULL OR p_amount <= 0 OR p_amount > v_balance THEN
+  IF v_req_amount > v_balance THEN
     RETURN jsonb_build_object('success', false, 'reason', 'insufficient_balance');
   END IF;
 
@@ -135,16 +157,20 @@ BEGIN
   END IF;
 
   INSERT INTO public.withdrawal_requests (driver_id, amount, status, method, idempotency_key)
-  VALUES (p_driver_id, p_amount, 'pending', p_method, p_idempotency_key)
+  VALUES (p_driver_id, v_req_amount, 'pending', p_method, p_idempotency_key)
   RETURNING id INTO v_id;
   INSERT INTO public.driver_earnings (driver_id, type, amount, description)
-  VALUES (p_driver_id, 'withdrawal', -p_amount, 'Withdrawal request');
-  UPDATE public.drivers SET earnings_balance = v_balance - p_amount WHERE id = p_driver_id;
+  VALUES (p_driver_id, 'withdrawal', -v_req_amount, 'Withdrawal request');
+  UPDATE public.drivers SET earnings_balance = v_balance - v_req_amount WHERE id = p_driver_id;
   RETURN jsonb_build_object('success', true, 'withdrawal_id', v_id);
 END;
 $function$;
 
--- Recreate the pre-423 ACL exactly: postgres, authenticated, service_role.
+-- 423 v2 (#131): strip the default PUBLIC execute the DDL grants, then
+-- recreate only the intended grants. (The pre-423 three-arg form also
+-- leaked PUBLIC execute; this fixes that gap rather than recreating it.)
+REVOKE ALL ON FUNCTION public.request_withdrawal(uuid, double precision, text, text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.request_withdrawal(uuid, double precision, text, text) FROM anon;
 GRANT EXECUTE ON FUNCTION public.request_withdrawal(uuid, double precision, text, text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.request_withdrawal(uuid, double precision, text, text) TO postgres;
 GRANT EXECUTE ON FUNCTION public.request_withdrawal(uuid, double precision, text, text) TO service_role;

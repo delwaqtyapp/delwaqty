@@ -6,9 +6,11 @@
 -- sets a value the platform default of 150 EGP/hour applies. Hourly
 -- inherits independently. The fixed min/max pair is ONE override: both
 -- provider values set = provider pair, otherwise the whole pair follows
--- the category. One resolver, service_provider_effective_pricing(), is
--- used by every price read (admin/provider RPCs and the booking
--- normalizer) so the displayed price is the booking truth.
+-- the category. One resolver, service_provider_effective_pricing(), backs
+-- every price display and the booking estimate: the admin list RPC, the
+-- provider self-view RPC, the customer-facing
+-- service_providers_with_effective_pricing view, and the booking
+-- normalizer all read the same resolved values.
 --
 --   1. public.service_category_pricing - per-category default rates
 --      (platform-wide; owner / country-level admins only).
@@ -165,24 +167,32 @@ CREATE OR REPLACE FUNCTION public.service_providers_pricing_guard()
  SET search_path TO 'public', 'pg_temp'
 AS $function$
 BEGIN
-  IF NEW.hourly_rate IS DISTINCT FROM OLD.hourly_rate
+  IF TG_OP = 'INSERT'
+     OR NEW.hourly_rate IS DISTINCT FROM OLD.hourly_rate
      OR NEW.fixed_price_min IS DISTINCT FROM OLD.fixed_price_min
      OR NEW.fixed_price_max IS DISTINCT FROM OLD.fixed_price_max THEN
     PERFORM public._assert_valid_provider_pricing(
       NEW.hourly_rate, NEW.fixed_price_min, NEW.fixed_price_max);
-    PERFORM public.write_audit(
-      'PROVIDER_PRICING_CHANGED', 'service_providers', NEW.id::text,
-      jsonb_build_object(
-        'old', jsonb_build_object(
-          'hourly_rate', OLD.hourly_rate,
-          'fixed_price_min', OLD.fixed_price_min,
-          'fixed_price_max', OLD.fixed_price_max),
-        'new', jsonb_build_object(
-          'hourly_rate', NEW.hourly_rate,
-          'fixed_price_min', NEW.fixed_price_min,
-          'fixed_price_max', NEW.fixed_price_max),
-        'note', NULLIF(current_setting('app.pricing_note', true), '')
-      ));
+    -- Audit only when a pricing value is actually present/changed: a plain
+    -- provisioning insert (all NULL) carries no pricing decision.
+    IF TG_OP = 'UPDATE'
+       OR NEW.hourly_rate IS NOT NULL
+       OR NEW.fixed_price_min IS NOT NULL
+       OR NEW.fixed_price_max IS NOT NULL THEN
+      PERFORM public.write_audit(
+        'PROVIDER_PRICING_CHANGED', 'service_providers', NEW.id::text,
+        jsonb_build_object(
+          'old', CASE WHEN TG_OP = 'INSERT' THEN NULL ELSE jsonb_build_object(
+            'hourly_rate', OLD.hourly_rate,
+            'fixed_price_min', OLD.fixed_price_min,
+            'fixed_price_max', OLD.fixed_price_max) END,
+          'new', jsonb_build_object(
+            'hourly_rate', NEW.hourly_rate,
+            'fixed_price_min', NEW.fixed_price_min,
+            'fixed_price_max', NEW.fixed_price_max),
+          'note', NULLIF(current_setting('app.pricing_note', true), '')
+        ));
+    END IF;
   END IF;
   RETURN NEW;
 END;
@@ -190,7 +200,7 @@ $function$;
 
 DROP TRIGGER IF EXISTS trg_service_provider_pricing_guard ON public.service_providers;
 CREATE TRIGGER trg_service_provider_pricing_guard
-  BEFORE UPDATE ON public.service_providers
+  BEFORE INSERT OR UPDATE ON public.service_providers
   FOR EACH ROW EXECUTE FUNCTION public.service_providers_pricing_guard();
 
 -- ---------- 2. set provider overrides ----------
@@ -324,28 +334,26 @@ BEGIN
     RAISE EXCEPTION 'invalid_category';
   END IF;
 
-  -- Lock the row so a concurrent edit logs the true old value. The one
-  -- uncovered race is two first-time inserts of the same category; the
-  -- loser then logs an empty old row.
+  -- Make sure the row exists WITHOUT touching values, then lock it, so a
+  -- concurrent first-time write serializes here and the second writer logs
+  -- the first writer's values as the true old ones.
+  INSERT INTO public.service_category_pricing (category_type)
+  VALUES (v_cat)
+  ON CONFLICT (category_type) DO NOTHING;
+
   SELECT * INTO v_old
     FROM public.service_category_pricing
    WHERE category_type = v_cat
    FOR UPDATE;
 
-  INSERT INTO public.service_category_pricing AS cp (
-    category_type, hourly_rate, fixed_price_min, fixed_price_max,
-    currency, updated_by, updated_at
-  )
-  VALUES (
-    v_cat, p_hourly_rate, p_fixed_price_min, p_fixed_price_max,
-    'EGP', auth.uid(), now()
-  )
-  ON CONFLICT (category_type) DO UPDATE
-    SET hourly_rate = EXCLUDED.hourly_rate,
-        fixed_price_min = EXCLUDED.fixed_price_min,
-        fixed_price_max = EXCLUDED.fixed_price_max,
-        updated_by = EXCLUDED.updated_by,
-        updated_at = EXCLUDED.updated_at;
+  UPDATE public.service_category_pricing
+     SET hourly_rate = p_hourly_rate,
+         fixed_price_min = p_fixed_price_min,
+         fixed_price_max = p_fixed_price_max,
+         currency = 'EGP',
+         updated_by = auth.uid(),
+         updated_at = now()
+   WHERE category_type = v_cat;
 
   PERFORM public.write_audit(
     'CATEGORY_PRICING_CHANGED', 'service_category_pricing', v_cat,
@@ -444,7 +452,7 @@ BEGIN
       LEFT JOIN public.service_categories sc
         ON sc.type = v.category_type
       CROSS JOIN LATERAL (SELECT public.service_provider_effective_pricing(v.id) AS eff) e
-     ORDER BY lower(v.name)
+     ORDER BY lower(v.name), v.id
      LIMIT GREATEST(1, LEAST(COALESCE(p_limit, 50), 200))
     OFFSET GREATEST(0, COALESCE(p_offset, 0))
   )
@@ -696,6 +704,37 @@ END;
 $function$;
 
 -- ---------- privileges ----------
+-- ---------- 9. customer-facing read: every price shown is the resolved one ----------
+-- The customer app reads providers through this view, so an inherited NULL
+-- hourly shows the live category rate and a half fixed pair shows exactly
+-- what the booking normalizer will use. security_invoker keeps the base
+-- table's RLS (anon/authenticated see only available providers).
+CREATE OR REPLACE VIEW public.service_providers_with_effective_pricing
+WITH (security_invoker = true) AS
+SELECT sp.*,
+       (eff.p->>'hourly_rate')::numeric AS effective_hourly_rate,
+       (eff.p->>'fixed_price_min')::numeric AS effective_fixed_price_min,
+       (eff.p->>'fixed_price_max')::numeric AS effective_fixed_price_max,
+       eff.p->>'hourly_source' AS hourly_source,
+       eff.p->>'fixed_source' AS fixed_source,
+       eff.p->>'currency' AS pricing_currency
+  FROM public.service_providers sp
+  CROSS JOIN LATERAL (
+    SELECT public.service_provider_effective_pricing(sp.id) AS p
+  ) eff;
+
+GRANT SELECT ON public.service_providers_with_effective_pricing TO anon;
+GRANT SELECT ON public.service_providers_with_effective_pricing TO authenticated;
+
+-- Trigger functions are fired by the engine as the table owner; no role
+-- may call them directly.
+REVOKE ALL ON FUNCTION public.service_providers_pricing_guard() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.service_providers_pricing_guard() FROM anon;
+REVOKE ALL ON FUNCTION public.service_providers_pricing_guard() FROM authenticated;
+REVOKE ALL ON FUNCTION public.service_providers_guard_sensitive_fields() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.service_providers_guard_sensitive_fields() FROM anon;
+REVOKE ALL ON FUNCTION public.service_providers_guard_sensitive_fields() FROM authenticated;
+
 REVOKE ALL ON FUNCTION public._assert_valid_provider_pricing(numeric, numeric, numeric) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public._assert_valid_provider_pricing(numeric, numeric, numeric) FROM anon;
 REVOKE ALL ON FUNCTION public._assert_valid_provider_pricing(numeric, numeric, numeric) FROM authenticated;
@@ -703,6 +742,8 @@ REVOKE ALL ON FUNCTION public._assert_valid_provider_pricing(numeric, numeric, n
 REVOKE ALL ON FUNCTION public.service_provider_effective_pricing(uuid) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.service_provider_effective_pricing(uuid) FROM anon;
 GRANT EXECUTE ON FUNCTION public.service_provider_effective_pricing(uuid) TO authenticated;
+-- anon too: the customer-facing pricing view runs with the caller's rights
+GRANT EXECUTE ON FUNCTION public.service_provider_effective_pricing(uuid) TO anon;
 
 REVOKE ALL ON FUNCTION public.admin_set_provider_pricing(uuid, numeric, numeric, numeric, text[], text) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.admin_set_provider_pricing(uuid, numeric, numeric, numeric, text[], text) FROM anon;

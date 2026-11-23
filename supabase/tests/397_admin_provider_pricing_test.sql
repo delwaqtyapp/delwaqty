@@ -263,8 +263,11 @@ begin
   assert exists(select 1 from public.activity_logs
     where action='PROVIDER_PRICING_CHANGED' and resource_id=v_pa::text and user_id=v_radmin::text),
     'provider pricing audit row written';
+  -- the fixture INSERT of A also audited (old = null); the RPC write adds
+  -- exactly one row carrying a real old value
   assert (select count(*) from public.activity_logs
-    where action='PROVIDER_PRICING_CHANGED' and resource_id=v_pa::text) = 1,
+    where action='PROVIDER_PRICING_CHANGED' and resource_id=v_pa::text
+      and details->>'old' is not null) = 1,
     'exactly one audit row for the RPC write (trigger + RPC share one entry)';
 end $test$;
 
@@ -712,6 +715,139 @@ begin
     'new provider resolves to the live category default';
 end $test$;
 
+-- ---------- S13. pagination beyond 200 rows: the 201st is reachable ----------
+insert into public.service_providers(id, user_id, name, category_type, is_verified, is_available, latitude, longitude)
+select gen_random_uuid(), (select provider_a_user from _t397),
+       'zz-test-397p-bulk-' || lpad(g::text, 3, '0'), 'plumbing', true, true,
+       30.0444, 31.2357
+  from generate_series(1, 205) g;
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', (select country_admin_id::text from _t397), true);
+do $test$
+declare
+  v_res jsonb;
+  v_ids text[] := '{}';
+  v_page text[];
+  v_off int;
+  v_expected uuid;
+begin
+  -- five fixed-size pages of 50 must cover all 205 rows exactly once
+  for v_off in select generate_series(0, 200, 50) loop
+    v_res := public.admin_list_provider_pricing('zz-test-397p-bulk', null, 50, v_off);
+    assert (v_res->>'total')::int = 205, 'bulk total=205, got ' || (v_res->>'total');
+    assert jsonb_array_length(v_res->'items') = least(50, 205 - v_off),
+      'page at offset ' || v_off || ' size wrong';
+    select array_agg(x->>'provider_id') into v_page
+      from jsonb_array_elements(v_res->'items') x;
+    v_ids := v_ids || v_page;
+  end loop;
+  v_ids := (select array_agg(distinct unn) from (select unnest(v_ids) unn) u);
+  assert array_length(v_ids, 1) = 205,
+    'pages cover 205 distinct rows (201st reachable), got ' || coalesce(array_length(v_ids, 1), 0);
+
+  -- stable order: page 5's first row is the 201st of lower(name), id
+  select id into v_expected
+    from public.service_providers
+   where name like 'zz-test-397p-bulk%'
+   order by lower(name), id
+   offset 200 limit 1;
+  v_res := public.admin_list_provider_pricing('zz-test-397p-bulk', null, 50, 200);
+  assert (v_res->'items'->0->>'provider_id')::uuid = v_expected,
+    'offset 200 first row = 201st by lower(name), id';
+end $test$;
+reset role;
+
+-- ---------- S14. customer-facing view shows the resolved price ----------
+update public.service_providers set is_available = false
+ where id = (select provider_b from _t397);
+
+set local role anon;
+do $test$
+declare
+  v_pa uuid:=(select provider_a from _t397);
+  v_pb uuid:=(select provider_b from _t397);
+  v_pc uuid:=(select provider_c from _t397);
+  v_pf uuid:=(select provider_f from _t397);
+  v_rec record;
+begin
+  -- provider override shows as-is
+  select effective_hourly_rate, hourly_source into v_rec
+    from public.service_providers_with_effective_pricing where id = v_pa;
+  assert v_rec.effective_hourly_rate = 260 and v_rec.hourly_source = 'provider',
+    'view: provider override shown';
+
+  -- inherited NULL hourly shows the live category rate
+  select effective_hourly_rate, hourly_source into v_rec
+    from public.service_providers_with_effective_pricing where id = v_pc;
+  assert v_rec.effective_hourly_rate = 240 and v_rec.hourly_source = 'category',
+    'view: inherited NULL hourly shows category rate';
+
+  -- half fixed pair shows what the booking normalizer uses (category pair)
+  select effective_fixed_price_min, effective_fixed_price_max, fixed_source into v_rec
+    from public.service_providers_with_effective_pricing where id = v_pf;
+  assert v_rec.effective_fixed_price_min = 450 and v_rec.effective_fixed_price_max = 900
+     and v_rec.fixed_source = 'category',
+    'view: half pair resolves to the booking-truth category pair';
+
+  -- base-table RLS still applies through the view
+  assert not exists(select 1 from public.service_providers_with_effective_pricing where id = v_pb),
+    'view: unavailable provider hidden from anon';
+end $test$;
+reset role;
+
+-- ---------- S15. guard covers INSERT: validation + audit on create ----------
+set local role authenticated;
+select set_config('request.jwt.claim.sub', (select region_admin_id::text from _t397), true);
+do $test$
+declare
+  v_err text;
+  v_id uuid := gen_random_uuid();
+  v_user uuid := (select provider_e_user from _t397);
+begin
+  begin
+    insert into public.service_providers(id, user_id, name, category_type, is_verified, is_available, hourly_rate, latitude, longitude)
+    values (v_id, v_user, 'zz-test-397-insert-bad', 'plumbing', true, true, -5, 30.0444, 31.2357);
+    raise exception 'expected invalid_hourly_rate';
+  exception when others then
+    v_err := sqlerrm;
+    assert v_err like '%invalid_hourly_rate%', 'insert validated, got: ' || v_err;
+  end;
+
+  insert into public.service_providers(id, user_id, name, category_type, is_verified, is_available, hourly_rate, latitude, longitude)
+  values (v_id, v_user, 'zz-test-397-insert-ok', 'plumbing', true, true, 300, 30.0444, 31.2357);
+end $test$;
+reset role;
+do $test$
+declare v_radmin uuid:=(select region_admin_id from _t397);
+begin
+  assert exists(select 1 from public.activity_logs
+    where action='PROVIDER_PRICING_CHANGED' and user_id=v_radmin::text
+      and details->>'old' is null
+      and (details->'new'->>'hourly_rate')::numeric = 300),
+    'insert with pricing audited (old = null)';
+end $test$;
+
+-- ---------- S16. category first-time insert logs a true (empty) old row ----------
+delete from public.service_category_pricing where category_type = 'painting';
+set local role authenticated;
+select set_config('request.jwt.claim.sub', (select country_admin_id::text from _t397), true);
+do $test$
+declare v_res jsonb;
+begin
+  v_res := public.admin_set_category_pricing('painting', 180, null, null, 'first paint default');
+  assert (v_res->>'success')::boolean, 'first-time category insert ok';
+end $test$;
+reset role;
+do $test$
+begin
+  assert exists(select 1 from public.activity_logs
+    where action='CATEGORY_PRICING_CHANGED' and resource_id='painting'
+      and details->'old'->>'hourly_rate' is null
+      and (details->'new'->>'hourly_rate')::numeric = 180),
+    'first-time category insert audited with empty old row';
+end $test$;
+
 select set_config('request.jwt.claim.sub', '', true);
-select 'PASS397: set-role matrix (owner/country/region/in+out/null/inactive/unassigned/provider/customer/anon), validation, partial+clear semantics, inheritance + fallback 150, booking floor parity, direct-write refusals + admin audit, audit sequence, self view, pagination, provisioning' result;
+select 'PASS397: set-role matrix (owner/country/region/in+out/null/inactive/unassigned/provider/customer/anon), validation, partial+clear semantics, inheritance + fallback 150, booking floor parity, direct-write refusals + admin audit, audit sequence, self view, 205-row pagination reaching the 201st, customer view resolver parity + RLS, insert guard, category first-insert audit, provisioning' result;
 rollback;

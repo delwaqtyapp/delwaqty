@@ -28,7 +28,11 @@ class ServiceBookingRepositoryImpl implements ServiceBookingRepository {
     ServiceCategoryType? categoryType,
     String? city,
   }) async {
-    var query = _client.from('service_providers').select();
+    // 397: read through the resolver-backed view so an inherited NULL
+    // hourly shows the live category rate, matching booking truth.
+    var query = _client
+        .from('service_providers_with_effective_pricing')
+        .select();
     if (categoryType != null) {
       query = query.eq('category_type', categoryType.name);
     }
@@ -48,7 +52,7 @@ class ServiceBookingRepositoryImpl implements ServiceBookingRepository {
   @override
   Future<ServiceProvider?> getProvider(String id) async {
     final response = await _client
-        .from('service_providers')
+        .from('service_providers_with_effective_pricing')
         .select()
         .eq('id', id)
         .maybeSingle();

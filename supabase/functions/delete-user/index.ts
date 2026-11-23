@@ -91,7 +91,7 @@ Deno.serve(async (req: Request) => {
         global: { headers: { Authorization: `Bearer ${token}` } },
       });
       const { data: activeAdmin, error: adminError } = await scopedClient.rpc("is_admin");
-      const { data: regionId, error: regionError } = await admin.rpc("_member_region_id", { p_user_id: targetId });
+      const { data: regionId, error: regionError } = await admin.rpc("_member_region_id", { p_member_id: targetId });
       const { data: scopeOk, error: scopeError } = await scopedClient.rpc("_admin_member_scope", { p_user_id: targetId });
       const { data: permissionOk, error: permissionError } = await scopedClient.rpc("has_permission", {
         p_permission: "MEMBER_MODERATE", p_region_id: regionId,

@@ -26,12 +26,14 @@ class ProviderApp extends ConsumerStatefulWidget {
   ConsumerState<ProviderApp> createState() => _ProviderAppState();
 }
 
-class _ProviderAppState extends ConsumerState<ProviderApp> {
+class _ProviderAppState extends ConsumerState<ProviderApp>
+    with WidgetsBindingObserver {
   AuthStateNotifier? _authListenerOwner;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
 
@@ -65,6 +67,11 @@ class _ProviderAppState extends ConsumerState<ProviderApp> {
       _startDeepLinkListener();
       unawaited(_checkOtaUpdate());
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) unawaited(_checkOtaUpdate());
   }
 
   Future<void> _checkOtaUpdate() async {
@@ -104,6 +111,7 @@ class _ProviderAppState extends ConsumerState<ProviderApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _authListenerOwner?.stopAuthListener();
     super.dispose();
   }

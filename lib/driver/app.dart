@@ -26,7 +26,8 @@ class DriverApp extends ConsumerStatefulWidget {
   ConsumerState<DriverApp> createState() => _DriverAppState();
 }
 
-class _DriverAppState extends ConsumerState<DriverApp> {
+class _DriverAppState extends ConsumerState<DriverApp>
+    with WidgetsBindingObserver {
   StreamSubscription<DeepLinkRoute>? _deepLinkSub;
 
   AuthStateNotifier? _authListenerOwner;
@@ -34,6 +35,7 @@ class _DriverAppState extends ConsumerState<DriverApp> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
 
@@ -67,6 +69,11 @@ class _DriverAppState extends ConsumerState<DriverApp> {
       _startDeepLinkListener();
       unawaited(_checkOtaUpdate());
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) unawaited(_checkOtaUpdate());
   }
 
   Future<void> _checkOtaUpdate() async {
@@ -107,6 +114,7 @@ class _DriverAppState extends ConsumerState<DriverApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _deepLinkSub?.cancel();
     _authListenerOwner?.stopAuthListener();
     super.dispose();

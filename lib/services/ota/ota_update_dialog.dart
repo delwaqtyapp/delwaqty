@@ -10,6 +10,8 @@ import 'package:delwaqty/gen/assets.gen.dart';
 import 'package:delwaqty/provider/app_router.dart';
 import 'package:delwaqty/services/ota/ota_update_manager.dart';
 
+final Set<AppFlavor> _openUpdateFlavors = {};
+
 /// Shows a single update dialog when a newer build is available for the
 /// running flavor. Returns true if a dialog (update / failure) was shown.
 ///
@@ -20,6 +22,7 @@ Future<bool> showOtaUpdateIfAvailable({
   required AppFlavor flavor,
   bool force = false,
 }) async {
+  if (_openUpdateFlavors.contains(flavor)) return false;
   final result = await checkForOtaUpdate(flavor);
   if (!result.needsUpdate && !force) return false;
 
@@ -31,12 +34,17 @@ Future<bool> showOtaUpdateIfAvailable({
   if (navCtx != null && !navCtx.mounted) return false;
 
   final dialogContext = navCtx ?? context!;
-  await showDialog<void>(
-    context: dialogContext,
-    barrierDismissible: false,
-    builder: (_) => OtaUpdateDialog(flavor: flavor, result: result),
-  );
-  return true;
+  if (!_openUpdateFlavors.add(flavor)) return false;
+  try {
+    await showDialog<void>(
+      context: dialogContext,
+      barrierDismissible: false,
+      builder: (_) => OtaUpdateDialog(flavor: flavor, result: result),
+    );
+    return true;
+  } finally {
+    _openUpdateFlavors.remove(flavor);
+  }
 }
 
 /// Shows the update dialog for an ALREADY-verified [result] (the caller has
@@ -246,6 +254,7 @@ class _OtaUpdateDialogState extends State<OtaUpdateDialog>
           if (_step == OtaDialogStep.idle ||
               _step == OtaDialogStep.downloadFailed ||
               _step == OtaDialogStep.installFailed ||
+              _step == OtaDialogStep.awaitingPermission ||
               _step == OtaDialogStep.checksumFailed)
             TextButton(
               onPressed: () => Navigator.of(context).pop(),

@@ -27,12 +27,13 @@ class App extends ConsumerStatefulWidget {
   ConsumerState<App> createState() => _AppState();
 }
 
-class _AppState extends ConsumerState<App> {
+class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
   AuthStateNotifier? _authListenerOwner;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
 
@@ -72,6 +73,11 @@ class _AppState extends ConsumerState<App> {
     });
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) unawaited(_checkOtaUpdate());
+  }
+
   Future<void> _checkOtaUpdate() async {
     if (!mounted) return;
     await Future<void>.delayed(const Duration(seconds: 4));
@@ -108,6 +114,7 @@ class _AppState extends ConsumerState<App> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _authListenerOwner?.stopAuthListener();
     super.dispose();
   }

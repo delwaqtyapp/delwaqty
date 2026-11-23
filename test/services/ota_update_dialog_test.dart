@@ -68,6 +68,21 @@ Future<void> _pump(WidgetTester tester, _Fake fake, {Locale? locale}) async {
 }
 
 void main() {
+  testWidgets('permission wait offers Later without hiding Install', (
+    tester,
+  ) async {
+    final fake = _Fake();
+    await _pump(tester, fake);
+    await tester.tap(find.text('Update now'));
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('Install'), findsOneWidget);
+    expect(find.text('Later'), findsOneWidget);
+    await tester.tap(find.text('Later'));
+    await tester.pumpAndSettle();
+    expect(find.byType(OtaUpdateDialog), findsNothing);
+  });
+
   testWidgets('permanent installer failure keeps a safe Later escape', (
     tester,
   ) async {

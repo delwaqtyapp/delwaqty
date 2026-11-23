@@ -5,6 +5,14 @@ import 'package:flutter/material.dart';
 /// Contains semantic colors, surface variants, merchant type colors,
 /// order status colors, and core brand colors used throughout the app.
 abstract final class AppColors {
+  static const Color roleSceneAccent1 = Color(0xFFEC8A8A);
+  static const Color roleSceneAccent2 = Color(0xFFEB9568);
+  static const Color roleSceneAccent3 = Color(0xFF6ABF72);
+  static const Color roleSceneAccent4 = Color(0xFFB3CD65);
+  static const Color roleSceneAccent5 = Color(0xFFE9BB7E);
+  static const Color roleSceneAccent6 = Color(0xFFC9955B);
+  static const Color roleSceneAccent7 = Color(0xFFE4BA84);
+  static const Color roleSceneAccent8 = Color(0xFFFFD979);
   static const Color roleSceneInk = Color(0xFF25243C);
   static const Color roleSceneSkin = Color(0xFFF5C7A5);
   static const Color roleTileBorder = Color(0xFFE8E8F0);

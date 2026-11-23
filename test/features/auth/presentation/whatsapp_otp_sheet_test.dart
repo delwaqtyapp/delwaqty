@@ -39,6 +39,25 @@ void main() {
     client.dispose();
   });
 
+  testWidgets('Arabic 320 large text keeps OTP together', (tester) async {
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    final client = _fakeClient(status: 'pending');
+    await _openSheet(tester, client, locale: const Locale('ar'));
+    expect(tester.takeException(), isNull);
+    expect(find.text('1 2 3 4 5 6'), findsOneWidget);
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('goldens/whatsapp_otp_ar_320_large.png'),
+    );
+    await tester.pumpWidget(const SizedBox.shrink());
+    client.dispose();
+  });
+
   testWidgets(
     'no manual code grants verification; only webhook status closes sheet',
     (tester) async {

@@ -285,6 +285,29 @@ void main() {
       );
     });
 
+    testWidgets('plumber 320 large text prices wrap', (tester) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await pumpServices(tester, 'plumbing', const [
+        ProviderServiceInfo(
+          categoryType: 'plumbing',
+          name: 'سباكة',
+          description: 'تأسيس وصيانة',
+          hourlyRate: 150,
+          fixedPriceMin: 200,
+          fixedPriceMax: 450,
+          tags: ['تسريب', 'غسالات'],
+        ),
+      ]);
+      tester.view.physicalSize = const Size(320, 640);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await expectLater(
+        find.byKey(const ValueKey('capture')),
+        matchesGoldenFile('goldens/services_plumbing_ar_320_large.png'),
+      );
+    });
+
     testWidgets('teacher wording and unset price', (tester) async {
       await pumpServices(tester, 'teacher', const [
         ProviderServiceInfo(categoryType: 'teacher', name: 'مدرس رياضيات'),

@@ -7973,4 +7973,52 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get appInvitationsFooter =>
       'Downloading an app does not grant a role. Access follows your current account approval. Android installation permission may be required.';
+
+  @override
+  String get otaTitle => 'A new update is available';
+
+  @override
+  String get otaIntro => 'New improvements are ready to install.';
+
+  @override
+  String get otaIntroHint =>
+      'The update will be downloaded and installed without reinstalling the app.';
+
+  @override
+  String get otaDownloading => 'Downloading…';
+
+  @override
+  String get otaReadyTitle => 'The update is ready to install';
+
+  @override
+  String get otaReadyBody =>
+      'The update has been downloaded. Tap Install to finish.';
+
+  @override
+  String get otaPermissionBody =>
+      'Allow Delwaqty to install updates in the settings screen, then come back. The installation will continue by itself and the download is kept.';
+
+  @override
+  String get otaDownloadFailed =>
+      'Could not download the update. Check your connection and try again.';
+
+  @override
+  String get otaInstallFailed =>
+      'Could not start the installation. Tap Install to try again.';
+
+  @override
+  String get otaChecksumFailed =>
+      'The downloaded update could not be verified. Tap Update now to download it again.';
+
+  @override
+  String get otaLater => 'Later';
+
+  @override
+  String get otaUpdateNow => 'Update now';
+
+  @override
+  String get otaInstall => 'Install';
+
+  @override
+  String get otaRetry => 'Try again';
 }

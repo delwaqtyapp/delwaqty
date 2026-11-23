@@ -15109,6 +15109,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Downloading an app does not grant a role. Access follows your current account approval. Android installation permission may be required.'**
   String get appInvitationsFooter;
+
+  /// No description provided for @otaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A new update is available'**
+  String get otaTitle;
+
+  /// No description provided for @otaIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'New improvements are ready to install.'**
+  String get otaIntro;
+
+  /// No description provided for @otaIntroHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The update will be downloaded and installed without reinstalling the app.'**
+  String get otaIntroHint;
+
+  /// No description provided for @otaDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading…'**
+  String get otaDownloading;
+
+  /// No description provided for @otaReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The update is ready to install'**
+  String get otaReadyTitle;
+
+  /// No description provided for @otaReadyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The update has been downloaded. Tap Install to finish.'**
+  String get otaReadyBody;
+
+  /// No description provided for @otaPermissionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Delwaqty to install updates in the settings screen, then come back. The installation will continue by itself and the download is kept.'**
+  String get otaPermissionBody;
+
+  /// No description provided for @otaDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not download the update. Check your connection and try again.'**
+  String get otaDownloadFailed;
+
+  /// No description provided for @otaInstallFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start the installation. Tap Install to try again.'**
+  String get otaInstallFailed;
+
+  /// No description provided for @otaChecksumFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The downloaded update could not be verified. Tap Update now to download it again.'**
+  String get otaChecksumFailed;
+
+  /// No description provided for @otaLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get otaLater;
+
+  /// No description provided for @otaUpdateNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Update now'**
+  String get otaUpdateNow;
+
+  /// No description provided for @otaInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Install'**
+  String get otaInstall;
+
+  /// No description provided for @otaRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get otaRetry;
 }
 
 class _AppLocalizationsDelegate

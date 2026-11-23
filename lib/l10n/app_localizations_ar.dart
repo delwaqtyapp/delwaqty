@@ -7905,4 +7905,51 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get appInvitationsFooter =>
       'تحميل التطبيق لا يمنح صلاحيات جديدة. الدخول مرتبط باعتماد حسابك الحالي. قد تحتاج إلى السماح بالتثبيت على أندرويد.';
+
+  @override
+  String get otaTitle => 'يتوفر تحديث جديد';
+
+  @override
+  String get otaIntro => 'تحسينات جديدة جاهزة للتطبيق.';
+
+  @override
+  String get otaIntroHint =>
+      'سيتم تنزيل التحديث وتثبيته مباشرة دون إعادة تثبيت التطبيق.';
+
+  @override
+  String get otaDownloading => 'جاري تحميل التحديث…';
+
+  @override
+  String get otaReadyTitle => 'التحديث جاهز للتثبيت';
+
+  @override
+  String get otaReadyBody => 'تم تحميل التحديث. اضغط تثبيت لإكمال التحديث.';
+
+  @override
+  String get otaPermissionBody =>
+      'اسمح لدلوقتي بتثبيت التحديثات من شاشة الإعدادات ثم ارجع للتطبيق. سيكمل التثبيت تلقائيًا والملف المحمّل محفوظ.';
+
+  @override
+  String get otaDownloadFailed =>
+      'تعذر تحميل التحديث. تأكد من الاتصال بالإنترنت ثم أعد المحاولة.';
+
+  @override
+  String get otaInstallFailed =>
+      'تعذر بدء التثبيت. اضغط تثبيت للمحاولة مرة أخرى.';
+
+  @override
+  String get otaChecksumFailed =>
+      'تعذر التحقق من التحديث المحمّل. اضغط تحديث الآن لتحميله مرة أخرى.';
+
+  @override
+  String get otaLater => 'لاحقًا';
+
+  @override
+  String get otaUpdateNow => 'تحديث الآن';
+
+  @override
+  String get otaInstall => 'تثبيت';
+
+  @override
+  String get otaRetry => 'حاول مرة أخرى';
 }

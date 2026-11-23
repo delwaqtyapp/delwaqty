@@ -11,6 +11,8 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/constants/storage_keys.dart';
+import 'package:delwaqty/features/_shared/feature_tour/feature_tour_gate.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 
 export 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart'
@@ -27,6 +29,20 @@ class MerchantProductsPage extends ConsumerStatefulWidget {
 class _MerchantProductsPageState extends ConsumerState<MerchantProductsPage> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      showFeatureTourOnce(
+        context,
+        ref,
+        storageKey: StorageKeys.merchantProductGuideSeen,
+        stepsBuilder: buildMerchantProductGuideSteps,
+      );
+    });
+  }
 
   @override
   void dispose() {
@@ -50,6 +66,14 @@ class _MerchantProductsPageState extends ConsumerState<MerchantProductsPage> {
               ),
         ),
         actions: [
+          IconButton(
+            tooltip: l10n.merchantGuideOpenTooltip,
+            icon: const Icon(Icons.help_outline_rounded),
+            onPressed: () => showFeatureTour(
+              context,
+              stepsBuilder: buildMerchantProductGuideSteps,
+            ),
+          ),
           if (ref.watch(providerProfileProvider).hasInventory ||
               ref.watch(providerProfileProvider).isNeutral)
             IconButton(

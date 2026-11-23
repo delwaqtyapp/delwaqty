@@ -16051,6 +16051,69 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Admin management'**
   String get adminManagement;
+
+  /// No description provided for @customerTourStep1Title.
+  String get customerTourStep1Title;
+
+  /// No description provided for @customerTourStep1Body.
+  String get customerTourStep1Body;
+
+  /// No description provided for @customerTourStep2Title.
+  String get customerTourStep2Title;
+
+  /// No description provided for @customerTourStep2Body.
+  String get customerTourStep2Body;
+
+  /// No description provided for @customerTourStep3Title.
+  String get customerTourStep3Title;
+
+  /// No description provided for @customerTourStep3Body.
+  String get customerTourStep3Body;
+
+  /// No description provided for @customerTourStep4Title.
+  String get customerTourStep4Title;
+
+  /// No description provided for @customerTourStep4Body.
+  String get customerTourStep4Body;
+
+  /// No description provided for @customerTourStep5Title.
+  String get customerTourStep5Title;
+
+  /// No description provided for @customerTourStep5Body.
+  String get customerTourStep5Body;
+
+  /// No description provided for @merchantGuideStep1Title.
+  String get merchantGuideStep1Title;
+
+  /// No description provided for @merchantGuideStep1Body.
+  String get merchantGuideStep1Body;
+
+  /// No description provided for @merchantGuideStep2Title.
+  String get merchantGuideStep2Title;
+
+  /// No description provided for @merchantGuideStep2Body.
+  String get merchantGuideStep2Body;
+
+  /// No description provided for @merchantGuideStep3Title.
+  String get merchantGuideStep3Title;
+
+  /// No description provided for @merchantGuideStep3Body.
+  String get merchantGuideStep3Body;
+
+  /// No description provided for @merchantGuideStep4Title.
+  String get merchantGuideStep4Title;
+
+  /// No description provided for @merchantGuideStep4Body.
+  String get merchantGuideStep4Body;
+
+  /// No description provided for @merchantGuideStep5Title.
+  String get merchantGuideStep5Title;
+
+  /// No description provided for @merchantGuideStep5Body.
+  String get merchantGuideStep5Body;
+
+  /// No description provided for @merchantGuideOpenTooltip.
+  String get merchantGuideOpenTooltip;
 }
 
 class _AppLocalizationsDelegate
@@ -16085,4 +16148,5 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
     'that was used.',
   );
+
 }

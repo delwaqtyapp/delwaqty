@@ -7334,6 +7334,12 @@ abstract class AppLocalizations {
   /// **'Resolution note'**
   String get suggestionResolutionNote;
 
+  /// No description provided for @suggestionsProfileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your ideas to improve the platform'**
+  String get suggestionsProfileSubtitle;
+
   /// No description provided for @adminSuggestionsTitle.
   ///
   /// In en, this message translates to:

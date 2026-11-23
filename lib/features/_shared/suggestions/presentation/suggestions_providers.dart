@@ -26,9 +26,20 @@ final mySuggestionsProvider = FutureProvider<List<Suggestion>>((ref) async {
   return repo.getMySuggestions(user.id);
 });
 
-/// Admin triage list. Fetches up to 500 (the RPC's clamp) newest first; the
-/// admin page applies its status filter client-side, same as complaints.
-final adminSuggestionsProvider = FutureProvider<List<Suggestion>>((ref) async {
-  final repo = ref.read(suggestionsRepositoryProvider);
-  return repo.adminListSuggestions(limit: 500);
-});
+/// Admin triage page: one server-side page (status filter applied by the
+/// RPC BEFORE the limit, so nothing is lost beyond the page size). The
+/// admin page paginates with offset via load-more (#146).
+typedef AdminSuggestionsQuery = ({String? status, int offset});
+
+final adminSuggestionsPageProvider =
+    FutureProvider.family<List<Suggestion>, AdminSuggestionsQuery>((
+      ref,
+      q,
+    ) async {
+      final repo = ref.read(suggestionsRepositoryProvider);
+      return repo.adminListSuggestions(
+        status: q.status,
+        limit: 100,
+        offset: q.offset,
+      );
+    });

@@ -107,41 +107,53 @@ class _MySuggestionsPageState extends ConsumerState<MySuggestionsPage> {
       useSafeArea: true,
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(suggestion.subject, style: Theme.of(ctx).textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Text(
-              suggestion.description,
-              style: Theme.of(ctx).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 16),
-            Row(
+        // Scrollable + height-bounded: descriptions run to 2000 chars, so a
+        // plain Column would overflow on long Arabic text.
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(ctx).size.height * 0.8,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.circle, size: 8),
-                const SizedBox(width: 8),
-                Text(suggestionStatusLabel(l10n, suggestion.status)),
+                Text(
+                  suggestion.subject,
+                  style: Theme.of(ctx).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  suggestion.description,
+                  style: Theme.of(ctx).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    const Icon(Icons.circle, size: 8),
+                    const SizedBox(width: 8),
+                    Text(suggestionStatusLabel(l10n, suggestion.status)),
+                  ],
+                ),
+                if (suggestion.resolutionNote != null &&
+                    suggestion.resolutionNote!.trim().isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    suggestion.resolutionNote!,
+                    style: Theme.of(ctx).textTheme.bodyMedium,
+                  ),
+                ],
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: Text(l10n.ok),
+                  ),
+                ),
               ],
             ),
-            if (suggestion.resolutionNote != null &&
-                suggestion.resolutionNote!.trim().isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(
-                suggestion.resolutionNote!,
-                style: Theme.of(ctx).textTheme.bodyMedium,
-              ),
-            ],
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: Text(l10n.ok),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

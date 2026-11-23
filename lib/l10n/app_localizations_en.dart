@@ -3752,6 +3752,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get suggestions => 'Suggestions';
 
   @override
+  String get suggestionsProfileSubtitle =>
+      'Share your ideas to improve the platform';
+
+  @override
   String get newSuggestion => 'New Suggestion';
 
   @override

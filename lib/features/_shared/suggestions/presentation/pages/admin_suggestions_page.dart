@@ -29,11 +29,63 @@ class _AdminSuggestionsPageState extends ConsumerState<AdminSuggestionsPage> {
     'implemented',
   ];
 
+  // Server-side pagination (#146): the status filter is passed to the RPC
+  // so it applies before the LIMIT; pages are appended with load-more.
+  static const _pageSize = 100;
+  final List<Suggestion> _items = [];
+  int _offset = 0;
+  bool _hasMore = false;
+  bool _loading = true;
+  bool _loadingMore = false;
+  Object? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _load(reset: true);
+  }
+
+  Future<void> _load({required bool reset}) async {
+    if (reset) {
+      setState(() {
+        _items.clear();
+        _offset = 0;
+        _hasMore = false;
+        _loading = true;
+        _error = null;
+      });
+    } else {
+      setState(() => _loadingMore = true);
+    }
+    try {
+      final rows = await ref.read(
+        adminSuggestionsPageProvider((
+          status: _statusFilter == 'all' ? null : _statusFilter,
+          offset: reset ? 0 : _offset,
+        )).future,
+      );
+      if (!mounted) return;
+      setState(() {
+        _items.addAll(rows);
+        _offset = (reset ? 0 : _offset) + rows.length;
+        _hasMore = rows.length == _pageSize;
+        _loading = false;
+        _loadingMore = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e;
+        _loading = false;
+        _loadingMore = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
-    final suggestionsAsync = ref.watch(adminSuggestionsProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.adminSuggestionsTitle)),
@@ -70,54 +122,63 @@ class _AdminSuggestionsPageState extends ConsumerState<AdminSuggestionsPage> {
                           ),
                         )
                         .toList(),
-                    onChanged: (v) => setState(() => _statusFilter = v!),
+                    onChanged: (v) {
+                      setState(() => _statusFilter = v!);
+                      _load(reset: true);
+                    },
                   ),
                 ),
                 IconButton(
                   tooltip: l10n.refresh,
                   icon: const Icon(Icons.refresh_rounded),
-                  onPressed: () => ref.invalidate(adminSuggestionsProvider),
+                  onPressed: () => _load(reset: true),
                 ),
               ],
             ),
           ),
           Expanded(
-            child: suggestionsAsync.when(
-              loading: () => const Center(child: AppLoaderCircular()),
-              error: (e, _) => PremiumEmptyState(
-                icon: Icons.error_outline,
-                title: l10n.error,
-                message: appErrorText(context, e),
-                actionLabel: l10n.retry,
-                onAction: () => ref.invalidate(adminSuggestionsProvider),
-              ),
-              data: (suggestions) {
-                final filtered = _statusFilter == 'all'
-                    ? suggestions
-                    : suggestions
-                          .where((s) => s.status == _statusFilter)
-                          .toList();
-                if (filtered.isEmpty) {
-                  return PremiumEmptyState(
+            child: _loading
+                ? const Center(child: AppLoaderCircular())
+                : _error != null
+                ? PremiumEmptyState(
+                    icon: Icons.error_outline,
+                    title: l10n.error,
+                    message: appErrorText(context, _error!),
+                    actionLabel: l10n.retry,
+                    onAction: () => _load(reset: true),
+                  )
+                : _items.isEmpty
+                ? PremiumEmptyState(
                     icon: Icons.lightbulb_outline_rounded,
                     title: l10n.noSuggestions,
                     message: l10n.noSuggestionsDescription,
-                  );
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.all(12),
-                  itemCount: filtered.length,
-                  itemBuilder: (context, index) {
-                    return _SuggestionTile(
-                      suggestion: filtered[index],
-                      cs: cs,
-                      l10n: l10n,
-                      onTap: () => _showSuggestionDetail(filtered[index]),
-                    );
-                  },
-                );
-              },
-            ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(12),
+                    itemCount: _items.length + (_hasMore ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index >= _items.length) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Center(
+                            child: _loadingMore
+                                ? const AppLoaderCircular()
+                                : TextButton.icon(
+                                    onPressed: () => _load(reset: false),
+                                    icon: const Icon(Icons.expand_more_rounded),
+                                    label: Text(l10n.loadMore),
+                                  ),
+                          ),
+                        );
+                      }
+                      return _SuggestionTile(
+                        suggestion: _items[index],
+                        cs: cs,
+                        l10n: l10n,
+                        onTap: () => _showSuggestionDetail(_items[index]),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -133,7 +194,7 @@ class _AdminSuggestionsPageState extends ConsumerState<AdminSuggestionsPage> {
       ),
       builder: (ctx) => _SuggestionTriageSheet(
         suggestion: suggestion,
-        onStatusChanged: () => ref.invalidate(adminSuggestionsProvider),
+        onStatusChanged: () => _load(reset: true),
       ),
     );
   }

@@ -3722,6 +3722,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get suggestions => 'الاقتراحات';
 
   @override
+  String get suggestionsProfileSubtitle => 'شاركنا أفكارك لتطوير المنصة';
+
+  @override
   String get newSuggestion => 'اقتراح جديد';
 
   @override

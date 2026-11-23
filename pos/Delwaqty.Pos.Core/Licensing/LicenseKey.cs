@@ -111,7 +111,7 @@ namespace Delwaqty.Pos.Core.Licensing
         {
             if (string.IsNullOrEmpty(expectedSealHex)) return false;
             var actual = Seal(statePayload, deviceKey);
-            return string.Equals(actual, expectedSealHex.ToLowerInvariant(), StringComparison.Ordinal);
+            return FixedTimeEqualsHex(actual, expectedSealHex.ToLowerInvariant());
         }
 
         public static string StatePayload(LicenseInfo info, string deviceId, DateTimeOffset validatedAtUtc)
@@ -141,7 +141,20 @@ namespace Delwaqty.Pos.Core.Licensing
         {
             if (string.IsNullOrEmpty(expectedSealHex)) return false;
             var actual = SealState(stateJson, deviceId, deviceKey);
-            return string.Equals(actual, expectedSealHex.ToLowerInvariant(), StringComparison.Ordinal);
+            return FixedTimeEqualsHex(actual, expectedSealHex.ToLowerInvariant());
+        }
+
+        /// <summary>
+        /// Constant-time hex comparison (security review LOW-2): no early
+        /// exit on the first differing character, so the compare does not
+        /// leak how much of a forged seal was right.
+        /// </summary>
+        private static bool FixedTimeEqualsHex(string a, string b)
+        {
+            if (a == null || b == null || a.Length != b.Length) return false;
+            var diff = 0;
+            for (var i = 0; i < a.Length; i++) diff |= a[i] ^ b[i];
+            return diff == 0;
         }
 
         private static string ToHex(byte[] bytes)

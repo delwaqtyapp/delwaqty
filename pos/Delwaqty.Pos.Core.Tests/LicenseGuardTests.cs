@@ -57,6 +57,27 @@ namespace Delwaqty.Pos.Core.Tests
         {
             Assert.Equal(PosMode.Locked, LicenseGuard.Evaluate(null, DateTimeOffset.UtcNow));
         }
+
+        [Fact]
+        public void Unknown_Or_Revoked_Status_Is_Locked_Never_Full()
+        {
+            // #119 follow-up: fail closed on anything outside the allowlist —
+            // an unknown status must not sell even with no expiry set.
+            var now = DateTimeOffset.UtcNow;
+            Assert.Equal(PosMode.Locked, LicenseGuard.Evaluate(State(status: "revoked"), now));
+            Assert.Equal(PosMode.Locked, LicenseGuard.Evaluate(State(status: "whatever"), now));
+            Assert.Equal(PosMode.Locked, LicenseGuard.Evaluate(State(status: ""), now));
+            Assert.Equal(PosMode.Locked, LicenseGuard.Evaluate(State(status: null), now));
+            Assert.Equal(PosMode.Locked,
+                LicenseGuard.Evaluate(State(status: "whatever", lifetime: true), now));
+            // 'expired' is clock-evaluated: grace window still applies.
+            Assert.Equal(PosMode.Grace, LicenseGuard.Evaluate(State(status: "expired", expiresInDays: -1), now));
+            Assert.Equal(PosMode.Locked, LicenseGuard.Evaluate(State(status: "expired", expiresInDays: -9), now));
+            // ...but an 'expired' status with no expiry date cannot establish
+            // a grace window: locked.
+            Assert.Equal(PosMode.Locked,
+                LicenseGuard.Evaluate(State(status: "expired", lifetime: true), now));
+        }
     }
 
     public class LicenseRefresherTests : IDisposable
@@ -144,6 +165,29 @@ namespace Delwaqty.Pos.Core.Tests
             Assert.Equal(PosMode.Locked, res.Mode);
             Assert.Equal("suspended", state.Status);
             // And the verdict persisted: a fresh restore stays locked.
+            var restored = new ActivationService(_dir, "Pharmacy").Restore();
+            Assert.Equal(PosMode.Locked, LicenseGuard.Evaluate(restored, DateTimeOffset.UtcNow));
+        }
+
+        [Fact]
+        public void Authoritative_Denial_Unknown_Key_Locks_And_Persists()
+        {
+            // #119 follow-up: UNKNOWN_KEY / BOUND_TO_OTHER_DEVICE are
+            // authoritative denials, not transient errors — the app locks and
+            // the verdict survives a restart.
+            var stub = new StubHandler();
+            var svc = NewActivatedService(stub);
+            var state = svc.Restore();
+            state.ValidatedAtUtc = DateTimeOffset.UtcNow.AddDays(-2);
+
+            stub.Ok("{\"ok\":false,\"reason\":\"UNKNOWN_KEY\"}");
+            var refresher = new LicenseRefresher(svc,
+                new SyncClient("https://x.supabase.co", "anon", new HttpClient(stub)));
+            var res = refresher.RefreshAsync(state, DateTimeOffset.UtcNow).Result;
+
+            Assert.True(res.Contacted);
+            Assert.Equal(PosMode.Locked, res.Mode);
+            Assert.Equal("revoked", state.Status);
             var restored = new ActivationService(_dir, "Pharmacy").Restore();
             Assert.Equal(PosMode.Locked, LicenseGuard.Evaluate(restored, DateTimeOffset.UtcNow));
         }

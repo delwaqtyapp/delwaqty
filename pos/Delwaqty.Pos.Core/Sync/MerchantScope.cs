@@ -99,7 +99,13 @@ namespace Delwaqty.Pos.Core.Sync
                             if (db.Outbox.PendingCount() > 0) return scope;
                     }
                 }
-                catch { /* unreadable scope: not a reason to block activation */ }
+                catch
+                {
+                    // FAIL CLOSED (review #116 follow-up): a scope we cannot
+                    // read may hold unsynced ops; activating another merchant
+                    // over it could strand them. Block and let support look.
+                    return scope;
+                }
             }
             return null;
         }

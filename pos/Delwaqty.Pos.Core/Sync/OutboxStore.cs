@@ -127,6 +127,22 @@ namespace Delwaqty.Pos.Core.Sync
             }
         }
 
+        /// <summary>
+        /// Put a prematurely-marked op back on the pending queue WITHOUT an
+        /// attempt bump (review #117b: a duplicate shift_open whose result
+        /// carried no server id stays queued until the server can resolve it
+        /// by client_op_id — it is waiting, not failing).
+        /// </summary>
+        public void MarkUnsynced(string opId)
+        {
+            using (var cmd = Cmd())
+            {
+                cmd.CommandText = "UPDATE outbox SET synced = 0 WHERE op_id = $id;";
+                cmd.Parameters.AddWithValue("$id", opId);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
         public void BumpAttempts(string opId)
         {
             using (var cmd = Cmd())

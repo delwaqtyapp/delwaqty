@@ -25,6 +25,12 @@ namespace Delwaqty.Pos.Core.Licensing
         public string MerchantAddress;
         public string DeviceId;
         public DateTimeOffset ValidatedAtUtc;
+        /// <summary>
+        /// The app flavor this state was sealed under (pharmacy/retail).
+        /// Sealed with the rest of the state (review #116 follow-up): a seal
+        /// written by another flavor never restores here.
+        /// </summary>
+        public string Flavor;
 
         public bool IsPharmacy
         {
@@ -43,8 +49,9 @@ namespace Delwaqty.Pos.Core.Licensing
     ///   refresh token is DPAPI-sealed (SealedCredentialStore v2); legacy
     ///   plaintext-key / XOR files migrate on first read.
     /// - #115: the seal covers the FULL serialized state, bound to the device
-    ///   identity (LocalLicenseSeal.SealState); v1 seals (partial payload)
-    ///   are verified once and upgraded.
+    ///   identity (LocalLicenseSeal.SealState); v1 seals (partial payload,
+    ///   unsigned StateJson) are never restored — they force one online
+    ///   re-activation so every stored field is server-verified.
     /// - #116: all per-merchant files live in a merchant+flavor scope dir
     ///   (MerchantScope); activating a different merchant is refused while a
     ///   previous merchant still has unsynced outbox ops.
@@ -131,6 +138,7 @@ namespace Delwaqty.Pos.Core.Licensing
             }
             var parsed = ParseDeviceLink(linkJson, licenseKey, deviceId);
             if (!parsed.Ok) return parsed;
+            parsed.State.Flavor = _flavor; // bound into the sealed state (#116)
 
             // #116: never let merchant B inherit merchant A's pending queue.
             var newScope = ScopeDirFor(parsed.State.MerchantId);
@@ -144,17 +152,20 @@ namespace Delwaqty.Pos.Core.Licensing
                     Error = blocker,
                 };
             }
-            // Upgrade from the pre-#116 flat layout when the legacy root seal
-            // belongs to this same merchant (different merchant: leave the old
-            // files untouched — they are that merchant's archive).
-            var legacyState = TryRestoreLegacy(out _);
-            if (legacyState != null && legacyState.MerchantId == parsed.State.MerchantId)
+            // Upgrade from the pre-#116 flat layout when the legacy root seal's
+            // HMAC-VERIFIED payload names this same merchant (different
+            // merchant: leave the old files untouched — they are that
+            // merchant's archive). Only the verified payload is trusted; the
+            // unsigned v1 StateJson is never read (review #115 follow-up).
+            var legacyMerchant = TryReadLegacyMerchantId();
+            if (legacyMerchant != null && legacyMerchant == parsed.State.MerchantId)
             {
                 MerchantScope.MigrateLegacyRootData(_rootDir, newScope);
             }
             _scopeDir = newScope;
             Directory.CreateDirectory(_scopeDir);
             Persist(parsed.State, session);
+            WriteActiveScopePointer(_scopeDir);
             return parsed;
         }
 
@@ -246,19 +257,51 @@ namespace Delwaqty.Pos.Core.Licensing
         /// <summary>
         /// Restore a previously activated state. Returns null when there is no
         /// seal, the seal does not verify, or the state belongs to another
-        /// device. Offline grace evaluation is the caller's job (LicenseGuard).
+        /// device or flavor. Offline grace evaluation is the caller's job
+        /// (LicenseGuard).
+        ///
+        /// Scope selection (review #116 follow-up): the active scope is the
+        /// one named by the explicit active-scope pointer written at
+        /// activation; archived scopes (previous merchants, other flavors)
+        /// are NEVER auto-selected as the logged-in identity. The pointer is
+        /// verified against the seal's canonical path (scope dir must equal
+        /// ScopeDirFor(state.MerchantId)) and the current flavor (the sealed
+        /// state carries its flavor).
+        ///
+        /// Legacy v1 seals (partial HMAC over a payload, unsigned StateJson)
+        /// are NOT restored or re-sealed: their unsigned fields (Pro, ExpiresAt,
+        /// MerchantId) were forgeable (review #115 follow-up), so a v1 install
+        /// must re-activate ONLINE once — the fresh verified state is then
+        /// sealed as v2. Only the v1 HMAC-verified payload's merchant id is
+        /// read, and only to migrate that merchant's legacy data files on
+        /// successful re-activation.
         /// </summary>
         public ActivationState Restore()
         {
-            // Current layout: exactly one scope should hold a seal; if several
-            // do (merchant switch with fully-synced data), take the most
-            // recently validated one.
+            var pointer = ReadActiveScopePointer();
+            if (pointer != null)
+            {
+                // An EMPTY pointer is the explicit signed-out marker
+                // (Deactivate): archived seals are never auto-selected.
+                if (pointer.Length == 0) return null;
+                // Explicit active scope: restore exactly this one, never scan.
+                var state = TryRestoreSealed(Path.Combine(pointer, "license.seal"));
+                if (state != null && IsCanonicalScope(pointer, state))
+                {
+                    _scopeDir = pointer;
+                    return state;
+                }
+                return null; // pointer present but seal gone/invalid: reactivate
+            }
+            // Pre-pointer installs: consider only current-flavor scopes whose
+            // seal verifies AND whose path is canonical for the sealed state.
             ActivationState best = null;
             string bestScope = null;
             foreach (var scope in MerchantScope.ExistingScopes(_rootDir))
             {
                 var state = TryRestoreSealed(Path.Combine(scope, "license.seal"));
-                if (state != null && (best == null || state.ValidatedAtUtc > best.ValidatedAtUtc))
+                if (state != null && IsCanonicalScope(scope, state) &&
+                    (best == null || state.ValidatedAtUtc > best.ValidatedAtUtc))
                 {
                     best = state;
                     bestScope = scope;
@@ -267,23 +310,47 @@ namespace Delwaqty.Pos.Core.Licensing
             if (best != null)
             {
                 _scopeDir = bestScope;
+                WriteActiveScopePointer(bestScope);
                 return best;
             }
-            // Upgrade path for the pre-#116 flat layout.
-            var legacy = TryRestoreLegacy(out var migratedOk);
-            if (legacy != null && migratedOk)
+            // A legacy v1 seal is deliberately NOT restored here: it requires
+            // a fresh online activation (see class remarks).
+            return null;
+        }
+
+        /// <summary>
+        /// The scope dir must be exactly ScopeDirFor(state.MerchantId) for the
+        /// CURRENT flavor, and the sealed state must carry that same flavor.
+        /// </summary>
+        private bool IsCanonicalScope(string scope, ActivationState state)
+        {
+            if (state.MerchantId == null) return false;
+            if (!string.Equals(state.Flavor ?? "", _flavor, StringComparison.OrdinalIgnoreCase))
+                return false;
+            return string.Equals(Path.GetFullPath(scope),
+                Path.GetFullPath(ScopeDirFor(state.MerchantId)), StringComparison.OrdinalIgnoreCase);
+        }
+
+        private string ActiveScopePointerPath { get { return Path.Combine(_rootDir, "active.scope"); } }
+
+        private void WriteActiveScopePointer(string scopeDir)
+        {
+            try { File.WriteAllText(ActiveScopePointerPath, Path.GetFullPath(scopeDir)); }
+            catch { /* pointer loss only forces one re-activation */ }
+        }
+
+        /// <summary>
+        /// null = no pointer file (pre-pointer install, scan fallback allowed);
+        /// "" = explicit signed-out marker (never scan); otherwise the scope path.
+        /// </summary>
+        private string ReadActiveScopePointer()
+        {
+            try
             {
-                var scope = ScopeDirFor(legacy.MerchantId);
-                MerchantScope.MigrateLegacyRootData(_rootDir, scope);
-                _scopeDir = scope;
-                WriteSeal(legacy); // reseal as v2 inside the scope dir
-                // Re-save the credentials as v2 under the scope dir.
-                string rt, email;
-                var legacyCred = Path.Combine(scope, "session.cred");
-                if (SealedCredentialStore.TryLoadLegacy(legacyCred, _deviceKey, out rt, out email))
-                    SealedCredentialStore.Save(legacyCred, rt, email, CredProtector);
+                if (!File.Exists(ActiveScopePointerPath)) return null;
+                return (File.ReadAllText(ActiveScopePointerPath) ?? "").Trim();
             }
-            return legacy;
+            catch { return null; }
         }
 
         private ActivationState TryRestoreSealed(string path)
@@ -310,21 +377,25 @@ namespace Delwaqty.Pos.Core.Licensing
         }
 
         /// <summary>
-        /// Read the legacy v1 seal at the data root (partial HMAC payload).
-        /// migratedOk is false when the seal parses but fails verification.
+        /// Read ONLY the merchant id from a legacy v1 seal at the data root,
+        /// and only from its HMAC-verified payload. The unsigned v1 StateJson
+        /// is never deserialized or trusted (review #115 follow-up): its
+        /// Pro/ExpiresAt/MerchantId fields were forgeable. A v1 install must
+        /// re-activate online; this id exists only so a SAME-merchant
+        /// re-activation can migrate the legacy data files.
+        /// Payload layout: id|merchantId|plan|expiry|deviceId|validatedAt.
         /// </summary>
-        private ActivationState TryRestoreLegacy(out bool migratedOk)
+        private string TryReadLegacyMerchantId()
         {
-            migratedOk = false;
             var path = Path.Combine(_rootDir, "license.seal");
             if (!File.Exists(path)) return null;
             try
             {
                 var file = JsonSerializer.Deserialize<SealFile>(File.ReadAllText(path));
-                if (file == null || file.StateJson == null || file.Payload == null) return null;
+                if (file == null || file.Payload == null || file.Seal == null) return null;
                 if (!LocalLicenseSeal.Verify(file.Payload, file.Seal, _deviceKey)) return null;
-                migratedOk = true;
-                return JsonSerializer.Deserialize<ActivationState>(file.StateJson, FieldJson);
+                var f = file.Payload.Split('|');
+                return f.Length >= 2 && f[1].Length > 0 ? f[1] : null;
             }
             catch { return null; }
         }
@@ -347,11 +418,22 @@ namespace Delwaqty.Pos.Core.Licensing
             SealedCredentialStore.Save(CredentialPath, refreshToken, email, CredProtector);
         }
 
-        /// <summary>Remove local activation (move to a new PC / sign out). Local sales data stays.</summary>
+        /// <summary>
+        /// Remove local activation (move to a new PC / sign out). Clears ALL
+        /// active authorization: the active-scope pointer, the active scope's
+        /// seal and its session credential (review #116 follow-up — deleting
+        /// only the seal let an archived merchant's seal auto-restore at the
+        /// next startup). Archived scopes' data files stay on disk, but no
+        /// archive is ever selected as the logged-in identity.
+        /// </summary>
         public void Deactivate()
         {
+            // Empty pointer = signed out: the scan fallback must stay off so
+            // no archived seal can become the identity at the next startup.
+            File.WriteAllText(ActiveScopePointerPath, "");
             if (File.Exists(SealPath)) File.Delete(SealPath);
             SealedCredentialStore.Clear(CredentialPath);
+            _scopeDir = null;
         }
 
         private static string Str(JsonElement el, string name)

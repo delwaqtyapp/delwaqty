@@ -83,6 +83,32 @@ lookup resolves inside the same call. Until this lands, such sales fail
 visibly (FK violation reason) and stay queued — data-safe, but the feature
 is dark. Please prioritize.
 
+## 2b. shift_open duplicates must return the existing shift id (review #117b)
+
+**Problem.** Today a `shift_open` result carries `shift_id`, but on an
+ON CONFLICT duplicate it is NULL. The crash window is real: server commits
+the open, client dies before saving its local->server map, and on retry the
+duplicate answer gives no id — the client cannot recover the mapping.
+
+**Client behavior now:** the op stays queued (never attempt-bumped) and
+dependent sales/closes block. The client deliberately does NOT adopt "the
+currently open shift" from a pull: an old shift's ops mapped onto whatever
+shift is open now corrupts the books.
+
+**Ask.** In the `shift_open` arm of `cashier_sync_push`, return the EXISTING
+row's id on conflict, resolved by the same key the dedupe uses:
+
+```sql
+-- sketch, NOT a migration
+-- on the ON CONFLICT path:
+SELECT s.id INTO v_shift_id FROM public.pos_shifts s
+ WHERE s.merchant_id = p_merchant_id AND s.client_op_id = v_op_id;
+-- then always include 'shift_id': v_shift_id in the op result
+```
+
+Until this lands, the crash window leaves the shift's ops queued (data-safe,
+needs support). Please prioritize with #2.
+
 ## 3. Staff identity for the cashier (security review structural follow-up)
 
 **Problem.** Cashier PCs sign in with the merchant OWNER login. The owner
@@ -117,7 +143,10 @@ server gates must land together; doing it halfway would weaken audit data.
 ## Also documented in this pass (no server change)
 
 - The device-bound license is per license KEY: a full data-dir copy to a
-  second PC fails to restore (DPAPI machine binding + seal device check),
-  but DPAPI is machine-bound, not license-bound — any process on the same
-  PC can unprotect. Support resets the device binding when a PC is
-  replaced. (Noted in license-activation-e2e.md.)
+  second PC fails to restore (DPAPI CurrentUser binding + seal device
+  check). Accepted threat boundary: the supported model is ONE dedicated
+  Windows account per shop PC; DPAPI is user-bound, so any process running
+  as that same Windows user can unprotect the blob — the data-dir ACL
+  (current user + SYSTEM + Administrators only) keeps other local users
+  out. Support resets the device binding when a PC is replaced. (Noted in
+  license-activation-e2e.md.)

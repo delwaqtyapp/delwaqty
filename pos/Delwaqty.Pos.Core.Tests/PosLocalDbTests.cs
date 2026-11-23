@@ -126,6 +126,59 @@ namespace Delwaqty.Pos.Core.Tests
         }
 
         [Fact]
+        public void CommitSale_Blocks_Atomicallly_On_Tracked_Shortfall()
+        {
+            // #120 follow-up: tracked stock that cannot cover the line
+            // (including all-expired batches) aborts the WHOLE sale — no
+            // outbox op, no journal row, no partial batch movement.
+            using (var db = new PosLocalDb(DbPath))
+            {
+                db.Batches.AddBatch("item-1", "اوجمنتين", 3, DateTime.Today.AddDays(30), "B1");
+                db.Batches.AddBatch("item-1", "اوجمنتين", 5, DateTime.Today.AddDays(-2), "B0"); // expired
+                var sale = MakeSale("item-1", 4); // sellable is only 3
+                var op = OutboxPayloads.Sale(sale);
+
+                var ex = Assert.Throws<InvalidOperationException>(() =>
+                    db.CommitSale(op, sale, "shift-1", dispenseBatches: true));
+                Assert.StartsWith("INSUFFICIENT_TRACKED_STOCK", ex.Message);
+                Assert.Equal(0, db.Outbox.PendingCount());
+                Assert.Empty(db.Sales.Recent(5));
+                Assert.Equal(8, db.Batches.TrackedQty("item-1")); // untouched
+                Assert.Empty(db.Batches.AllocationsFor(op.OpId));
+            }
+        }
+
+        [Fact]
+        public void CommitSale_Untracked_Quick_Line_Sells_Without_Dispensing()
+        {
+            // The explicit untracked policy: an item with NO batches ever
+            // recorded sells freely and records no allocation rows.
+            using (var db = new PosLocalDb(DbPath))
+            {
+                var sale = MakeSale("never-tracked", 2);
+                var op = OutboxPayloads.Sale(sale);
+                db.CommitSale(op, sale, "shift-1", dispenseBatches: true);
+                Assert.Equal(1, db.Outbox.PendingCount());
+                Assert.Single(db.Sales.Recent(5));
+                Assert.Empty(db.Batches.AllocationsFor(op.OpId));
+            }
+        }
+
+        [Fact]
+        public void Corrupt_Legacy_Db_Sets_Repair_State_And_Keeps_The_File()
+        {
+            // #120 migration follow-up: an unreadable legacy file must surface
+            // a repair state instead of silently running on an empty pos.db.
+            File.WriteAllText(Path.Combine(_dir, "outbox.db"), "definitely not sqlite");
+            using (var db = new PosLocalDb(DbPath))
+            {
+                Assert.NotNull(db.RepairState);
+                Assert.Contains("outbox.db", db.RepairState);
+            }
+            Assert.True(File.Exists(Path.Combine(_dir, "outbox.db"))); // kept for support
+        }
+
+        [Fact]
         public void Legacy_Separate_Dbs_Are_Imported_Once()
         {
             // Pre-pos.db layout: three separate files.
@@ -141,9 +194,14 @@ namespace Delwaqty.Pos.Core.Tests
 
             using (var db = new PosLocalDb(DbPath))
             {
+                Assert.Null(db.RepairState);
                 Assert.Equal(1, db.Outbox.PendingCount());
                 Assert.Single(db.Sales.Recent(5));
                 Assert.Equal(7, db.Batches.TrackedQty("item-1"));
+                // The row-count assertion ran: one row per legacy table.
+                Assert.Equal(1, db.ImportedCounts["outbox"]);
+                Assert.Equal(1, db.ImportedCounts["local_sales"]);
+                Assert.Equal(1, db.ImportedCounts["batches"]);
             }
             // Legacy files moved aside; a second open imports nothing again.
             Assert.True(File.Exists(Path.Combine(_dir, "outbox.db.migrated")));

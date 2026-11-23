@@ -12,10 +12,10 @@ namespace Delwaqty.Pos.Core.Licensing
         /// <summary>Expired but inside the grace window: everything still works.</summary>
         Grace,
         /// <summary>
-        /// Suspended, or expired past the offline cutoff: selling and stock
-        /// mutations stop; local data is preserved and the outbox keeps
-        /// syncing (review #119: a clear offline cutoff that preserves
-        /// unsynced data).
+        /// Suspended, revoked, unknown, or expired past the offline cutoff:
+        /// selling and stock mutations stop; local data is preserved and the
+        /// outbox keeps syncing (review #119: a clear offline cutoff that
+        /// preserves unsynced data).
         /// </summary>
         Locked,
     }
@@ -23,17 +23,37 @@ namespace Delwaqty.Pos.Core.Licensing
     /// <summary>
     /// Offline license mode decision, mirroring the server rules
     /// (cashier_license_validate / cashier_device_link: grace_days default 3).
+    ///
+    /// Fail-closed policy (review #119 follow-up): the status string is an
+    /// explicit allowlist. Only "active"/"trial" sell freely; "expired" is
+    /// evaluated against the clock (grace window); everything else —
+    /// suspended, revoked, unknown, missing — locks. A lifetime license
+    /// (no expires_at) is only honoured for an allowlisted active status:
+    /// an unknown status with no expiry is Locked, never Full.
     /// </summary>
     public static class LicenseGuard
     {
         public const int DefaultGraceDays = 3;
 
+        /// <summary>Statuses that may sell (subject to the expiry clock).</summary>
+        public static readonly string[] ActiveStatuses = { "active", "trial" };
+
+        /// <summary>Statuses that are evaluated against the expiry clock.</summary>
+        public static readonly string[] ClockStatuses = { "active", "trial", "expired" };
+
         public static PosMode Evaluate(ActivationState state, DateTimeOffset nowUtc)
         {
             if (state == null) return PosMode.Locked;
-            if (string.Equals(state.Status, "suspended", StringComparison.OrdinalIgnoreCase))
+            var status = (state.Status ?? "").Trim().ToLowerInvariant();
+            var clocked = false;
+            foreach (var s in ClockStatuses) if (status == s) { clocked = true; break; }
+            if (!clocked) return PosMode.Locked; // suspended/revoked/unknown/missing: fail closed
+            if (!state.ExpiresAt.HasValue)
+            {
+                // Lifetime: only genuinely active statuses are Full.
+                foreach (var s in ActiveStatuses) if (status == s) return PosMode.Full;
                 return PosMode.Locked;
-            if (!state.ExpiresAt.HasValue) return PosMode.Full; // lifetime
+            }
             if (nowUtc <= state.ExpiresAt.Value) return PosMode.Full;
             var graceEnd = state.GraceUntil ?? state.ExpiresAt.Value.AddDays(DefaultGraceDays);
             return nowUtc <= graceEnd ? PosMode.Grace : PosMode.Locked;
@@ -44,7 +64,13 @@ namespace Delwaqty.Pos.Core.Licensing
     /// Periodic verified license refresh (review #119: enforcement used to
     /// happen only at startup, so a suspension never reached a running app).
     /// Re-runs cashier_device_link on a schedule, merges the verified state
-    /// and reseals it locally. Network failures keep the current state.
+    /// and reseals it locally.
+    ///
+    /// Network failure is transient: the sealed state is kept and the guard's
+    /// clock/grace cutoff applies. An authoritative NEGATIVE answer
+    /// (SUSPENDED, EXPIRED, UNKNOWN_KEY, BOUND_TO_OTHER_DEVICE, ...) is not:
+    /// the state is marked revoked/suspended/expired, resealed, and the app
+    /// locks (review #119 follow-up).
     /// </summary>
     public sealed class LicenseRefresher
     {
@@ -70,6 +96,8 @@ namespace Delwaqty.Pos.Core.Licensing
         /// <summary>
         /// Refresh when the last verified contact is older than interval.
         /// Mutates and reseals state on change; returns null when skipped.
+        /// Callers must STILL re-run LicenseGuard.Evaluate on a skip/null:
+        /// the clock moves even when the network is not asked (review #119).
         /// </summary>
         public async Task<RefreshResult> RefreshAsync(ActivationState state, DateTimeOffset nowUtc, TimeSpan? interval = null)
         {
@@ -84,7 +112,8 @@ namespace Delwaqty.Pos.Core.Licensing
             }
             catch
             {
-                // Offline: keep the sealed state; the guard's grace cutoff applies.
+                // Transient network failure: keep the sealed state; the
+                // guard's grace cutoff still applies via the clock.
                 result.Mode = LicenseGuard.Evaluate(state, nowUtc);
                 return result;
             }
@@ -93,20 +122,18 @@ namespace Delwaqty.Pos.Core.Licensing
             var parsed = ActivationService.ParseDeviceLink(linkJson, state.LicenseKey, state.DeviceId);
             if (!parsed.Ok)
             {
-                // Verified negative answer: suspended / expired / unbound.
+                // Authoritative denial from the server — fail closed.
                 result.Reason = parsed.Reason;
                 if (string.Equals(parsed.Reason, "SUSPENDED", StringComparison.OrdinalIgnoreCase))
-                {
                     state.Status = "suspended";
-                    _activation.Reseal(state);
-                    result.Changed = true;
-                }
                 else if (string.Equals(parsed.Reason, "EXPIRED", StringComparison.OrdinalIgnoreCase))
-                {
                     state.Status = "expired";
-                    _activation.Reseal(state);
-                    result.Changed = true;
-                }
+                else
+                    // UNKNOWN_KEY, BOUND_TO_OTHER_DEVICE, or any other verified
+                    // negative: the server no longer honours this activation.
+                    state.Status = "revoked";
+                _activation.Reseal(state);
+                result.Changed = true;
                 result.Mode = LicenseGuard.Evaluate(state, nowUtc);
                 return result;
             }

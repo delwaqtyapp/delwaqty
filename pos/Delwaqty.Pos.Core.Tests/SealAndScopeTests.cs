@@ -23,6 +23,7 @@ namespace Delwaqty.Pos.Core.Tests
                 GraceUntil = DateTimeOffset.UtcNow.AddMonths(6).AddDays(3),
                 MerchantId = "m-1", MerchantName = "صيدلية الشفاء", MerchantType = "pharmacy",
                 DeviceId = deviceId, ValidatedAtUtc = DateTimeOffset.UtcNow,
+                Flavor = "pharmacy",
             };
         }
 
@@ -64,50 +65,159 @@ namespace Delwaqty.Pos.Core.Tests
             Assert.Null(new ActivationService(_dir, "Pharmacy").Restore());
         }
 
-        [Fact]
-        public void Legacy_V1_Flat_Layout_Migrates_Into_Scope_And_V2()
+        /// <summary>Build a legacy v1 flat-layout seal (valid payload HMAC).</summary>
+        private string WriteLegacyV1Seal(ActivationService svc, ActivationState state)
         {
-            // Build the pre-#116 flat layout by hand: v1 seal + XOR creds +
-            // loose outbox.db at the data root.
-            var svc = new ActivationService(_dir, "Pharmacy");
-            var deviceId = svc.LocalDeviceId;
-            var state = SampleState(deviceId);
             var info = new LicenseInfo
             {
-                Id = Guid.NewGuid().ToString(), MerchantId = "m-1", Plan = "core_annual",
+                Id = Guid.NewGuid().ToString(), MerchantId = state.MerchantId, Plan = state.Plan,
                 ExpiresAt = state.ExpiresAt,
             };
-            var payload = LocalLicenseSeal.StatePayload(info, deviceId, state.ValidatedAtUtc);
+            var payload = LocalLicenseSeal.StatePayload(info, state.DeviceId, state.ValidatedAtUtc);
             var stateJson = System.Text.Json.JsonSerializer.Serialize(state,
                 new System.Text.Json.JsonSerializerOptions { IncludeFields = true });
             File.WriteAllText(Path.Combine(_dir, "license.seal"),
                 "{\"Payload\":" + System.Text.Json.JsonSerializer.Serialize(payload) +
                 ",\"Seal\":\"" + LocalLicenseSeal.Seal(payload, svc.DeviceKey) +
                 "\",\"StateJson\":" + System.Text.Json.JsonSerializer.Serialize(stateJson) + "}");
-            var credBytes = System.Text.Encoding.UTF8.GetBytes("rt-legacy\nm@example.com");
-            for (var i = 0; i < credBytes.Length; i++) credBytes[i] ^= svc.DeviceKey[i % svc.DeviceKey.Length];
-            File.WriteAllText(Path.Combine(_dir, "session.cred"), Convert.ToBase64String(credBytes));
+            return payload;
+        }
+
+        [Fact]
+        public void Legacy_V1_State_Is_Never_Restored_Or_Resealed()
+        {
+            // Review #115 follow-up: v1 keeps its unsigned StateJson — even a
+            // PERFECTLY VALID v1 seal is not restored; the install must
+            // re-activate online so every field is server-verified.
+            var svc = new ActivationService(_dir, "Pharmacy");
+            WriteLegacyV1Seal(svc, SampleState(svc.LocalDeviceId));
             using (var store = new OutboxStore(Path.Combine(_dir, "outbox.db")))
                 store.Enqueue(OutboxPayloads.Customer("احمد", "010", null));
 
-            var restored = svc.Restore();
-            Assert.NotNull(restored);
-            Assert.Equal("m-1", restored.MerchantId);
-            Assert.NotNull(svc.CurrentScopeDir);
-            // Root files moved into the scope; the pending outbox op survives.
+            Assert.Null(svc.Restore());
+            Assert.Null(new ActivationService(_dir, "Pharmacy").Restore());
+            // Nothing migrated, nothing re-sealed: the root files stay put.
+            Assert.True(File.Exists(Path.Combine(_dir, "outbox.db")));
+            Assert.True(File.Exists(Path.Combine(_dir, "license.seal")));
+            Assert.False(Directory.Exists(Path.Combine(_dir, "merchants")));
+            Assert.DoesNotContain("\"Version\":2",
+                File.ReadAllText(Path.Combine(_dir, "license.seal")));
+        }
+
+        [Fact]
+        public void Forged_Legacy_V1_State_Is_Rejected()
+        {
+            // The exact #115 attack: a valid v1 payload HMAC (the attacker
+            // read the old plaintext device key) but a StateJson with Pro and
+            // expiry forged. The forged fields must never reach a v2 seal.
+            var svc = new ActivationService(_dir, "Pharmacy");
+            var forged = SampleState(svc.LocalDeviceId);
+            forged.Plan = "core_annual";       // payload says the same...
+            WriteLegacyV1Seal(svc, forged);
+            forged.Pro = true;                  // ...but the UNSIGNED state is forged
+            forged.ExpiresAt = DateTimeOffset.UtcNow.AddYears(10);
+            var stateJson = System.Text.Json.JsonSerializer.Serialize(forged,
+                new System.Text.Json.JsonSerializerOptions { IncludeFields = true });
+            var text = File.ReadAllText(Path.Combine(_dir, "license.seal"));
+            var doc = System.Text.Json.JsonDocument.Parse(text);
+            var payload = doc.RootElement.GetProperty("Payload").GetString();
+            var seal = doc.RootElement.GetProperty("Seal").GetString();
+            File.WriteAllText(Path.Combine(_dir, "license.seal"),
+                "{\"Payload\":" + System.Text.Json.JsonSerializer.Serialize(payload) +
+                ",\"Seal\":\"" + seal +
+                "\",\"StateJson\":" + System.Text.Json.JsonSerializer.Serialize(stateJson) + "}");
+
+            Assert.Null(svc.Restore());
+            Assert.False(Directory.Exists(Path.Combine(_dir, "merchants")));
+        }
+
+        [Fact]
+        public async System.Threading.Tasks.Task Legacy_V1_Data_Migrates_On_Online_Reactivation()
+        {
+            // The v1 install re-activates ONLINE with the same merchant: only
+            // then do the legacy data files move into the scope, keyed by the
+            // HMAC-verified payload merchant id — never by the unsigned state.
+            var svc = new ActivationService(_dir, "Pharmacy");
+            var state = SampleState(svc.LocalDeviceId);
+            WriteLegacyV1Seal(svc, state);
+            using (var store = new OutboxStore(Path.Combine(_dir, "outbox.db")))
+                store.Enqueue(OutboxPayloads.Customer("احمد", "010", null));
+
+            var stub = new StubHandler()
+                .Ok("{\"access_token\":\"at\",\"refresh_token\":\"rt\",\"expires_in\":3600,\"user\":{\"id\":\"u\"}}")
+                .Ok("{\"ok\":true,\"plan\":\"core_annual\",\"pro\":true,\"status\":\"active\"," +
+                    "\"expires_at\":\"" + DateTimeOffset.UtcNow.AddMonths(6).ToString("yyyy-MM-dd HH:mm:ss+00") + "\"," +
+                    "\"merchant\":{\"id\":\"m-1\",\"name\":\"صيدلية الشفاء\",\"type\":\"pharmacy\"}}");
+            var http = new System.Net.Http.HttpClient(stub);
+            var auth = new Auth.AuthClient("https://x.supabase.co", "anon", http);
+            var sync = new SyncClient("https://x.supabase.co", "anon", http);
+            var key = "DLWQ1." + LicenseKey.Base64UrlEncode(
+                System.Text.Encoding.UTF8.GetBytes(Guid.NewGuid() + "|m-1|core_annual|lifetime")) +
+                "." + new string('a', 64);
+            var res = await svc.ActivateAsync(auth, sync, "m@example.com", "pw", key, svc.LocalDeviceId);
+
+            Assert.True(res.Ok, res.Reason);
             Assert.False(File.Exists(Path.Combine(_dir, "outbox.db")));
             Assert.True(File.Exists(Path.Combine(svc.CurrentScopeDir, "outbox.db")));
             using (var scoped = new OutboxStore(Path.Combine(svc.CurrentScopeDir, "outbox.db")))
                 Assert.Equal(1, scoped.PendingCount());
-            // Seal re-written as v2 inside the scope and verifies.
-            var sealText = File.ReadAllText(Path.Combine(svc.CurrentScopeDir, "license.seal"));
-            Assert.Contains("\"Version\":2", sealText);
             Assert.NotNull(new ActivationService(_dir, "Pharmacy").Restore());
-            // Credentials upgraded to v2 (DPAPI marker).
-            Assert.True(svc.TryLoadRefreshToken(out var rt, out _));
-            Assert.Equal("rt-legacy", rt);
-            Assert.StartsWith(SealedCredentialStore.BlobPrefix,
-                File.ReadAllText(Path.Combine(svc.CurrentScopeDir, "session.cred")));
+        }
+
+        [Fact]
+        public void Seal_From_Other_Flavor_Never_Restores()
+        {
+            // #116 follow-up: the flavor is part of the authenticated state —
+            // a pharmacy install must not pick up a retail scope's seal.
+            var svc = new ActivationService(_dir, "Pharmacy");
+            var scope = svc.ScopeDirFor("m-1");
+            Directory.CreateDirectory(scope);
+            svc.Reseal(SampleState(svc.LocalDeviceId));
+
+            var retail = new ActivationService(_dir, "Retail");
+            Assert.Null(retail.Restore());
+            // ...while the pharmacy service still restores it.
+            Assert.NotNull(new ActivationService(_dir, "Pharmacy").Restore());
+        }
+
+        [Fact]
+        public void Seal_In_Alien_Scope_Path_Never_Restores()
+        {
+            // A valid seal copied into a scope dir that does NOT match its
+            // sealed merchant id is not selected (canonical path check).
+            var svc = new ActivationService(_dir, "Pharmacy");
+            var scope = svc.ScopeDirFor("m-1");
+            Directory.CreateDirectory(scope);
+            svc.Reseal(SampleState(svc.LocalDeviceId));
+            var alien = Path.Combine(_dir, "merchants", "zzz-pharmacy");
+            Directory.CreateDirectory(alien);
+            File.Copy(Path.Combine(scope, "license.seal"), Path.Combine(alien, "license.seal"));
+            File.Delete(Path.Combine(scope, "license.seal"));
+
+            Assert.Null(new ActivationService(_dir, "Pharmacy").Restore());
+        }
+
+        [Fact]
+        public void Deactivate_Clears_Pointer_So_No_Archive_Auto_Restores()
+        {
+            var svc = new ActivationService(_dir, "Pharmacy");
+            var scope = svc.ScopeDirFor("m-1");
+            Directory.CreateDirectory(scope);
+            svc.Reseal(SampleState(svc.LocalDeviceId));
+            Assert.NotNull(svc.Restore()); // writes the pointer
+
+            // A second merchant's archive with a valid seal (old device state).
+            var scopeB = svc.ScopeDirFor("m-2");
+            Directory.CreateDirectory(scopeB);
+            var svcB = new ActivationService(_dir, "Pharmacy");
+            var stateB = SampleState(svcB.LocalDeviceId);
+            stateB.MerchantId = "m-2";
+            svcB.Reseal(stateB); // seals into m-2 scope via MerchantId
+
+            svc.Deactivate();
+            // Sign-out cleared the pointer AND the active seal: the archived
+            // m-2 seal must not become the logged-in identity at startup.
+            Assert.Null(new ActivationService(_dir, "Pharmacy").Restore());
         }
 
         [Fact]
@@ -148,6 +258,66 @@ namespace Delwaqty.Pos.Core.Tests
                     File.ReadAllText(Path.Combine(dir2, "device.key")));
             }
             finally { Directory.Delete(dir2, true); }
+        }
+
+        [Fact]
+        public void Planted_Legacy_Key_Is_Ignored_After_Migration()
+        {
+            // Review #114 follow-up: once a protected key exists (marker
+            // written), a plaintext device.key planted by a directory writer
+            // must NOT be adopted — adopting it would let them forge seals.
+            var svc = new ActivationService(_dir, "Pharmacy");
+            var original = svc.DeviceKey;
+            Assert.True(File.Exists(Path.Combine(_dir, Protection.DeviceKeyStore.MarkerFileName)));
+
+            var planted = LocalLicenseSeal.NewDeviceKey();
+            File.WriteAllText(Path.Combine(_dir, "device.key"), Convert.ToBase64String(planted));
+            var loaded = Protection.DeviceKeyStore.GetOrCreate(_dir);
+            Assert.NotEqual(planted, loaded);   // regenerated, not adopted
+            Assert.NotEqual(original, loaded);  // old seals die -> reactivation
+            Assert.StartsWith(Protection.DeviceKeyStore.BlobPrefix,
+                File.ReadAllText(Path.Combine(_dir, "device.key")));
+        }
+
+        private sealed class ThrowingProtector : Protection.ILocalProtector
+        {
+            public string Name { get { return "throwing"; } }
+            public byte[] Protect(byte[] plain) { return (byte[])plain.Clone(); }
+            public byte[] Unprotect(byte[] blob) { throw new System.Security.Cryptography.CryptographicException("foreign blob"); }
+        }
+
+        [Fact]
+        public void Corrupt_Or_Foreign_Device_Key_Regenerates_Instead_Of_Crashing()
+        {
+            // Security review LOW-1: a device.key protected by another user /
+            // machine (or corrupted) must not crash startup; the key is
+            // regenerated, which invalidates old seals and forces reactivation.
+            var dir2 = Path.Combine(Path.GetTempPath(), "key-" + Guid.NewGuid());
+            Directory.CreateDirectory(dir2);
+            try
+            {
+                var first = Protection.DeviceKeyStore.GetOrCreate(dir2, new ThrowingProtector());
+                // Second read: unprotect throws -> regenerate.
+                var second = Protection.DeviceKeyStore.GetOrCreate(dir2, new ThrowingProtector());
+                Assert.NotEqual(first, second);
+                Assert.StartsWith(Protection.DeviceKeyStore.BlobPrefix,
+                    File.ReadAllText(Path.Combine(dir2, "device.key")));
+            }
+            finally { Directory.Delete(dir2, true); }
+        }
+
+        [Fact]
+        public void Unreadable_Scope_Blocks_Activation_FailClosed()
+        {
+            // #116 follow-up: a scope whose database cannot be read may hold
+            // unsynced ops — it must block cross-merchant activation, not be
+            // silently ignored.
+            var svc = new ActivationService(_dir, "Pharmacy");
+            var scopeA = svc.ScopeDirFor("m-A");
+            Directory.CreateDirectory(scopeA);
+            File.WriteAllText(Path.Combine(scopeA, "pos.db"), "this is not sqlite");
+
+            Assert.Equal(scopeA, MerchantScope.ScopeWithPendingOps(_dir, svc.ScopeDirFor("m-B")));
         }
 
     }

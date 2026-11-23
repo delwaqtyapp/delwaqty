@@ -38,11 +38,12 @@ namespace Delwaqty.Pos.Core.Tests
             var saleB = OutboxPayloads.Sale(MakeSale(openB.OpId, 33m));
             var closeB = OutboxPayloads.DailyClose(openB.OpId, 300m);
 
+            // Responses in STRICT creation order: openA, saleA, closeA, then B.
             var stub = new StubHandler()
                 .Ok("{\"ok\":true,\"results\":[{\"op_id\":\"" + openA.OpId + "\",\"ok\":true,\"shift_id\":\"srv-A\"}]}")
-                .Ok("{\"ok\":true,\"results\":[{\"op_id\":\"" + openB.OpId + "\",\"ok\":true,\"shift_id\":\"srv-B\"}]}")
                 .Ok("{\"ok\":true,\"results\":[{\"op_id\":\"" + saleA.OpId + "\",\"ok\":true,\"sale_id\":\"s-1\"}]}")
                 .Ok("{\"ok\":true,\"expected_cash\":500}")
+                .Ok("{\"ok\":true,\"results\":[{\"op_id\":\"" + openB.OpId + "\",\"ok\":true,\"shift_id\":\"srv-B\"}]}")
                 .Ok("{\"ok\":true,\"results\":[{\"op_id\":\"" + saleB.OpId + "\",\"ok\":true,\"sale_id\":\"s-2\"}]}")
                 .Ok("{\"ok\":true,\"expected_cash\":300}");
             var client = new SyncClient("https://x.supabase.co", "anon", new HttpClient(stub));
@@ -66,23 +67,21 @@ namespace Delwaqty.Pos.Core.Tests
                 Assert.Equal("srv-A", store.GetServerId("shift", openA.OpId));
                 Assert.Equal("srv-B", store.GetServerId("shift", openB.OpId));
 
-                // Order: shift opens first (one batch each), then each shift's
-                // sales, and a close only after its own sales were pushed.
+                // #117a: STRICT creation order — openB is never hoisted above
+                // closeA, so it can never bind to (or be rejected for) the
+                // still-open A on the server.
                 Assert.Equal(6, stub.Requests.Count);
-                Assert.Contains(openA.OpId, stub.Requests[0].Body);
-                Assert.Contains(openB.OpId, stub.Requests[1].Body);
-
-                // The sales reached the server with SERVER shift ids, not null.
-                Assert.Contains(saleA.OpId, stub.Requests[2].Body);
+                Assert.Contains(openA.OpId, stub.Requests[0].Body);   // open A
+                Assert.Contains(saleA.OpId, stub.Requests[1].Body);   // sale A
+                Assert.Contains("srv-A", stub.Requests[1].Body);
+                Assert.DoesNotContain(openA.OpId, stub.Requests[1].Body);
+                Assert.Contains("cashier_daily_close", stub.Requests[2].Url); // close A
                 Assert.Contains("srv-A", stub.Requests[2].Body);
                 Assert.DoesNotContain(openA.OpId, stub.Requests[2].Body);
-                Assert.Contains("cashier_daily_close", stub.Requests[3].Url);
-                Assert.Contains("srv-A", stub.Requests[3].Body);
-                Assert.DoesNotContain(openA.OpId, stub.Requests[3].Body);
-
-                Assert.Contains(saleB.OpId, stub.Requests[4].Body);
+                Assert.Contains(openB.OpId, stub.Requests[3].Body);   // open B AFTER close A
+                Assert.Contains(saleB.OpId, stub.Requests[4].Body);   // sale B
                 Assert.Contains("srv-B", stub.Requests[4].Body);
-                Assert.Contains("cashier_daily_close", stub.Requests[5].Url);
+                Assert.Contains("cashier_daily_close", stub.Requests[5].Url); // close B
                 Assert.Contains("srv-B", stub.Requests[5].Body);
                 Assert.DoesNotContain(openB.OpId, stub.Requests[5].Body);
 
@@ -143,27 +142,75 @@ namespace Delwaqty.Pos.Core.Tests
         }
 
         [Fact]
-        public async System.Threading.Tasks.Task Duplicate_ShiftOpen_Recovers_Id_From_Pull()
+        public async System.Threading.Tasks.Task Duplicate_ShiftOpen_Without_Id_Stays_Queued()
         {
-            // Crash between push and MarkSynced: the retry is a duplicate and
-            // the result has no shift_id; the engine falls back to one pull.
+            // #117b: crash after the server committed the shift_open but
+            // before the map was saved — the retry is a duplicate whose
+            // result carries NO shift_id. The engine must NEVER adopt the
+            // server's currently-open shift (it may be a different one); the
+            // op stays queued until the server resolves by client_op_id, and
+            // the dependent close blocks.
             var openA = OutboxPayloads.ShiftOpen(100m);
+            var saleA = OutboxPayloads.Sale(MakeSale(openA.OpId, 66m));
             var closeA = OutboxPayloads.DailyClose(openA.OpId, 500m);
             var stub = new StubHandler()
                 .Ok("{\"ok\":true,\"results\":[{\"op_id\":\"" + openA.OpId + "\",\"ok\":true,\"duplicate\":true}]}")
-                .Ok("{\"ok\":true,\"open_shift\":{\"id\":\"srv-A\",\"opened_at\":\"2026-11-23 08:00:00+00\",\"opening_float\":100}}")
-                .Ok("{\"ok\":true,\"expected_cash\":500}");
+                .Ok("{\"ok\":true,\"open_shift\":{\"id\":\"srv-OTHER\",\"opened_at\":\"2026-11-23 08:00:00+00\",\"opening_float\":100}}");
             var client = new SyncClient("https://x.supabase.co", "anon", new HttpClient(stub));
             using (var store = new OutboxStore(_path))
             {
-                store.Enqueue(openA); store.Enqueue(closeA);
+                store.Enqueue(openA); store.Enqueue(saleA); store.Enqueue(closeA);
                 var engine = new SyncEngine(store, client, "m-1");
                 var res = await engine.FlushAsync();
-                Assert.Equal(2, res.Synced);
-                Assert.Equal(0, res.Blocked);
-                Assert.Equal("srv-A", store.GetServerId("shift", openA.OpId));
-                Assert.Contains("cashier_daily_close", stub.Requests[2].Url);
-                Assert.Contains("srv-A", stub.Requests[2].Body);
+
+                Assert.Equal(0, res.Synced);
+                Assert.Equal(0, res.Failed);
+                Assert.Equal(3, res.Blocked);            // open + sale + close
+                Assert.Equal(3, store.PendingCount());   // everything queued
+                Assert.Null(store.GetServerId("shift", openA.OpId));
+                // No arbitrary pull/adoption happened: only the push went out.
+                Assert.Single(stub.Requests);
+                Assert.DoesNotContain(stub.Requests, r => r.Url.Contains("cashier_sync_pull"));
+                // The queued open was not attempt-bumped: it waits, unharmed.
+                Assert.Equal(0, store.Pending(10).Single(o => o.OpId == openA.OpId).Attempts);
+            }
+        }
+
+        [Fact]
+        public async System.Threading.Tasks.Task Sale_Http_Failure_Before_Close_Blocks_The_Close()
+        {
+            // #117c: the sale push fails (HTTP error); the close must NOT run
+            // — a shift never closes with a missing sale, and the close stays
+            // queued for the next flush even though its shift IS mapped.
+            var openA = OutboxPayloads.ShiftOpen(100m);
+            var saleA = OutboxPayloads.Sale(MakeSale(openA.OpId, 66m));
+            var closeA = OutboxPayloads.DailyClose(openA.OpId, 500m);
+            var stub = new StubHandler()
+                .Ok("{\"ok\":true,\"results\":[{\"op_id\":\"" + openA.OpId + "\",\"ok\":true,\"shift_id\":\"srv-A\"}]}");
+            // no response for the sale push -> 404 -> failure
+            var client = new SyncClient("https://x.supabase.co", "anon", new HttpClient(stub));
+            using (var store = new OutboxStore(_path))
+            {
+                store.Enqueue(openA); store.Enqueue(saleA); store.Enqueue(closeA);
+                var engine = new SyncEngine(store, client, "m-1");
+                var res = await engine.FlushAsync();
+
+                Assert.Equal(1, res.Synced);  // only the shift_open
+                Assert.Equal(1, res.Failed);  // the sale
+                Assert.Equal(1, res.Blocked); // the close
+                Assert.Equal(2, store.PendingCount());
+                // The close never reached the server.
+                Assert.DoesNotContain(stub.Requests, r => r.Url.Contains("cashier_daily_close"));
+
+                // Next flush: sale now pushes fine, close follows in the same run.
+                stub.Ok("{\"ok\":true,\"results\":[{\"op_id\":\"" + saleA.OpId + "\",\"ok\":true,\"sale_id\":\"s-1\"}]}")
+                    .Ok("{\"ok\":true,\"expected_cash\":500}");
+                var res2 = await engine.FlushAsync();
+                Assert.Equal(2, res2.Synced);
+                Assert.Equal(0, res2.Blocked);
+                Assert.Equal(0, store.PendingCount());
+                Assert.Contains("cashier_daily_close", stub.Requests[stub.Requests.Count - 1].Url);
+                Assert.Contains("srv-A", stub.Requests[stub.Requests.Count - 1].Body);
             }
         }
     }

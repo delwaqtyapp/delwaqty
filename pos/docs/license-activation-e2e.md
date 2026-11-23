@@ -57,13 +57,26 @@ Trial key issued on the bughunt store → device A links (ok, plan, merchant
 profile returned) → device B rejected `BOUND_TO_OTHER_DEVICE` → unknown key
 rejected `UNKNOWN_KEY` → new keys are single-line (345 fix).
 
-## Clone limitation (security review 2026-11-23)
+## Clone limitation and threat boundary (security review 2026-11-23)
 
 A full copy of the app's data directory to a second PC does NOT move the
-activation: the refresh credential and license seal are DPAPI machine-key
-protected (they cannot be decrypted on another machine) and the seal also
-fails its device-id check. Caveat: DPAPI is machine-bound, not
-license-bound — any process running on the same PC can unprotect the blob,
-so the protection is against copying, not against local malware. Device
-binding (one key, one PC, `BOUND_TO_OTHER_DEVICE`) remains the real
-enforcement; support resets the binding when a PC is replaced.
+activation: the refresh credential and license seal are DPAPI CurrentUser
+protected (they cannot be decrypted by another Windows user or on another
+machine) and the seal also fails its device-id check.
+
+Supported deployment model: ONE dedicated Windows account per shop PC —
+every cashier shares that Windows login, and the data-dir ACL grants only
+that account + SYSTEM + Administrators. Staff identity inside the app is
+the structural fix for per-cashier accountability (see
+docs/server-change-proposals-2026-11-23.md).
+
+Accepted threat boundary: DPAPI CurrentUser is user-bound, not
+process-bound — any process running AS that Windows user can unprotect the
+blob. The protection is against copying and against other local users, not
+against malware running as the shop account. Device binding (one key, one
+PC, `BOUND_TO_OTHER_DEVICE`) remains the real enforcement; support resets
+the binding when a PC is replaced.
+
+Legacy v1 seals (partial payload HMAC, unsigned state) are never restored:
+an old install re-activates online once, and only then do its legacy data
+files migrate into the merchant scope.

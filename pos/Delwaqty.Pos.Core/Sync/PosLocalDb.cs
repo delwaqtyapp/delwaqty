@@ -27,6 +27,18 @@ namespace Delwaqty.Pos.Core.Sync
         public readonly LocalSalesLog Sales;
         public readonly BatchStore Batches;
 
+        /// <summary>
+        /// Non-null when a legacy import failed or its row counts did not add
+        /// up (review #120 migration follow-up): the legacy file is kept in
+        /// place, but the app must show a visible repair state and refuse
+        /// selling and sync until support looks — silently proceeding with an
+        /// empty pos.db would orphan queued sales.
+        /// </summary>
+        public string RepairState { get; private set; }
+
+        /// <summary>Rows imported per legacy table (diagnostics/tests).</summary>
+        public readonly Dictionary<string, int> ImportedCounts = new Dictionary<string, int>();
+
         public PosLocalDb(string path) : this(path, importLegacy: true) { }
 
         public PosLocalDb(string path, bool importLegacy)
@@ -40,9 +52,9 @@ namespace Delwaqty.Pos.Core.Sync
                 var dir = Path.GetDirectoryName(path);
                 if (!string.IsNullOrEmpty(dir))
                 {
-                    ImportLegacyDb(dir, "outbox.db", "outbox");
-                    ImportLegacyDb(dir, "sales.db", "local_sales");
-                    ImportLegacyDb(dir, "batches.db", "batches");
+                    ImportLegacyDb(dir, "outbox.db", "outbox", "op_id");
+                    ImportLegacyDb(dir, "sales.db", "local_sales", "op_id");
+                    ImportLegacyDb(dir, "batches.db", "batches", "id");
                 }
             }
         }
@@ -77,6 +89,26 @@ namespace Delwaqty.Pos.Core.Sync
         {
             Tx(() =>
             {
+                // #120 follow-up: coverage is verified BEFORE anything is
+                // written, inside the same transaction — a tracked item whose
+                // sellable (unexpired) batches do not cover the line aborts
+                // the WHOLE sale (outbox op, journal row, every batch
+                // movement roll back together). Untracked items (no batches
+                // ever recorded) are the explicit exception: they sell
+                // without batch dispensing, as documented for quick lines.
+                if (dispenseBatches)
+                {
+                    foreach (var line in sale.Lines)
+                    {
+                        var key = line.ProductId ?? line.DrugCatalogId;
+                        if (key == null) continue;
+                        if (Batches.TrackedQty(key) <= 0) continue; // untracked: sells freely
+                        var plan = Batches.AllocateFefo(key, line.Qty);
+                        if (!plan.Covered)
+                            throw new InvalidOperationException(
+                                "INSUFFICIENT_TRACKED_STOCK:" + key + ":missing " + plan.Missing);
+                    }
+                }
                 Outbox.Enqueue(op);
                 Sales.Add(new LocalSalesLog.OutboxOpRef(op.OpId), sale, localShiftId);
                 if (dispenseBatches)
@@ -84,7 +116,8 @@ namespace Delwaqty.Pos.Core.Sync
                     foreach (var line in sale.Lines)
                     {
                         var key = line.ProductId ?? line.DrugCatalogId;
-                        if (key != null) Batches.Dispense(key, line.Qty, op.OpId);
+                        if (key != null && Batches.TrackedQty(key) > 0)
+                            Batches.Dispense(key, line.Qty, op.OpId);
                     }
                 }
             });
@@ -109,7 +142,7 @@ namespace Delwaqty.Pos.Core.Sync
         /// into pos.db, then rename the file to &lt;name&gt;.migrated. Idempotent
         /// (INSERT OR IGNORE); a missing or empty legacy file is skipped.
         /// </summary>
-        private void ImportLegacyDb(string dir, string fileName, string table)
+        private void ImportLegacyDb(string dir, string fileName, string table, string pk)
         {
             var legacy = Path.Combine(dir, fileName);
             if (!File.Exists(legacy)) return;
@@ -124,11 +157,44 @@ namespace Delwaqty.Pos.Core.Sync
                 try
                 {
                     var cols = LegacyColumns(table);
+                    // Assert the counts (review #120 migration follow-up):
+                    // every legacy row must land in main unless its key is
+                    // already there (idempotent re-import).
+                    long legacyCount, alreadyThere, before, after;
+                    using (var cmd = _db.CreateCommand())
+                    {
+                        cmd.CommandText = "SELECT COUNT(*) FROM legacy." + table + ";";
+                        legacyCount = (long)cmd.ExecuteScalar();
+                    }
+                    using (var cmd = _db.CreateCommand())
+                    {
+                        cmd.CommandText = "SELECT COUNT(*) FROM legacy." + table +
+                            " WHERE " + pk + " IN (SELECT " + pk + " FROM main." + table + ");";
+                        alreadyThere = (long)cmd.ExecuteScalar();
+                    }
+                    using (var cmd = _db.CreateCommand())
+                    {
+                        cmd.CommandText = "SELECT COUNT(*) FROM main." + table + ";";
+                        before = (long)cmd.ExecuteScalar();
+                    }
                     using (var cmd = _db.CreateCommand())
                     {
                         cmd.CommandText = "INSERT OR IGNORE INTO main." + table +
                             " (" + cols + ") SELECT " + cols + " FROM legacy." + table + ";";
                         cmd.ExecuteNonQuery();
+                    }
+                    using (var cmd = _db.CreateCommand())
+                    {
+                        cmd.CommandText = "SELECT COUNT(*) FROM main." + table + ";";
+                        after = (long)cmd.ExecuteScalar();
+                    }
+                    var inserted = after - before;
+                    ImportedCounts[table] = (int)inserted;
+                    if (inserted + alreadyThere != legacyCount)
+                    {
+                        RepairState = "legacy import of " + fileName + " lost rows (" +
+                            legacyCount + " legacy, " + alreadyThere + " existing, " + inserted + " inserted)";
+                        return; // keep the legacy file in place
                     }
                 }
                 finally
@@ -141,10 +207,11 @@ namespace Delwaqty.Pos.Core.Sync
                 }
                 File.Move(legacy, legacy + ".migrated");
             }
-            catch
+            catch (Exception ex)
             {
-                // Never block startup on a legacy import problem; the file
-                // stays in place for support.
+                // The file stays in place and the app must surface a repair
+                // state instead of running on a silently empty pos.db.
+                RepairState = "legacy import of " + fileName + " failed: " + ex.Message;
             }
         }
 

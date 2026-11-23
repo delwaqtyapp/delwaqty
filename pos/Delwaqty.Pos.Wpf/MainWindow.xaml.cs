@@ -122,6 +122,20 @@ namespace Delwaqty.Pos.Wpf
 
         private bool EnsureSellingAllowed()
         {
+            // #120 migration: a failed legacy import means local data is in a
+            // repair state — never sell on top of it.
+            if (_localDb.RepairState != null)
+            {
+                MessageBox.Show(this,
+                    "ترقية البيانات المحلية تحتاج إصلاحاً — تواصل مع الدعم قبل البيع. بياناتك القديمة محفوظة كما هي.",
+                    "إصلاح البيانات", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            // #119 follow-up: re-evaluate against the clock on EVERY mutation,
+            // independent of network or the refresh timer — an offline session
+            // must stop selling the moment expiry/grace passes.
+            var nowMode = LicenseGuard.Evaluate(_state, DateTimeOffset.UtcNow);
+            if (nowMode != _mode) { _mode = nowMode; ApplyMode(); }
             if (_mode != PosMode.Locked) return true;
             MessageBox.Show(this,
                 "الترخيص موقوف أو منتهي. البيع متوقف حتى التجديد — البيانات المحلية محفوظة.",
@@ -346,8 +360,21 @@ namespace Delwaqty.Pos.Wpf
 
             var op = OutboxPayloads.Sale(_sale);
             // #120: outbox op + journal + FEFO batch dispensing in ONE
-            // transaction — a crash cannot record a sale without its stock.
-            _localDb.CommitSale(op, _sale, _currentShiftId, dispenseBatches: _isPharmacy);
+            // transaction — a crash cannot record a sale without its stock,
+            // and a tracked-stock shortfall aborts the whole sale atomically
+            // (the pre-check above normally catches it; this is the race-safe
+            // enforcement inside the transaction).
+            try
+            {
+                _localDb.CommitSale(op, _sale, _currentShiftId, dispenseBatches: _isPharmacy);
+            }
+            catch (InvalidOperationException ex) when (ex.Message.StartsWith("INSUFFICIENT_TRACKED_STOCK"))
+            {
+                MessageBox.Show(this,
+                    "المخزون المتتبع لا يغطي البيع — راجع التشغيلات. لم يُسجَّل أي بيع.",
+                    "مخزون غير كافٍ", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             if (_isPharmacy) RefreshExpiryAlerts();
 
             var receipt = ReceiptBuilder.Build(new ReceiptBuilder.Context
@@ -656,20 +683,28 @@ namespace Delwaqty.Pos.Wpf
             _syncing = true;
             try
             {
+                // #119 follow-up: the license clock is evaluated on every
+                // sync tick BEFORE any network step — a failed session
+                // refresh must never leave a stale mode past expiry/grace.
+                var clockMode = LicenseGuard.Evaluate(_state, DateTimeOffset.UtcNow);
+                if (clockMode != _mode) { _mode = clockMode; ApplyMode(); }
+
+                if (_localDb.RepairState != null) { UpdateSyncBadge(); return; }
                 if (!await EnsureSession()) { UpdateSyncBadge(); return; }
 
                 // #119: periodic verified license refresh — a suspension or
                 // expiry decided on the server reaches a running app within
-                // the refresh interval, not only at the next restart.
+                // the refresh interval, not only at the next restart. The
+                // mode is re-evaluated after ANY outcome: refreshed, denied,
+                // or skipped (null) — the clock moved regardless.
                 var refreshed = await _licenseRefresher.RefreshAsync(_state, DateTimeOffset.UtcNow);
-                if (refreshed != null)
+                var newMode = refreshed != null
+                    ? refreshed.Mode
+                    : LicenseGuard.Evaluate(_state, DateTimeOffset.UtcNow);
+                if (newMode != _mode)
                 {
-                    var newMode = refreshed.Mode;
-                    if (newMode != _mode)
-                    {
-                        _mode = newMode;
-                        ApplyMode();
-                    }
+                    _mode = newMode;
+                    ApplyMode();
                 }
 
                 var flush = await _engine.FlushAsync();

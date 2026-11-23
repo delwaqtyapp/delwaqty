@@ -32,6 +32,29 @@ class _MapSearchHit {
 }
 
 class SmartMapPickerSheet extends ConsumerStatefulWidget {
+  /// Test seam: widget tests cannot host a GoogleMap platform view, so they
+  /// inject a placeholder through here. Never set in production code.
+  @visibleForTesting
+  static WidgetBuilder? debugMapOverride;
+
+  /// Test seam: canned search results for rendering the hits dropdown
+  /// without network. Never set in production code.
+  @visibleForTesting
+  static List<({String title, String subtitle})>? debugSearchHits;
+
+  /// Test seam: force the GPS-locking/resolved state for golden tests, where
+  /// the real geolocator plugin is unavailable. Null falls back to live state.
+  @visibleForTesting
+  static bool? debugLockingGps;
+
+  /// Test seam: force the resolved-address card text for golden tests.
+  @visibleForTesting
+  static String? debugResolvedAddress;
+
+  /// Test seam: force the accuracy chip for golden tests.
+  @visibleForTesting
+  static double? debugAccuracyMeters;
+
   const SmartMapPickerSheet({this.initialLat, this.initialLng, super.key});
 
   final double? initialLat;
@@ -334,7 +357,23 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final height = MediaQuery.sizeOf(context).height * 0.90;
+    // Subtract the keyboard inset: with the keyboard open the sheet must
+    // shrink into the space above it instead of running off the top of the
+    // screen (#149 keyboard-open coverage).
+    final height =
+        (MediaQuery.sizeOf(context).height -
+            MediaQuery.viewInsetsOf(context).bottom) *
+        0.90;
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    // At large text scales the overlays (status banner, GPS action) must not
+    // eat the map: the banner moves out of the map into a slim strip and the
+    // GPS action compacts to a small circular button (#149).
+    final compactOverlays = textScale > 1.3;
+    final isLockingGps = SmartMapPickerSheet.debugLockingGps ?? _isLockingGps;
+    final resolvedAddress =
+        SmartMapPickerSheet.debugResolvedAddress ?? _resolvedAddress;
+    final accuracyMeters =
+        SmartMapPickerSheet.debugAccuracyMeters ?? _accuracyMeters;
 
     return Container(
       height: height,
@@ -343,216 +382,247 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          // Top bar
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 12, 6),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.satellite_alt_rounded,
-                  color: AppColors.brandPurple,
-                  size: 22,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.pickLocationOnMap,
-                        style: AppTextStyles.titleMedium.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      Text(
-                        kIsWeb
-                            ? l10n.webMapSearchHint
-                            : l10n.dragMapToRefineLocation,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  tooltip: l10n.close,
-                  icon: const Icon(Icons.close_rounded),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-          ),
-          // Live Search Bar
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: TextField(
-              controller: _searchController,
-              onChanged: _onSearchChanged,
-              textInputAction: TextInputAction.search,
-              onSubmitted: _performSearch,
-              decoration: InputDecoration(
-                hintText: '${l10n.search}…',
-                prefixIcon: const Icon(Icons.search_rounded),
-                suffixIcon: _isSearching
-                    ? const Padding(
-                        padding: EdgeInsets.all(12),
-                        child: SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      )
-                    : _searchController.text.isNotEmpty
-                    ? IconButton(
-                        tooltip: l10n.clear,
-                        icon: const Icon(Icons.clear_rounded, size: 18),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() => _searchHits = const []);
-                        },
-                      )
-                    : null,
-                isDense: true,
-                filled: true,
-                fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.45),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ),
-          if (_searchHits.isNotEmpty)
-            Container(
-              constraints: const BoxConstraints(maxHeight: 190),
-              margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              decoration: BoxDecoration(
-                color: cs.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: cs.outlineVariant),
-              ),
-              child: ListView.separated(
-                shrinkWrap: true,
-                itemCount: _searchHits.length,
-                separatorBuilder: (_, _) => const Divider(height: 1),
-                itemBuilder: (_, idx) {
-                  final hit = _searchHits[idx];
-                  return ListTile(
-                    dense: true,
-                    leading: const Icon(
-                      Icons.place_rounded,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // With the keyboard open on a small phone the sheet is very
+          // short: fixed sections can no longer share the space, so
+          // everything scrolls and the map keeps a usable fixed height.
+          final tight = constraints.maxHeight < 380;
+          final topColumn = Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Top bar
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 12, 6),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.satellite_alt_rounded,
                       color: AppColors.brandPurple,
-                      size: 20,
+                      size: 22,
                     ),
-                    title: Text(
-                      hit.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    subtitle: hit.subtitle.isNotEmpty
-                        ? Text(
-                            hit.subtitle,
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.pickLocationOnMap,
+                            style: AppTextStyles.titleMedium.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(
+                            kIsWeb
+                                ? l10n.webMapSearchHint
+                                : l10n.dragMapToRefineLocation,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: cs.onSurfaceVariant,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: l10n.close,
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ),
+              // Live Search Bar
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: _onSearchChanged,
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: _performSearch,
+                  decoration: InputDecoration(
+                    hintText: '${l10n.search}…',
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    suffixIcon: _isSearching
+                        ? const Padding(
+                            padding: EdgeInsets.all(12),
+                            child: SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          )
+                        : _searchController.text.isNotEmpty
+                        ? IconButton(
+                            tooltip: l10n.clear,
+                            icon: const Icon(Icons.clear_rounded, size: 18),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _searchHits = const []);
+                            },
                           )
                         : null,
-                    onTap: () => _selectSearchHit(hit),
-                  );
-                },
-              ),
-            ),
-          // Map + Floating center pin + accuracy badge
-          Expanded(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                if (kIsWeb)
-                  const _WebMapFallback()
-                else
-                  GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: _center,
-                      zoom: 17,
+                    isDense: true,
+                    filled: true,
+                    fillColor: cs.surfaceContainerHighest.withValues(
+                      alpha: 0.45,
                     ),
-                    myLocationEnabled: true,
-                    myLocationButtonEnabled: false,
-                    zoomControlsEnabled: false,
-                    mapToolbarEnabled: false,
-                    gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-                      const Factory<OneSequenceGestureRecognizer>(
-                        EagerGestureRecognizer.new,
-                      ),
-                    },
-                    onMapCreated: (ctrl) {
-                      if (!_mapController.isCompleted) {
-                        _mapController.complete(ctrl);
-                      }
-                    },
-                    onCameraMoveStarted: () {
-                      if (!_isMoving || _accuracyMeters != null) {
-                        setState(() {
-                          _isMoving = true;
-                          _accuracyMeters = null;
-                        });
-                      }
-                    },
-                    onCameraMove: (pos) {
-                      _center = pos.target;
-                    },
-                    onCameraIdle: () {
-                      if (_isMoving) {
-                        setState(() => _isMoving = false);
-                      }
-                      _reverseGeocodeCenter(_center);
-                    },
-                  ),
-                // Animated floating center pin
-                IgnorePointer(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        curve: Curves.easeOutBack,
-                        transform: Matrix4.translationValues(
-                          0,
-                          _isMoving ? -10 : 0,
-                          0,
-                        ),
-                        child: const Icon(
-                          Icons.location_on_rounded,
-                          size: 46,
-                          color: AppColors.brandPurple,
-                        ),
-                      ),
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        width: _isMoving ? 14 : 8,
-                        height: _isMoving ? 6 : 4,
-                        decoration: BoxDecoration(
-                          color: cs.shadow.withValues(
-                            alpha: _isMoving ? 0.25 : 0.45,
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      const SizedBox(height: 36),
-                    ],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
                 ),
-                // Accuracy or locking status chip at top of map
+              ),
+              if (_searchHits.isNotEmpty ||
+                  SmartMapPickerSheet.debugSearchHits?.isNotEmpty == true)
+                Container(
+                  constraints: const BoxConstraints(maxHeight: 190),
+                  margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: cs.outlineVariant),
+                  ),
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount:
+                          SmartMapPickerSheet.debugSearchHits?.length ??
+                          _searchHits.length,
+                      separatorBuilder: (_, _) => const Divider(height: 1),
+                      itemBuilder: (_, idx) {
+                        final debugHit =
+                            SmartMapPickerSheet.debugSearchHits != null
+                            ? SmartMapPickerSheet.debugSearchHits![idx]
+                            : null;
+                        final hit = debugHit == null ? _searchHits[idx] : null;
+                        final title = debugHit?.title ?? hit!.title;
+                        final subtitle = debugHit?.subtitle ?? hit!.subtitle;
+                        return ListTile(
+                          dense: true,
+                          leading: const Icon(
+                            Icons.place_rounded,
+                            color: AppColors.brandPurple,
+                            size: 20,
+                          ),
+                          title: Text(
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          subtitle: subtitle.isNotEmpty
+                              ? Text(
+                                  subtitle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                )
+                              : null,
+                          onTap: hit == null
+                              ? null
+                              : () => _selectSearchHit(hit),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+            ],
+          );
+          final topSection = tight
+              ? topColumn
+              : SingleChildScrollView(child: topColumn);
+          final mapSection = Stack(
+            alignment: Alignment.center,
+            children: [
+              if (SmartMapPickerSheet.debugMapOverride != null)
+                SmartMapPickerSheet.debugMapOverride!(context)
+              else if (kIsWeb)
+                const _WebMapFallback()
+              else
+                GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: _center,
+                    zoom: 17,
+                  ),
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: false,
+                  zoomControlsEnabled: false,
+                  mapToolbarEnabled: false,
+                  gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                    const Factory<OneSequenceGestureRecognizer>(
+                      EagerGestureRecognizer.new,
+                    ),
+                  },
+                  onMapCreated: (ctrl) {
+                    if (!_mapController.isCompleted) {
+                      _mapController.complete(ctrl);
+                    }
+                  },
+                  onCameraMoveStarted: () {
+                    if (!_isMoving || _accuracyMeters != null) {
+                      setState(() {
+                        _isMoving = true;
+                        _accuracyMeters = null;
+                      });
+                    }
+                  },
+                  onCameraMove: (pos) {
+                    _center = pos.target;
+                  },
+                  onCameraIdle: () {
+                    if (_isMoving) {
+                      setState(() => _isMoving = false);
+                    }
+                    _reverseGeocodeCenter(_center);
+                  },
+                ),
+              // Animated floating center pin
+              IgnorePointer(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      curve: Curves.easeOutBack,
+                      transform: Matrix4.translationValues(
+                        0,
+                        _isMoving ? -10 : 0,
+                        0,
+                      ),
+                      child: const Icon(
+                        Icons.location_on_rounded,
+                        size: 46,
+                        color: AppColors.brandPurple,
+                      ),
+                    ),
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      width: _isMoving ? 14 : 8,
+                      height: _isMoving ? 6 : 4,
+                      decoration: BoxDecoration(
+                        color: cs.shadow.withValues(
+                          alpha: _isMoving ? 0.25 : 0.45,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    const SizedBox(height: 36),
+                  ],
+                ),
+              ),
+              // Accuracy or locking status chip at top of map. At large
+              // text scales it moves out of the map (see the slim strip
+              // below the map) so it cannot blanket the pin area.
+              if (!compactOverlays)
                 Positioned(
                   top: 12,
                   left: 16,
                   right: 16,
                   child: Center(
-                    child: _isLockingGps
+                    child: isLockingGps
                         ? Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 14,
@@ -590,7 +660,7 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
                               ],
                             ),
                           )
-                        : _accuracyMeters != null
+                        : accuracyMeters != null
                         ? Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -613,7 +683,7 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
                                 const SizedBox(width: 6),
                                 Text(
                                   l10n.gpsLockedWithinMeters(
-                                    _accuracyMeters!.toStringAsFixed(1),
+                                    accuracyMeters!.toStringAsFixed(1),
                                   ),
                                   style: AppTextStyles.labelSmall.copyWith(
                                     color: cs.onPrimary,
@@ -626,30 +696,86 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
                         : const SizedBox.shrink(),
                   ),
                 ),
-                // Floating Smart GPS button
-                Positioned(
-                  bottom: 16,
-                  right: 16,
-                  child: FloatingActionButton.extended(
-                    heroTag: 'smart_gps_btn',
-                    onPressed: _isLockingGps ? null : _detectPreciseGps,
-                    backgroundColor: cs.surface,
-                    foregroundColor: AppColors.brandPurple,
-                    icon: const Icon(Icons.my_location_rounded),
-                    label: Text(
-                      l10n.useSmartGpsLocation,
-                      style: AppTextStyles.labelMedium.copyWith(
-                        color: AppColors.brandPurple,
-                        fontWeight: FontWeight.w700,
+              // Floating Smart GPS button: a compact circular button at
+              // large text scales so the label never clips and the pin
+              // area stays clear; the full label lives in the tooltip.
+              Positioned(
+                bottom: 16,
+                right: 16,
+                child: compactOverlays
+                    ? FloatingActionButton.small(
+                        heroTag: 'smart_gps_btn',
+                        tooltip: l10n.useSmartGpsLocation,
+                        onPressed: isLockingGps ? null : _detectPreciseGps,
+                        backgroundColor: cs.surface,
+                        foregroundColor: AppColors.brandPurple,
+                        child: const Icon(Icons.my_location_rounded),
+                      )
+                    : FloatingActionButton.extended(
+                        heroTag: 'smart_gps_btn',
+                        onPressed: isLockingGps ? null : _detectPreciseGps,
+                        backgroundColor: cs.surface,
+                        foregroundColor: AppColors.brandPurple,
+                        icon: const Icon(Icons.my_location_rounded),
+                        label: Text(
+                          l10n.useSmartGpsLocation,
+                          style: AppTextStyles.labelMedium.copyWith(
+                            color: AppColors.brandPurple,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
+              ),
+            ],
+          );
+          final stripSection = compactOverlays
+              ? Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                  child: SizedBox(
+                    height: 28 * textScale.clamp(1.0, 1.6).toDouble(),
+                    child: Center(
+                      child: isLockingGps
+                          ? Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    l10n.acquiringHighAccuracyGps,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTextStyles.labelSmall.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : accuracyMeters != null
+                          ? Text(
+                              l10n.gpsLockedWithinMeters(
+                                accuracyMeters!.toStringAsFixed(1),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.labelSmall.copyWith(
+                                color: AppColors.successLight,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            )
+                          : const SizedBox.shrink(),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          // Bottom card with resolved address + confirm button
-          SafeArea(
+                )
+              : const SizedBox.shrink();
+          final bottomCard = SafeArea(
             top: false,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
@@ -694,8 +820,8 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
                               Text(
                                 _isGeocoding
                                     ? l10n.searchingForLocation
-                                    : (_resolvedAddress.isNotEmpty
-                                          ? _resolvedAddress
+                                    : (resolvedAddress.isNotEmpty
+                                          ? resolvedAddress
                                           : l10n.locationUnavailable),
                                 style: AppTextStyles.bodyMedium.copyWith(
                                   fontWeight: FontWeight.w600,
@@ -716,8 +842,8 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
                       onPressed:
                           _isConfirming ||
                               _isGeocoding ||
-                              _isLockingGps ||
-                              _resolvedAddress.isEmpty
+                              isLockingGps ||
+                              resolvedAddress.isEmpty
                           ? null
                           : _confirmSelection,
                       style: FilledButton.styleFrom(
@@ -748,8 +874,28 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
                 ],
               ),
             ),
-          ),
-        ],
+          );
+          if (tight) {
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  topSection,
+                  SizedBox(height: 160, child: mapSection),
+                  stripSection,
+                  bottomCard,
+                ],
+              ),
+            );
+          }
+          return Column(
+            children: [
+              Flexible(flex: 3, fit: FlexFit.loose, child: topSection),
+              Expanded(flex: 4, child: mapSection),
+              stripSection,
+              bottomCard,
+            ],
+          );
+        },
       ),
     );
   }

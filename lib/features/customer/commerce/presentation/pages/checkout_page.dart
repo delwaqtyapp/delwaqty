@@ -305,47 +305,30 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   ),
                 ),
                 if (savedAddresses != null && savedAddresses.isNotEmpty)
-                  SizedBox(
-                    height: 44,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.only(top: 8),
-                      itemCount: savedAddresses.length,
-                      separatorBuilder: (_, _) => const SizedBox(width: 8),
-                      itemBuilder: (context, i) {
-                        final a = savedAddresses[i];
-                        final lat = (a['latitude'] as num?)?.toDouble();
-                        final lng = (a['longitude'] as num?)?.toDouble();
-                        final label =
-                            (a['label'] as String?)?.trim().isNotEmpty == true
-                            ? a['label'] as String
-                            : (a['address'] as String? ?? '');
-                        final selected =
-                            lat != null &&
-                            _deliveryLocation?.latitude == lat &&
-                            _deliveryLocation?.longitude == lng;
-                        return ChoiceChip(
-                          label: Text(label),
-                          selected: selected,
-                          onSelected: lat == null || lng == null
-                              ? null
-                              : (_) => setState(() {
-                                  final addr = (a['address'] as String?) ?? '';
-                                  final lbl =
-                                      (a['label'] as String?)?.trim() ?? '';
-                                  _addressController.text = lbl.isNotEmpty
-                                      ? '$lbl - $addr'
-                                      : addr;
-                                  _deliveryLocation = UserLocation(
-                                    latitude: lat,
-                                    longitude: lng,
-                                    detailedAddress: addr,
-                                  );
-                                  _addressPrefilled = true;
-                                }),
-                        );
-                      },
-                    ),
+                  SavedAddressChipStrip(
+                    addresses: savedAddresses,
+                    isSelected: (a) {
+                      final lat = (a['latitude'] as num?)?.toDouble();
+                      final lng = (a['longitude'] as num?)?.toDouble();
+                      return lat != null &&
+                          _deliveryLocation?.latitude == lat &&
+                          _deliveryLocation?.longitude == lng;
+                    },
+                    onSelect: (a) => setState(() {
+                      final lat = (a['latitude'] as num?)?.toDouble();
+                      final lng = (a['longitude'] as num?)?.toDouble();
+                      final addr = (a['address'] as String?) ?? '';
+                      final lbl = (a['label'] as String?)?.trim() ?? '';
+                      _addressController.text = lbl.isNotEmpty
+                          ? '$lbl - $addr'
+                          : addr;
+                      _deliveryLocation = UserLocation(
+                        latitude: lat!,
+                        longitude: lng!,
+                        detailedAddress: addr,
+                      );
+                      _addressPrefilled = true;
+                    }),
                   ),
                 Wrap(
                   alignment: WrapAlignment.end,
@@ -867,6 +850,53 @@ class _PaymentOptionTile extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Horizontal strip of saved-address chips shown on the checkout page.
+/// Public so widget tests can render the strip in isolation at extreme text
+/// scales: its height grows with the text scale (clamped at 1.6x) so
+/// large-text chips are never clipped.
+class SavedAddressChipStrip extends StatelessWidget {
+  const SavedAddressChipStrip({
+    super.key,
+    required this.addresses,
+    required this.isSelected,
+    required this.onSelect,
+  });
+
+  final List<Map<String, dynamic>> addresses;
+  final bool Function(Map<String, dynamic> address) isSelected;
+
+  /// Called only for addresses that carry coordinates.
+  final void Function(Map<String, dynamic> address) onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height:
+          44 *
+          MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.6).toDouble(),
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.only(top: 8),
+        itemCount: addresses.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (context, i) {
+          final a = addresses[i];
+          final lat = (a['latitude'] as num?)?.toDouble();
+          final lng = (a['longitude'] as num?)?.toDouble();
+          final label = (a['label'] as String?)?.trim().isNotEmpty == true
+              ? a['label'] as String
+              : (a['address'] as String? ?? '');
+          return ChoiceChip(
+            label: Text(label),
+            selected: isSelected(a),
+            onSelected: lat == null || lng == null ? null : (_) => onSelect(a),
+          );
+        },
       ),
     );
   }

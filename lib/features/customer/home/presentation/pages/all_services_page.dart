@@ -149,21 +149,10 @@ class AllServicesPage extends ConsumerWidget {
     List<_GridItem> items,
     Widget Function(int index) builder,
   ) {
-    final ts = MediaQuery.textScalerOf(context)
-        .scale(1.0)
-        .clamp(1.0, 1.8)
-        .toDouble();
     return SliverPadding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
       sliver: SliverGrid(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          mainAxisSpacing: 14,
-          crossAxisSpacing: 12,
-          // Grow rows with the text scale so long Arabic service
-          // names on two lines never crop.
-          mainAxisExtent: 132 * ts,
-        ),
+        gridDelegate: adaptiveServiceGridDelegate(context),
         delegate: SliverChildBuilderDelegate(
           (context, index) => builder(index),
           childCount: items.length,
@@ -291,4 +280,32 @@ class _SimpleGridTile extends StatelessWidget {
       child: Text(emoji ?? '🏪', style: const TextStyle(fontSize: 22)),
     );
   }
+}
+
+/// Grid delegate for the all-services grid. Column count adapts to width
+/// and text scale: large text needs wider tiles, so a small screen at 2.0x
+/// drops from 3 columns to 2 instead of squeezing labels into unreadable
+/// slivers. Row height grows with the text scale so long Arabic service
+/// names on two lines never crop.
+SliverGridDelegateWithFixedCrossAxisCount adaptiveServiceGridDelegate(
+  BuildContext context,
+) {
+  final ts = MediaQuery.textScalerOf(context)
+      .scale(1.0)
+      .clamp(1.0, 1.8)
+      .toDouble();
+  // A zero width (tests that override MediaQuery without a size) keeps
+  // the historical 3-column layout.
+  final width = MediaQuery.sizeOf(context).width;
+  final minTileWidth = 110.0 * ts;
+  final available = width - 32; // horizontal padding
+  final columns = width <= 0
+      ? 3
+      : (available / minTileWidth).floor().clamp(1, 3);
+  return SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: columns,
+    mainAxisSpacing: 14,
+    crossAxisSpacing: 12,
+    mainAxisExtent: 132 * ts,
+  );
 }

@@ -159,14 +159,18 @@ final providerRawCategoryProvider = FutureProvider<String>((ref) async {
         .select('role')
         .eq('id', uid)
         .maybeSingle();
-    final role = (userRow?['role'] as String?)?.trim().toLowerCase();
-    if (role == 'provider') {
-      return 'home_services';
-    }
+    return unprovisionedCategoryForRole(userRow?['role'] as String?);
   } catch (_) {}
 
   return 'unknown';
 });
+
+/// Category for an account with a bare role and no merchant or service row:
+/// always unknown. A provider is not only home services (doctor, nurse,
+/// teacher, barber...), so guessing 'home_services' here opened the wrong
+/// surfaces for every unprovisioned professional account. Unknown fails
+/// closed (dashboard + money only) until provisioning writes a real row.
+String unprovisionedCategoryForRole(String? role) => 'unknown';
 
 /// The provider's canonical category (normalized from the raw DB value).
 final providerCategoryProvider = Provider<ProviderCategory>((ref) {

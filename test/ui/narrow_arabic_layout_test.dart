@@ -21,6 +21,26 @@ import 'package:delwaqty/features/customer/commerce/domain/repositories/order_re
 import 'package:delwaqty/features/customer/commerce/presentation/pages/order_tracking_page.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/pages/orders_page.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/cash_collection.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_order.dart';
+import 'package:delwaqty/features/customer/driver/presentation/providers/dispatch_providers.dart';
+import 'package:delwaqty/features/driver/driver_module.dart';
+import 'package:delwaqty/features/driver/domain/entities/driver_profile.dart';
+import 'package:delwaqty/features/customer/restaurant/domain/entities/branch.dart';
+import 'package:delwaqty/features/customer/restaurant/domain/entities/reservation.dart';
+import 'package:delwaqty/features/customer/restaurant/domain/repositories/branch_repository.dart';
+import 'package:delwaqty/features/customer/restaurant/domain/repositories/reservation_repository.dart';
+import 'package:delwaqty/features/customer/restaurant/presentation/pages/restaurant_reservation_page.dart';
+import 'package:delwaqty/features/customer/restaurant/restaurant_module.dart';
+import 'package:delwaqty/features/driver/presentation/pages/driver_delivery_detail_page.dart';
+import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/domain/entities/user.dart';
+import 'package:delwaqty/features/provider/merchant/domain/entities/merchant_order.dart';
+import 'package:delwaqty/features/provider/merchant/domain/entities/merchant_stats.dart';
+import 'package:delwaqty/features/provider/merchant/domain/repositories/merchant_dashboard_repository.dart';
+import 'package:delwaqty/features/provider/merchant/merchant_module.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_orders_page.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/review.dart';
 import 'package:delwaqty/features/customer/commerce/domain/repositories/review_repository.dart';
@@ -86,6 +106,9 @@ void main() {
   }
 
   _registerOrderPageTests(pumpPage);
+  _registerMerchantOrdersTest(pumpPage);
+  _registerDriverDeliveryDetailTest(pumpPage);
+  _registerReservationTest(pumpPage);
 
   group('ServiceReviewsPage SummaryCard histogram', () {
     testWidgets('320 / 1.6x Arabic: no overflow, 1000 stays on one line', (
@@ -630,6 +653,268 @@ void _registerOrderPageTests(
       );
       expect(tester.takeException(), isNull);
       expect(find.textContaining('مطعم الاختبار'), findsWidgets);
+    });
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Item 34: merchant orders list rows
+// ---------------------------------------------------------------------------
+
+class _FakeMerchantDashboardRepository implements MerchantDashboardRepository {
+  _FakeMerchantDashboardRepository({this.orders = const []});
+
+  final List<MerchantOrder> orders;
+
+  @override
+  Future<List<MerchantOrder>> getMerchantOrders(
+    String merchantId, {
+    String? status,
+    int limit = 20,
+    int offset = 0,
+  }) async => orders;
+
+  @override
+  Future<MerchantStats> getMerchantStats(String merchantId) =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> updateOrderStatus(String orderId, String status) =>
+      throw UnimplementedError();
+
+  @override
+  Future<List<Map<String, dynamic>>> getMerchantProducts(String merchantId) =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> createProduct(String merchantId, Map<String, dynamic> product) =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> updateProduct(String productId, Map<String, dynamic> product) =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> deleteProduct(String productId) => throw UnimplementedError();
+}
+
+void _registerMerchantOrdersTest(
+  Future<void> Function(
+    WidgetTester tester,
+    Widget home, {
+    List<Override> overrides,
+    bool settle,
+  })
+  pumpPage,
+) {
+  group('MerchantOrdersPage rows (item 34)', () {
+    testWidgets('320 / 1.6x Arabic: amount on own line, actions wrap', (
+      tester,
+    ) async {
+      await pumpPage(
+        tester,
+        const MerchantOrdersPage(),
+        settle: false,
+        overrides: [
+          merchantDashboardRepositoryProvider.overrideWithValue(
+            _FakeMerchantDashboardRepository(
+              orders: [
+                MerchantOrder(
+                  id: 'mo1',
+                  customerId: 'c1',
+                  customerName: 'أحمد محمد عبدالله إبراهيم',
+                  totalAmount: 12345.67,
+                  status: 'pending',
+                  createdAt: DateTime(2026, 1, 1),
+                ),
+              ],
+            ),
+          ),
+          // Empty id skips the realtime subscription in initState.
+          providerMerchantIdProvider.overrideWith((ref) async => ''),
+        ],
+      );
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining('12345.67'), findsWidgets);
+    });
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Item 47: driver delivery detail stacked rows + localized fare
+// ---------------------------------------------------------------------------
+
+class _FakeAuthenticatedNotifier extends AuthStateNotifier {
+  @override
+  AuthState build() => AuthState.authenticated(
+    user: User(
+      id: 'd1',
+      email: 'driver@example.com',
+      createdAt: DateTime(2026, 1, 1),
+    ),
+  );
+}
+
+void _registerDriverDeliveryDetailTest(
+  Future<void> Function(
+    WidgetTester tester,
+    Widget home, {
+    List<Override> overrides,
+    bool settle,
+  })
+  pumpPage,
+) {
+  group('DriverDeliveryDetailPage fare rows (item 47)', () {
+    testWidgets('320 / 1.6x Arabic: fare readable, no overflow', (
+      tester,
+    ) async {
+      await pumpPage(
+        tester,
+        const DriverDeliveryDetailPage(id: 'del1'),
+        settle: false,
+        overrides: [
+          authStateProvider.overrideWith(_FakeAuthenticatedNotifier.new),
+          deliveryOrderByIdProvider.overrideWith(
+            (ref, id) async => DeliveryOrder(
+              id: 'del1',
+              serviceType: 'delivery',
+              pickupLatitude: 30.0,
+              pickupLongitude: 31.0,
+              dropoffLatitude: 30.1,
+              dropoffLongitude: 31.1,
+              pickupAddress: 'عنوان الاستلام من المتجر الكبير',
+              dropoffAddress: 'عنوان التوصيل إلى العميل',
+              fare: 1234.56,
+              status: 'in_progress',
+            ),
+          ),
+          driverProfileProvider.overrideWith(
+            (ref, id) async => DriverProfile(
+              id: 'dr1',
+              userId: 'd1',
+              createdAt: DateTime(2026, 1, 1),
+            ),
+          ),
+          driverLivePositionProvider.overrideWith((ref, id) => null),
+          cashCollectionStateProvider.overrideWith((ref, id) async => null),
+        ],
+      );
+      expect(tester.takeException(), isNull);
+      // Fare renders whole (toStringAsFixed(0)) with the localized
+      // currency symbol.
+      expect(find.textContaining('1235'), findsWidgets);
+      expect(find.textContaining('ج.م'), findsWidgets);
+    });
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Item 42: restaurant reservation date chips + slots
+// ---------------------------------------------------------------------------
+
+class _FakeBranchRepository implements BranchRepository {
+  @override
+  Future<List<Branch>> getBranches(String merchantId) async => [
+    Branch(
+      id: 'b1',
+      merchantId: 'm1',
+      name: 'الفرع الرئيسي',
+      createdAt: DateTime(2026, 1, 1),
+    ),
+  ];
+
+  @override
+  Future<Branch?> getBranchById(String id) async => null;
+
+  @override
+  Future<Branch> createBranch(Branch branch) => throw UnimplementedError();
+
+  @override
+  Future<Branch> updateBranch(Branch branch) => throw UnimplementedError();
+
+  @override
+  Future<void> deleteBranch(String id) => throw UnimplementedError();
+}
+
+class _FakeReservationRepository implements ReservationRepository {
+  @override
+  Future<List<ReservationSlot>> getAvailableSlots({
+    required String merchantId,
+    required DateTime date,
+    required int partySize,
+    String? branchId,
+  }) async => [
+    ReservationSlot(
+      time: date,
+      tableNumber: 'T1',
+      capacity: 4,
+      isAvailable: true,
+    ),
+  ];
+
+  @override
+  Future<List<Reservation>> getReservations(
+    String merchantId, {
+    ReservationStatus? status,
+  }) async => const [];
+
+  @override
+  Future<List<Reservation>> getUserReservations(
+    String userId, {
+    ReservationStatus? status,
+  }) async => const [];
+
+  @override
+  Future<Reservation?> getReservationById(String id) async => null;
+
+  @override
+  Future<Reservation> createReservation(Reservation reservation) =>
+      throw UnimplementedError();
+
+  @override
+  Future<Reservation> updateReservation(String id, ReservationStatus status) =>
+      throw UnimplementedError();
+
+  @override
+  Future<Reservation> modifyReservation({
+    required String reservationId,
+    int? partySize,
+    DateTime? reservationTime,
+    String? specialRequests,
+    String? tableNumber,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<Reservation> cancelReservation(
+    String reservationId, {
+    String? reason,
+  }) => throw UnimplementedError();
+}
+
+void _registerReservationTest(
+  Future<void> Function(
+    WidgetTester tester,
+    Widget home, {
+    List<Override> overrides,
+    bool settle,
+  })
+  pumpPage,
+) {
+  group('RestaurantReservationPage date chips (item 42)', () {
+    testWidgets('320 / 1.6x Arabic: date chips fully visible, no overflow', (
+      tester,
+    ) async {
+      await pumpPage(
+        tester,
+        const RestaurantReservationPage(merchantId: 'm1'),
+        overrides: [
+          branchRepositoryProvider.overrideWithValue(_FakeBranchRepository()),
+          reservationRepositoryProvider.overrideWithValue(
+            _FakeReservationRepository(),
+          ),
+        ],
+      );
+      expect(tester.takeException(), isNull);
     });
   });
 }

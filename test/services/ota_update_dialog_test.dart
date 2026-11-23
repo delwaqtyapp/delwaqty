@@ -112,7 +112,7 @@ void main() {
     // Calm instructions, Install button visible, no error colour text.
     expect(find.text('Install'), findsOneWidget);
     expect(find.textContaining('Allow Delwaqty'), findsOneWidget);
-    expect(find.text('Later'), findsNothing);
+    expect(find.text('Later'), findsOneWidget);
 
     // Back from settings without permission: nothing happens, still shown.
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);

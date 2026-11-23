@@ -1,3 +1,4 @@
+import 'package:delwaqty/shared/widgets/readable_fit_text.dart';
 import 'package:delwaqty/shared/widgets/delivery_handoff_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -451,14 +452,10 @@ class _OrderDetailsCard extends StatelessWidget {
                       const SizedBox(width: 8),
                       Flexible(
                         flex: 2,
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            '${item.totalPrice.toStringAsFixed(2)} ${l10n.egp}',
-                            maxLines: 1,
-                            style: textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
+                        child: ReadableFitText(
+                          '${item.totalPrice.toStringAsFixed(2)} ${l10n.egp}',
+                          style: textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -532,14 +529,10 @@ class _PriceRow extends StatelessWidget {
         const SizedBox(width: 8),
         Flexible(
           flex: 2,
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              value,
-              maxLines: 1,
-              style: textTheme.bodyMedium?.copyWith(
-                fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
-              ),
+          child: ReadableFitText(
+            value,
+            style: textTheme.bodyMedium?.copyWith(
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
             ),
           ),
         ),

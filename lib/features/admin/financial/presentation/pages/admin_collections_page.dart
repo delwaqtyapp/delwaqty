@@ -217,13 +217,13 @@ class _MetricGrid extends StatelessWidget {
           color: AppColors.brandPurple,
         ),
         IntelligenceStat(
-          title: l10n.weeklyEarnings,
+          title: l10n.periodWeek,
           value: fmt(summary.week as double),
           icon: Icons.date_range_rounded,
           color: cs.tertiary,
         ),
         IntelligenceStat(
-          title: l10n.monthlyEarnings,
+          title: l10n.periodMonth,
           value: fmt(summary.month as double),
           icon: Icons.calendar_month_rounded,
           color: cs.primary,

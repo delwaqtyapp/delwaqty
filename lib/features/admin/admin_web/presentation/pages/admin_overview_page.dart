@@ -68,7 +68,14 @@ class _StatsGrid extends StatelessWidget {
             crossAxisCount: crossAxisCount,
             mainAxisSpacing: 20,
             crossAxisSpacing: 20,
-            mainAxisExtent: 116,
+            // Height grows with the text scale so the value and the
+            // wrapped Arabic label never overflow the card bottom.
+            mainAxisExtent:
+                116 *
+                MediaQuery.textScalerOf(context)
+                    .scale(1.0)
+                    .clamp(1.0, 1.8)
+                    .toDouble(),
           ),
           children: [
             AdminKpiCard(

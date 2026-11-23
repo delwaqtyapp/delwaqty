@@ -4,6 +4,7 @@ import 'package:delwaqty/services/admin/admin_providers.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/glass_card.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
+import 'package:delwaqty/shared/widgets/readable_fit_text.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 
@@ -107,12 +108,18 @@ class _RevenueOverviewSection extends StatelessWidget {
                         size: 40,
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        '${l10n.currencySymbol} ${metrics.totalRevenue.toStringAsFixed(2)}',
-                        style: AppTextStyles.titleMedium.copyWith(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onPrimary,
+                      // Never clip the amount at the card edge: scale
+                      // down to a readable minimum, then wrap.
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: ReadableFitText(
+                          '${l10n.currencySymbol} ${metrics.totalRevenue.toStringAsFixed(2)}',
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.titleMedium.copyWith(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 4),

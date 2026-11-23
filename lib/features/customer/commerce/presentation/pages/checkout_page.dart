@@ -823,39 +823,48 @@ class _PaymentOptionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Material(
-      color: selected ? cs.primaryContainer : cs.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: selected ? cs.primary : cs.outlineVariant,
-          width: selected ? 1.5 : 1,
+    return Semantics(
+      button: true,
+      selected: selected,
+      inMutuallyExclusiveGroup: true,
+      label: label,
+      child: Material(
+        color: selected ? cs.primaryContainer : cs.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: selected ? cs.primary : cs.outlineVariant,
+            width: selected ? 1.5 : 1,
+          ),
         ),
-      ),
-      child: InkWell(
-        onTap: () => onSelected(value),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Row(
-            children: [
-              Icon(icon, color: selected ? cs.primary : cs.onSurfaceVariant),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+        child: InkWell(
+          onTap: () => onSelected(value),
+          borderRadius: BorderRadius.circular(12),
+          canRequestFocus: true,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              children: [
+                Icon(icon, color: selected ? cs.primary : cs.onSurfaceVariant),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: selected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                    ),
                   ),
                 ),
-              ),
-              Icon(
-                selected
-                    ? Icons.radio_button_checked_rounded
-                    : Icons.radio_button_off_rounded,
-                color: selected ? cs.primary : cs.onSurfaceVariant,
-              ),
-            ],
+                Icon(
+                  selected
+                      ? Icons.radio_button_checked_rounded
+                      : Icons.radio_button_off_rounded,
+                  color: selected ? cs.primary : cs.onSurfaceVariant,
+                ),
+              ],
+            ),
           ),
         ),
       ),

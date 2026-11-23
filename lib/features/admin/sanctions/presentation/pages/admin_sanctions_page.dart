@@ -225,9 +225,10 @@ class _SanctionDetailSheetState extends ConsumerState<_SanctionDetailSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
+              // Generated signature is alphabetical: (role, type).
               l10n.revokeSanctionConfirm(
-                _sanctionTypeLabel(l10n, widget.sanction.sanctionType),
                 _targetRoleLabel(l10n, widget.sanction.targetRole),
+                _sanctionTypeLabel(l10n, widget.sanction.sanctionType),
               ),
             ),
             const SizedBox(height: 12),

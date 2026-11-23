@@ -116,11 +116,19 @@ class _AdminRegionsManagementPageState
           )
           // FittedBox scales the extended FAB down on narrow screens so
           // a long localized label never clips at the screen edge.
-          ? FittedBox(
-              child: FloatingActionButton.extended(
-                onPressed: () => _openUpsertSheet(parent: _currentParent),
-                icon: const Icon(Icons.add_location_alt_rounded),
-                label: Text(l10n.addSubRegion),
+          // Constrain to the screen width so a long localized label
+          // scales down instead of clipping at the right edge.
+          ? ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.sizeOf(context).width - 32,
+              ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: FloatingActionButton.extended(
+                  onPressed: () => _openUpsertSheet(parent: _currentParent),
+                  icon: const Icon(Icons.add_location_alt_rounded),
+                  label: Text(l10n.addSubRegion),
+                ),
               ),
             )
           : null,

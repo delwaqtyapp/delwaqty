@@ -1,3 +1,4 @@
+import 'package:delwaqty/shared/widgets/readable_fit_text.dart';
 import 'package:delwaqty/shared/widgets/delivery_handoff_button.dart';
 import 'package:delwaqty/shared/widgets/delivery_incident_dialog.dart';
 
@@ -646,14 +647,10 @@ class _ReceiptRow extends StatelessWidget {
           const SizedBox(width: 8),
           Flexible(
             flex: 2,
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                value,
-                maxLines: 1,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-                ),
+            child: ReadableFitText(
+              value,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: bold ? FontWeight.bold : FontWeight.normal,
               ),
             ),
           ),

@@ -361,7 +361,7 @@ class _LedgerItemTile extends StatelessWidget {
                 cs: cs,
               ),
               _AmountColumn(
-                label: l10n.commissionLabel,
+                label: l10n.commissionRate,
                 value: '${item.commissionRate.toStringAsFixed(0)}%',
                 cs: cs,
                 isSmall: true,

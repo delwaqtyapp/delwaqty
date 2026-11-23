@@ -154,11 +154,15 @@ class _InsuranceMismatchTile extends StatelessWidget {
                     ),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
+                  // Full sale id on its own line: a non-flex trailing
+                  // Text would eat the narrow row width.
+                  Text(
+                    '#${mismatch.insuranceSaleId}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            Text('#${mismatch.insuranceSaleId}', maxLines: 1, softWrap: false),
           ],
         ),
       ),

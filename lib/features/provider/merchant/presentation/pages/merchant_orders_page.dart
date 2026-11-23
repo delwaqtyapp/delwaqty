@@ -1,3 +1,5 @@
+import 'package:delwaqty/shared/widgets/readable_fit_text.dart';
+
 import 'dart:async';
 
 import 'package:delwaqty/shared/widgets/delivery_handoff_button.dart';
@@ -554,15 +556,11 @@ class _OrderCard extends StatelessWidget {
               // end-aligned row below so neither overflows the card.
               Align(
                 alignment: AlignmentDirectional.centerStart,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    '${l10n.currencySymbol} ${order.totalAmount.toStringAsFixed(2)}',
-                    maxLines: 1,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
-                    ),
+                child: ReadableFitText(
+                  '${l10n.currencySymbol} ${order.totalAmount.toStringAsFixed(2)}',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
                   ),
                 ),
               ),

@@ -65,7 +65,7 @@ do $$ declare
   v_adm uuid := gen_random_uuid(); v_denied boolean;
   v_country uuid := gen_random_uuid(); v_regional uuid := gen_random_uuid();
   v_unassigned uuid := gen_random_uuid(); v_inactive uuid := gen_random_uuid();
-  v_uid uuid; v_oid uuid;
+  v_uid uuid; v_oid uuid; v_oid2 uuid;
 begin
   select * into t from zz_ctx;
 
@@ -559,7 +559,8 @@ begin
     'J3: audit row carries the reference';
   r := public.mark_platform_payable_settled(o1, 'driver_payable', 'duplicate');
   assert r->>'ok'='true' and r->>'already_settled'='true'
-     and r->>'money_moved'='false', 'J3: repeat idempotent';
+     and r->>'money_moved'='false' and r->>'reference'='zz-transfer-114',
+    'J3: repeat idempotent, replays the ORIGINAL reference';
   assert (select count(*) from public.activity_logs
     where action='PLATFORM_PAYABLE_SETTLED' and resource_id=o1::text) = 1,
     'J3: still one audit row';
@@ -624,7 +625,60 @@ begin
     v_denied := position('no settleable' in sqlerrm) > 0;
   end;
   assert v_denied, 'J6: void row rejected by the setter';
+
+  -- J7 fixtures: an open payable plus the country admin id, handed to the
+  -- top-level real-role ACL checks through transaction-local settings.
+  select o.id into v_oid2 from public.orders o
+   where not exists (select 1 from public.platform_subsidies ps where ps.order_id = o.id)
+   order by o.created_at desc
+   limit 1;
+  insert into public.platform_subsidies(order_id, kind, amount, settlement_model, reimburses, driver_payable, status)
+  values (v_oid2, 'delay_apology_credit', 7, 'platform', 'driver', 7, 'netted');
+  perform set_config('app.zz_acl_oid', v_oid2::text, true);
+  perform set_config('app.zz_acl_country', v_country::text, true);
 end $$;
+
+-- ============ J7. Real-role ACL checks (authenticated + anon) ===========
+-- Run under the real roles, not the postgres test runner: the EXECUTE
+-- grant must reach authenticated and must NOT reach anon, and the
+-- global-finance scope gate must still pass under the real role.
+select set_config('request.jwt.claim.sub', current_setting('app.zz_acl_country'), true);
+set local role authenticated;
+do $$
+declare
+  v_oid uuid := current_setting('app.zz_acl_oid')::uuid;
+  v_r jsonb;
+begin
+  assert exists(select 1 from public.admin_open_platform_payables(v_oid)
+    where driver_payable = 7),
+    'J7: authenticated role executes the read RPC (grant + gate)';
+  v_r := public.mark_platform_payable_settled(v_oid, 'driver_payable', 'zz-acl-ref');
+  assert v_r->>'ok'='true' and v_r->>'already_settled'='false'
+     and v_r->>'money_moved'='false',
+    'J7: authenticated role executes the setter (grant + gate)';
+  v_r := public.mark_platform_payable_settled(v_oid, 'driver_payable', 'changed-note');
+  assert v_r->>'already_settled'='true' and v_r->>'reference'='zz-acl-ref',
+    'J7: replay returns the ORIGINAL audit reference';
+end $$;
+reset role;
+
+set local role anon;
+do $$
+declare
+  v_oid uuid := current_setting('app.zz_acl_oid')::uuid;
+begin
+  begin
+    perform 1 from public.admin_open_platform_payables(v_oid) limit 1;
+    raise exception 'J7: anon reached the read RPC';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    perform public.mark_platform_payable_settled(v_oid, 'driver_payable', null);
+    raise exception 'J7: anon reached the setter';
+  exception when insufficient_privilege then null;
+  end;
+end $$;
+reset role;
 
 -- ============ G. wallet_pay immiscibility (#68) ========================
 -- Both client-callable wallet_pay overloads must leave the gift balance
@@ -712,5 +766,5 @@ do $$ declare t record; a jsonb; begin
     'G: own credit readable';
 end $$;
 
-select 'PASS v5: spend mechanics, one-grant-per-order, above-goods, full-total, remainder, cancel/reject restore + retry, paid refund + retry, coupon+gift, replay, net-at-settlement in both models + netted subsidy + payables, dispatch ceiling on net, sweep on net obligations, full-credit both models (goods extinguished, 13.95 earned, payables), non-cash netted_noncash, admin payables list + settle-once idempotent + per-kind partial settle + global-scope gate (owner/country OK; regional/unassigned/inactive/customer denied) + void excluded + NULL/invalid kind rejected, wallet_pay immiscibility, client lockdown' as result;
+select 'PASS v5: spend mechanics, one-grant-per-order, above-goods, full-total, remainder, cancel/reject restore + retry, paid refund + retry, coupon+gift, replay, net-at-settlement in both models + netted subsidy + payables, dispatch ceiling on net, sweep on net obligations, full-credit both models (goods extinguished, 13.95 earned, payables), non-cash netted_noncash, admin payables list + settle-once idempotent + per-kind partial settle + global-scope gate (owner/country OK; regional/unassigned/inactive/customer denied) + void excluded + NULL/invalid kind rejected + real-role ACL (authenticated granted, anon denied) + original-reference replay, wallet_pay immiscibility, client lockdown' as result;
 rollback;

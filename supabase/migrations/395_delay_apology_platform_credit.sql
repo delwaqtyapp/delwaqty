@@ -1480,7 +1480,8 @@ $function$;
 -- Both are global-finance scope (#97): owner or country-level admin, via
 -- _admin_write_scope(NULL). The optional note is the ops settlement
 -- reference (transfer id, receipt no) kept in the audit row; the result
--- states explicitly that it records settlement and moves no money.
+-- states explicitly that it records settlement and moves no money. A
+-- repeat call replays the ORIGINAL recorded reference, not the new note.
 -- ---------------------------------------------------------------------------
 
 create or replace function public.admin_open_platform_payables(p_order_id uuid default null)
@@ -1537,6 +1538,7 @@ declare
   v_sub public.platform_subsidies%rowtype;
   v_amount numeric;
   v_all_settled boolean;
+  v_orig_ref text;
 begin
   -- #97: global finance scope, same as the read path above.
   if not public._admin_write_scope(null) then
@@ -1562,10 +1564,19 @@ begin
   -- and writes no second audit row.
   if (p_kind = 'driver_payable' and v_sub.driver_payable_settled_at is not null)
      or (p_kind = 'merchant_payable' and v_sub.merchant_payable_settled_at is not null) then
+    -- A replay reports the reference recorded by the ORIGINAL settle call,
+    -- never whatever note this repeat call carried.
+    select al.details->>'reference' into v_orig_ref
+      from public.activity_logs al
+     where al.action = 'PLATFORM_PAYABLE_SETTLED'
+       and al.resource_id = p_order_id::text
+       and al.details->>'payable_kind' = p_kind
+     order by al."timestamp" desc
+     limit 1;
     return jsonb_build_object('ok', true, 'order_id', p_order_id, 'kind', p_kind,
                               'amount', v_amount, 'already_settled', true,
                               'settlement_recorded', true, 'money_moved', false,
-                              'reference', p_note);
+                              'reference', v_orig_ref);
   end if;
   if p_kind = 'driver_payable' then
     update public.platform_subsidies set driver_payable_settled_at = now()

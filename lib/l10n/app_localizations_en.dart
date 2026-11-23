@@ -7049,6 +7049,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resendWhatsAppCode => 'Resend Code';
+
   @override
   String get whatsappYourCodeLabel => 'Your verification code';
 
@@ -7095,8 +7096,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retryRequest => 'Try again';
 
   @override
-  String get iSentItCheckNow => "I've sent it - check now";
-
+  String get iSentItCheckNow => 'I\'ve sent it - check now';
 
   @override
   String get phoneOrEmailOrUsername => 'Phone Number or Username';

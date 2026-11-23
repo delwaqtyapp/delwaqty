@@ -6995,6 +6995,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get resendWhatsAppCode => 'إعادة إرسال الكود';
+
   @override
   String get whatsappYourCodeLabel => 'رمز التحقق الخاص بك';
 
@@ -7042,7 +7043,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get iSentItCheckNow => 'أرسلتها - تحقق الآن';
-
 
   @override
   String get phoneOrEmailOrUsername => 'رقم الهاتف أو اسم المستخدم';

@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -15,11 +18,13 @@ class WhatsAppOtpSheet extends StatefulWidget {
     required this.phone,
     this.purpose = 'register',
     this.client,
+    this.now,
   });
 
   final String phone;
   final String purpose;
   final SupabaseClient? client;
+  final DateTime Function()? now;
 
   static Future<bool> show(
     BuildContext context, {
@@ -38,7 +43,7 @@ class WhatsAppOtpSheet extends StatefulWidget {
     return showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF140D24),
+      backgroundColor: AppColors.brandPurpleDeep,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -57,6 +62,7 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
 
   Timer? _pollTimer;
   Timer? _tickTimer;
+  Timer? _copyTimer;
   late final AnimationController _pulse;
   _OtpPhase _phase = _OtpPhase.loading;
   bool _verifying = false;
@@ -66,7 +72,8 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
   int _requestGeneration = 0;
   String? _otpCode;
   String? _challenge;
-  String _whatsappNumber = '+201000000000';
+  String _whatsappNumber = '';
+  DateTime _now() => (widget.now ?? DateTime.now)();
   String? _errorText;
   DateTime? _expiresAt;
   DateTime? _resendAvailableAt;
@@ -86,6 +93,7 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
   void dispose() {
     _pollTimer?.cancel();
     _tickTimer?.cancel();
+    _copyTimer?.cancel();
     _pulse.dispose();
     super.dispose();
   }
@@ -114,29 +122,29 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
       final ok = map['ok'] == true;
       final otp = (map['otp_code'] as String?)?.trim();
       final challenge = (map['challenge'] as String?)?.trim();
-      final supportNumber =
-          (map['whatsapp_number'] as String?)?.trim() ?? '+201000000000';
+      final supportNumber = (map['whatsapp_number'] as String?)?.trim() ?? '';
       final ttlSeconds = (map['expires_in_seconds'] as num?)?.toInt();
       if (ok &&
           otp != null &&
           otp.isNotEmpty &&
           challenge != null &&
-          challenge.isNotEmpty) {
+          challenge.isNotEmpty &&
+          supportNumber.replaceAll(RegExp(r'[^0-9]'), '').isNotEmpty) {
         setState(() {
           _otpCode = otp;
           _challenge = challenge;
           _whatsappNumber = supportNumber;
           _phase = _OtpPhase.active;
-          _expiresAt = DateTime.now().add(
+          _expiresAt = _now().add(
             ttlSeconds != null && ttlSeconds > 0
                 ? Duration(seconds: ttlSeconds)
                 : _defaultCodeTtl,
           );
-          _remaining = _expiresAt!.difference(DateTime.now());
+          _remaining = _expiresAt!.difference(_now());
           // Cooldown only after a manual resend; the first automatic
           // request must leave Resend tappable (RPC has its own limit).
           if (manual) {
-            _resendAvailableAt = DateTime.now().add(_resendCooldown);
+            _resendAvailableAt = _now().add(_resendCooldown);
           }
         });
         _startPolling();
@@ -173,7 +181,8 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
     await Clipboard.setData(ClipboardData(text: code));
     if (!mounted) return;
     setState(() => _copied = true);
-    Timer(const Duration(seconds: 2), () {
+    _copyTimer?.cancel();
+    _copyTimer = Timer(const Duration(seconds: 2), () {
       if (mounted) setState(() => _copied = false);
     });
   }
@@ -196,7 +205,7 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
       if (!mounted || _completed || _phase != _OtpPhase.active) return;
       final expiresAt = _expiresAt;
       if (expiresAt == null) return;
-      final remaining = expiresAt.difference(DateTime.now());
+      final remaining = expiresAt.difference(_now());
       setState(() {
         _remaining = remaining.isNegative ? Duration.zero : remaining;
         if (_remaining == Duration.zero) {
@@ -230,8 +239,9 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
       if (!mounted ||
           _completed ||
           generation != _requestGeneration ||
-          challenge != _challenge)
+          challenge != _challenge) {
         return false;
+      }
       final map = raw is Map
           ? Map<String, dynamic>.from(raw)
           : <String, dynamic>{};
@@ -275,8 +285,8 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
       setState(() {
         _verifying = false;
         if (_phase == _OtpPhase.active) {
-          _errorText =
-              AppLocalizations.of(context).otpNotConfirmedYet(widget.phone);
+          _errorText = AppLocalizations.of(context)
+              .otpNotConfirmedYet(widget.phone);
         }
       });
     }
@@ -284,361 +294,348 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
 
   bool get _resendEnabled {
     final at = _resendAvailableAt;
-    return at == null || !DateTime.now().isBefore(at);
+    return at == null || !_now().isBefore(at);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    const whatsappGreen = Color(0xFF25D366);
+    const whatsappGreen = AppColors.successDark;
 
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.fromLTRB(20, 14, 20, 20 + bottomInset),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 42,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 4,
                   decoration: BoxDecoration(
-                    color: whatsappGreen.withValues(alpha: 0.16),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: whatsappGreen.withValues(alpha: 0.4),
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.chat_rounded,
-                    color: whatsappGreen,
-                    size: 24,
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(999),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.whatsappOtpTitle,
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        widget.phone,
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          color: Colors.white.withValues(alpha: 0.65),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  tooltip: l10n.cancel,
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: Icon(
-                    Icons.close_rounded,
-                    color: Colors.white.withValues(alpha: 0.7),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              l10n.whatsappOtpSubtitle,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.white.withValues(alpha: 0.7),
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (_phase == _OtpPhase.loading)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
-                child: Center(
-                  child: CircularProgressIndicator(color: whatsappGreen),
-                ),
-              )
-            else if (_phase == _OtpPhase.requestFailed) ...[
-              if (_errorText != null)
-                Text(
-                  _errorText!,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                    fontSize: 12.5,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              const SizedBox(height: 14),
-              FilledButton.icon(
-                onPressed: _requestOtp,
-                style: FilledButton.styleFrom(
-                  backgroundColor: whatsappGreen,
-                  foregroundColor: const Color(0xFF0A0614),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                icon: const Icon(Icons.refresh_rounded),
-                label: Text(
-                  l10n.retryRequest,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            ] else if (_phase == _OtpPhase.expired) ...[
-              const SizedBox(height: 6),
-              Icon(
-                Icons.timer_off_rounded,
-                color: Colors.white.withValues(alpha: 0.6),
-                size: 40,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                l10n.otpExpiredTitle,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 6),
-              Text(
-                l10n.otpExpiredBody,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.white.withValues(alpha: 0.7),
-                  height: 1.4,
-                ),
-                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: _requestOtp,
-                style: FilledButton.styleFrom(
-                  backgroundColor: whatsappGreen,
-                  foregroundColor: const Color(0xFF0A0614),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                icon: const Icon(Icons.refresh_rounded),
-                label: Text(
-                  l10n.requestNewOtpCode,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            ] else ...[
-              if (_otpCode != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: whatsappGreen.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: whatsappGreen.withValues(alpha: 0.45),
+              Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: whatsappGreen.withValues(alpha: 0.16),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: whatsappGreen.withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.chat_rounded,
+                      color: whatsappGreen,
+                      size: 24,
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.whatsappYourCodeLabel,
-                              style: TextStyle(
-                                fontSize: 11.5,
-                                color: Colors.white.withValues(alpha: 0.6),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _otpCode!.split('').join(' '),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 26,
-                                letterSpacing: 4,
-                                fontFamily: 'monospace',
-                              ),
-                            ),
-                          ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.whatsappOtpTitle,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        tooltip: l10n.copyOtpCode,
-                        onPressed: _copyCode,
-                        icon: Icon(
-                          _copied
-                              ? Icons.check_rounded
-                              : Icons.copy_rounded,
-                          color: whatsappGreen,
-                          size: 22,
+                        const SizedBox(height: 2),
+                        Text(
+                          widget.phone,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: Colors.white.withValues(alpha: 0.65),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              if (_copied) ...[
-                const SizedBox(height: 6),
-                Text(
-                  l10n.otpCodeCopied,
-                  style: const TextStyle(
-                    color: whatsappGreen,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _PulsingDots(animation: _pulse, color: whatsappGreen),
-                  const SizedBox(width: 10),
-                  Flexible(
-                    child: Text(
-                      l10n.whatsappWaitingAuto,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.65),
-                        height: 1.35,
-                      ),
+                  IconButton(
+                    tooltip: l10n.cancel,
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: Icon(
+                      Icons.close_rounded,
+                      color: Colors.white.withValues(alpha: 0.7),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
+              const SizedBox(height: 12),
+              Text(
+                l10n.whatsappOtpSubtitle,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (_phase == _OtpPhase.loading)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Center(
+                    child: CircularProgressIndicator(color: whatsappGreen),
                   ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(999),
+                )
+              else if (_phase == _OtpPhase.requestFailed) ...[
+                if (_errorText != null)
+                  Text(
+                    _errorText!,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  child: Text(
-                    l10n.otpExpiresIn(_formatDuration(_remaining)),
-                    style: TextStyle(
-                      fontSize: 11.5,
-                      color: Colors.white.withValues(alpha: 0.7),
-                      fontWeight: FontWeight.w600,
+                const SizedBox(height: 14),
+                FilledButton.icon(
+                  onPressed: _requestOtp,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: whatsappGreen,
+                    foregroundColor: AppColors.textPrimary,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: Text(
+                    l10n.retryRequest,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 14),
-              FilledButton.icon(
-                onPressed: _openWhatsApp,
-                style: FilledButton.styleFrom(
-                  backgroundColor: whatsappGreen,
-                  foregroundColor: const Color(0xFF0A0614),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+              ] else if (_phase == _OtpPhase.expired) ...[
+                const SizedBox(height: 6),
+                Icon(
+                  Icons.timer_off_rounded,
+                  color: Colors.white.withValues(alpha: 0.6),
+                  size: 40,
                 ),
-                icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                label: Text(
-                  l10n.openWhatsAppToVerify,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              TextButton.icon(
-                onPressed: _verifying ? null : _verifyOtp,
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white.withValues(alpha: 0.8),
-                ),
-                icon: _verifying
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.check_circle_outline_rounded, size: 18),
-                label: Text(l10n.iSentItCheckNow),
-              ),
-              if (_errorText != null) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: 10),
                 Text(
-                  _errorText!,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                    fontSize: 12.5,
+                  l10n.otpExpiredTitle,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  l10n.otpExpiredBody,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: _requestOtp,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: whatsappGreen,
+                    foregroundColor: AppColors.textPrimary,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: Text(
+                    l10n.requestNewOtpCode,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ] else ...[
+                if (_otpCode != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: whatsappGreen.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: whatsappGreen.withValues(alpha: 0.45),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.whatsappYourCodeLabel,
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.6),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _otpCode!.split('').join(' '),
+                                style: AppTextStyles.headlineSmall.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 4,
+                                  fontFamily: 'monospace',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: l10n.copyOtpCode,
+                          onPressed: _copyCode,
+                          icon: Icon(
+                            _copied ? Icons.check_rounded : Icons.copy_rounded,
+                            color: whatsappGreen,
+                            size: 22,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                if (_copied) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    l10n.otpCodeCopied,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: whatsappGreen,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _PulsingDots(animation: _pulse, color: whatsappGreen),
+                    const SizedBox(width: 10),
+                    Flexible(
+                      child: Text(
+                        l10n.whatsappWaitingAuto,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: Colors.white.withValues(alpha: 0.65),
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      l10n.otpExpiresIn(_formatDuration(_remaining)),
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                FilledButton.icon(
+                  onPressed: _openWhatsApp,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: whatsappGreen,
+                    foregroundColor: AppColors.textPrimary,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                  label: Text(
+                    l10n.openWhatsAppToVerify,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                TextButton.icon(
+                  onPressed: _verifying ? null : _verifyOtp,
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white.withValues(alpha: 0.8),
+                  ),
+                  icon: _verifying
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(
+                          Icons.check_circle_outline_rounded,
+                          size: 18,
+                        ),
+                  label: Text(l10n.iSentItCheckNow),
+                ),
+                if (_errorText != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    _errorText!,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+                const SizedBox(height: 6),
+                TextButton.icon(
+                  onPressed: (_verifying || !_resendEnabled)
+                      ? null
+                      : () => _requestOtp(manual: true),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white.withValues(alpha: 0.7),
+                  ),
+                  icon: const Icon(Icons.refresh_rounded, size: 17),
+                  label: Text(
+                    _resendEnabled
+                        ? l10n.resendWhatsAppCode
+                        : l10n.resendOtpAvailableIn(
+                            _formatDuration(
+                              _resendAvailableAt!.difference(_now()),
+                            ),
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  l10n.wrongPhoneNumberHint,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: Colors.white.withValues(alpha: 0.45),
                   ),
                   textAlign: TextAlign.center,
                 ),
               ],
-              const SizedBox(height: 6),
-              TextButton.icon(
-                onPressed: (_verifying || !_resendEnabled)
-                    ? null
-                    : () => _requestOtp(manual: true),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white.withValues(alpha: 0.7),
-                ),
-                icon: const Icon(Icons.refresh_rounded, size: 17),
-                label: Text(
-                  _resendEnabled
-                      ? l10n.resendWhatsAppCode
-                      : l10n.resendOtpAvailableIn(
-                          _formatDuration(
-                            _resendAvailableAt!.difference(DateTime.now()),
-                          ),
-                        ),
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                l10n.wrongPhoneNumberHint,
-                style: TextStyle(
-                  fontSize: 11.5,
-                  color: Colors.white.withValues(alpha: 0.45),
-                ),
-                textAlign: TextAlign.center,
-              ),
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -660,7 +657,8 @@ class _PulsingDots extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: List.generate(3, (i) {
             final phase = (animation.value - i / 3) % 1.0;
-            final opacity = 0.3 + 0.7 * (phase < 0.5 ? phase * 2 : 2 - phase * 2);
+            final opacity =
+                0.3 + 0.7 * (phase < 0.5 ? phase * 2 : 2 - phase * 2);
             return Container(
               width: 7,
               height: 7,

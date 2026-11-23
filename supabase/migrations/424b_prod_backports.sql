@@ -1,128 +1,40 @@
--- 424: prod/staging hardening convergence (security-reviewer triage, 2026-11-23).
+-- 424b: PROD-ONLY backports (security-reviewer triage 2026-11-23).
 --
--- Part A - revoke spec: trigger guard functions must not be callable by
--- clients. Revokes are idempotent, so one file converges both environments:
--- prod only had service_providers_guard_sensitive_fields leaked to
--- authenticated; staging had anon+authenticated on the other eight.
--- Root cause of the staging re-grants: 000_baseline.sql lines granting
--- EXECUTE on these trigger functions TO PUBLIC/anon/authenticated; staging
--- was bootstrapped from that baseline and prod later revoked them.
+-- Every body replace is guarded by a live pre-state md5 check:
+--   * prod pre-state md5  -> the backport applies;
+--   * staging's newer body (398/400) or the backport target -> skipped,
+--     so this file CANNOT clobber staging and is safe to re-run on prod;
+--   * anything else       -> loud abort.
+-- No gift-credit / platform-credit parts; none exist in these bodies.
+-- 395 stays staging-only pending the owner's confirmation.
+-- All columns touched verified present on prod 2026-11-23; audit_log and
+-- its columns exist on prod; the helpers come from 424a.
 --
--- Part B - audit helpers (new on prod): _audit_cash_collection and
--- _audit_cash_pair_mismatch, verbatim from staging, writing to the existing
--- public.audit_log table. ACL per the new standard: REVOKE FROM PUBLIC,
--- anon, authenticated; GRANT to service_role only (matches staging).
---
--- Part C - safe backports from the staging versions (no gift-credit /
--- platform-credit parts; none exist in these bodies):
---   * confirm_cash_collection: staging body verbatim - order confirmation
---     requires status 'delivered' (prod allowed 'delivering'), unauthorized
---     ids return NOT_FOUND (no existence oracle), canonical lock order
---     orders->rides with linked-partner payment_status sync, idempotent
---     replay healing and audit rows.
---   * rate_ride: staging body verbatim - only a completed ride can be
---     rated; a cash ride requires cash_collected_at (matches the RLS).
---   * provider_set_working_hours: prod body + regex rejects 24:xx-29:xx.
---     NOTE: staging's 398 overnight-window semantics (open=close = 24h,
---     close<open = overnight) are deliberately NOT backported here.
---   * pharmacy_import_drug: barcode trimmed ONCE and used for both the
---     dedup lookup and the stored row. (Staging trimmed only the
---     comparison; the untrimmed stored barcode defeated the fix - flagged
---     to the reviewers.) Staging's unique-index race re-read is NOT
---     backported (prod has no such unique index on products; dead code).
---   * pos_create_sale: prod body + replay lookup scoped to the merchant
---     (idempotency keys are per-merchant). NOTE: staging's #96 advisory
---     lock + sub-block restructure is deliberately NOT backported here.
---
--- RERUNNABLE: every statement is idempotent (CREATE OR REPLACE / REVOKE /
--- GRANT). Column dependencies verified against prod 2026-11-23: every
--- column these bodies touch exists on prod; audit_log exists on prod.
---
--- Explicitly EXCLUDED per owner-pending decision: 395 (gift-credit
--- netting) stays on staging until the owner confirms.
+-- pos_sales idempotency: prod still carries the GLOBAL unique constraint
+-- pos_sales_idempotency_key_key (verified live 2026-11-23); with a
+-- merchant-scoped replay lookup that would 23505 across merchants, so the
+-- constraint is swapped for the per-merchant partial unique index (the
+-- 400 shape). The swap statements are idempotent/convergent (staging
+-- already has them via 400) and intentionally unguarded.
 
 BEGIN;
 
--- ── Part B first: helpers used by confirm_cash_collection ────────────
-CREATE OR REPLACE FUNCTION public._audit_cash_collection(p_resource text, p_resource_id uuid, p_amount numeric)
- RETURNS void
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public', 'pg_temp'
-AS $function$
+-- ── pos_sales: global unique -> per-merchant partial unique ──────────
+ALTER TABLE public.pos_sales DROP CONSTRAINT IF EXISTS pos_sales_idempotency_key_key;
+CREATE UNIQUE INDEX IF NOT EXISTS pos_sales_merchant_idempotency_uq
+  ON public.pos_sales (merchant_id, idempotency_key)
+  WHERE idempotency_key IS NOT NULL;
+
+-- ── confirm_cash_collection ─────────────────────────────────────────────────────────
+-- staging body verbatim: order confirmation requires 'delivered' (prod allowed 'delivering'), unauthorized ids return NOT_FOUND, canonical lock order orders->rides with linked-partner payment sync, idempotent replay healing, CASH_COLLECTED audit + pair warnings.
+DO $g$
+DECLARE
+  v_md5 text := (SELECT md5(pg_get_functiondef(p.oid)) FROM pg_proc p
+                 JOIN pg_namespace n ON n.oid=p.pronamespace
+                 WHERE n.nspname='public' AND p.proname='confirm_cash_collection');
 BEGIN
-  -- Idempotent: one CASH_COLLECTED audit row per resource, however many
-  -- times the confirmation is replayed (double tap, retry, order+ride pair).
-  INSERT INTO public.audit_log (actor, actor_role, scope, action, resource, resource_id, after)
-  SELECT auth.uid(),
-         COALESCE((SELECT u.role FROM public.users u WHERE u.id = auth.uid()), 'unknown'),
-         'GLOBAL',
-         'CASH_COLLECTED',
-         p_resource,
-         p_resource_id::text,
-         jsonb_build_object('amount', p_amount, 'collected_by', auth.uid())
-  WHERE NOT EXISTS (
-    SELECT 1 FROM public.audit_log a
-     WHERE a.action = 'CASH_COLLECTED'
-       AND a.resource = p_resource
-       AND a.resource_id = p_resource_id::text
-  );
-END;
-$function$;
-
-CREATE OR REPLACE FUNCTION public._audit_cash_pair_mismatch(p_resource text, p_reference_id uuid, p_warnings jsonb)
- RETURNS void
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public', 'pg_temp'
-AS $function$
-BEGIN
-  IF p_warnings IS NULL OR jsonb_array_length(p_warnings) = 0 THEN
-    RETURN;
-  END IF;
-  IF EXISTS (SELECT 1 FROM public.audit_log a
-              WHERE a.action = 'CASH_PAIR_MISMATCH'
-                AND a.resource = p_resource
-                AND a.resource_id = p_reference_id::text) THEN
-    UPDATE public.audit_log
-       SET after = jsonb_build_object('pair_warnings', p_warnings, 'reported_by', auth.uid()),
-           created_at = now()
-     WHERE action = 'CASH_PAIR_MISMATCH'
-       AND resource = p_resource
-       AND resource_id = p_reference_id::text;
-  ELSE
-    INSERT INTO public.audit_log (actor, actor_role, scope, action, resource, resource_id, after, reason)
-    VALUES (auth.uid(),
-            COALESCE((SELECT u.role FROM public.users u WHERE u.id = auth.uid()), 'unknown'),
-            'GLOBAL',
-            'CASH_PAIR_MISMATCH',
-            p_resource,
-            p_reference_id::text,
-            jsonb_build_object('pair_warnings', p_warnings, 'reported_by', auth.uid()),
-            'cash_handoff_pair_mismatch');
-  END IF;
-END;
-$function$;
-
-REVOKE ALL ON FUNCTION public._audit_cash_collection(text,uuid,numeric) FROM PUBLIC, anon, authenticated;
-REVOKE ALL ON FUNCTION public._audit_cash_pair_mismatch(text,uuid,jsonb) FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public._audit_cash_collection(text,uuid,numeric) TO service_role;
-GRANT EXECUTE ON FUNCTION public._audit_cash_pair_mismatch(text,uuid,jsonb) TO service_role;
-
--- ── Part A: trigger guard revoke spec ──────────────────────────────
-
-REVOKE EXECUTE ON FUNCTION public.orders_guard_sensitive() FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.rides_guard_client_writes() FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.service_bookings_guard_client_writes() FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.reservations_guard_customer_updates() FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.freeze_review_identity() FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.freeze_service_review_identity() FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.complaints_guard_admin_fields() FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.guard_vehicle_verification() FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.service_providers_guard_sensitive_fields() FROM PUBLIC, anon, authenticated;
-
--- ── Part C: backports ──────────────────────────────────────────────
-
+  IF v_md5 = '0b1310bd3142b9bca01c3d074e3dd953' THEN
+    EXECUTE $ccc$
 CREATE OR REPLACE FUNCTION public.confirm_cash_collection(p_reference_type cash_ref_type, p_reference_id uuid)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -416,8 +328,25 @@ EXCEPTION
   WHEN NO_DATA_FOUND THEN
     RETURN jsonb_build_object('ok', false, 'code', 'NOT_FOUND', 'reference_type', p_reference_type::text);
 END;
-$function$;
+$function$
+$ccc$;
+  ELSIF v_md5 IN ('9bba5a7f0e1411410b0917b16dfeefad', '9bba5a7f0e1411410b0917b16dfeefad') THEN
+    RAISE NOTICE '424b: confirm_cash_collection already at staging/target state (%), skipped', v_md5;
+  ELSE
+    RAISE EXCEPTION '424b: confirm_cash_collection unexpected pre-state md5 % - aborting', v_md5;
+  END IF;
+END $g$;
 
+-- ── rate_ride ─────────────────────────────────────────────────────────
+-- staging body verbatim: only a completed ride is rateable; a cash ride requires cash_collected_at (matches the RLS).
+DO $g$
+DECLARE
+  v_md5 text := (SELECT md5(pg_get_functiondef(p.oid)) FROM pg_proc p
+                 JOIN pg_namespace n ON n.oid=p.pronamespace
+                 WHERE n.nspname='public' AND p.proname='rate_ride');
+BEGIN
+  IF v_md5 = '59c7a16a2ce1ad8acf2439c9966a21cf' THEN
+    EXECUTE $rr$
 CREATE OR REPLACE FUNCTION public.rate_ride(p_ride_id uuid, p_rating integer, p_feedback text DEFAULT NULL::text, p_tip numeric DEFAULT NULL::numeric)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -462,8 +391,25 @@ BEGIN
    WHERE id = p_ride_id AND rider_id = v_uid;
   RETURN jsonb_build_object('ok', true, 'tip', v_tip);
 END;
-$function$;
+$function$
+$rr$;
+  ELSIF v_md5 IN ('4c167fe1e1aab6c01af6a50cf6d4b735', '4c167fe1e1aab6c01af6a50cf6d4b735') THEN
+    RAISE NOTICE '424b: rate_ride already at staging/target state (%), skipped', v_md5;
+  ELSE
+    RAISE EXCEPTION '424b: rate_ride unexpected pre-state md5 % - aborting', v_md5;
+  END IF;
+END $g$;
 
+-- ── provider_set_working_hours ─────────────────────────────────────────────────────────
+-- prod body + regex rejects 24:xx-29:xx. Staging's 398 overnight-window semantics deliberately NOT backported; prod keeps the close-after-open rule.
+DO $g$
+DECLARE
+  v_md5 text := (SELECT md5(pg_get_functiondef(p.oid)) FROM pg_proc p
+                 JOIN pg_namespace n ON n.oid=p.pronamespace
+                 WHERE n.nspname='public' AND p.proname='provider_set_working_hours');
+BEGIN
+  IF v_md5 = '17262838dc784a15d723021fb19f171b' THEN
+    EXECUTE $wh$
 CREATE OR REPLACE FUNCTION public.provider_set_working_hours(p_schedule jsonb)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -527,8 +473,25 @@ BEGIN
     'merchant_id', v_merchant
   );
 END;
-$function$;
+$function$
+$wh$;
+  ELSIF v_md5 IN ('23fb4da4e061c3b88aa483e234825932', '7c2f6d1b25ca39384e35120df2aa0210') THEN
+    RAISE NOTICE '424b: provider_set_working_hours already at staging/target state (%), skipped', v_md5;
+  ELSE
+    RAISE EXCEPTION '424b: provider_set_working_hours unexpected pre-state md5 % - aborting', v_md5;
+  END IF;
+END $g$;
 
+-- ── pharmacy_import_drug ─────────────────────────────────────────────────────────
+-- prod body + barcode trimmed ONCE (NULLIF(btrim)) used for the dedup lookup AND the stored row (prod has no canonicalize trigger; 400 is staging-only). Staging's unique-index race re-read not backported (no such index on prod).
+DO $g$
+DECLARE
+  v_md5 text := (SELECT md5(pg_get_functiondef(p.oid)) FROM pg_proc p
+                 JOIN pg_namespace n ON n.oid=p.pronamespace
+                 WHERE n.nspname='public' AND p.proname='pharmacy_import_drug');
+BEGIN
+  IF v_md5 = '82dc574833b609a86da914050e674290' THEN
+    EXECUTE $ph$
 CREATE OR REPLACE FUNCTION public.pharmacy_import_drug(p_drug_id uuid, p_merchant_id uuid, p_price numeric DEFAULT NULL::numeric, p_stock integer DEFAULT 0)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -564,10 +527,9 @@ BEGIN
     RAISE EXCEPTION 'DRUG_NOT_FOUND';
   END IF;
 
-  -- 424: normalize the barcode ONCE (trim) and use the trimmed value for
-  -- the dedup lookup AND the stored row. (The staging version trimmed only
-  -- the comparison, so a padded catalog barcode was stored untrimmed and
-  -- every re-import duplicated anyway.)
+  -- 424b: normalize the barcode ONCE (trim) and use the trimmed value for
+  -- the dedup lookup AND the stored row. (Prod has no canonicalize
+  -- trigger - 400 is staging-only - so the function must do it.)
   v_barcode := NULLIF(btrim(v_drug.barcode, E' \t\r\n'), '');
 
   -- Default to the official retail price when the caller does not set one.
@@ -608,8 +570,25 @@ BEGIN
 
   RETURN jsonb_build_object('ok', true, 'product_id', v_product_id);
 END;
-$function$;
+$function$
+$ph$;
+  ELSIF v_md5 IN ('7249f4a78b7f22e8725f6a653ead5f8f', '7d1c8a7aa115f2d5d79023494ae8fc2c') THEN
+    RAISE NOTICE '424b: pharmacy_import_drug already at staging/target state (%), skipped', v_md5;
+  ELSE
+    RAISE EXCEPTION '424b: pharmacy_import_drug unexpected pre-state md5 % - aborting', v_md5;
+  END IF;
+END $g$;
 
+-- ── pos_create_sale ─────────────────────────────────────────────────────────
+-- prod body + replay lookup scoped to the merchant, paired with the per-merchant idempotency index below. Staging's #96 advisory lock + sub-block restructure deliberately NOT backported.
+DO $g$
+DECLARE
+  v_md5 text := (SELECT md5(pg_get_functiondef(p.oid)) FROM pg_proc p
+                 JOIN pg_namespace n ON n.oid=p.pronamespace
+                 WHERE n.nspname='public' AND p.proname='pos_create_sale');
+BEGIN
+  IF v_md5 = 'd1b339b24d960ec9503c0b3e17e7b601' THEN
+    EXECUTE $pos$
 CREATE OR REPLACE FUNCTION public.pos_create_sale(p_merchant_id uuid, p_items jsonb, p_discount numeric DEFAULT 0, p_payment_method text DEFAULT 'cash'::text, p_customer_name text DEFAULT NULL::text, p_notes text DEFAULT NULL::text, p_idempotency_key text DEFAULT NULL::text)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -731,10 +710,18 @@ BEGIN
     'items', v_lines
   );
 END;
-$function$;
+$function$
+$pos$;
+  ELSIF v_md5 IN ('ca32bc89277d6777be2ac66f0c3a8683', '0004abb4841688095ae1a2ae58ebb488') THEN
+    RAISE NOTICE '424b: pos_create_sale already at staging/target state (%), skipped', v_md5;
+  ELSE
+    RAISE EXCEPTION '424b: pos_create_sale unexpected pre-state md5 % - aborting', v_md5;
+  END IF;
+END $g$;
 
--- ACL standard (423 v2): replaced SECURITY DEFINER functions keep their
--- existing grants via CREATE OR REPLACE; assert no PUBLIC/anon leakage.
+-- ACL standard: CREATE OR REPLACE preserves each function's existing
+-- grants ({postgres, authenticated, service_role} on prod); assert no
+-- PUBLIC/anon leakage.
 REVOKE EXECUTE ON FUNCTION public.confirm_cash_collection(cash_ref_type,uuid) FROM PUBLIC, anon;
 REVOKE EXECUTE ON FUNCTION public.rate_ride(uuid,integer,text,numeric) FROM PUBLIC, anon;
 REVOKE EXECUTE ON FUNCTION public.provider_set_working_hours(jsonb) FROM PUBLIC, anon;

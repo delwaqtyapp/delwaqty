@@ -955,14 +955,17 @@ class _CartPanel extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Text(
-                    l10n.cart,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Text(
+                      l10n.cart,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                  const Spacer(),
                   if (lines.isNotEmpty)
                     TextButton(onPressed: onClear, child: Text(l10n.clearCart)),
                 ],

@@ -440,18 +440,26 @@ class _OrderDetailsCard extends StatelessWidget {
                 (item) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
+                        flex: 3,
                         child: Text(
                           '${item.quantity}x ${item.productName}',
                           style: textTheme.bodyMedium,
                         ),
                       ),
-                      Text(
-                        '${item.totalPrice.toStringAsFixed(2)} ${l10n.egp}',
-                        style: textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
+                      const SizedBox(width: 8),
+                      Flexible(
+                        flex: 2,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            '${item.totalPrice.toStringAsFixed(2)} ${l10n.egp}',
+                            maxLines: 1,
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -508,19 +516,31 @@ class _PriceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Label keeps the flexible share; the value scales down on its own
+    // bounded slot so the two never collide at large text scales.
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: textTheme.bodyMedium?.copyWith(
-            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+        Expanded(
+          flex: 3,
+          child: Text(
+            label,
+            style: textTheme.bodyMedium?.copyWith(
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
         ),
-        Text(
-          value,
-          style: textTheme.bodyMedium?.copyWith(
-            fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+        const SizedBox(width: 8),
+        Flexible(
+          flex: 2,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: textTheme.bodyMedium?.copyWith(
+                fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+              ),
+            ),
           ),
         ),
       ],

@@ -179,22 +179,20 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                                   vertical: 12,
                                 ),
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(t.description),
                                     Text(
                                       t.type,
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodySmall,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall,
                                     ),
                                     const SizedBox(height: 4),
                                     // The amount sits on its own line so
                                     // it never squeezes the description.
                                     Align(
-                                      alignment:
-                                          AlignmentDirectional.centerEnd,
+                                      alignment: AlignmentDirectional.centerEnd,
                                       child: Text(
                                         t.amount.toStringAsFixed(2),
                                         style: const TextStyle(
@@ -233,8 +231,7 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                                   vertical: 12,
                                 ),
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       '${t.amount.toStringAsFixed(2)} ${t.currency}',
@@ -244,9 +241,9 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                                     ),
                                     Text(
                                       '${t.status} · ${t.paymentMethod}',
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodySmall,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall,
                                     ),
                                     // The rejection reason takes the full
                                     // width below; an unbounded trailing
@@ -259,9 +256,9 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                                             .textTheme
                                             .bodySmall
                                             ?.copyWith(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.error,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .error,
                                             ),
                                       ),
                                   ],

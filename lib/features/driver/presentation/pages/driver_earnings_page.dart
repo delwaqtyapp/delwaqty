@@ -160,8 +160,7 @@ class _EarningsBody extends ConsumerWidget {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(_typeLabel(l10n, e.type)),
                                   Text(

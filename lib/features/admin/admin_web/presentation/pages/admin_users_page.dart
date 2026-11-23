@@ -146,19 +146,18 @@ class _AdminUsersWebPageState extends State<AdminUsersWebPage> {
                   // Scrollable so a tall error state never overflows
                   // vertically on small screens.
                   return LayoutBuilder(
-                    builder: (context, constraints) =>
-                        SingleChildScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              minHeight: constraints.maxHeight,
-                            ),
-                            child: AdminErrorState(
-                              message: appErrorText(context, snap.error!),
-                              onRetry: _refresh,
-                            ),
-                          ),
+                    builder: (context, constraints) => SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
                         ),
+                        child: AdminErrorState(
+                          message: appErrorText(context, snap.error!),
+                          onRetry: _refresh,
+                        ),
+                      ),
+                    ),
                   );
                 }
                 final users = _applyFilters(snap.data ?? const []);

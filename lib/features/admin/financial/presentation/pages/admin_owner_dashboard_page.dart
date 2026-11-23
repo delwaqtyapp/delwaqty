@@ -130,7 +130,11 @@ class _CollectionsSection extends StatelessWidget {
       ),
       _Stat(l10n.today, fmt(summary['today']), const Color(0xFF00C7BE)),
       _Stat(l10n.weeklyEarnings, fmt(summary['week']), const Color(0xFFFF9500)),
-      _Stat(l10n.monthlyEarnings, fmt(summary['month']), const Color(0xFFAF52DE)),
+      _Stat(
+        l10n.monthlyEarnings,
+        fmt(summary['month']),
+        const Color(0xFFAF52DE),
+      ),
     ];
 
     return Column(

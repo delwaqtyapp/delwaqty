@@ -590,21 +590,21 @@ class _ReceiptCard extends StatelessWidget {
               label: l10n.deliveryFee,
               value: l10n.amountWithCurrency(
                 (ride.baseFare ?? 0).toStringAsFixed(2),
-                ride.currency,
+                _localizedCurrency(l10n, ride.currency),
               ),
             ),
             if (ride.discountAmount > 0)
               _ReceiptRow(
                 label: l10n.offers,
                 value:
-                    '-${l10n.amountWithCurrency(ride.discountAmount.toStringAsFixed(2), ride.currency)}',
+                    '-${l10n.amountWithCurrency(ride.discountAmount.toStringAsFixed(2), _localizedCurrency(l10n, ride.currency))}',
               ),
             const Divider(),
             _ReceiptRow(
               label: l10n.subtotal,
               value: l10n.amountWithCurrency(
                 (ride.fare ?? 0).toStringAsFixed(2),
-                ride.currency,
+                _localizedCurrency(l10n, ride.currency),
               ),
               bold: true,
             ),
@@ -630,26 +630,31 @@ class _ReceiptRow extends StatelessWidget {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
+      // Money stays fully readable: the label wraps, the amount scales
+      // down on its own bounded slot instead of ellipsizing.
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Flexible(
+          Expanded(
+            flex: 3,
             child: Text(
               label,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: bold ? FontWeight.bold : FontWeight.normal,
               ),
-              overflow: TextOverflow.ellipsis,
             ),
           ),
           const SizedBox(width: 8),
           Flexible(
-            child: Text(
-              value,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+            flex: 2,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                value,
+                maxLines: 1,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+                ),
               ),
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -657,3 +662,6 @@ class _ReceiptRow extends StatelessWidget {
     );
   }
 }
+
+String _localizedCurrency(AppLocalizations l10n, String code) =>
+    code == 'EGP' ? l10n.egp : code;

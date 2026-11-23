@@ -8305,4 +8305,73 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get whatsappNotConfigured =>
       'تفعيل واتساب غير متاح حاليا. يمكنك تسجيل الدخول بحساب جوجل.';
+
+  @override
+  String get approved => 'معتمدة';
+
+  @override
+  String get settled => 'مسددة';
+
+  @override
+  String get collected => 'محصلة';
+
+  @override
+  String get outstanding => 'مستحق';
+
+  @override
+  String get underReview => 'قيد المراجعة';
+
+  @override
+  String get failed => 'فشل';
+
+  @override
+  String get reconciliation => 'التسوية';
+
+  @override
+  String get totalCollected => 'إجمالي المحصَّل';
+
+  @override
+  String get approvedSettlements => 'التسويات المعتمدة';
+
+  @override
+  String get closingOutstanding => 'المستحق الختامي';
+
+  @override
+  String get collectionLedger => 'سجل التحصيلات';
+
+  @override
+  String get noCollections => 'لا توجد تحصيلات';
+
+  @override
+  String get noCollectionsYet => 'لا توجد تعبئات مستلمة في هذه المنطقة بعد.';
+
+  @override
+  String get platformCollectionsAllRegions => 'تحصيلات المنصة (كل المناطق)';
+
+  @override
+  String get platformSettlementsAllRegions => 'تسويات المنصة (كل المناطق)';
+
+  @override
+  String get graceLimitLabel => 'الحد';
+
+  @override
+  String get graceUsedLabel => 'المستخدم';
+
+  @override
+  String get graceRemainingLabel => 'المتبقي';
+
+  @override
+  String revokeSanctionConfirm(Object role, Object type) {
+    return 'إلغاء $type لـ$role؟';
+  }
+
+  @override
+  String get adminRegionScopeTitle => 'نطاق المناطق';
+
+  @override
+  String get adminRegionScopeSubtitle =>
+      'عيّن نطاق المناطق للمشرفين على أي مستوى (محافظة، مركز، حي، قرية، ...). المشرف بدون تعيينات يكون عاما.';
+
+  @override
+  String get adminManagement => 'إدارة المشرفين';
 }

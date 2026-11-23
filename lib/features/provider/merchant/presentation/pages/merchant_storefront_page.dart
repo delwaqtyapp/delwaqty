@@ -791,7 +791,6 @@ class _MerchantStorefrontPageState
       ),
     );
   }
-
 }
 
 /// One day of the weekly schedule: the day name and its toggle on the

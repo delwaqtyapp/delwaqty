@@ -91,14 +91,8 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
             spacing: gap,
             runSpacing: gap,
             children: [
-              SizedBox(
-                width: fieldWidth,
-                child: _statusDropdown(l10n),
-              ),
-              SizedBox(
-                width: fieldWidth,
-                child: _typeDropdown(l10n),
-              ),
+              SizedBox(width: fieldWidth, child: _statusDropdown(l10n)),
+              SizedBox(width: fieldWidth, child: _typeDropdown(l10n)),
               IconButton(
                 tooltip: l10n.refresh,
                 icon: const Icon(Icons.refresh_rounded),
@@ -115,35 +109,30 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
     return DropdownButtonFormField<String>(
       initialValue: _statusFilter,
       isExpanded: true,
-              decoration: InputDecoration(
-                labelText: l10n.status,
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
+      decoration: InputDecoration(
+        labelText: l10n.status,
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      items:
+          [
+                'all',
+                'pending',
+                'investigating',
+                'resolved',
+                'rejected',
+                'escalated',
+                'closed',
+              ]
+              .map(
+                (s) => DropdownMenuItem(
+                  value: s,
+                  child: Text(_complaintStatusLabel(l10n, s)),
                 ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              items:
-                  [
-                        'all',
-                        'pending',
-                        'investigating',
-                        'resolved',
-                        'rejected',
-                        'escalated',
-                        'closed',
-                      ]
-                      .map(
-                        (s) => DropdownMenuItem(
-                          value: s,
-                          child: Text(_complaintStatusLabel(l10n, s)),
-                        ),
-                      )
-                      .toList(),
-              onChanged: (v) => setState(() => _statusFilter = v!),
+              )
+              .toList(),
+      onChanged: (v) => setState(() => _statusFilter = v!),
     );
   }
 
@@ -151,27 +140,21 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
     return DropdownButtonFormField<String>(
       initialValue: _typeFilter,
       isExpanded: true,
-              decoration: InputDecoration(
-                labelText: l10n.type,
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              items:
-                  ['all', 'driver', 'merchant', 'customer', 'provider', 'other']
-                      .map(
-                        (s) => DropdownMenuItem(
-                          value: s,
-                          child: Text(_complaintTypeLabel(l10n, s)),
-                        ),
-                      )
-                      .toList(),
-              onChanged: (v) => setState(() => _typeFilter = v!),
+      decoration: InputDecoration(
+        labelText: l10n.type,
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      items: ['all', 'driver', 'merchant', 'customer', 'provider', 'other']
+          .map(
+            (s) => DropdownMenuItem(
+              value: s,
+              child: Text(_complaintTypeLabel(l10n, s)),
+            ),
+          )
+          .toList(),
+      onChanged: (v) => setState(() => _typeFilter = v!),
     );
   }
 

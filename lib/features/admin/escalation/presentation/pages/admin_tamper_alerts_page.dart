@@ -158,11 +158,7 @@ class _InsuranceMismatchTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Text(
-              '#${mismatch.insuranceSaleId}',
-              maxLines: 1,
-              softWrap: false,
-            ),
+            Text('#${mismatch.insuranceSaleId}', maxLines: 1, softWrap: false),
           ],
         ),
       ),

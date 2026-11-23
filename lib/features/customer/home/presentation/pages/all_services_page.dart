@@ -96,7 +96,7 @@ class AllServicesPage extends ConsumerWidget {
             slivers: [
               if (platformItems.isNotEmpty) ...[
                 _sectionHeader(context, l10n.mainCategories),
-                _gridSliver(platformItems, (index) {
+                _gridSliver(context, platformItems, (index) {
                   final item = platformItems[index];
                   return _buildPlatformTile(context, item.category);
                 }),
@@ -104,7 +104,7 @@ class AllServicesPage extends ConsumerWidget {
               ],
               if (bookingItems.isNotEmpty) ...[
                 _sectionHeader(context, l10n.bookingServices),
-                _gridSliver(bookingItems, (index) {
+                _gridSliver(context, bookingItems, (index) {
                   final item = bookingItems[index];
                   final rtl = Directionality.of(context) == TextDirection.rtl;
                   final label = rtl ? item.service.nameAr : item.service.nameEn;
@@ -145,17 +145,24 @@ class AllServicesPage extends ConsumerWidget {
   }
 
   Widget _gridSliver(
+    BuildContext context,
     List<_GridItem> items,
     Widget Function(int index) builder,
   ) {
+    final ts = MediaQuery.textScalerOf(context)
+        .scale(1.0)
+        .clamp(1.0, 1.8)
+        .toDouble();
     return SliverPadding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
       sliver: SliverGrid(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
           mainAxisSpacing: 14,
           crossAxisSpacing: 12,
-          mainAxisExtent: 132,
+          // Grow rows with the text scale so long Arabic service
+          // names on two lines never crop.
+          mainAxisExtent: 132 * ts,
         ),
         delegate: SliverChildBuilderDelegate(
           (context, index) => builder(index),
@@ -238,7 +245,12 @@ class _SimpleGridTile extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             SizedBox(
-              height: 20,
+              height:
+                  20 *
+                  MediaQuery.textScalerOf(context)
+                      .scale(1.0)
+                      .clamp(1.0, 1.8)
+                      .toDouble(),
               child: Center(
                 child: Text(
                   label,
@@ -248,7 +260,7 @@ class _SimpleGridTile extends StatelessWidget {
                     color: cs.onSurface,
                   ),
                   textAlign: TextAlign.center,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),

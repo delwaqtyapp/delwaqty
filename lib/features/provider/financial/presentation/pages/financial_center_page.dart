@@ -398,8 +398,7 @@ class FinancialCenterPage extends ConsumerWidget {
                                                   .textTheme
                                                   .bodySmall
                                                   ?.copyWith(
-                                                    color:
-                                                        AppColors.errorLight,
+                                                    color: AppColors.errorLight,
                                                   ),
                                             ),
                                         ],

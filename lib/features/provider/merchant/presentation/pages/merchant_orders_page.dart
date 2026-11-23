@@ -550,16 +550,28 @@ class _OrderCard extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  Text(
+              // Amount on its own scaled line; the actions wrap on an
+              // end-aligned row below so neither overflows the card.
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
                     '${l10n.currencySymbol} ${order.totalAmount.toStringAsFixed(2)}',
+                    maxLines: 1,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.primary,
                     ),
                   ),
-                  const Spacer(),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                alignment: WrapAlignment.end,
+                spacing: 8,
+                runSpacing: 8,
+                children: [
                   if (order.status == 'pending') ...[
                     _ActionButton(
                       label: l10n.accept,

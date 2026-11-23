@@ -428,8 +428,9 @@ class _TopMerchantsSection extends StatelessWidget {
                                   maxLines: 1,
                                   style: AppTextStyles.bodyMedium.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primary,
                                   ),
                                 ),
                               ),
@@ -557,8 +558,9 @@ class _DriverPerformanceSection extends StatelessWidget {
                                   maxLines: 1,
                                   style: AppTextStyles.bodyMedium.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primary,
                                   ),
                                 ),
                               ),

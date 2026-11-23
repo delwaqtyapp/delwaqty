@@ -8375,4 +8375,75 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get whatsappNotConfigured =>
       'WhatsApp verification is not available yet. You can still sign in with Google.';
+
+  @override
+  String get approved => 'Approved';
+
+  @override
+  String get settled => 'Settled';
+
+  @override
+  String get collected => 'Collected';
+
+  @override
+  String get outstanding => 'Outstanding';
+
+  @override
+  String get underReview => 'Under Review';
+
+  @override
+  String get failed => 'Failed';
+
+  @override
+  String get reconciliation => 'Reconciliation';
+
+  @override
+  String get totalCollected => 'Total Collected';
+
+  @override
+  String get approvedSettlements => 'Approved Settlements';
+
+  @override
+  String get closingOutstanding => 'Closing Outstanding';
+
+  @override
+  String get collectionLedger => 'Collection Ledger';
+
+  @override
+  String get noCollections => 'No collections';
+
+  @override
+  String get noCollectionsYet => 'No received top-ups in this region yet.';
+
+  @override
+  String get platformCollectionsAllRegions =>
+      'Platform Collections (all regions)';
+
+  @override
+  String get platformSettlementsAllRegions =>
+      'Platform Settlements (all regions)';
+
+  @override
+  String get graceLimitLabel => 'Limit';
+
+  @override
+  String get graceUsedLabel => 'Used';
+
+  @override
+  String get graceRemainingLabel => 'Remaining';
+
+  @override
+  String revokeSanctionConfirm(Object role, Object type) {
+    return 'Revoke $type for $role?';
+  }
+
+  @override
+  String get adminRegionScopeTitle => 'Region Scope';
+
+  @override
+  String get adminRegionScopeSubtitle =>
+      'Assign region scope to admin-tier users at any level (governorate, markaz, district, village, ...). An admin with no assignments is global.';
+
+  @override
+  String get adminManagement => 'Admin management';
 }

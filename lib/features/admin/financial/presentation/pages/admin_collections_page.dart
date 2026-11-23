@@ -205,8 +205,7 @@ class _MetricGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
-    String fmt(double v) =>
-        '${l10n.currencySymbol} ${v.toStringAsFixed(2)}';
+    String fmt(double v) => '${l10n.currencySymbol} ${v.toStringAsFixed(2)}';
     // Shared responsive grid: content-driven tile heights, so nothing
     // clips at narrow widths or large text scales.
     return IntelligenceStatGrid(

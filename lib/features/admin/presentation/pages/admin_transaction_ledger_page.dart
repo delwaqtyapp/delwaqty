@@ -374,8 +374,7 @@ class _LedgerItemTile extends StatelessWidget {
               ),
               _AmountColumn(
                 label: l10n.netLabel,
-                value:
-                    '${item.netAmount.toStringAsFixed(2)} ${item.currency}',
+                value: '${item.netAmount.toStringAsFixed(2)} ${item.currency}',
                 cs: cs,
               ),
             ],

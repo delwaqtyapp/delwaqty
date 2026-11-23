@@ -1,15 +1,68 @@
--- 419: server-side cashier license gate (review #119, HIGH).
--- cashier_sync_push and cashier_daily_close checked only is_merchant_owner;
--- a merchant whose license is suspended or expired past grace could keep
--- writing sales with a tampered client. The shared gate below is called at
--- the top of both RPCs. pharmacy drug import (cashier_apply_moh_prices)
--- and the insurance paths go through _cashier_has_pro, which already
--- excludes suspended/expired-past-grace licenses (status IN
--- ('issued','active') + grace window) - verified live, no change needed.
--- LICENSE_* exceptions surface to the desktop client as retryable op
--- failures: queued ops re-upload after renewal, unsynced data is never
--- dropped.
+-- 419 v2: server-side cashier license gate (review #119, reworked per
+-- NO-GO #128). Entitlement is per merchant (device binding explicitly out
+-- of scope). Eligibility is an explicit predicate, aligned across this
+-- gate, _cashier_has_pro and the desktop client's grace_until contract:
+--   * issued/active, within expiry + grace (NULL expires_at = lifetime)
+--   * expired but still inside grace (validate flips status at first
+--     crossing; the client keeps working until grace ends)
+--   * expired with a future/NULL expires_at is inconsistent data: denied
+-- A suspended row does not block a merchant holding another eligible
+-- license; a merchant whose licenses are all suspended/past-grace is
+-- denied (LICENSE_SUSPENDED when a suspended row exists, LICENSE_EXPIRED
+-- otherwise, LICENSE_REQUIRED when none).
+-- Enforcement: sync_push computes the code once and refuses each gated op
+-- as its own result (a locked batch is not poisoned); the recovery ops
+-- sale_void and debt_payment stay allowed while locked (approved desktop
+-- behavior). cashier_daily_close is fully gated and raises.
 BEGIN;
+
+CREATE OR REPLACE FUNCTION public.cashier_license_check(p_merchant_id uuid)
+ RETURNS text
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+BEGIN
+  -- 419 v2 (review #128): entitlement is an explicit ELIGIBILITY predicate
+  -- over the merchant's licenses, never a status rank. Eligible:
+  --   issued/active within expiry+grace (NULL expires_at = lifetime), or
+  --   expired-but-inside-grace (validate's grace_until contract).
+  -- 'expired' with a future/NULL expires_at is inconsistent data: it fails
+  -- closed because the expired branch requires expires_at <= now().
+  -- A suspended row does NOT block a merchant holding another eligible
+  -- license; a merchant with only suspended/past-grace rows is denied.
+  -- Security reviewer (LOW): no status oracle for arbitrary signed-in
+  -- users - owner or scoped admin only; service_role calls carry no uid
+  -- and pass through.
+  IF auth.uid() IS NOT NULL AND NOT public.is_merchant_owner(p_merchant_id) THEN
+    RAISE EXCEPTION 'Not authorized';
+  END IF;
+  RETURN (
+    SELECT CASE
+      WHEN EXISTS (
+        SELECT 1 FROM public.cashier_licenses l
+        WHERE l.merchant_id = p_merchant_id AND (
+          (l.status IN ('issued','active')
+           AND (l.expires_at IS NULL
+                OR l.expires_at + (COALESCE(l.grace_days,0) || ' days')::interval > now()))
+          OR (l.status = 'expired'
+              AND l.expires_at IS NOT NULL
+              AND l.expires_at <= now()
+              AND l.expires_at + (COALESCE(l.grace_days,0) || ' days')::interval > now()))
+      ) THEN NULL
+      WHEN NOT EXISTS (SELECT 1 FROM public.cashier_licenses l WHERE l.merchant_id = p_merchant_id)
+        THEN 'LICENSE_REQUIRED'
+      WHEN EXISTS (SELECT 1 FROM public.cashier_licenses l WHERE l.merchant_id = p_merchant_id AND l.status = 'suspended')
+        THEN 'LICENSE_SUSPENDED'
+      ELSE 'LICENSE_EXPIRED'
+    END
+  );
+END;
+$function$;
+
+REVOKE ALL ON FUNCTION public.cashier_license_check(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.cashier_license_check(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.cashier_license_check(uuid) TO service_role;
 
 CREATE OR REPLACE FUNCTION public.cashier_license_gate(p_merchant_id uuid)
  RETURNS void
@@ -18,25 +71,11 @@ CREATE OR REPLACE FUNCTION public.cashier_license_gate(p_merchant_id uuid)
  SET search_path TO 'public', 'pg_temp'
 AS $function$
 DECLARE
-  v_worst record;
+  v_code text;
 BEGIN
-  -- Best license wins: a merchant holding any valid (issued/active,
-  -- in-grace) license passes even if another row is suspended/expired.
-  SELECT l.status, l.expires_at, l.grace_days INTO v_worst
-    FROM public.cashier_licenses l
-   WHERE l.merchant_id = p_merchant_id
-   ORDER BY (l.status IN ('active','issued')) DESC, (l.status = 'active') DESC,
-            l.expires_at DESC NULLS FIRST
-   LIMIT 1;
-  IF NOT FOUND THEN
-    RAISE EXCEPTION 'LICENSE_REQUIRED';
-  END IF;
-  IF v_worst.status = 'suspended' THEN
-    RAISE EXCEPTION 'LICENSE_SUSPENDED';
-  END IF;
-  IF v_worst.expires_at IS NOT NULL
-     AND now() > v_worst.expires_at + (v_worst.grace_days || ' days')::interval THEN
-    RAISE EXCEPTION 'LICENSE_EXPIRED';
+  v_code := public.cashier_license_check(p_merchant_id);
+  IF v_code IS NOT NULL THEN
+    RAISE EXCEPTION '%', v_code;
   END IF;
 END;
 $function$;
@@ -44,6 +83,34 @@ $function$;
 REVOKE ALL ON FUNCTION public.cashier_license_gate(uuid) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.cashier_license_gate(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.cashier_license_gate(uuid) TO service_role;
+
+-- Aligned on the same eligibility rule as cashier_license_check (review
+-- #128 asks gate, PRO check and client to share one rule): previously an
+-- 'expired'-but-in-grace license lost PRO while the gate let it trade.
+CREATE OR REPLACE FUNCTION public._cashier_has_pro(p_merchant_id uuid)
+ RETURNS boolean
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+  SELECT EXISTS (
+    SELECT 1 FROM public.cashier_licenses l
+    WHERE l.merchant_id = p_merchant_id
+      AND l.pro
+      AND ((
+      l.status IN ('issued','active')
+      AND (l.expires_at IS NULL
+           OR l.expires_at + (COALESCE(l.grace_days,0) || ' days')::interval > now())
+    ) OR (
+      -- flipped to expired by a validate call but still inside grace: the
+      -- client's grace_until contract keeps it working until grace ends
+      l.status = 'expired'
+      AND l.expires_at IS NOT NULL
+      AND l.expires_at <= now()
+      AND l.expires_at + (COALESCE(l.grace_days,0) || ' days')::interval > now()
+    )  )
+  );
+$function$;
 
 CREATE OR REPLACE FUNCTION public.cashier_sync_push(p_merchant_id uuid, p_ops jsonb)
  RETURNS jsonb
@@ -88,21 +155,27 @@ DECLARE
   v_repriced integer;
   v_server_total numeric;
   v_mismatch boolean;
+  v_license_code text;
 BEGIN
   IF v_uid IS NULL OR NOT public.is_merchant_owner(p_merchant_id) THEN
     RAISE EXCEPTION 'Not authorized';
   END IF;
-  -- 419: server-side license gate. A tampered client can push past the
-  -- client-side cutoff; a suspended or past-grace license must not write.
-  -- Raised before the op loop so the whole call fails (single-merchant
-  -- call; the desktop client treats LICENSE_* as retryable and re-queues).
-  PERFORM public.cashier_license_gate(p_merchant_id);
+  -- 419 v2 (review #128): license state is computed ONCE per call and
+  -- enforced per op below; recovery ops (sale_void, debt_payment) stay
+  -- allowed while locked so a locked merchant can still reverse/collect.
+  v_license_code := public.cashier_license_check(p_merchant_id);
   IF jsonb_typeof(p_ops) <> 'array' THEN RAISE EXCEPTION 'ops must be an array'; END IF;
   SELECT * INTO v_merchant FROM public.merchants WHERE id = p_merchant_id;
 
   FOR v_op IN SELECT * FROM jsonb_array_elements(p_ops) LOOP
     v_type := v_op->>'type';
     v_op_id := (v_op->>'op_id')::uuid;
+    -- 419 v2: while locked, refuse everything except the recovery ops;
+    -- the refusal is THIS op's result, never a batch-level abort.
+    IF v_license_code IS NOT NULL AND v_type NOT IN ('sale_void','debt_payment') THEN
+      v_results := v_results || jsonb_build_object('op_id', v_op_id, 'ok', false, 'reason', v_license_code);
+      CONTINUE;
+    END IF;
     BEGIN
       CASE v_type
       WHEN 'customer' THEN
@@ -422,10 +495,7 @@ BEGIN
   IF v_uid IS NULL OR NOT public.is_merchant_owner(p_merchant_id) THEN
     RAISE EXCEPTION 'Not authorized';
   END IF;
-  -- 419: server-side license gate. A tampered client can push past the
-  -- client-side cutoff; a suspended or past-grace license must not write.
-  -- Raised before the op loop so the whole call fails (single-merchant
-  -- call; the desktop client treats LICENSE_* as retryable and re-queues).
+  -- 419: daily close is fully gated (not a recovery op).
   PERFORM public.cashier_license_gate(p_merchant_id);
   SELECT * INTO v_shift FROM public.pos_shifts
    WHERE id = p_shift_id AND merchant_id = p_merchant_id AND closed_at IS NULL FOR UPDATE;
@@ -451,5 +521,35 @@ BEGIN
 END;
 $function$;
 
+
+-- Security reviewer note (1): suspension happens by direct admin table
+-- write (cashier_licenses_admin_write policy; no RPC). Suspending must take
+-- down ALL of the merchant's still-usable rows, not just the one edited:
+-- cascade to every issued/active/expired sibling (expired rows can still be
+-- inside grace and therefore eligible). pg_trigger_depth() keeps the
+-- cascade's own UPDATEs from recursing.
+CREATE OR REPLACE FUNCTION public._cashier_license_cascade_suspend()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+BEGIN
+  IF pg_trigger_depth() = 1 AND NEW.status = 'suspended'
+     AND (TG_OP = 'INSERT' OR OLD.status IS DISTINCT FROM 'suspended') THEN
+    UPDATE public.cashier_licenses
+       SET status = 'suspended', updated_at = now()
+     WHERE merchant_id = NEW.merchant_id
+       AND id <> NEW.id
+       AND status IN ('issued','active','expired');
+  END IF;
+  RETURN NEW;
+END;
+$function$;
+
+DROP TRIGGER IF EXISTS cashier_licenses_cascade_suspend ON public.cashier_licenses;
+CREATE TRIGGER cashier_licenses_cascade_suspend
+  AFTER INSERT OR UPDATE OF status ON public.cashier_licenses
+  FOR EACH ROW EXECUTE FUNCTION public._cashier_license_cascade_suspend();
 
 COMMIT;

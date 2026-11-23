@@ -1,11 +1,11 @@
--- 420: offline customer id resolution + shift_open duplicate id
--- (reviews #118 and #117b, both prioritized by the cashier reviewers).
--- Full cashier_sync_push body, identical to the post-419 body except the
--- marked 420 edits: client customer ids resolve through
--- pos_customers.client_op_id in the sale and debt_payment arms, an
--- unresolved customer on a deferred sale/payment fails the op
--- (CUSTOMER_UNRESOLVED, stays queued), and a duplicate shift_open returns
--- the existing shift id.
+-- 420 v2: offline customer id resolution + shift_open duplicate id
+-- (reviews #118/#117b, reworked per NO-GO #129). Full cashier_sync_push
+-- body, identical to the post-419v2 body except the marked 420 edits:
+-- client customer ids resolve through pos_customers.client_op_id in the
+-- sale and debt_payment arms; ANY deferred amount without a resolved
+-- customer (omitted, null, blank, unknown or foreign reference) fails the
+-- op with CUSTOMER_UNRESOLVED and rolls back the whole op; a duplicate
+-- shift_open returns the existing shift id.
 BEGIN;
 
 CREATE OR REPLACE FUNCTION public.cashier_sync_push(p_merchant_id uuid, p_ops jsonb)
@@ -51,22 +51,28 @@ DECLARE
   v_repriced integer;
   v_server_total numeric;
   v_mismatch boolean;
+  v_license_code text;
   v_cust uuid;
 BEGIN
   IF v_uid IS NULL OR NOT public.is_merchant_owner(p_merchant_id) THEN
     RAISE EXCEPTION 'Not authorized';
   END IF;
-  -- 419: server-side license gate. A tampered client can push past the
-  -- client-side cutoff; a suspended or past-grace license must not write.
-  -- Raised before the op loop so the whole call fails (single-merchant
-  -- call; the desktop client treats LICENSE_* as retryable and re-queues).
-  PERFORM public.cashier_license_gate(p_merchant_id);
+  -- 419 v2 (review #128): license state is computed ONCE per call and
+  -- enforced per op below; recovery ops (sale_void, debt_payment) stay
+  -- allowed while locked so a locked merchant can still reverse/collect.
+  v_license_code := public.cashier_license_check(p_merchant_id);
   IF jsonb_typeof(p_ops) <> 'array' THEN RAISE EXCEPTION 'ops must be an array'; END IF;
   SELECT * INTO v_merchant FROM public.merchants WHERE id = p_merchant_id;
 
   FOR v_op IN SELECT * FROM jsonb_array_elements(p_ops) LOOP
     v_type := v_op->>'type';
     v_op_id := (v_op->>'op_id')::uuid;
+    -- 419 v2: while locked, refuse everything except the recovery ops;
+    -- the refusal is THIS op's result, never a batch-level abort.
+    IF v_license_code IS NOT NULL AND v_type NOT IN ('sale_void','debt_payment') THEN
+      v_results := v_results || jsonb_build_object('op_id', v_op_id, 'ok', false, 'reason', v_license_code);
+      CONTINUE;
+    END IF;
     BEGIN
       CASE v_type
       WHEN 'customer' THEN
@@ -244,15 +250,15 @@ BEGIN
           VALUES (v_sale_id, v_pay->>'method', (v_pay->>'amount')::numeric);
           IF v_pay->>'method' = 'deferred' THEN v_deferred := v_deferred + (v_pay->>'amount')::numeric; END IF;
         END LOOP;
-        -- 420: a deferred sale needs its debtor. If a customer reference
-        -- was given but did not resolve, fail the whole op (subtransaction
-        -- rolls back the sale too) so it stays queued instead of writing a
-        -- debt with no customer.
-        IF v_deferred > 0 AND v_cust IS NULL
-           AND NULLIF(v_op->'payload'->>'customer_id','') IS NOT NULL THEN
+        -- 420 v2 (review #129): ANY deferred amount without a resolved
+        -- customer fails the whole op (omitted, null, blank, unknown or
+        -- foreign reference alike) - the subtransaction rolls the sale,
+        -- payments, stock moves and commission back, and the op stays
+        -- queued instead of writing debtor-less money rows.
+        IF v_deferred > 0 AND v_cust IS NULL THEN
           RAISE EXCEPTION 'CUSTOMER_UNRESOLVED';
         END IF;
-        IF v_deferred > 0 AND v_cust IS NOT NULL THEN
+        IF v_deferred > 0 THEN
           INSERT INTO public.pos_debt_ledger (merchant_id, customer_id, sale_id, kind, amount, created_by, created_offline_at)
           VALUES (p_merchant_id, v_cust,
                   v_sale_id, 'charge', v_deferred, v_uid, (v_op->>'created_offline_at')::timestamptz);

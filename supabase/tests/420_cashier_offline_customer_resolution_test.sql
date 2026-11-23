@@ -96,7 +96,48 @@ BEGIN
      AND v_r->'results'->0->>'reason' = 'CUSTOMER_UNRESOLVED',
     '420: unresolved payment not refused: ' || v_r::text;
 
+  -- 420 v2 (review #129): ANY deferred amount without a resolved customer
+  -- is refused - omitted, null, blank, unknown and foreign references
+  -- alike - with zero side effects (no sale, payments, stock, debt,
+  -- commission rows).
   PERFORM set_config('role','none',true);
+  DECLARE
+    m2 uuid := gen_random_uuid(); u2 uuid := gen_random_uuid(); foreign_cust uuid := gen_random_uuid();
+    n_sales int; n_pay int; n_moves int; n_debt int; n_comm int;
+  BEGIN
+    INSERT INTO auth.users(id,email) VALUES (u2,u2::text||'@x.i');
+    INSERT INTO public.users(id,email,role) VALUES (u2,u2::text||'@x.i','merchant') ON CONFLICT(id) DO NOTHING;
+    INSERT INTO public.merchants(id,owner_user_id,name,type) VALUES (m2,u2,'420b','grocery');
+    INSERT INTO public.pos_customers(id,merchant_id,name) VALUES (foreign_cust,m2,'Someone else');
+    SELECT (SELECT count(*) FROM public.pos_sales WHERE merchant_id=m),
+           (SELECT count(*) FROM public.pos_sale_payments p JOIN public.pos_sales s2 ON s2.id=p.sale_id WHERE s2.merchant_id=m),
+           (SELECT count(*) FROM public.pos_stock_moves WHERE merchant_id=m),
+           (SELECT count(*) FROM public.pos_debt_ledger WHERE merchant_id=m),
+           (SELECT count(*) FROM public.platform_commissions c JOIN public.merchants mm ON mm.owner_user_id=c.member_id WHERE mm.id=m)
+      INTO n_sales, n_pay, n_moves, n_debt, n_comm;
+    PERFORM set_config('role','authenticated',true);
+    PERFORM set_config('request.jwt.claim.sub', u::text, true);
+    FOR v_r IN
+      SELECT public.cashier_sync_push(m, jsonb_build_array(
+        jsonb_build_object('type','sale','op_id',gen_random_uuid(),'created_offline_at',now(),
+          'payload', jsonb_build_object(
+            'items', jsonb_build_array(jsonb_build_object('product_id',NULL,'qty',1,'unit_price',9,'name','Z','discount_amount',0,'is_weight_based',false)),
+            'payments', jsonb_build_array(jsonb_build_object('method','deferred','amount',9)))
+            || CASE t.k WHEN 'omit' THEN '{}'::jsonb ELSE jsonb_build_object('customer_id', t.v) END)))
+      FROM (VALUES ('omit',NULL),('null',NULL),('blank',''),('unknown',gen_random_uuid()::text),('foreign',foreign_cust::text)) AS t(k,v)
+    LOOP
+      ASSERT NOT (v_r->'results'->0->>'ok')::boolean
+         AND v_r->'results'->0->>'reason' = 'CUSTOMER_UNRESOLVED',
+        '420v2: deferred sale not refused: ' || v_r::text;
+    END LOOP;
+    PERFORM set_config('role','none',true);
+    ASSERT (SELECT count(*) FROM public.pos_sales WHERE merchant_id=m) = n_sales
+       AND (SELECT count(*) FROM public.pos_sale_payments p JOIN public.pos_sales s2 ON s2.id=p.sale_id WHERE s2.merchant_id=m) = n_pay
+       AND (SELECT count(*) FROM public.pos_stock_moves WHERE merchant_id=m) = n_moves
+       AND (SELECT count(*) FROM public.pos_debt_ledger WHERE merchant_id=m) = n_debt
+       AND (SELECT count(*) FROM public.platform_commissions c JOIN public.merchants mm ON mm.owner_user_id=c.member_id WHERE mm.id=m) = n_comm,
+      '420v2: refused deferred sales left side effects';
+  END;
 END $$;
 SELECT '420 customer resolution matrix passed' AS result;
 ROLLBACK;

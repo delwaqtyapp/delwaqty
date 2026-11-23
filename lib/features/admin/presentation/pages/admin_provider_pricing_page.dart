@@ -675,19 +675,24 @@ class _AdminProviderPricingPageState
             name,
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
-          subtitle: Text(
-            hourly != null
-                ? '${_fmt(hourly)} ${l10n.currencySymbol}${l10n.perHour}'
-                : l10n.providerPricingPlatformDefault,
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                hourly != null
+                    ? '${_fmt(hourly)} ${l10n.currencySymbol}${l10n.perHour}'
+                    : l10n.providerPricingPlatformDefault,
+              ),
               if (fixedMin != null || fixedMax != null)
                 Text(
                   '${_fmt(fixedMin)} - ${_fmt(fixedMax)} ${l10n.currencySymbol}',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
+            ],
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
               IconButton(
                 tooltip: l10n.providerPricingEditTitle,
                 icon: Icon(

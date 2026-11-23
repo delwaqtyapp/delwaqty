@@ -473,7 +473,7 @@ class _MerchantTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(type),
+            Text(_merchantTypeLabel(l10n, type)),
             Align(
               alignment: AlignmentDirectional.centerEnd,
               child: Wrap(
@@ -625,7 +625,7 @@ class _MerchantTile extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          type,
+                          _merchantTypeLabel(l10n, type),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: cs.onSurfaceVariant,
                           ),
@@ -1014,5 +1014,24 @@ class _ProductEditorDialogState extends State<_ProductEditorDialog> {
         FilledButton(onPressed: _save, child: Text(l10n.saveProduct)),
       ],
     );
+  }
+}
+
+String _merchantTypeLabel(AppLocalizations l10n, String type) {
+  switch (type) {
+    case 'restaurant':
+      return l10n.restaurant;
+    case 'grocery':
+      return l10n.grocery;
+    case 'pharmacy':
+      return l10n.pharmacy;
+    case 'market':
+      return l10n.market;
+    case 'bakery':
+      return l10n.bakery;
+    case 'cafe':
+      return l10n.cafe;
+    default:
+      return type;
   }
 }

@@ -92,16 +92,16 @@ select is_empty(
   'customer: no chat messages without room membership');
 
 -- Wallet forgery: direct inserts stay impossible.
-select throws_ok(
+select throws_like(
   $$ insert into public.wallets (user_id, balance)
      values (tests.get_supabase_uid('rls_customer_a'), 100) $$,
-  'new row violates row-level security policy for table "wallets"',
+  '%WALLET_LEDGER_GUARD: wallets rows must start at balance 0%',
   'customer: cannot self-create wallet with balance');
 
-select throws_ok(
+select throws_like(
   $$ insert into public.wallet_transactions (wallet_id, type, amount)
      values (gen_random_uuid(), 'credit', 50) $$,
-  'new row violates row-level security policy for table "wallet_transactions"',
+  '%permission denied for table wallet_transactions%',
   'customer: cannot insert wallet_transactions directly');
 
 -- Account-field guards: role and phone are not client-writable.
@@ -147,12 +147,12 @@ select ok(
 
 select ok(
   not has_function_privilege('authenticated',
-    'public.wallet_refund(uuid, numeric, text, uuid)', 'EXECUTE'),
+    'public.wallet_refund(uuid, numeric, text, text, uuid)', 'EXECUTE'),
   'wallet_refund not executable by authenticated');
 
 select ok(
   not has_function_privilege('authenticated',
-    'public._platform_credit_grant(uuid, numeric, text, uuid)', 'EXECUTE'),
+    'public._platform_credit_grant(uuid, numeric, uuid)', 'EXECUTE'),
   '_platform_credit_grant not executable by authenticated');
 
 select ok(

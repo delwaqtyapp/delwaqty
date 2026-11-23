@@ -2,6 +2,18 @@
 -- Generated from live catalogs 2026-11-21T21:23:44Z; supersedes archived migrations 001-214.
 -- Schema-only: no data. Includes RLS, policies, grants, default ACLs, realtime publication.
 
+-- Replay preamble (2026-11-23): the local Supabase CLI postgres image grants
+-- function EXECUTE to anon/authenticated via bootstrap default privileges on
+-- the postgres role; hosted Supabase does not. Without stripping those
+-- implicit defaults, replayed ACLs diverge from staging/prod: functions keep
+-- named anon/authenticated EXECUTE grants that our REVOKE ... FROM PUBLIC
+-- statements do not remove (pgTAP redteam caught this on _wallet_credit).
+-- App RPCs carry explicit GRANTs, so stripping implicit defaults is safe and
+-- makes replay converge with hosted.
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public REVOKE ALL ON FUNCTIONS FROM anon;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public REVOKE ALL ON FUNCTIONS FROM authenticated;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public REVOKE ALL ON FUNCTIONS FROM PUBLIC;
+
 BEGIN;
 CREATE SCHEMA IF NOT EXISTS extensions;
 CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;

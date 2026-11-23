@@ -77,14 +77,9 @@ class _FakeDashboardRepo implements MerchantDashboardRepository {
   Future<void> deleteProduct(String productId) async {}
 }
 
-<<<<<<< HEAD
 Widget _marker(String path) => Scaffold(
-  body: Center(child: Text('route:$path', key: ValueKey('page'))),
+  body: Center(child: Text('route:$path', key: const ValueKey('page'))),
 );
-=======
-Widget _marker(String path) =>
-    Scaffold(body: Center(child: Text('route:$path', key: const ValueKey('page'))));
->>>>>>> integration/provider399
 
 class _NavTab extends FeatureModule {
   _NavTab(this.id, this.path, this.priority, {this.builder});

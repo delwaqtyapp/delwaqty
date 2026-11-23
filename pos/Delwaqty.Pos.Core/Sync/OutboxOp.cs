@@ -60,6 +60,21 @@ namespace Delwaqty.Pos.Core.Sync
             { ["name"] = name, ["phone"] = phone, ["notes"] = notes }));
         }
 
+        /// <summary>
+        /// #118: a customer created at sale time gets a stable client id (the
+        /// op id itself). Deferred sales and debt payments reference that id
+        /// in customer_id; the server resolves it through
+        /// pos_customers.client_op_id (server-side resolution is a pending
+        /// builder migration — until it lands, such ops fail visibly and stay
+        /// queued instead of throwing at sale time).
+        /// </summary>
+        public static OutboxOp Customer(string name, string phone, string notes, string clientOpId)
+        {
+            return new OutboxOp("customer", Json(new Dictionary<string, object>
+            { ["name"] = name, ["phone"] = phone, ["notes"] = notes }))
+            { OpId = clientOpId ?? Guid.NewGuid().ToString() };
+        }
+
         public static OutboxOp ShiftOpen(decimal openingFloat)
         {
             return new OutboxOp("shift_open", Json(new Dictionary<string, object>

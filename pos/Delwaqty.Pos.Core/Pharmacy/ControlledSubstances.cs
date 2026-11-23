@@ -50,23 +50,39 @@ namespace Delwaqty.Pos.Core.Pharmacy
         /// True when the ingredient or product name indicates a controlled
         /// substance. nameOrIngredient may be the Arabic/English name or the
         /// active-ingredient string ("Tramadol HCl 50mg" matches "tramadol").
+        /// Combination products are split on every usual separator
+        /// ("tramadol+paracetamol", "Tramadol/Paracetamol") — review #120.
         /// </summary>
         public static bool IsControlled(string nameOrIngredient)
         {
             if (string.IsNullOrWhiteSpace(nameOrIngredient)) return false;
             var norm = Text.ArabicNormalizer.Normalize(nameOrIngredient);
             if (norm == null) return false;
-            foreach (var raw in norm.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
+            var words = norm.Split(
+                new[] { ' ', '\t', '+', '/', '\\', '-', '(', ')', '[', ']', ',', ';', ':', '.', '\'', '"', '_' },
+                StringSplitOptions.RemoveEmptyEntries);
+            foreach (var word in words)
             {
-                // Strip surrounding punctuation: "(tramadol" from "Ultracet (Tramadol + ...)".
-                var word = raw.Trim('(', ')', '[', ']', ',', ';', ':', '.', '+', '/', '-', '\'', '"');
                 if (word.Length > 0 && Ingredients.Contains(word)) return true;
             }
             return false;
         }
 
-        /// <summary>The warning the cashier sees. Dispensing prompt only.</summary>
+        /// <summary>
+        /// The sale-time check (#120): a null OR empty/whitespace ingredient
+        /// both fall back to the display name, so catalog rows without an
+        /// ingredient field are still checked by name.
+        /// </summary>
+        public static bool ShouldWarn(string ingredient, string fallbackName)
+        {
+            return IsControlled(string.IsNullOrWhiteSpace(ingredient) ? fallbackName : ingredient);
+        }
+
+        // #120: this prompt is a CONVENIENCE REMINDER for the pharmacist, not
+        // a compliance gate and never medical advice; wording says so plainly.
+        public const string TitleAr = "تنبيه صرف (مساعد — غير ملزم)";
         public const string WarningAr =
-            "صنف خاضع للرقابة (جدول): تأكد من وجود روشتة سارية قبل الصرف";
+            "هذا الصنف قد يكون خاضعاً للرقابة (جدول). " +
+            "تنبيه مساعد فقط وليس حكماً قانونياً: تحقق من الروشتة والقواعد بنفسك — القرار والمسؤولية عليك كصيدلي.";
     }
 }

@@ -31,6 +31,37 @@ namespace Delwaqty.Pos.Core.Tests
         }
 
         [Fact]
+        public void Combination_Names_Are_Split_On_Every_Separator()
+        {
+            // #120: combination products without spaces around the separator.
+            Assert.True(ControlledSubstances.IsControlled("tramadol+paracetamol"));
+            Assert.True(ControlledSubstances.IsControlled("Tramadol/Paracetamol"));
+            Assert.True(ControlledSubstances.IsControlled("PARACETAMOL+TRAMADOL 325/37.5"));
+            Assert.True(ControlledSubstances.IsControlled("Codeine,Phosphate"));
+        }
+
+        [Fact]
+        public void Null_Or_Empty_Ingredient_Falls_Back_To_The_Display_Name()
+        {
+            // #120: null and whitespace ingredient both mean "check by name".
+            Assert.True(ControlledSubstances.ShouldWarn(null, "Ultracet Tramadol"));
+            Assert.True(ControlledSubstances.ShouldWarn("", "Ultracet Tramadol"));
+            Assert.True(ControlledSubstances.ShouldWarn("   ", "Ultracet Tramadol"));
+            Assert.True(ControlledSubstances.ShouldWarn("tramadol", null));
+            Assert.False(ControlledSubstances.ShouldWarn(null, "Panadol"));
+            Assert.False(ControlledSubstances.ShouldWarn(null, null));
+        }
+
+        [Fact]
+        public void Warning_Is_Labelled_A_Convenience_Not_Compliance()
+        {
+            // #120: never present the prompt as a legal ruling.
+            Assert.Contains("تنبيه مساعد", ControlledSubstances.WarningAr);
+            Assert.Contains("ليس حكماً قانونياً", ControlledSubstances.WarningAr);
+            Assert.Contains("غير ملزم", ControlledSubstances.TitleAr);
+        }
+
+        [Fact]
         public void Warning_Is_A_Dispensing_Prompt_Not_Advice()
         {
             Assert.Contains("روشتة", ControlledSubstances.WarningAr);
@@ -51,17 +82,20 @@ namespace Delwaqty.Pos.Core.Tests
             _store.AddBatch("item-1", "اوجمنتين", 5, new DateTime(2027, 6, 1), "B-late");
             _store.AddBatch("item-1", "اوجمنتين", 3, new DateTime(2027, 1, 1), "B-early");
             var alloc = _store.AllocateFefo("item-1", 4);
-            Assert.Equal(2, alloc.Count);
-            Assert.Equal(3, alloc[0].Value);   // finishes the early batch first
-            Assert.Equal(1, alloc[1].Value);
+            Assert.Equal(2, alloc.Items.Count);
+            Assert.True(alloc.Covered);
+            Assert.Equal(3, alloc.Items[0].Value);   // finishes the early batch first
+            Assert.Equal(1, alloc.Items[1].Value);
         }
 
         [Fact]
-        public void Dispense_Decrements_And_Clamps_At_Zero()
+        public void Dispense_Decrements_Clamps_And_Reports_Shortfall()
         {
             var id = _store.AddBatch("item-2", "اموكسيل", 2, new DateTime(2027, 3, 1), null);
-            _store.Dispense("item-2", 5); // more than on hand
+            var plan = _store.Dispense("item-2", 5, "sale-x"); // more than on hand
             Assert.Equal(0, _store.TrackedQty("item-2"));
+            Assert.False(plan.Covered);
+            Assert.Equal(3, plan.Missing);
         }
 
         [Fact]
@@ -80,7 +114,8 @@ namespace Delwaqty.Pos.Core.Tests
         public void Untracked_Item_Allocates_Nothing_And_Still_Sells()
         {
             var alloc = _store.AllocateFefo("no-such-item", 3);
-            Assert.Empty(alloc);
+            Assert.Empty(alloc.Items);
+            Assert.Equal(3, alloc.Missing);
         }
 
         [Fact]

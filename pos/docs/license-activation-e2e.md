@@ -56,3 +56,14 @@ paid product.
 Trial key issued on the bughunt store → device A links (ok, plan, merchant
 profile returned) → device B rejected `BOUND_TO_OTHER_DEVICE` → unknown key
 rejected `UNKNOWN_KEY` → new keys are single-line (345 fix).
+
+## Clone limitation (security review 2026-11-23)
+
+A full copy of the app's data directory to a second PC does NOT move the
+activation: the refresh credential and license seal are DPAPI machine-key
+protected (they cannot be decrypted on another machine) and the seal also
+fails its device-id check. Caveat: DPAPI is machine-bound, not
+license-bound — any process running on the same PC can unprotect the blob,
+so the protection is against copying, not against local malware. Device
+binding (one key, one PC, `BOUND_TO_OTHER_DEVICE`) remains the real
+enforcement; support resets the binding when a PC is replaced.

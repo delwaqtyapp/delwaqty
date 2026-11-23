@@ -1,6 +1,9 @@
 using System;
+using System.Net.Http;
 using System.Windows;
+using Delwaqty.Pos.Core.Auth;
 using Delwaqty.Pos.Core.Licensing;
+using Delwaqty.Pos.Core.Protection;
 using Delwaqty.Pos.Core.Sync;
 
 namespace Delwaqty.Pos.Wpf
@@ -10,19 +13,24 @@ namespace Delwaqty.Pos.Wpf
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            var dataDir = AppPaths.DataDir();
-            var activation = new ActivationService(dataDir);
+            var rootDir = AppPaths.DataDir();
+            DataDirSecurity.Harden(rootDir); // #114: tighten the shared dir ACL (Windows)
+            var activation = new ActivationService(rootDir, PosConfig.BuildFlavor);
             var state = activation.Restore();
 
-            if (state != null && IsPastGrace(state))
+            if (state != null && LicenseGuard.Evaluate(state, DateTimeOffset.UtcNow) == PosMode.Locked)
             {
-                // Past grace with no server contact: re-activate, keep local data.
-                state = null;
+                // #119: past the offline cutoff (or suspended from a previous
+                // refresh): try one verified online refresh before asking for
+                // re-activation. Local data is never touched either way.
+                TryOnlineRefresh(activation, state);
+                if (LicenseGuard.Evaluate(state, DateTimeOffset.UtcNow) == PosMode.Locked)
+                    state = null; // forces the activation window below
             }
 
             if (state == null)
             {
-                var win = new ActivationWindow(activation, dataDir);
+                var win = new ActivationWindow(activation);
                 if (win.ShowDialog() != true)
                 {
                     Shutdown();
@@ -31,17 +39,29 @@ namespace Delwaqty.Pos.Wpf
                 state = win.ActivatedState;
             }
 
-            var main = new MainWindow(activation, dataDir, state);
+            var main = new MainWindow(activation, state);
             MainWindow = main;
             main.Show();
         }
 
-        /// <summary>Offline grace: the seal alone is enough until grace_until passes.</summary>
-        internal static bool IsPastGrace(ActivationState state)
+        /// <summary>Best-effort one-shot refresh at startup; silent on any failure.</summary>
+        private static void TryOnlineRefresh(ActivationService activation, ActivationState state)
         {
-            if (!state.ExpiresAt.HasValue) return false; // lifetime
-            var graceEnd = state.GraceUntil ?? state.ExpiresAt.Value.AddDays(3);
-            return DateTimeOffset.UtcNow > graceEnd && state.ValidatedAtUtc < graceEnd;
+            try
+            {
+                string refresh, email;
+                if (!activation.TryLoadRefreshToken(out refresh, out email)) return;
+                var http = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
+                var auth = new AuthClient(PosConfig.SupabaseUrl, PosConfig.SupabaseAnonKey, http);
+                var sync = new SyncClient(PosConfig.SupabaseUrl, PosConfig.SupabaseAnonKey, http);
+                var session = auth.Refresh(refresh).GetAwaiter().GetResult();
+                activation.SaveRefreshToken(session.RefreshToken, session.Email ?? email);
+                sync.AccessToken = session.AccessToken;
+                state.ValidatedAtUtc = DateTimeOffset.MinValue; // force the refresh
+                new LicenseRefresher(activation, sync)
+                    .RefreshAsync(state, DateTimeOffset.UtcNow).GetAwaiter().GetResult();
+            }
+            catch { /* offline or expired session: the guard's cutoff applies */ }
         }
     }
 }

@@ -38,21 +38,34 @@ namespace Delwaqty.Pos.Core.Tests
         }
 
         [Fact]
-        public void Sealed_Credentials_Roundtrip_And_Reject_Other_Device_Key()
+        public void Sealed_Credentials_V2_Roundtrip_And_Legacy_Xor_Still_Reads()
         {
             var dir = Path.Combine(Path.GetTempPath(), "cred-" + Guid.NewGuid());
             Directory.CreateDirectory(dir);
             try
             {
                 var path = Path.Combine(dir, "s.cred");
-                var key1 = LocalLicenseSeal.NewDeviceKey();
-                var key2 = LocalLicenseSeal.NewDeviceKey();
-                SealedCredentialStore.Save(path, "rt-abc", "m@example.com", key1);
-                Assert.True(SealedCredentialStore.TryLoad(path, key1, out var rt, out var email));
+                var protector = TestProtector.New();
+                SealedCredentialStore.Save(path, "rt-abc", "m@example.com", protector);
+                Assert.True(SealedCredentialStore.TryLoad(path, protector, out var rt, out var email));
                 Assert.Equal("rt-abc", rt);
                 Assert.Equal("m@example.com", email);
-                // A copied file on another PC (different device key) must not decode.
-                Assert.False(SealedCredentialStore.TryLoad(path, key2, out var rt2, out _) && rt2 == "rt-abc");
+                // A copied file on another PC (different machine key) must not decode.
+                var foreign = TestProtector.New();
+                Assert.False(SealedCredentialStore.TryLoad(path, foreign, out var rt2, out _) && rt2 == "rt-abc");
+                // The v2 file carries the DPAPI marker.
+                Assert.StartsWith(SealedCredentialStore.BlobPrefix, File.ReadAllText(path));
+
+                // Legacy v1 (XOR with the device key) still loads through the
+                // legacy reader, and the v2 loader never mistakes it for v2.
+                var legacyPath = Path.Combine(dir, "legacy.cred");
+                var deviceKey = LocalLicenseSeal.NewDeviceKey();
+                var payload = System.Text.Encoding.UTF8.GetBytes("rt-old\nm@example.com");
+                for (var i = 0; i < payload.Length; i++) payload[i] ^= deviceKey[i % deviceKey.Length];
+                File.WriteAllText(legacyPath, Convert.ToBase64String(payload));
+                Assert.False(SealedCredentialStore.TryLoad(legacyPath, protector, out _, out _));
+                Assert.True(SealedCredentialStore.TryLoadLegacy(legacyPath, deviceKey, out var rtOld, out _));
+                Assert.Equal("rt-old", rtOld);
             }
             finally { Directory.Delete(dir, true); }
         }
@@ -94,6 +107,14 @@ namespace Delwaqty.Pos.Core.Tests
             }
         }
 
+        private static string MakeTrialKey()
+        {
+            return "DLWQ1." + LicenseKey.Base64UrlEncode(
+                System.Text.Encoding.UTF8.GetBytes(
+                    Guid.NewGuid() + "|" + Guid.NewGuid() + "|trial|2026-12-22 00:00:00+00")) + "." +
+                new string('a', 64);
+        }
+
         [Fact]
         public async System.Threading.Tasks.Task Activate_Then_Restore_Roundtrips()
         {
@@ -103,16 +124,18 @@ namespace Delwaqty.Pos.Core.Tests
             var http = new HttpClient(stub);
             var auth = new AuthClient("https://x.supabase.co", "anon", http);
             var sync = new SyncClient("https://x.supabase.co", "anon", http);
-            var svc = new ActivationService(_dir);
-            var key = "DLWQ1." + LicenseKey.Base64UrlEncode(
-                System.Text.Encoding.UTF8.GetBytes(
-                    Guid.NewGuid() + "|" + Guid.NewGuid() + "|trial|2026-12-22 00:00:00+00")) + "." +
-                new string('a', 64);
-            var res = await svc.ActivateAsync(auth, sync, "m@example.com", "pw", key, "dev-1");
-            Assert.True(res.Ok);
+            var svc = new ActivationService(_dir, "Pharmacy");
+            var deviceId = svc.LocalDeviceId;
+            var res = await svc.ActivateAsync(auth, sync, "m@example.com", "pw", MakeTrialKey(), deviceId);
+            Assert.True(res.Ok, res.Reason + " " + res.Error);
             // device_link was called with the key and device id
             Assert.Contains("cashier_device_link", stub.Requests[1].Url);
-            Assert.Contains("dev-1", stub.Requests[1].Body);
+            Assert.Contains(deviceId, stub.Requests[1].Body);
+
+            // Data lives in the merchant+flavor scope dir (#116), not the root.
+            Assert.NotNull(svc.CurrentScopeDir);
+            Assert.Contains("m-1", svc.CurrentScopeDir);
+            Assert.Contains("pharmacy", svc.CurrentScopeDir);
 
             var restored = svc.Restore();
             Assert.NotNull(restored);
@@ -125,10 +148,27 @@ namespace Delwaqty.Pos.Core.Tests
         [Fact]
         public void Restore_Rejects_A_Tampered_Or_Foreign_Seal()
         {
-            var svc = new ActivationService(_dir);
+            var svc = new ActivationService(_dir, "Pharmacy");
             File.WriteAllText(svc.SealPath,
                 "{\"Payload\":\"a|b|trial|lifetime|dev|2026-01-01\",\"Seal\":\"" + new string('0', 64) +
                 "\",\"StateJson\":\"{}\"}");
+            Assert.Null(svc.Restore());
+
+            // #115: a v2 file whose StateJson was edited by hand (Pro flipped)
+            // is rejected — the seal covers the WHOLE serialized state.
+            var scope = svc.ScopeDirFor("m-9");
+            Directory.CreateDirectory(scope);
+            var state = new ActivationState
+            {
+                LicenseKey = "k", Plan = "trial", Pro = true, Status = "active",
+                MerchantId = "m-9", MerchantType = "pharmacy", DeviceId = svc.LocalDeviceId,
+                ValidatedAtUtc = DateTimeOffset.UtcNow,
+            };
+            var json = System.Text.Json.JsonSerializer.Serialize(state,
+                new System.Text.Json.JsonSerializerOptions { IncludeFields = true });
+            File.WriteAllText(Path.Combine(scope, "license.seal"),
+                "{\"Version\":2,\"Seal\":\"" + new string('0', 64) + "\",\"StateJson\":" +
+                System.Text.Json.JsonSerializer.Serialize(json) + "}");
             Assert.Null(svc.Restore());
         }
 

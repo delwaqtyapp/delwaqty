@@ -28,13 +28,16 @@ namespace Delwaqty.Pos.Core.Sales
         }
 
         private readonly SqliteConnection _db;
+        private readonly bool _ownsConnection;
+        internal SqliteTransaction Tx;
 
-        public LocalSalesLog(string path)
+        public LocalSalesLog(string path) : this(Sync.OutboxStore.Open(path), true) { }
+
+        internal LocalSalesLog(SqliteConnection db, bool ownsConnection)
         {
-            var cs = new SqliteConnectionStringBuilder { DataSource = path }.ToString();
-            _db = new SqliteConnection(cs);
-            _db.Open();
-            using (var cmd = _db.CreateCommand())
+            _db = db;
+            _ownsConnection = ownsConnection;
+            using (var cmd = Cmd())
             {
                 cmd.CommandText =
                     "CREATE TABLE IF NOT EXISTS local_sales (" +
@@ -60,7 +63,7 @@ namespace Delwaqty.Pos.Core.Sales
         {
             // Payment exposes fields, not properties: IncludeFields is required.
             var payments = JsonSerializer.Serialize(sale.Payments, FieldJson);
-            using (var cmd = _db.CreateCommand())
+            using (var cmd = Cmd())
             {
                 cmd.CommandText =
                     "INSERT OR IGNORE INTO local_sales" +
@@ -91,7 +94,7 @@ namespace Delwaqty.Pos.Core.Sales
         /// the server shift id after the shift_open op syncs).</summary>
         public void RemapShift(string oldShiftId, string newShiftId)
         {
-            using (var cmd = _db.CreateCommand())
+            using (var cmd = Cmd())
             {
                 cmd.CommandText = "UPDATE local_sales SET shift_id = $new WHERE shift_id = $old;";
                 cmd.Parameters.AddWithValue("$new", newShiftId);
@@ -102,7 +105,7 @@ namespace Delwaqty.Pos.Core.Sales
 
         public void MarkVoided(string opId)
         {
-            using (var cmd = _db.CreateCommand())
+            using (var cmd = Cmd())
             {
                 cmd.CommandText = "UPDATE local_sales SET status = 'voided' WHERE op_id = $id;";
                 cmd.Parameters.AddWithValue("$id", opId);
@@ -113,7 +116,7 @@ namespace Delwaqty.Pos.Core.Sales
         public List<Entry> SalesForShift(string shiftId)
         {
             var list = new List<Entry>();
-            using (var cmd = _db.CreateCommand())
+            using (var cmd = Cmd())
             {
                 cmd.CommandText =
                     "SELECT op_id, shift_id, total, payments, customer_id, customer_name, status, created_at" +
@@ -127,7 +130,7 @@ namespace Delwaqty.Pos.Core.Sales
         public List<Entry> Recent(int limit)
         {
             var list = new List<Entry>();
-            using (var cmd = _db.CreateCommand())
+            using (var cmd = Cmd())
             {
                 cmd.CommandText =
                     "SELECT op_id, shift_id, total, payments, customer_id, customer_name, status, created_at" +
@@ -178,6 +181,13 @@ namespace Delwaqty.Pos.Core.Sales
             };
         }
 
-        public void Dispose() { _db.Dispose(); }
+        internal SqliteCommand Cmd()
+        {
+            var cmd = _db.CreateCommand();
+            if (Tx != null) cmd.Transaction = Tx;
+            return cmd;
+        }
+
+        public void Dispose() { if (_ownsConnection) _db.Dispose(); }
     }
 }

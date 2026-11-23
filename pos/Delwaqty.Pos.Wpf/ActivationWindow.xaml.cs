@@ -9,14 +9,12 @@ namespace Delwaqty.Pos.Wpf
     public partial class ActivationWindow : Window
     {
         private readonly ActivationService _activation;
-        private readonly string _dataDir;
         public ActivationState ActivatedState { get; private set; }
 
-        public ActivationWindow(ActivationService activation, string dataDir)
+        public ActivationWindow(ActivationService activation)
         {
             InitializeComponent();
             _activation = activation;
-            _dataDir = dataDir;
         }
 
         private async void Activate_Click(object sender, RoutedEventArgs e)
@@ -46,8 +44,8 @@ namespace Delwaqty.Pos.Wpf
                 var http = new System.Net.Http.HttpClient();
                 var auth = new AuthClient(PosConfig.SupabaseUrl, PosConfig.SupabaseAnonKey, http);
                 var sync = new SyncClient(PosConfig.SupabaseUrl, PosConfig.SupabaseAnonKey, http);
-                var deviceId = DeviceId.GetOrCreate(_dataDir);
-                var result = await _activation.ActivateAsync(auth, sync, email, password, key, deviceId);
+                var result = await _activation.ActivateAsync(auth, sync, email, password, key,
+                    _activation.LocalDeviceId);
                 if (!result.Ok)
                 {
                     ErrorText.Text = ArabicReason(result.Reason, result.Error);
@@ -79,6 +77,8 @@ namespace Delwaqty.Pos.Wpf
                 case "SUSPENDED": return "الترخيص موقوف من المنصة. تواصل مع الدعم.";
                 case "BOUND_TO_OTHER_DEVICE": return "المفتاح مفعّل على جهاز آخر. تواصل مع الدعم لنقله.";
                 case "EXPIRED": return "الترخيص منتهي. جدد الاشتراك من المنصة.";
+                case "OTHER_MERCHANT_DATA_PENDING":
+                    return "هناك بيانات غير مرفوعة لتاجر آخر على هذا الجهاز. فعّل التاجر السابق وارفع بياناته أولاً.";
                 case "NETWORK": return "تعذر الاتصال بالخادم. تأكد من الإنترنت وحاول مرة أخرى.";
                 default: return "تعذر التفعيل (" + reason + ")" + (detail != null ? ": " + detail : "");
             }

@@ -43,7 +43,7 @@ namespace Delwaqty.Pos.Wpf
 
         private readonly ActivationService _activation;
         private readonly ActivationState _state;
-        private readonly string _dataDir;
+        private readonly string _dataDir;   // the merchant+flavor scope dir (#116)
         private readonly bool _isPharmacy;
 
         private readonly HttpClientFactory _http = new HttpClientFactory();
@@ -53,38 +53,37 @@ namespace Delwaqty.Pos.Wpf
 
         private readonly CatalogCache _drugs;            // pharmacy
         private readonly RetailCatalogCache _products;   // store products (both flavors)
-        private readonly OutboxStore _outbox;
-        private readonly LocalSalesLog _salesLog;
-        private readonly BatchStore _batches;            // pharmacy
+        private readonly PosLocalDb _localDb;            // outbox + journal + batches, one db (#120)
         private readonly SyncEngine _engine;
+        private readonly LicenseRefresher _licenseRefresher;
+        private PosMode _mode = PosMode.Full;
 
         private readonly SaleBuilder _sale = new SaleBuilder();
         private readonly ObservableCollection<SaleLine> _cart = new ObservableCollection<SaleLine>();
         private List<PullApplier.PosCustomer> _customers = new List<PullApplier.PosCustomer>();
         private string _currentShiftId;   // local grouping id (op id until adopted)
-        private string _serverShiftId;    // real pos_shifts id once the pull shows it
-        private decimal? _pendingCloseCash; // close recorded locally, awaiting server shift id
+        private string _serverShiftId;    // real pos_shifts id once the shift_open synced
         private decimal _currentFloat;
         private readonly DispatcherTimer _syncTimer;
         private readonly DispatcherTimer _clockTimer;
         private bool _syncing;
 
-        public MainWindow(ActivationService activation, string dataDir, ActivationState state)
+        public MainWindow(ActivationService activation, ActivationState state)
         {
             InitializeComponent();
             _activation = activation;
-            _dataDir = dataDir;
+            _dataDir = activation.CurrentScopeDir;
             _state = state;
             _isPharmacy = state.IsPharmacy;
 
             _sync = new SyncClient(PosConfig.SupabaseUrl, PosConfig.SupabaseAnonKey, _http.Client);
             _auth = new AuthClient(PosConfig.SupabaseUrl, PosConfig.SupabaseAnonKey, _http.Client);
-            _drugs = new CatalogCache(Path.Combine(dataDir, "catalog.db"));
-            _products = new RetailCatalogCache(Path.Combine(dataDir, "products.db"));
-            _outbox = new OutboxStore(Path.Combine(dataDir, "outbox.db"));
-            _salesLog = new LocalSalesLog(Path.Combine(dataDir, "sales.db"));
-            _batches = new BatchStore(Path.Combine(dataDir, "batches.db"));
-            _engine = new SyncEngine(_outbox, _sync, state.MerchantId);
+            _drugs = new CatalogCache(Path.Combine(_dataDir, "catalog.db"));
+            _products = new RetailCatalogCache(Path.Combine(_dataDir, "products.db"));
+            _localDb = new PosLocalDb(Path.Combine(_dataDir, "pos.db"));
+            _engine = new SyncEngine(_localDb.Outbox, _sync, state.MerchantId);
+            _licenseRefresher = new LicenseRefresher(activation, _sync);
+            _mode = LicenseGuard.Evaluate(state, DateTimeOffset.UtcNow);
 
             ConfigureFlavor();
             CartGrid.ItemsSource = _cart;
@@ -102,7 +101,32 @@ namespace Delwaqty.Pos.Wpf
             _clockTimer.Tick += (s, e) => ClockText.Text = DateTime.Now.ToString("yyyy/MM/dd HH:mm");
             _clockTimer.Start();
             Loaded += async (s, e) => await SyncNow();
-            Closed += (s, e) => { _syncTimer.Stop(); _clockTimer.Stop(); };
+            Closed += (s, e) => { _syncTimer.Stop(); _clockTimer.Stop(); _localDb.Dispose(); };
+            ApplyMode();
+        }
+
+        // ==================== LICENSE MODE (#119) ====================
+
+        private void ApplyMode()
+        {
+            if (_mode == PosMode.Locked)
+            {
+                StatusText.Text = "الترخيص موقوف أو منتهي — البيع متوقف. بياناتك محفوظة وتُرفع عند التجديد.";
+            }
+            else if (_mode == PosMode.Grace)
+            {
+                StatusText.Text = "الترخيص منتهي — فترة سماح. جدد الاشتراك قريباً.";
+            }
+            UpdateLicenseBadge();
+        }
+
+        private bool EnsureSellingAllowed()
+        {
+            if (_mode != PosMode.Locked) return true;
+            MessageBox.Show(this,
+                "الترخيص موقوف أو منتهي. البيع متوقف حتى التجديد — البيانات المحلية محفوظة.",
+                "الترخيص", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return false;
         }
 
         private void ConfigureFlavor()
@@ -189,9 +213,11 @@ namespace Delwaqty.Pos.Wpf
         private void AddRow(SearchRow row)
         {
             if (row == null) return;
-            if (_isPharmacy && ControlledSubstances.IsControlled(row.Ingredient ?? row.DisplayName))
+            // #120: convenience reminder only (never compliance); null OR
+            // empty ingredient falls back to the display name.
+            if (_isPharmacy && ControlledSubstances.ShouldWarn(row.Ingredient, row.DisplayName))
             {
-                MessageBox.Show(this, ControlledSubstances.WarningAr, "تنبيه صرف",
+                MessageBox.Show(this, ControlledSubstances.WarningAr, ControlledSubstances.TitleAr,
                     MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
             var line = new SaleLine
@@ -213,6 +239,13 @@ namespace Delwaqty.Pos.Wpf
             if (string.IsNullOrWhiteSpace(name)) return;
             var price = InputDialog.AskAmount(this, "صنف سريع", "السعر:", "");
             if (!price.HasValue) return;
+            // #120: the convenience controlled-substance reminder applies to
+            // quick lines too (checked by the entered name).
+            if (_isPharmacy && ControlledSubstances.IsControlled(name))
+            {
+                MessageBox.Show(this, ControlledSubstances.WarningAr, ControlledSubstances.TitleAr,
+                    MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            }
             var qty = InputDialog.AskAmount(this, "صنف سريع", "الكمية (للوزن: بالكيلو مثل 0.5):", "1");
             if (!qty.HasValue || qty.Value <= 0) return;
             var line = new SaleLine
@@ -268,37 +301,54 @@ namespace Delwaqty.Pos.Wpf
 
         private void Pay_Click(object sender, RoutedEventArgs e)
         {
+            if (!EnsureSellingAllowed()) return;
             if (_sale.Lines.Count == 0)
             {
                 CartNote.Text = "الفاتورة فارغة";
                 return;
             }
-            // Only a SERVER shift id goes on the payload; a local-only shift
-            // leaves shift_id null (the local journal still groups the sale).
-            _sale.ShiftId = _serverShiftId;
-            var dlg = new PaymentDialog(_sale, () => _customers) { Owner = this };
-            if (dlg.ShowDialog() != true) return;
-
-            // A brand-new customer from the payment dialog gets enqueued first.
-            if (dlg.NewCustomer != null)
-            {
-                _outbox.Enqueue(OutboxPayloads.Customer(dlg.NewCustomer.NewCustomerName,
-                    dlg.NewCustomer.NewCustomerPhone, null));
-            }
-
-            var op = OutboxPayloads.Sale(_sale);
-            _outbox.Enqueue(op);
-            _salesLog.Add(new LocalSalesLog.OutboxOpRef(op.OpId), _sale, _currentShiftId);
-
+            // #120: never sell tracked stock the batches cannot cover (and
+            // never from an expired batch). Untracked items sell freely.
             if (_isPharmacy)
             {
                 foreach (var line in _sale.Lines)
                 {
                     var key = line.ProductId ?? line.DrugCatalogId;
-                    if (key != null) _batches.Dispense(key, line.Qty);
+                    if (key == null) continue;
+                    if (_localDb.Batches.TrackedQty(key) <= 0) continue; // untracked
+                    var plan = _localDb.Batches.AllocateFefo(key, line.Qty);
+                    if (!plan.Covered)
+                    {
+                        var sellable = _localDb.Batches.SellableQty(key);
+                        MessageBox.Show(this,
+                            "لا يمكن صرف " + line.Name + ": المتتبع الصالح " + sellable.ToString("0.##") +
+                            " فقط والمطلوب " + line.Qty.ToString("0.##") +
+                            ". راجع التشغيلات (قد يوجد مخزون منتهي الصلاحية).",
+                            "مخزون غير كافٍ", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
                 }
-                RefreshExpiryAlerts();
             }
+            // The payload carries the server shift id when known, else the
+            // local shift op id — the sync engine rewrites it through the
+            // shift map before pushing (#117).
+            _sale.ShiftId = _serverShiftId ?? _currentShiftId;
+            var dlg = new PaymentDialog(_sale, () => _customers) { Owner = this };
+            if (dlg.ShowDialog() != true) return;
+
+            // A brand-new customer from the payment dialog gets a stable
+            // client id (the op id); the sale already references it (#118).
+            if (dlg.NewCustomer != null)
+            {
+                _localDb.Outbox.Enqueue(OutboxPayloads.Customer(dlg.NewCustomer.NewCustomerName,
+                    dlg.NewCustomer.NewCustomerPhone, null, dlg.NewCustomerClientId));
+            }
+
+            var op = OutboxPayloads.Sale(_sale);
+            // #120: outbox op + journal + FEFO batch dispensing in ONE
+            // transaction — a crash cannot record a sale without its stock.
+            _localDb.CommitSale(op, _sale, _currentShiftId, dispenseBatches: _isPharmacy);
+            if (_isPharmacy) RefreshExpiryAlerts();
 
             var receipt = ReceiptBuilder.Build(new ReceiptBuilder.Context
             {
@@ -310,9 +360,11 @@ namespace Delwaqty.Pos.Wpf
                 CustomerName = _sale.CustomerName,
                 IsPharmacy = _isPharmacy,
             }, _sale);
-            var phone = _sale.CustomerId != null
-                ? (_customers.FirstOrDefault(c => c.Id == _sale.CustomerId) ?? new PullApplier.PosCustomer()).Phone
-                : (dlg.NewCustomer != null ? dlg.NewCustomer.NewCustomerPhone : null);
+            var phone = dlg.NewCustomer != null
+                ? dlg.NewCustomer.NewCustomerPhone
+                : (_sale.CustomerId != null
+                    ? (_customers.FirstOrDefault(c => c.Id == _sale.CustomerId) ?? new PullApplier.PosCustomer()).Phone
+                    : null);
 
             StatusText.Text = "تم تسجيل الفاتورة (تُرفع عند الاتصال)";
             ClearCart();
@@ -349,7 +401,7 @@ namespace Delwaqty.Pos.Wpf
                 StatusText.Text = "اختر صنفاً مسجلاً وأدخل الكمية الفعلية";
                 return;
             }
-            _outbox.Enqueue(OutboxPayloads.StockCount(row.ProductId, counted, "جرد يدوي"));
+            _localDb.Outbox.Enqueue(OutboxPayloads.StockCount(row.ProductId, counted, "جرد يدوي"));
             var cached = _products.ById(row.ProductId);
             if (cached != null) { cached.Stock = counted; _products.Upsert(cached); }
             StatusText.Text = "سُجل جرد: " + row.DisplayName;
@@ -364,14 +416,14 @@ namespace Delwaqty.Pos.Wpf
             var dlg = new BatchDialog(row.DisplayName) { Owner = this };
             if (dlg.ShowDialog() != true) return;
             var key = row.ProductId ?? row.DrugCatalogId;
-            _batches.AddBatch(key, row.DisplayName, dlg.Qty, dlg.Expiry, dlg.BatchNo);
+            _localDb.Batches.AddBatch(key, row.DisplayName, dlg.Qty, dlg.Expiry, dlg.BatchNo);
             // Absolute stock correction rides the normal stock-count op when
             // the item is a tracked store product.
             if (row.ProductId != null)
             {
                 var cached = _products.ById(row.ProductId);
                 var newTotal = (cached != null && cached.Stock.HasValue ? cached.Stock.Value : 0) + dlg.Qty;
-                _outbox.Enqueue(OutboxPayloads.StockCount(row.ProductId, newTotal, "توريد تشغيلة"));
+                _localDb.Outbox.Enqueue(OutboxPayloads.StockCount(row.ProductId, newTotal, "توريد تشغيلة"));
                 if (cached != null) { cached.Stock = newTotal; _products.Upsert(cached); }
             }
             StatusText.Text = "سُجل توريد: " + row.DisplayName;
@@ -392,7 +444,7 @@ namespace Delwaqty.Pos.Wpf
             if (row == null || row.ProductId == null) { StatusText.Text = "اختر صنفاً مسجلاً أولاً"; return; }
             var price = InputDialog.AskAmount(this, "تغيير السعر", "السعر الجديد:", row.Price.ToString("0.##"));
             if (!price.HasValue) return;
-            _outbox.Enqueue(OutboxPayloads.PriceChange(row.ProductId, price.Value, "manual"));
+            _localDb.Outbox.Enqueue(OutboxPayloads.PriceChange(row.ProductId, price.Value, "manual"));
             var cached = _products.ById(row.ProductId);
             if (cached != null) { cached.Price = price.Value; _products.Upsert(cached); }
             StatusText.Text = "سُجل تغيير سعر: " + row.DisplayName;
@@ -408,7 +460,7 @@ namespace Delwaqty.Pos.Wpf
             if (MessageBox.Show(this, "ستُرفع أسعار كل الأصناف المتاحة بنسبة " + pct.Value + "%. متابعة؟",
                     "زيادة أسعار", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
                 return;
-            _outbox.Enqueue(OutboxPayloads.BulkPricePct(pct.Value));
+            _localDb.Outbox.Enqueue(OutboxPayloads.BulkPricePct(pct.Value));
             StatusText.Text = "سُجلت زيادة " + pct.Value + "% (تُطبق عند المزامنة)";
             UpdateSyncBadge();
         }
@@ -416,7 +468,7 @@ namespace Delwaqty.Pos.Wpf
         private void RefreshExpiryAlerts()
         {
             if (!_isPharmacy) return;
-            ExpiryGrid.ItemsSource = _batches.ExpiringSoon(
+            ExpiryGrid.ItemsSource = _localDb.Batches.ExpiringSoon(
                 DateTime.Today.AddDays(PosConfig.ExpiryWarnDays), 100);
         }
 
@@ -429,7 +481,7 @@ namespace Delwaqty.Pos.Wpf
                 StatusText.Text = "اكتب اسم العميل";
                 return;
             }
-            _outbox.Enqueue(OutboxPayloads.Customer(CustomerNameBox.Text.Trim(),
+            _localDb.Outbox.Enqueue(OutboxPayloads.Customer(CustomerNameBox.Text.Trim(),
                 (CustomerPhoneBox.Text ?? "").Trim(), null));
             StatusText.Text = "حُفظ العميل (يُرفع عند الاتصال)";
             CustomerNameBox.Clear(); CustomerPhoneBox.Clear();
@@ -443,7 +495,7 @@ namespace Delwaqty.Pos.Wpf
             var amount = InputDialog.AskAmount(this, "تحصيل دفعة",
                 "المبلغ المحصل من " + c.Name + " (دينه الحالي " + c.Balance.ToString("0.##") + "):", "");
             if (!amount.HasValue || amount.Value <= 0) return;
-            _outbox.Enqueue(OutboxPayloads.DebtPayment(c.Id, amount.Value, null));
+            _localDb.Outbox.Enqueue(OutboxPayloads.DebtPayment(c.Id, amount.Value, null));
             StatusText.Text = "سُجلت دفعة " + amount.Value.ToString("0.##") + " من " + c.Name;
             UpdateSyncBadge();
         }
@@ -464,29 +516,35 @@ namespace Delwaqty.Pos.Wpf
                         _currentShiftId = parts[0].Length > 0 ? parts[0] : null;
                         decimal.TryParse(parts[1], out _currentFloat);
                         if (parts.Length >= 3) _serverShiftId = parts[2].Length > 0 ? parts[2] : null;
+                        // Older builds stored a single pending close cash here
+                        // (#117 removed the scalar — closes are queued ops now).
                         if (parts.Length >= 4)
                         {
                             decimal pc;
-                            if (decimal.TryParse(parts[3], out pc)) _pendingCloseCash = pc;
+                            if (decimal.TryParse(parts[3], out pc) &&
+                                (_serverShiftId ?? _currentShiftId) != null)
+                            {
+                                _localDb.Outbox.Enqueue(OutboxPayloads.DailyClose(
+                                    _serverShiftId ?? _currentShiftId, pc));
+                            }
                         }
                     }
                 }
             }
-            catch { _currentShiftId = null; _serverShiftId = null; _pendingCloseCash = null; }
+            catch { _currentShiftId = null; _serverShiftId = null; }
             RefreshShiftUi();
         }
 
         private void SaveShiftState()
         {
-            if (_currentShiftId == null && !_pendingCloseCash.HasValue)
+            if (_currentShiftId == null)
             {
                 if (File.Exists(ShiftPath)) File.Delete(ShiftPath);
                 return;
             }
             File.WriteAllText(ShiftPath,
                 (_currentShiftId ?? "") + "|" + _currentFloat + "|" +
-                (_serverShiftId ?? "") + "|" +
-                (_pendingCloseCash.HasValue ? _pendingCloseCash.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : ""));
+                (_serverShiftId ?? ""));
         }
 
         private void RefreshShiftUi()
@@ -500,7 +558,7 @@ namespace Delwaqty.Pos.Wpf
         private void RefreshExpectedCash()
         {
             if (_currentShiftId == null) { ExpectedCashText.Text = "-"; return; }
-            var result = DailyCloseCalculator.Compute(_currentFloat, _salesLog.CloseRecordsFor(_currentShiftId), null);
+            var result = DailyCloseCalculator.Compute(_currentFloat, _localDb.Sales.CloseRecordsFor(_currentShiftId), null);
             ExpectedCashText.Text = result.ExpectedCash.ToString("0.##");
         }
 
@@ -510,8 +568,8 @@ namespace Delwaqty.Pos.Wpf
             decimal floatAmount;
             if (!decimal.TryParse(FloatBox.Text, out floatAmount) || floatAmount < 0) floatAmount = 0;
             var op = OutboxPayloads.ShiftOpen(floatAmount);
-            _outbox.Enqueue(op);
-            _currentShiftId = op.OpId;   // local id; the server shift id arrives on pull
+            _localDb.Outbox.Enqueue(op);
+            _currentShiftId = op.OpId;   // local id; the server id is mapped on sync (#117)
             _serverShiftId = null;
             _currentFloat = floatAmount;
             SaveShiftState();
@@ -530,17 +588,12 @@ namespace Delwaqty.Pos.Wpf
                 return;
             }
             var result = DailyCloseCalculator.Compute(_currentFloat,
-                _salesLog.CloseRecordsFor(_currentShiftId), closing);
-            if (_serverShiftId != null)
-            {
-                _outbox.Enqueue(OutboxPayloads.DailyClose(_serverShiftId, closing));
-            }
-            else
-            {
-                // The shift_open op has not synced yet: record the close and let
-                // the next sync enqueue it once the server shift id is known.
-                _pendingCloseCash = closing;
-            }
+                _localDb.Sales.CloseRecordsFor(_currentShiftId), closing);
+            // #117: always queue the close immediately, keyed by whichever
+            // shift id we know. The sync engine resolves a local id through
+            // the shift map after the shift_open op syncs — no scalar state,
+            // so a second shift works the same way.
+            _localDb.Outbox.Enqueue(OutboxPayloads.DailyClose(_serverShiftId ?? _currentShiftId, closing));
             CloseResultText.Text =
                 "مبيعات: " + result.SalesTotal.ToString("0.##") + " (" + result.SaleCount + " فاتورة)\n" +
                 "متوقع: " + result.ExpectedCash.ToString("0.##") + "  فعلي: " + closing.ToString("0.##") +
@@ -567,7 +620,7 @@ namespace Delwaqty.Pos.Wpf
 
         private void RefreshShiftSales()
         {
-            var rows = (_currentShiftId == null ? _salesLog.Recent(50) : _salesLog.SalesForShift(_currentShiftId))
+            var rows = (_currentShiftId == null ? _localDb.Sales.Recent(50) : _localDb.Sales.SalesForShift(_currentShiftId))
                 .Select(s => new ShiftSaleRow
                 {
                     OpId = s.OpId,
@@ -586,8 +639,9 @@ namespace Delwaqty.Pos.Wpf
             if (row.StatusAr == "ملغاة") { StatusText.Text = "الفاتورة ملغاة بالفعل"; return; }
             var reason = InputDialog.Ask(this, "إلغاء فاتورة", "سبب الإلغاء:", "خطأ في الإدخال");
             if (reason == null) return;
-            _outbox.Enqueue(OutboxPayloads.SaleVoid(row.OpId, reason));
-            _salesLog.MarkVoided(row.OpId);
+            // #120: void op + journal mark + batch quantity restore, atomically.
+            _localDb.VoidSale(OutboxPayloads.SaleVoid(row.OpId, reason), row.OpId);
+            if (_isPharmacy) RefreshExpiryAlerts();
             StatusText.Text = "سُجل إلغاء الفاتورة (يُرفع عند الاتصال)";
             RefreshShiftSales();
             RefreshExpectedCash();
@@ -603,45 +657,56 @@ namespace Delwaqty.Pos.Wpf
             try
             {
                 if (!await EnsureSession()) { UpdateSyncBadge(); return; }
+
+                // #119: periodic verified license refresh — a suspension or
+                // expiry decided on the server reaches a running app within
+                // the refresh interval, not only at the next restart.
+                var refreshed = await _licenseRefresher.RefreshAsync(_state, DateTimeOffset.UtcNow);
+                if (refreshed != null)
+                {
+                    var newMode = refreshed.Mode;
+                    if (newMode != _mode)
+                    {
+                        _mode = newMode;
+                        ApplyMode();
+                    }
+                }
+
                 var flush = await _engine.FlushAsync();
                 if (flush.RepricedLines > 0 || flush.ClientPricedLines > 0)
                     StatusText.Text = "السيرفر حدّث " + flush.RepricedLines + " سعراً؛ " +
                         flush.ClientPricedLines + " صنفاً بسعرك (قيد المراجعة)";
-                var pull = await _sync.Pull(_state.MerchantId, null);
-                var summary = PullApplier.Apply(pull, _products);
-                _customers = summary.CustomerList;
-                CustomersGrid.ItemsSource = _customers;
-                if (summary.OpenShiftId != null)
+
+                // #117: adopt the server shift ids the flush resolved; remap
+                // the local journal so shifts group by the server id.
+                foreach (var pair in flush.ResolvedShifts)
                 {
-                    if (_pendingCloseCash.HasValue)
+                    _localDb.Sales.RemapShift(pair.Key, pair.Value);
+                    if (_currentShiftId == pair.Key)
                     {
-                        // The shift was closed locally before its open synced:
-                        // enqueue the close now that the server id is known.
-                        _outbox.Enqueue(OutboxPayloads.DailyClose(summary.OpenShiftId, _pendingCloseCash.Value));
-                        _pendingCloseCash = null;
-                        SaveShiftState();
-                    }
-                    else if (_currentShiftId == null)
-                    {
-                        // A shift opened on another device: adopt it locally.
-                        _currentShiftId = summary.OpenShiftId;
-                        _serverShiftId = summary.OpenShiftId;
-                        SaveShiftState();
-                        RefreshShiftUi();
-                    }
-                    else if (_serverShiftId == null)
-                    {
-                        // Our offline-opened shift just got its server id.
-                        _salesLog.RemapShift(_currentShiftId, summary.OpenShiftId);
-                        _currentShiftId = summary.OpenShiftId;
-                        _serverShiftId = summary.OpenShiftId;
+                        _currentShiftId = pair.Value;
+                        _serverShiftId = pair.Value;
                         SaveShiftState();
                         RefreshShiftUi();
                     }
                 }
+
+                var pull = await _sync.Pull(_state.MerchantId, null);
+                var summary = PullApplier.Apply(pull, _products);
+                _customers = summary.CustomerList;
+                CustomersGrid.ItemsSource = _customers;
+                if (summary.OpenShiftId != null && _currentShiftId == null)
+                {
+                    // A shift opened on another device: adopt it locally.
+                    _currentShiftId = summary.OpenShiftId;
+                    _serverShiftId = summary.OpenShiftId;
+                    SaveShiftState();
+                    RefreshShiftUi();
+                }
                 SyncDetailText.Text = "آخر مزامنة: " + DateTime.Now.ToString("HH:mm:ss") +
                     " — أصناف: " + summary.Products + "، عملاء: " + summary.Customers +
-                    (flush.Failures.Count > 0 ? "\nعمليات فشلت: " + flush.Failures.Count : "");
+                    (flush.Failures.Count > 0 ? "\nعمليات فشلت: " + flush.Failures.Count : "") +
+                    (flush.Blocked > 0 ? "\nعمليات تنتظر اكتمال المزامنة: " + flush.Blocked : "");
             }
             catch (Exception)
             {
@@ -680,7 +745,7 @@ namespace Delwaqty.Pos.Wpf
 
         private void UpdateSyncBadge()
         {
-            var pending = _outbox.PendingCount();
+            var pending = _localDb.Outbox.PendingCount();
             SyncBadge.Text = pending == 0 ? "لا عمليات معلقة ✅" : "معلق: " + pending + " عملية";
             SyncBadge.Foreground = pending == 0
                 ? System.Windows.Media.Brushes.LightGreen
@@ -689,6 +754,11 @@ namespace Delwaqty.Pos.Wpf
 
         private void UpdateLicenseBadge()
         {
+            if (_mode == PosMode.Locked)
+            {
+                LicenseBadge.Text = _state.Status == "suspended" ? "موقوف ⛔" : "منتهي ⛔";
+                return;
+            }
             var planAr = _state.Plan == "trial" ? "تجريبي" : "مفعل";
             if (_state.Pro) planAr += " PRO";
             if (_state.ExpiresAt.HasValue)

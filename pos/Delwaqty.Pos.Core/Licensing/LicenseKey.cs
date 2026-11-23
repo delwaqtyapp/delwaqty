@@ -121,6 +121,29 @@ namespace Delwaqty.Pos.Core.Licensing
                    deviceId + "|" + validatedAtUtc.UtcDateTime.ToString("o");
         }
 
+        // ---- v2: the WHOLE serialized activation state is sealed (review
+        // #115). v1 covered only a subset of fields, so Pro/ExpiresAt/
+        // MerchantId in the stored StateJson were forgeable by anyone who
+        // could read the device key. v2 binds the exact stored JSON to the
+        // device identity; any byte changed invalidates the seal.
+        public const string SealV2Prefix = "DELWQ-SEAL-v2";
+
+        public static string SealState(string stateJson, string deviceId, byte[] deviceKey)
+        {
+            using (var h = new HMACSHA256(deviceKey))
+            {
+                var input = SealV2Prefix + "|" + (deviceId ?? "") + "|" + (stateJson ?? "");
+                return ToHex(h.ComputeHash(Encoding.UTF8.GetBytes(input)));
+            }
+        }
+
+        public static bool VerifyState(string stateJson, string deviceId, string expectedSealHex, byte[] deviceKey)
+        {
+            if (string.IsNullOrEmpty(expectedSealHex)) return false;
+            var actual = SealState(stateJson, deviceId, deviceKey);
+            return string.Equals(actual, expectedSealHex.ToLowerInvariant(), StringComparison.Ordinal);
+        }
+
         private static string ToHex(byte[] bytes)
         {
             var sb = new StringBuilder(bytes.Length * 2);

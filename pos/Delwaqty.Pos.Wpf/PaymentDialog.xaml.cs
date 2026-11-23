@@ -72,8 +72,12 @@ namespace Delwaqty.Pos.Wpf
                 }
                 else
                 {
-                    // New customer created in the dialog: the caller enqueues the
-                    // customer op; the sale references them by name until sync.
+                    // New customer created in the dialog (#118): assign the
+                    // stable client id NOW so the deferred sale closes and
+                    // references it; MainWindow enqueues the customer op with
+                    // this id and the server resolves it on sync.
+                    NewCustomerClientId = Guid.NewGuid().ToString();
+                    _sale.CustomerId = NewCustomerClientId;
                     _sale.CustomerName = dlg.NewCustomerName;
                     NewCustomer = dlg;
                 }
@@ -83,6 +87,9 @@ namespace Delwaqty.Pos.Wpf
 
         /// <summary>Non-null when the payer is a new customer that must be enqueued.</summary>
         public CustomerDialog NewCustomer { get; private set; }
+
+        /// <summary>The stable client id of the new customer (the customer op id).</summary>
+        public string NewCustomerClientId { get; private set; }
 
         private void RemovePayment(object s, RoutedEventArgs e)
         {

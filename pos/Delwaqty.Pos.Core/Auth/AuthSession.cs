@@ -113,30 +113,62 @@ namespace Delwaqty.Pos.Core.Auth
     }
 
     /// <summary>
-    /// Persists the refresh token next to the other app data, XOR-obfuscated
-    /// with the device key so the file is useless on another PC.
-    /// Format: base64( XOR(utf8 payload, deviceKey repeated) ).
+    /// Persists the refresh token next to the other app data (review #114).
+    ///
+    /// v2 (current): DPAPI LocalMachine via ILocalProtector — the blob only
+    /// unprotects on this PC; a copied data dir is useless elsewhere.
+    /// File format: "DP2:" + base64(protect(utf8 payload)).
     /// Payload: refreshToken + "\n" + email.
+    ///
+    /// v1 (legacy, read-only): base64( XOR(utf8 payload, deviceKey repeated) ).
+    /// v1 files are migrated to v2 on first successful load.
     /// </summary>
     public static class SealedCredentialStore
     {
-        public static void Save(string path, string refreshToken, string email, byte[] deviceKey)
+        public const string BlobPrefix = "DP2:";
+
+        public static void Save(string path, string refreshToken, string email,
+            Protection.ILocalProtector protector)
         {
             var payload = (refreshToken ?? "") + "\n" + (email ?? "");
-            var bytes = Encoding.UTF8.GetBytes(payload);
-            for (var i = 0; i < bytes.Length; i++) bytes[i] ^= deviceKey[i % deviceKey.Length];
-            File.WriteAllText(path, Convert.ToBase64String(bytes));
+            var blob = protector.Protect(Encoding.UTF8.GetBytes(payload));
+            File.WriteAllText(path, BlobPrefix + Convert.ToBase64String(blob));
         }
 
-        public static bool TryLoad(string path, byte[] deviceKey, out string refreshToken, out string email)
+        public static bool TryLoad(string path, Protection.ILocalProtector protector,
+            out string refreshToken, out string email)
         {
             refreshToken = null; email = null;
             if (!File.Exists(path)) return false;
+            string text;
+            try { text = (File.ReadAllText(path) ?? "").Trim(); }
+            catch { return false; }
+            if (!text.StartsWith(BlobPrefix, StringComparison.Ordinal)) return false;
             byte[] bytes;
-            try { bytes = Convert.FromBase64String(File.ReadAllText(path).Trim()); }
+            try { bytes = protector.Unprotect(Convert.FromBase64String(text.Substring(BlobPrefix.Length))); }
+            catch { return false; } // foreign PC / wrong entropy
+            return Split(Encoding.UTF8.GetString(bytes), out refreshToken, out email);
+        }
+
+        /// <summary>Read a legacy v1 (XOR with device key) credential file.</summary>
+        public static bool TryLoadLegacy(string path, byte[] deviceKey, out string refreshToken, out string email)
+        {
+            refreshToken = null; email = null;
+            if (!File.Exists(path)) return false;
+            string text;
+            try { text = (File.ReadAllText(path) ?? "").Trim(); }
+            catch { return false; }
+            if (text.StartsWith(BlobPrefix, StringComparison.Ordinal)) return false;
+            byte[] bytes;
+            try { bytes = Convert.FromBase64String(text); }
             catch { return false; }
             for (var i = 0; i < bytes.Length; i++) bytes[i] ^= deviceKey[i % deviceKey.Length];
-            var payload = Encoding.UTF8.GetString(bytes);
+            return Split(Encoding.UTF8.GetString(bytes), out refreshToken, out email);
+        }
+
+        private static bool Split(string payload, out string refreshToken, out string email)
+        {
+            refreshToken = null; email = null;
             var nl = payload.IndexOf('\n');
             if (nl < 0) return false;
             refreshToken = payload.Substring(0, nl);

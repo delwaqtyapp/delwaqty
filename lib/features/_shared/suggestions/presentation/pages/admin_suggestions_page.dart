@@ -31,9 +31,14 @@ class _AdminSuggestionsPageState extends ConsumerState<AdminSuggestionsPage> {
 
   // Server-side pagination (#146): the status filter is passed to the RPC
   // so it applies before the LIMIT; pages are appended with load-more.
+  // #147: every load fetches fresh from the repository (no provider cache,
+  // so refresh/retry/after-triage never show stale rows), and a generation
+  // counter plus captured query makes a slow old response unable to append
+  // into a newer filter; overlapping pagination calls are blocked.
   static const _pageSize = 100;
   final List<Suggestion> _items = [];
   int _offset = 0;
+  int _generation = 0;
   bool _hasMore = false;
   bool _loading = true;
   bool _loadingMore = false;
@@ -46,6 +51,10 @@ class _AdminSuggestionsPageState extends ConsumerState<AdminSuggestionsPage> {
   }
 
   Future<void> _load({required bool reset}) async {
+    if (!reset && (_loading || _loadingMore)) return; // no overlapping pages
+    final generation = ++_generation; // invalidates any in-flight load
+    final status = _statusFilter == 'all' ? null : _statusFilter;
+    final offset = reset ? 0 : _offset;
     if (reset) {
       setState(() {
         _items.clear();
@@ -58,22 +67,23 @@ class _AdminSuggestionsPageState extends ConsumerState<AdminSuggestionsPage> {
       setState(() => _loadingMore = true);
     }
     try {
-      final rows = await ref.read(
-        adminSuggestionsPageProvider((
-          status: _statusFilter == 'all' ? null : _statusFilter,
-          offset: reset ? 0 : _offset,
-        )).future,
-      );
-      if (!mounted) return;
+      final rows = await ref
+          .read(suggestionsRepositoryProvider)
+          .adminListSuggestions(
+            status: status,
+            limit: _pageSize,
+            offset: offset,
+          );
+      if (!mounted || generation != _generation) return; // stale completion
       setState(() {
         _items.addAll(rows);
-        _offset = (reset ? 0 : _offset) + rows.length;
+        _offset = offset + rows.length;
         _hasMore = rows.length == _pageSize;
         _loading = false;
         _loadingMore = false;
       });
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted || generation != _generation) return;
       setState(() {
         _error = e;
         _loading = false;
@@ -235,33 +245,36 @@ class _SuggestionTile extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: AnimatedFadeIn(
         child: GlassCard(
-          child: ListTile(
-            leading: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: _suggestionStatusColor(
-                  cs,
-                  suggestion.status,
-                ).withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(10),
+          child: Material(
+            type: MaterialType.transparency,
+            child: ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: _suggestionStatusColor(
+                    cs,
+                    suggestion.status,
+                  ).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.lightbulb_outline_rounded,
+                  color: _suggestionStatusColor(cs, suggestion.status),
+                ),
               ),
-              child: Icon(
-                Icons.lightbulb_outline_rounded,
-                color: _suggestionStatusColor(cs, suggestion.status),
+              title: Text(
+                suggestion.subject,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
+              subtitle: Text(
+                '${suggestionCategoryLabel(l10n, suggestion.category)} · '
+                '${suggestionStatusLabel(l10n, suggestion.status)} · '
+                '${suggestion.appRole}',
+                maxLines: 1,
+              ),
+              onTap: onTap,
             ),
-            title: Text(
-              suggestion.subject,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            subtitle: Text(
-              '${suggestionCategoryLabel(l10n, suggestion.category)} · '
-              '${suggestionStatusLabel(l10n, suggestion.status)} · '
-              '${suggestion.appRole}',
-              maxLines: 1,
-            ),
-            onTap: onTap,
           ),
         ),
       ),

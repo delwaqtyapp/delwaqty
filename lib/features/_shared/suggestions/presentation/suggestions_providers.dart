@@ -26,20 +26,6 @@ final mySuggestionsProvider = FutureProvider<List<Suggestion>>((ref) async {
   return repo.getMySuggestions(user.id);
 });
 
-/// Admin triage page: one server-side page (status filter applied by the
-/// RPC BEFORE the limit, so nothing is lost beyond the page size). The
-/// admin page paginates with offset via load-more (#146).
-typedef AdminSuggestionsQuery = ({String? status, int offset});
-
-final adminSuggestionsPageProvider =
-    FutureProvider.family<List<Suggestion>, AdminSuggestionsQuery>((
-      ref,
-      q,
-    ) async {
-      final repo = ref.read(suggestionsRepositoryProvider);
-      return repo.adminListSuggestions(
-        status: q.status,
-        limit: 100,
-        offset: q.offset,
-      );
-    });
+// The admin triage list intentionally has no cached provider (#147): the
+// admin page fetches fresh pages from the repository with a generation
+// guard, so refresh/retry/after-triage can never serve stale rows.

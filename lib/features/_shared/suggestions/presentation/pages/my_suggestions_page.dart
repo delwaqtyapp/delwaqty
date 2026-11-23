@@ -60,30 +60,33 @@ class _MySuggestionsPageState extends ConsumerState<MySuggestionsPage> {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: AnimatedFadeIn(
                   child: GlassCard(
-                    child: ListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: implemented
-                              ? Colors.green.withValues(alpha: 0.15)
-                              : Colors.orange.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(10),
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: ListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: implemented
+                                ? Colors.green.withValues(alpha: 0.15)
+                                : Colors.orange.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            implemented ? Icons.check_circle : Icons.pending,
+                            color: implemented ? Colors.green : Colors.orange,
+                          ),
                         ),
-                        child: Icon(
-                          implemented ? Icons.check_circle : Icons.pending,
-                          color: implemented ? Colors.green : Colors.orange,
+                        title: Text(
+                          s.subject,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
+                        subtitle: Text(
+                          '${l10n.statusLabel}: ${suggestionStatusLabel(l10n, s.status)}',
+                        ),
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: () => _showSuggestionDetail(context, l10n, s),
                       ),
-                      title: Text(
-                        s.subject,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      subtitle: Text(
-                        '${l10n.statusLabel}: ${suggestionStatusLabel(l10n, s.status)}',
-                      ),
-                      trailing: const Icon(Icons.chevron_right_rounded),
-                      onTap: () => _showSuggestionDetail(context, l10n, s),
                     ),
                   ),
                 ),

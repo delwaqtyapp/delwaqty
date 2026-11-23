@@ -50,7 +50,6 @@ class _MerchantProductFormPageState
   final _categoryController = TextEditingController();
   final _imageUrlController = TextEditingController();
   bool _isAvailable = true;
-  bool _isFeatured = false;
   bool _isSaving = false;
   bool _isUploadingPhoto = false;
   bool _isLoadingInitial = false;
@@ -80,7 +79,6 @@ class _MerchantProductFormPageState
       _imageUrlController.text = product['image_url'] as String? ?? '';
       setState(() {
         _isAvailable = product['is_available'] as bool? ?? true;
-        _isFeatured = product['is_featured'] as bool? ?? false;
       });
     } catch (e) {
       if (mounted) {
@@ -421,18 +419,6 @@ class _MerchantProductFormPageState
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               ),
             ),
-            const Divider(height: 1),
-            SwitchListTile(
-              title: Text(l10n.featured),
-              subtitle: Text(l10n.featuredProductHint),
-              value: _isFeatured,
-              onChanged: (value) => setState(() => _isFeatured = value),
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(16),
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -496,7 +482,6 @@ class _MerchantProductFormPageState
         'category': _categoryController.text.trim(),
         'image_url': _imageUrlController.text.trim(),
         'is_available': _isAvailable,
-        'is_featured': _isFeatured,
       };
 
       // One barcode per store (migration 400 index enforces it server-side;

@@ -52,6 +52,58 @@ namespace Delwaqty.Pos.Core.Sync
         }
 
         /// <summary>
+        /// Pre-DP1 flat-layout repair check (review: upgrade completeness).
+        /// Unsynced data at the data ROOT (outside any merchant scope) whose
+        /// legacy merchant can no longer be verified — e.g. after a device
+        /// key regeneration — must NOT be abandoned: activating would start
+        /// an empty scope and the stranded queue would vanish from view.
+        /// Returns a human-readable reason when a repair state is required
+        /// (callers block activation/selling and keep every file untouched),
+        /// or null when the root is clean. Unreadable files fail CLOSED.
+        /// </summary>
+        public static string LegacyFlatRepairReason(string rootDir)
+        {
+            var outbox = Path.Combine(rootDir, "outbox.db");
+            if (File.Exists(outbox))
+            {
+                try
+                {
+                    using (var store = new OutboxStore(outbox))
+                    {
+                        var n = store.PendingCount();
+                        if (n > 0) return "legacy root outbox.db holds " + n + " unsynced op(s)";
+                    }
+                }
+                catch { return "legacy root outbox.db is unreadable"; }
+            }
+            var pos = Path.Combine(rootDir, "pos.db");
+            if (File.Exists(pos))
+            {
+                try
+                {
+                    using (var db = new PosLocalDb(pos, importLegacy: false))
+                    {
+                        var n = db.Outbox.PendingCount();
+                        if (n > 0) return "legacy root pos.db holds " + n + " unsynced op(s)";
+                    }
+                }
+                catch { return "legacy root pos.db is unreadable"; }
+            }
+            var sales = Path.Combine(rootDir, "sales.db");
+            if (File.Exists(sales))
+            {
+                try
+                {
+                    using (var log = new Sales.LocalSalesLog(sales))
+                        if (log.Recent(1).Count > 0)
+                            return "legacy root sales.db holds sales history";
+                }
+                catch { return "legacy root sales.db is unreadable"; }
+            }
+            return null;
+        }
+
+        /// <summary>
         /// One-time upgrade: pre-#116 installs kept every per-merchant file at
         /// the root. Move them into the merchant's scope dir (no overwrite).
         /// Returns the moved file names (for tests/diagnostics).

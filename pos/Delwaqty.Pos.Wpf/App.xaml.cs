@@ -39,6 +39,21 @@ namespace Delwaqty.Pos.Wpf
                 state = win.ActivatedState;
             }
 
+            // Upgrade completeness: unverifiable legacy flat-layout data with
+            // an unsynced queue must not vanish under a fresh scope. Enter
+            // the visible repair state: no selling, no files touched, until
+            // support runs a verified migration.
+            var repair = activation.LegacyRepairReason();
+            if (repair != null)
+            {
+                MessageBox.Show(
+                    "توجد بيانات قديمة غير متزامنة على هذا الجهاز لا يمكن التحقق من التاجر المالك لها.\n" +
+                    "تواصل مع الدعم لترحيلها قبل التشغيل — بياناتك محفوظة كما هي ولم يُمسّ أي ملف.\n\n(" + repair + ")",
+                    "إصلاح البيانات", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Shutdown();
+                return;
+            }
+
             var main = new MainWindow(activation, state);
             MainWindow = main;
             main.Show();

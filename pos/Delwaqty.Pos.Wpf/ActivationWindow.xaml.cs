@@ -79,6 +79,8 @@ namespace Delwaqty.Pos.Wpf
                 case "EXPIRED": return "الترخيص منتهي. جدد الاشتراك من المنصة.";
                 case "OTHER_MERCHANT_DATA_PENDING":
                     return "هناك بيانات غير مرفوعة لتاجر آخر على هذا الجهاز. فعّل التاجر السابق وارفع بياناته أولاً.";
+                case "LEGACY_DATA_NEEDS_REPAIR":
+                    return "توجد بيانات قديمة غير متزامنة لا يمكن التحقق من التاجر المالك لها. تواصل مع الدعم لترحيلها قبل التفعيل — بياناتك محفوظة ولم يُمسّ أي ملف.";
                 case "NETWORK": return "تعذر الاتصال بالخادم. تأكد من الإنترنت وحاول مرة أخرى.";
                 default: return "تعذر التفعيل (" + reason + ")" + (detail != null ? ": " + detail : "");
             }

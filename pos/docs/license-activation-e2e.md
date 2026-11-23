@@ -95,6 +95,9 @@ older build:
   untouched; queued ops upload normally after reactivation.
 - Pre-DP1 installs (plaintext device key era) lose legacy payload
   verification, so their flat-layout files are NOT auto-migrated into the
-  merchant scope — support moves those files manually if such a PC exists.
+  merchant scope. Such a PC enters the visible REPAIR state instead:
+  activation and selling are blocked with an Arabic message, every file
+  stays untouched, and support runs the migration manually. See
+  docs/windows-proof-checklist.md item 4 for the manual verification.
 - The supported model is one dedicated Windows account per shop PC; the
   data-dir ACL grants only that account + SYSTEM + Administrators.

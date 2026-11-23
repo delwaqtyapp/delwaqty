@@ -163,7 +163,24 @@ namespace Delwaqty.Pos.Core.Licensing
             // payload after the key regenerates — their flat files stay at
             // the root for support to migrate manually.
             var legacyMerchant = TryReadLegacyMerchantId();
-            if (legacyMerchant != null && legacyMerchant == parsed.State.MerchantId)
+            if (legacyMerchant == null)
+            {
+                // Upgrade completeness: unverifiable legacy flat data with an
+                // unsynced queue must NOT be abandoned under a fresh empty
+                // scope — refuse activation into a visible repair state and
+                // keep every file untouched (support migrates manually).
+                var repair = MerchantScope.LegacyFlatRepairReason(_rootDir);
+                if (repair != null)
+                {
+                    return new ActivateResult
+                    {
+                        Ok = false,
+                        Reason = "LEGACY_DATA_NEEDS_REPAIR",
+                        Error = repair,
+                    };
+                }
+            }
+            else if (legacyMerchant == parsed.State.MerchantId)
             {
                 MerchantScope.MigrateLegacyRootData(_rootDir, newScope);
             }
@@ -390,6 +407,20 @@ namespace Delwaqty.Pos.Core.Licensing
         /// re-activation can migrate the legacy data files.
         /// Payload layout: id|merchantId|plan|expiry|deviceId|validatedAt.
         /// </summary>
+        /// <summary>
+        /// Non-null when the app must enter the visible repair state:
+        /// unverifiable legacy flat-layout data with an unsynced queue sits
+        /// at the data root (e.g. after a device-key regeneration). Callers
+        /// block activation and selling; all files stay untouched. A
+        /// verifiable legacy payload (DP1-era key intact) migrates normally
+        /// and never triggers this.
+        /// </summary>
+        public string LegacyRepairReason()
+        {
+            if (TryReadLegacyMerchantId() != null) return null;
+            return MerchantScope.LegacyFlatRepairReason(_rootDir);
+        }
+
         private string TryReadLegacyMerchantId()
         {
             var path = Path.Combine(_rootDir, "license.seal");

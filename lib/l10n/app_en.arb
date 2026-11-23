@@ -2311,6 +2311,40 @@
   "enterOtpCode": "Enter 6-digit verification code",
   "verifyAndActivateAccount": "Verify & Activate Account",
   "resendWhatsAppCode": "Resend Code",
+  "whatsappYourCodeLabel": "Your verification code",
+  "copyOtpCode": "Copy code",
+  "otpCodeCopied": "Code copied",
+  "whatsappWaitingAuto": "Waiting for WhatsApp confirmation. This screen updates automatically once your message arrives.",
+  "otpExpiresIn": "Code expires in {time}",
+  "@otpExpiresIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "otpExpiredTitle": "Code expired",
+  "otpExpiredBody": "Codes last 10 minutes. Get a fresh one - it takes seconds.",
+  "requestNewOtpCode": "Get a new code",
+  "otpNotConfirmedYet": "Not confirmed yet. Make sure you sent the message from your WhatsApp ({phone}), then give it a few seconds.",
+  "@otpNotConfirmedYet": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "wrongPhoneNumberHint": "Wrong number? Close this and go back to edit it.",
+  "resendOtpAvailableIn": "Resend available in {time}",
+  "@resendOtpAvailableIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "retryRequest": "Try again",
+  "iSentItCheckNow": "I've sent it - check now",
   "phoneOrEmailOrUsername": "Phone Number or Username",
   "phoneOptionalEmailHint": "Email (Optional - auto-generated from phone if left blank)",
   "whatsappVerifiedSuccess": "Phone number verified via WhatsApp successfully!",

@@ -7168,6 +7168,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resendWhatsAppCode => 'Resend Code';
 
   @override
+  String get whatsappYourCodeLabel => 'Your verification code';
+
+  @override
+  String get copyOtpCode => 'Copy code';
+
+  @override
+  String get otpCodeCopied => 'Code copied';
+
+  @override
+  String get whatsappWaitingAuto =>
+      'Waiting for WhatsApp confirmation. This screen updates automatically once your message arrives.';
+
+  @override
+  String otpExpiresIn(String time) {
+    return 'Code expires in $time';
+  }
+
+  @override
+  String get otpExpiredTitle => 'Code expired';
+
+  @override
+  String get otpExpiredBody =>
+      'Codes last 10 minutes. Get a fresh one - it takes seconds.';
+
+  @override
+  String get requestNewOtpCode => 'Get a new code';
+
+  @override
+  String otpNotConfirmedYet(String phone) {
+    return 'Not confirmed yet. Make sure you sent the message from your WhatsApp ($phone), then give it a few seconds.';
+  }
+
+  @override
+  String get wrongPhoneNumberHint =>
+      'Wrong number? Close this and go back to edit it.';
+
+  @override
+  String resendOtpAvailableIn(String time) {
+    return 'Resend available in $time';
+  }
+
+  @override
+  String get retryRequest => 'Try again';
+
+  @override
+  String get iSentItCheckNow => 'I\'ve sent it - check now';
+
+  @override
   String get phoneOrEmailOrUsername => 'Phone Number or Username';
 
   @override

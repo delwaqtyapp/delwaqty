@@ -2304,6 +2304,40 @@
   "enterOtpCode": "أدخل كود التفعيل المكون من 6 أرقام",
   "verifyAndActivateAccount": "تأكيد وتفعيل الحساب",
   "resendWhatsAppCode": "إعادة إرسال الكود",
+  "whatsappYourCodeLabel": "رمز التحقق الخاص بك",
+  "copyOtpCode": "نسخ الرمز",
+  "otpCodeCopied": "تم نسخ الرمز",
+  "whatsappWaitingAuto": "بانتظار تأكيد واتساب. ستتحدث هذه الشاشة تلقائيًا فور وصول رسالتك.",
+  "otpExpiresIn": "تنتهي صلاحية الرمز خلال {time}",
+  "@otpExpiresIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "otpExpiredTitle": "انتهت صلاحية الرمز",
+  "otpExpiredBody": "الرمز صالح لمدة 10 دقائق. اطلب رمزًا جديدًا - يستغرق ثوانٍ.",
+  "requestNewOtpCode": "احصل على رمز جديد",
+  "otpNotConfirmedYet": "لم يصل التأكيد بعد. تأكد أنك أرسلت الرسالة من واتساب الخاص بك ({phone}) ثم انتظر ثواني.",
+  "@otpNotConfirmedYet": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "wrongPhoneNumberHint": "الرقم غير صحيح؟ أغلق هذه النافذة وارجع لتعديله.",
+  "resendOtpAvailableIn": "يمكنك إعادة الإرسال خلال {time}",
+  "@resendOtpAvailableIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "retryRequest": "حاول مرة أخرى",
+  "iSentItCheckNow": "أرسلتها - تحقق الآن",
   "phoneOrEmailOrUsername": "رقم الهاتف أو اسم المستخدم",
   "phoneOptionalEmailHint": "البريد الإلكتروني (اختياري - يتم توليده تلقائيًا من رقم الهاتف)",
   "whatsappVerifiedSuccess": "تم التحقق من رقم الهاتف عبر واتساب بنجاح!",

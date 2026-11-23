@@ -25,8 +25,7 @@ class ReadableFitText extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final effectiveStyle =
-            style ?? DefaultTextStyle.of(context).style;
+        final effectiveStyle = style ?? DefaultTextStyle.of(context).style;
         final painter = TextPainter(
           text: TextSpan(text: text, style: effectiveStyle),
           maxLines: 1,

@@ -242,7 +242,8 @@ class _RestaurantReservationPageState
         SizedBox(
           // Grow with the text scale so the day name and number
           // never clip vertically.
-          height: 70 * MediaQuery.textScalerOf(context).scale(1.0).clamp(1.0, 1.8),
+          height:
+              70 * MediaQuery.textScalerOf(context).scale(1.0).clamp(1.0, 1.8),
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: dates.length,

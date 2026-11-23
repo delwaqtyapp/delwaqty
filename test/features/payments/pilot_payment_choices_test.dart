@@ -7,17 +7,17 @@ void main() {
     final source = File(
       'lib/features/customer/commerce/presentation/pages/checkout_page.dart',
     ).readAsStringSync();
-    final selector = source.substring(
-      source.indexOf('SegmentedButton<String>'),
-      source.indexOf('selected: {_paymentMethod}'),
-    );
-    final choices = RegExp("value: '([^']+)'")
-        .allMatches(selector)
+    // The payment selector is a ChoiceChip row gated on
+    // `_paymentMethod == '<method>'` (reworked from SegmentedButton in the
+    // top-up-history UI branch). The guard is unchanged: exactly the three
+    // working pilot methods, no card/wallet.
+    final choices = RegExp("_paymentMethod == '([^']+)'")
+        .allMatches(source)
         .map((match) => match.group(1))
         .toList();
     expect(choices, ['cash', 'instapay', 'vodafone_cash']);
-    expect(selector, isNot(contains("value: 'card'")));
-    expect(selector, isNot(contains("value: 'wallet'")));
+    expect(source, isNot(contains("_paymentMethod == 'card'")));
+    expect(source, isNot(contains("_paymentMethod == 'wallet'")));
   });
 
   test('wallet top-up does not advertise card or wallet payment', () {

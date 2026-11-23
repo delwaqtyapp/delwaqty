@@ -828,9 +828,9 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
             );
           }
 
-          final textScale = MediaQuery.textScalerOf(
-            context,
-          ).scale(1.0).clamp(1.0, 1.8);
+          final textScale = MediaQuery.textScalerOf(context)
+              .scale(1.0)
+              .clamp(1.0, 1.8);
           return GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),

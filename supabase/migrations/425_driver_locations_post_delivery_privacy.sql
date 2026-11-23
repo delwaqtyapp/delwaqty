@@ -1,6 +1,7 @@
--- 425 v2: driver_locations post-delivery privacy (owner-directed follow-up
--- to the ops WS privacy test, 2026-11-23). v2 hardens the prod-safe guard
--- per code-review finding #134.
+-- 425 v3: driver_locations post-delivery privacy (owner-directed follow-up
+-- to the ops WS privacy test, 2026-11-23). v2 hardened the prod-safe guard
+-- per code-review finding #134; v3 adds the polpermissive check from the
+-- #134 continuation review.
 --
 -- driver_locations_select lets a customer (or their merchant) read the
 -- assigned driver's live location while an order links them
@@ -16,11 +17,11 @@
 -- Convergent: prod and staging share this baseline policy.
 --
 -- Guard: the whole change is one DO block. It reads the live policy's
--- canonical pg_get_expr qual, command and roles and
---   - no-ops when the policy is already at the exact target predicate
+-- canonical pg_get_expr qual, command, roles and permissive flag and
+--   - no-ops when the policy is already at the exact target state
 --     (idempotent re-run, e.g. staging),
 --   - aborts WITHOUT any mutation on any drift from the exact canonical
---     pre-state (different qual, command or roles),
+--     pre-state (permissive flag, command, roles or qual),
 --   - otherwise swaps the policy atomically.
 -- The guard block below is copied VERBATIM into
 -- supabase/tests/425_driver_locations_post_delivery_test.sql, which proves
@@ -30,9 +31,10 @@ BEGIN;
 
 DO $g$
 DECLARE
-  v_qual  text;
-  v_cmd   "char";
-  v_roles oid[];
+  v_qual       text;
+  v_cmd        "char";
+  v_roles      oid[];
+  v_permissive boolean;
   c_pre    constant text := $q$((driver_id IN ( SELECT drivers.id
    FROM drivers
   WHERE (drivers.user_id = auth.uid()))) OR _is_owner_uid(auth.uid()) OR admin_has_permission('DELIVERY_LOCATION_VIEW'::text, NULL::uuid) OR (EXISTS ( SELECT 1
@@ -48,8 +50,8 @@ DECLARE
            FROM merchants
           WHERE (merchants.owner_user_id = auth.uid()))))))))$q$;
 BEGIN
-  SELECT pg_get_expr(p.polqual, p.polrelid), p.polcmd, p.polroles
-    INTO v_qual, v_cmd, v_roles
+  SELECT pg_get_expr(p.polqual, p.polrelid), p.polcmd, p.polroles, p.polpermissive
+    INTO v_qual, v_cmd, v_roles, v_permissive
     FROM pg_policy p
     JOIN pg_class c ON c.oid = p.polrelid
     JOIN pg_namespace n ON n.oid = c.relnamespace
@@ -61,10 +63,10 @@ BEGIN
     RAISE EXCEPTION '425: driver_locations_select policy missing - aborting';
   END IF;
 
-  IF v_cmd = 'r' AND v_roles = '{0}'::oid[] AND v_qual = c_target THEN
+  IF v_permissive AND v_cmd = 'r' AND v_roles = '{0}'::oid[] AND v_qual = c_target THEN
     RAISE NOTICE '425: driver_locations_select already at target state - no-op';
-  ELSIF v_cmd <> 'r' OR v_roles <> '{0}'::oid[] OR v_qual IS DISTINCT FROM c_pre THEN
-    RAISE EXCEPTION '425: driver_locations_select drifted from expected pre-state - aborting WITHOUT mutation (cmd=%, roles=%, qual=%)', v_cmd, v_roles, v_qual;
+  ELSIF (NOT v_permissive) OR v_cmd <> 'r' OR v_roles <> '{0}'::oid[] OR v_qual IS DISTINCT FROM c_pre THEN
+    RAISE EXCEPTION '425: driver_locations_select drifted from expected pre-state - aborting WITHOUT mutation (permissive=%, cmd=%, roles=%, qual=%)', v_permissive, v_cmd, v_roles, v_qual;
   ELSE
     EXECUTE $ddl$DROP POLICY driver_locations_select ON public.driver_locations$ddl$;
     EXECUTE $ddl$CREATE POLICY driver_locations_select ON public.driver_locations AS PERMISSIVE FOR SELECT TO public USING (((driver_id IN ( SELECT drivers.id

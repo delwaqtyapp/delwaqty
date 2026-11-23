@@ -1,9 +1,9 @@
--- 425 v2 actual-role staging run (transaction-wrapped, everything rolled back).
+-- 425 v3 actual-role staging run (transaction-wrapped, everything rolled back).
 -- Section A: guard behavior. The guard block below is a VERBATIM copy of the
 --   guard in supabase/migrations/425_driver_locations_post_delivery_privacy.sql.
---   Proves: no-op on exact target, abort-without-mutation on a drifted
---   predicate (extra AND restriction; changed admin branch), apply on exact
---   pre-state.
+--   Proves: no-op on exact target; abort-without-mutation on a drifted
+--   predicate (extra AND restriction; changed admin branch; RESTRICTIVE
+--   variant of the same predicate); apply on exact pre-state.
 -- Section B: RLS matrix with real roles.
 --   Customer + merchant: readable while delivering, unreadable after
 --   delivered and after cancelled. Driver self, owner and permissioned
@@ -16,6 +16,7 @@ DECLARE
   v_msg    text;
   v_before text;
   v_after  text;
+  v_perm   boolean;
   c_pre    constant text := $q$((driver_id IN ( SELECT drivers.id
    FROM drivers
   WHERE (drivers.user_id = auth.uid()))) OR _is_owner_uid(auth.uid()) OR admin_has_permission('DELIVERY_LOCATION_VIEW'::text, NULL::uuid) OR (EXISTS ( SELECT 1
@@ -38,13 +39,14 @@ BEGIN
    WHERE n.nspname='public' AND c.relname='driver_locations' AND p.polname='driver_locations_select';
   ASSERT v_before = c_target, 'A0: staging policy not at expected target state';
 
-  -- A1: no-op path - guard accepts the exact target predicate, no exception, no change
+  -- A1: no-op path - guard accepts the exact target state, no exception, no change
   v_msg := NULL;
   BEGIN
 DECLARE
-  v_qual  text;
-  v_cmd   "char";
-  v_roles oid[];
+  v_qual       text;
+  v_cmd        "char";
+  v_roles      oid[];
+  v_permissive boolean;
   c_pre    constant text := $q$((driver_id IN ( SELECT drivers.id
    FROM drivers
   WHERE (drivers.user_id = auth.uid()))) OR _is_owner_uid(auth.uid()) OR admin_has_permission('DELIVERY_LOCATION_VIEW'::text, NULL::uuid) OR (EXISTS ( SELECT 1
@@ -60,8 +62,8 @@ DECLARE
            FROM merchants
           WHERE (merchants.owner_user_id = auth.uid()))))))))$q$;
 BEGIN
-  SELECT pg_get_expr(p.polqual, p.polrelid), p.polcmd, p.polroles
-    INTO v_qual, v_cmd, v_roles
+  SELECT pg_get_expr(p.polqual, p.polrelid), p.polcmd, p.polroles, p.polpermissive
+    INTO v_qual, v_cmd, v_roles, v_permissive
     FROM pg_policy p
     JOIN pg_class c ON c.oid = p.polrelid
     JOIN pg_namespace n ON n.oid = c.relnamespace
@@ -73,10 +75,10 @@ BEGIN
     RAISE EXCEPTION '425: driver_locations_select policy missing - aborting';
   END IF;
 
-  IF v_cmd = 'r' AND v_roles = '{0}'::oid[] AND v_qual = c_target THEN
+  IF v_permissive AND v_cmd = 'r' AND v_roles = '{0}'::oid[] AND v_qual = c_target THEN
     RAISE NOTICE '425: driver_locations_select already at target state - no-op';
-  ELSIF v_cmd <> 'r' OR v_roles <> '{0}'::oid[] OR v_qual IS DISTINCT FROM c_pre THEN
-    RAISE EXCEPTION '425: driver_locations_select drifted from expected pre-state - aborting WITHOUT mutation (cmd=%, roles=%, qual=%)', v_cmd, v_roles, v_qual;
+  ELSIF (NOT v_permissive) OR v_cmd <> 'r' OR v_roles <> '{0}'::oid[] OR v_qual IS DISTINCT FROM c_pre THEN
+    RAISE EXCEPTION '425: driver_locations_select drifted from expected pre-state - aborting WITHOUT mutation (permissive=%, cmd=%, roles=%, qual=%)', v_permissive, v_cmd, v_roles, v_qual;
   ELSE
     EXECUTE $ddl$DROP POLICY driver_locations_select ON public.driver_locations$ddl$;
     EXECUTE $ddl$CREATE POLICY driver_locations_select ON public.driver_locations AS PERMISSIVE FOR SELECT TO public USING (((driver_id IN ( SELECT drivers.id
@@ -114,9 +116,10 @@ END;
   v_msg := NULL;
   BEGIN
 DECLARE
-  v_qual  text;
-  v_cmd   "char";
-  v_roles oid[];
+  v_qual       text;
+  v_cmd        "char";
+  v_roles      oid[];
+  v_permissive boolean;
   c_pre    constant text := $q$((driver_id IN ( SELECT drivers.id
    FROM drivers
   WHERE (drivers.user_id = auth.uid()))) OR _is_owner_uid(auth.uid()) OR admin_has_permission('DELIVERY_LOCATION_VIEW'::text, NULL::uuid) OR (EXISTS ( SELECT 1
@@ -132,8 +135,8 @@ DECLARE
            FROM merchants
           WHERE (merchants.owner_user_id = auth.uid()))))))))$q$;
 BEGIN
-  SELECT pg_get_expr(p.polqual, p.polrelid), p.polcmd, p.polroles
-    INTO v_qual, v_cmd, v_roles
+  SELECT pg_get_expr(p.polqual, p.polrelid), p.polcmd, p.polroles, p.polpermissive
+    INTO v_qual, v_cmd, v_roles, v_permissive
     FROM pg_policy p
     JOIN pg_class c ON c.oid = p.polrelid
     JOIN pg_namespace n ON n.oid = c.relnamespace
@@ -145,10 +148,10 @@ BEGIN
     RAISE EXCEPTION '425: driver_locations_select policy missing - aborting';
   END IF;
 
-  IF v_cmd = 'r' AND v_roles = '{0}'::oid[] AND v_qual = c_target THEN
+  IF v_permissive AND v_cmd = 'r' AND v_roles = '{0}'::oid[] AND v_qual = c_target THEN
     RAISE NOTICE '425: driver_locations_select already at target state - no-op';
-  ELSIF v_cmd <> 'r' OR v_roles <> '{0}'::oid[] OR v_qual IS DISTINCT FROM c_pre THEN
-    RAISE EXCEPTION '425: driver_locations_select drifted from expected pre-state - aborting WITHOUT mutation (cmd=%, roles=%, qual=%)', v_cmd, v_roles, v_qual;
+  ELSIF (NOT v_permissive) OR v_cmd <> 'r' OR v_roles <> '{0}'::oid[] OR v_qual IS DISTINCT FROM c_pre THEN
+    RAISE EXCEPTION '425: driver_locations_select drifted from expected pre-state - aborting WITHOUT mutation (permissive=%, cmd=%, roles=%, qual=%)', v_permissive, v_cmd, v_roles, v_qual;
   ELSE
     EXECUTE $ddl$DROP POLICY driver_locations_select ON public.driver_locations$ddl$;
     EXECUTE $ddl$CREATE POLICY driver_locations_select ON public.driver_locations AS PERMISSIVE FOR SELECT TO public USING (((driver_id IN ( SELECT drivers.id
@@ -187,9 +190,10 @@ END;
   v_msg := NULL;
   BEGIN
 DECLARE
-  v_qual  text;
-  v_cmd   "char";
-  v_roles oid[];
+  v_qual       text;
+  v_cmd        "char";
+  v_roles      oid[];
+  v_permissive boolean;
   c_pre    constant text := $q$((driver_id IN ( SELECT drivers.id
    FROM drivers
   WHERE (drivers.user_id = auth.uid()))) OR _is_owner_uid(auth.uid()) OR admin_has_permission('DELIVERY_LOCATION_VIEW'::text, NULL::uuid) OR (EXISTS ( SELECT 1
@@ -205,8 +209,8 @@ DECLARE
            FROM merchants
           WHERE (merchants.owner_user_id = auth.uid()))))))))$q$;
 BEGIN
-  SELECT pg_get_expr(p.polqual, p.polrelid), p.polcmd, p.polroles
-    INTO v_qual, v_cmd, v_roles
+  SELECT pg_get_expr(p.polqual, p.polrelid), p.polcmd, p.polroles, p.polpermissive
+    INTO v_qual, v_cmd, v_roles, v_permissive
     FROM pg_policy p
     JOIN pg_class c ON c.oid = p.polrelid
     JOIN pg_namespace n ON n.oid = c.relnamespace
@@ -218,10 +222,10 @@ BEGIN
     RAISE EXCEPTION '425: driver_locations_select policy missing - aborting';
   END IF;
 
-  IF v_cmd = 'r' AND v_roles = '{0}'::oid[] AND v_qual = c_target THEN
+  IF v_permissive AND v_cmd = 'r' AND v_roles = '{0}'::oid[] AND v_qual = c_target THEN
     RAISE NOTICE '425: driver_locations_select already at target state - no-op';
-  ELSIF v_cmd <> 'r' OR v_roles <> '{0}'::oid[] OR v_qual IS DISTINCT FROM c_pre THEN
-    RAISE EXCEPTION '425: driver_locations_select drifted from expected pre-state - aborting WITHOUT mutation (cmd=%, roles=%, qual=%)', v_cmd, v_roles, v_qual;
+  ELSIF (NOT v_permissive) OR v_cmd <> 'r' OR v_roles <> '{0}'::oid[] OR v_qual IS DISTINCT FROM c_pre THEN
+    RAISE EXCEPTION '425: driver_locations_select drifted from expected pre-state - aborting WITHOUT mutation (permissive=%, cmd=%, roles=%, qual=%)', v_permissive, v_cmd, v_roles, v_qual;
   ELSE
     EXECUTE $ddl$DROP POLICY driver_locations_select ON public.driver_locations$ddl$;
     EXECUTE $ddl$CREATE POLICY driver_locations_select ON public.driver_locations AS PERMISSIVE FOR SELECT TO public USING (((driver_id IN ( SELECT drivers.id
@@ -244,21 +248,31 @@ END;
    WHERE n.nspname='public' AND c.relname='driver_locations' AND p.polname='driver_locations_select';
   ASSERT v_after = v_before, 'A3: guard mutated a drifted policy';
 
-  -- A4: apply path - exact canonical pre-state applies cleanly to the target
+  -- A4: drift - RESTRICTIVE variant of the exact target predicate. Must abort, policy untouched.
   EXECUTE 'DROP POLICY driver_locations_select ON public.driver_locations';
-  EXECUTE $x$CREATE POLICY driver_locations_select ON public.driver_locations AS PERMISSIVE FOR SELECT TO public USING (((driver_id IN ( SELECT drivers.id
+  EXECUTE $x$CREATE POLICY driver_locations_select ON public.driver_locations AS RESTRICTIVE FOR SELECT TO public USING (((driver_id IN ( SELECT drivers.id
    FROM drivers
   WHERE (drivers.user_id = auth.uid()))) OR _is_owner_uid(auth.uid()) OR admin_has_permission('DELIVERY_LOCATION_VIEW'::text, NULL::uuid) OR (EXISTS ( SELECT 1
    FROM orders o
-  WHERE ((o.driver_id = driver_locations.driver_id) AND (o.dispatch_status = ANY (ARRAY['ASSIGNED'::text, 'ACCEPTED'::text])) AND ((o.user_id = auth.uid()) OR (o.merchant_id IN ( SELECT merchants.id
+  WHERE ((o.driver_id = driver_locations.driver_id) AND (o.dispatch_status = ANY (ARRAY['ASSIGNED'::text, 'ACCEPTED'::text])) AND (o.status <> ALL (ARRAY['delivered'::text, 'cancelled'::text])) AND ((o.user_id = auth.uid()) OR (o.merchant_id IN ( SELECT merchants.id
            FROM merchants
           WHERE (merchants.owner_user_id = auth.uid())))))))))$x$;
+  SELECT pg_get_expr(polqual, polrelid) INTO v_before
+    FROM pg_policy p JOIN pg_class c ON c.oid = p.polrelid
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+   WHERE n.nspname='public' AND c.relname='driver_locations' AND p.polname='driver_locations_select';
+  SELECT polpermissive INTO v_perm
+    FROM pg_policy p JOIN pg_class c ON c.oid = p.polrelid
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+   WHERE n.nspname='public' AND c.relname='driver_locations' AND p.polname='driver_locations_select';
+  ASSERT v_perm = false, 'A4: restrictive fixture was not restrictive';
   v_msg := NULL;
   BEGIN
 DECLARE
-  v_qual  text;
-  v_cmd   "char";
-  v_roles oid[];
+  v_qual       text;
+  v_cmd        "char";
+  v_roles      oid[];
+  v_permissive boolean;
   c_pre    constant text := $q$((driver_id IN ( SELECT drivers.id
    FROM drivers
   WHERE (drivers.user_id = auth.uid()))) OR _is_owner_uid(auth.uid()) OR admin_has_permission('DELIVERY_LOCATION_VIEW'::text, NULL::uuid) OR (EXISTS ( SELECT 1
@@ -274,8 +288,8 @@ DECLARE
            FROM merchants
           WHERE (merchants.owner_user_id = auth.uid()))))))))$q$;
 BEGIN
-  SELECT pg_get_expr(p.polqual, p.polrelid), p.polcmd, p.polroles
-    INTO v_qual, v_cmd, v_roles
+  SELECT pg_get_expr(p.polqual, p.polrelid), p.polcmd, p.polroles, p.polpermissive
+    INTO v_qual, v_cmd, v_roles, v_permissive
     FROM pg_policy p
     JOIN pg_class c ON c.oid = p.polrelid
     JOIN pg_namespace n ON n.oid = c.relnamespace
@@ -287,10 +301,10 @@ BEGIN
     RAISE EXCEPTION '425: driver_locations_select policy missing - aborting';
   END IF;
 
-  IF v_cmd = 'r' AND v_roles = '{0}'::oid[] AND v_qual = c_target THEN
+  IF v_permissive AND v_cmd = 'r' AND v_roles = '{0}'::oid[] AND v_qual = c_target THEN
     RAISE NOTICE '425: driver_locations_select already at target state - no-op';
-  ELSIF v_cmd <> 'r' OR v_roles <> '{0}'::oid[] OR v_qual IS DISTINCT FROM c_pre THEN
-    RAISE EXCEPTION '425: driver_locations_select drifted from expected pre-state - aborting WITHOUT mutation (cmd=%, roles=%, qual=%)', v_cmd, v_roles, v_qual;
+  ELSIF (NOT v_permissive) OR v_cmd <> 'r' OR v_roles <> '{0}'::oid[] OR v_qual IS DISTINCT FROM c_pre THEN
+    RAISE EXCEPTION '425: driver_locations_select drifted from expected pre-state - aborting WITHOUT mutation (permissive=%, cmd=%, roles=%, qual=%)', v_permissive, v_cmd, v_roles, v_qual;
   ELSE
     EXECUTE $ddl$DROP POLICY driver_locations_select ON public.driver_locations$ddl$;
     EXECUTE $ddl$CREATE POLICY driver_locations_select ON public.driver_locations AS PERMISSIVE FOR SELECT TO public USING (((driver_id IN ( SELECT drivers.id
@@ -305,12 +319,86 @@ END;
   EXCEPTION WHEN raise_exception THEN
     GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
   END;
-  ASSERT v_msg IS NULL, 'A4: guard raised on exact pre-state: ' || coalesce(v_msg, '');
+  ASSERT v_msg LIKE '425: driver_locations_select drifted from expected pre-state%',
+    'A4: restrictive-policy drift did not abort: ' || coalesce(v_msg, '<no exception>');
   SELECT pg_get_expr(polqual, polrelid) INTO v_after
     FROM pg_policy p JOIN pg_class c ON c.oid = p.polrelid
     JOIN pg_namespace n ON n.oid = c.relnamespace
    WHERE n.nspname='public' AND c.relname='driver_locations' AND p.polname='driver_locations_select';
-  ASSERT v_after = c_target, 'A4: apply path did not reach the target predicate';
+  SELECT polpermissive INTO v_perm
+    FROM pg_policy p JOIN pg_class c ON c.oid = p.polrelid
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+   WHERE n.nspname='public' AND c.relname='driver_locations' AND p.polname='driver_locations_select';
+  ASSERT v_after = v_before AND v_perm = false, 'A4: guard mutated a restrictive drifted policy';
+
+  -- A5: apply path - exact canonical pre-state applies cleanly to the target
+  EXECUTE 'DROP POLICY driver_locations_select ON public.driver_locations';
+  EXECUTE $x$CREATE POLICY driver_locations_select ON public.driver_locations AS PERMISSIVE FOR SELECT TO public USING (((driver_id IN ( SELECT drivers.id
+   FROM drivers
+  WHERE (drivers.user_id = auth.uid()))) OR _is_owner_uid(auth.uid()) OR admin_has_permission('DELIVERY_LOCATION_VIEW'::text, NULL::uuid) OR (EXISTS ( SELECT 1
+   FROM orders o
+  WHERE ((o.driver_id = driver_locations.driver_id) AND (o.dispatch_status = ANY (ARRAY['ASSIGNED'::text, 'ACCEPTED'::text])) AND ((o.user_id = auth.uid()) OR (o.merchant_id IN ( SELECT merchants.id
+           FROM merchants
+          WHERE (merchants.owner_user_id = auth.uid())))))))))$x$;
+  v_msg := NULL;
+  BEGIN
+DECLARE
+  v_qual       text;
+  v_cmd        "char";
+  v_roles      oid[];
+  v_permissive boolean;
+  c_pre    constant text := $q$((driver_id IN ( SELECT drivers.id
+   FROM drivers
+  WHERE (drivers.user_id = auth.uid()))) OR _is_owner_uid(auth.uid()) OR admin_has_permission('DELIVERY_LOCATION_VIEW'::text, NULL::uuid) OR (EXISTS ( SELECT 1
+   FROM orders o
+  WHERE ((o.driver_id = driver_locations.driver_id) AND (o.dispatch_status = ANY (ARRAY['ASSIGNED'::text, 'ACCEPTED'::text])) AND ((o.user_id = auth.uid()) OR (o.merchant_id IN ( SELECT merchants.id
+           FROM merchants
+          WHERE (merchants.owner_user_id = auth.uid()))))))))$q$;
+  c_target constant text := $q$((driver_id IN ( SELECT drivers.id
+   FROM drivers
+  WHERE (drivers.user_id = auth.uid()))) OR _is_owner_uid(auth.uid()) OR admin_has_permission('DELIVERY_LOCATION_VIEW'::text, NULL::uuid) OR (EXISTS ( SELECT 1
+   FROM orders o
+  WHERE ((o.driver_id = driver_locations.driver_id) AND (o.dispatch_status = ANY (ARRAY['ASSIGNED'::text, 'ACCEPTED'::text])) AND (o.status <> ALL (ARRAY['delivered'::text, 'cancelled'::text])) AND ((o.user_id = auth.uid()) OR (o.merchant_id IN ( SELECT merchants.id
+           FROM merchants
+          WHERE (merchants.owner_user_id = auth.uid()))))))))$q$;
+BEGIN
+  SELECT pg_get_expr(p.polqual, p.polrelid), p.polcmd, p.polroles, p.polpermissive
+    INTO v_qual, v_cmd, v_roles, v_permissive
+    FROM pg_policy p
+    JOIN pg_class c ON c.oid = p.polrelid
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+   WHERE n.nspname = 'public'
+     AND c.relname = 'driver_locations'
+     AND p.polname = 'driver_locations_select';
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION '425: driver_locations_select policy missing - aborting';
+  END IF;
+
+  IF v_permissive AND v_cmd = 'r' AND v_roles = '{0}'::oid[] AND v_qual = c_target THEN
+    RAISE NOTICE '425: driver_locations_select already at target state - no-op';
+  ELSIF (NOT v_permissive) OR v_cmd <> 'r' OR v_roles <> '{0}'::oid[] OR v_qual IS DISTINCT FROM c_pre THEN
+    RAISE EXCEPTION '425: driver_locations_select drifted from expected pre-state - aborting WITHOUT mutation (permissive=%, cmd=%, roles=%, qual=%)', v_permissive, v_cmd, v_roles, v_qual;
+  ELSE
+    EXECUTE $ddl$DROP POLICY driver_locations_select ON public.driver_locations$ddl$;
+    EXECUTE $ddl$CREATE POLICY driver_locations_select ON public.driver_locations AS PERMISSIVE FOR SELECT TO public USING (((driver_id IN ( SELECT drivers.id
+   FROM drivers
+  WHERE (drivers.user_id = auth.uid()))) OR _is_owner_uid(auth.uid()) OR admin_has_permission('DELIVERY_LOCATION_VIEW'::text, NULL::uuid) OR (EXISTS ( SELECT 1
+   FROM orders o
+  WHERE ((o.driver_id = driver_locations.driver_id) AND (o.dispatch_status = ANY (ARRAY['ASSIGNED'::text, 'ACCEPTED'::text])) AND (o.status <> ALL (ARRAY['delivered'::text, 'cancelled'::text])) AND ((o.user_id = auth.uid()) OR (o.merchant_id IN ( SELECT merchants.id
+           FROM merchants
+          WHERE (merchants.owner_user_id = auth.uid())))))))))$ddl$;
+  END IF;
+END;
+  EXCEPTION WHEN raise_exception THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+  END;
+  ASSERT v_msg IS NULL, 'A5: guard raised on exact pre-state: ' || coalesce(v_msg, '');
+  SELECT pg_get_expr(polqual, polrelid) INTO v_after
+    FROM pg_policy p JOIN pg_class c ON c.oid = p.polrelid
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+   WHERE n.nspname='public' AND c.relname='driver_locations' AND p.polname='driver_locations_select';
+  ASSERT v_after = c_target, 'A5: apply path did not reach the target predicate';
 END $t$;
 
 DO $$

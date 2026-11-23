@@ -210,13 +210,17 @@ class _BenefitCode extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: SelectableText(
-              code,
-              maxLines: 1,
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.2,
-                color: colorScheme.primary,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerStart,
+              child: SelectableText(
+                code,
+                maxLines: 1,
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.2,
+                  color: colorScheme.primary,
+                ),
               ),
             ),
           ),

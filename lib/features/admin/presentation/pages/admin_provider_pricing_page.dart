@@ -22,7 +22,9 @@ class AdminProviderPricingPage extends ConsumerStatefulWidget {
 
 class _AdminProviderPricingPageState
     extends ConsumerState<AdminProviderPricingPage> {
+  static const int _pageSize = 50;
   String _search = '';
+  int _limit = _pageSize;
   String? _category;
   bool _saving = false;
 
@@ -299,6 +301,7 @@ class _AdminProviderPricingPageState
       providerPricingProvider((
         search: _search.isEmpty ? null : _search,
         category: _category,
+        limit: _limit,
       )),
     );
 
@@ -314,7 +317,10 @@ class _AdminProviderPricingPageState
                 borderRadius: BorderRadius.all(Radius.circular(12)),
               ),
             ),
-            onChanged: (v) => setState(() => _search = v.trim()),
+            onChanged: (v) => setState(() {
+              _search = v.trim();
+              _limit = _pageSize;
+            }),
           ),
         ),
         categoriesAsync.when(
@@ -354,13 +360,17 @@ class _AdminProviderPricingPageState
                       ),
                     ),
                 ],
-                onChanged: (v) => setState(() => _category = v),
+                onChanged: (v) => setState(() {
+                  _category = v;
+                  _limit = _pageSize;
+                }),
               ),
             );
           },
         ),
         Expanded(
           child: providersAsync.when(
+            skipLoadingOnReload: true,
             loading: () => const Center(child: AppLoaderCircular()),
             error: (e, _) => Center(
               child: PremiumEmptyState(
@@ -384,10 +394,38 @@ class _AdminProviderPricingPageState
                   ),
                 );
               }
+              final total = (data['total'] as num?)?.toInt() ?? items.length;
+              final hasMore = items.length < total;
               return ListView.builder(
                 padding: const EdgeInsets.all(16),
-                itemCount: items.length,
-                itemBuilder: (context, i) => _providerTile(items[i], l10n),
+                itemCount: items.length + 1,
+                itemBuilder: (context, i) {
+                  if (i < items.length) return _providerTile(items[i], l10n);
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Column(
+                      children: [
+                        Text(
+                          l10n.providerPricingShowingOf(items.length, total),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        if (hasMore)
+                          TextButton(
+                            onPressed: providersAsync.isLoading
+                                ? null
+                                : () => setState(() => _limit += _pageSize),
+                            child: providersAsync.isLoading
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: AppLoaderCircular(),
+                                  )
+                                : Text(l10n.providerPricingLoadMore),
+                          ),
+                      ],
+                    ),
+                  );
+                },
               );
             },
           ),

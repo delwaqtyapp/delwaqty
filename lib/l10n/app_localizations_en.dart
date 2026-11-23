@@ -8264,4 +8264,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get providerPricingInvalidInput =>
       'Enter a valid number within the allowed range';
+
+  @override
+  String providerPricingShowingOf(int shown, int total) {
+    return 'Showing $shown of $total';
+  }
+
+  @override
+  String get providerPricingLoadMore => 'Load more';
 }

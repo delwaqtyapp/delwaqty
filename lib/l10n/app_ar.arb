@@ -2884,5 +2884,17 @@
   "rateDriverAfterCollection": "يمكنك تقييم الكابتن بعد تحصيل المبلغ.",
   "cashCollectionStateError": "تعذر تحميل حالة التحصيل. تحقق من الاتصال وأعد المحاولة.",
   "driverReviewHint": "اكتب رأيك في الكابتن (اختياري)",
-  "providerPricingInvalidInput": "أدخل رقمًا صحيحًا ضمن الحدود المسموحة"
+  "providerPricingInvalidInput": "أدخل رقمًا صحيحًا ضمن الحدود المسموحة",
+  "providerPricingShowingOf": "عرض {shown} من {total}",
+  "@providerPricingShowingOf": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "providerPricingLoadMore": "تحميل المزيد"
 }

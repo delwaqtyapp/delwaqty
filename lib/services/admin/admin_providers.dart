@@ -5,6 +5,7 @@ import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 import 'package:delwaqty/data/repositories/admin_repository.dart';
 import 'package:delwaqty/services/admin/admin_service.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // ─── Repository & Service Providers ────────────────────────
 
@@ -179,26 +180,36 @@ final commissionRulesProvider = FutureProvider<Map<String, dynamic>>((
 
 // ─── Provider Pricing (397) ──────────────────────────────────
 
-final categoryPricingProvider = FutureProvider<Map<String, dynamic>>((
-  ref,
-) async {
-  final client = ref.watch(supabaseClientProvider);
-  final response = await client.rpc('admin_list_category_pricing');
-  return Map<String, dynamic>.from(response as Map);
+/// Signed-in user id, streamed so dependents rebuild on account switch.
+/// The pricing providers below watch it: a switch refetches under the new
+/// account instead of showing the previous account's data.
+final adminAuthUidProvider = StreamProvider.autoDispose<String?>((ref) {
+  return Supabase.instance.client.auth.onAuthStateChange.map(
+    (event) => event.session?.user.id,
+  );
 });
 
-final providerPricingProvider =
-    FutureProvider.family<
+final categoryPricingProvider =
+    FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
+      ref.watch(adminAuthUidProvider);
+      final client = ref.watch(supabaseClientProvider);
+      final response = await client.rpc('admin_list_category_pricing');
+      return Map<String, dynamic>.from(response as Map);
+    });
+
+final providerPricingProvider = FutureProvider.autoDispose
+    .family<
       Map<String, dynamic>,
-      ({String? search, String? category})
+      ({String? search, String? category, int limit})
     >((ref, query) async {
+      ref.watch(adminAuthUidProvider);
       final client = ref.watch(supabaseClientProvider);
       final response = await client.rpc(
         'admin_list_provider_pricing',
         params: {
           'p_search': query.search,
           'p_category_type': query.category,
-          'p_limit': 100,
+          'p_limit': query.limit,
           'p_offset': 0,
         },
       );

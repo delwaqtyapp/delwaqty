@@ -84,9 +84,7 @@ jobs:
           psql "postgresql://postgres:postgres@localhost:54322/postgres"
           -v ON_ERROR_STOP=1
           -c "create extension if not exists pgtap;"
-          -c "create extension if not exists dbdev cascade;"
-          -c "select dbdev.install('basejump-supabase_test_helpers');"
-          -c "create extension if not exists \"basejump-supabase_test_helpers\" cascade;"
+          -f supabase/tests/vendor/supabase_test_helpers_0_0_6.sql
       - name: Run negative RLS tests
         run: >-
           psql "postgresql://postgres:postgres@localhost:54322/postgres"

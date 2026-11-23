@@ -19,8 +19,11 @@
 --   chat_messages:  scoped-admin delete only -> keep authenticated, revoke
 --                   anon.
 -- Privileged purge/retention (deletion-request edge function, service_role
--- RPCs) still emit DELETE events for the 3 kept tables; accepted residual,
--- same decision as orders staying published.
+-- RPCs) still emit DELETE events for the 3 kept tables. That exposure and
+-- the metadata exposure of the kept tables overall is a known, unverified
+-- residual: realtime RLS filtering of DELETE payloads has not been proven
+-- with a websocket wire capture (not available), so it is not claimed as
+-- verified. See 422 for the REPLICA IDENTITY half of this fix.
 BEGIN;
 DO $$
 DECLARE t text;

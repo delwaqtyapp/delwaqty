@@ -8367,4 +8367,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get otaRetry => 'Try again';
+
+  @override
+  String get whatsappLaunchUnavailable =>
+      'WhatsApp could not open. Copy the code and send it manually.';
 }

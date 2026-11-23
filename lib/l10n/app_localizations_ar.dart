@@ -8297,4 +8297,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get otaRetry => 'حاول مرة أخرى';
+
+  @override
+  String get whatsappLaunchUnavailable =>
+      'تعذر فتح واتساب. انسخ الرمز وأرسله يدويا.';
 }

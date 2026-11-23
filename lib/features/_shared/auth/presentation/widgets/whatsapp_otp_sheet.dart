@@ -173,8 +173,22 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
       'https://wa.me/$cleanNumber?text=${Uri.encodeComponent("Verify Delwaqty OTP: $code")}',
     );
     try {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (_) {}
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        if (mounted)
+          setState(
+            () =>
+                _errorText = AppLocalizations.of(context)
+                    .whatsappLaunchUnavailable,
+          );
+      }
+    } catch (_) {
+      if (mounted)
+        setState(
+          () =>
+              _errorText = AppLocalizations.of(context)
+                  .whatsappLaunchUnavailable,
+        );
+    }
   }
 
   Future<void> _copyCode() async {

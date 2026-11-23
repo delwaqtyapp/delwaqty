@@ -22,7 +22,7 @@ class ProviderBusinessProfile {
   factory ProviderBusinessProfile.fromJson(Map<String, dynamic> json) =>
       ProviderBusinessProfile(
         id: json['id']?.toString() ?? '',
-        categoryType: (json['category_type'] as String? ?? 'restaurant').trim(),
+        categoryType: (json['category_type'] as String? ?? 'unknown').trim(),
         displayName: (json['display_name'] as String? ?? '').trim(),
         status: (json['status'] as String? ?? 'pending').trim(),
         merchantId: json['merchant_id'] as String?,
@@ -44,7 +44,7 @@ class ProviderBusinessProfile {
 class ProviderProfilesState {
   const ProviderProfilesState({
     this.isOwner = false,
-    this.activeCategory = 'restaurant',
+    this.activeCategory = 'unknown',
     this.profiles = const [],
   });
 
@@ -92,9 +92,14 @@ final providerProfilesProvider = FutureProvider<ProviderProfilesState>((
     return ProviderProfilesState(
       isOwner: map['is_owner'] == true,
       activeCategory:
-          (map['active_category'] as String?)?.trim().isNotEmpty == true
+          profiles.any(
+            (p) =>
+                p.isApproved &&
+                p.categoryType != 'unknown' &&
+                p.categoryType == (map['active_category'] as String?)?.trim(),
+          )
           ? (map['active_category'] as String).trim()
-          : 'restaurant',
+          : 'unknown',
       profiles: profiles,
     );
   }

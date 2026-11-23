@@ -77,11 +77,15 @@ class OtaCheckResult {
     required this.current,
     required this.latest,
     required this.needsUpdate,
+    this.channel,
+    this.releaseTag,
   });
 
   final int current;
   final int latest;
   final bool needsUpdate;
+  final OtaChannelConfig? channel;
+  final String? releaseTag;
 }
 
 const _otaMethodChannel = MethodChannel('com.delwaqty.app/ota');
@@ -140,7 +144,8 @@ Future<OtaManifest?> fetchOtaManifestForTag(String tag) async {
 Future<OtaCheckResult> checkForOtaUpdate(AppFlavor flavor) async {
   final packageInfo = await PackageInfo.fromPlatform();
   final current = int.tryParse(packageInfo.buildNumber) ?? 0;
-  final manifest = await fetchOtaManifest();
+  final tag = await _fetchLatestTag();
+  final manifest = tag == null ? null : await fetchOtaManifestForTag(tag);
   if (manifest == null) {
     return OtaCheckResult(
       current: current,
@@ -154,6 +159,8 @@ Future<OtaCheckResult> checkForOtaUpdate(AppFlavor flavor) async {
     current: current,
     latest: latest,
     needsUpdate: latest > current,
+    channel: channel,
+    releaseTag: tag,
   );
 }
 
@@ -180,12 +187,15 @@ class OtaDownloadResult {
 Future<OtaDownloadResult> downloadLatestApk(
   AppFlavor flavor, {
   void Function(double fraction)? onProgress,
+  OtaCheckResult? offered,
 }) async {
   try {
-    final tag = await _fetchLatestTag();
+    final tag = offered?.releaseTag ?? await _fetchLatestTag();
     if (tag == null) return const OtaDownloadResult();
-    final manifest = await fetchOtaManifestForTag(tag);
-    final channel = manifest?.forFlavor(flavor);
+    final manifest = offered?.channel == null
+        ? await fetchOtaManifestForTag(tag)
+        : null;
+    final channel = offered?.channel ?? manifest?.forFlavor(flavor);
     if (channel == null || channel.apk.isEmpty) {
       return const OtaDownloadResult();
     }

@@ -43,7 +43,8 @@ class _RoleIllustrationState extends State<RoleIllustration>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _visibilityCheck?.cancel();
-    if (!MediaQuery.disableAnimationsOf(context) &&
+    if (_foreground &&
+        !MediaQuery.disableAnimationsOf(context) &&
         TickerMode.valuesOf(context).enabled) {
       _visibilityCheck = Timer.periodic(
         const Duration(milliseconds: 600),
@@ -76,6 +77,13 @@ class _RoleIllustrationState extends State<RoleIllustration>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _foreground = state == AppLifecycleState.resumed;
+    _visibilityCheck?.cancel();
+    if (_foreground) {
+      _visibilityCheck = Timer.periodic(
+        const Duration(milliseconds: 600),
+        (_) => _syncClock(),
+      );
+    }
     _syncClock();
   }
 

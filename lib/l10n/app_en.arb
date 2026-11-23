@@ -3028,5 +3028,6 @@
   "otaLater": "Later",
   "otaUpdateNow": "Update now",
   "otaInstall": "Install",
-  "otaRetry": "Try again"
+  "otaRetry": "Try again",
+  "whatsappLaunchUnavailable": "WhatsApp could not open. Copy the code and send it manually."
 }

@@ -2944,5 +2944,6 @@
   "otaLater": "لاحقًا",
   "otaUpdateNow": "تحديث الآن",
   "otaInstall": "تثبيت",
-  "otaRetry": "حاول مرة أخرى"
+  "otaRetry": "حاول مرة أخرى",
+  "whatsappLaunchUnavailable": "تعذر فتح واتساب. انسخ الرمز وأرسله يدويا."
 }

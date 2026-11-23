@@ -78,8 +78,12 @@ class OtaUpdateActions {
     required this.install,
   });
 
-  factory OtaUpdateActions.forFlavor(AppFlavor flavor) => OtaUpdateActions(
-    download: (onProgress) => downloadLatestApk(flavor, onProgress: onProgress),
+  factory OtaUpdateActions.forFlavor(
+    AppFlavor flavor, {
+    OtaCheckResult? offered,
+  }) => OtaUpdateActions(
+    download: (onProgress) =>
+        downloadLatestApk(flavor, onProgress: onProgress, offered: offered),
     canInstall: canRequestPackageInstalls,
     install: installDownloadedApk,
   );
@@ -125,7 +129,8 @@ class OtaUpdateDialog extends StatefulWidget {
 class _OtaUpdateDialogState extends State<OtaUpdateDialog>
     with WidgetsBindingObserver {
   late final OtaUpdateActions _actions =
-      widget.actions ?? OtaUpdateActions.forFlavor(widget.flavor);
+      widget.actions ??
+      OtaUpdateActions.forFlavor(widget.flavor, offered: widget.result);
   OtaDialogStep _step = OtaDialogStep.idle;
   double _progress = 0;
   File? _file;

@@ -15823,6 +15823,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try again'**
   String get otaRetry;
+
+  /// No description provided for @whatsappLaunchUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp could not open. Copy the code and send it manually.'**
+  String get whatsappLaunchUnavailable;
 }
 
 class _AppLocalizationsDelegate

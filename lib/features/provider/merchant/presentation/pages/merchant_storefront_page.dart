@@ -747,63 +747,21 @@ class _MerchantStorefrontPageState
     ];
     return [
       for (var i = 0; i < _hours.length; i++)
-        Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: SwitchListTile(
-            value: !_hours[i].closed,
-            title: Text(dayNames[_hours[i].day]),
-            subtitle: _hours[i].closed
-                ? null
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _timeField(
-                              value: _hours[i].open,
-                              onChanged: (v) => setState(() {
-                                _hours[i] = _hours[i].copyWith(
-                                  open: v,
-                                  closed: false,
-                                );
-                                _hoursDirty = true;
-                              }),
-                            ),
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
-                            child: Text('—'),
-                          ),
-                          Expanded(
-                            child: _timeField(
-                              value: _hours[i].close,
-                              onChanged: (v) => setState(() {
-                                _hours[i] = _hours[i].copyWith(
-                                  close: v,
-                                  closed: false,
-                                );
-                                _hoursDirty = true;
-                              }),
-                            ),
-                          ),
-                        ],
-                      ),
-                      // close <= open is valid: equal times mean open 24
-                      // hours, a close before the open is an overnight
-                      // window that ends on the next calendar day.
-                      ScheduleWindowNote(
-                        open: _hours[i].open,
-                        close: _hours[i].close,
-                        closed: _hours[i].closed,
-                      ),
-                    ],
-                  ),
-            onChanged: (open) => setState(() {
-              _hours[i] = _hours[i].copyWith(closed: !open);
-              _hoursDirty = true;
-            }),
-          ),
+        WorkingHoursDayCard(
+          dayName: dayNames[_hours[i].day],
+          day: _hours[i],
+          onToggle: (open) => setState(() {
+            _hours[i] = _hours[i].copyWith(closed: !open);
+            _hoursDirty = true;
+          }),
+          onOpenChanged: (v) => setState(() {
+            _hours[i] = _hours[i].copyWith(open: v, closed: false);
+            _hoursDirty = true;
+          }),
+          onCloseChanged: (v) => setState(() {
+            _hours[i] = _hours[i].copyWith(close: v, closed: false);
+            _hoursDirty = true;
+          }),
         ),
     ];
   }
@@ -833,18 +791,106 @@ class _MerchantStorefrontPageState
       ),
     );
   }
+}
 
-  TimeOfDay _parseTimeOfDay(String hhmm) {
+/// One day of the weekly schedule: the day name and its toggle on the
+/// first line, the open/close fields on a full-width row below it, so
+/// the values stay visible at narrow widths and large text scales.
+class WorkingHoursDayCard extends StatelessWidget {
+  const WorkingHoursDayCard({
+    super.key,
+    required this.dayName,
+    required this.day,
+    required this.onToggle,
+    required this.onOpenChanged,
+    required this.onCloseChanged,
+  });
+
+  final String dayName;
+  final WorkingHoursDay day;
+  final ValueChanged<bool> onToggle;
+  final ValueChanged<String> onOpenChanged;
+  final ValueChanged<String> onCloseChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    dayName,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ),
+                Switch(value: !day.closed, onChanged: onToggle),
+              ],
+            ),
+            if (!day.closed) ...[
+              const SizedBox(height: 4),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  // At narrow widths / large text scales the two fields
+                  // stack so the full HH:MM is never cut off.
+                  final open = _HoursTimeField(
+                    value: day.open,
+                    onChanged: onOpenChanged,
+                  );
+                  final close = _HoursTimeField(
+                    value: day.close,
+                    onChanged: onCloseChanged,
+                  );
+                  if (constraints.maxWidth < 360) {
+                    return Column(
+                      children: [open, const SizedBox(height: 8), close],
+                    );
+                  }
+                  return Row(
+                    children: [
+                      Expanded(child: open),
+                      const SizedBox(width: 12),
+                      Expanded(child: close),
+                    ],
+                  );
+                },
+              ),
+              // close <= open is valid: equal times mean open 24
+              // hours, a close before the open is an overnight
+              // window that ends on the next calendar day.
+              ScheduleWindowNote(
+                open: day.open,
+                close: day.close,
+                closed: day.closed,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HoursTimeField extends StatelessWidget {
+  const _HoursTimeField({required this.value, required this.onChanged});
+
+  final String value;
+  final ValueChanged<String> onChanged;
+
+  static TimeOfDay _parse(String hhmm) {
     final parts = hhmm.split(':');
     final h = parts.isNotEmpty ? (int.tryParse(parts[0]) ?? 9) : 9;
     final m = parts.length > 1 ? (int.tryParse(parts[1]) ?? 0) : 0;
     return TimeOfDay(hour: h.clamp(0, 23), minute: m.clamp(0, 59));
   }
 
-  Widget _timeField({
-    required String value,
-    required ValueChanged<String> onChanged,
-  }) {
+  @override
+  Widget build(BuildContext context) {
     return TextFormField(
       key: ValueKey(value),
       readOnly: true,
@@ -862,9 +908,9 @@ class _MerchantStorefrontPageState
       onTap: () async {
         final picked = await showTimePicker(
           context: context,
-          initialTime: _parseTimeOfDay(value),
+          initialTime: _parse(value),
         );
-        if (picked != null && mounted) {
+        if (picked != null && context.mounted) {
           final formatted =
               '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
           onChanged(formatted);

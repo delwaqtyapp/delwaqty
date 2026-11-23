@@ -477,7 +477,7 @@ class _VerificationCard extends StatelessWidget {
                       request.fullName ?? request.email,
                       style: Theme.of(context).textTheme.titleSmall
                           ?.copyWith(fontWeight: FontWeight.bold),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
@@ -501,7 +501,9 @@ class _VerificationCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  request.userType.code.toUpperCase(),
+                  _verificationTypeLabel(l10n, request.userType.code),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: typeColor,
                     fontSize: 12,
@@ -796,5 +798,20 @@ class _DocumentThumb extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+String _verificationTypeLabel(AppLocalizations l10n, String code) {
+  switch (code) {
+    case 'driver':
+      return l10n.driver;
+    case 'merchant':
+      return l10n.merchant;
+    case 'customer':
+      return l10n.customer;
+    case 'provider':
+      return l10n.provider;
+    default:
+      return code;
   }
 }

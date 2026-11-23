@@ -80,6 +80,15 @@ class _EscalationTile extends StatelessWidget {
     }
   }
 
+  String _entityTypeLabel(String type, AppLocalizations l10n) {
+    switch (type) {
+      case 'complaint':
+        return l10n.complaint;
+      default:
+        return type;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -96,7 +105,7 @@ class _EscalationTile extends StatelessWidget {
               child: Icon(Icons.swap_vert_circle_rounded, color: cs.primary),
             ),
             title: Text(
-              '${event.entityType} Â· ${event.createdAt.toLocal()}'.trim(),
+              '${_entityTypeLabel(event.entityType, l10n)} · ${event.createdAt.toLocal()}',
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             subtitle: Text(

@@ -164,8 +164,9 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final padding = MediaQuery.sizeOf(context).width < 600 ? 16.0 : 32.0;
     return Padding(
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -264,132 +265,157 @@ class _VerificationCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
+      // Stacked layout: the identity block keeps the full width and the
+      // action buttons sit on their own line below, so the card never
+      // overflows horizontally at narrow widths.
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 28,
-            backgroundColor: AppColors.brandPurple.withValues(alpha: 0.1),
-            backgroundImage: profilePhotoUrl != null
-                ? NetworkImage(profilePhotoUrl)
-                : null,
-            child: profilePhotoUrl == null
-                ? Text(
-                    safeInitial(name),
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.brandPurple,
-                    ),
-                  )
-                : null,
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  email,
-                  style: const TextStyle(
-                    color: AppColors.textMuted,
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _roleColor(role).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        role.toString().toUpperCase(),
-                        style: TextStyle(
-                          color: _roleColor(role),
-                          fontSize: 11,
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: AppColors.brandPurple.withValues(alpha: 0.1),
+                backgroundImage: profilePhotoUrl != null
+                    ? NetworkImage(profilePhotoUrl)
+                    : null,
+                child: profilePhotoUrl == null
+                    ? Text(
+                        safeInitial(name),
+                        style: const TextStyle(
+                          fontSize: 20,
                           fontWeight: FontWeight.w700,
+                          color: AppColors.brandPurple,
                         ),
+                      )
+                    : null,
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    if (idCardUrl != null)
-                      GestureDetector(
-                        onTap: () => _showDocument(context, idCardUrl),
-                        child: Container(
+                    const SizedBox(height: 4),
+                    Text(
+                      email,
+                      style: const TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF007AFF)
-                                .withValues(alpha: 0.1),
+                            color: _roleColor(role).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
-                            'VIEW ID',
+                          child: Text(
+                            _roleLabel(
+                              AppLocalizations.of(context),
+                              role.toString(),
+                            ),
                             style: TextStyle(
-                              color: Color(0xFF007AFF),
+                              color: _roleColor(role),
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
-                      ),
+                        if (idCardUrl != null)
+                          GestureDetector(
+                            onTap: () => _showDocument(context, idCardUrl),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF007AFF)
+                                    .withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Text(
+                                'VIEW ID',
+                                style: TextStyle(
+                                  color: Color(0xFF007AFF),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          if (isProcessing)
-            const SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          else
-            Row(
-              children: [
-                OutlinedButton(
-                  onPressed: onReject,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.errorLight,
-                    side: const BorderSide(color: Color(0xFFC62828)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+          const SizedBox(height: 12),
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: isProcessing
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      OutlinedButton(
+                        onPressed: onReject,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.errorLight,
+                          side: const BorderSide(color: Color(0xFFC62828)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: Text(l10n.reject),
+                      ),
+                      const SizedBox(width: 12),
+                      FilledButton(
+                        onPressed: onApprove,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.successLight,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: Text(l10n.approve),
+                      ),
+                    ],
                   ),
-                  child: Text(l10n.reject),
-                ),
-                const SizedBox(width: 12),
-                FilledButton(
-                  onPressed: onApprove,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.successLight,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: Text(l10n.approve),
-                ),
-              ],
-            ),
+          ),
         ],
       ),
     );
   }
+
+  // Localized role chip: never show raw backend codes in Arabic.
+  String _roleLabel(AppLocalizations l10n, String role) => switch (role) {
+    'customer' => l10n.customer,
+    'merchant' => l10n.merchant,
+    'driver' || 'delivery' => l10n.driver,
+    'provider' => l10n.provider,
+    _ => role,
+  };
 
   Color _roleColor(String role) => switch (role) {
     'merchant' => const Color(0xFF8B5CF6),

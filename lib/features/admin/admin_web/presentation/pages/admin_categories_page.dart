@@ -263,8 +263,9 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
     final isOwner =
         authState is AuthAuthenticated && authState.user.role == 'owner';
 
+    final padding = MediaQuery.sizeOf(context).width < 600 ? 16.0 : 32.0;
     return Padding(
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

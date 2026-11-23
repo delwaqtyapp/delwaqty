@@ -372,28 +372,34 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                 const SizedBox(height: 8),
                 AnimatedFadeIn(
                   delay: const Duration(milliseconds: 300),
-                  child: SegmentedButton<String>(
-                    segments: [
-                      ButtonSegment(
+                  // Full-width option tiles: a horizontal segmented control
+                  // fragments the Arabic labels at large text scales.
+                  child: Column(
+                    children: [
+                      _PaymentOptionTile(
                         value: 'cash',
-                        label: Text(l10n.cashOnDelivery),
-                        icon: const Icon(Icons.payments_outlined),
+                        label: l10n.cashOnDelivery,
+                        icon: Icons.payments_outlined,
+                        selected: _paymentMethod == 'cash',
+                        onSelected: (v) => setState(() => _paymentMethod = v),
                       ),
-                      ButtonSegment(
+                      const SizedBox(height: 8),
+                      _PaymentOptionTile(
                         value: 'instapay',
-                        label: Text(l10n.paymentInstapay),
-                        icon: const Icon(Icons.account_balance_wallet_outlined),
+                        label: l10n.paymentInstapay,
+                        icon: Icons.account_balance_wallet_outlined,
+                        selected: _paymentMethod == 'instapay',
+                        onSelected: (v) => setState(() => _paymentMethod = v),
                       ),
-                      ButtonSegment(
+                      const SizedBox(height: 8),
+                      _PaymentOptionTile(
                         value: 'vodafone_cash',
-                        label: Text(l10n.paymentVodafoneCash),
-                        icon: const Icon(Icons.phone_iphone_rounded),
+                        label: l10n.paymentVodafoneCash,
+                        icon: Icons.phone_iphone_rounded,
+                        selected: _paymentMethod == 'vodafone_cash',
+                        onSelected: (v) => setState(() => _paymentMethod = v),
                       ),
                     ],
-                    selected: {_paymentMethod},
-                    onSelectionChanged: (v) =>
-                        setState(() => _paymentMethod = v.first),
-                    showSelectedIcon: false,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -792,6 +798,75 @@ class _SummaryRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Full-width radio-style payment option used instead of a horizontal
+/// segmented control so long Arabic labels never fragment.
+class _PaymentOptionTile extends StatelessWidget {
+  const _PaymentOptionTile({
+    required this.value,
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final String value;
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Semantics(
+      button: true,
+      selected: selected,
+      inMutuallyExclusiveGroup: true,
+      label: label,
+      child: Material(
+        color: selected ? cs.primaryContainer : cs.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: selected ? cs.primary : cs.outlineVariant,
+            width: selected ? 1.5 : 1,
+          ),
+        ),
+        child: InkWell(
+          onTap: () => onSelected(value),
+          borderRadius: BorderRadius.circular(12),
+          canRequestFocus: true,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              children: [
+                Icon(icon, color: selected ? cs.primary : cs.onSurfaceVariant),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: selected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                    ),
+                  ),
+                ),
+                Icon(
+                  selected
+                      ? Icons.radio_button_checked_rounded
+                      : Icons.radio_button_off_rounded,
+                  color: selected ? cs.primary : cs.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

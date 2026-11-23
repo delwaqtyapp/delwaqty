@@ -1,3 +1,5 @@
+import 'package:delwaqty/shared/widgets/readable_fit_text.dart';
+
 import 'dart:async';
 
 import 'package:delwaqty/shared/widgets/delivery_handoff_button.dart';
@@ -550,16 +552,24 @@ class _OrderCard extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  Text(
-                    '${l10n.currencySymbol} ${order.totalAmount.toStringAsFixed(2)}',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
-                    ),
+              // Amount on its own scaled line; the actions wrap on an
+              // end-aligned row below so neither overflows the card.
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: ReadableFitText(
+                  '${l10n.currencySymbol} ${order.totalAmount.toStringAsFixed(2)}',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
                   ),
-                  const Spacer(),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                alignment: WrapAlignment.end,
+                spacing: 8,
+                runSpacing: 8,
+                children: [
                   if (order.status == 'pending') ...[
                     _ActionButton(
                       label: l10n.accept,

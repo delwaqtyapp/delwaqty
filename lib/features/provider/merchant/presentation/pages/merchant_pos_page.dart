@@ -986,41 +986,54 @@ class _CartPanel extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    subtitle: Text(
-                      '${(((byId[line.key.split('|').first]!['price'] as num?)?.toDouble() ?? 0) + (surcharges[line.key] ?? 0)).toStringAsFixed(2)} '
-                      '${l10n.currencySymbol}'
-                      '${(optionLabels[line.key] ?? '').isEmpty ? '' : ' · ${optionLabels[line.key]}'}',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
+                    // The qty stepper wraps below the line text so the
+                    // product name keeps a usable width.
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.remove_circle_outline),
-                          constraints: const BoxConstraints(
-                            minWidth: 44,
-                            minHeight: 44,
-                          ),
-                          onPressed: () =>
-                              onQtyChanged(line.key, (cart[line.key] ?? 1) - 1),
+                        Text(
+                          '${(((byId[line.key.split('|').first]!['price'] as num?)?.toDouble() ?? 0) + (surcharges[line.key] ?? 0)).toStringAsFixed(2)} '
+                          '${l10n.currencySymbol}'
+                          '${(optionLabels[line.key] ?? '').isEmpty ? '' : ' · ${optionLabels[line.key]}'}',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        Text('${cart[line.key]}'),
-                        IconButton(
-                          icon: const Icon(Icons.add_circle_outline),
-                          constraints: const BoxConstraints(
-                            minWidth: 44,
-                            minHeight: 44,
+                        Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.remove_circle_outline),
+                                constraints: const BoxConstraints(
+                                  minWidth: 44,
+                                  minHeight: 44,
+                                ),
+                                onPressed: () => onQtyChanged(
+                                  line.key,
+                                  (cart[line.key] ?? 1) - 1,
+                                ),
+                              ),
+                              Text('${cart[line.key]}'),
+                              IconButton(
+                                icon: const Icon(Icons.add_circle_outline),
+                                constraints: const BoxConstraints(
+                                  minWidth: 44,
+                                  minHeight: 44,
+                                ),
+                                onPressed: () {
+                                  final p = byId[line.key.split('|').first]!;
+                                  final stock =
+                                      (p['stock_quantity'] as num?)?.toInt() ??
+                                      0;
+                                  final cur = cart[line.key] ?? 0;
+                                  if (cur < stock) {
+                                    onQtyChanged(line.key, cur + 1);
+                                  }
+                                },
+                              ),
+                            ],
                           ),
-                          onPressed: () {
-                            final p = byId[line.key.split('|').first]!;
-                            final stock =
-                                (p['stock_quantity'] as num?)?.toInt() ?? 0;
-                            final cur = cart[line.key] ?? 0;
-                            if (cur < stock) {
-                              onQtyChanged(line.key, cur + 1);
-                            }
-                          },
                         ),
                       ],
                     ),

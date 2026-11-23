@@ -239,16 +239,18 @@ class _BranchCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // The name takes the full width; the primary badge and the
+              // active switch sit on their own line below it so long
+              // branch names never get squeezed into a narrow column.
+              Text(
+                branch.name,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
               Row(
                 children: [
-                  Expanded(
-                    child: Text(
-                      branch.name,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
                   if (branch.isPrimary)
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -267,7 +269,7 @@ class _BranchCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                  const SizedBox(width: 8),
+                  const Spacer(),
                   Switch(
                     value: branch.isActive,
                     onChanged: (_) => onToggleActive(),

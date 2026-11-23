@@ -336,6 +336,7 @@ class _AdminPushNotificationsPageState
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       initialValue: _audience,
+                      isExpanded: true,
                       decoration: InputDecoration(
                         labelText: l10n.audience,
                         border: const OutlineInputBorder(),
@@ -344,23 +345,38 @@ class _AdminPushNotificationsPageState
                       items: [
                         DropdownMenuItem(
                           value: 'all',
-                          child: Text(l10n.audienceAll),
+                          child: Text(
+                            l10n.audienceAll,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'customer',
-                          child: Text(l10n.audienceCustomer),
+                          child: Text(
+                            l10n.audienceCustomer,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'driver',
-                          child: Text(l10n.audienceDriver),
+                          child: Text(
+                            l10n.audienceDriver,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'merchant',
-                          child: Text(l10n.audienceMerchant),
+                          child: Text(
+                            l10n.audienceMerchant,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'admin',
-                          child: Text(l10n.audienceAdmin),
+                          child: Text(
+                            l10n.audienceAdmin,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ],
                       onChanged: (value) =>

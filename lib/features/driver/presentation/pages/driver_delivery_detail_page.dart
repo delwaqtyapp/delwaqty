@@ -300,22 +300,22 @@ class _DriverDeliveryDetailPageState
     }
   }
 
+  // Stacked label-above-value: the fixed 120px label column squeezed
+  // long addresses into narrow fragments at large text scales.
   Widget _row(String label, String value) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 6),
-    child: Row(
+    child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.grey,
-              fontWeight: FontWeight.w600,
-            ),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.grey,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        Expanded(child: Text(value)),
+        const SizedBox(height: 2),
+        Text(value),
       ],
     ),
   );
@@ -544,7 +544,12 @@ class _DriverDeliveryDetailPageState
                           if (order.fare != null)
                             _row(
                               l10n.fare,
-                              '${order.fare!.toStringAsFixed(0)} ${order.currency}',
+                              l10n.amountWithCurrency(
+                                order.fare!.toStringAsFixed(0),
+                                order.currency == 'EGP'
+                                    ? l10n.egp
+                                    : order.currency,
+                              ),
                             ),
                           if (order.distance != null)
                             _row(

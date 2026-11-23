@@ -12,6 +12,40 @@ import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 
+/// Localized label for a sanction type code coming from the backend.
+String _sanctionTypeLabel(AppLocalizations l10n, String type) {
+  switch (type) {
+    case 'warning':
+      return l10n.warning;
+    case 'fine':
+      return l10n.fine;
+    case 'suspension':
+      return l10n.suspension;
+    case 'temporary_ban':
+      return l10n.temporaryBan;
+    case 'permanent_ban':
+      return l10n.permanentBan;
+    default:
+      return type;
+  }
+}
+
+/// Localized label for a sanction target role code.
+String _targetRoleLabel(AppLocalizations l10n, String role) {
+  switch (role) {
+    case 'driver':
+      return l10n.driver;
+    case 'merchant':
+      return l10n.merchant;
+    case 'customer':
+      return l10n.customer;
+    case 'provider':
+      return l10n.provider;
+    default:
+      return role;
+  }
+}
+
 class AdminSanctionsPage extends ConsumerStatefulWidget {
   const AdminSanctionsPage({super.key});
 
@@ -106,8 +140,8 @@ class _AdminSanctionsPageState extends ConsumerState<AdminSanctionsPage> {
                         ),
                       ),
                       title: Text(
-                        '${s.sanctionType} — ${s.targetRole}',
-                        maxLines: 1,
+                        '${_sanctionTypeLabel(l10n, s.sanctionType)} · ${_targetRoleLabel(l10n, s.targetRole)}',
+                        maxLines: 2,
                       ),
                       subtitle: Text(
                         s.reason,
@@ -191,13 +225,17 @@ class _SanctionDetailSheetState extends ConsumerState<_SanctionDetailSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Revoke ${widget.sanction.sanctionType} for ${widget.sanction.targetRole}?',
+              // Generated signature is alphabetical: (role, type).
+              l10n.revokeSanctionConfirm(
+                _targetRoleLabel(l10n, widget.sanction.targetRole),
+                _sanctionTypeLabel(l10n, widget.sanction.sanctionType),
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: reasonController,
               decoration: InputDecoration(
-                labelText: 'Reason',
+                labelText: l10n.reason,
                 hintText: 'Enter reason for revocation',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -278,7 +316,7 @@ class _SanctionDetailSheetState extends ConsumerState<_SanctionDetailSheet> {
               ),
               const SizedBox(height: 16),
               Text(
-                '${sanction.sanctionType} — ${sanction.targetRole}',
+                '${_sanctionTypeLabel(l10n, sanction.sanctionType)} · ${_targetRoleLabel(l10n, sanction.targetRole)}',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 8),
@@ -289,12 +327,12 @@ class _SanctionDetailSheetState extends ConsumerState<_SanctionDetailSheet> {
               const SizedBox(height: 16),
               if (sanction.amount > 0)
                 Text(
-                  '${l10n.fineAmount}: \$${sanction.amount.toStringAsFixed(2)}',
+                  '${l10n.fineAmount}: ${l10n.amountWithCurrency(sanction.amount.toStringAsFixed(2), l10n.currencySymbol)}',
                 ),
               if (sanction.durationDays > 0)
                 Text('${l10n.duration}: ${sanction.durationDays} ${l10n.days}'),
               Text(
-                'Status: ${sanction.isActive ? l10n.active : l10n.inactive}',
+                '${l10n.status}: ${sanction.isActive ? l10n.active : l10n.inactive}',
               ),
               Text(
                 '${l10n.startDate}: ${sanction.startDate.toLocal().toString().split('.')[0]}',

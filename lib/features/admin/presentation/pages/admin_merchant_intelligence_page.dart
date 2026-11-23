@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/admin/presentation/providers/platform_intelligence_providers.dart';
+import 'package:delwaqty/features/admin/presentation/widgets/intelligence_stat_grid.dart';
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
@@ -72,7 +73,12 @@ class AdminMerchantIntelligencePage extends ConsumerWidget {
           const SizedBox(height: 12),
           AnimatedFadeIn(
             delay: const Duration(milliseconds: 150),
-            child: _buildMerchantsByType(context, data.merchantsByType, cs),
+            child: _buildMerchantsByType(
+              context,
+              data.merchantsByType,
+              l10n,
+              cs,
+            ),
           ),
           const SizedBox(height: 24),
           AnimatedFadeIn(
@@ -96,40 +102,29 @@ class AdminMerchantIntelligencePage extends ConsumerWidget {
     AppLocalizations l10n,
     ColorScheme cs,
   ) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth > 600 ? 2 : 2;
-        return GridView.count(
-          crossAxisCount: crossAxisCount,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: 1.6,
-          children: [
-            _SummaryCard(
-              title: l10n.totalMerchants,
-              value: data.totalMerchants.toString(),
-              icon: Icons.store_outlined,
-              color: const Color(0xFF34C759),
-              cs: cs,
-            ),
-            _SummaryCard(
-              title: l10n.active,
-              value: data.activeMerchants.toString(),
-              icon: Icons.check_circle_outline,
-              color: const Color(0xFF007AFF),
-              cs: cs,
-            ),
-          ],
-        );
-      },
+    return IntelligenceStatGrid(
+      wideColumns: 2,
+      stats: [
+        IntelligenceStat(
+          title: l10n.totalMerchants,
+          value: data.totalMerchants.toString(),
+          icon: Icons.store_outlined,
+          color: const Color(0xFF34C759),
+        ),
+        IntelligenceStat(
+          title: l10n.active,
+          value: data.activeMerchants.toString(),
+          icon: Icons.check_circle_outline,
+          color: const Color(0xFF007AFF),
+        ),
+      ],
     );
   }
 
   Widget _buildMerchantsByType(
     BuildContext context,
     List<TypeCount> items,
+    AppLocalizations l10n,
     ColorScheme cs,
   ) {
     if (items.isEmpty) {
@@ -151,7 +146,11 @@ class AdminMerchantIntelligencePage extends ConsumerWidget {
       spacing: 8,
       runSpacing: 8,
       children: items.map((item) {
-        return _TypeChip(label: item.type, count: item.count, cs: cs);
+        return _TypeChip(
+          label: localizedCategoryTypeLabel(item.type, l10n),
+          count: item.count,
+          cs: cs,
+        );
       }).toList(),
     );
   }
@@ -186,64 +185,6 @@ class AdminMerchantIntelligencePage extends ConsumerWidget {
           ),
         );
       }),
-    );
-  }
-}
-
-class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.color,
-    required this.cs,
-  });
-
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color color;
-  final ColorScheme cs;
-
-  @override
-  Widget build(BuildContext context) {
-    return PremiumCard(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  value,
-                  style: Theme.of(context).textTheme.titleLarge
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.labelSmall
-                    ?.copyWith(color: cs.onSurfaceVariant),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }
@@ -316,93 +257,114 @@ class _MerchantInfoTile extends StatelessWidget {
         : AppColors.warningLight;
     final stars = merchant.rating.round().clamp(0, 5);
 
+    final statusLabel = switch (merchant.status) {
+      'active' || 'verified' => l10n.active,
+      'pending' => l10n.pending,
+      'suspended' => l10n.suspended,
+      _ => merchant.status,
+    };
+
     return PremiumCard(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(Icons.store_outlined, color: statusColor, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  merchant.name,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(height: 2),
-                Row(
+                child: Icon(Icons.store_outlined, color: statusColor, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 1,
+                    Text(
+                      merchant.name,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
-                      decoration: BoxDecoration(
-                        color: AppColors.brandLavender,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        merchant.type,
-                        style: AppTextStyles.labelSmall.copyWith(
-                          color: AppColors.brandPurple,
-                        ),
-                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 1,
-                      ),
-                      decoration: BoxDecoration(
-                        color: statusColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        merchant.status,
-                        style: AppTextStyles.labelSmall.copyWith(
-                          color: statusColor,
+                    const SizedBox(height: 2),
+                    // Chips wrap instead of overflowing the card edge.
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 1,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.brandLavender,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            localizedCategoryTypeLabel(merchant.type, l10n),
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: AppColors.brandPurple,
+                            ),
+                          ),
                         ),
-                      ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 1,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            statusLabel,
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: statusColor,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: List.generate(5, (i) {
-                  return Icon(
-                    i < stars ? Icons.star_rounded : Icons.star_outline_rounded,
-                    size: 14,
-                    color: AppColors.rating,
-                  );
-                }),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                '${merchant.totalOrders} ${l10n.orders}',
-                style: AppTextStyles.labelSmall.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
               ),
             ],
+          ),
+          const SizedBox(height: 4),
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(5, (i) {
+                    return Icon(
+                      i < stars
+                          ? Icons.star_rounded
+                          : Icons.star_outline_rounded,
+                      size: 14,
+                      color: AppColors.rating,
+                    );
+                  }),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${merchant.totalOrders} ${l10n.orders}',
+                  style: AppTextStyles.labelSmall.copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

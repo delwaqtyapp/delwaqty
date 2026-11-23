@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/admin/presentation/providers/platform_intelligence_providers.dart';
+import 'package:delwaqty/features/admin/presentation/widgets/intelligence_stat_grid.dart';
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
@@ -75,44 +76,34 @@ class AdminDeliveryIntelligencePage extends ConsumerWidget {
         const SizedBox(height: 12),
         AnimatedFadeIn(
           delay: const Duration(milliseconds: 50),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final crossAxisCount = constraints.maxWidth > 600 ? 4 : 2;
-              return GridView.count(
-                crossAxisCount: crossAxisCount,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                childAspectRatio: 1.4,
-                children: [
-                  _StatCard(
-                    l10n.totalDrivers,
-                    data.totalDrivers.toString(),
-                    Icons.people_outline_rounded,
-                    const Color(0xFF007AFF),
-                  ),
-                  _StatCard(
-                    l10n.onlineStat,
-                    data.onlineDrivers.toString(),
-                    Icons.wifi_rounded,
-                    const Color(0xFF34C759),
-                  ),
-                  _StatCard(
-                    l10n.pendingStat,
-                    data.pendingDrivers.toString(),
-                    Icons.pending_outlined,
-                    const Color(0xFFFF9500),
-                  ),
-                  _StatCard(
-                    l10n.verifiedStat,
-                    data.verifiedDrivers.toString(),
-                    Icons.verified_outlined,
-                    const Color(0xFF5B3DF0),
-                  ),
-                ],
-              );
-            },
+          child: IntelligenceStatGrid(
+            wideColumns: 4,
+            stats: [
+              IntelligenceStat(
+                title: l10n.totalDrivers,
+                value: data.totalDrivers.toString(),
+                icon: Icons.people_outline_rounded,
+                color: const Color(0xFF007AFF),
+              ),
+              IntelligenceStat(
+                title: l10n.onlineStat,
+                value: data.onlineDrivers.toString(),
+                icon: Icons.wifi_rounded,
+                color: const Color(0xFF34C759),
+              ),
+              IntelligenceStat(
+                title: l10n.pendingStat,
+                value: data.pendingDrivers.toString(),
+                icon: Icons.pending_outlined,
+                color: const Color(0xFFFF9500),
+              ),
+              IntelligenceStat(
+                title: l10n.verifiedStat,
+                value: data.verifiedDrivers.toString(),
+                icon: Icons.verified_outlined,
+                color: const Color(0xFF5B3DF0),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 24),
@@ -127,50 +118,42 @@ class AdminDeliveryIntelligencePage extends ConsumerWidget {
         const SizedBox(height: 12),
         AnimatedFadeIn(
           delay: const Duration(milliseconds: 200),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final crossAxisCount = constraints.maxWidth > 600 ? 3 : 2;
-              return GridView.count(
-                crossAxisCount: crossAxisCount,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                childAspectRatio: 1.6,
-                children: [
-                  _StatCard(
-                    l10n.completedDeliveries,
-                    data.completedDeliveries.toString(),
-                    Icons.check_circle_outline_rounded,
-                    const Color(0xFF34C759),
-                  ),
-                  _StatCard(
-                    l10n.pendingDeliveries,
-                    data.pendingDeliveries.toString(),
-                    Icons.schedule_rounded,
-                    const Color(0xFFFF9500),
-                  ),
-                  _StatCard(
-                    l10n.cancelledDeliveries,
-                    data.cancelledDeliveries.toString(),
-                    Icons.cancel_outlined,
-                    const Color(0xFFFF3B30),
-                  ),
-                  _StatCard(
-                    l10n.deliveryGmv,
+          child: IntelligenceStatGrid(
+            wideColumns: 3,
+            stats: [
+              IntelligenceStat(
+                title: l10n.completedDeliveries,
+                value: data.completedDeliveries.toString(),
+                icon: Icons.check_circle_outline_rounded,
+                color: const Color(0xFF34C759),
+              ),
+              IntelligenceStat(
+                title: l10n.pendingDeliveries,
+                value: data.pendingDeliveries.toString(),
+                icon: Icons.schedule_rounded,
+                color: const Color(0xFFFF9500),
+              ),
+              IntelligenceStat(
+                title: l10n.cancelledDeliveries,
+                value: data.cancelledDeliveries.toString(),
+                icon: Icons.cancel_outlined,
+                color: const Color(0xFFFF3B30),
+              ),
+              IntelligenceStat(
+                title: l10n.deliveryGmv,
+                value:
                     '${l10n.currencySymbol} ${data.deliveryGmv.toStringAsFixed(0)}',
-                    Icons.payments_outlined,
-                    const Color(0xFF5B3DF0),
-                  ),
-                  _StatCard(
-                    l10n.driverEarnings,
+                icon: Icons.payments_outlined,
+                color: const Color(0xFF5B3DF0),
+              ),
+              IntelligenceStat(
+                title: l10n.driverEarnings,
+                value:
                     '${l10n.currencySymbol} ${data.driverEarningsTotal.toStringAsFixed(0)}',
-                    Icons.account_balance_wallet_rounded,
-                    const Color(0xFF14B8A6),
-                  ),
-                ],
-              );
-            },
+                icon: Icons.account_balance_wallet_rounded,
+                color: const Color(0xFF14B8A6),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 24),
@@ -238,58 +221,6 @@ class AdminDeliveryIntelligencePage extends ConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  const _StatCard(this.label, this.value, this.icon, this.color);
-
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return PremiumCard(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  value,
-                  style: Theme.of(context).textTheme.titleLarge
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.labelSmall
-                    ?.copyWith(color: cs.onSurfaceVariant),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }

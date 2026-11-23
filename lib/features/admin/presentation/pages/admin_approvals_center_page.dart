@@ -178,30 +178,37 @@ class _AdminApprovalsCenterPageState
                       children: [
                         Row(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: scheme.primary.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                _typeLabel(
-                                  l10n,
-                                  request['request_type'] as String,
+                            // Badge takes the flexible share and ellipsizes;
+                            // the date keeps a single unwrapped line.
+                            Flexible(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
                                 ),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: scheme.primary,
-                                  fontWeight: FontWeight.w700,
+                                decoration: BoxDecoration(
+                                  color: scheme.primary.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  _typeLabel(
+                                    l10n,
+                                    request['request_type'] as String,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: scheme.primary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ),
                             ),
-                            const Spacer(),
+                            const SizedBox(width: 8),
                             Text(
                               _formatDate(request['created_at'] as String?),
+                              maxLines: 1,
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ],
@@ -231,7 +238,11 @@ class _AdminApprovalsCenterPageState
                                     ? null
                                     : () => _decide(request, approve: false),
                                 icon: const Icon(Icons.close_rounded, size: 18),
-                                label: Text(l10n.rejectRequest),
+                                label: Text(
+                                  l10n.rejectRequest,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -252,7 +263,11 @@ class _AdminApprovalsCenterPageState
                                           color: Colors.white,
                                         ),
                                       )
-                                    : Text(l10n.approveRequest),
+                                    : Text(
+                                        l10n.approveRequest,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                               ),
                             ),
                           ],

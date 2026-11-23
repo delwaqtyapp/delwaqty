@@ -457,20 +457,32 @@ class _MerchantProductModifiersPageState
                                     ? o['name_ar'] as String
                                     : (o['name'] ?? '').toString(),
                               ),
-                              subtitle: Text(
-                                '+${((o['price_adjustment'] as num?)?.toDouble() ?? 0).toStringAsFixed(2)} '
-                                '${l10n.currencySymbol}',
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
+                              // Actions wrap below so the option name keeps
+                              // the full tile width.
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit_outlined),
-                                    onPressed: () => _editOption(g, o),
+                                  Text(
+                                    '+${((o['price_adjustment'] as num?)?.toDouble() ?? 0).toStringAsFixed(2)} '
+                                    '${l10n.currencySymbol}',
                                   ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete_outline),
-                                    onPressed: () => _deleteOption(o),
+                                  Align(
+                                    alignment: AlignmentDirectional.centerEnd,
+                                    child: Wrap(
+                                      spacing: 4,
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.edit_outlined),
+                                          onPressed: () => _editOption(g, o),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.delete_outline,
+                                          ),
+                                          onPressed: () => _deleteOption(o),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),

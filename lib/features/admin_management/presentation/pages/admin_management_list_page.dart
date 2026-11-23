@@ -96,83 +96,128 @@ class _AdminManagementListPageState
         children: [
           Padding(
             padding: const EdgeInsets.all(12),
-            child: Wrap(
-              spacing: 12,
-              runSpacing: 8,
-              children: [
-                SizedBox(
-                  width: 260,
-                  child: TextField(
-                    controller: _searchCtrl,
-                    decoration: InputDecoration(
-                      hintText: loc.adminMgmtSearch,
-                      prefixIcon: const Icon(Icons.search),
-                      border: const OutlineInputBorder(),
+            child: LayoutBuilder(
+              builder: (context, filterConstraints) {
+                // Two filter columns on narrow screens so the filter
+                // block stays compact and the rows below keep room.
+                final narrow = filterConstraints.maxWidth < 480;
+                final searchWidth = narrow ? filterConstraints.maxWidth : 260.0;
+                final dropWidth = narrow
+                    ? (filterConstraints.maxWidth - 12) / 2
+                    : 150.0;
+                return Wrap(
+                  spacing: 12,
+                  runSpacing: 8,
+                  children: [
+                    SizedBox(
+                      width: searchWidth,
+                      child: TextField(
+                        controller: _searchCtrl,
+                        decoration: InputDecoration(
+                          hintText: loc.adminMgmtSearch,
+                          prefixIcon: const Icon(Icons.search),
+                          border: const OutlineInputBorder(),
+                        ),
+                        onChanged: (_) => setState(() {}),
+                      ),
                     ),
-                    onChanged: (_) => setState(() {}),
-                  ),
-                ),
-                DropdownButton<String?>(
-                  value: _roleFilter,
-                  hint: Text(loc.adminMgmtFilterRole),
-                  items: [
-                    DropdownMenuItem(child: Text(loc.adminMgmtAll)),
-                    DropdownMenuItem(
-                      value: 'owner',
-                      child: Text(loc.adminMgmtRoleOwner),
+                    // Bounded, expanded dropdowns so the filter row wraps
+                    // cleanly on narrow screens.
+                    SizedBox(
+                      width: dropWidth,
+                      child: DropdownButtonFormField<String?>(
+                        initialValue: _roleFilter,
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          isDense: true,
+                          border: OutlineInputBorder(),
+                        ),
+                        hint: Text(loc.adminMgmtFilterRole),
+                        items: [
+                          DropdownMenuItem(child: Text(loc.adminMgmtAll)),
+                          DropdownMenuItem(
+                            value: 'owner',
+                            child: Text(loc.adminMgmtRoleOwner),
+                          ),
+                          DropdownMenuItem(
+                            value: 'admin',
+                            child: Text(loc.adminMgmtRoleAdmin),
+                          ),
+                        ],
+                        onChanged: (v) => setState(() => _roleFilter = v),
+                      ),
                     ),
-                    DropdownMenuItem(
-                      value: 'admin',
-                      child: Text(loc.adminMgmtRoleAdmin),
+                    SizedBox(
+                      width: dropWidth,
+                      child: DropdownButtonFormField<String?>(
+                        initialValue: _statusFilter,
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          isDense: true,
+                          border: OutlineInputBorder(),
+                        ),
+                        hint: Text(loc.adminMgmtFilterStatus),
+                        items: [
+                          DropdownMenuItem(child: Text(loc.adminMgmtAll)),
+                          DropdownMenuItem(
+                            value: 'active',
+                            child: Text(loc.adminMgmtStatusActive),
+                          ),
+                          DropdownMenuItem(
+                            value: 'inactive',
+                            child: Text(loc.adminMgmtStatusInactive),
+                          ),
+                        ],
+                        onChanged: (v) => setState(() => _statusFilter = v),
+                      ),
+                    ),
+                    SizedBox(
+                      width: dropWidth,
+                      child: DropdownButtonFormField<String?>(
+                        initialValue: _regionFilter,
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          isDense: true,
+                          border: OutlineInputBorder(),
+                        ),
+                        hint: Text(loc.adminMgmtFilterRegion),
+                        items: [
+                          DropdownMenuItem(child: Text(loc.adminMgmtAll)),
+                          for (final r in regions)
+                            DropdownMenuItem(value: r, child: Text(r)),
+                        ],
+                        onChanged: (v) => setState(() => _regionFilter = v),
+                      ),
+                    ),
+                    SizedBox(
+                      width: dropWidth,
+                      child: DropdownButtonFormField<String>(
+                        initialValue: _sort,
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          isDense: true,
+                          border: OutlineInputBorder(),
+                        ),
+                        items: [
+                          DropdownMenuItem(
+                            value: 'createdAt',
+                            child: Text(loc.adminMgmtSortCreated),
+                          ),
+                          DropdownMenuItem(
+                            value: 'name',
+                            child: Text(loc.adminMgmtSortName),
+                          ),
+                          DropdownMenuItem(
+                            value: 'role',
+                            child: Text(loc.adminMgmtSortRole),
+                          ),
+                        ],
+                        onChanged: (v) => setState(() => _sort = v!),
+                      ),
                     ),
                   ],
-                  onChanged: (v) => setState(() => _roleFilter = v),
-                ),
-                DropdownButton<String?>(
-                  value: _statusFilter,
-                  hint: Text(loc.adminMgmtFilterStatus),
-                  items: [
-                    DropdownMenuItem(child: Text(loc.adminMgmtAll)),
-                    DropdownMenuItem(
-                      value: 'active',
-                      child: Text(loc.adminMgmtStatusActive),
-                    ),
-                    DropdownMenuItem(
-                      value: 'inactive',
-                      child: Text(loc.adminMgmtStatusInactive),
-                    ),
-                  ],
-                  onChanged: (v) => setState(() => _statusFilter = v),
-                ),
-                DropdownButton<String?>(
-                  value: _regionFilter,
-                  hint: Text(loc.adminMgmtFilterRegion),
-                  items: [
-                    DropdownMenuItem(child: Text(loc.adminMgmtAll)),
-                    for (final r in regions)
-                      DropdownMenuItem(value: r, child: Text(r)),
-                  ],
-                  onChanged: (v) => setState(() => _regionFilter = v),
-                ),
-                DropdownButton<String>(
-                  value: _sort,
-                  items: [
-                    DropdownMenuItem(
-                      value: 'createdAt',
-                      child: Text(loc.adminMgmtSortCreated),
-                    ),
-                    DropdownMenuItem(
-                      value: 'name',
-                      child: Text(loc.adminMgmtSortName),
-                    ),
-                    DropdownMenuItem(
-                      value: 'role',
-                      child: Text(loc.adminMgmtSortRole),
-                    ),
-                  ],
-                  onChanged: (v) => setState(() => _sort = v!),
-                ),
-              ],
+                );
+              },
             ),
           ),
           Expanded(
@@ -254,31 +299,48 @@ class _AdminRow extends StatelessWidget {
         : account.role == 'admin'
         ? loc.adminMgmtRoleAdmin
         : account.role;
+    // Name keeps the full width; role/status chips move to their own
+    // wrapped line under the subtitle.
     return ListTile(
       leading: CircleAvatar(child: Text(initials)),
-      title: Text(account.fullName ?? account.email),
-      subtitle: Text(
-        '${account.email} • ${loc.adminMgmtRegion}: ${account.regionName ?? loc.adminMgmtUnknown}',
+      title: Text(
+        account.fullName ?? account.email,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
-      trailing: Wrap(
-        spacing: 6,
-        crossAxisAlignment: WrapCrossAlignment.center,
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Chip(label: Text(roleLabel), visualDensity: VisualDensity.compact),
-          Chip(
-            label: Text(
-              account.isActive
-                  ? loc.adminMgmtStatusActive
-                  : loc.adminMgmtStatusInactive,
-            ),
-            visualDensity: VisualDensity.compact,
-            backgroundColor: account.isActive
-                ? Colors.green.shade100
-                : Colors.red.shade100,
+          Text(
+            '${account.email} • ${loc.adminMgmtRegion}: ${account.regionName ?? loc.adminMgmtUnknown}',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
-          const Icon(Icons.chevron_left),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 6,
+            runSpacing: 4,
+            children: [
+              Chip(
+                label: Text(roleLabel),
+                visualDensity: VisualDensity.compact,
+              ),
+              Chip(
+                label: Text(
+                  account.isActive
+                      ? loc.adminMgmtStatusActive
+                      : loc.adminMgmtStatusInactive,
+                ),
+                visualDensity: VisualDensity.compact,
+                backgroundColor: account.isActive
+                    ? Colors.green.shade100
+                    : Colors.red.shade100,
+              ),
+            ],
+          ),
         ],
       ),
+      trailing: const Icon(Icons.chevron_left),
       onTap: onTap,
     );
   }

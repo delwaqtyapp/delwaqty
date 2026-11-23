@@ -93,15 +93,20 @@ class _ClientSupportPageState extends ConsumerState<ClientSupportPage> {
                           color: cs.primary,
                         ),
                       ),
-                      title: Text(
+                      // Full complaint reference, selectable/copyable and
+                      // never truncated to a few letters.
+                      title: SelectableText(
                         refNum == null
-                            ? '${l10n.chatRoom} ${room.id.length >= 8 ? room.id.substring(0, 8) : room.id}'
+                            ? '${l10n.chatRoom} ${room.id}'
                             : '${l10n.complaintNo}: $refNum',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
                       ),
                       subtitle: Text(
-                        room.isActive ? room.roomType : l10n.chatClosedLabel,
+                        room.isActive
+                            ? (room.roomType == 'support'
+                                  ? l10n.support
+                                  : room.roomType)
+                            : l10n.chatClosedLabel,
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => context.push('/support/room/${room.id}'),

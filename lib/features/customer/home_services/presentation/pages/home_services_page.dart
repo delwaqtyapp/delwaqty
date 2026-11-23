@@ -77,17 +77,23 @@ class HomeServicesPage extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           mainAxisSpacing: 14,
           crossAxisSpacing: 14,
-          mainAxisExtent: 140,
+          mainAxisExtent: _tileExtent(context),
         ),
         itemCount: 8,
         itemBuilder: (_, _) => const ShimmerCard(),
       ),
     );
   }
+
+  // Row height grows with the text scale so two-line Arabic category
+  // names never crop inside the card.
+  static double _tileExtent(BuildContext context) =>
+      140 *
+      MediaQuery.textScalerOf(context).scale(1.0).clamp(1.0, 1.8).toDouble();
 
   Widget _buildCategoryGrid(
     BuildContext context,
@@ -96,11 +102,11 @@ class HomeServicesPage extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           mainAxisSpacing: 14,
           crossAxisSpacing: 14,
-          mainAxisExtent: 140,
+          mainAxisExtent: _tileExtent(context),
         ),
         itemCount: categories.length,
         itemBuilder: (context, index) {
@@ -203,7 +209,12 @@ class _CategoryCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   SizedBox(
-                    height: 20,
+                    height:
+                        20 *
+                        MediaQuery.textScalerOf(context)
+                            .scale(1.0)
+                            .clamp(1.0, 1.8)
+                            .toDouble(),
                     child: Center(
                       child: Text(
                         name,
@@ -211,7 +222,8 @@ class _CategoryCard extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
-                        maxLines: 1,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),

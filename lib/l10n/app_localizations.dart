@@ -11912,6 +11912,30 @@ abstract class AppLocalizations {
   /// **'Admin assigned'**
   String get adminAssigned;
 
+  /// No description provided for @auditResourceServiceCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Service category'**
+  String get auditResourceServiceCategory;
+
+  /// No description provided for @auditCommissionRateUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Commission rate updated'**
+  String get auditCommissionRateUpdated;
+
+  /// No description provided for @walletTxCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit'**
+  String get walletTxCredit;
+
+  /// No description provided for @walletTxDebit.
+  ///
+  /// In en, this message translates to:
+  /// **'Debit'**
+  String get walletTxDebit;
+
   /// No description provided for @roleUpdated.
   ///
   /// In en, this message translates to:
@@ -15847,6 +15871,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'WhatsApp verification is not available yet. You can still sign in with Google.'**
   String get whatsappNotConfigured;
+
+  /// No description provided for @approved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get approved;
+
+  /// No description provided for @settled.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled'**
+  String get settled;
+
+  /// No description provided for @collected.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected'**
+  String get collected;
+
+  /// No description provided for @outstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding'**
+  String get outstanding;
+
+  /// No description provided for @underReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Under Review'**
+  String get underReview;
+
+  /// No description provided for @failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get failed;
+
+  /// No description provided for @reconciliation.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconciliation'**
+  String get reconciliation;
+
+  /// No description provided for @totalCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Collected'**
+  String get totalCollected;
+
+  /// No description provided for @approvedSettlements.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved Settlements'**
+  String get approvedSettlements;
+
+  /// No description provided for @closingOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing Outstanding'**
+  String get closingOutstanding;
+
+  /// No description provided for @collectionLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection Ledger'**
+  String get collectionLedger;
+
+  /// No description provided for @noCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'No collections'**
+  String get noCollections;
+
+  /// No description provided for @noCollectionsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No received top-ups in this region yet.'**
+  String get noCollectionsYet;
+
+  /// No description provided for @platformCollectionsAllRegions.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Collections (all regions)'**
+  String get platformCollectionsAllRegions;
+
+  /// No description provided for @platformSettlementsAllRegions.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Settlements (all regions)'**
+  String get platformSettlementsAllRegions;
+
+  /// No description provided for @graceLimitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit'**
+  String get graceLimitLabel;
+
+  /// No description provided for @graceUsedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Used'**
+  String get graceUsedLabel;
+
+  /// No description provided for @graceRemainingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining'**
+  String get graceRemainingLabel;
+
+  /// No description provided for @revokeSanctionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke {type} for {role}?'**
+  String revokeSanctionConfirm(Object role, Object type);
+
+  /// No description provided for @adminRegionScopeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Region Scope'**
+  String get adminRegionScopeTitle;
+
+  /// No description provided for @adminRegionSelectUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an admin user to manage scope'**
+  String get adminRegionSelectUser;
+
+  /// No description provided for @adminRegionScopeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign region scope to admin-tier users at any level (governorate, markaz, district, village, ...). An admin with no assignments is global.'**
+  String get adminRegionScopeSubtitle;
+
+  /// No description provided for @adminManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin management'**
+  String get adminManagement;
 }
 
 class _AppLocalizationsDelegate

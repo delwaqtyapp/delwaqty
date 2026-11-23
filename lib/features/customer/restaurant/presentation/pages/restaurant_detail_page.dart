@@ -593,7 +593,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
                       label,
                       style: AppTextStyles.labelSmall,
                       textAlign: TextAlign.center,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],

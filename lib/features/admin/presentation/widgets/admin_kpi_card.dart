@@ -68,6 +68,7 @@ class AdminKpiCard extends StatelessWidget {
                     Flexible(
                       child: Text(
                         label,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 13,

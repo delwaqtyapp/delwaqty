@@ -302,67 +302,80 @@ class _ProductCard extends ConsumerWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            subtitle: Row(
+            // Title gets the full tile width; the availability switch wraps
+            // below instead of starving the product name.
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '${l10n.currencySymbol} ${price.toStringAsFixed(2)}',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color:
-                        (isAvailable
-                                ? AppColors.successLight
-                                : AppColors.errorLight)
-                            .withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    isAvailable ? l10n.available : l10n.unavailable,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: isAvailable
-                          ? AppColors.successLight
-                          : AppColors.errorLight,
-                      fontWeight: FontWeight.bold,
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        '${l10n.currencySymbol} ${price.toStringAsFixed(2)}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color:
+                            (isAvailable
+                                    ? AppColors.successLight
+                                    : AppColors.errorLight)
+                                .withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        isAvailable ? l10n.available : l10n.unavailable,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: isAvailable
+                              ? AppColors.successLight
+                              : AppColors.errorLight,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Tooltip(
+                        message: l10n.toggleProductAvailability,
+                        child: Switch(
+                          value: isAvailable,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          onChanged: (value) async {
+                            try {
+                              await ref
+                                  .read(merchantDashboardDataSourceProvider)
+                                  .updateProduct(id, {'is_available': value});
+                              ref.invalidate(merchantProductsProvider);
+                            } catch (e) {
+                              if (context.mounted) {
+                                context.showAppSnackBar(
+                                  appErrorText(context, e),
+                                  isError: true,
+                                );
+                              }
+                            }
+                          },
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right_rounded),
+                    ],
                   ),
                 ),
-              ],
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Tooltip(
-                  message: l10n.toggleProductAvailability,
-                  child: Switch(
-                    value: isAvailable,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    onChanged: (value) async {
-                      try {
-                        await ref
-                            .read(merchantDashboardDataSourceProvider)
-                            .updateProduct(id, {'is_available': value});
-                        ref.invalidate(merchantProductsProvider);
-                      } catch (e) {
-                        if (context.mounted) {
-                          context.showAppSnackBar(
-                            appErrorText(context, e),
-                            isError: true,
-                          );
-                        }
-                      }
-                    },
-                  ),
-                ),
-                const Icon(Icons.chevron_right_rounded),
               ],
             ),
           ),

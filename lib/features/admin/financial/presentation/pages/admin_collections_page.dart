@@ -5,7 +5,9 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
+import 'package:delwaqty/features/admin/presentation/widgets/intelligence_stat_grid.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 class AdminCollectionsPage extends ConsumerWidget {
   const AdminCollectionsPage({super.key});
@@ -63,24 +65,24 @@ class AdminCollectionsPage extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Reconciliation',
+                          l10n.reconciliation,
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
                         _ReconcileRow(
-                          label: 'Total Collected',
+                          label: l10n.totalCollected,
                           value: s.total,
                           color: cs.primary,
                         ),
                         _ReconcileRow(
-                          label: 'Approved Settlements',
+                          label: l10n.approvedSettlements,
                           value: -s.settled,
                           color: Colors.green,
                         ),
                         const Divider(),
                         _ReconcileRow(
-                          label: 'Closing Outstanding',
+                          label: l10n.closingOutstanding,
                           value: s.outstanding,
                           color: s.outstanding > 0
                               ? Colors.orange
@@ -95,7 +97,7 @@ class AdminCollectionsPage extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Collection Ledger',
+              l10n.collectionLedger,
               style: Theme.of(context).textTheme.titleMedium
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
@@ -116,10 +118,10 @@ class AdminCollectionsPage extends ConsumerWidget {
               ),
               data: (items) {
                 if (items.isEmpty) {
-                  return const PremiumEmptyState(
+                  return PremiumEmptyState(
                     icon: Icons.receipt_long_rounded,
-                    title: 'No collections',
-                    message: 'No received top-ups in this region yet.',
+                    title: l10n.noCollections,
+                    message: l10n.noCollectionsYet,
                   );
                 }
                 return Column(
@@ -141,7 +143,7 @@ class AdminCollectionsPage extends ConsumerWidget {
                                       ),
                                     ),
                                     Text(
-                                      'Account: ${c.accountId}',
+                                      '${l10n.account}: ${c.accountId}',
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodySmall,
@@ -169,8 +171,8 @@ class AdminCollectionsPage extends ConsumerWidget {
                                 ),
                                 child: Text(
                                   c.status == 'settled'
-                                      ? 'Settled'
-                                      : 'Collected',
+                                      ? l10n.settled
+                                      : l10n.collected,
                                   style: TextStyle(
                                     color: c.status == 'settled'
                                         ? Colors.green
@@ -202,47 +204,61 @@ class _MetricGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final items = [
-      ('Today', summary.today),
-      ('Week', summary.week),
-      ('Month', summary.month),
-      ('Total', summary.total),
-      ('Pending', summary.pending),
-      ('Approved', summary.approved),
-      ('Rejected', summary.rejected),
-      ('Settled', summary.settled),
-    ];
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      childAspectRatio: 2.4,
-      children: items
-          .map(
-            (e) => PremiumCard(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    e.$1,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  Text(
-                    '${l10n.currencySymbol} ${e.$2.toStringAsFixed(2)}',
-                    style: Theme.of(context).textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-          )
-          .toList(),
+    final cs = Theme.of(context).colorScheme;
+    String fmt(double v) => '${l10n.currencySymbol} ${v.toStringAsFixed(2)}';
+    // Shared responsive grid: content-driven tile heights, so nothing
+    // clips at narrow widths or large text scales.
+    return IntelligenceStatGrid(
+      stats: [
+        IntelligenceStat(
+          title: l10n.today,
+          value: fmt(summary.today as double),
+          icon: Icons.today_rounded,
+          color: AppColors.brandPurple,
+        ),
+        IntelligenceStat(
+          title: l10n.periodWeek,
+          value: fmt(summary.week as double),
+          icon: Icons.date_range_rounded,
+          color: cs.tertiary,
+        ),
+        IntelligenceStat(
+          title: l10n.periodMonth,
+          value: fmt(summary.month as double),
+          icon: Icons.calendar_month_rounded,
+          color: cs.primary,
+        ),
+        IntelligenceStat(
+          title: l10n.total,
+          value: fmt(summary.total as double),
+          icon: Icons.account_balance_wallet_outlined,
+          color: AppColors.brandPurple,
+        ),
+        IntelligenceStat(
+          title: l10n.pending,
+          value: fmt(summary.pending as double),
+          icon: Icons.hourglass_top_rounded,
+          color: AppColors.warningLight,
+        ),
+        IntelligenceStat(
+          title: l10n.approved,
+          value: fmt(summary.approved as double),
+          icon: Icons.check_circle_outline_rounded,
+          color: AppColors.successLight,
+        ),
+        IntelligenceStat(
+          title: l10n.rejected,
+          value: fmt(summary.rejected as double),
+          icon: Icons.cancel_outlined,
+          color: AppColors.errorLight,
+        ),
+        IntelligenceStat(
+          title: l10n.settled,
+          value: fmt(summary.settled as double),
+          icon: Icons.payments_outlined,
+          color: AppColors.infoLight,
+        ),
+      ],
     );
   }
 }

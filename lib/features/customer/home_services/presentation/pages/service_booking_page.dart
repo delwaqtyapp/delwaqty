@@ -249,88 +249,111 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
                     message: l10n.noProvidersDescription,
                   );
                 }
-                return SizedBox(
-                  height: 100,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: providers.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 12),
-                    itemBuilder: (context, index) {
-                      final provider = providers[index];
-                      final isSelected = _selectedProviderId == provider.id;
-                      return GestureDetector(
-                        onTap: () => setState(() {
-                          _selectedProviderId = provider.id;
-                          _selectedProviderName = provider.name;
-                        }),
-                        child: Container(
-                          width: 140,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? AppColors.brandPurple.withValues(alpha: 0.12)
-                                : Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest
-                                      .withValues(alpha: 0.35),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: isSelected
-                                  ? AppColors.brandPurple
-                                  : Theme.of(context).colorScheme.outlineVariant
-                                        .withValues(alpha: 0.2),
-                              width: isSelected ? 2 : 1,
+                // Height is content-driven so scaled text and two-line
+                // names never spill out of the provider cards.
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (var index = 0; index < providers.length; index++)
+                          Padding(
+                            padding: EdgeInsetsDirectional.only(
+                              end: index < providers.length - 1 ? 12 : 0,
                             ),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CircleAvatar(
-                                radius: 20,
-                                backgroundColor: AppColors.brandPurple
-                                    .withValues(alpha: 0.12),
-                                child: Text(
-                                  safeInitial(provider.name),
-                                  style: AppTextStyles.titleMedium.copyWith(
-                                    color: AppColors.brandPurple,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                provider.name,
-                                style: AppTextStyles.labelMedium.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              if (provider.rating > 0) ...[
-                                const SizedBox(height: 2),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.star_rounded,
-                                      size: 12,
-                                      color: AppColors.rating,
-                                    ),
-                                    const SizedBox(width: 2),
-                                    Text(
-                                      provider.rating.toStringAsFixed(1),
-                                      style: AppTextStyles.labelSmall.copyWith(
-                                        fontSize: 10,
+                            child: Builder(
+                              builder: (context) {
+                                final provider = providers[index];
+                                final isSelected =
+                                    _selectedProviderId == provider.id;
+                                return GestureDetector(
+                                  onTap: () => setState(() {
+                                    _selectedProviderId = provider.id;
+                                    _selectedProviderName = provider.name;
+                                  }),
+                                  child: Container(
+                                    width: 140,
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: isSelected
+                                          ? AppColors.brandPurple.withValues(
+                                              alpha: 0.12,
+                                            )
+                                          : Theme.of(context)
+                                                .colorScheme
+                                                .surfaceContainerHighest
+                                                .withValues(alpha: 0.35),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? AppColors.brandPurple
+                                            : Theme.of(context)
+                                                  .colorScheme
+                                                  .outlineVariant
+                                                  .withValues(alpha: 0.2),
+                                        width: isSelected ? 2 : 1,
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ],
-                            ],
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 20,
+                                          backgroundColor: AppColors.brandPurple
+                                              .withValues(alpha: 0.12),
+                                          child: Text(
+                                            safeInitial(provider.name),
+                                            style: AppTextStyles.titleMedium
+                                                .copyWith(
+                                                  color: AppColors.brandPurple,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          provider.name,
+                                          style: AppTextStyles.labelMedium
+                                              .copyWith(
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        if (provider.rating > 0) ...[
+                                          const SizedBox(height: 2),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              const Icon(
+                                                Icons.star_rounded,
+                                                size: 12,
+                                                color: AppColors.rating,
+                                              ),
+                                              const SizedBox(width: 2),
+                                              Text(
+                                                provider.rating.toStringAsFixed(
+                                                  1,
+                                                ),
+                                                style: AppTextStyles.labelSmall
+                                                    .copyWith(fontSize: 10),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                      ],
+                    ),
                   ),
                 );
               },

@@ -159,9 +159,9 @@ class SummaryCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Column(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final averagePanel = Column(
               children: [
                 Text(
                   summary.totalReviews == 0
@@ -176,19 +176,32 @@ class SummaryCard extends StatelessWidget {
                 Text(
                   l10n.basedOnReviews(summary.totalReviews),
                   style: theme.textTheme.bodySmall,
+                  textAlign: TextAlign.center,
                 ),
               ],
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                children: [
-                  for (var stars = 5; stars >= 1; stars--)
-                    _buildBar(stars, summary.countFor(stars), maxCount, theme),
-                ],
-              ),
-            ),
-          ],
+            );
+            final histogram = Column(
+              children: [
+                for (var stars = 5; stars >= 1; stars--)
+                  _buildBar(stars, summary.countFor(stars), maxCount, theme),
+              ],
+            );
+            // On narrow widths (small phones, large text scale) the side by
+            // side layout starves the histogram, so stack the average panel
+            // above it and give the bars the full card width.
+            if (constraints.maxWidth < 300) {
+              return Column(
+                children: [averagePanel, const SizedBox(height: 16), histogram],
+              );
+            }
+            return Row(
+              children: [
+                averagePanel,
+                const SizedBox(width: 20),
+                Expanded(child: histogram),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -217,12 +230,18 @@ class SummaryCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          SizedBox(
-            width: 24,
-            child: Text(
-              '$count',
-              style: theme.textTheme.bodySmall,
-              textAlign: TextAlign.end,
+          ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 44),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerEnd,
+              child: Text(
+                '$count',
+                style: theme.textTheme.bodySmall,
+                textAlign: TextAlign.end,
+                maxLines: 1,
+                softWrap: false,
+              ),
             ),
           ),
         ],

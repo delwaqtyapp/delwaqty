@@ -467,60 +467,84 @@ class _MerchantTile extends StatelessWidget {
           ),
         ),
         title: Text(name),
-        subtitle: Text(type),
-        trailing: Row(
+        // Status badge and menu wrap below so the merchant name keeps the
+        // full tile width.
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: isVerified
-                    ? AppColors.successLight.withValues(alpha: 0.1)
-                    : AppColors.warningLight.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                statusLabel,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: isVerified
-                      ? AppColors.successLight
-                      : AppColors.warningLight,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                if (value == '__products') {
-                  onManageProducts();
-                } else if (value == '__delete') {
-                  onDeleteMerchant();
-                } else {
-                  onStatusChanged(value);
-                }
-              },
-              itemBuilder: (context) => [
-                if (!isVerified)
-                  PopupMenuItem(value: 'verified', child: Text(l10n.verify)),
-                if (status != 'suspended')
-                  PopupMenuItem(value: 'suspended', child: Text(l10n.suspend)),
-                if (status != 'pending')
-                  PopupMenuItem(value: 'pending', child: Text(l10n.setPending)),
-                const PopupMenuDivider(),
-                PopupMenuItem(
-                  value: '__products',
-                  child: Text(l10n.manageProducts),
-                ),
-                PopupMenuItem(
-                  value: '__delete',
-                  child: Text(
-                    l10n.deleteMerchant,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
+            Text(_merchantTypeLabel(l10n, type)),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: Wrap(
+                spacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isVerified
+                          ? AppColors.successLight.withValues(alpha: 0.1)
+                          : AppColors.warningLight.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      statusLabel,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: isVerified
+                            ? AppColors.successLight
+                            : AppColors.warningLight,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == '__products') {
+                        onManageProducts();
+                      } else if (value == '__delete') {
+                        onDeleteMerchant();
+                      } else {
+                        onStatusChanged(value);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      if (!isVerified)
+                        PopupMenuItem(
+                          value: 'verified',
+                          child: Text(l10n.verify),
+                        ),
+                      if (status != 'suspended')
+                        PopupMenuItem(
+                          value: 'suspended',
+                          child: Text(l10n.suspend),
+                        ),
+                      if (status != 'pending')
+                        PopupMenuItem(
+                          value: 'pending',
+                          child: Text(l10n.setPending),
+                        ),
+                      const PopupMenuDivider(),
+                      PopupMenuItem(
+                        value: '__products',
+                        child: Text(l10n.manageProducts),
+                      ),
+                      PopupMenuItem(
+                        value: '__delete',
+                        child: Text(
+                          l10n.deleteMerchant,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -601,7 +625,7 @@ class _MerchantTile extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          type,
+                          _merchantTypeLabel(l10n, type),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: cs.onSurfaceVariant,
                           ),
@@ -990,5 +1014,24 @@ class _ProductEditorDialogState extends State<_ProductEditorDialog> {
         FilledButton(onPressed: _save, child: Text(l10n.saveProduct)),
       ],
     );
+  }
+}
+
+String _merchantTypeLabel(AppLocalizations l10n, String type) {
+  switch (type) {
+    case 'restaurant':
+      return l10n.restaurant;
+    case 'grocery':
+      return l10n.grocery;
+    case 'pharmacy':
+      return l10n.pharmacy;
+    case 'market':
+      return l10n.market;
+    case 'bakery':
+      return l10n.bakery;
+    case 'cafe':
+      return l10n.cafe;
+    default:
+      return type;
   }
 }

@@ -828,15 +828,22 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
             );
           }
 
+          final textScale = MediaQuery.textScalerOf(
+            context,
+          ).scale(1.0).clamp(1.0, 1.8);
           return GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            // Extra bottom padding keeps the last row clear of the
+            // pinned basket bar.
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 90),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
-              childAspectRatio: 0.72,
+              // Taller cells at large text scales so the product info
+              // below the image never clips.
+              childAspectRatio: 0.72 / textScale,
             ),
             itemCount: products.length,
             itemBuilder: (context, index) {

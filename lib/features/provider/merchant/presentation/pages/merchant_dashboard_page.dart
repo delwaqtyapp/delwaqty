@@ -1,3 +1,4 @@
+import 'package:delwaqty/shared/widgets/readable_fit_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -512,47 +513,51 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
 
   Widget _buildStatsGrid(BuildContext context, MerchantStats stats) {
     final l10n = AppLocalizations.of(context);
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
-      childAspectRatio: 1.5,
-      children: [
-        _StatCard(
-          title: l10n.todayOrders,
-          value: stats.todayOrders.toString(),
-          icon: Icons.shopping_bag_outlined,
-          color: AppColors.infoLight,
-          onTap: () => context.push('/merchant-dashboard/orders'),
-        ),
-        _StatCard(
-          title: l10n.revenue,
-          value:
-              '${stats.todayRevenue.toStringAsFixed(0)} ${l10n.currencySymbol}',
-          icon: Icons.payments_outlined,
-          color: AppColors.successLight,
-          onTap: () => context.push('/provider-financial-center'),
-        ),
-        _StatCard(
-          title: l10n.pending,
-          value: stats.pendingOrders.toString(),
-          icon: Icons.pending_actions_rounded,
-          color: stats.pendingOrders > 0
-              ? AppColors.warningLight
-              : AppColors.brandPurple,
-          highlight: stats.pendingOrders > 0,
-          onTap: () => context.push('/merchant-dashboard/orders'),
-        ),
-        _StatCard(
-          title: l10n.rating,
-          value: stats.averageRating.toStringAsFixed(1),
-          icon: Icons.star_rounded,
-          color: AppColors.rating,
-          onTap: () => context.push('/merchant-dashboard/reviews'),
-        ),
-      ],
+    // Content-driven tile heights via Wrap: a fixed grid aspect ratio
+    // clips values and labels at large text scales.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final tileWidth = (constraints.maxWidth - 12) / 2;
+        Widget tile(Widget child) => SizedBox(width: tileWidth, child: child);
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            _StatCard(
+              title: l10n.todayOrders,
+              value: stats.todayOrders.toString(),
+              icon: Icons.shopping_bag_outlined,
+              color: AppColors.infoLight,
+              onTap: () => context.push('/merchant-dashboard/orders'),
+            ),
+            _StatCard(
+              title: l10n.revenue,
+              value:
+                  '${stats.todayRevenue.toStringAsFixed(0)} ${l10n.currencySymbol}',
+              icon: Icons.payments_outlined,
+              color: AppColors.successLight,
+              onTap: () => context.push('/provider-financial-center'),
+            ),
+            _StatCard(
+              title: l10n.pending,
+              value: stats.pendingOrders.toString(),
+              icon: Icons.pending_actions_rounded,
+              color: stats.pendingOrders > 0
+                  ? AppColors.warningLight
+                  : AppColors.brandPurple,
+              highlight: stats.pendingOrders > 0,
+              onTap: () => context.push('/merchant-dashboard/orders'),
+            ),
+            _StatCard(
+              title: l10n.rating,
+              value: stats.averageRating.toStringAsFixed(1),
+              icon: Icons.star_rounded,
+              color: AppColors.rating,
+              onTap: () => context.push('/merchant-dashboard/reviews'),
+            ),
+          ].map(tile).toList(),
+        );
+      },
     );
   }
 
@@ -680,17 +685,23 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
         ),
     ];
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: items.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 10,
-        childAspectRatio: 2.35,
-      ),
-      itemBuilder: (context, index) => _QuickActionCard(item: items[index]),
+    // Content-driven tile heights via Wrap: a fixed grid aspect ratio
+    // clips the two-line action labels at large text scales.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final tileWidth = (constraints.maxWidth - 10) / 2;
+        return Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            for (final item in items)
+              SizedBox(
+                width: tileWidth,
+                child: _QuickActionCard(item: item),
+              ),
+          ],
+        );
+      },
     );
   }
 }
@@ -771,9 +782,12 @@ class _StoreHeroCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Row(
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        if (category.isNotEmpty) ...[
+                        if (category.isNotEmpty)
                           InkWell(
                             onTap: onSwitchWorkspace,
                             borderRadius: BorderRadius.circular(999),
@@ -789,12 +803,19 @@ class _StoreHeroCard extends StatelessWidget {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
-                                    category,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
+                                  ConstrainedBox(
+                                    constraints: const BoxConstraints(
+                                      maxWidth: 160,
+                                    ),
+                                    child: Text(
+                                      category,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 4),
@@ -807,14 +828,11 @@ class _StoreHeroCard extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
-                        ],
                         const Icon(
                           Icons.star_rounded,
                           color: Colors.amber,
                           size: 16,
                         ),
-                        const SizedBox(width: 3),
                         Text(
                           rating.toStringAsFixed(1),
                           style: const TextStyle(
@@ -1020,10 +1038,8 @@ class _StatCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    ReadableFitText(
                       value,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -1031,7 +1047,7 @@ class _StatCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       title,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,

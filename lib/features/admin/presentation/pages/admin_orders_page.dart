@@ -260,75 +260,113 @@ class _OrderTile extends StatelessWidget {
       _ => status,
     };
 
+    // Stacked card: id + amount share the header (amount scales down),
+    // customer/merchant get the full width, status on its own chip.
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: statusColor.withValues(alpha: 0.1),
-          child: Icon(Icons.receipt_outlined, color: statusColor, size: 20),
-        ),
-        title: Row(
-          children: [
-            Text(
-              orderId.length > 8 ? orderId.substring(0, 8) : orderId,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const Spacer(),
-            Text(
-              '${l10n.currencySymbol} ${totalAmount.toStringAsFixed(2)}',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.primary,
-              ),
-            ),
-          ],
-        ),
-        subtitle: Row(
-          children: [
-            Expanded(child: Text('$customerName • $merchantName')),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: statusColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                statusLabel,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: statusColor,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-        trailing: PopupMenuButton<String>(
-          onSelected: (value) => onStatusChanged(value),
-          itemBuilder: (context) => [
-            if (status != 'in_transit')
-              PopupMenuItem(
-                value: 'in_transit',
-                child: Text(l10n.markInTransit),
-              ),
-            if (status != 'delivered')
-              PopupMenuItem(
-                value: 'delivered',
-                child: Text(l10n.markDelivered),
-              ),
-            if (status != 'cancelled')
-              PopupMenuItem(
-                value: 'cancelled',
-                child: Text(
-                  l10n.cancelOrder,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
-                ),
-              ),
-          ],
-        ),
+      child: InkWell(
         onTap: () =>
             _showOrderDetailsSheet(context, order, l10n, onStatusChanged),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: statusColor.withValues(alpha: 0.1),
+                    child: Icon(
+                      Icons.receipt_outlined,
+                      color: statusColor,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      orderId.length > 8 ? orderId.substring(0, 8) : orderId,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        '${l10n.currencySymbol} ${totalAmount.toStringAsFixed(2)}',
+                        maxLines: 1,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  PopupMenuButton<String>(
+                    onSelected: (value) => onStatusChanged(value),
+                    itemBuilder: (context) => [
+                      if (status != 'in_transit')
+                        PopupMenuItem(
+                          value: 'in_transit',
+                          child: Text(l10n.markInTransit),
+                        ),
+                      if (status != 'delivered')
+                        PopupMenuItem(
+                          value: 'delivered',
+                          child: Text(l10n.markDelivered),
+                        ),
+                      if (status != 'cancelled')
+                        PopupMenuItem(
+                          value: 'cancelled',
+                          child: Text(
+                            l10n.cancelOrder,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '$customerName • $merchantName',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      statusLabel,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: statusColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -349,13 +349,17 @@ class _OfferCard extends StatelessWidget {
                     ),
                   ],
                   const SizedBox(height: 12),
-                  Row(
+                  // Wrap: on narrow screens the minimum-order line drops
+                  // under the status chip instead of overflowing right.
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       _StatusChip(
                         label: offer.isActive ? l10n.active : l10n.inactive,
                         isActive: offer.isActive,
                       ),
-                      const SizedBox(width: 8),
                       if (offer.minimumOrder > 0)
                         Text(
                           l10n.minOrderRequired(

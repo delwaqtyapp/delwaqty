@@ -314,11 +314,15 @@ class _DeliveryGlassTile extends StatelessWidget {
                   children: [
                     Text(
                       '${l10n.deliveryNumber}$idShort',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyMedium
                           ?.copyWith(fontWeight: FontWeight.w600),
                     ),
                     Text(
-                      serviceType.replaceAll('_', ' ').toUpperCase(),
+                      _serviceTypeLabel(l10n, serviceType),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: cs.onSurfaceVariant,
                         letterSpacing: 0.5,
@@ -353,10 +357,14 @@ class _DeliveryGlassTile extends StatelessWidget {
                 color: cs.onSurfaceVariant,
               ),
               const SizedBox(width: 6),
-              Text(
-                '${l10n.from}: $senderName',
-                style: Theme.of(context).textTheme.bodySmall
-                    ?.copyWith(color: cs.onSurfaceVariant),
+              Expanded(
+                child: Text(
+                  '${l10n.from}: $senderName',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: cs.onSurfaceVariant),
+                ),
               ),
             ],
           ),
@@ -365,10 +373,14 @@ class _DeliveryGlassTile extends StatelessWidget {
             children: [
               Icon(Icons.person_rounded, size: 16, color: cs.onSurfaceVariant),
               const SizedBox(width: 6),
-              Text(
-                '${l10n.to}: $receiverName',
-                style: Theme.of(context).textTheme.bodySmall
-                    ?.copyWith(color: cs.onSurfaceVariant),
+              Expanded(
+                child: Text(
+                  '${l10n.to}: $receiverName',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: cs.onSurfaceVariant),
+                ),
               ),
             ],
           ),
@@ -473,5 +485,22 @@ class _DeliveryGlassTile extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+String _serviceTypeLabel(AppLocalizations l10n, String serviceType) {
+  switch (serviceType) {
+    case 'food':
+      return l10n.food;
+    case 'grocery':
+      return l10n.grocery;
+    case 'pharmacy':
+      return l10n.pharmacy;
+    case 'direct_delivery':
+      return l10n.directDelivery;
+    case 'delivery':
+      return l10n.delivery;
+    default:
+      return serviceType.replaceAll('_', ' ');
   }
 }

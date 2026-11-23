@@ -241,9 +241,9 @@ class _RatingSummary extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Column(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final averagePanel = Column(
             children: [
               Text(
                 summary.averageRating.toStringAsFixed(1),
@@ -268,42 +268,55 @@ class _RatingSummary extends StatelessWidget {
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
+                textAlign: TextAlign.center,
               ),
             ],
-          ),
-          const SizedBox(width: 24),
-          Expanded(
-            child: Column(
-              children: [
-                _RatingBar(
-                  label: '5',
-                  count: summary.fiveStarCount,
-                  total: summary.totalReviews,
-                ),
-                _RatingBar(
-                  label: '4',
-                  count: summary.fourStarCount,
-                  total: summary.totalReviews,
-                ),
-                _RatingBar(
-                  label: '3',
-                  count: summary.threeStarCount,
-                  total: summary.totalReviews,
-                ),
-                _RatingBar(
-                  label: '2',
-                  count: summary.twoStarCount,
-                  total: summary.totalReviews,
-                ),
-                _RatingBar(
-                  label: '1',
-                  count: summary.oneStarCount,
-                  total: summary.totalReviews,
-                ),
-              ],
-            ),
-          ),
-        ],
+          );
+          final histogram = Column(
+            children: [
+              _RatingBar(
+                label: '5',
+                count: summary.fiveStarCount,
+                total: summary.totalReviews,
+              ),
+              _RatingBar(
+                label: '4',
+                count: summary.fourStarCount,
+                total: summary.totalReviews,
+              ),
+              _RatingBar(
+                label: '3',
+                count: summary.threeStarCount,
+                total: summary.totalReviews,
+              ),
+              _RatingBar(
+                label: '2',
+                count: summary.twoStarCount,
+                total: summary.totalReviews,
+              ),
+              _RatingBar(
+                label: '1',
+                count: summary.oneStarCount,
+                total: summary.totalReviews,
+              ),
+            ],
+          );
+          // On narrow widths (small phones, large text scale) the side by
+          // side layout starves the histogram, so stack the average panel
+          // above it and give the bars the full width.
+          if (constraints.maxWidth < 300) {
+            return Column(
+              children: [averagePanel, const SizedBox(height: 16), histogram],
+            );
+          }
+          return Row(
+            children: [
+              averagePanel,
+              const SizedBox(width: 24),
+              Expanded(child: histogram),
+            ],
+          );
+        },
       ),
     );
   }
@@ -350,14 +363,20 @@ class _RatingBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 4),
-          SizedBox(
-            width: 20,
-            child: Text(
-              count.toString(),
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+          ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 44),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerEnd,
+              child: Text(
+                count.toString(),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.end,
+                maxLines: 1,
+                softWrap: false,
               ),
-              textAlign: TextAlign.start,
             ),
           ),
         ],

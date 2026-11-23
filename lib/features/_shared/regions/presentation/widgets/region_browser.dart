@@ -126,35 +126,45 @@ class _RegionBrowserState extends ConsumerState<RegionBrowser> {
         _displayName(region),
         style: const TextStyle(fontWeight: FontWeight.w600),
       ),
-      subtitle: Text(_typeLabel(region, l10n)),
-      onTap: opening || !allowed ? null : () => _openOrSelect(region),
-      trailing: Row(
+      // Actions wrap below so the region name keeps the full tile width.
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(
-            tooltip: l10n.selectPlace,
-            icon: Icon(
-              isCurrent
-                  ? Icons.check_circle_rounded
-                  : Icons.check_circle_outline,
-              color: isCurrent
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.outline,
+          Text(_typeLabel(region, l10n)),
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  tooltip: l10n.selectPlace,
+                  icon: Icon(
+                    isCurrent
+                        ? Icons.check_circle_rounded
+                        : Icons.check_circle_outline,
+                    color: isCurrent
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.outline,
+                  ),
+                  onPressed: opening || !allowed
+                      ? null
+                      : () => widget.onSelected(region),
+                ),
+                if (opening)
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                else
+                  const Icon(Icons.chevron_right_rounded),
+              ],
             ),
-            onPressed: opening || !allowed
-                ? null
-                : () => widget.onSelected(region),
           ),
-          if (opening)
-            const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          else
-            const Icon(Icons.chevron_right_rounded),
         ],
       ),
+      onTap: opening || !allowed ? null : () => _openOrSelect(region),
     );
   }
 

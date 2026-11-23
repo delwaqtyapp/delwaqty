@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/services/admin/admin_providers.dart';
+import 'package:delwaqty/services/admin/provider_pricing_pager.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
@@ -27,18 +28,18 @@ class _AdminProviderPricingPageState
   String? _category;
   bool _saving = false;
 
-  // Offset-paged provider list: fixed page size, pages appended.
-  List<Map<String, dynamic>> _items = [];
-  int _total = 0;
-  bool _loading = true;
-  bool _loadingMore = false;
-  Object? _error;
-  int _requestSeq = 0;
+  // Offset-paged provider list: fixed page size, pages appended (#102).
+  late final ProviderPricingPager _pager = ProviderPricingPager(
+    fetchPage: _fetchPage,
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
+  );
 
   @override
   void initState() {
     super.initState();
-    _reload();
+    _pager.reload();
   }
 
   Future<Map<String, dynamic>> _fetchPage(int offset) async {
@@ -55,51 +56,12 @@ class _AdminProviderPricingPageState
     return Map<String, dynamic>.from(response as Map);
   }
 
-  Future<void> _reload() async {
-    final seq = ++_requestSeq;
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    try {
-      final data = await _fetchPage(0);
-      if (!mounted || seq != _requestSeq) return;
-      setState(() {
-        _items = (data['items'] as List? ?? [])
-            .map((e) => Map<String, dynamic>.from(e as Map))
-            .toList();
-        _total = (data['total'] as num?)?.toInt() ?? _items.length;
-        _loading = false;
-      });
-    } catch (e) {
-      if (!mounted || seq != _requestSeq) return;
-      setState(() {
-        _error = e;
-        _loading = false;
-      });
-    }
-  }
+  Future<void> _reload() => _pager.reload();
 
   Future<void> _loadMore() async {
-    if (_loading || _loadingMore || _items.length >= _total) return;
-    final seq = _requestSeq;
-    setState(() => _loadingMore = true);
-    try {
-      final data = await _fetchPage(_items.length);
-      if (!mounted || seq != _requestSeq) return;
-      setState(() {
-        _items = [
-          ..._items,
-          ...(data['items'] as List? ?? []).map(
-            (e) => Map<String, dynamic>.from(e as Map),
-          ),
-        ];
-        _total = (data['total'] as num?)?.toInt() ?? _total;
-        _loadingMore = false;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => _loadingMore = false);
+    await _pager.loadMore();
+    if (mounted && _pager.loadMoreFailed) {
+      _pager.loadMoreFailed = false;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context).errorLoading)),
       );
@@ -444,9 +406,9 @@ class _AdminProviderPricingPageState
           },
         ),
         Expanded(
-          child: _loading
+          child: _pager.loading
               ? const Center(child: AppLoaderCircular())
-              : _error != null
+              : _pager.error != null
               ? Center(
                   child: PremiumEmptyState(
                     icon: Icons.error_outline_rounded,
@@ -456,7 +418,7 @@ class _AdminProviderPricingPageState
                     onAction: _reload,
                   ),
                 )
-              : _items.isEmpty
+              : _pager.items.isEmpty
               ? Center(
                   child: PremiumEmptyState(
                     icon: Icons.handyman_outlined,
@@ -467,10 +429,10 @@ class _AdminProviderPricingPageState
               : ListView.builder(
                   // Clear the floating bottom navigation bar.
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
-                  itemCount: _items.length + 1,
+                  itemCount: _pager.items.length + 1,
                   itemBuilder: (context, i) {
-                    if (i < _items.length) {
-                      return _providerTile(_items[i], l10n);
+                    if (i < _pager.items.length) {
+                      return _providerTile(_pager.items[i], l10n);
                     }
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -478,15 +440,15 @@ class _AdminProviderPricingPageState
                         children: [
                           Text(
                             l10n.providerPricingShowingOf(
-                              _items.length,
-                              _total,
+                              _pager.items.length,
+                              _pager.total,
                             ),
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
-                          if (_items.length < _total)
+                          if (_pager.items.length < _pager.total)
                             TextButton(
-                              onPressed: _loadingMore ? null : _loadMore,
-                              child: _loadingMore
+                              onPressed: _pager.loadingMore ? null : _loadMore,
+                              child: _pager.loadingMore
                                   ? const SizedBox(
                                       width: 18,
                                       height: 18,

@@ -21,6 +21,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/app_shell.dart';
 import 'package:delwaqty/shared/widgets/appearance_segmented.dart';
+import 'package:delwaqty/shared/widgets/adaptive_tile_wrap.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/shared/widgets/floating_glass_buttons.dart';
 import 'package:delwaqty/shared/widgets/gradient_background.dart';
@@ -513,26 +514,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
           ];
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns =
-            constraints.maxWidth < 340 ||
-                MediaQuery.textScalerOf(context).scale(1) > 1.3
-            ? 2
-            : 3;
-        final width = (constraints.maxWidth - 10 * (columns - 1)) / columns;
-        return Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: [
-            for (final item in items)
-              SizedBox(
-                width: width,
-                child: _BentoActionTile(item: item),
-              ),
-          ],
-        );
-      },
+    // AdaptiveTileWrap: column count adapts to width AND text scale, and a
+    // short last row stretches to full width instead of dangling an orphan
+    // tile (owner feedback at large system font sizes).
+    return AdaptiveTileWrap(
+      children: [for (final item in items) _BentoActionTile(item: item)],
     );
   }
 

@@ -32,6 +32,11 @@ class _MapSearchHit {
 }
 
 class SmartMapPickerSheet extends ConsumerStatefulWidget {
+  /// Test seam: widget tests cannot host a GoogleMap platform view, so they
+  /// inject a placeholder through here. Never set in production code.
+  @visibleForTesting
+  static WidgetBuilder? debugMapOverride;
+
   const SmartMapPickerSheet({this.initialLat, this.initialLng, super.key});
 
   final double? initialLat;
@@ -345,134 +350,165 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
       clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
-          // Top bar
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 12, 6),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.satellite_alt_rounded,
-                  color: AppColors.brandPurple,
-                  size: 22,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.pickLocationOnMap,
-                        style: AppTextStyles.titleMedium.copyWith(
-                          fontWeight: FontWeight.w800,
+          // Top sections (title, search bar, search hits) live in a loose,
+          // scrollable flex region: at large system font sizes they scroll
+          // instead of squeezing the map to zero height (owner feedback:
+          // "the map disappears under the search button").
+          Flexible(
+            flex: 3,
+            fit: FlexFit.loose,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Top bar
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      20,
+                      12,
+                      12,
+                      6,
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.satellite_alt_rounded,
+                          color: AppColors.brandPurple,
+                          size: 22,
                         ),
-                      ),
-                      Text(
-                        kIsWeb
-                            ? l10n.webMapSearchHint
-                            : l10n.dragMapToRefineLocation,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: cs.onSurfaceVariant,
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.pickLocationOnMap,
+                                style: AppTextStyles.titleMedium.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              Text(
+                                kIsWeb
+                                    ? l10n.webMapSearchHint
+                                    : l10n.dragMapToRefineLocation,
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: cs.onSurfaceVariant,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                        IconButton(
+                          tooltip: l10n.close,
+                          icon: const Icon(Icons.close_rounded),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                IconButton(
-                  tooltip: l10n.close,
-                  icon: const Icon(Icons.close_rounded),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-          ),
-          // Live Search Bar
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: TextField(
-              controller: _searchController,
-              onChanged: _onSearchChanged,
-              textInputAction: TextInputAction.search,
-              onSubmitted: _performSearch,
-              decoration: InputDecoration(
-                hintText: '${l10n.search}…',
-                prefixIcon: const Icon(Icons.search_rounded),
-                suffixIcon: _isSearching
-                    ? const Padding(
-                        padding: EdgeInsets.all(12),
-                        child: SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                  // Live Search Bar
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: _onSearchChanged,
+                      textInputAction: TextInputAction.search,
+                      onSubmitted: _performSearch,
+                      decoration: InputDecoration(
+                        hintText: '${l10n.search}…',
+                        prefixIcon: const Icon(Icons.search_rounded),
+                        suffixIcon: _isSearching
+                            ? const Padding(
+                                padding: EdgeInsets.all(12),
+                                child: SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              )
+                            : _searchController.text.isNotEmpty
+                            ? IconButton(
+                                tooltip: l10n.clear,
+                                icon: const Icon(Icons.clear_rounded, size: 18),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() => _searchHits = const []);
+                                },
+                              )
+                            : null,
+                        isDense: true,
+                        filled: true,
+                        fillColor: cs.surfaceContainerHighest.withValues(
+                          alpha: 0.45,
                         ),
-                      )
-                    : _searchController.text.isNotEmpty
-                    ? IconButton(
-                        tooltip: l10n.clear,
-                        icon: const Icon(Icons.clear_rounded, size: 18),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() => _searchHits = const []);
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (_searchHits.isNotEmpty)
+                    Container(
+                      constraints: const BoxConstraints(maxHeight: 190),
+                      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: cs.outlineVariant),
+                      ),
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: _searchHits.length,
+                        separatorBuilder: (_, _) => const Divider(height: 1),
+                        itemBuilder: (_, idx) {
+                          final hit = _searchHits[idx];
+                          return ListTile(
+                            dense: true,
+                            leading: const Icon(
+                              Icons.place_rounded,
+                              color: AppColors.brandPurple,
+                              size: 20,
+                            ),
+                            title: Text(
+                              hit.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            subtitle: hit.subtitle.isNotEmpty
+                                ? Text(
+                                    hit.subtitle,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  )
+                                : null,
+                            onTap: () => _selectSearchHit(hit),
+                          );
                         },
-                      )
-                    : null,
-                isDense: true,
-                filled: true,
-                fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.45),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
-          if (_searchHits.isNotEmpty)
-            Container(
-              constraints: const BoxConstraints(maxHeight: 190),
-              margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              decoration: BoxDecoration(
-                color: cs.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: cs.outlineVariant),
-              ),
-              child: ListView.separated(
-                shrinkWrap: true,
-                itemCount: _searchHits.length,
-                separatorBuilder: (_, _) => const Divider(height: 1),
-                itemBuilder: (_, idx) {
-                  final hit = _searchHits[idx];
-                  return ListTile(
-                    dense: true,
-                    leading: const Icon(
-                      Icons.place_rounded,
-                      color: AppColors.brandPurple,
-                      size: 20,
-                    ),
-                    title: Text(
-                      hit.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    subtitle: hit.subtitle.isNotEmpty
-                        ? Text(
-                            hit.subtitle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          )
-                        : null,
-                    onTap: () => _selectSearchHit(hit),
-                  );
-                },
-              ),
-            ),
-          // Map + Floating center pin + accuracy badge
+          // Map + Floating center pin + accuracy badge. The tight flex share
+          // guarantees the map always keeps at least ~4/7 of the space left
+          // after the bottom card, at any text scale.
           Expanded(
+            flex: 4,
             child: Stack(
               alignment: Alignment.center,
               children: [
-                if (kIsWeb)
+                if (SmartMapPickerSheet.debugMapOverride != null)
+                  SmartMapPickerSheet.debugMapOverride!(context)
+                else if (kIsWeb)
                   const _WebMapFallback()
                 else
                   GoogleMap(

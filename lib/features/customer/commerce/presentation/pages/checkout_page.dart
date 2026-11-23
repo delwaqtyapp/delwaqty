@@ -306,7 +306,13 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                 ),
                 if (savedAddresses != null && savedAddresses.isNotEmpty)
                   SizedBox(
-                    height: 44,
+                    // Grow with the text scale so large-text ChoiceChips are
+                    // not clipped by the fixed strip height.
+                    height:
+                        44 *
+                        MediaQuery.textScalerOf(context)
+                            .scale(1)
+                            .clamp(1.0, 1.6),
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.only(top: 8),

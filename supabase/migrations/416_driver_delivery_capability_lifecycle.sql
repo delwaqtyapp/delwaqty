@@ -3,6 +3,12 @@
 -- No per-vehicle category exclusion exists in the current dispatcher: vehicle,
 -- distance and weight constraints are retained separately. No is_verified change.
 BEGIN;
+-- Explicit reviewed legacy cleanup, no verification/availability/opt-in change.
+UPDATE public.drivers SET service_types=ARRAY[]::text[],updated_at=now()
+ WHERE id='5d4e38b7-c629-4a42-b893-c8cd82a67ba4' AND service_types=ARRAY['ride']::text[] AND accepts_deliveries=false;
+UPDATE public.drivers SET service_types=ARRAY['food','grocery','pharmacy','parcel']::text[],updated_at=now()
+ WHERE id IN ('4f6294aa-8651-4d1f-88b4-bf5ed5963e6e','59327517-66e4-434b-a8c1-c56a4cbb6db7','18c439e9-20fa-4cab-b74a-7b0d882cbc5a')
+ AND service_types=ARRAY['food','grocery','pharmacy','package']::text[];
 DO $$ DECLARE bad text; BEGIN
  SELECT string_agg(id::text,',') INTO bad FROM public.drivers WHERE
  (service_types IS NOT NULL AND cardinality(service_types)>0 AND NOT service_types <@ ARRAY['food','grocery','pharmacy','parcel']::text[])

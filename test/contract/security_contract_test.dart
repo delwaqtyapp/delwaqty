@@ -194,14 +194,21 @@ void main() {
           .map((f) => f.path.split('/').last.split('_').first)
           .toList();
       for (final n in names) {
-        expect(n.length, 3, reason: 'migration number $n is not zero padded');
+        // A version may carry a single-letter split suffix (424a/424b); the
+        // numeric prefix must still be fixed-width.
+        final m = RegExp(r'^(\d+)([a-z]?)$').firstMatch(n);
+        expect(m, isNotNull, reason: 'migration version $n is malformed');
+        expect(m!.group(1)!.length, 3,
+            reason: 'migration number $n is not zero padded');
       }
       final counts = <String, int>{};
       for (final n in names) {
         counts[n] = (counts[n] ?? 0) + 1;
       }
       final duplicates = counts.entries
-          .where((e) => e.value > 1 && int.parse(e.key) >= 100)
+          .where((e) =>
+              e.value > 1 &&
+              int.parse(RegExp(r'^(\d+)').firstMatch(e.key)!.group(1)!) >= 100)
           .map((e) => e.key)
           .toList();
       expect(

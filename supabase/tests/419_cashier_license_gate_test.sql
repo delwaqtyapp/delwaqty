@@ -25,11 +25,23 @@ BEGIN
   PERFORM set_config('role','authenticated',true);
   PERFORM set_config('request.jwt.claim.sub', u::text, true);
 
-  -- status oracle: an unrelated signed-in user cannot probe the check
+  -- no oracle and no bypass: authenticated callers cannot EXECUTE the
+  -- helpers directly at all, with or without a uid (grants revoked).
   PERFORM set_config('request.jwt.claim.sub', other::text, true);
   BEGIN PERFORM public.cashier_license_check(m); v_err := 'NO_ERROR';
   EXCEPTION WHEN OTHERS THEN v_err := SQLERRM; END;
-  ASSERT v_err = 'Not authorized', '419: check is a status oracle: ' || v_err;
+  ASSERT v_err ILIKE '%permission denied%', '419: authenticated called check: ' || v_err;
+  PERFORM set_config('request.jwt.claim.sub', '', true);
+  BEGIN PERFORM public.cashier_license_check(m); v_err := 'NO_ERROR';
+  EXCEPTION WHEN OTHERS THEN v_err := SQLERRM; END;
+  ASSERT v_err ILIKE '%permission denied%', '419: no-uid bypass of check: ' || v_err;
+  PERFORM set_config('request.jwt.claim.sub', other::text, true);
+  BEGIN PERFORM public.cashier_license_gate(m); v_err := 'NO_ERROR';
+  EXCEPTION WHEN OTHERS THEN v_err := SQLERRM; END;
+  ASSERT v_err ILIKE '%permission denied%', '419: authenticated called gate: ' || v_err;
+  BEGIN PERFORM public._cashier_has_pro(m); v_err := 'NO_ERROR';
+  EXCEPTION WHEN OTHERS THEN v_err := SQLERRM; END;
+  ASSERT v_err ILIKE '%permission denied%', '419: authenticated called has_pro: ' || v_err;
   PERFORM set_config('request.jwt.claim.sub', u::text, true);
 
   -- no license: gated op refused per-op with LICENSE_REQUIRED (no raise)
@@ -88,15 +100,11 @@ BEGIN
   ASSERT EXISTS (SELECT 1 FROM public.pos_sales WHERE merchant_id=m AND idempotency_key=v_sale::text AND status='completed'),
     '419: unlocked sale not recorded';
 
-  -- suspended sibling does NOT block a valid license. The cascade trigger
-  -- (tested below) makes this state unreachable through the suspend path on
-  -- purpose; build it directly to test the check predicate in isolation
-  -- (historical rows can predate the trigger).
+  -- suspended sibling does NOT block a valid license (the check predicate
+  -- in isolation; suspension itself stays per-license - no cascade).
   PERFORM set_config('role','none',true);
-  ALTER TABLE public.cashier_licenses DISABLE TRIGGER cashier_licenses_cascade_suspend;
   INSERT INTO public.cashier_licenses(merchant_id,license_key,plan,status,grace_days)
   VALUES (m,'419-K2','core_monthly','suspended',7);
-  ALTER TABLE public.cashier_licenses ENABLE TRIGGER cashier_licenses_cascade_suspend;
   PERFORM set_config('role','authenticated',true);
   v_r := public.cashier_sync_push(m, jsonb_build_array(v_saleop));
   ASSERT (v_r->'results'->0->>'ok')::boolean, '419: suspended sibling blocked valid license: ' || v_r::text;
@@ -127,22 +135,13 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN v_err := SQLERRM; END;
   ASSERT v_err = 'LICENSE_SUSPENDED', '419: daily_close not locked: ' || v_err;
 
-  -- suspend cascade: fresh merchant, 3 usable rows; suspending one cascades
-  PERFORM set_config('role','none',true);
-  DECLARE m2 uuid := gen_random_uuid(); u2 uuid := gen_random_uuid();
-  BEGIN
-    INSERT INTO auth.users(id,email) VALUES (u2,u2::text||'@x.i');
-    INSERT INTO public.users(id,email,role) VALUES (u2,u2::text||'@x.i','merchant') ON CONFLICT(id) DO NOTHING;
-    INSERT INTO public.merchants(id,owner_user_id,name,type) VALUES (m2,u2,'419b','grocery');
-    INSERT INTO public.cashier_licenses(merchant_id,license_key,plan,status,grace_days,expires_at) VALUES
-      (m2,'419-M1','trial','active',7,now()+interval '30 days'),
-      (m2,'419-M2','core_monthly','issued',7,now()+interval '60 days'),
-      (m2,'419-M3','core_annual','expired',7,now()-interval '1 days');
-    UPDATE public.cashier_licenses SET status='suspended'
-     WHERE merchant_id=m2 AND license_key='419-M1';
-    ASSERT (SELECT count(*) FROM public.cashier_licenses WHERE merchant_id=m2 AND status='suspended') = 3,
-      '419: suspend did not cascade to sibling licenses';
-  END;
+  -- suspension stays per-license (no cascade trigger exists)
+  ASSERT NOT EXISTS (SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+                      WHERE n.nspname='public' AND p.proname='_cashier_license_cascade_suspend'),
+    '419: rejected cascade function still present';
+  ASSERT NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='cashier_licenses_cascade_suspend' AND NOT tgisinternal),
+    '419: rejected cascade trigger still present';
+
 END $$;
 SELECT '419 v2 matrix passed' AS result;
 ROLLBACK;

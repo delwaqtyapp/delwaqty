@@ -60,8 +60,10 @@ BEGIN
 END;
 $function$;
 
-REVOKE ALL ON FUNCTION public.cashier_license_check(uuid) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.cashier_license_check(uuid) TO authenticated;
+-- #128 hardening: helpers are called only from inside the authorized
+-- SECURITY DEFINER RPCs (sync_push, daily_close); no direct client access,
+-- so the NULL-uid path can only be real service_role authority.
+REVOKE ALL ON FUNCTION public.cashier_license_check(uuid) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.cashier_license_check(uuid) TO service_role;
 
 CREATE OR REPLACE FUNCTION public.cashier_license_gate(p_merchant_id uuid)
@@ -80,8 +82,7 @@ BEGIN
 END;
 $function$;
 
-REVOKE ALL ON FUNCTION public.cashier_license_gate(uuid) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.cashier_license_gate(uuid) TO authenticated;
+REVOKE ALL ON FUNCTION public.cashier_license_gate(uuid) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.cashier_license_gate(uuid) TO service_role;
 
 -- Aligned on the same eligibility rule as cashier_license_check (review
@@ -111,6 +112,9 @@ AS $function$
     )  )
   );
 $function$;
+
+REVOKE ALL ON FUNCTION public._cashier_has_pro(uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public._cashier_has_pro(uuid) TO service_role;
 
 CREATE OR REPLACE FUNCTION public.cashier_sync_push(p_merchant_id uuid, p_ops jsonb)
  RETURNS jsonb
@@ -522,34 +526,18 @@ END;
 $function$;
 
 
--- Security reviewer note (1): suspension happens by direct admin table
--- write (cashier_licenses_admin_write policy; no RPC). Suspending must take
--- down ALL of the merchant's still-usable rows, not just the one edited:
--- cascade to every issued/active/expired sibling (expired rows can still be
--- inside grace and therefore eligible). pg_trigger_depth() keeps the
--- cascade's own UPDATEs from recursing.
-CREATE OR REPLACE FUNCTION public._cashier_license_cascade_suspend()
- RETURNS trigger
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public', 'pg_temp'
-AS $function$
-BEGIN
-  IF pg_trigger_depth() = 1 AND NEW.status = 'suspended'
-     AND (TG_OP = 'INSERT' OR OLD.status IS DISTINCT FROM 'suspended') THEN
-    UPDATE public.cashier_licenses
-       SET status = 'suspended', updated_at = now()
-     WHERE merchant_id = NEW.merchant_id
-       AND id <> NEW.id
-       AND status IN ('issued','active','expired');
-  END IF;
-  RETURN NEW;
-END;
-$function$;
+-- Suspension stays PER-LICENSE (a blanket cascade trigger was rejected in
+-- review: deadlock risk between two admins, and a concurrent issue escapes
+-- it). Product rule: suspending a MERCHANT means suspending all of its
+-- non-terminal rows. Admin helper SQL (run by an admin, not a trigger):
+--   UPDATE public.cashier_licenses
+--      SET status = 'suspended', updated_at = now()
+--    WHERE merchant_id = '<merchant uuid>'
+--      AND status IN ('issued','active','expired');
+-- (expired rows included: expired-in-grace is still eligible above).
 
+-- Converge environments where the rejected trigger existed (419 v2 staging).
 DROP TRIGGER IF EXISTS cashier_licenses_cascade_suspend ON public.cashier_licenses;
-CREATE TRIGGER cashier_licenses_cascade_suspend
-  AFTER INSERT OR UPDATE OF status ON public.cashier_licenses
-  FOR EACH ROW EXECUTE FUNCTION public._cashier_license_cascade_suspend();
+DROP FUNCTION IF EXISTS public._cashier_license_cascade_suspend();
 
 COMMIT;

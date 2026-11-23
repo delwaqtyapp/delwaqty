@@ -4,6 +4,9 @@
 -- abort, and the trigger behavior around the new default.
 BEGIN;
 
+-- force the exact canonical pre-state (staging may already carry the target)
+ALTER TABLE public.drivers ALTER COLUMN service_types SET DEFAULT ARRAY[]::text[];
+
 -- apply path (verbatim guard body from 427_drivers_service_types_default.sql)
 DO $g$
 DECLARE
@@ -67,7 +70,7 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN
     v_msg := SQLSTATE;
   END;
-  ASSERT v_msg IS NOT NULL, '427: invalid service_types accepted';
+  ASSERT v_msg = '23514', '427: invalid service_types must violate the CHECK (23514), got: ' || coalesce(v_msg,'<no error>');
 
   -- default change does not weaken the trigger on explicit empty +
   -- accepts_deliveries
@@ -77,7 +80,7 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN
     v_msg := SQLSTATE;
   END;
-  ASSERT v_msg IS NOT NULL, '427: explicit empty array with accepts_deliveries accepted';
+  ASSERT v_msg = '23514', '427: explicit empty array with accepts_deliveries must be rejected (23514), got: ' || coalesce(v_msg,'<no error>');
 
   -- canonical default on the catalog matches the guard target
   SELECT pg_get_expr(a.adbin, a.adrelid) INTO v_def
@@ -162,7 +165,6 @@ BEGIN
      AND a.adnum = (SELECT attnum FROM pg_attribute
                      WHERE attrelid = 'public.drivers'::regclass AND attname = 'service_types');
   ASSERT v_after = 'ARRAY[''parcel''::text]', '427: guard mutated a drifted default: ' || v_after;
-  ASSERT v_before <> v_after OR v_before IS NOT NULL; -- trivially true; keeps v_before used
 END $t$;
 
 ROLLBACK;

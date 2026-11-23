@@ -23,7 +23,10 @@
 -- the metadata exposure of the kept tables overall is a known, unverified
 -- residual: realtime RLS filtering of DELETE payloads has not been proven
 -- with a websocket wire capture (not available), so it is not claimed as
--- verified. See 422 for the REPLICA IDENTITY half of this fix.
+-- verified. The residual is not just opaque UUIDs: the chat_typing PK is
+-- (room_id, user_id), so even PK-only DELETE events reveal user-room
+-- association and timing. See 422 for the REPLICA IDENTITY half of this
+-- fix (old-row exposure reduced; wire behavior not measured).
 BEGIN;
 DO $$
 DECLARE t text;

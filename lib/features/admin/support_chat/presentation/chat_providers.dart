@@ -108,7 +108,8 @@ final chatRoomProvider = FutureProvider.family<ChatRoom, String>((
 
 // LIVE room stream: reflects is_active / assigned_admin changes in real time
 // on BOTH sides (admin closing the chat flips the customer's UI instantly).
-// Requires the chat_rooms REPLICA IDENTITY FULL (migration 098).
+// UPDATE events always carry the new record, so REPLICA IDENTITY DEFAULT
+// suffices (422); the old FULL requirement from migration 098 no longer holds.
 final chatRoomStreamProvider = StreamProvider.family<ChatRoom, String>((
   ref,
   roomId,

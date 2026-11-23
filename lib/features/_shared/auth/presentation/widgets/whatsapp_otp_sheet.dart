@@ -1,3 +1,5 @@
+import 'package:delwaqty/core/theme/app_spacing.dart';
+
 import 'dart:async';
 
 import 'package:delwaqty/core/theme/app_colors.dart';
@@ -317,7 +319,7 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
                   height: 4,
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
                   ),
                 ),
               ),
@@ -329,7 +331,9 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
                     height: 44,
                     decoration: BoxDecoration(
                       color: whatsappGreen.withValues(alpha: 0.16),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusServiceCard,
+                      ),
                       border: Border.all(
                         color: whatsappGreen.withValues(alpha: 0.4),
                       ),
@@ -405,7 +409,7 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
                     foregroundColor: AppColors.textPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                     ),
                   ),
                   icon: const Icon(Icons.refresh_rounded),
@@ -449,7 +453,7 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
                     foregroundColor: AppColors.textPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                     ),
                   ),
                   icon: const Icon(Icons.refresh_rounded),
@@ -469,7 +473,7 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
                     ),
                     decoration: BoxDecoration(
                       color: whatsappGreen.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                       border: Border.all(
                         color: whatsappGreen.withValues(alpha: 0.45),
                       ),
@@ -548,7 +552,9 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusFull,
+                      ),
                     ),
                     child: Text(
                       l10n.otpExpiresIn(_formatDuration(_remaining)),
@@ -567,7 +573,7 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
                     foregroundColor: AppColors.textPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                     ),
                   ),
                   icon: const Icon(Icons.open_in_new_rounded, size: 18),

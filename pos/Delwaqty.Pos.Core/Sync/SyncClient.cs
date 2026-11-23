@@ -86,6 +86,19 @@ namespace Delwaqty.Pos.Core.Sync
                 "{\"p_query\":" + JsonString(query) + ",\"p_limit\":" + limit + "}");
         }
 
+        /// <summary>
+        /// Import a catalog drug into the store's products (migration 400):
+        /// race-safe, returns the product id the sale lines should reference.
+        /// </summary>
+        public Task<string> PharmacyImportDrug(string drugCatalogId, string merchantId, decimal? price, int stock)
+        {
+            return RpcAsync("pharmacy_import_drug",
+                "{\"p_drug_id\":" + JsonString(drugCatalogId) +
+                ",\"p_merchant_id\":" + JsonString(merchantId) +
+                (price.HasValue ? ",\"p_price\":" + price.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "") +
+                ",\"p_stock\":" + stock + "}");
+        }
+
         /// <summary>PostgREST read. path is e.g. "drug_catalog?select=id,name_en&limit=1000".</summary>
         public async Task<string> RestGetAsync(string pathAndQuery)
         {

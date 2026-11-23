@@ -90,6 +90,12 @@ namespace Delwaqty.Pos.Core.Sales
             }
         }
 
+        public void RemoveLineAt(int index) { _lines.RemoveAt(index); }
+
+        public void RemovePaymentAt(int index) { _payments.RemoveAt(index); }
+
+        public void ClearPayments() { _payments.Clear(); }
+
         public decimal PaidAmount
         {
             get
@@ -102,6 +108,17 @@ namespace Delwaqty.Pos.Core.Sales
         public decimal DeferredAmount
         {
             get { return Math.Round(Total - PaidAmount, 2, MidpointRounding.AwayFromZero); }
+        }
+
+        /// <summary>Reset to an empty sale (new transaction without losing settings).</summary>
+        public void Reset()
+        {
+            _lines.Clear();
+            _payments.Clear();
+            DiscountAmount = 0;
+            CustomerId = null;
+            CustomerName = null;
+            Notes = null;
         }
 
         /// <summary>Validate and auto-balance: adds a cash payment for any uncovered remainder.</summary>

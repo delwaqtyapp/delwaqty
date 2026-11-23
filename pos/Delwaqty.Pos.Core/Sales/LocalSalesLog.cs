@@ -51,7 +51,12 @@ namespace Delwaqty.Pos.Core.Sales
             }
         }
 
-        public void Add(OutboxOpRef op, SaleBuilder sale)
+        public void Add(OutboxOpRef op, SaleBuilder sale) { Add(op, sale, sale.ShiftId); }
+
+        /// <summary>Add with an explicit local shift grouping id (the sale payload
+        /// may carry the SERVER shift id while the local journal groups by the
+        /// locally-known id until the server id is adopted).</summary>
+        public void Add(OutboxOpRef op, SaleBuilder sale, string shiftId)
         {
             // Payment exposes fields, not properties: IncludeFields is required.
             var payments = JsonSerializer.Serialize(sale.Payments, FieldJson);
@@ -62,7 +67,7 @@ namespace Delwaqty.Pos.Core.Sales
                     " (op_id, shift_id, total, payments, customer_id, customer_name, status, created_at)" +
                     " VALUES ($id, $shift, $total, $pay, $cid, $cname, 'completed', $at);";
                 cmd.Parameters.AddWithValue("$id", op.OpId);
-                cmd.Parameters.AddWithValue("$shift", (object)sale.ShiftId ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("$shift", (object)shiftId ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("$total", sale.Total);
                 cmd.Parameters.AddWithValue("$pay", payments);
                 cmd.Parameters.AddWithValue("$cid", (object)sale.CustomerId ?? DBNull.Value);
@@ -80,6 +85,19 @@ namespace Delwaqty.Pos.Core.Sales
         {
             public string OpId;
             public OutboxOpRef(string opId) { OpId = opId; }
+        }
+
+        /// <summary>Reassign all rows of one local shift id to another (adopting
+        /// the server shift id after the shift_open op syncs).</summary>
+        public void RemapShift(string oldShiftId, string newShiftId)
+        {
+            using (var cmd = _db.CreateCommand())
+            {
+                cmd.CommandText = "UPDATE local_sales SET shift_id = $new WHERE shift_id = $old;";
+                cmd.Parameters.AddWithValue("$new", newShiftId);
+                cmd.Parameters.AddWithValue("$old", oldShiftId);
+                cmd.ExecuteNonQuery();
+            }
         }
 
         public void MarkVoided(string opId)

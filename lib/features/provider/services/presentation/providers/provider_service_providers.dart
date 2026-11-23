@@ -33,13 +33,13 @@ class SupabaseProviderServiceRepository implements ProviderServiceRepository {
   Future<List<ProviderServiceInfo>> servicesFor(
     String serviceProviderId,
   ) async {
-    // Swap point: provider_get_my_pricing (admin pricing) replaces this read.
+    // Same effective rates as customer browsing and checkout.
     final rows = await _ref
         .read(supabaseClientProvider)
-        .from('service_providers')
+        .from('service_providers_with_effective_pricing')
         .select(
-          'category_type,name,description,hourly_rate,fixed_price_min,'
-          'fixed_price_max,is_available,tags',
+          'category_type,name,description,hourly_rate:effective_hourly_rate,'
+          'fixed_price_min:effective_fixed_price_min,fixed_price_max:effective_fixed_price_max,is_available,tags',
         )
         .eq('id', serviceProviderId);
     return (rows as List)

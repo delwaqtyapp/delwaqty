@@ -4457,25 +4457,25 @@ class AppLocalizationsAr extends AppLocalizations {
   String get userTypeCustomer => 'عميل';
 
   @override
-  String get userTypeCustomerDesc => 'اطلب من المتاجر والمطاعم والخدمات';
+  String get userTypeCustomerDesc => 'اطلب أكلك دلوقتي';
 
   @override
   String get userTypeMerchant => 'تاجر';
 
   @override
-  String get userTypeMerchantDesc => 'بع منتجاتك على المنصة';
+  String get userTypeMerchantDesc => 'بيع منتجاتك مع دلوقتي';
 
   @override
   String get userTypeDriver => 'مندوب توصيل';
 
   @override
-  String get userTypeDriverDesc => 'وصّل الطلبات للعملاء';
+  String get userTypeDriverDesc => 'وصّل طلباتك واكسب مع دلوقتي';
 
   @override
   String get userTypeProvider => 'مقدم خدمة';
 
   @override
-  String get userTypeProviderDesc => 'قدم خدماتك للعملاء';
+  String get userTypeProviderDesc => 'قدّم خدماتك باحترافية';
 
   @override
   String get uploadIdCard => 'رفع البطاقة الشخصية';

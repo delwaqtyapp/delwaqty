@@ -7,6 +7,10 @@ import 'package:flutter/material.dart';
 abstract final class AppColors {
   /// Dark teal accent for admin service-pricing actions.
   static const Color brandTealDark = Color(0xFF0D9488);
+  static const Color roleSceneInk = Color(0xFF25243C);
+  static const Color roleSceneSkin = Color(0xFFF5C7A5);
+  static const Color roleTileBorder = Color(0xFFE8E8F0);
+  static const Color roleTileChevron = Color(0xFFDFE1EC);
   // ---------------------------------------------------------------------------
   // Premium Brand Palette (V2)
   // ---------------------------------------------------------------------------

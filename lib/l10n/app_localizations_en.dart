@@ -4492,26 +4492,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userTypeCustomer => 'Customer';
 
   @override
-  String get userTypeCustomerDesc =>
-      'Order from stores, restaurants and services';
+  String get userTypeCustomerDesc => 'Order your food now';
 
   @override
   String get userTypeMerchant => 'Merchant';
 
   @override
-  String get userTypeMerchantDesc => 'Sell your products on the platform';
+  String get userTypeMerchantDesc => 'Sell your products with Delwaqty';
 
   @override
   String get userTypeDriver => 'Delivery Driver';
 
   @override
-  String get userTypeDriverDesc => 'Deliver orders to customers';
+  String get userTypeDriverDesc => 'Deliver orders and earn with Delwaqty';
 
   @override
   String get userTypeProvider => 'Service Provider';
 
   @override
-  String get userTypeProviderDesc => 'Offer your services to customers';
+  String get userTypeProviderDesc => 'Offer your services professionally';
 
   @override
   String get uploadIdCard => 'Upload National ID';

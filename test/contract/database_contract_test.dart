@@ -372,6 +372,7 @@ void main() {
         final token = f.path.split('/').last.split('_').first;
         return int.parse(RegExp(r'^(\d+)').firstMatch(token)!.group(1)!);
       }
+
       final hits =
           migrationFiles
               .where((f) => f.readAsStringSync().contains(marker))
@@ -425,6 +426,7 @@ void main() {
       final token = f.path.split('/').last.split('_').first;
       return int.parse(RegExp(r'^(\d+)').firstMatch(token)!.group(1)!);
     }
+
     final hits =
         migrationFiles
             .where((f) => f.readAsStringSync().contains(marker))

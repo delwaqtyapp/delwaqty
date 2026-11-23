@@ -40,7 +40,7 @@ namespace Delwaqty.Pos.Core.Tests
                 Assert.Equal("1", hits[0].Product.Id);
                 Assert.Equal(33, hits[0].Product.OfficialPriceEgp);
             }
-            finally { cache.Dispose(); File.Delete(path); }
+            finally { cache.Dispose(); Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); File.Delete(path); }
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace Delwaqty.Pos.Core.Tests
                 Assert.Equal("2", hits[0].Product.Id);
                 Assert.Equal(0.9, hits[0].Score); // word-boundary boost, server parity
             }
-            finally { cache.Dispose(); File.Delete(path); }
+            finally { cache.Dispose(); Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); File.Delete(path); }
         }
 
         [Fact]
@@ -66,7 +66,7 @@ namespace Delwaqty.Pos.Core.Tests
                 Assert.Single(hits);
                 Assert.Equal("1", hits[0].Product.Id);
             }
-            finally { cache.Dispose(); File.Delete(path); }
+            finally { cache.Dispose(); Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); File.Delete(path); }
         }
     }
 

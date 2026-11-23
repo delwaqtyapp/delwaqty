@@ -38,7 +38,7 @@ namespace Delwaqty.Pos.Core.Tests
                     Assert.Equal("6221", cached.Barcode);
                 }
             }
-            finally { File.Delete(dbPath); }
+            finally { Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); File.Delete(dbPath); }
         }
 
         [Fact]

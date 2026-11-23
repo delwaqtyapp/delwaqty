@@ -17,7 +17,7 @@ namespace Delwaqty.Pos.Core.Tests
     public class ShiftOrderingTests : IDisposable
     {
         private readonly string _path = Path.Combine(Path.GetTempPath(), "ord-" + Guid.NewGuid() + ".db");
-        public void Dispose() { if (File.Exists(_path)) File.Delete(_path); }
+        public void Dispose() { Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); if (File.Exists(_path)) File.Delete(_path); }
 
         private static SaleBuilder MakeSale(string shiftId, decimal price)
         {

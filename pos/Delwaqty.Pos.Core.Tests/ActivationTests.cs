@@ -67,7 +67,7 @@ namespace Delwaqty.Pos.Core.Tests
                 Assert.True(SealedCredentialStore.TryLoadLegacy(legacyPath, deviceKey, out var rtOld, out _));
                 Assert.Equal("rt-old", rtOld);
             }
-            finally { Directory.Delete(dir, true); }
+            finally { Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); Directory.Delete(dir, true); }
         }
     }
 
@@ -75,7 +75,7 @@ namespace Delwaqty.Pos.Core.Tests
     {
         private readonly string _dir = Path.Combine(Path.GetTempPath(), "act-" + Guid.NewGuid());
         public ActivationTests() { Directory.CreateDirectory(_dir); }
-        public void Dispose() { Directory.Delete(_dir, true); }
+        public void Dispose() { Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); Directory.Delete(_dir, true); }
 
         private const string LinkOk =
             "{\"ok\":true,\"plan\":\"trial\",\"pro\":false,\"status\":\"active\"," +
@@ -181,6 +181,7 @@ namespace Delwaqty.Pos.Core.Tests
             var other = Path.Combine(Path.GetTempPath(), "dev-" + Guid.NewGuid());
             var c = DeviceId.GetOrCreate(other);
             Assert.NotEqual(a, c);
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); 
             Directory.Delete(other, true);
         }
     }

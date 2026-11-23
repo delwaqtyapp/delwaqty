@@ -18,7 +18,7 @@ namespace Delwaqty.Pos.Core.Tests
     public class CustomerLinkTests : IDisposable
     {
         private readonly string _path = Path.Combine(Path.GetTempPath(), "cust-" + Guid.NewGuid() + ".db");
-        public void Dispose() { if (File.Exists(_path)) File.Delete(_path); }
+        public void Dispose() { Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); if (File.Exists(_path)) File.Delete(_path); }
 
         [Fact]
         public void New_Customer_Gets_Stable_Id_And_Deferred_Close_Succeeds()

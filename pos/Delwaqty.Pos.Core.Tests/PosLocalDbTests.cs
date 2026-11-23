@@ -17,7 +17,7 @@ namespace Delwaqty.Pos.Core.Tests
     {
         private readonly string _dir = Path.Combine(Path.GetTempPath(), "posdb-" + Guid.NewGuid());
         public BatchAndLocalDbTests() { Directory.CreateDirectory(_dir); }
-        public void Dispose() { Directory.Delete(_dir, true); }
+        public void Dispose() { Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); Directory.Delete(_dir, true); }
 
         private string DbPath { get { return Path.Combine(_dir, "pos.db"); } }
 

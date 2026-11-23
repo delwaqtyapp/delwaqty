@@ -12,7 +12,7 @@ namespace Delwaqty.Pos.Core.Tests
     {
         private readonly string _dir = Path.Combine(Path.GetTempPath(), "seal-" + Guid.NewGuid());
         public SealAndScopeTests() { Directory.CreateDirectory(_dir); }
-        public void Dispose() { Directory.Delete(_dir, true); }
+        public void Dispose() { Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); Directory.Delete(_dir, true); }
 
         private static ActivationState SampleState(string deviceId)
         {
@@ -261,7 +261,7 @@ namespace Delwaqty.Pos.Core.Tests
                 // And it round-trips afterwards.
                 Assert.Equal(loaded, Protection.DeviceKeyStore.GetOrCreate(dir2));
             }
-            finally { Directory.Delete(dir2, true); }
+            finally { Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); Directory.Delete(dir2, true); }
         }
 
         [Fact]
@@ -328,7 +328,7 @@ namespace Delwaqty.Pos.Core.Tests
                 Assert.StartsWith(Protection.DeviceKeyStore.BlobPrefix,
                     File.ReadAllText(Path.Combine(dir2, "device.key")));
             }
-            finally { Directory.Delete(dir2, true); }
+            finally { Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); Directory.Delete(dir2, true); }
         }
 
         [Fact]

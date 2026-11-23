@@ -27,7 +27,10 @@ namespace Delwaqty.Pos.Core.Sync
 
         internal static SqliteConnection Open(string path)
         {
-            var cs = new SqliteConnectionStringBuilder { DataSource = path }.ToString();
+            var cs = new SqliteConnectionStringBuilder { DataSource = path, Pooling = false }.ToString();
+            // Pooling disabled: a pooled handle keeps the .db file locked after
+            // Dispose on Windows, breaking migrations (File.Move), teardown and any
+            // second opener. Stores here are long-lived, so pooling buys nothing.
             var db = new SqliteConnection(cs);
             db.Open();
             return db;

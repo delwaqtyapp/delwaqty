@@ -84,7 +84,7 @@ namespace Delwaqty.Pos.Core.Tests
     {
         private readonly string _dir = Path.Combine(Path.GetTempPath(), "refresh-" + Guid.NewGuid());
         public LicenseRefresherTests() { Directory.CreateDirectory(_dir); }
-        public void Dispose() { Directory.Delete(_dir, true); }
+        public void Dispose() { Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); Directory.Delete(_dir, true); }
 
         private ActivationService NewActivatedService(StubHandler stub)
         {

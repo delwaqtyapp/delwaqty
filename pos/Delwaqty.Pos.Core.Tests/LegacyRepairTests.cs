@@ -17,7 +17,7 @@ namespace Delwaqty.Pos.Core.Tests
     {
         private readonly string _dir = Path.Combine(Path.GetTempPath(), "repair-" + Guid.NewGuid());
         public LegacyRepairTests() { Directory.CreateDirectory(_dir); }
-        public void Dispose() { Directory.Delete(_dir, true); }
+        public void Dispose() { Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); Directory.Delete(_dir, true); }
 
         private void WriteFlatOutboxWithPendingOp()
         {
@@ -152,6 +152,7 @@ namespace Delwaqty.Pos.Core.Tests
             var svc = new ActivationService(_dir, "Pharmacy");
             Assert.NotNull(svc.LegacyRepairReason(null));
 
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); 
             File.Delete(Path.Combine(_dir, "catalog.db"));
             File.WriteAllText(Path.Combine(_dir, "shift.json"), "{\"opId\":\"x\",\"openingFloat\":100}");
             Assert.NotNull(svc.LegacyRepairReason(null));

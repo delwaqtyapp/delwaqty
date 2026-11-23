@@ -11,7 +11,7 @@ namespace Delwaqty.Pos.Core.Tests
     public class DrugCatalogSyncTests : IDisposable
     {
         private readonly string _path = Path.Combine(Path.GetTempPath(), "cat-" + Guid.NewGuid() + ".db");
-        public void Dispose() { if (File.Exists(_path)) File.Delete(_path); }
+        public void Dispose() { Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); if (File.Exists(_path)) File.Delete(_path); }
 
         [Fact]
         public async System.Threading.Tasks.Task Downloads_Pages_Until_Short_Page()
@@ -44,7 +44,7 @@ namespace Delwaqty.Pos.Core.Tests
     public class SyncEngineLocalRpcTests : IDisposable
     {
         private readonly string _path = Path.Combine(Path.GetTempPath(), "outbox-" + Guid.NewGuid() + ".db");
-        public void Dispose() { if (File.Exists(_path)) File.Delete(_path); }
+        public void Dispose() { Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); if (File.Exists(_path)) File.Delete(_path); }
 
         [Fact]
         public async System.Threading.Tasks.Task DailyClose_Goes_To_Its_Own_Rpc_Not_SyncPush()

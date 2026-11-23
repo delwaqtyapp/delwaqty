@@ -74,7 +74,7 @@ namespace Delwaqty.Pos.Core.Tests
         private readonly BatchStore _store;
 
         public BatchStoreTests() { _store = new BatchStore(_path); }
-        public void Dispose() { _store.Dispose(); if (File.Exists(_path)) File.Delete(_path); }
+        public void Dispose() { _store.Dispose(); Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); if (File.Exists(_path)) File.Delete(_path); }
 
         [Fact]
         public void Fefo_Allocates_Soonest_Expiry_First()

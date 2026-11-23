@@ -11,7 +11,7 @@ namespace Delwaqty.Pos.Core.Tests
         private readonly string _path = Path.Combine(Path.GetTempPath(), "sales-" + Guid.NewGuid() + ".db");
         private readonly LocalSalesLog _log;
         public LocalSalesLogTests() { _log = new LocalSalesLog(_path); }
-        public void Dispose() { _log.Dispose(); if (File.Exists(_path)) File.Delete(_path); }
+        public void Dispose() { _log.Dispose(); Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); if (File.Exists(_path)) File.Delete(_path); }
 
         private static SaleBuilder Sale(string shiftId, decimal price, params (string m, decimal a)[] pays)
         {

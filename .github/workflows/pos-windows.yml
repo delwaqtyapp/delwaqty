@@ -1,0 +1,96 @@
+name: POS Windows cashier (experimental)
+# Builds the WPF cashier (Delwaqty.Pos.Wpf, Pharmacy flavor) from the
+# work/pos-cashier branch WITHOUT committing to that branch, and attaches the
+# zipped build to the rolling 'development' release as
+# delwaqty-cashier-windows-EXPERIMENTAL.zip. Manual dispatch only: the branch
+# is pre-merge and its Windows runtime proof is still outstanding, so this is
+# an experimental artifact for a first real run on the owner's machine.
+#
+# Security split (#148): the job that touches the selected ref's code has no
+# write token and no persisted git credentials; the job that holds
+# contents:write never checks out or executes source - it only moves a
+# fixed-name artifact to the release.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Ref to build the cashier from'
+        required: true
+        default: 'work/pos-cashier'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build-cashier:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Unit tests (Pos.Core)
+        run: dotnet test pos/Delwaqty.Pos.Core.Tests/Delwaqty.Pos.Core.Tests.csproj -c Release --nologo
+
+      - name: Publish Pharmacy cashier (net8.0-windows, win-x64)
+        run: >-
+          dotnet publish pos/Delwaqty.Pos.Wpf/Delwaqty.Pos.Wpf.csproj
+          -c Release -f net8.0-windows -r win-x64 --self-contained true
+          -p:PosFlavor=Pharmacy -o publish/pharmacy --nologo
+
+      - name: Add first-run README and zip
+        shell: pwsh
+        run: |
+          $sha = (git rev-parse HEAD)
+          @"
+          Delwaqty Cashier (Windows) - EXPERIMENTAL FIRST-RUN BUILD
+          ==========================================================
+          Built from commit: $sha
+          This is the first Windows build of the Delwaqty pharmacy cashier.
+          It compiles and passes its unit tests, but it has NOT yet completed
+          the manual Windows proof checklist.
+
+          - Run it on a real Windows 10/11 machine.
+          - Use TEST DATA ONLY. Do not run a real shop day on this build.
+          - After installing, run through pos/docs/windows-proof-checklist.md
+            in the repo (cross-user protection, copy-to-another-PC,
+            uninstall/reinstall recovery) and report anything unexpected.
+
+          Start: DelwaqtyPharmacyPos.exe
+          Data dir: C:\ProgramData\Delwaqty\Pos
+          "@ | Out-File -Encoding utf8 publish/pharmacy/README-FIRST-RUN.txt
+          Compress-Archive -Path publish/pharmacy/* -DestinationPath delwaqty-cashier-windows-EXPERIMENTAL.zip
+
+      - name: Hand off the zip as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: delwaqty-cashier-windows-EXPERIMENTAL
+          path: delwaqty-cashier-windows-EXPERIMENTAL.zip
+          if-no-files-found: error
+          retention-days: 7
+
+  publish-cashier:
+    needs: build-cashier
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # gh release upload only; no source checkout here
+    steps:
+      - name: Download the fixed-name artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: delwaqty-cashier-windows-EXPERIMENTAL
+
+      - name: Attach to the development release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release upload development delwaqty-cashier-windows-EXPERIMENTAL.zip
+          --clobber -R delwaqtyapp/delwaqty

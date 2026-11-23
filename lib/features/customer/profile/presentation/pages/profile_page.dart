@@ -950,6 +950,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             subtitle: l10n.appInvitationApproved,
             onTap: () => context.push('/profile/app-invitations'),
           ),
+        // Suggestions entry in the profile screen (owner request
+        // 2026-11-23, all four apps; complaints lives in the side menu).
+        _SectionTile(
+          icon: Icons.lightbulb_outline_rounded,
+          color: primary,
+          title: l10n.suggestions,
+          subtitle: l10n.suggestionsProfileSubtitle,
+          onTap: () => context.push('/my-suggestions'),
+        ),
         _SectionTile(
           icon: Icons.help_outline_rounded,
           color: primary,

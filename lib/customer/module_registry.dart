@@ -15,6 +15,7 @@ import 'package:delwaqty/features/customer/search/search_module.dart';
 import 'package:delwaqty/features/customer/orders/orders_module.dart';
 import 'package:delwaqty/features/customer/home_services/home_services_module.dart';
 import 'package:delwaqty/features/_shared/complaints/complaints_module.dart';
+import 'package:delwaqty/features/_shared/suggestions/suggestions_module.dart';
 import 'package:delwaqty/features/_shared/regions/regions_module.dart';
 import 'package:delwaqty/features/_shared/rewards/rewards_module.dart';
 import 'package:delwaqty/features/_shared/campaigns/campaigns_module.dart';
@@ -39,6 +40,7 @@ void registerAllModules() {
     WalletModule(),
     DirectDeliveryModule(),
     ComplaintsModule(),
+    SuggestionsModule(),
     RewardsModule(),
     CommerceModule(),
     RestaurantModule(),

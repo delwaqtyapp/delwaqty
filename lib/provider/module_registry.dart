@@ -13,9 +13,12 @@ import 'package:delwaqty/features/customer/restaurant/restaurant_module.dart';
 import 'package:delwaqty/features/provider/merchant/merchant_module.dart';
 import 'package:delwaqty/features/provider/financial/financial_module.dart';
 import 'package:delwaqty/features/admin/support_chat/support_chat_module.dart';
+import 'package:delwaqty/features/_shared/suggestions/suggestions_module.dart';
 
 // Provider flavor: customer-only modules (complaints, rewards, direct
-// delivery, customer wallet) are intentionally NOT registered. The provider
+// delivery, customer wallet) are intentionally NOT registered. Suggestions
+// IS registered in all four apps: owner request 2026-11-23 (platform-wide
+// ideas next to Complaints), so it is not a customer-only feature. The provider
 // money surface is the financial center; owner review 2026-11-22 asked for
 // one entry per function and no customer features in the provider app.
 void registerProviderModules() {
@@ -40,6 +43,7 @@ void registerProviderModules() {
     ProviderServicesNavModule(),
     ProviderCashierNavModule(),
     FinancialModule(),
+    SuggestionsModule(),
     SupportChatModule(),
   ]);
 

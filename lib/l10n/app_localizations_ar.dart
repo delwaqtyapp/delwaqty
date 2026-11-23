@@ -3719,6 +3719,75 @@ class AppLocalizationsAr extends AppLocalizations {
   String get myComplaints => 'شكاوي';
 
   @override
+  String get suggestions => 'الاقتراحات';
+
+  @override
+  String get suggestionsProfileSubtitle => 'شاركنا أفكارك لتطوير المنصة';
+
+  @override
+  String get newSuggestion => 'اقتراح جديد';
+
+  @override
+  String get mySuggestions => 'اقتراحاتي';
+
+  @override
+  String get noSuggestions => 'لا توجد اقتراحات بعد';
+
+  @override
+  String get noSuggestionsDescription => 'ستظهر اقتراحاتك هنا بعد إرسالها.';
+
+  @override
+  String get suggestionSubject => 'العنوان';
+
+  @override
+  String get suggestionDescription => 'اكتب اقتراحك';
+
+  @override
+  String get suggestionCategory => 'النوع';
+
+  @override
+  String get suggestionCategoryGeneral => 'عام';
+
+  @override
+  String get suggestionCategoryApp => 'التطبيق';
+
+  @override
+  String get suggestionCategoryFeature => 'ميزة جديدة';
+
+  @override
+  String get suggestionCategoryPayment => 'الدفع';
+
+  @override
+  String get suggestionCategoryOther => 'أخرى';
+
+  @override
+  String get suggestionSubmit => 'إرسال';
+
+  @override
+  String get suggestionSent => 'وصلنا اقتراحك، شكراً لك';
+
+  @override
+  String get suggestionStatusPending => 'جديد';
+
+  @override
+  String get suggestionStatusReviewing => 'بنراجعه';
+
+  @override
+  String get suggestionStatusAccepted => 'مقبول';
+
+  @override
+  String get suggestionStatusRejected => 'مرفوض';
+
+  @override
+  String get suggestionStatusImplemented => 'اتنفذ';
+
+  @override
+  String get suggestionResolutionNote => 'ملاحظة الرد';
+
+  @override
+  String get adminSuggestionsTitle => 'اقتراحات المستخدمين';
+
+  @override
   String get complaintType => 'نوع الشكوى';
 
   @override

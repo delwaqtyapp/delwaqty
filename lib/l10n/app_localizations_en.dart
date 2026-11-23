@@ -3749,6 +3749,77 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myComplaints => 'My Complaints';
 
   @override
+  String get suggestions => 'Suggestions';
+
+  @override
+  String get suggestionsProfileSubtitle =>
+      'Share your ideas to improve the platform';
+
+  @override
+  String get newSuggestion => 'New Suggestion';
+
+  @override
+  String get mySuggestions => 'My Suggestions';
+
+  @override
+  String get noSuggestions => 'No suggestions yet';
+
+  @override
+  String get noSuggestionsDescription =>
+      'Your suggestions will appear here once sent.';
+
+  @override
+  String get suggestionSubject => 'Subject';
+
+  @override
+  String get suggestionDescription => 'Write your suggestion';
+
+  @override
+  String get suggestionCategory => 'Category';
+
+  @override
+  String get suggestionCategoryGeneral => 'General';
+
+  @override
+  String get suggestionCategoryApp => 'The App';
+
+  @override
+  String get suggestionCategoryFeature => 'New Feature';
+
+  @override
+  String get suggestionCategoryPayment => 'Payment';
+
+  @override
+  String get suggestionCategoryOther => 'Other';
+
+  @override
+  String get suggestionSubmit => 'Send';
+
+  @override
+  String get suggestionSent => 'Your suggestion reached us, thank you';
+
+  @override
+  String get suggestionStatusPending => 'New';
+
+  @override
+  String get suggestionStatusReviewing => 'Under review';
+
+  @override
+  String get suggestionStatusAccepted => 'Accepted';
+
+  @override
+  String get suggestionStatusRejected => 'Rejected';
+
+  @override
+  String get suggestionStatusImplemented => 'Implemented';
+
+  @override
+  String get suggestionResolutionNote => 'Resolution note';
+
+  @override
+  String get adminSuggestionsTitle => 'User Suggestions';
+
+  @override
   String get complaintType => 'Complaint Type';
 
   @override

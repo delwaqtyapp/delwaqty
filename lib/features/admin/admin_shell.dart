@@ -92,6 +92,11 @@ final List<_AdminNavGroup> _adminGroups = [
         icon: Icons.warning_amber_rounded,
         label: (l) => l.complaints,
       ),
+      _AdminNavItem(
+        path: '/admin/suggestions',
+        icon: Icons.lightbulb_outline_rounded,
+        label: (l) => l.suggestions,
+      ),
     ],
   ),
   _AdminNavGroup(

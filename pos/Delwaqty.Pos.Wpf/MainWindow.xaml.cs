@@ -322,21 +322,35 @@ namespace Delwaqty.Pos.Wpf
                 return;
             }
             // #120: never sell tracked stock the batches cannot cover (and
-            // never from an expired batch). Untracked items sell freely.
+            // never from an expired batch). Quantities are AGGREGATED per
+            // item key (#120b: two lines of one product share the same
+            // batches) and tracked means HasTrackedBatches (#120a: an item
+            // sold exactly to zero is still tracked). Untracked items sell
+            // freely. The transaction inside CommitSale re-checks all of
+            // this race-safely; this is the friendly pre-check.
             if (_isPharmacy)
             {
+                var byKey = new Dictionary<string, decimal>();
+                var nameOf = new Dictionary<string, string>();
                 foreach (var line in _sale.Lines)
                 {
                     var key = line.ProductId ?? line.DrugCatalogId;
                     if (key == null) continue;
-                    if (_localDb.Batches.TrackedQty(key) <= 0) continue; // untracked
-                    var plan = _localDb.Batches.AllocateFefo(key, line.Qty);
+                    decimal cur;
+                    byKey.TryGetValue(key, out cur);
+                    byKey[key] = cur + line.Qty;
+                    nameOf[key] = line.Name;
+                }
+                foreach (var kv in byKey)
+                {
+                    if (!_localDb.Batches.HasTrackedBatches(kv.Key)) continue; // untracked
+                    var plan = _localDb.Batches.AllocateFefo(kv.Key, kv.Value);
                     if (!plan.Covered)
                     {
-                        var sellable = _localDb.Batches.SellableQty(key);
+                        var sellable = _localDb.Batches.SellableQty(kv.Key);
                         MessageBox.Show(this,
-                            "لا يمكن صرف " + line.Name + ": المتتبع الصالح " + sellable.ToString("0.##") +
-                            " فقط والمطلوب " + line.Qty.ToString("0.##") +
+                            "لا يمكن صرف " + nameOf[kv.Key] + ": المتتبع الصالح " + sellable.ToString("0.##") +
+                            " فقط والمطلوب " + kv.Value.ToString("0.##") +
                             ". راجع التشغيلات (قد يوجد مخزون منتهي الصلاحية).",
                             "مخزون غير كافٍ", MessageBoxButton.OK, MessageBoxImage.Warning);
                         return;
@@ -349,6 +363,11 @@ namespace Delwaqty.Pos.Wpf
             _sale.ShiftId = _serverShiftId ?? _currentShiftId;
             var dlg = new PaymentDialog(_sale, () => _customers) { Owner = this };
             if (dlg.ShowDialog() != true) return;
+
+            // #119 follow-up: the dialog can stay open across a grace cutoff
+            // or a suspension — re-evaluate the license AFTER it closes and
+            // BEFORE anything is committed.
+            if (!EnsureSellingAllowed()) return;
 
             // A brand-new customer from the payment dialog gets a stable
             // client id (the op id); the sale already references it (#118).
@@ -438,6 +457,7 @@ namespace Delwaqty.Pos.Wpf
 
         private void AddBatch_Click(object sender, RoutedEventArgs e)
         {
+            if (!EnsureSellingAllowed()) return; // stock mutation: license-gated
             var row = StockResults.SelectedItem as SearchRow;
             if (row == null) { StatusText.Text = "اختر صنفاً أولاً"; return; }
             var dlg = new BatchDialog(row.DisplayName) { Owner = this };
@@ -467,6 +487,7 @@ namespace Delwaqty.Pos.Wpf
 
         private void PriceChange_Click(object sender, RoutedEventArgs e)
         {
+            if (!EnsureSellingAllowed()) return; // price mutation: license-gated
             var row = StockResults.SelectedItem as SearchRow;
             if (row == null || row.ProductId == null) { StatusText.Text = "اختر صنفاً مسجلاً أولاً"; return; }
             var price = InputDialog.AskAmount(this, "تغيير السعر", "السعر الجديد:", row.Price.ToString("0.##"));
@@ -517,6 +538,11 @@ namespace Delwaqty.Pos.Wpf
 
         private void DebtPayment_Click(object sender, RoutedEventArgs e)
         {
+            // License-gate EXEMPTION (deliberate, review #119): recording a
+            // customer's repayment is a recovery op — it only reduces what is
+            // owed and never sells stock, so it stays available while locked.
+            // Selling, stock intake and price changes ARE gated; reversals
+            // (void below) and recoveries (here) are not.
             var c = CustomersGrid.SelectedItem as PullApplier.PosCustomer;
             if (c == null) { StatusText.Text = "اختر عميلاً من القائمة"; return; }
             var amount = InputDialog.AskAmount(this, "تحصيل دفعة",
@@ -661,6 +687,9 @@ namespace Delwaqty.Pos.Wpf
 
         private void VoidSale_Click(object sender, RoutedEventArgs e)
         {
+            // License-gate EXEMPTION (deliberate, review #119): a void is a
+            // reversal — it restores stock and must stay possible while
+            // locked, or locked shops could never correct a mistaken sale.
             var row = ShiftSalesGrid.SelectedItem as ShiftSaleRow;
             if (row == null) { StatusText.Text = "اختر فاتورة أولاً"; return; }
             if (row.StatusAr == "ملغاة") { StatusText.Text = "الفاتورة ملغاة بالفعل"; return; }

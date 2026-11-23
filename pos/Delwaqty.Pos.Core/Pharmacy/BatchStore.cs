@@ -305,6 +305,23 @@ namespace Delwaqty.Pos.Core.Pharmacy
             return list;
         }
 
+        /// <summary>
+        /// Whether the item has EVER had batch rows recorded (review #120a):
+        /// the tracked/untracked policy decision uses this, never current
+        /// quantity — an item sold exactly to zero is still tracked and must
+        /// still pass FEFO coverage (i.e. block on shortfall), not silently
+        /// become "untracked".
+        /// </summary>
+        public bool HasTrackedBatches(string itemKey)
+        {
+            using (var cmd = Cmd())
+            {
+                cmd.CommandText = "SELECT EXISTS(SELECT 1 FROM batches WHERE item_key = $k);";
+                cmd.Parameters.AddWithValue("$k", itemKey ?? "");
+                return Convert.ToInt64(cmd.ExecuteScalar()) == 1;
+            }
+        }
+
         /// <summary>Total tracked on-hand for an item across batches (incl. expired).</summary>
         public decimal TrackedQty(string itemKey)
         {

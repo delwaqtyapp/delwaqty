@@ -46,8 +46,10 @@ namespace Delwaqty.Pos.Core.Licensing
     ///
     /// Review fixes folded in:
     /// - #114: the device key is DPAPI-protected (DeviceKeyStore) and the
-    ///   refresh token is DPAPI-sealed (SealedCredentialStore v2); legacy
-    ///   plaintext-key / XOR files migrate on first read.
+    ///   refresh token is DPAPI-sealed (SealedCredentialStore v2). Plaintext
+    ///   device keys are NEVER adopted (a planted key would forge seals):
+    ///   non-protected content regenerates the key and forces reactivation.
+    ///   Legacy XOR credentials still migrate on first read.
     /// - #115: the seal covers the FULL serialized state, bound to the device
     ///   identity (LocalLicenseSeal.SealState); v1 seals (partial payload,
     ///   unsigned StateJson) are never restored — they force one online
@@ -157,6 +159,9 @@ namespace Delwaqty.Pos.Core.Licensing
             // merchant: leave the old files untouched — they are that
             // merchant's archive). Only the verified payload is trusted; the
             // unsigned v1 StateJson is never read (review #115 follow-up).
+            // Pre-DP1 installs (plaintext device key) cannot verify their old
+            // payload after the key regenerates — their flat files stay at
+            // the root for support to migrate manually.
             var legacyMerchant = TryReadLegacyMerchantId();
             if (legacyMerchant != null && legacyMerchant == parsed.State.MerchantId)
             {

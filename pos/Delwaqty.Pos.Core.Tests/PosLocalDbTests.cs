@@ -149,6 +149,58 @@ namespace Delwaqty.Pos.Core.Tests
         }
 
         [Fact]
+        public void CommitSale_Item_Sold_To_Zero_Is_Still_Tracked()
+        {
+            // #120a: selling exactly the tracked quantity must NOT turn the
+            // item "untracked" — the next sale of it blocks on coverage.
+            using (var db = new PosLocalDb(DbPath))
+            {
+                db.Batches.AddBatch("item-1", "اوجمنتين", 3, DateTime.Today.AddDays(30), "B1");
+                var first = MakeSale("item-1", 3);
+                db.CommitSale(OutboxPayloads.Sale(first), first, "shift-1", dispenseBatches: true);
+                Assert.Equal(0, db.Batches.TrackedQty("item-1")); // sold out
+                Assert.True(db.Batches.HasTrackedBatches("item-1"));
+
+                var second = MakeSale("item-1", 1);
+                var op2 = OutboxPayloads.Sale(second);
+                Assert.Throws<InvalidOperationException>(() =>
+                    db.CommitSale(op2, second, "shift-1", dispenseBatches: true));
+                Assert.Equal(1, db.Outbox.PendingCount()); // only the first sale
+            }
+        }
+
+        [Fact]
+        public void CommitSale_Aggregates_Lines_Of_The_Same_Key()
+        {
+            // #120b: two lines of one product share the same batches — 3+3
+            // against stock 5 must fail even though each line alone fits.
+            using (var db = new PosLocalDb(DbPath))
+            {
+                db.Batches.AddBatch("item-1", "اوجمنتين", 5, DateTime.Today.AddDays(30), "B1");
+                var sale = new SaleBuilder { ShiftId = "shift-1" };
+                sale.AddLine(new SaleLine { ProductId = "item-1", Name = "اوجمنتين", Qty = 3, UnitPrice = 10 });
+                sale.AddLine(new SaleLine { ProductId = "item-1", Name = "اوجمنتين", Qty = 3, UnitPrice = 10 });
+                sale.AddPayment("cash", 60);
+                sale.Close();
+                Assert.Throws<InvalidOperationException>(() =>
+                    db.CommitSale(OutboxPayloads.Sale(sale), sale, "shift-1", dispenseBatches: true));
+                Assert.Equal(0, db.Outbox.PendingCount());
+                Assert.Equal(5, db.Batches.TrackedQty("item-1"));
+
+                // 3+2 against stock 5 commits, dispensing the aggregate once.
+                var sale2 = new SaleBuilder { ShiftId = "shift-1" };
+                sale2.AddLine(new SaleLine { ProductId = "item-1", Name = "اوجمنتين", Qty = 3, UnitPrice = 10 });
+                sale2.AddLine(new SaleLine { ProductId = "item-1", Name = "اوجمنتين", Qty = 2, UnitPrice = 10 });
+                sale2.AddPayment("cash", 50);
+                sale2.Close();
+                var op2 = OutboxPayloads.Sale(sale2);
+                db.CommitSale(op2, sale2, "shift-1", dispenseBatches: true);
+                Assert.Equal(0, db.Batches.TrackedQty("item-1"));
+                Assert.Equal(5, db.Batches.AllocationsFor(op2.OpId).Sum(a => a.Qty));
+            }
+        }
+
+        [Fact]
         public void CommitSale_Untracked_Quick_Line_Sells_Without_Dispensing()
         {
             // The explicit untracked policy: an item with NO batches ever

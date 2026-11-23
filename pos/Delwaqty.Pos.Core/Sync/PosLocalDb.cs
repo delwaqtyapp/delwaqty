@@ -89,37 +89,50 @@ namespace Delwaqty.Pos.Core.Sync
         {
             Tx(() =>
             {
-                // #120 follow-up: coverage is verified BEFORE anything is
-                // written, inside the same transaction — a tracked item whose
-                // sellable (unexpired) batches do not cover the line aborts
-                // the WHOLE sale (outbox op, journal row, every batch
-                // movement roll back together). Untracked items (no batches
-                // ever recorded) are the explicit exception: they sell
+                // #120a/b: coverage is decided per ITEM KEY on the AGGREGATED
+                // quantity (two lines of one product share the same batches),
+                // and tracked means "has batch rows" (HasTrackedBatches),
+                // never "qty > 0" — an item sold exactly to zero is still
+                // tracked and still blocks on shortfall. Untracked items (no
+                // batch rows ever) are the explicit exception: they sell
                 // without batch dispensing, as documented for quick lines.
+                // Everything runs in this one transaction: a shortfall aborts
+                // the WHOLE sale (op, journal row, batch movements roll back
+                // together), and each Dispense result is asserted Covered as
+                // the race-safe check.
                 if (dispenseBatches)
                 {
+                    var byKey = new Dictionary<string, decimal>();
                     foreach (var line in sale.Lines)
                     {
                         var key = line.ProductId ?? line.DrugCatalogId;
                         if (key == null) continue;
-                        if (Batches.TrackedQty(key) <= 0) continue; // untracked: sells freely
-                        var plan = Batches.AllocateFefo(key, line.Qty);
+                        decimal cur;
+                        byKey.TryGetValue(key, out cur);
+                        byKey[key] = cur + line.Qty;
+                    }
+                    foreach (var kv in byKey)
+                    {
+                        if (!Batches.HasTrackedBatches(kv.Key)) continue; // untracked: sells freely
+                        var plan = Batches.AllocateFefo(kv.Key, kv.Value);
                         if (!plan.Covered)
                             throw new InvalidOperationException(
-                                "INSUFFICIENT_TRACKED_STOCK:" + key + ":missing " + plan.Missing);
+                                "INSUFFICIENT_TRACKED_STOCK:" + kv.Key + ":missing " + plan.Missing);
                     }
+                    Outbox.Enqueue(op);
+                    Sales.Add(new LocalSalesLog.OutboxOpRef(op.OpId), sale, localShiftId);
+                    foreach (var kv in byKey)
+                    {
+                        if (!Batches.HasTrackedBatches(kv.Key)) continue;
+                        var dispensed = Batches.Dispense(kv.Key, kv.Value, op.OpId);
+                        if (!dispensed.Covered)
+                            throw new InvalidOperationException(
+                                "INSUFFICIENT_TRACKED_STOCK:" + kv.Key + ":missing " + dispensed.Missing);
+                    }
+                    return;
                 }
                 Outbox.Enqueue(op);
                 Sales.Add(new LocalSalesLog.OutboxOpRef(op.OpId), sale, localShiftId);
-                if (dispenseBatches)
-                {
-                    foreach (var line in sale.Lines)
-                    {
-                        var key = line.ProductId ?? line.DrugCatalogId;
-                        if (key != null && Batches.TrackedQty(key) > 0)
-                            Batches.Dispense(key, line.Qty, op.OpId);
-                    }
-                }
             });
         }
 

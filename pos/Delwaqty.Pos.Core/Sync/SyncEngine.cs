@@ -94,6 +94,11 @@ namespace Delwaqty.Pos.Core.Sync
             var pendingCustomerIds = new HashSet<string>(
                 pending.Where(o => o.Type == "customer").Select(o => o.OpId));
             var pushable = new List<OutboxOp>();
+            // A close that did not complete is a shift boundary: no LATER
+            // shift_open may be pushed past it (review #117 follow-up) — the
+            // server would bind the new open against a shift whose books are
+            // still incomplete.
+            var boundaryBlocked = false;
 
             // Strict creation order: no op is ever pushed ahead of an earlier
             // one it might depend on (review #117a).
@@ -101,6 +106,14 @@ namespace Delwaqty.Pos.Core.Sync
             {
                 if (op.Type == "shift_open")
                 {
+                    if (boundaryBlocked)
+                    {
+                        // Leave queued, unharmed; its sales/close block via
+                        // unresolvedShifts like any unmapped shift.
+                        result.Blocked++;
+                        unresolvedShifts.Add(op.OpId);
+                        continue;
+                    }
                     await DrainPush(pushable, result, failedIds).ConfigureAwait(false);
                     await FlushShiftOpen(op, result, failedIds, unresolvedShifts).ConfigureAwait(false);
                     continue;
@@ -108,7 +121,10 @@ namespace Delwaqty.Pos.Core.Sync
                 if (op.IsLocalRpc)
                 {
                     await DrainPush(pushable, result, failedIds).ConfigureAwait(false);
+                    var syncedBefore = result.Synced;
                     await FlushLocalRpc(op, result, failedIds, unresolvedShifts).ConfigureAwait(false);
+                    if (op.Type == "rpc:daily_close" && result.Synced == syncedBefore)
+                        boundaryBlocked = true; // close failed or blocked
                     continue;
                 }
                 if (op.Type == "sale" || op.Type == "debt_payment")

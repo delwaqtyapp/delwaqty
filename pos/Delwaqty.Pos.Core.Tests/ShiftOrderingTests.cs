@@ -142,6 +142,54 @@ namespace Delwaqty.Pos.Core.Tests
         }
 
         [Fact]
+        public async System.Threading.Tasks.Task Blocked_Close_Gates_The_Next_Shift_Open()
+        {
+            // #117 follow-up: saleA fails -> closeA blocked -> openB MUST NOT
+            // be sent: the server would bind B against A's incomplete books.
+            var openA = OutboxPayloads.ShiftOpen(100m);
+            var saleA = OutboxPayloads.Sale(MakeSale(openA.OpId, 66m));
+            var closeA = OutboxPayloads.DailyClose(openA.OpId, 500m);
+            var openB = OutboxPayloads.ShiftOpen(50m);
+            var saleB = OutboxPayloads.Sale(MakeSale(openB.OpId, 33m));
+            var closeB = OutboxPayloads.DailyClose(openB.OpId, 300m);
+
+            var stub = new StubHandler()
+                .Ok("{\"ok\":true,\"results\":[{\"op_id\":\"" + openA.OpId + "\",\"ok\":true,\"shift_id\":\"srv-A\"}]}");
+            // no response for saleA's push -> 404 -> failure
+            var client = new SyncClient("https://x.supabase.co", "anon", new HttpClient(stub));
+            using (var store = new OutboxStore(_path))
+            {
+                store.Enqueue(openA); store.Enqueue(saleA); store.Enqueue(closeA);
+                store.Enqueue(openB); store.Enqueue(saleB); store.Enqueue(closeB);
+                var engine = new SyncEngine(store, client, "m-1");
+                var res = await engine.FlushAsync();
+
+                Assert.Equal(1, res.Synced);  // only openA
+                Assert.Equal(1, res.Failed);  // saleA
+                // closeA (missing sale), openB (boundary), saleB + closeB (shift B unresolved)
+                Assert.Equal(4, res.Blocked);
+                Assert.Equal(5, store.PendingCount());
+                // openB never hit the wire.
+                Assert.DoesNotContain(stub.Requests, r => r.Body != null && r.Body.Contains(openB.OpId));
+                Assert.DoesNotContain(stub.Requests, r => r.Url.Contains("cashier_daily_close"));
+                // openB was not attempt-bumped.
+                Assert.Equal(0, store.Pending(10).Single(o => o.OpId == openB.OpId).Attempts);
+
+                // Once shift A heals, everything flows in order.
+                stub.Ok("{\"ok\":true,\"results\":[{\"op_id\":\"" + saleA.OpId + "\",\"ok\":true,\"sale_id\":\"s-1\"}]}")
+                    .Ok("{\"ok\":true,\"expected_cash\":500}")
+                    .Ok("{\"ok\":true,\"results\":[{\"op_id\":\"" + openB.OpId + "\",\"ok\":true,\"shift_id\":\"srv-B\"}]}")
+                    .Ok("{\"ok\":true,\"results\":[{\"op_id\":\"" + saleB.OpId + "\",\"ok\":true,\"sale_id\":\"s-2\"}]}")
+                    .Ok("{\"ok\":true,\"expected_cash\":300}");
+                var res2 = await engine.FlushAsync();
+                Assert.Equal(5, res2.Synced);
+                Assert.Equal(0, res2.Blocked);
+                Assert.Equal(0, store.PendingCount());
+                Assert.Equal("srv-B", store.GetServerId("shift", openB.OpId));
+            }
+        }
+
+        [Fact]
         public async System.Threading.Tasks.Task Duplicate_ShiftOpen_Without_Id_Stays_Queued()
         {
             // #117b: crash after the server committed the shift_open but

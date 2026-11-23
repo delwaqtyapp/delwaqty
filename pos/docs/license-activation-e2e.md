@@ -80,3 +80,21 @@ the binding when a PC is replaced.
 Legacy v1 seals (partial payload HMAC, unsigned state) are never restored:
 an old install re-activates online once, and only then do its legacy data
 files migrate into the merchant scope.
+
+## Rollout note (2026-11-23): DPAPI CurrentUser + key-import removal
+
+This build changes the protection scope from LocalMachine to CurrentUser
+and stops adopting plaintext device keys entirely. For any PC that ran an
+older build:
+
+- Blobs sealed under LocalMachine cannot be unprotected under CurrentUser
+  — the device key regenerates on first start, every local seal and the
+  saved session stop verifying, and the app asks for ONE online
+  reactivation. Plan for one online reactivation per PC at rollout.
+- All other local data (outbox, sales journal, batches, scopes) survives
+  untouched; queued ops upload normally after reactivation.
+- Pre-DP1 installs (plaintext device key era) lose legacy payload
+  verification, so their flat-layout files are NOT auto-migrated into the
+  merchant scope — support moves those files manually if such a PC exists.
+- The supported model is one dedicated Windows account per shop PC; the
+  data-dir ACL grants only that account + SYSTEM + Administrators.

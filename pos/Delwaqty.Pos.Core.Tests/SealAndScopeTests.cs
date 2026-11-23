@@ -245,7 +245,9 @@ namespace Delwaqty.Pos.Core.Tests
             var again = new ActivationService(_dir, "Pharmacy");
             Assert.Equal(svc.DeviceKey, again.DeviceKey);
 
-            // A legacy plaintext key is migrated on first read.
+            // Plaintext content is NEVER adopted (review #115 follow-up) —
+            // not even a genuine legacy key: the file is replaced with a
+            // fresh protected key, old seals die, reactivation is forced.
             var dir2 = Path.Combine(Path.GetTempPath(), "key-" + Guid.NewGuid());
             Directory.CreateDirectory(dir2);
             try
@@ -253,9 +255,11 @@ namespace Delwaqty.Pos.Core.Tests
                 var legacy = LocalLicenseSeal.NewDeviceKey();
                 File.WriteAllText(Path.Combine(dir2, "device.key"), Convert.ToBase64String(legacy));
                 var loaded = Protection.DeviceKeyStore.GetOrCreate(dir2);
-                Assert.Equal(legacy, loaded);
+                Assert.NotEqual(legacy, loaded);
                 Assert.StartsWith(Protection.DeviceKeyStore.BlobPrefix,
                     File.ReadAllText(Path.Combine(dir2, "device.key")));
+                // And it round-trips afterwards.
+                Assert.Equal(loaded, Protection.DeviceKeyStore.GetOrCreate(dir2));
             }
             finally { Directory.Delete(dir2, true); }
         }
@@ -263,12 +267,12 @@ namespace Delwaqty.Pos.Core.Tests
         [Fact]
         public void Planted_Legacy_Key_Is_Ignored_After_Migration()
         {
-            // Review #114 follow-up: once a protected key exists (marker
-            // written), a plaintext device.key planted by a directory writer
-            // must NOT be adopted — adopting it would let them forge seals.
+            // Review #114/#115 follow-up: a plaintext device.key planted by a
+            // directory writer must NOT be adopted — adopting it would let
+            // them forge seals. There is no marker file to delete anymore:
+            // plaintext content is unconditionally replaced.
             var svc = new ActivationService(_dir, "Pharmacy");
             var original = svc.DeviceKey;
-            Assert.True(File.Exists(Path.Combine(_dir, Protection.DeviceKeyStore.MarkerFileName)));
 
             var planted = LocalLicenseSeal.NewDeviceKey();
             File.WriteAllText(Path.Combine(_dir, "device.key"), Convert.ToBase64String(planted));
@@ -277,6 +281,27 @@ namespace Delwaqty.Pos.Core.Tests
             Assert.NotEqual(original, loaded);  // old seals die -> reactivation
             Assert.StartsWith(Protection.DeviceKeyStore.BlobPrefix,
                 File.ReadAllText(Path.Combine(_dir, "device.key")));
+        }
+
+        [Fact]
+        public void Key_Regeneration_Preserves_All_Other_Data()
+        {
+            // Device-key recovery flow (review follow-up): a regenerated key
+            // kills the seals but every other byte stays — the outbox and
+            // scopes survive for reactivation/sync.
+            var svc = new ActivationService(_dir, "Pharmacy");
+            var scope = svc.ScopeDirFor("m-1");
+            Directory.CreateDirectory(scope);
+            using (var store = new OutboxStore(Path.Combine(scope, "outbox.db")))
+                store.Enqueue(OutboxPayloads.Customer("احمد", "010", null));
+
+            File.WriteAllText(Path.Combine(_dir, "device.key"), Convert.ToBase64String(new byte[32]));
+            var fresh = Protection.DeviceKeyStore.GetOrCreate(_dir);
+            Assert.NotEqual(svc.DeviceKey, fresh);
+            // Data untouched, outbox intact.
+            Assert.True(File.Exists(Path.Combine(scope, "outbox.db")));
+            using (var store = new OutboxStore(Path.Combine(scope, "outbox.db")))
+                Assert.Equal(1, store.PendingCount());
         }
 
         private sealed class ThrowingProtector : Protection.ILocalProtector

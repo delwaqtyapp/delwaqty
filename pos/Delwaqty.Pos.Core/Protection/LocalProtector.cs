@@ -92,27 +92,29 @@ namespace Delwaqty.Pos.Core.Protection
     /// base64 next to the data it protected).
     /// File format: "DP1:" + base64(protect(key)).
     ///
-    /// Legacy plaintext keys migrate ONCE: a marker file (device.key.dp1) is
-    /// written with the first protected save, and plaintext content is never
-    /// accepted again afterwards. Without the marker a planted plaintext key
-    /// would let a directory writer substitute a key they know and forge
-    /// seals (review #114 follow-up).
+    /// Plaintext content is NEVER adopted (review #115 follow-up): a marker
+    /// file can be deleted by the same directory writer who plants a chosen
+    /// key, so any migration path is a forge-seals path. A non-"DP1:" file
+    /// — legacy plaintext or planted — is overwritten with a fresh protected
+    /// key. Consequence: every local seal and legacy payload HMAC stops
+    /// verifying and the install must re-activate ONLINE. Data recovery: all
+    /// other files (outbox, sales, scopes) stay exactly where they are; the
+    /// pre-DP1 flat layout is NOT auto-migrated afterwards (its payload can
+    /// no longer be verified), so support migrates those files manually.
     ///
     /// A protected blob that fails to unprotect (foreign user/machine, or
-    /// corrupted file) is NOT a crash: the key is regenerated and the old
-    /// one discarded, which invalidates every local seal and forces a fresh
-    /// online activation (security review LOW-1).
+    /// corrupted file) follows the same recovery flow instead of crashing
+    /// (security review LOW-1): regenerate, keep all other data, reactivate
+    /// online.
     /// </summary>
     public static class DeviceKeyStore
     {
         public const string BlobPrefix = "DP1:";
-        public const string MarkerFileName = "device.key.dp1";
 
         public static byte[] GetOrCreate(string rootDir, ILocalProtector protector = null)
         {
             System.IO.Directory.CreateDirectory(rootDir);
             var path = System.IO.Path.Combine(rootDir, "device.key");
-            var markerPath = System.IO.Path.Combine(rootDir, MarkerFileName);
             protector = protector ?? LocalProtector.ForPurpose("device-key");
             if (System.IO.File.Exists(path))
             {
@@ -121,39 +123,24 @@ namespace Delwaqty.Pos.Core.Protection
                 {
                     try
                     {
-                        var key = protector.Unprotect(Convert.FromBase64String(text.Substring(BlobPrefix.Length)));
-                        TouchMarker(markerPath);
-                        return key;
+                        return protector.Unprotect(Convert.FromBase64String(text.Substring(BlobPrefix.Length)));
                     }
                     catch
                     {
                         // Foreign or corrupted blob: regenerate (old seals die,
-                        // reactivation required) instead of crashing at startup.
+                        // data stays, reactivation required) — never crash.
                         var fresh = Licensing.LocalLicenseSeal.NewDeviceKey();
                         Save(path, fresh, protector);
-                        TouchMarker(markerPath);
                         return fresh;
                     }
                 }
-                if (System.IO.File.Exists(markerPath))
-                {
-                    // A protected key existed before: this plaintext content was
-                    // planted after the migration. Never adopt it (review #114):
-                    // regenerate so seals forged with the planted key never
-                    // verify, forcing a fresh online activation.
-                    var fresh2 = Licensing.LocalLicenseSeal.NewDeviceKey();
-                    Save(path, fresh2, protector);
-                    return fresh2;
-                }
-                // Genuine legacy plaintext base64 key: migrate once, then mark.
-                var legacy = Convert.FromBase64String(text);
-                Save(path, legacy, protector);
-                TouchMarker(markerPath);
-                return legacy;
+                // Plaintext content — legacy or planted — is never adopted.
+                var freshPlain = Licensing.LocalLicenseSeal.NewDeviceKey();
+                Save(path, freshPlain, protector);
+                return freshPlain;
             }
             var created = Licensing.LocalLicenseSeal.NewDeviceKey();
             Save(path, created, protector);
-            TouchMarker(markerPath);
             return created;
         }
 
@@ -161,12 +148,6 @@ namespace Delwaqty.Pos.Core.Protection
         {
             System.IO.File.WriteAllText(path,
                 BlobPrefix + Convert.ToBase64String(protector.Protect(key)));
-        }
-
-        private static void TouchMarker(string markerPath)
-        {
-            if (!System.IO.File.Exists(markerPath))
-                System.IO.File.WriteAllText(markerPath, "dp1");
         }
     }
 

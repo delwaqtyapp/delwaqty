@@ -22,8 +22,8 @@ BEGIN
   RETURN jsonb_build_object('success',false,'reason','ACTIVE_VEHICLE_REQUIRED');
  END IF;
  UPDATE public.drivers SET onboarding_completed=true,onboarding_step=5,
-   service_types=CASE WHEN coalesce(cardinality(service_types),0)=0 THEN ARRAY['food','grocery','pharmacy','parcel']::text[] ELSE service_types END,
-   accepts_deliveries=true,
+   service_types=CASE WHEN NOT coalesce(d.onboarding_completed,false) AND coalesce(cardinality(service_types),0)=0 THEN ARRAY['food','grocery','pharmacy','parcel']::text[] ELSE service_types END,
+   accepts_deliveries=CASE WHEN NOT coalesce(d.onboarding_completed,false) THEN true ELSE accepts_deliveries END,
    verification_status=CASE WHEN is_verified THEN verification_status ELSE 'pending' END,
    updated_at=now() WHERE id=p_driver_id;
  RETURN jsonb_build_object('success',true);
@@ -61,4 +61,17 @@ END;
 $function$
 ;
 UPDATE public.drivers SET service_types=ARRAY['food','grocery','pharmacy','parcel']::text[],updated_at=now() WHERE coalesce(cardinality(service_types),0)=0;
+CREATE OR REPLACE FUNCTION public.driver_capability_bounds_guard()
+RETURNS trigger LANGUAGE plpgsql SECURITY INVOKER SET search_path TO public,pg_temp AS $$
+BEGIN
+ IF NEW.service_types IS NULL OR NOT NEW.service_types <@ ARRAY['food','grocery','pharmacy','parcel']::text[]
+    OR (NEW.accepts_deliveries AND cardinality(NEW.service_types)=0)
+    OR NEW.max_delivery_distance_km IS NULL OR NEW.max_delivery_distance_km<=0 OR NEW.max_delivery_distance_km>200
+    OR NEW.max_weight_kg IS NULL OR NEW.max_weight_kg<=0 OR NEW.max_weight_kg>1000 THEN
+   RAISE EXCEPTION 'INVALID_CAPABILITIES' USING ERRCODE='23514';
+ END IF;
+ RETURN NEW;
+END $$;
+DROP TRIGGER IF EXISTS driver_capability_bounds ON public.drivers;
+CREATE TRIGGER driver_capability_bounds BEFORE INSERT OR UPDATE OF service_types,accepts_deliveries,max_delivery_distance_km,max_weight_kg ON public.drivers FOR EACH ROW EXECUTE FUNCTION public.driver_capability_bounds_guard();
 COMMIT;

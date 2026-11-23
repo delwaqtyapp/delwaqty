@@ -65,6 +65,29 @@ BEGIN
  ASSERT a->>'success'='true','delivery subset toggle rejected';
  a:=public.update_driver_capabilities(d,ARRAY[]::text[],false,15,20);
  ASSERT a->>'success'='true','delivery opt-out rejected';
+ a:=public.complete_driver_onboarding(d);
+ ASSERT a->>'success'='true','repeat onboarding rejected';
+ PERFORM set_config('role','none',true);
+ ASSERT NOT (SELECT accepts_deliveries FROM public.drivers WHERE id=d),'repeat onboarding reset opt-out';
+ PERFORM set_config('role','authenticated',true);
+ BEGIN
+  UPDATE public.drivers SET service_types=ARRAY['ride'] WHERE id=d;
+  RAISE EXCEPTION 'direct ride update accepted';
+ EXCEPTION WHEN check_violation THEN NULL;
+ END;
+ BEGIN
+  UPDATE public.drivers SET max_weight_kg=-1 WHERE id=d;
+  RAISE EXCEPTION 'direct invalid weight accepted';
+ EXCEPTION WHEN check_violation THEN NULL;
+ END;
+ PERFORM set_config('request.jwt.claim.sub',gen_random_uuid()::text,true);
+ a:=public.update_driver_capabilities(d,ARRAY['food'],true,15,20);
+ ASSERT a->>'reason'='FORBIDDEN','foreign caller accepted';
+ PERFORM set_config('request.jwt.claim.sub','',true);
+ a:=public.update_driver_capabilities(d,ARRAY['food'],true,15,20);
+ ASSERT a->>'reason'='FORBIDDEN','anon claim accepted';
+ PERFORM set_config('request.jwt.claim.sub',u::text,true);
+
 
  a:=public.review_driver_application(d,true,NULL);
  IF a->>'reason' <> 'FORBIDDEN' THEN RAISE EXCEPTION 'self admin approval allowed'; END IF;

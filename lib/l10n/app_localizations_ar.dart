@@ -6995,6 +6995,54 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get resendWhatsAppCode => 'إعادة إرسال الكود';
+  @override
+  String get whatsappYourCodeLabel => 'رمز التحقق الخاص بك';
+
+  @override
+  String get copyOtpCode => 'نسخ الرمز';
+
+  @override
+  String get otpCodeCopied => 'تم نسخ الرمز';
+
+  @override
+  String get whatsappWaitingAuto =>
+      'بانتظار تأكيد واتساب. ستتحدث هذه الشاشة تلقائيًا فور وصول رسالتك.';
+
+  @override
+  String otpExpiresIn(String time) {
+    return 'تنتهي صلاحية الرمز خلال $time';
+  }
+
+  @override
+  String get otpExpiredTitle => 'انتهت صلاحية الرمز';
+
+  @override
+  String get otpExpiredBody =>
+      'الرمز صالح لمدة 10 دقائق. اطلب رمزًا جديدًا - يستغرق ثوانٍ.';
+
+  @override
+  String get requestNewOtpCode => 'احصل على رمز جديد';
+
+  @override
+  String otpNotConfirmedYet(String phone) {
+    return 'لم يصل التأكيد بعد. تأكد أنك أرسلت الرسالة من واتساب الخاص بك ($phone) ثم انتظر ثواني.';
+  }
+
+  @override
+  String get wrongPhoneNumberHint =>
+      'الرقم غير صحيح؟ أغلق هذه النافذة وارجع لتعديله.';
+
+  @override
+  String resendOtpAvailableIn(String time) {
+    return 'يمكنك إعادة الإرسال خلال $time';
+  }
+
+  @override
+  String get retryRequest => 'حاول مرة أخرى';
+
+  @override
+  String get iSentItCheckNow => 'أرسلتها - تحقق الآن';
+
 
   @override
   String get phoneOrEmailOrUsername => 'رقم الهاتف أو اسم المستخدم';

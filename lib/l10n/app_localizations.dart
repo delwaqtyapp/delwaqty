@@ -13472,6 +13472,84 @@ abstract class AppLocalizations {
   /// **'Resend Code'**
   String get resendWhatsAppCode;
 
+  /// No description provided for @whatsappYourCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your verification code'**
+  String get whatsappYourCodeLabel;
+
+  /// No description provided for @copyOtpCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy code'**
+  String get copyOtpCode;
+
+  /// No description provided for @otpCodeCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Code copied'**
+  String get otpCodeCopied;
+
+  /// No description provided for @whatsappWaitingAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for WhatsApp confirmation. This screen updates automatically once your message arrives.'**
+  String get whatsappWaitingAuto;
+
+  /// No description provided for @otpExpiresIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Code expires in {time}'**
+  String otpExpiresIn(String time);
+
+  /// No description provided for @otpExpiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Code expired'**
+  String get otpExpiredTitle;
+
+  /// No description provided for @otpExpiredBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Codes last 10 minutes. Get a fresh one - it takes seconds.'**
+  String get otpExpiredBody;
+
+  /// No description provided for @requestNewOtpCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Get a new code'**
+  String get requestNewOtpCode;
+
+  /// No description provided for @otpNotConfirmedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not confirmed yet. Make sure you sent the message from your WhatsApp ({phone}), then give it a few seconds.'**
+  String otpNotConfirmedYet(String phone);
+
+  /// No description provided for @wrongPhoneNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong number? Close this and go back to edit it.'**
+  String get wrongPhoneNumberHint;
+
+  /// No description provided for @resendOtpAvailableIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend available in {time}'**
+  String resendOtpAvailableIn(String time);
+
+  /// No description provided for @retryRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get retryRequest;
+
+  /// No description provided for @iSentItCheckNow.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve sent it - check now'**
+  String get iSentItCheckNow;
+
   /// No description provided for @phoneOrEmailOrUsername.
   ///
   /// In en, this message translates to:

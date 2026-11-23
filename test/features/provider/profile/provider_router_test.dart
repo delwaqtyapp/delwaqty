@@ -32,7 +32,7 @@ import 'package:go_router/go_router.dart';
 
 class _FakeAuth extends AuthStateNotifier {
   _FakeAuth(this._initial);
-  AuthState _initial;
+  final AuthState _initial;
 
   @override
   AuthState build() => _initial;
@@ -80,7 +80,7 @@ class _FakeDashboardRepo implements MerchantDashboardRepository {
 }
 
 Widget _marker(String path) =>
-    Scaffold(body: Center(child: Text('route:$path', key: ValueKey('page'))));
+    Scaffold(body: Center(child: Text('route:$path', key: const ValueKey('page'))));
 
 class _NavTab extends FeatureModule {
   _NavTab(this.id, this.path, this.priority, {this.builder});

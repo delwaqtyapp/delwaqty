@@ -489,6 +489,7 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet>
                               const SizedBox(height: 4),
                               Text(
                                 _otpCode!.split('').join(' '),
+                                textDirection: TextDirection.ltr,
                                 style: AppTextStyles.headlineSmall.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w900,

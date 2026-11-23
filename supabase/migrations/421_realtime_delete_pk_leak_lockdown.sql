@@ -4,15 +4,35 @@
 -- DELETE on sensitive tables. Client code subscribes only to chat_messages,
 -- notifications and orders (verified across lib/ on integration/release10),
 -- so every sensitive financial/PII table with no client dependency leaves
--- the publication here. orders stays: the merchant orders page and dashboard
--- depend on it for live refresh; its exposure is limited to order UUIDs on
--- actual deletes, which product flows never perform (cancellation is a
--- status UPDATE). Removing orders is a product decision for the owner.
+-- the publication here (drops are guarded: a rerun is a no-op). orders
+-- stays: the merchant orders page and dashboard depend on it for live
+-- refresh; its residual exposure is order UUIDs on actual deletes, which
+-- product flows never perform (cancellation is a status UPDATE). Removing
+-- orders too is a product decision for the owner (deferred).
+--
+-- Client DELETE grants, audited live on staging+prod 2026-11-23:
+--   orders:         no DELETE policy exists, no client delete path -> revoke
+--                   anon + authenticated DELETE (hygiene; RLS already denied).
+--   notifications:  "Users delete own notifications" (used by the app's
+--                   delete-notification feature) + scoped admins -> keep
+--                   authenticated, revoke anon (no matching rows anyway).
+--   chat_messages:  scoped-admin delete only -> keep authenticated, revoke
+--                   anon.
+-- Privileged purge/retention (deletion-request edge function, service_role
+-- RPCs) still emit DELETE events for the 3 kept tables; accepted residual,
+-- same decision as orders staying published.
 BEGIN;
-ALTER PUBLICATION supabase_realtime DROP TABLE public.wallet_transactions;
-ALTER PUBLICATION supabase_realtime DROP TABLE public.wallets;
-ALTER PUBLICATION supabase_realtime DROP TABLE public.withdrawal_requests;
-ALTER PUBLICATION supabase_realtime DROP TABLE public.driver_earnings;
-ALTER PUBLICATION supabase_realtime DROP TABLE public.sanctions;
-ALTER PUBLICATION supabase_realtime DROP TABLE public.users;
+DO $$
+DECLARE t text;
+BEGIN
+  FOREACH t IN ARRAY ARRAY['wallet_transactions','wallets','withdrawal_requests','driver_earnings','sanctions','users'] LOOP
+    IF EXISTS (SELECT 1 FROM pg_publication_tables
+                WHERE pubname='supabase_realtime' AND schemaname='public' AND tablename=t) THEN
+      EXECUTE format('ALTER PUBLICATION supabase_realtime DROP TABLE public.%I', t);
+    END IF;
+  END LOOP;
+END $$;
+REVOKE DELETE ON public.orders FROM anon, authenticated;
+REVOKE DELETE ON public.notifications FROM anon;
+REVOKE DELETE ON public.chat_messages FROM anon;
 COMMIT;

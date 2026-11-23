@@ -7208,6 +7208,138 @@ abstract class AppLocalizations {
   /// **'My Complaints'**
   String get myComplaints;
 
+  /// No description provided for @suggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions'**
+  String get suggestions;
+
+  /// No description provided for @newSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'New Suggestion'**
+  String get newSuggestion;
+
+  /// No description provided for @mySuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'My Suggestions'**
+  String get mySuggestions;
+
+  /// No description provided for @noSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'No suggestions yet'**
+  String get noSuggestions;
+
+  /// No description provided for @noSuggestionsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your suggestions will appear here once sent.'**
+  String get noSuggestionsDescription;
+
+  /// No description provided for @suggestionSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get suggestionSubject;
+
+  /// No description provided for @suggestionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your suggestion'**
+  String get suggestionDescription;
+
+  /// No description provided for @suggestionCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get suggestionCategory;
+
+  /// No description provided for @suggestionCategoryGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get suggestionCategoryGeneral;
+
+  /// No description provided for @suggestionCategoryApp.
+  ///
+  /// In en, this message translates to:
+  /// **'The App'**
+  String get suggestionCategoryApp;
+
+  /// No description provided for @suggestionCategoryFeature.
+  ///
+  /// In en, this message translates to:
+  /// **'New Feature'**
+  String get suggestionCategoryFeature;
+
+  /// No description provided for @suggestionCategoryPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get suggestionCategoryPayment;
+
+  /// No description provided for @suggestionCategoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get suggestionCategoryOther;
+
+  /// No description provided for @suggestionSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get suggestionSubmit;
+
+  /// No description provided for @suggestionSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Your suggestion reached us, thank you'**
+  String get suggestionSent;
+
+  /// No description provided for @suggestionStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get suggestionStatusPending;
+
+  /// No description provided for @suggestionStatusReviewing.
+  ///
+  /// In en, this message translates to:
+  /// **'Under review'**
+  String get suggestionStatusReviewing;
+
+  /// No description provided for @suggestionStatusAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get suggestionStatusAccepted;
+
+  /// No description provided for @suggestionStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get suggestionStatusRejected;
+
+  /// No description provided for @suggestionStatusImplemented.
+  ///
+  /// In en, this message translates to:
+  /// **'Implemented'**
+  String get suggestionStatusImplemented;
+
+  /// No description provided for @suggestionResolutionNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolution note'**
+  String get suggestionResolutionNote;
+
+  /// No description provided for @adminSuggestionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'User Suggestions'**
+  String get adminSuggestionsTitle;
+
   /// No description provided for @complaintType.
   ///
   /// In en, this message translates to:

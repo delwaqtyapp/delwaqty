@@ -10,6 +10,7 @@ import 'package:delwaqty/features/admin/escalation/escalation_module.dart';
 import 'package:delwaqty/features/_shared/regions/regions_module.dart';
 import 'package:delwaqty/features/_shared/campaigns/campaigns_module.dart';
 import 'package:delwaqty/features/_shared/notifications/notifications_module.dart';
+import 'package:delwaqty/features/_shared/suggestions/suggestions_module.dart';
 
 // Admin flavor: customer-facing complaints (/my-complaints, /new-complaint)
 // and rewards (/rewards) are intentionally NOT registered. Complaint handling
@@ -31,6 +32,7 @@ void registerAdminModules() {
     RegionsModule(),
     CampaignsModule(),
     NotificationsModule(),
+    SuggestionsModule(),
   ]);
 
   registry.freeze();

@@ -29,6 +29,7 @@ import 'package:delwaqty/features/admin/presentation/pages/admin_provider_intell
 import 'package:delwaqty/features/admin/presentation/pages/admin_wallet_intelligence_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_transaction_ledger_page.dart';
 import 'package:delwaqty/features/_shared/complaints/presentation/pages/admin_complaints_page.dart';
+import 'package:delwaqty/features/_shared/suggestions/presentation/pages/admin_suggestions_page.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/pages/admin_support_chat_page.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/pages/support_chat_room_page.dart';
 import 'package:delwaqty/features/admin/member_management/presentation/pages/member_operations_center.dart';
@@ -229,6 +230,11 @@ class AdminModule extends FeatureModule {
           path: 'complaints',
           pageBuilder: (context, state) =>
               _adminPage(const AdminComplaintsPage()),
+        ),
+        GoRoute(
+          path: 'suggestions',
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminSuggestionsPage()),
         ),
         GoRoute(
           path: 'support-chat',

@@ -94,7 +94,7 @@ Deno.serve(async (req: Request) => {
       const { data: regionId, error: regionError } = await admin.rpc("_member_region_id", { p_member_id: targetId });
       const { data: scopeOk, error: scopeError } = await scopedClient.rpc("_admin_member_scope", { p_user_id: targetId });
       const { data: permissionOk, error: permissionError } = await scopedClient.rpc("has_permission", {
-        p_permission: "MEMBER_MODERATE", p_region_id: regionId,
+        p_permission: "MEMBER_DELETE", p_region_id: regionId,
       });
       if (adminError || regionError || scopeError || permissionError || activeAdmin !== true || scopeOk !== true || permissionOk !== true) {
         return json({ error: "Not authorized for this member" }, 403);

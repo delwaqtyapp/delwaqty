@@ -1,4 +1,5 @@
--- 413 regression: red team round 1 function authorization + sensitive-field guards.
+-- 418 regression: products.is_featured admin-only gate (trigger + scoped RPC)
+-- plus the 413 red team round 1 function/field guard assertions.
 -- Actual-role fixtures: the staging QA accounts (qa.* / pilot.* villages).
 -- Transactional: every write rolls back; no staging state is mutated.
 --
@@ -23,6 +24,11 @@ DECLARE
   v_merchant uuid := '22222222-2222-4222-8222-000000000202';
   v_product  uuid := '66666666-6666-4666-8666-000000020201';
   v_region   uuid := '905b0ccc-f2ed-5306-b661-233b49edd400'; -- from user_region_preferences
+  v_admin_village uuid := 'c3b38bed-3010-4bd5-9fb1-0ffddfe87a81'; -- qa.admin-village-1 (region self + MERCHANT_EDIT)
+  v_admin_plain   uuid := 'b02d03fb-c0d6-4b3d-9e5a-076eaebba0b5'; -- qa.admin-plain-1 (no region assignment)
+  v_admin_susp    uuid := '60fac5b0-bc70-47f9-84d2-dbf302841a6d'; -- qa.admin-suspended-1 (admin_management inactive)
+  v_admin_cairo   uuid := 'bceec1f3-ba83-40f3-bf2e-862540a69915'; -- qa.lab-member-outside, promoted in-tx
+  v_cairo    uuid := '00000000-0000-0000-0000-000000000107';
   v_err  text;
   v_j    jsonb;
   v_new  uuid;
@@ -65,24 +71,41 @@ BEGIN
   PERFORM 1 FROM public.products LIMIT 1;
   PERFORM 1 FROM public.service_providers LIMIT 1;
   PERFORM set_config('role','authenticated',true);
-  -- Merchant feature INSERT/UPDATE denied, normal price edit retained.
+  -- ── 418 part 1: direct client feature writes denied (featured=false state) ─
   PERFORM set_config('role','none',true);
   INSERT INTO public.products(id,merchant_id,name,price,is_featured) VALUES(v_product,v_merchant,'zz418-fixture',1,false) ON CONFLICT(id) DO NOTHING;
+  UPDATE public.products SET is_featured=false WHERE id=v_product;
   PERFORM set_config('role','authenticated',true);
   PERFORM set_config('request.jwt.claim.sub', v_merch_u::text,true);
   v_err:=NULL;
   BEGIN UPDATE public.products SET is_featured=true WHERE id=v_product;
   EXCEPTION WHEN insufficient_privilege THEN v_err:=SQLERRM; END;
-  ASSERT v_err IS NOT NULL,'merchant self-feature update accepted';
+  ASSERT v_err IS NOT NULL,'418: merchant self-feature update accepted';
   v_err:=NULL;
   BEGIN INSERT INTO public.products(merchant_id,name,price,is_featured) VALUES(v_merchant,'zz418-forged',1,true);
   EXCEPTION WHEN insufficient_privilege THEN v_err:=SQLERRM; END;
-  ASSERT v_err IS NOT NULL,'merchant self-feature insert accepted';
-  PERFORM set_config('request.jwt.claim.sub',v_owner::text,true);
-  v_j:=public.admin_set_product_featured(v_product,true);
-  ASSERT v_j->>'ok'='true','owner admin RPC denied';
+  ASSERT v_err IS NOT NULL,'418: merchant self-feature insert accepted';
+  -- default-false insert and a normal price edit stay allowed
+  INSERT INTO public.products(merchant_id,name,price,is_featured) VALUES(v_merchant,'zz418-plain',1,false);
+  UPDATE public.products SET price=2 WHERE id=v_product;
+  -- customer direct write: RLS hides the row (0 rows) or the trigger rejects;
+  -- either way the column must stay false
+  PERFORM set_config('request.jwt.claim.sub', v_customer::text,true);
+  UPDATE public.products SET is_featured=true WHERE id=v_product;
   PERFORM set_config('role','none',true);
-  ASSERT (SELECT is_featured FROM public.products WHERE id=v_product),'admin feature path denied';
+  ASSERT NOT (SELECT is_featured FROM public.products WHERE id=v_product),'418: customer feature update landed';
+  -- anon direct write: same guarantee
+  PERFORM set_config('role','anon',true);
+  PERFORM set_config('request.jwt.claim.sub','',true);
+  UPDATE public.products SET is_featured=true WHERE id=v_product;
+  PERFORM set_config('role','none',true);
+  ASSERT NOT (SELECT is_featured FROM public.products WHERE id=v_product),'418: anon feature update landed';
+  PERFORM set_config('role','anon',true);
+  -- anon cannot execute the admin RPC at all (EXECUTE revoked)
+  v_err:=NULL;
+  BEGIN PERFORM public.admin_set_product_featured(v_product,true);
+  EXCEPTION WHEN OTHERS THEN v_err:=SQLERRM; END;
+  ASSERT v_err IS NOT NULL,'418: anon executed admin RPC';
   PERFORM set_config('role','authenticated',true);
   -- ── (3) merchants.settlement_model guard ──────────────────────────────────
   PERFORM set_config('role', 'authenticated', true);
@@ -170,9 +193,68 @@ BEGIN
   PERFORM set_config('request.jwt.claim.sub', v_admin::text, true);
   UPDATE public.drivers SET is_active = false, is_online = false, status = 'offline' WHERE id = v_driver;
 
-  -- ── (6) products.is_featured: merchant flow intentionally preserved ───────
-  PERFORM set_config('request.jwt.claim.sub', v_merch_u::text, true);
-  UPDATE public.products SET is_featured = true WHERE id = v_product;
+  -- ── 418 part 2: scoped RPC matrix + dual-role direct write ────────────────
+  -- dual-role admin+merchant fixture (in-transaction, rolls back)
+  PERFORM set_config('role','none',true);
+  UPDATE public.users SET role='admin' WHERE id=v_merch_u;
+  INSERT INTO public.admin_management(admin_id,supervisor_id,is_active,created_by) VALUES(v_merch_u,v_owner,true,v_owner);
+  INSERT INTO public.admin_region_assignments(admin_id,region_id,scope,created_by) VALUES(v_merch_u,v_region,'self',v_owner);
+  INSERT INTO public.admin_permission_grants(admin_id,permission,granted_by) VALUES(v_merch_u,'MERCHANT_EDIT',v_owner);
+  -- out-of-region admin fixture (Cairo governorate scope + grant)
+  UPDATE public.users SET role='admin' WHERE id=v_admin_cairo;
+  INSERT INTO public.admin_management(admin_id,supervisor_id,is_active,created_by) VALUES(v_admin_cairo,v_owner,true,v_owner);
+  INSERT INTO public.admin_region_assignments(admin_id,region_id,scope,created_by) VALUES(v_admin_cairo,v_cairo,'descendants',v_owner);
+  INSERT INTO public.admin_permission_grants(admin_id,permission,granted_by) VALUES(v_admin_cairo,'MERCHANT_EDIT',v_owner);
+  PERFORM set_config('role','authenticated',true);
+  -- dual-role direct client PATCH still denied: admins must use the RPC
+  PERFORM set_config('request.jwt.claim.sub', v_merch_u::text,true);
+  v_err:=NULL;
+  BEGIN UPDATE public.products SET is_featured=true WHERE id=v_product;
+  EXCEPTION WHEN insufficient_privilege THEN v_err:=SQLERRM; END;
+  ASSERT v_err IS NOT NULL,'418: dual-role admin+merchant direct feature update accepted';
+  -- owner RPC: success, featured true
+  PERFORM set_config('request.jwt.claim.sub',v_owner::text,true);
+  v_j:=public.admin_set_product_featured(v_product,true);
+  ASSERT v_j->>'ok'='true','418: owner RPC denied';
+  PERFORM set_config('role','none',true);
+  ASSERT (SELECT is_featured FROM public.products WHERE id=v_product),'418: owner RPC did not set featured';
+  PERFORM set_config('role','authenticated',true);
+  -- with featured now true: merchant direct changes still denied, false insert ok
+  PERFORM set_config('request.jwt.claim.sub', v_merch_u::text,true);
+  v_err:=NULL;
+  BEGIN UPDATE public.products SET is_featured=false WHERE id=v_product;
+  EXCEPTION WHEN insufficient_privilege THEN v_err:=SQLERRM; END;
+  ASSERT v_err IS NOT NULL,'418: merchant unfeature update accepted';
+  INSERT INTO public.products(merchant_id,name,price,is_featured) VALUES(v_merchant,'zz418-plain2',1,false);
+  -- scoped non-owner admin (village self scope + MERCHANT_EDIT): success
+  PERFORM set_config('request.jwt.claim.sub', v_admin_village::text,true);
+  v_j:=public.admin_set_product_featured(v_product,false);
+  ASSERT v_j->>'ok'='true','418: scoped admin RPC denied: %',v_j;
+  PERFORM set_config('role','none',true);
+  ASSERT NOT (SELECT is_featured FROM public.products WHERE id=v_product),'418: scoped admin RPC did not unset featured';
+  -- same admin with the MERCHANT_EDIT grant removed: denied
+  DELETE FROM public.admin_permission_grants WHERE admin_id=v_admin_village AND permission='MERCHANT_EDIT';
+  PERFORM set_config('role','authenticated',true);
+  v_j:=public.admin_set_product_featured(v_product,true);
+  ASSERT v_j->>'ok'='false' AND v_j->>'code'='FORBIDDEN','418: permissionless admin RPC allowed: %',v_j;
+  -- unassigned admin: denied
+  PERFORM set_config('request.jwt.claim.sub', v_admin_plain::text,true);
+  v_j:=public.admin_set_product_featured(v_product,true);
+  ASSERT v_j->>'ok'='false' AND v_j->>'code'='FORBIDDEN','418: unassigned admin RPC allowed: %',v_j;
+  -- suspended admin: denied
+  PERFORM set_config('request.jwt.claim.sub', v_admin_susp::text,true);
+  v_j:=public.admin_set_product_featured(v_product,true);
+  ASSERT v_j->>'ok'='false' AND v_j->>'code'='FORBIDDEN','418: suspended admin RPC allowed: %',v_j;
+  -- out-of-region admin (Cairo scope + grant): denied
+  PERFORM set_config('request.jwt.claim.sub', v_admin_cairo::text,true);
+  v_j:=public.admin_set_product_featured(v_product,true);
+  ASSERT v_j->>'ok'='false' AND v_j->>'code'='FORBIDDEN','418: out-of-region admin RPC allowed: %',v_j;
+  -- null value and unknown product: rejected
+  PERFORM set_config('request.jwt.claim.sub',v_owner::text,true);
+  v_j:=public.admin_set_product_featured(v_product,NULL);
+  ASSERT v_j->>'ok'='false' AND v_j->>'code'='INVALID_VALUE','418: NULL featured accepted: %',v_j;
+  v_j:=public.admin_set_product_featured(gen_random_uuid(),true);
+  ASSERT v_j->>'ok'='false' AND v_j->>'code'='NOT_FOUND','418: unknown product accepted: %',v_j;
 
   -- ── (7) signup-style insert unaffected (guards are UPDATE-only) ───────────
   v_new := gen_random_uuid();
@@ -183,5 +265,5 @@ BEGIN
   VALUES (v_new, 'm413-probe@example.invalid', 'm413 probe', 'ar', false,
           'customer', 'customer', 'approved', false, 'active', 'active', true, 0);
 END $$;
-SELECT 'm413 assertions passed; fixtures rolled back' AS result;
+SELECT '418+413 assertions passed; fixtures rolled back' AS result;
 ROLLBACK;

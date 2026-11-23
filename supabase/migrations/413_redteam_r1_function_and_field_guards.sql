@@ -4,9 +4,8 @@ BEGIN;
 -- 1) admin_effective_permissions(p_admin_id): was callable by any authenticated
 --    user for ANY admin id, leaking role, permission grants and region
 --    assignments. Now restricted to the subject themself or an active admin.
--- 2) is_admin(): the anon role held EXECUTE on the no-arg overload on staging
---    (is_admin(uid) had already been revoked in 032/051). anon needs neither
---    overload; revoked on both (idempotent).
+-- 2) Revoke anon EXECUTE only on supplied-identity is_admin(uuid).
+--    Retain zero-argument is_admin() for anonymous RLS policy evaluation.
 -- 3) merchants_guard_sensitive_fields: settlement_model is now guarded for
 --    direct client writes. Merchants keep self-service through the
 --    SECURITY DEFINER merchant_set_settlement_model RPC; admins/owner keep

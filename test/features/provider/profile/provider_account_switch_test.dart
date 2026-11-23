@@ -22,7 +22,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' show SupabaseClient;
 
 class _FakeAuth extends AuthStateNotifier {
   _FakeAuth(this._initial);
-  AuthState _initial;
+  final AuthState _initial;
 
   @override
   AuthState build() => _initial;

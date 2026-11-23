@@ -240,6 +240,7 @@ class _OtaUpdateDialogState extends State<OtaUpdateDialog>
         actions: [
           if (_step == OtaDialogStep.idle ||
               _step == OtaDialogStep.downloadFailed ||
+              _step == OtaDialogStep.installFailed ||
               _step == OtaDialogStep.checksumFailed)
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -325,6 +326,11 @@ class _OtaUpdateDialogState extends State<OtaUpdateDialog>
     final error = await _actions.install(file);
     _installing = false;
     if (!mounted) return;
+    if (error == 'artifact_missing' || error == 'artifact_invalid') {
+      _file = null;
+      await _startUpdate();
+      return;
+    }
     setState(() {
       if (error == null) {
         // The system installer is open. Keep the notice and its Install

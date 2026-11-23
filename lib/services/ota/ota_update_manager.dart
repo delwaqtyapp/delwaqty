@@ -160,6 +160,8 @@ Future<OtaCheckResult> checkForOtaUpdate(AppFlavor flavor) async {
 /// Result of [downloadLatestApk]: either a verified APK on disk or an error
 /// code (`missing_checksum`, `checksum_mismatch`, or null for a plain
 /// network failure).
+final Map<String, String> _verifiedArtifactHashes = {};
+
 class OtaDownloadResult {
   const OtaDownloadResult({this.file, this.error});
 
@@ -199,33 +201,46 @@ Future<OtaDownloadResult> downloadLatestApk(
     }
     if (!target.existsSync() || target.lengthSync() == 0) {
       final uri = Uri.parse('$kOtaDownloadBaseUrl$tag/${channel.apk}');
-      final streamed = await http.Client()
-          .send(http.Request('GET', uri))
-          .timeout(const Duration(seconds: 30));
-      if (streamed.statusCode != 200) {
-        unawaited(streamed.stream.drain<void>());
-        return const OtaDownloadResult();
-      }
-
-      // Write to a temp file and rename, so an interrupted download is never
-      // mistaken for a finished one on the next attempt.
-      final partial = File('${target.path}.part');
-      final total = streamed.contentLength;
-      final sink = partial.openWrite();
-      var received = 0;
+      final client = http.Client();
       try {
-        await for (final chunk in streamed.stream) {
-          sink.add(chunk);
-          received += chunk.length;
-          if (total != null && total > 0 && onProgress != null) {
-            onProgress((received / total).clamp(0.0, 1.0));
-          }
+        final streamed = await client
+            .send(http.Request('GET', uri))
+            .timeout(const Duration(seconds: 30));
+        if (streamed.statusCode != 200) {
+          return const OtaDownloadResult();
         }
+
+        // Write to a temp file and rename, so an interrupted download is never
+        // mistaken for a finished one on the next attempt.
+        final partial = File('${target.path}.part');
+        final total = streamed.contentLength;
+        final sink = partial.openWrite();
+        var received = 0;
+        try {
+          await streamed.stream
+              .timeout(const Duration(seconds: 30))
+              .forEach((chunk) {
+                sink.add(chunk);
+                received += chunk.length;
+                if (total != null && total > 0 && onProgress != null) {
+                  onProgress((received / total).clamp(0.0, 1.0));
+                }
+              })
+              .timeout(
+                const Duration(minutes: 5),
+                onTimeout: () {
+                  client.close();
+                  throw TimeoutException('APK download timed out');
+                },
+              );
+        } finally {
+          await sink.flush();
+          await sink.close();
+        }
+        await partial.rename(target.path);
       } finally {
-        await sink.flush();
-        await sink.close();
+        client.close();
       }
-      await partial.rename(target.path);
     }
 
     if (!await verifyArtifactChecksum(target, expectedHash)) {
@@ -239,6 +254,7 @@ Future<OtaDownloadResult> downloadLatestApk(
     }
 
     onProgress?.call(1.0);
+    _verifiedArtifactHashes[target.path] = expectedHash;
     return OtaDownloadResult(file: target);
   } catch (_) {
     return const OtaDownloadResult();
@@ -265,6 +281,12 @@ Future<bool> canRequestPackageInstalls() async {
 /// this again, the file is kept.
 Future<String?> installDownloadedApk(File file) async {
   try {
+    final expected = _verifiedArtifactHashes[file.path];
+    if (!await file.exists()) return 'artifact_missing';
+    if (expected == null || !await verifyArtifactChecksum(file, expected)) {
+      if (await file.exists()) await file.delete();
+      return 'artifact_invalid';
+    }
     await _otaMethodChannel.invokeMethod('installApk', {'path': file.path});
     return null;
   } on PlatformException catch (e) {

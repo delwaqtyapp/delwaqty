@@ -25,8 +25,6 @@ Each item names the code path it exercises and the expected result.
 - [ ] Search by barcode: exact product, top hit.
 - [ ] Search Arabic name with a different alef form (ارز vs أرز): found.
 - [ ] Search with a spelling slip (ديتولل): found via similarity fallback.
-- [ ] Pharmacy flavor: drug lookup finds MoH catalog rows offline, official
-      price (التسعيرة الرسمية) visible on the item.
 
 ## 3. Selling (online)
 - [ ] Build a sale of 3 items, pay exact cash: receipt totals correct, stock
@@ -52,20 +50,11 @@ Each item names the code path it exercises and the expected result.
       count_adjustment move logged with the delta.
 - [ ] Dispense (صرف) an item without a sale: dispense move logged, stock drops.
 
-## 6. PRO features
-- [ ] Insurance sale: pick a company, enter member + shares; statement RPC
-      returns the row with matching totals.
-- [ ] Shortage list (قائمة النواقص): set an item's reorder level above its
-      stock; it appears in the shortage list; reset and it disappears.
-- [ ] Apply MoH prices: after an admin import, cashier_apply_moh_prices
-      updates only barcode-matched products; price history rows show
-      source 'moh_update'.
-
-## 7. Daily close
+## 6. Daily close
 - [ ] Close the shift with counted cash: expected vs closing cash difference
       shown; totals JSON matches the day's sales by method.
 
-## 8. Grace / expiry
+## 7. Grace / expiry
 - [ ] System clock past expiry: app enters grace mode (grace_days), warns in
       Arabic, still allows sales (offline grace by design).
 - [ ] Past grace: activation screen returns with EXPIRED reason.

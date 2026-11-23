@@ -20,22 +20,17 @@ namespace Delwaqty.Pos.Core.Licensing
         public DateTimeOffset? GraceUntil;
         public string MerchantId;
         public string MerchantName;
-        public string MerchantType;        // pharmacy | grocery | ... (drives the flavor)
+        public string MerchantType;        // grocery | restaurant | ... (merchant's business type)
         public string MerchantPhone;
         public string MerchantAddress;
         public string DeviceId;
         public DateTimeOffset ValidatedAtUtc;
         /// <summary>
-        /// The app flavor this state was sealed under (pharmacy/retail).
+        /// The app flavor this state was sealed under.
         /// Sealed with the rest of the state (review #116 follow-up): a seal
         /// written by another flavor never restores here.
         /// </summary>
         public string Flavor;
-
-        public bool IsPharmacy
-        {
-            get { return string.Equals(MerchantType, "pharmacy", StringComparison.OrdinalIgnoreCase); }
-        }
     }
 
     /// <summary>

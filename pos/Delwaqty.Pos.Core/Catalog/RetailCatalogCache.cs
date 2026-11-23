@@ -8,7 +8,7 @@ namespace Delwaqty.Pos.Core.Catalog
 {
     /// <summary>
     /// Local mirror of a retail merchant's products table for offline lookup.
-    /// Same scoring as the drug CatalogCache: exact barcode 1.0, prefix 1.0,
+    /// Scoring: exact barcode 1.0, prefix 1.0,
     /// word-boundary 0.9, substring 0.6, trigram word-similarity fallback for
     /// spelling variants.
     /// </summary>
@@ -118,7 +118,7 @@ namespace Delwaqty.Pos.Core.Catalog
                         {
                             var p = Read(r);
                             if (seen.Contains(p.Id ?? "") || p.SearchNorm == null) continue;
-                            var sim = CatalogCache.WordSimilarity(norm, p.SearchNorm);
+                            var sim = TextSimilarity.WordSimilarity(norm, p.SearchNorm);
                             if (sim >= 0.4) hits.Add(new Hit { Product = p, Score = sim });
                         }
                     }

@@ -15,8 +15,7 @@ verified refresh + offline cutoff), but a tampered client can still push.
 past grace can keep writing sales forever.
 
 **Ask.** Add a shared guard and call it at the top of every cashier
-mutation RPC (sync_push, daily_close, pharmacy_import_drug is already
-covered by the PRO gate in 378 — verify it also covers suspension):
+mutation RPC (sync_push and daily_close):
 
 ```sql
 -- sketch, NOT a migration

@@ -80,44 +80,6 @@ namespace Delwaqty.Pos.Core.Sync
                 ",\"p_closing_cash\":" + closingCash.ToString(System.Globalization.CultureInfo.InvariantCulture) + "}");
         }
 
-        public Task<string> CatalogSearchOnline(string query, int limit)
-        {
-            return RpcAsync("drug_catalog_search",
-                "{\"p_query\":" + JsonString(query) + ",\"p_limit\":" + limit + "}");
-        }
-
-        /// <summary>
-        /// Import a catalog drug into the store's products (migration 400):
-        /// race-safe, returns the product id the sale lines should reference.
-        /// </summary>
-        public Task<string> PharmacyImportDrug(string drugCatalogId, string merchantId, decimal? price, int stock)
-        {
-            return RpcAsync("pharmacy_import_drug",
-                "{\"p_drug_id\":" + JsonString(drugCatalogId) +
-                ",\"p_merchant_id\":" + JsonString(merchantId) +
-                (price.HasValue ? ",\"p_price\":" + price.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "") +
-                ",\"p_stock\":" + stock + "}");
-        }
-
-        /// <summary>PostgREST read. path is e.g. "drug_catalog?select=id,name_en&limit=1000".</summary>
-        public async Task<string> RestGetAsync(string pathAndQuery)
-        {
-            using (var req = new HttpRequestMessage(HttpMethod.Get, _baseUrl + "/rest/v1/" + pathAndQuery))
-            {
-                req.Headers.Add("apikey", _anonKey);
-                if (AccessToken != null)
-                    req.Headers.Authorization =
-                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AccessToken);
-                using (var res = await _http.SendAsync(req).ConfigureAwait(false))
-                {
-                    var text = await res.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    if (!res.IsSuccessStatusCode)
-                        throw new InvalidOperationException("GET " + pathAndQuery + " failed: " + (int)res.StatusCode + " " + text);
-                    return text;
-                }
-            }
-        }
-
         /// <summary>PostgREST insert/update. Returns the representation when prefer is return=representation.</summary>
         public async Task<string> RestWriteAsync(string method, string pathAndQuery, string bodyJson, string prefer)
         {

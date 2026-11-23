@@ -6,8 +6,7 @@ namespace Delwaqty.Pos.Core.Sales
 {
     public sealed class SaleLine
     {
-        public string ProductId;       // null for catalog-only drugs not in the store's products
-        public string DrugCatalogId;
+        public string ProductId;       // null for quick lines not in the store's products
         public string Name;
         public decimal Qty;
         public decimal UnitPrice;

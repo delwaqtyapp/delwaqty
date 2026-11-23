@@ -11,7 +11,7 @@ namespace Delwaqty.Pos.Core.Sync
     {
         public string OpId;
         // sync_push ops: customer | shift_open | sale | sale_void | debt_payment |
-        //                stock_count | price_change | bulk_price_pct | insurance_sale
+        //                stock_count | price_change | bulk_price_pct
         // local ops executed by SyncEngine directly (never sent to sync_push):
         //                rpc:daily_close
         public string Type;
@@ -86,7 +86,6 @@ namespace Delwaqty.Pos.Core.Sync
             var items = sale.Lines.Select(l => new Dictionary<string, object>
             {
                 ["product_id"] = l.ProductId,
-                ["drug_catalog_id"] = l.DrugCatalogId,
                 ["name"] = l.Name,
                 ["qty"] = l.Qty,
                 ["unit_price"] = l.UnitPrice,
@@ -122,25 +121,6 @@ namespace Delwaqty.Pos.Core.Sync
             { ["sale_op_id"] = saleOpId, ["reason"] = reason }));
         }
 
-        /// <summary>
-        /// Insured sale record (PRO). company_share + patient_share must equal
-        /// total within a piastre or the server rejects with INSURANCE_SHARE_MISMATCH.
-        /// saleOpId optionally links the pos_sale pushed earlier (its op id).
-        /// </summary>
-        public static OutboxOp InsuranceSale(string companyId, string saleOpId, string memberName,
-            string memberCardNo, decimal total, decimal companyShare, decimal patientShare)
-        {
-            return new OutboxOp("insurance_sale", Json(new Dictionary<string, object>
-            {
-                ["company_id"] = companyId,
-                ["sale_op_id"] = saleOpId,
-                ["member_name"] = memberName,
-                ["member_card_no"] = memberCardNo,
-                ["total"] = total,
-                ["company_share"] = companyShare,
-                ["patient_share"] = patientShare,
-            }));
-        }
 
         /// <summary>
         /// Local op: close the open shift with the counted drawer cash. SyncEngine

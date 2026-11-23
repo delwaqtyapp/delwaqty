@@ -3,7 +3,7 @@
 Manual on-Windows verification for the protection changes (DPAPI
 CurrentUser, ACL hardening, key regeneration, legacy repair state). We
 cannot run Windows in CI, so each item is a scripted manual pass. Run on a
-real Windows 10/11 machine (or VM) with the Pharmacy build.
+real Windows 10/11 machine (or VM) with the shop build.
 
 Setup for all items: install/run the app once as Windows user A
 ("SHOPPC\Cashi­er"), activate with a test key, make at least one offline

@@ -21,8 +21,8 @@ namespace Delwaqty.Pos.Core.Sync
         public static readonly string[] ScopedFiles =
         {
             "license.seal", "session.cred",
-            "outbox.db", "sales.db", "batches.db", "pos.db",
-            "catalog.db", "products.db", "shift.json",
+            "outbox.db", "sales.db", "pos.db",
+            "products.db", "shift.json",
         };
 
         public static string ScopeDirName(string merchantId, string flavor)
@@ -66,17 +66,14 @@ namespace Delwaqty.Pos.Core.Sync
             // Every check is READ-ONLY (SQLite Mode=ReadOnly + sqlite_master
             // inspection): the detector never creates or modifies a file, so
             // the repair promise "no file touched" is literally true.
-            // Any nonempty financial/inventory/history flat db triggers the
-            // repair state — an old pharmacy's stock or history must not pass
-            // clean just because no sale is pending right now.
+            // Any nonempty financial/history flat db triggers the repair
+            // state — an old shop's history must not pass clean just because
+            // no sale is pending right now.
             string reason;
             if ((reason = CheckFlatDb(rootDir, "outbox.db", "outbox", "synced = 0", "unsynced op(s)")) != null) return reason;
             if ((reason = CheckFlatDb(rootDir, "pos.db", "outbox", "synced = 0", "unsynced op(s)")) != null) return reason;
             if ((reason = CheckFlatDb(rootDir, "pos.db", "local_sales", null, "sales history")) != null) return reason;
-            if ((reason = CheckFlatDb(rootDir, "pos.db", "batches", null, "stock batches")) != null) return reason;
             if ((reason = CheckFlatDb(rootDir, "sales.db", "local_sales", null, "sales history")) != null) return reason;
-            if ((reason = CheckFlatDb(rootDir, "batches.db", "batches", null, "stock batches")) != null) return reason;
-            if ((reason = CheckFlatDb(rootDir, "catalog.db", "catalog", null, "drug catalog")) != null) return reason;
             if ((reason = CheckFlatDb(rootDir, "products.db", "products", null, "product catalog")) != null) return reason;
             var shift = Path.Combine(rootDir, "shift.json");
             if (File.Exists(shift))

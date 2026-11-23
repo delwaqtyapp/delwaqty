@@ -91,7 +91,7 @@ older build:
   — the device key regenerates on first start, every local seal and the
   saved session stop verifying, and the app asks for ONE online
   reactivation. Plan for one online reactivation per PC at rollout.
-- All other local data (outbox, sales journal, batches, scopes) survives
+- All other local data (outbox, sales journal, scopes) survives
   untouched; queued ops upload normally after reactivation.
 - Pre-DP1 installs (plaintext device key era) lose legacy payload
   verification, so their flat-layout files are NOT auto-migrated into the

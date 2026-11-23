@@ -12,6 +12,7 @@ class _Fake {
   int downloads = 0;
   int installs = 0;
   bool allowed = false;
+  String? installError;
   final file = File('/tmp/ota-test.apk');
 
   OtaUpdateActions get actions => OtaUpdateActions(
@@ -23,6 +24,7 @@ class _Fake {
     canInstall: () async => allowed,
     install: (f) async {
       installs++;
+      if (installError != null) return installError;
       return allowed ? null : 'needs_install_permission';
     },
   );
@@ -66,6 +68,22 @@ Future<void> _pump(WidgetTester tester, _Fake fake, {Locale? locale}) async {
 }
 
 void main() {
+  testWidgets('permanent installer failure keeps a safe Later escape', (
+    tester,
+  ) async {
+    final fake = _Fake()
+      ..allowed = true
+      ..installError = 'install_failed';
+    await _pump(tester, fake);
+    await tester.tap(find.text('Update now'));
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('Later'), findsOneWidget);
+    await tester.tap(find.text('Later'));
+    await tester.pumpAndSettle();
+    expect(find.byType(OtaUpdateDialog), findsNothing);
+  });
+
   testWidgets('permission needed: notice stays, resume continues install '
       'without a second download', (tester) async {
     final fake = _Fake();

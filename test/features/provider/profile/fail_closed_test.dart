@@ -1,8 +1,21 @@
 import 'package:delwaqty/features/provider/capability/domain/provider_capability.dart';
 import 'package:delwaqty/features/provider/capability/domain/provider_profile.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:delwaqty/features/provider/capability/presentation/providers/provider_capability_providers.dart';
 
 void main() {
+  test('malformed business profile is unknown and pending is not approved', () {
+    final malformed = ProviderBusinessProfile.fromJson({'id': 'x'});
+    expect(malformed.categoryType, 'unknown');
+    expect(malformed.isApproved, isFalse);
+    expect(const ProviderProfilesState().activeCategory, 'unknown');
+    final pending = ProviderBusinessProfile.fromJson({
+      'id': 'y',
+      'category_type': 'restaurant',
+      'status': 'pending',
+    });
+    expect(pending.isApproved, isFalse);
+  });
   for (final p in [ProviderProfile.loading(), ProviderProfile.failed()]) {
     test('not-ready profile fails closed (${p.status.name})', () {
       expect(p.isReady, isFalse);

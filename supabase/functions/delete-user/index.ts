@@ -85,13 +85,19 @@ Deno.serve(async (req: Request) => {
     const url = new URL(req.url);
     const targetId = url.searchParams.get("userId") ?? callerId;
     if (targetId !== callerId) {
-      const { data: callerRow, error: roleError } = await admin
-        .from("users")
-        .select("role")
-        .eq("id", callerId)
-        .single();
-      if (roleError || callerRow?.role !== "admin") {
-        return json({ error: "Admin required to delete other users" }, 403);
+      // Scope and permission are evaluated with the caller JWT, never with
+      // service-role identity or a client-supplied actor parameter.
+      const scopedClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: `Bearer ${token}` } },
+      });
+      const { data: activeAdmin, error: adminError } = await scopedClient.rpc("is_admin");
+      const { data: regionId, error: regionError } = await admin.rpc("_member_region_id", { p_user_id: targetId });
+      const { data: scopeOk, error: scopeError } = await scopedClient.rpc("_admin_member_scope", { p_user_id: targetId });
+      const { data: permissionOk, error: permissionError } = await scopedClient.rpc("has_permission", {
+        p_permission: "MEMBER_MODERATE", p_region_id: regionId,
+      });
+      if (adminError || regionError || scopeError || permissionError || activeAdmin !== true || scopeOk !== true || permissionOk !== true) {
+        return json({ error: "Not authorized for this member" }, 403);
       }
     }
 

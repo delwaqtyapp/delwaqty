@@ -2676,6 +2676,14 @@
     }
   },
   "checkoutCouponInvalid": "This coupon cannot be used for this order",
+  "checkoutWalletNotAvailable": "Wallet payment is not available yet. Please pay cash on delivery, InstaPay or Vodafone Cash.",
+  "@checkoutWalletNotAvailable": {
+    "description": "Checkout RPC error mapping"
+  },
+  "checkoutCardNotAvailable": "Card payment is not available yet. Please pay cash on delivery, InstaPay or Vodafone Cash.",
+  "@checkoutCardNotAvailable": {
+    "description": "Checkout RPC error mapping"
+  },
   "@checkoutCouponInvalid": {
     "description": "Checkout RPC error mapping"
   },

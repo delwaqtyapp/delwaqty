@@ -2617,6 +2617,14 @@
     }
   },
   "checkoutCouponInvalid": "لا يمكن استخدام هذه القسيمة لهذا الطلب",
+  "checkoutWalletNotAvailable": "الدفع بالمحفظة غير متاح حالياً. برجاء الدفع كاش عند الاستلام أو إنستاباي أو فودافون كاش.",
+  "@checkoutWalletNotAvailable": {
+    "description": "Checkout RPC error mapping"
+  },
+  "checkoutCardNotAvailable": "الدفع بالبطاقة غير متاح حالياً. برجاء الدفع كاش عند الاستلام أو إنستاباي أو فودافون كاش.",
+  "@checkoutCardNotAvailable": {
+    "description": "Checkout RPC error mapping"
+  },
   "@checkoutCouponInvalid": {
     "description": "Checkout RPC error mapping"
   },

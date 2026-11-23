@@ -7854,6 +7854,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get checkoutCouponInvalid => 'لا يمكن استخدام هذه القسيمة لهذا الطلب';
 
   @override
+  String get checkoutWalletNotAvailable =>
+      'الدفع بالمحفظة غير متاح حالياً. برجاء الدفع كاش عند الاستلام أو إنستاباي أو فودافون كاش.';
+
+  @override
+  String get checkoutCardNotAvailable =>
+      'الدفع بالبطاقة غير متاح حالياً. برجاء الدفع كاش عند الاستلام أو إنستاباي أو فودافون كاش.';
+
+  @override
   String get checkoutMissingDeliveryLocation =>
       'يرجى اختيار موقع التوصيل على الخريطة';
 

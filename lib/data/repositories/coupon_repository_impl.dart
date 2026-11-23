@@ -37,11 +37,15 @@ class CouponRepositoryImpl implements CouponRepository {
   @override
   Future<Coupon> applyCoupon(String code, double orderTotal) async {
     try {
+      // Validate/display only (review #123): usage consumption belongs ONLY
+      // in the server checkout transaction (create_order -> redeem_coupon,
+      // atomic since migration 415). The pre-checkout increment_coupon_usage
+      // call consumed usage before any order existed and double-counted with
+      // the server-side redemption.
       final coupon = await _dataSource.validateCoupon(code, orderTotal);
       if (coupon == null) {
         throw const ServerException(message: 'Invalid or expired coupon');
       }
-      await _dataSource.incrementUsage(code);
       return coupon;
     } catch (e) {
       throw ServerException(message: e.toString());

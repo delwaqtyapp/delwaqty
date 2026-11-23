@@ -15041,6 +15041,18 @@ abstract class AppLocalizations {
   /// Checkout RPC error mapping
   ///
   /// In en, this message translates to:
+  /// **'Wallet payment is not available yet. Please pay cash on delivery, InstaPay or Vodafone Cash.'**
+  String get checkoutWalletNotAvailable;
+
+  /// Checkout RPC error mapping
+  ///
+  /// In en, this message translates to:
+  /// **'Card payment is not available yet. Please pay cash on delivery, InstaPay or Vodafone Cash.'**
+  String get checkoutCardNotAvailable;
+
+  /// Checkout RPC error mapping
+  ///
+  /// In en, this message translates to:
   /// **'Please choose a delivery location on the map'**
   String get checkoutMissingDeliveryLocation;
 

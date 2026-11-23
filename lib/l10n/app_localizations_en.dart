@@ -7920,6 +7920,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'This coupon cannot be used for this order';
 
   @override
+  String get checkoutWalletNotAvailable =>
+      'Wallet payment is not available yet. Please pay cash on delivery, InstaPay or Vodafone Cash.';
+
+  @override
+  String get checkoutCardNotAvailable =>
+      'Card payment is not available yet. Please pay cash on delivery, InstaPay or Vodafone Cash.';
+
+  @override
   String get checkoutMissingDeliveryLocation =>
       'Please choose a delivery location on the map';
 

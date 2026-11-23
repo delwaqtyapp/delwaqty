@@ -281,12 +281,18 @@ class _RatingSummaryCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
-                    SizedBox(
-                      width: 32,
-                      child: Text(
-                        '$count',
-                        style: theme.textTheme.labelSmall,
-                        textAlign: TextAlign.end,
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(minWidth: 44),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: Text(
+                          '$count',
+                          style: theme.textTheme.labelSmall,
+                          textAlign: TextAlign.end,
+                          maxLines: 1,
+                          softWrap: false,
+                        ),
                       ),
                     ),
                   ],

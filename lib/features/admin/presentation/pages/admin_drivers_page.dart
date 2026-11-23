@@ -239,7 +239,7 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
                       delay: Duration(milliseconds: index * 50),
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: 8),
-                        child: _DriverGlassTile(
+                        child: AdminDriverGlassTile(
                           driver: driver,
                           cs: cs,
                           l10n: l10n,
@@ -343,8 +343,8 @@ class _StatItem extends StatelessWidget {
   }
 }
 
-class _DriverGlassTile extends StatelessWidget {
-  const _DriverGlassTile({
+class AdminDriverGlassTile extends StatelessWidget {
+  const AdminDriverGlassTile({
     required this.driver,
     required this.cs,
     required this.l10n,
@@ -397,7 +397,12 @@ class _DriverGlassTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          // The header wraps: on narrow widths the status badge drops below
+          // the name instead of squeezing it into single-word lines.
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Container(
                 width: 44,
@@ -416,24 +421,22 @@ class _DriverGlassTile extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    name,
+                    style: Theme.of(context).textTheme.bodyMedium
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  if (phone.isNotEmpty)
                     Text(
-                      name,
-                      style: Theme.of(context).textTheme.bodyMedium
-                          ?.copyWith(fontWeight: FontWeight.w600),
+                      phone,
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: cs.onSurfaceVariant),
                     ),
-                    if (phone.isNotEmpty)
-                      Text(
-                        phone,
-                        style: Theme.of(context).textTheme.bodySmall
-                            ?.copyWith(color: cs.onSurfaceVariant),
-                      ),
-                  ],
-                ),
+                ],
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -469,27 +472,27 @@ class _DriverGlassTile extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          Row(
+          // Metric chips wrap onto extra lines instead of overflowing.
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children: [
               _DriverInfoChip(
                 icon: Icons.star_rounded,
                 label: rating.toStringAsFixed(1),
                 color: Colors.amber,
               ),
-              const SizedBox(width: 8),
               _DriverInfoChip(
                 icon: Icons.route_rounded,
                 label: '$tripsCount ${l10n.tripsLabel}',
                 color: cs.primary,
               ),
-              if (vehicleModel.isNotEmpty) ...[
-                const SizedBox(width: 8),
+              if (vehicleModel.isNotEmpty)
                 _DriverInfoChip(
                   icon: Icons.directions_car_rounded,
                   label: vehicleModel,
                   color: cs.secondary,
                 ),
-              ],
             ],
           ),
           if (vehiclePlate.isNotEmpty) ...[

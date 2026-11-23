@@ -130,25 +130,23 @@ class _ProviderVerificationPageState
                     ),
                   ),
                 )
+              else if (rejected)
+                // Rejected is a single state: one card that carries the
+                // reason, with the reapply action in the form below.
+                Card(
+                  color: Colors.red.shade50,
+                  child: ListTile(
+                    leading: const Icon(Icons.error_outline, color: Colors.red),
+                    title: Text(l10n.rejected),
+                    subtitle: (reason != null && reason.isNotEmpty)
+                        ? Text(reason)
+                        : null,
+                  ),
+                )
               else
                 Card(
                   color: Colors.grey,
                   child: ListTile(title: Text(l10n.notSubmitted)),
-                ),
-              if (rejected && reason != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Card(
-                    color: Colors.red.shade50,
-                    child: ListTile(
-                      leading: const Icon(
-                        Icons.error_outline,
-                        color: Colors.red,
-                      ),
-                      title: Text(l10n.rejected),
-                      subtitle: Text(reason),
-                    ),
-                  ),
                 ),
               if (!approved) ...[
                 const SizedBox(height: 16),

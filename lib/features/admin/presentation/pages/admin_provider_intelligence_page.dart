@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/admin/presentation/providers/platform_intelligence_providers.dart';
+import 'package:delwaqty/features/admin/presentation/widgets/intelligence_stat_grid.dart';
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
@@ -107,41 +108,28 @@ class AdminProviderIntelligencePage extends ConsumerWidget {
     AppLocalizations l10n,
     ColorScheme cs,
   ) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth > 600 ? 3 : 3;
-        return GridView.count(
-          crossAxisCount: crossAxisCount,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: 1.4,
-          children: [
-            _SummaryCard(
-              title: l10n.totalUsers,
-              value: data.totalProviders.toString(),
-              icon: Icons.people_outline_rounded,
-              color: const Color(0xFF4A90D9),
-              cs: cs,
-            ),
-            _SummaryCard(
-              title: l10n.verified,
-              value: data.verifiedProviders.toString(),
-              icon: Icons.verified_outlined,
-              color: const Color(0xFF34C759),
-              cs: cs,
-            ),
-            _SummaryCard(
-              title: l10n.available,
-              value: data.availableProviders.toString(),
-              icon: Icons.access_time_rounded,
-              color: const Color(0xFFFF9500),
-              cs: cs,
-            ),
-          ],
-        );
-      },
+    return IntelligenceStatGrid(
+      wideColumns: 3,
+      stats: [
+        IntelligenceStat(
+          title: l10n.totalUsers,
+          value: data.totalProviders.toString(),
+          icon: Icons.people_outline_rounded,
+          color: const Color(0xFF4A90D9),
+        ),
+        IntelligenceStat(
+          title: l10n.verified,
+          value: data.verifiedProviders.toString(),
+          icon: Icons.verified_outlined,
+          color: const Color(0xFF34C759),
+        ),
+        IntelligenceStat(
+          title: l10n.available,
+          value: data.availableProviders.toString(),
+          icon: Icons.access_time_rounded,
+          color: const Color(0xFFFF9500),
+        ),
+      ],
     );
   }
 
@@ -169,7 +157,14 @@ class AdminProviderIntelligencePage extends ConsumerWidget {
       spacing: 8,
       runSpacing: 8,
       children: items.map((item) {
-        return _CategoryChip(label: item.type, count: item.count, cs: cs);
+        return _CategoryChip(
+          label: localizedCategoryTypeLabel(
+            item.type,
+            AppLocalizations.of(context),
+          ),
+          count: item.count,
+          cs: cs,
+        );
       }).toList(),
     );
   }
@@ -198,66 +193,15 @@ class AdminProviderIntelligencePage extends ConsumerWidget {
       spacing: 8,
       runSpacing: 8,
       children: items.map((item) {
-        return _CategoryChip(label: item.type, count: item.count, cs: cs);
+        return _CategoryChip(
+          label: localizedCategoryTypeLabel(
+            item.type,
+            AppLocalizations.of(context),
+          ),
+          count: item.count,
+          cs: cs,
+        );
       }).toList(),
-    );
-  }
-}
-
-class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.color,
-    required this.cs,
-  });
-
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color color;
-  final ColorScheme cs;
-
-  @override
-  Widget build(BuildContext context) {
-    return PremiumCard(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  value,
-                  style: Theme.of(context).textTheme.titleLarge
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.labelSmall
-                    ?.copyWith(color: cs.onSurfaceVariant),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }

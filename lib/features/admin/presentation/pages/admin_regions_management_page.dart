@@ -274,24 +274,34 @@ class _AdminRegionsManagementPageState
                   region.displayName(lang),
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
-                subtitle: Text(_typeLabel(region.type, l10n)),
-                onTap: () => setState(() => _crumbs.add(region)),
-                trailing: Row(
+                // Actions wrap below so the region name keeps full width.
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(
-                      tooltip: l10n.edit,
-                      icon: const Icon(Icons.edit_outlined, size: 20),
-                      onPressed: _canEditRegion(scope, region)
-                          ? () => _openUpsertSheet(
-                              existing: region,
-                              parent: parent,
-                            )
-                          : null,
+                    Text(_typeLabel(region.type, l10n)),
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            tooltip: l10n.edit,
+                            icon: const Icon(Icons.edit_outlined, size: 20),
+                            onPressed: _canEditRegion(scope, region)
+                                ? () => _openUpsertSheet(
+                                    existing: region,
+                                    parent: parent,
+                                  )
+                                : null,
+                          ),
+                          const Icon(Icons.chevron_right_rounded),
+                        ],
+                      ),
                     ),
-                    const Icon(Icons.chevron_right_rounded),
                   ],
                 ),
+                onTap: () => setState(() => _crumbs.add(region)),
               );
             },
           ),
@@ -324,22 +334,32 @@ class _AdminRegionsManagementPageState
             return ListTile(
               leading: const Icon(Icons.place_rounded),
               title: Text(region.displayName(lang)),
-              subtitle: Text(_typeLabel(region.type, l10n)),
-              trailing: Row(
+              // Actions wrap below so the region name keeps full width.
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  IconButton(
-                    tooltip: l10n.edit,
-                    icon: const Icon(Icons.edit_outlined, size: 20),
-                    onPressed:
-                        _canEditRegion(
-                          ref.watch(adminRegionScopeProvider).value,
-                          region,
-                        )
-                        ? () => _openUpsertSheet(existing: region)
-                        : null,
+                  Text(_typeLabel(region.type, l10n)),
+                  Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          tooltip: l10n.edit,
+                          icon: const Icon(Icons.edit_outlined, size: 20),
+                          onPressed:
+                              _canEditRegion(
+                                ref.watch(adminRegionScopeProvider).value,
+                                region,
+                              )
+                              ? () => _openUpsertSheet(existing: region)
+                              : null,
+                        ),
+                        const Icon(Icons.chevron_right_rounded),
+                      ],
+                    ),
                   ),
-                  const Icon(Icons.chevron_right_rounded),
                 ],
               ),
               onTap: () {

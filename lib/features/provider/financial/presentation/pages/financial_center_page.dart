@@ -259,26 +259,66 @@ class FinancialCenterPage extends ConsumerWidget {
                           : AppColors.errorLight;
                       return Card(
                         margin: const EdgeInsets.only(bottom: 8),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: color.withValues(alpha: 0.12),
-                            child: Icon(
-                              isCredit
-                                  ? Icons.arrow_downward_rounded
-                                  : Icons.arrow_upward_rounded,
-                              color: color,
-                            ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
                           ),
-                          title: Text(t.description),
-                          subtitle: Text(
-                            isCredit ? l10n.topUp : l10n.commission,
-                          ),
-                          trailing: Text(
-                            '${isCredit ? '+' : '-'}${t.amount.toStringAsFixed(2)} ${l10n.currencySymbol}',
-                            style: TextStyle(
-                              color: color,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor: color.withValues(
+                                      alpha: 0.12,
+                                    ),
+                                    child: Icon(
+                                      isCredit
+                                          ? Icons.arrow_downward_rounded
+                                          : Icons.arrow_upward_rounded,
+                                      color: color,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          t.description,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge,
+                                        ),
+                                        Text(
+                                          isCredit
+                                              ? l10n.topUp
+                                              : l10n.commission,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              // The amount sits on its own line under the
+                              // description so it never squeezes the text.
+                              Align(
+                                alignment: AlignmentDirectional.centerEnd,
+                                child: Text(
+                                  '${isCredit ? '+' : '-'}${t.amount.toStringAsFixed(2)} ${l10n.currencySymbol}',
+                                  style: TextStyle(
+                                    color: color,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       );

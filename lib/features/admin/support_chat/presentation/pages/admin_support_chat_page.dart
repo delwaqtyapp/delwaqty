@@ -122,36 +122,44 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
                           ),
                           const SizedBox(height: 4),
                           _originBadge(room, l10n),
-                        ],
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (room.isActive)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.green.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                l10n.active,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.green,
+                          // Badge and delete action wrap below so the title
+                          // keeps the full tile width.
+                          Align(
+                            alignment: AlignmentDirectional.centerEnd,
+                            child: Wrap(
+                              spacing: 4,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                if (room.isActive)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green.withValues(
+                                        alpha: 0.15,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      l10n.active,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.green,
+                                      ),
+                                    ),
+                                  ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline_rounded,
+                                    size: 20,
+                                  ),
+                                  tooltip: l10n.deleteChat,
+                                  onPressed: () => _confirmDelete(room.id),
                                 ),
-                              ),
+                              ],
                             ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.delete_outline_rounded,
-                              size: 20,
-                            ),
-                            tooltip: l10n.deleteChat,
-                            onPressed: () => _confirmDelete(room.id),
                           ),
                         ],
                       ),

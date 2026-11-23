@@ -6,9 +6,12 @@ import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
 class WorkingHoursCard extends StatelessWidget {
-  const WorkingHoursCard({super.key, required this.hours});
+  const WorkingHoursCard({super.key, required this.hours, this.at});
 
   final List<WorkingHours> hours;
+
+  /// Fixed instant for "today" (tests). Null uses the real Cairo clock.
+  final DateTime? at;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +19,10 @@ class WorkingHoursCard extends StatelessWidget {
     final theme = Theme.of(context);
     // Storage convention is 0=Sunday..6=Saturday; "today" is the Cairo
     // weekday so the highlight matches the schedule and checkout.
-    final cairoNow = tz.TZDateTime.now(_cairo());
+    final at = this.at;
+    final cairoNow = at != null
+        ? tz.TZDateTime.from(at, _cairo())
+        : tz.TZDateTime.now(_cairo());
     final today = cairoNow.weekday % 7;
     final sortedHours = List<WorkingHours>.from(hours)
       ..sort((a, b) => a.dayOfWeek.compareTo(b.dayOfWeek));

@@ -120,9 +120,7 @@ class _NotificationCenterPageState
   void _showActionError() {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context).somethingWentWrong),
-      ),
+      SnackBar(content: Text(AppLocalizations.of(context).somethingWentWrong)),
     );
   }
 
@@ -145,17 +143,27 @@ class _NotificationCenterPageState
         actions: [
           TextButton(
             onPressed: () async {
+              final repo = ref.read(notificationRepositoryProvider);
               try {
-                final repo = ref.read(notificationRepositoryProvider);
-                await repo.markAllAsRead();
+                final result = await repo.markAllAsRead();
                 if (!mounted) return;
-                for (var i = 0; i < _items.length; i++) {
-                  _items[i] = _items[i].copyWith(isRead: true);
+                if (result.completed) {
+                  for (var i = 0; i < _items.length; i++) {
+                    _items[i] = _items[i].copyWith(isRead: true);
+                  }
+                  setState(() {});
+                  _invalidateNotificationProviders();
+                  return;
                 }
-                setState(() {});
+                // Partial: local state is stale, reload from the server.
+                _showActionError();
+                await _refresh();
                 _invalidateNotificationProviders();
               } catch (_) {
+                if (!mounted) return;
                 _showActionError();
+                await _refresh();
+                _invalidateNotificationProviders();
               }
             },
             child: Text(l10n.markAllRead),
@@ -385,20 +393,29 @@ class _NotificationCenterPageState
     );
     if (confirmed != true || !mounted) return;
 
+    final repo = ref.read(notificationRepositoryProvider);
     try {
-      final repo = ref.read(notificationRepositoryProvider);
-      await repo.clearAll();
-    } catch (_) {
+      final result = await repo.clearAll();
+      if (!mounted) return;
+      if (result.completed) {
+        setState(() {
+          _items.clear();
+          _offset = 0;
+          _hasMore = false;
+        });
+        _invalidateNotificationProviders();
+        return;
+      }
+      // Partial: local state is stale, reload from the server.
       _showActionError();
-      return;
+      await _refresh();
+      _invalidateNotificationProviders();
+    } catch (_) {
+      if (!mounted) return;
+      _showActionError();
+      await _refresh();
+      _invalidateNotificationProviders();
     }
-    if (!mounted) return;
-    setState(() {
-      _items.clear();
-      _offset = 0;
-      _hasMore = false;
-    });
-    _invalidateNotificationProviders();
   }
 }
 

@@ -337,11 +337,15 @@ class _GlassNotificationsPanel extends ConsumerWidget {
                         icon: const Icon(Icons.done_all_rounded, size: 19),
                         onPressed: () async {
                           try {
-                            await ref
+                            final result = await ref
                                 .read(notificationRepositoryProvider)
                                 .markAllAsRead();
+                            // Always reload: on a partial result the
+                            // optimistic state would be stale.
                             _invalidateAll(ref);
+                            if (!result.completed) _showActionError();
                           } catch (_) {
+                            _invalidateAll(ref);
                             _showActionError();
                           }
                         },
@@ -352,11 +356,13 @@ class _GlassNotificationsPanel extends ConsumerWidget {
                         icon: const Icon(Icons.delete_sweep_rounded, size: 19),
                         onPressed: () async {
                           try {
-                            await ref
+                            final result = await ref
                                 .read(notificationRepositoryProvider)
                                 .clearAll();
                             _invalidateAll(ref);
+                            if (!result.completed) _showActionError();
                           } catch (_) {
+                            _invalidateAll(ref);
                             _showActionError();
                           }
                         },

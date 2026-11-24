@@ -27,7 +27,10 @@ void main() {
       'anon-key',
       httpClient: httpClient,
     );
-    dataSource = SupabaseNotificationDataSource(supabase);
+    dataSource = SupabaseNotificationDataSource(
+      supabase,
+      currentUserId: () => 'user-1',
+    );
     capturedRequest = null;
     rows = [];
 
@@ -163,6 +166,11 @@ void main() {
     late List<Map<String, dynamic>> serverRows;
     late List<Uri> patchCalls;
     late List<Uri> deleteCalls;
+    late List<Uri> getCalls;
+    late int requestCount;
+    bool endlessVisibleRows = false;
+    int failOnPatchNumber = -1;
+    int failOnDeleteNumber = -1;
 
     Set<String> parseInFilter(Uri uri) {
       final raw = uri.queryParameters['id'] ?? '';
@@ -174,50 +182,103 @@ void main() {
           .toSet();
     }
 
+    String? userFilter(Uri uri) {
+      final raw = uri.queryParameters['user_id'];
+      if (raw != null && raw.startsWith('eq.')) return raw.substring(3);
+      return null;
+    }
+
     Map<String, dynamic> unreadRow(
       String id, {
       String type = 'system',
       String audience = 'customer',
+      String userId = 'user-1',
+      bool isRead = false,
     }) => {
       'id': id,
       'type': type,
       'deep_link': null,
       'data': null,
       'audience': audience,
-      'is_read': false,
+      'is_read': isRead,
+      'user_id': userId,
+      'created_at': '2026-11-24T00:00:00.000Z',
     };
 
+    // A tiny in-memory PostgREST: honours the user_id/is_read filters on
+    // reads AND mutations, exactly like the real server would.
     setUp(() {
       serverRows = [];
       patchCalls = [];
       deleteCalls = [];
+      getCalls = [];
+      requestCount = 0;
+      endlessVisibleRows = false;
+      failOnPatchNumber = -1;
+      failOnDeleteNumber = -1;
 
       when(() => httpClient.send(any())).thenAnswer((invocation) async {
         final request = invocation.positionalArguments[0] as http.Request;
+        requestCount++;
         final uri = request.url;
         Object body;
         if (request.method == 'GET') {
-          Iterable<Map<String, dynamic>> result = serverRows;
-          if (uri.queryParameters['is_read'] == 'eq.false') {
-            result = result.where((r) => r['is_read'] == false);
+          getCalls.add(uri);
+          if (endlessVisibleRows) {
+            final offset =
+                int.tryParse(uri.queryParameters['offset'] ?? '') ?? 0;
+            body = List.generate(200, (i) => unreadRow('gen-$offset-$i'));
+          } else {
+            Iterable<Map<String, dynamic>> result = serverRows;
+            final uf = userFilter(uri);
+            if (uf != null) {
+              result = result.where((r) => r['user_id'] == uf);
+            }
+            if (uri.queryParameters['is_read'] == 'eq.false') {
+              result = result.where((r) => r['is_read'] == false);
+            }
+            final offset =
+                int.tryParse(uri.queryParameters['offset'] ?? '') ?? 0;
+            final limit = int.tryParse(uri.queryParameters['limit'] ?? '');
+            result = result.skip(offset);
+            if (limit != null) result = result.take(limit);
+            body = result.toList();
           }
-          final offset =
-              int.tryParse(uri.queryParameters['offset'] ?? '') ?? 0;
-          final limit = int.tryParse(uri.queryParameters['limit'] ?? '');
-          result = result.skip(offset);
-          if (limit != null) result = result.take(limit);
-          body = result.toList();
         } else if (request.method == 'PATCH') {
           patchCalls.add(uri);
+          if (patchCalls.length == failOnPatchNumber) {
+            return http.StreamedResponse(
+              Stream.value(utf8.encode('{"message":"boom"}')),
+              500,
+              headers: {'content-type': 'application/json; charset=utf-8'},
+              request: request,
+            );
+          }
           final ids = parseInFilter(uri);
+          final uf = userFilter(uri);
+          final onlyUnread = uri.queryParameters['is_read'] == 'eq.false';
           for (final row in serverRows) {
-            if (ids.contains(row['id'])) row['is_read'] = true;
+            if (!ids.contains(row['id'])) continue;
+            if (uf != null && row['user_id'] != uf) continue;
+            if (onlyUnread && row['is_read'] != false) continue;
+            row['is_read'] = true;
           }
           body = <Map<String, dynamic>>[];
         } else if (request.method == 'DELETE') {
           deleteCalls.add(uri);
+          if (deleteCalls.length == failOnDeleteNumber) {
+            return http.StreamedResponse(
+              Stream.value(utf8.encode('{"message":"boom"}')),
+              500,
+              headers: {'content-type': 'application/json; charset=utf-8'},
+              request: request,
+            );
+          }
           final ids = parseInFilter(uri);
-          serverRows.removeWhere((r) => ids.contains(r['id']));
+          final uf = userFilter(uri);
+          serverRows.removeWhere(
+            (r) => ids.contains(r['id']) && (uf == null || r['user_id'] == uf),
+          );
           body = <Map<String, dynamic>>[];
         } else {
           body = true;
@@ -236,10 +297,11 @@ void main() {
         serverRows.add(unreadRow('n-$i'));
       }
 
-      await dataSource.markAllAsRead();
+      final result = await dataSource.markAllAsRead();
 
+      expect(result.completed, isTrue);
+      expect(result.processed, 250);
       expect(serverRows.every((r) => r['is_read'] == true), isTrue);
-      expect(patchCalls, isNotEmpty);
       for (final call in patchCalls) {
         expect(
           parseInFilter(call).length,
@@ -247,30 +309,30 @@ void main() {
           reason: 'each update must stay a small in-filter: $call',
         );
       }
-      final marked = patchCalls
-          .expand(parseInFilter)
-          .toSet();
+      final marked = patchCalls.expand(parseInFilter).toSet();
       expect(marked, hasLength(250));
     });
 
-    test('markAllAsRead leaves notifications of other app contexts unread',
-        () async {
-      serverRows.add(unreadRow('mine-1'));
-      serverRows.add(
-        unreadRow('admin-1', type: 'admin_management', audience: 'admin'),
-      );
+    test(
+      'markAllAsRead leaves notifications of other app contexts unread',
+      () async {
+        serverRows.add(unreadRow('mine-1'));
+        serverRows.add(
+          unreadRow('admin-1', type: 'admin_management', audience: 'admin'),
+        );
 
-      await dataSource.markAllAsRead();
+        await dataSource.markAllAsRead();
 
-      expect(
-        serverRows.singleWhere((r) => r['id'] == 'mine-1')['is_read'],
-        isTrue,
-      );
-      expect(
-        serverRows.singleWhere((r) => r['id'] == 'admin-1')['is_read'],
-        isFalse,
-      );
-    });
+        expect(
+          serverRows.singleWhere((r) => r['id'] == 'mine-1')['is_read'],
+          isTrue,
+        );
+        expect(
+          serverRows.singleWhere((r) => r['id'] == 'admin-1')['is_read'],
+          isFalse,
+        );
+      },
+    );
 
     test('markAllAsRead with no unread rows issues no update', () async {
       await dataSource.markAllAsRead();
@@ -282,8 +344,9 @@ void main() {
         serverRows.add(unreadRow('d-$i'));
       }
 
-      await dataSource.clearAll();
+      final result = await dataSource.clearAll();
 
+      expect(result.completed, isTrue);
       expect(serverRows, isEmpty);
       expect(deleteCalls, hasLength(3));
       for (final call in deleteCalls) {
@@ -305,6 +368,207 @@ void main() {
 
       expect(serverRows, hasLength(1));
       expect(serverRows.single['id'], 'admin-1');
+    });
+
+    test('every bulk read and mutation carries the user_id filter', () async {
+      for (var i = 0; i < 75; i++) {
+        serverRows.add(unreadRow('s-$i'));
+      }
+
+      await dataSource.markAllAsRead();
+      await dataSource.clearAll();
+
+      for (final uri in [...getCalls, ...patchCalls, ...deleteCalls]) {
+        expect(userFilter(uri), 'user-1', reason: 'unscoped request: $uri');
+      }
+    });
+
+    test(
+      'markAllAsRead scans past a hidden prefix longer than one page',
+      () async {
+        // 250 hidden rows (other app context) before any visible row: the
+        // old fixed-window fetch saw an all-hidden page and stopped.
+        for (var i = 0; i < 250; i++) {
+          serverRows.add(
+            unreadRow('hidden-$i', type: 'admin_management', audience: 'admin'),
+          );
+        }
+        serverRows.add(unreadRow('visible-1'));
+        serverRows.add(unreadRow('visible-2'));
+
+        final result = await dataSource.markAllAsRead();
+
+        expect(result.completed, isTrue);
+        expect(result.processed, 2);
+        expect(
+          serverRows
+              .where((r) => (r['id'] as String).startsWith('visible-'))
+              .every((r) => r['is_read'] == true),
+          isTrue,
+        );
+        expect(
+          serverRows
+              .where((r) => (r['id'] as String).startsWith('hidden-'))
+              .every((r) => r['is_read'] == false),
+          isTrue,
+        );
+      },
+    );
+
+    test('clearAll scans past a hidden prefix longer than one page', () async {
+      for (var i = 0; i < 250; i++) {
+        serverRows.add(
+          unreadRow('hidden-$i', type: 'admin_management', audience: 'admin'),
+        );
+      }
+      serverRows.add(unreadRow('visible-1'));
+      serverRows.add(unreadRow('visible-2'));
+
+      final result = await dataSource.clearAll();
+
+      expect(result.completed, isTrue);
+      expect(result.processed, 2);
+      expect(serverRows, hasLength(250));
+      expect(
+        serverRows.every((r) => (r['id'] as String).startsWith('hidden-')),
+        isTrue,
+      );
+    });
+
+    test(
+      'both ops handle visible and hidden rows mixed across pages',
+      () async {
+        for (var i = 0; i < 450; i++) {
+          final hidden = i % 3 == 0;
+          serverRows.add(
+            hidden
+                ? unreadRow('h-$i', type: 'admin_management', audience: 'admin')
+                : unreadRow('v-$i'),
+          );
+        }
+        final visibleCount = serverRows
+            .where((r) => (r['id'] as String).startsWith('v-'))
+            .length;
+
+        final markResult = await dataSource.markAllAsRead();
+        expect(markResult.completed, isTrue);
+        expect(markResult.processed, visibleCount);
+        expect(
+          serverRows
+              .where((r) => (r['id'] as String).startsWith('v-'))
+              .every((r) => r['is_read'] == true),
+          isTrue,
+        );
+        expect(
+          serverRows
+              .where((r) => (r['id'] as String).startsWith('h-'))
+              .every((r) => r['is_read'] == false),
+          isTrue,
+        );
+
+        final clearResult = await dataSource.clearAll();
+        expect(clearResult.completed, isTrue);
+        expect(serverRows, hasLength(450 - visibleCount));
+        expect(
+          serverRows.every((r) => (r['id'] as String).startsWith('h-')),
+          isTrue,
+        );
+      },
+    );
+
+    test(
+      'an admin session never touches another user\'s same-context rows',
+      () async {
+        // RLS lets admins select/delete members' rows; the data source
+        // must still scope every query to the signed-in user.
+        final adminDs = SupabaseNotificationDataSource(
+          supabase,
+          currentUserId: () => 'admin-1',
+        );
+        for (var i = 0; i < 3; i++) {
+          serverRows.add(unreadRow('admin-n-$i', userId: 'admin-1'));
+        }
+        for (var i = 0; i < 2; i++) {
+          serverRows.add(unreadRow('member-n-$i', userId: 'member-9'));
+        }
+
+        final markResult = await adminDs.markAllAsRead();
+        expect(markResult.completed, isTrue);
+        expect(markResult.processed, 3);
+        expect(
+          serverRows
+              .where((r) => r['user_id'] == 'member-9')
+              .every((r) => r['is_read'] == false),
+          isTrue,
+        );
+
+        final clearResult = await adminDs.clearAll();
+        expect(clearResult.completed, isTrue);
+        expect(clearResult.processed, 3);
+        expect(serverRows, hasLength(2));
+        expect(serverRows.every((r) => r['user_id'] == 'member-9'), isTrue);
+
+        for (final uri in [...patchCalls, ...deleteCalls]) {
+          expect(userFilter(uri), 'admin-1', reason: 'unscoped mutation: $uri');
+        }
+      },
+    );
+
+    test('markAllAsRead returns partial status when a chunk fails', () async {
+      for (var i = 0; i < 120; i++) {
+        serverRows.add(unreadRow('p-$i'));
+      }
+      failOnPatchNumber = 2; // first chunk ok, second explodes
+
+      final result = await dataSource.markAllAsRead();
+
+      expect(result.completed, isFalse);
+      expect(result.processed, 50);
+      expect(result.error, isNotNull);
+    });
+
+    test('clearAll returns partial status when a chunk fails', () async {
+      for (var i = 0; i < 120; i++) {
+        serverRows.add(unreadRow('p-$i'));
+      }
+      failOnDeleteNumber = 2;
+
+      final result = await dataSource.clearAll();
+
+      expect(result.completed, isFalse);
+      expect(result.processed, 50);
+      expect(result.error, isNotNull);
+      expect(serverRows, hasLength(70));
+    });
+
+    test(
+      'a full safety-cap run returns a structured result, never throws',
+      () async {
+        endlessVisibleRows = true; // server that never runs out of rows
+
+        final result = await dataSource.markAllAsRead();
+
+        expect(result.completed, isFalse);
+        expect(result.limitReached, isTrue);
+        expect(result.error, isNull);
+      },
+    );
+
+    test('no signed-in user: throws and never issues a request', () async {
+      final anonDs = SupabaseNotificationDataSource(
+        supabase,
+        currentUserId: () => null,
+        sessionRetryCount: 2,
+        sessionRetryDelay: const Duration(milliseconds: 1),
+      );
+
+      await expectLater(anonDs.markAllAsRead(), throwsStateError);
+      await expectLater(anonDs.clearAll(), throwsStateError);
+      await expectLater(anonDs.getNotifications(), throwsStateError);
+      // getUnreadCount degrades to 0 via its catch, still without any
+      // unscoped request.
+      expect(await anonDs.getUnreadCount(), 0);
+      expect(requestCount, 0);
     });
   });
 }

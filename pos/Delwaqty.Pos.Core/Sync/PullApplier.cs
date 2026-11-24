@@ -14,10 +14,14 @@ namespace Delwaqty.Pos.Core.Sync
     {
         public sealed class PosCustomer
         {
-            public string Id;
-            public string Name;
-            public string Phone;
-            public decimal Balance;
+            // WPF binds {Binding Name}/{Binding Phone}/{Binding Balance} to
+            // these in the customers grids - bindings only see PROPERTIES,
+            // so fields here rendered as blank rows (found by the CI
+            // screenshot tour).
+            public string Id { get; set; }
+            public string Name { get; set; }
+            public string Phone { get; set; }
+            public decimal Balance { get; set; }
         }
 
         public sealed class Summary

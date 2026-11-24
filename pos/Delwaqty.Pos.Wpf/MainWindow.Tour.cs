@@ -118,6 +118,11 @@ namespace Delwaqty.Pos.Wpf
             if (tabIndex.HasValue)
             {
                 Tabs.SelectedIndex = tabIndex.Value;
+                // The product grids are search-driven by design (queries under
+                // two chars return nothing): type a query so the seeded
+                // products are visible in the capture.
+                if (tabIndex.Value == 0) SearchBox.Text = "أرز";
+                else if (tabIndex.Value == 1) StockSearchBox.Text = "كجم";
                 proof = "tab selected: " + ((TabItem)Tabs.Items[tabIndex.Value]).Header;
             }
             else

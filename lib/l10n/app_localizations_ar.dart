@@ -8423,61 +8423,71 @@ class AppLocalizationsAr extends AppLocalizations {
   String get customerTourStep1Title => 'استكشف كل حاجة حواليك';
 
   @override
-  String get customerTourStep1Body => 'مطاعم وماركت وخدمات منزلية وأكتر، كله من الشاشة الرئيسية قدامك.';
+  String get customerTourStep1Body =>
+      'مطاعم وماركت وخدمات منزلية وأكتر، كله من الشاشة الرئيسية قدامك.';
 
   @override
   String get customerTourStep2Title => 'اطلب أي حاجة';
 
   @override
-  String get customerTourStep2Body => 'محتاج حاجة من أي محل؟ اكتب اللي عايزه وأقرب كابتن هيشتريه ويوصله لحد عندك.';
+  String get customerTourStep2Body =>
+      'محتاج حاجة من أي محل؟ اكتب اللي عايزه وأقرب كابتن هيشتريه ويوصله لحد عندك.';
 
   @override
   String get customerTourStep3Title => 'تابع طلبك لحظة بلحظة';
 
   @override
-  String get customerTourStep3Body => 'تابع طلبك على الخريطة ويوصلك إشعار بكل خطوة لحد ما يوصل لباب البيت.';
+  String get customerTourStep3Body =>
+      'تابع طلبك على الخريطة ويوصلك إشعار بكل خطوة لحد ما يوصل لباب البيت.';
 
   @override
   String get customerTourStep4Title => 'محفظتك ونقاطك';
 
   @override
-  String get customerTourStep4Body => 'اشحن محفظتك وادفع بسهولة واجمع نقاط مكافآت مع كل طلب.';
+  String get customerTourStep4Body =>
+      'اشحن محفظتك وادفع بسهولة واجمع نقاط مكافآت مع كل طلب.';
 
   @override
   String get customerTourStep5Title => 'القائمة والإشعارات';
 
   @override
-  String get customerTourStep5Body => 'من القائمة الجانبية توصل لطلباتك وحسابك وشكاويك، وجرس الإشعارات يخليك على اطلاع دائم.';
+  String get customerTourStep5Body =>
+      'من القائمة الجانبية توصل لطلباتك وحسابك وشكاويك، وجرس الإشعارات يخليك على اطلاع دائم.';
 
   @override
   String get merchantGuideStep1Title => 'افتح المنتجات';
 
   @override
-  String get merchantGuideStep1Body => 'من لوحة التحكم بتاعتك افتح شاشة المنتجات عشان تشوف وتدير كل اللي بتبيعه.';
+  String get merchantGuideStep1Body =>
+      'من لوحة التحكم بتاعتك افتح شاشة المنتجات عشان تشوف وتدير كل اللي بتبيعه.';
 
   @override
   String get merchantGuideStep2Title => 'اضغط زرار الإضافة';
 
   @override
-  String get merchantGuideStep2Body => 'اضغط على زرار + عشان تبدأ تضيف منتج جديد للكتالوج بتاعك.';
+  String get merchantGuideStep2Body =>
+      'اضغط على زرار + عشان تبدأ تضيف منتج جديد للكتالوج بتاعك.';
 
   @override
   String get merchantGuideStep3Title => 'صورة حقيقية واسم واضح';
 
   @override
-  String get merchantGuideStep3Body => 'ضيف صورة حقيقية واسم واضح ووصف قصير عشان العميل يشتري بسرعة.';
+  String get merchantGuideStep3Body =>
+      'ضيف صورة حقيقية واسم واضح ووصف قصير عشان العميل يشتري بسرعة.';
 
   @override
   String get merchantGuideStep4Title => 'السعر والكمية';
 
   @override
-  String get merchantGuideStep4Body => 'حدد السعر الصح وحدّث الكمية أول بأول عشان العميل يشوف المتاح دايمًا.';
+  String get merchantGuideStep4Body =>
+      'حدد السعر الصح وحدّث الكمية أول بأول عشان العميل يشوف المتاح دايمًا.';
 
   @override
   String get merchantGuideStep5Title => 'احفظ وابدأ البيع';
 
   @override
-  String get merchantGuideStep5Body => 'أول ما تحفظ، المنتج هيظهر للعملاء فورًا، وتقدر تعدله أو توقفه في أي وقت.';
+  String get merchantGuideStep5Body =>
+      'أول ما تحفظ، المنتج هيظهر للعملاء فورًا، وتقدر تعدله أو توقفه في أي وقت.';
 
   @override
   String get merchantGuideOpenTooltip => 'إزاي تضيف منتج';

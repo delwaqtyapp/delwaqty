@@ -16053,66 +16053,129 @@ abstract class AppLocalizations {
   String get adminManagement;
 
   /// No description provided for @customerTourStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore everything around you'**
   String get customerTourStep1Title;
 
   /// No description provided for @customerTourStep1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurants, markets, home services and more, all from the main screen in front of you.'**
   String get customerTourStep1Body;
 
   /// No description provided for @customerTourStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for anything'**
   String get customerTourStep2Title;
 
   /// No description provided for @customerTourStep2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Need something from any store? Write what you want and the nearest captain will buy it and bring it to you.'**
   String get customerTourStep2Body;
 
   /// No description provided for @customerTourStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Track your order live'**
   String get customerTourStep3Title;
 
   /// No description provided for @customerTourStep3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow your order on the map and get a notification at every step until it reaches your door.'**
   String get customerTourStep3Body;
 
   /// No description provided for @customerTourStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Your wallet and rewards'**
   String get customerTourStep4Title;
 
   /// No description provided for @customerTourStep4Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Charge your wallet, pay easily, and collect reward points with every order.'**
   String get customerTourStep4Body;
 
   /// No description provided for @customerTourStep5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Menu and notifications'**
   String get customerTourStep5Title;
 
   /// No description provided for @customerTourStep5Body.
+  ///
+  /// In en, this message translates to:
+  /// **'From the side menu you reach your orders, profile and complaints, and the bell keeps you up to date.'**
   String get customerTourStep5Body;
 
   /// No description provided for @merchantGuideStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Open your products'**
   String get merchantGuideStep1Title;
 
   /// No description provided for @merchantGuideStep1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'From your dashboard, open the products screen to see and manage everything you sell.'**
   String get merchantGuideStep1Body;
 
   /// No description provided for @merchantGuideStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the add button'**
   String get merchantGuideStep2Title;
 
   /// No description provided for @merchantGuideStep2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the + button to start adding a new product to your catalog.'**
   String get merchantGuideStep2Body;
 
   /// No description provided for @merchantGuideStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'A real photo and a clear name'**
   String get merchantGuideStep3Title;
 
   /// No description provided for @merchantGuideStep3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a real photo, a clear name and a short description so customers buy faster.'**
   String get merchantGuideStep3Body;
 
   /// No description provided for @merchantGuideStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Price and stock'**
   String get merchantGuideStep4Title;
 
   /// No description provided for @merchantGuideStep4Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the right price and keep the quantity up to date so customers always see what is available.'**
   String get merchantGuideStep4Body;
 
   /// No description provided for @merchantGuideStep5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and start selling'**
   String get merchantGuideStep5Title;
 
   /// No description provided for @merchantGuideStep5Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Once you save, the product appears to customers right away, and you can edit or pause it anytime.'**
   String get merchantGuideStep5Body;
 
   /// No description provided for @merchantGuideOpenTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'How to add products'**
   String get merchantGuideOpenTooltip;
 }
 
@@ -16148,5 +16211,4 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
     'that was used.',
   );
-
 }

@@ -76,7 +76,10 @@ BEGIN
     RETURN jsonb_build_object('ok', false, 'reason', 'INVALID_INPUT');
   END IF;
 
-  -- Abuse cap: at most 5 open (searching) courier rides per rider.
+  -- Abuse cap: at most 5 open (searching) rides per rider, counted over
+  -- all service types. The advisory lock serializes concurrent requests
+  -- from the same rider so the check-then-insert cannot race.
+  PERFORM pg_advisory_xact_lock(hashtext(v_uid::text));
   SELECT count(*) INTO v_open
     FROM public.rides
    WHERE rider_id = v_uid AND status = 'searching';
@@ -116,13 +119,23 @@ REVOKE ALL ON FUNCTION public.request_courier_delivery(numeric, numeric, text, n
 GRANT EXECUTE ON FUNCTION public.request_courier_delivery(numeric, numeric, text, numeric, numeric, text, text, text, text) TO authenticated;
 
 -- ACL postcheck: only authenticated (besides the owner) may hold EXECUTE.
+-- PUBLIC is checked via aclexplode (grantee 0): has_function_privilege
+-- with the uppercase literal 'PUBLIC' raises 42704 on prod (PG 17).
 DO $$
 DECLARE
   v_sig regprocedure := 'public.request_courier_delivery(numeric,numeric,text,numeric,numeric,text,text,text,text)'::regprocedure;
 BEGIN
-  IF has_function_privilege('PUBLIC', v_sig, 'EXECUTE')
-     OR has_function_privilege('anon', v_sig, 'EXECUTE') THEN
-    RAISE EXCEPTION '430: request_courier_delivery executable by PUBLIC/anon';
+  IF EXISTS (
+    SELECT 1 FROM pg_proc p,
+         aclexplode(COALESCE(p.proacl, acldefault('f', p.proowner))) a
+    WHERE p.oid = v_sig::oid
+      AND a.grantee = 0
+      AND a.privilege_type = 'EXECUTE'
+  ) THEN
+    RAISE EXCEPTION '430: request_courier_delivery executable by PUBLIC';
+  END IF;
+  IF has_function_privilege('anon', v_sig, 'EXECUTE') THEN
+    RAISE EXCEPTION '430: request_courier_delivery executable by anon';
   END IF;
   IF NOT has_function_privilege('authenticated', v_sig, 'EXECUTE') THEN
     RAISE EXCEPTION '430: authenticated lost EXECUTE on request_courier_delivery';

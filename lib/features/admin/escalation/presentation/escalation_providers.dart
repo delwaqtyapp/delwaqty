@@ -28,10 +28,6 @@ final clientPricedAlertsProvider = FutureProvider<List<ClientPricedAlert>>(
   (ref) => ref.read(escalationRepositoryProvider).getClientPricedAlerts(),
 );
 
-final insuranceMismatchesProvider = FutureProvider<List<InsuranceMismatch>>(
-  (ref) => ref.read(escalationRepositoryProvider).getInsuranceMismatches(),
-);
-
 final escalateComplaintProvider =
     Provider<
       Future<void> Function({

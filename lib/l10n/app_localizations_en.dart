@@ -3874,16 +3874,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clientPricedSection => 'Cashier-priced lines (last 30 days)';
 
   @override
-  String get insuranceMismatchSection =>
-      'Insurance total mismatches (last 30 days)';
-
-  @override
   String get noTamperSignals => 'No tamper signals in the last 30 days';
-
-  @override
-  String claimedVsServer(Object claimed, Object server) {
-    return 'Claimed $claimed · server $server';
-  }
 
   @override
   String clientPricedRatioLabel(Object lines, Object pct, Object total) {

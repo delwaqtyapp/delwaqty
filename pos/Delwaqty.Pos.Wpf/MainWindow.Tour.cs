@@ -120,9 +120,21 @@ namespace Delwaqty.Pos.Wpf
                 Tabs.SelectedIndex = tabIndex.Value;
                 // The product grids are search-driven by design (queries under
                 // two chars return nothing): type a query so the seeded
-                // products are visible in the capture.
-                if (tabIndex.Value == 0) SearchBox.Text = "أرز";
-                else if (tabIndex.Value == 1) StockSearchBox.Text = "كجم";
+                // products are visible in the capture. The catalog matches
+                // only barcode + search_norm, so the queries must hit the
+                // seeded norms (rice/oil/sugar/tea + Arabic), never NameAr
+                // (#205). Each query is asserted non-empty before the ready
+                // marker is written - an empty grid fails the tour loudly.
+                if (tabIndex.Value == 0)
+                {
+                    SearchBox.Text = "أرز";
+                    AssertSearchRows(SearchResults, "sales");
+                }
+                else if (tabIndex.Value == 1)
+                {
+                    StockSearchBox.Text = "سكر";
+                    AssertSearchRows(StockResults, "inventory");
+                }
                 proof = "tab selected: " + ((TabItem)Tabs.Items[tabIndex.Value]).Header;
             }
             else
@@ -132,6 +144,13 @@ namespace Delwaqty.Pos.Wpf
             }
             File.WriteAllText(Path.Combine(_tourDir, "ready-" + slug), proof);
             _tourWaitingAck = true;
+        }
+
+        private static void AssertSearchRows(System.Windows.Controls.DataGrid grid, string name)
+        {
+            var items = grid.ItemsSource as System.Collections.ICollection;
+            if (items == null || items.Count == 0)
+                throw new InvalidOperationException("tour: " + name + " search returned no rows");
         }
 
         private Window OpenTourDialog(string dialog)

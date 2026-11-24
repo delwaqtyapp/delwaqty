@@ -31,7 +31,8 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - id: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ inputs.ref }}
           persist-credentials: false
@@ -61,9 +62,22 @@ jobs:
         # reference too, so the shipped build's stale obj/*.cs got globbed into
         # the tour compile (CS0518/CS0234). A pristine second checkout gives
         # the tour build its own untouched obj/bin tree instead.
+        # #204: pinned to the exact commit the first checkout resolved (never
+        # the movable trigger ref), and it must not persist the job token into
+        # a tree that runs source code.
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           path: tour-src
+          ref: ${{ steps.checkout.outputs.commit }}
+          persist-credentials: false
+
+      - name: Assert both checkouts resolved the same commit
+        shell: pwsh
+        run: |
+          $a = (git rev-parse HEAD)
+          $b = (git -C tour-src rev-parse HEAD)
+          if ($a -ne $b) { throw "checkout mismatch: $a vs $b" }
+          "both trees at $a"
 
       - name: Publish screenshot-tour build (CI instrumentation, never shipped)
         # Compiles the SAME commit with SCREENSHOT_TOUR defined from the

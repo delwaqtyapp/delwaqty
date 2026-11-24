@@ -111,8 +111,10 @@ BEGIN
      OR (SELECT count(*) FROM public.courier_invoice_items WHERE ride_id = v_ride) IS DISTINCT FROM 0 THEN
     RAISE EXCEPTION 'RLS: stranger can read ask-anything rows';
   END IF;
-  IF (public.propose_courier_quote(v_ride, 25, NULL) ->> 'reason') NOT IN ('FORBIDDEN', 'INVALID_STATE') THEN
-    RAISE EXCEPTION 'stranger could propose a quote';
+  a := public.propose_courier_quote(v_ride, 25, NULL);
+  IF (a ->> 'reason') IS DISTINCT FROM 'FORBIDDEN'
+     AND (a ->> 'reason') IS DISTINCT FROM 'INVALID_STATE' THEN
+    RAISE EXCEPTION 'stranger could propose a quote: %', a;
   END IF;
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', u)::text, true);
 
@@ -281,7 +283,10 @@ BEGIN
   END IF;
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', u)::text, true);
   a := public.add_courier_invoice_item(v_ride, 'x', 'y', 1, NULL, NULL, NULL);
-  IF (a ->> 'ok')::boolean THEN RAISE EXCEPTION 'rider added an invoice item'; END IF;
+  IF (a ->> 'ok')::boolean IS DISTINCT FROM false
+     OR (a ->> 'reason') IS DISTINCT FROM 'FORBIDDEN' THEN
+    RAISE EXCEPTION 'rider added an invoice item: %', a;
+  END IF;
 
   -- RLS: the rider and the assigned driver read all three tables.
   IF (SELECT count(*) FROM public.courier_invoice_items WHERE ride_id = v_ride) IS DISTINCT FROM 3 THEN
@@ -316,7 +321,10 @@ BEGIN
   END IF;
   -- The driver cannot approve items himself.
   a := public.decide_courier_invoice_item(v_item3, 'approve');
-  IF (a ->> 'ok')::boolean THEN RAISE EXCEPTION 'driver approved an item'; END IF;
+  IF (a ->> 'ok')::boolean IS DISTINCT FROM false
+     OR (a ->> 'reason') IS DISTINCT FROM 'FORBIDDEN' THEN
+    RAISE EXCEPTION 'driver approved an item: %', a;
+  END IF;
   -- finish blocks on the pending item AND on the uncancelled rejection.
   a := public.finish_courier_shopping(v_ride);
   IF (a ->> 'reason') IS DISTINCT FROM 'ITEMS_PENDING' THEN

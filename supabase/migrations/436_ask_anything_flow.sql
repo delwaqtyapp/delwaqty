@@ -1672,7 +1672,9 @@ BEGIN
        WHERE c.table_schema = 'public' AND c.table_name = 'rides'
          AND c.column_name = want.col AND c.data_type = want.typ
          AND c.is_nullable = want.nullable
-         AND c.column_default::text LIKE want.dflt || '%'
+         AND regexp_replace(c.column_default::text,
+                            '::[a-zA-Z ]+(\\(\\d+(,\\d+)?\\))?$', '')
+               IS NOT DISTINCT FROM want.dflt
          AND (want.prec IS NULL
               OR (c.numeric_precision = want.prec AND c.numeric_scale = want.scale))
     )

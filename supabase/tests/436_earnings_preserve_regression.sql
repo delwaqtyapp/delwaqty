@@ -184,11 +184,11 @@ BEGIN
   -- r1, r2 and r3 each book one goods obligation (r4 is non-cash);
   -- r2, r3 and r4 each book one subsidy row.
   IF (SELECT count(*) FROM public.driver_earnings
-       WHERE ride_id IN (r1, r2, r3, r4)) <> 4
+       WHERE ride_id IN (r1, r2, r3, r4)) IS DISTINCT FROM 4
      OR (SELECT count(*) FROM public.driver_obligations
-       WHERE ride_id IN (r1, r2, r3, r4) AND kind = 'goods') <> 3
+       WHERE ride_id IN (r1, r2, r3, r4) AND kind = 'goods') IS DISTINCT FROM 3
      OR (SELECT count(*) FROM public.platform_subsidies
-       WHERE order_id IN (o2, o3, o4)) <> 3 THEN
+       WHERE order_id IN (o2, o3, o4)) IS DISTINCT FROM 3 THEN
     RAISE EXCEPTION 'earnings accrual not idempotent across all paths';
   END IF;
 

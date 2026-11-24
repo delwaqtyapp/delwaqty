@@ -1,11 +1,14 @@
 -- 436: ask-anything courier flow (owner decision 2026-11-24, issue #28;
--- code review #206-#210, security review B1/B2).
+-- code review #206-#211, security review B1/B2).
 --
 -- The owner's product decision for the ask-anything button (kept as is):
 -- the customer picks a unit (kilo / half / quarter) or an EGP amount and
 -- writes the product; the delivery price is set by the driver (minimum
 -- 15 EGP for the first shop + 5 EGP per extra shop by the declared shop
--- count, rising with distance - reviewer's product call in #209) and the
+-- count, rising with distance - main's product decision under the
+-- owner's delegation, from the owner's own voice-note words: "15 EGP
+-- for the first shop, +5 for each extra shop, may rise with distance,
+-- set by the driver" - #211) and the
 -- customer accepts, rejects or negotiates - never forced; the driver buys
 -- at the shops and records each item with its shop name and real price
 -- (typed, or a receipt photo); the customer sees a live itemized invoice
@@ -15,6 +18,11 @@
 -- from the fare; the platform takes commission on the fare only.
 -- Ask-anything rides are CASH ONLY (security B2b): the driver fronts the
 -- goods money. No pharmacy items.
+--
+-- The 15+5/shop floor binds BOTH sides of the negotiation (#211):
+-- driver proposals and customer counters below the floor are rejected
+-- by propose_courier_quote, and clients must enforce the same floor on
+-- a customer counter before calling the API.
 --
 -- Money semantics (confirmed by the owner via main, 2026-11-24):
 -- rides.fare is LOCKED to the accepted quote; goods money never passes
@@ -37,45 +45,97 @@ BEGIN;
 
 DO $$
 DECLARE
+  -- #210: exact regprocedure signatures for every replaced global.
+  f_rde constant regprocedure := 'public._record_delivery_earnings(uuid)'::regprocedure;
+  f_start constant regprocedure := 'public.start_trip(uuid,uuid,text)'::regprocedure;
+  f_cancel constant regprocedure := 'public.cancel_ride_lifecycle(uuid,text,text)'::regprocedure;
+  f_resolve constant regprocedure := 'public.resolve_delivery_incident(uuid,text,text)'::regprocedure;
   v_md5 text;
   v_owner text;
+  v_secdef boolean;
+  v_config text[];
+  v_acl text;
   v_rides_owner text;
 BEGIN
-  SELECT left(md5(p.prosrc), 8), pg_get_userbyid(p.proowner)
-    INTO v_md5, v_owner
-    FROM pg_proc p
-   WHERE p.proname = '_record_delivery_earnings'
-     AND p.pronamespace = 'public'::regnamespace;
-  IF v_md5 IS DISTINCT FROM 'fb95f00d' THEN
-    RAISE EXCEPTION '436: _record_delivery_earnings pre-image drifted (got %, want fb95f00d) - rebuild this migration on the live body', v_md5;
-  END IF;
   SELECT pg_get_userbyid(t.relowner) INTO v_rides_owner
     FROM pg_class t WHERE t.relname = 'rides' AND t.relnamespace = 'public'::regnamespace;
-  IF v_owner IS DISTINCT FROM v_rides_owner THEN
-    RAISE EXCEPTION '436: _record_delivery_earnings owner % differs from rides owner %', v_owner, v_rides_owner;
+
+  -- Every replaced global is pinned by the FULL md5 of its live body
+  -- (prosrc; pg_get_functiondef for start_trip, matching the security
+  -- reviewer's pin) and must be SECURITY DEFINER, owned by the rides
+  -- owner, with the exact search_path and effective EXECUTE set below
+  -- (#210, B1). Effective ACLs are compared as sorted grantee sets via
+  -- aclexplode, so grantor identity never false-trips the guard.
+  SELECT md5(p.prosrc), pg_get_userbyid(p.proowner), p.prosecdef, p.proconfig,
+         (SELECT string_agg(g, ',' ORDER BY g) FROM (
+            SELECT CASE WHEN a.grantee = 0 THEN 'PUBLIC'
+                        ELSE a.grantee::regrole::text END
+                   || '=' || a.privilege_type AS g
+              FROM aclexplode(COALESCE(p.proacl, acldefault('f', p.proowner))) a) x)
+    INTO v_md5, v_owner, v_secdef, v_config, v_acl
+    FROM pg_proc p WHERE p.oid = f_rde;
+  IF v_md5 IS DISTINCT FROM 'fb95f00d5003d6b493823b69baa1cd65' THEN
+    RAISE EXCEPTION '436: _record_delivery_earnings pre-image drifted (got %, want fb95f00d5003d6b493823b69baa1cd65) - rebuild this migration on the live body', v_md5;
+  END IF;
+  IF v_secdef IS DISTINCT FROM true
+     OR v_config IS DISTINCT FROM ARRAY['search_path=public, pg_temp']::text[]
+     OR v_owner IS DISTINCT FROM v_rides_owner
+     OR v_acl IS DISTINCT FROM 'postgres=EXECUTE,service_role=EXECUTE' THEN
+    RAISE EXCEPTION '436: _record_delivery_earnings property drifted (secdef %, config %, owner %, acl %)', v_secdef, v_config, v_owner, v_acl;
   END IF;
 
-  SELECT left(md5(pg_get_functiondef(p.oid)), 8), pg_get_userbyid(p.proowner)
-    INTO v_md5, v_owner
-    FROM pg_proc p
-   WHERE p.proname = 'start_trip' AND p.pronamespace = 'public'::regnamespace;
-  IF v_md5 IS DISTINCT FROM 'a5cbc1a3' THEN
-    RAISE EXCEPTION '436: start_trip pre-image drifted (got %, want a5cbc1a3)', v_md5;
+  SELECT md5(pg_get_functiondef(p.oid)), pg_get_userbyid(p.proowner), p.prosecdef, p.proconfig,
+         (SELECT string_agg(g, ',' ORDER BY g) FROM (
+            SELECT CASE WHEN a.grantee = 0 THEN 'PUBLIC'
+                        ELSE a.grantee::regrole::text END
+                   || '=' || a.privilege_type AS g
+              FROM aclexplode(COALESCE(p.proacl, acldefault('f', p.proowner))) a) x)
+    INTO v_md5, v_owner, v_secdef, v_config, v_acl
+    FROM pg_proc p WHERE p.oid = f_start;
+  IF v_md5 IS DISTINCT FROM 'a5cbc1a373cd7414047c7422fb5f6f4a' THEN
+    RAISE EXCEPTION '436: start_trip pre-image drifted (got %, want a5cbc1a373cd7414047c7422fb5f6f4a)', v_md5;
   END IF;
-  IF v_owner IS DISTINCT FROM v_rides_owner THEN
-    RAISE EXCEPTION '436: start_trip owner % differs from rides owner %', v_owner, v_rides_owner;
+  IF v_secdef IS DISTINCT FROM true
+     OR v_config IS DISTINCT FROM ARRAY['search_path=public, pg_temp']::text[]
+     OR v_owner IS DISTINCT FROM v_rides_owner
+     OR v_acl IS DISTINCT FROM 'authenticated=EXECUTE,postgres=EXECUTE,service_role=EXECUTE' THEN
+    RAISE EXCEPTION '436: start_trip property drifted (secdef %, config %, owner %, acl %)', v_secdef, v_config, v_owner, v_acl;
   END IF;
 
-  SELECT left(md5(p.prosrc), 8), pg_get_userbyid(p.proowner)
-    INTO v_md5, v_owner
-    FROM pg_proc p
-   WHERE p.proname = 'cancel_ride_lifecycle'
-     AND p.pronamespace = 'public'::regnamespace;
-  IF v_md5 IS DISTINCT FROM '89e175d7' THEN
-    RAISE EXCEPTION '436: cancel_ride_lifecycle pre-image drifted (got %, want 89e175d7)', v_md5;
+  SELECT md5(p.prosrc), pg_get_userbyid(p.proowner), p.prosecdef, p.proconfig,
+         (SELECT string_agg(g, ',' ORDER BY g) FROM (
+            SELECT CASE WHEN a.grantee = 0 THEN 'PUBLIC'
+                        ELSE a.grantee::regrole::text END
+                   || '=' || a.privilege_type AS g
+              FROM aclexplode(COALESCE(p.proacl, acldefault('f', p.proowner))) a) x)
+    INTO v_md5, v_owner, v_secdef, v_config, v_acl
+    FROM pg_proc p WHERE p.oid = f_cancel;
+  IF v_md5 IS DISTINCT FROM '89e175d7e4c7f7023881338201a5d7d5' THEN
+    RAISE EXCEPTION '436: cancel_ride_lifecycle pre-image drifted (got %, want 89e175d7e4c7f7023881338201a5d7d5)', v_md5;
   END IF;
-  IF v_owner IS DISTINCT FROM v_rides_owner THEN
-    RAISE EXCEPTION '436: cancel_ride_lifecycle owner % differs from rides owner %', v_owner, v_rides_owner;
+  IF v_secdef IS DISTINCT FROM true
+     OR v_config IS DISTINCT FROM ARRAY['search_path=public, pg_temp']::text[]
+     OR v_owner IS DISTINCT FROM v_rides_owner
+     OR v_acl IS DISTINCT FROM 'authenticated=EXECUTE,postgres=EXECUTE,service_role=EXECUTE' THEN
+    RAISE EXCEPTION '436: cancel_ride_lifecycle property drifted (secdef %, config %, owner %, acl %)', v_secdef, v_config, v_owner, v_acl;
+  END IF;
+
+  SELECT md5(p.prosrc), pg_get_userbyid(p.proowner), p.prosecdef, p.proconfig,
+         (SELECT string_agg(g, ',' ORDER BY g) FROM (
+            SELECT CASE WHEN a.grantee = 0 THEN 'PUBLIC'
+                        ELSE a.grantee::regrole::text END
+                   || '=' || a.privilege_type AS g
+              FROM aclexplode(COALESCE(p.proacl, acldefault('f', p.proowner))) a) x)
+    INTO v_md5, v_owner, v_secdef, v_config, v_acl
+    FROM pg_proc p WHERE p.oid = f_resolve;
+  IF v_md5 IS DISTINCT FROM '8e99388bbc8196b10b011da3d5e66ce9' THEN
+    RAISE EXCEPTION '436: resolve_delivery_incident pre-image drifted (got %, want 8e99388bbc8196b10b011da3d5e66ce9)', v_md5;
+  END IF;
+  IF v_secdef IS DISTINCT FROM true
+     OR v_config IS DISTINCT FROM ARRAY['search_path=public, pg_temp']::text[]
+     OR v_owner IS DISTINCT FROM v_rides_owner
+     OR v_acl IS DISTINCT FROM 'authenticated=EXECUTE,postgres=EXECUTE,service_role=EXECUTE' THEN
+    RAISE EXCEPTION '436: resolve_delivery_incident property drifted (secdef %, config %, owner %, acl %)', v_secdef, v_config, v_owner, v_acl;
   END IF;
 
   -- Column-shape drift checks for every rides column this migration
@@ -372,7 +432,8 @@ $function$;
 -- baseline by the declared shop count; it may rise with distance). The
 -- rider answers with respond_courier_quote; the rider's counters also go
 -- through this RPC - the caller's role is derived from the ride, never
--- from the caller. Caps: 20 quotes per ride, 10s between proposals.
+-- from the caller. The 15+5/shop floor binds both sides (#211). Caps:
+-- 20 quotes per ride, 10s between proposals.
 CREATE OR REPLACE FUNCTION public.propose_courier_quote(
   p_ride_id uuid,
   p_amount numeric,
@@ -433,9 +494,10 @@ BEGIN
     RETURN jsonb_build_object('ok', false, 'reason', 'FORBIDDEN');
   END IF;
 
-  -- #209 product call: the driver cannot go below the 15+5/shop baseline.
+  -- #211: the 15+5/shop baseline binds both sides - neither a driver
+  -- proposal nor a customer counter may go below it.
   v_baseline := 15 + 5 * (r.courier_shop_count - 1);
-  IF v_role = 'driver' AND p_amount < v_baseline THEN
+  IF p_amount < v_baseline THEN
     RETURN jsonb_build_object('ok', false, 'reason', 'BELOW_BASELINE',
                             'baseline', v_baseline);
   END IF;
@@ -621,9 +683,10 @@ $function$;
 -- The driver records each item at the shop: shop name, product and the
 -- real price (typed, or a receipt photo). Items start pending: the
 -- customer approves each one before it is bought. Caps (#209, B2): 50
--- items and 20 distinct shops per ride, 5,000,000 EGP goods aggregate,
--- 1s between adds; while a rejected item awaits cancellation the driver
--- cannot add more items (B2).
+-- attempted rows (cancelled included) and 20 distinct live shops per
+-- ride, 5,000,000 EGP money-active aggregate, 1s between attempts
+-- (cancelled rows keep the cadence busy); while a rejected item awaits
+-- cancellation the driver cannot add more items (B2).
 CREATE OR REPLACE FUNCTION public.add_courier_invoice_item(
   p_ride_id uuid,
   p_shop_name text,
@@ -683,22 +746,28 @@ BEGIN
     RETURN jsonb_build_object('ok', false, 'reason', 'REJECTED_ITEMS_OPEN');
   END IF;
 
-  -- Caps and throttle, all under the ride lock.
-  SELECT count(*), COALESCE(sum(price), 0), max(created_at)
-    INTO v_count, v_goods, v_last
+  -- Caps and throttle count EVERY attempted row, cancelled ones
+  -- included, so add-cancel-readd loops cannot bypass them (#209).
+  SELECT count(*), max(created_at)
+    INTO v_count, v_last
     FROM public.courier_invoice_items
-   WHERE ride_id = p_ride_id AND status <> 'cancelled';
+   WHERE ride_id = p_ride_id;
   IF v_count >= 50 THEN
     RETURN jsonb_build_object('ok', false, 'reason', 'ITEM_CAP');
   END IF;
-  -- The goods aggregate stays strictly below 5,000,000 EGP: at the
-  -- per-item cap (100,000) and item cap (50) the theoretical maximum is
-  -- exactly 5,000,000, so this bound is the real enforcement.
-  IF v_goods + p_price >= 5000000 THEN
-    RETURN jsonb_build_object('ok', false, 'reason', 'GOODS_CAP');
-  END IF;
   IF v_last IS NOT NULL AND v_last > now() - interval '1 second' THEN
     RETURN jsonb_build_object('ok', false, 'reason', 'THROTTLED');
+  END IF;
+  -- The money-active aggregate counts live items only (pending +
+  -- approved; rejected and cancelled rows never move money). It stays
+  -- strictly below 5,000,000 EGP: at the per-item cap (100,000) and
+  -- item cap (50) the theoretical maximum is exactly 5,000,000, so
+  -- this bound is the real enforcement.
+  SELECT COALESCE(sum(price), 0) INTO v_goods
+    FROM public.courier_invoice_items
+   WHERE ride_id = p_ride_id AND status IN ('pending', 'approved');
+  IF v_goods + p_price >= 5000000 THEN
+    RETURN jsonb_build_object('ok', false, 'reason', 'GOODS_CAP');
   END IF;
 
   -- A new shop may not push the ride past 20 distinct shops (the
@@ -1125,6 +1194,95 @@ END;
 $function$;
 
 
+-- ── resolve_delivery_incident: order-less courier rides (security a) ──
+-- Exact live body + two marked 436 blocks. An ask-anything ride has no
+-- order, so (1) the region lock falls back to the rider's region and
+-- (2) a cancelling resolution closes the RIDE directly instead of
+-- calling _finalize_order_cancel(NULL). The goods money state (invoice
+-- items, courier_goods_total) stays recorded for the ops settlement
+-- that follows the incident.
+
+CREATE OR REPLACE FUNCTION public.resolve_delivery_incident(p_incident_id uuid, p_resolution text, p_note text DEFAULT NULL::text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+declare
+  i public.delivery_incidents%rowtype;
+  v_region uuid;
+  -- 436: order-less courier rides (ask-anything) resolve below.
+  v_ride public.rides%rowtype;
+begin
+  if not public.is_admin() then
+    return jsonb_build_object('ok', false, 'reason', 'forbidden');
+  end if;
+  if p_resolution not in ('redelivered','returned_to_merchant','cancelled','dismissed') then
+    return jsonb_build_object('ok', false, 'reason', 'invalid_resolution');
+  end if;
+  select * into i from public.delivery_incidents where id = p_incident_id for update;
+  if not found then
+    return jsonb_build_object('ok', false, 'reason', 'not_found');
+  end if;
+  if i.status = 'resolved' then
+    return jsonb_build_object('ok', false, 'reason', 'already_resolved');
+  end if;
+
+  -- Region lock (194): the incident's order customer's region governs.
+  select u.region_id into v_region
+    from public.orders o join public.users u on u.id = o.user_id
+   where o.id = i.order_id;
+  -- 436: an order-less courier ride (ask-anything) has no order
+  -- customer; the rider's region governs instead.
+  if v_region is null and i.order_id is null then
+    select u.region_id into v_region
+      from public.rides ri join public.users u on u.id = ri.rider_id
+     where ri.id = i.ride_id;
+  end if;
+  if not public._admin_scope_allows(v_region) then
+    return jsonb_build_object('ok', false, 'reason', 'forbidden_region');
+  end if;
+
+  -- Returned goods end the ride and the order; a plain cancel of the order
+  -- closes it out. Redelivery keeps the ride alive for the driver to finish.
+  -- 194: incident-cancels do NOT restock (goods may be unsellable) but DO
+  -- refund and release the coupon, and clear the driver + ride.
+  if p_resolution in ('returned_to_merchant','cancelled') then
+    -- 436: an order-less courier ride (ask-anything) has no order to
+    -- finalize; cancel the ride directly. The goods money state
+    -- (invoice items, courier_goods_total) stays recorded for the ops
+    -- settlement that follows the incident.
+    if i.order_id is null then
+      update public.rides
+         set status = 'cancelled', cancelled_at = now(),
+             cancellation_reason = 'incident: ' || p_resolution,
+             cancelled_by = 'system'
+       where id = i.ride_id
+         and status not in ('completed', 'cancelled');
+      update public.ride_requests set status = 'expired', responded_at = now()
+       where ride_id = i.ride_id and status = 'offered';
+      update public.driver_locations set ride_id = null
+       where ride_id = i.ride_id;
+    else
+      perform public._finalize_order_cancel(
+        i.order_id, 'incident', 'incident: ' || p_resolution,
+        false, true, true, 'system');
+    end if;
+  end if;
+
+  update public.delivery_incidents
+     set status = 'resolved', resolution = p_resolution,
+         note = coalesce(nullif(btrim(p_note), ''), note),
+         resolved_by = auth.uid(), resolved_at = now()
+   where id = p_incident_id;
+  insert into trip_events (ride_id, event_type, actor)
+    values (i.ride_id, 'incident_resolved_' || p_resolution, 'support');
+  return jsonb_build_object('ok', true, 'resolution', p_resolution);
+end;
+$function$
+;
+
+
 -- ── Earnings (B1: exact live 395 body + one marked narrow block; the ───
 -- ── 188 delay waiver and the 395 credit netting stay byte-identical) ───
 
@@ -1414,8 +1572,9 @@ GRANT EXECUTE ON FUNCTION public.cancel_courier_invoice_item(uuid) TO authentica
 REVOKE ALL ON FUNCTION public.finish_courier_shopping(uuid) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.finish_courier_shopping(uuid) TO authenticated;
 
--- start_trip, cancel_ride_lifecycle and _record_delivery_earnings keep
--- their existing grants (CREATE OR REPLACE preserves ACLs).
+-- start_trip, cancel_ride_lifecycle, resolve_delivery_incident and
+-- _record_delivery_earnings keep their existing grants (CREATE OR
+-- REPLACE preserves ACLs).
 
 -- ── ACL postchecks (430 pattern: PUBLIC via aclexplode grantee 0) ───────
 
@@ -1470,6 +1629,55 @@ BEGIN
      OR NOT has_function_privilege('authenticated',
        'public.cancel_ride_lifecycle(uuid,text,text)'::regprocedure, 'EXECUTE') THEN
     RAISE EXCEPTION '436: cancel_ride_lifecycle ACL drifted';
+  END IF;
+  IF has_function_privilege('anon',
+       'public.resolve_delivery_incident(uuid,text,text)'::regprocedure, 'EXECUTE')
+     OR NOT has_function_privilege('authenticated',
+       'public.resolve_delivery_incident(uuid,text,text)'::regprocedure, 'EXECUTE') THEN
+    RAISE EXCEPTION '436: resolve_delivery_incident ACL drifted';
+  END IF;
+
+  -- Post-replacement property asserts (#210): every replaced global
+  -- keeps SECURITY DEFINER, its search_path, the rides owner and its
+  -- exact effective EXECUTE set.
+  IF EXISTS (
+    SELECT 1 FROM pg_proc p
+     WHERE p.oid IN (
+       'public._record_delivery_earnings(uuid)'::regprocedure,
+       'public.start_trip(uuid,uuid,text)'::regprocedure,
+       'public.cancel_ride_lifecycle(uuid,text,text)'::regprocedure,
+       'public.resolve_delivery_incident(uuid,text,text)'::regprocedure)
+       AND (NOT p.prosecdef
+            OR p.proconfig IS DISTINCT FROM ARRAY['search_path=public, pg_temp']::text[]
+            OR pg_get_userbyid(p.proowner) IS DISTINCT FROM
+               (SELECT pg_get_userbyid(t.relowner) FROM pg_class t
+                 WHERE t.relname = 'rides' AND t.relnamespace = 'public'::regnamespace))
+  ) THEN
+    RAISE EXCEPTION '436: a replaced global lost secdef/search_path/owner';
+  END IF;
+
+  -- Added-column shape checks (#210): every rides column this migration
+  -- adds, with type, nullability, default and (for the numeric one)
+  -- precision and scale.
+  IF EXISTS (
+    SELECT 1 FROM (VALUES
+      ('is_ask_anything', 'boolean', 'NO', 'false', NULL::int, NULL::int),
+      ('courier_shop_count', 'integer', 'NO', '1', NULL, NULL),
+      ('courier_quote_locked', 'boolean', 'NO', 'false', NULL, NULL),
+      ('courier_goods_total', 'numeric', 'NO', '0'::text, 10, 2),
+      ('courier_shopping_finished', 'boolean', 'NO', 'false', NULL, NULL)
+    ) AS want(col, typ, nullable, dflt, prec, scale)
+    WHERE NOT EXISTS (
+      SELECT 1 FROM information_schema.columns c
+       WHERE c.table_schema = 'public' AND c.table_name = 'rides'
+         AND c.column_name = want.col AND c.data_type = want.typ
+         AND c.is_nullable = want.nullable
+         AND c.column_default::text LIKE want.dflt || '%'
+         AND (want.prec IS NULL
+              OR (c.numeric_precision = want.prec AND c.numeric_scale = want.scale))
+    )
+  ) THEN
+    RAISE EXCEPTION '436: added rides column shape mismatch';
   END IF;
 END $$;
 

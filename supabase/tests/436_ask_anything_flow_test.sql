@@ -1,9 +1,11 @@
 -- Run after migration 436. Every fixture and resulting row is rolled back.
--- Covers the ask-anything flow end to end plus the #207-#210 and B2
+-- Covers the ask-anything flow end to end plus the #207-#211 and B2
 -- matrices: null/malformed actions, lock order, terminal states,
--- reassignment, caps/throttles, baseline floor, cancel lifecycle, cash
--- only, the real start/complete route, commission + idempotence, and the
--- RLS matrix on the three new tables.
+-- reassignment, caps/throttles (add-cancel abuse included), the baseline
+-- floor on BOTH sides, cancel lifecycle, the admin incident path on a
+-- stuck ride, cash only, the real start/complete route, commission +
+-- idempotence, and the RLS matrix on the three new tables. All nullable
+-- comparisons use IS DISTINCT FROM.
 -- Note: throttle aging UPDATEs are test-only, run as the migration role.
 BEGIN;
 -- Deterministic rule fixture (mirrors settlement_system_regression).
@@ -15,11 +17,14 @@ DECLARE
   du uuid := gen_random_uuid();         -- driver user
   du2 uuid := gen_random_uuid();        -- second driver user
   other uuid := gen_random_uuid();      -- unrelated user
+  admin_u uuid := gen_random_uuid();    -- owner-role admin
   d uuid := gen_random_uuid();          -- drivers row id
   d2 uuid := gen_random_uuid();         -- second drivers row id
-  v_ride uuid; v_ride2 uuid; v_ride3 uuid; v_ride4 uuid;
+  v_ride uuid; v_ride2 uuid; v_ride3 uuid; v_ride4 uuid; v_ride5 uuid;
+  v_ride6 uuid;
   a jsonb;
-  v_quote uuid; v_quote2 uuid;
+  v_quote uuid; v_quote2 uuid; v_quote3 uuid;
+  v_incident uuid;
   v_item1 uuid; v_item2 uuid; v_item3 uuid;
   v_denied boolean;
   v_goods numeric;
@@ -30,7 +35,8 @@ BEGIN
     (u, u::text || '@example.invalid'),
     (du, du::text || '@example.invalid'),
     (du2, du2::text || '@example.invalid'),
-    (other, other::text || '@example.invalid');
+    (other, other::text || '@example.invalid'),
+    (admin_u, admin_u::text || '@example.invalid');
   INSERT INTO public.users(id, email, role) VALUES
     (u, u::text || '@example.invalid', 'customer'),
     (du, du::text || '@example.invalid', 'driver'),
@@ -48,7 +54,7 @@ BEGIN
     30.0, 31.0, 'pickup', 30.1, 31.1, 'dropoff',
     '[{"product_name":"طماطم","unit":"kilo"},{"product_name":"مناديل","unit":"amount","amount_egp":50}]'::jsonb,
     2, NULL, 'standard');
-  IF NOT (a ->> 'ok')::boolean THEN
+  IF (a ->> 'ok')::boolean IS DISTINCT FROM true THEN
     RAISE EXCEPTION 'request_courier_shopping rejected a valid request: %', a;
   END IF;
   v_ride := (a ->> 'delivery_id')::uuid;
@@ -62,29 +68,29 @@ BEGIN
   IF (SELECT payment_method FROM public.rides WHERE id = v_ride) IS DISTINCT FROM 'cash' THEN
     RAISE EXCEPTION 'B2b: ask-anything ride not pinned to cash';
   END IF;
-  IF NOT (SELECT is_ask_anything FROM public.rides WHERE id = v_ride) THEN
+  IF (SELECT is_ask_anything FROM public.rides WHERE id = v_ride) IS DISTINCT FROM true THEN
     RAISE EXCEPTION 'ride not flagged is_ask_anything';
   END IF;
   PERFORM set_config('role', 'authenticated', true);
 
   IF (public.request_courier_shopping(30.0,31.0,'p',30.1,31.1,'d',
-      '[{"product_name":"x","unit":"dozen"}]'::jsonb, 1, NULL, 'standard') ->> 'reason') <> 'INVALID_ITEMS' THEN
+      '[{"product_name":"x","unit":"dozen"}]'::jsonb, 1, NULL, 'standard') ->> 'reason') IS DISTINCT FROM 'INVALID_ITEMS' THEN
     RAISE EXCEPTION 'bad unit accepted';
   END IF;
   IF (public.request_courier_shopping(30.0,31.0,'p',30.1,31.1,'d',
-      '[{"product_name":"x","unit":"amount"}]'::jsonb, 1, NULL, 'standard') ->> 'reason') <> 'INVALID_ITEMS' THEN
+      '[{"product_name":"x","unit":"amount"}]'::jsonb, 1, NULL, 'standard') ->> 'reason') IS DISTINCT FROM 'INVALID_ITEMS' THEN
     RAISE EXCEPTION 'amount unit without amount accepted';
   END IF;
   IF (public.request_courier_shopping(30.0,31.0,'p',30.1,31.1,'d',
-      '[{"product_name":"x","unit":"amount","amount_egp":"NaN"}]'::jsonb, 1, NULL, 'standard') ->> 'reason') <> 'INVALID_ITEMS' THEN
+      '[{"product_name":"x","unit":"amount","amount_egp":"NaN"}]'::jsonb, 1, NULL, 'standard') ->> 'reason') IS DISTINCT FROM 'INVALID_ITEMS' THEN
     RAISE EXCEPTION 'NaN amount accepted';
   END IF;
   IF (public.request_courier_shopping(30.0,31.0,'p',30.1,31.1,'d',
-      '[]'::jsonb, 1, NULL, 'standard') ->> 'reason') <> 'INVALID_ITEMS' THEN
+      '[]'::jsonb, 1, NULL, 'standard') ->> 'reason') IS DISTINCT FROM 'INVALID_ITEMS' THEN
     RAISE EXCEPTION 'empty items accepted';
   END IF;
   IF (public.request_courier_shopping(30.0,31.0,'p',30.1,31.1,'d',
-      '[{"product_name":"x","unit":"kilo"}]'::jsonb, 0, NULL, 'standard') ->> 'reason') <> 'INVALID_INPUT' THEN
+      '[{"product_name":"x","unit":"kilo"}]'::jsonb, 0, NULL, 'standard') ->> 'reason') IS DISTINCT FROM 'INVALID_INPUT' THEN
     RAISE EXCEPTION 'zero shops accepted';
   END IF;
 
@@ -100,9 +106,9 @@ BEGIN
   END IF;
 
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', other)::text, true);
-  IF (SELECT count(*) FROM public.courier_request_items WHERE ride_id = v_ride) <> 0
-     OR (SELECT count(*) FROM public.courier_quotes WHERE ride_id = v_ride) <> 0
-     OR (SELECT count(*) FROM public.courier_invoice_items WHERE ride_id = v_ride) <> 0 THEN
+  IF (SELECT count(*) FROM public.courier_request_items WHERE ride_id = v_ride) IS DISTINCT FROM 0
+     OR (SELECT count(*) FROM public.courier_quotes WHERE ride_id = v_ride) IS DISTINCT FROM 0
+     OR (SELECT count(*) FROM public.courier_invoice_items WHERE ride_id = v_ride) IS DISTINCT FROM 0 THEN
     RAISE EXCEPTION 'RLS: stranger can read ask-anything rows';
   END IF;
   IF (public.propose_courier_quote(v_ride, 25, NULL) ->> 'reason') NOT IN ('FORBIDDEN', 'INVALID_STATE') THEN
@@ -114,7 +120,7 @@ BEGIN
   PERFORM set_config('role', 'postgres', true);
   UPDATE public.rides SET status = 'matched', driver_id = d WHERE id = v_ride;
   PERFORM set_config('role', 'authenticated', true);
-  IF (public.propose_courier_quote(v_ride, 30, NULL) ->> 'reason') <> 'NO_QUOTE_TO_COUNTER' THEN
+  IF (public.propose_courier_quote(v_ride, 30, NULL) ->> 'reason') IS DISTINCT FROM 'NO_QUOTE_TO_COUNTER' THEN
     RAISE EXCEPTION 'rider opened the negotiation';
   END IF;
 
@@ -125,23 +131,23 @@ BEGIN
     RAISE EXCEPTION 'driver proposal below baseline accepted: %', a;
   END IF;
   -- NULL / malformed amounts.
-  IF (public.propose_courier_quote(v_ride, NULL, NULL) ->> 'reason') <> 'INVALID_AMOUNT' THEN
+  IF (public.propose_courier_quote(v_ride, NULL, NULL) ->> 'reason') IS DISTINCT FROM 'INVALID_AMOUNT' THEN
     RAISE EXCEPTION 'NULL amount accepted';
   END IF;
-  IF (public.propose_courier_quote(v_ride, 'NaN'::numeric, NULL) ->> 'reason') <> 'INVALID_AMOUNT' THEN
+  IF (public.propose_courier_quote(v_ride, 'NaN'::numeric, NULL) ->> 'reason') IS DISTINCT FROM 'INVALID_AMOUNT' THEN
     RAISE EXCEPTION 'NaN quote accepted';
   END IF;
-  IF (public.propose_courier_quote(v_ride, 'Infinity'::numeric, NULL) ->> 'reason') <> 'INVALID_AMOUNT' THEN
+  IF (public.propose_courier_quote(v_ride, 'Infinity'::numeric, NULL) ->> 'reason') IS DISTINCT FROM 'INVALID_AMOUNT' THEN
     RAISE EXCEPTION 'Infinity quote accepted';
   END IF;
 
   a := public.propose_courier_quote(v_ride, 40, 'بعيد شوية');
-  IF NOT (a ->> 'ok')::boolean OR (a ->> 'role') IS DISTINCT FROM 'driver' THEN
+  IF (a ->> 'ok')::boolean IS DISTINCT FROM true OR (a ->> 'role') IS DISTINCT FROM 'driver' THEN
     RAISE EXCEPTION 'driver proposal failed: %', a;
   END IF;
   v_quote := (a ->> 'quote_id')::uuid;
   -- Throttle: an immediate second proposal is refused.
-  IF (public.propose_courier_quote(v_ride, 41, NULL) ->> 'reason') <> 'THROTTLED' THEN
+  IF (public.propose_courier_quote(v_ride, 41, NULL) ->> 'reason') IS DISTINCT FROM 'THROTTLED' THEN
     RAISE EXCEPTION 'quote throttle missing';
   END IF;
   -- Age the quote (test-only) and supersede.
@@ -149,19 +155,25 @@ BEGIN
   UPDATE public.courier_quotes SET created_at = now() - interval '1 minute' WHERE ride_id = v_ride;
   PERFORM set_config('role', 'authenticated', true);
   a := public.propose_courier_quote(v_ride, 45, NULL);
-  IF NOT (a ->> 'ok')::boolean THEN RAISE EXCEPTION 'superseding proposal failed: %', a; END IF;
-  IF (SELECT count(*) FROM public.courier_quotes WHERE ride_id = v_ride AND status = 'pending') <> 1 THEN
+  IF (a ->> 'ok')::boolean IS DISTINCT FROM true THEN RAISE EXCEPTION 'superseding proposal failed: %', a; END IF;
+  IF (SELECT count(*) FROM public.courier_quotes WHERE ride_id = v_ride AND status = 'pending') IS DISTINCT FROM 1 THEN
     RAISE EXCEPTION 'more than one pending quote';
   END IF;
   v_quote := (a ->> 'quote_id')::uuid;
 
-  -- Rider counters below the baseline; the driver cannot accept it (#209).
+  -- #211: the floor binds the customer too - a counter below the
+  -- baseline is refused at proposal time.
   PERFORM set_config('role', 'postgres', true);
   UPDATE public.courier_quotes SET created_at = now() - interval '1 minute' WHERE ride_id = v_ride;
   PERFORM set_config('role', 'authenticated', true);
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', u)::text, true);
   a := public.propose_courier_quote(v_ride, 18, 'كفاية كده');
-  IF NOT (a ->> 'ok')::boolean OR (a ->> 'role') IS DISTINCT FROM 'customer' THEN
+  IF (a ->> 'reason') IS DISTINCT FROM 'BELOW_BASELINE' THEN
+    RAISE EXCEPTION 'rider counter below the floor was not refused: %', a;
+  END IF;
+  -- A counter at or above the floor (below the driver's 45) goes through.
+  a := public.propose_courier_quote(v_ride, 22, 'كفاية كده');
+  IF (a ->> 'ok')::boolean IS DISTINCT FROM true OR (a ->> 'role') IS DISTINCT FROM 'customer' THEN
     RAISE EXCEPTION 'rider counter failed: %', a;
   END IF;
   v_quote2 := (a ->> 'quote_id')::uuid;
@@ -170,35 +182,49 @@ BEGIN
   END IF;
 
   -- #207: NULL and malformed actions; self-answer.
-  IF (public.respond_courier_quote(v_quote2, NULL) ->> 'reason') <> 'INVALID_INPUT' THEN
+  IF (public.respond_courier_quote(v_quote2, NULL) ->> 'reason') IS DISTINCT FROM 'INVALID_INPUT' THEN
     RAISE EXCEPTION 'NULL action did not fail closed';
   END IF;
-  IF (public.respond_courier_quote(v_quote2, 'maybe') ->> 'reason') <> 'INVALID_INPUT' THEN
+  IF (public.respond_courier_quote(v_quote2, 'maybe') ->> 'reason') IS DISTINCT FROM 'INVALID_INPUT' THEN
     RAISE EXCEPTION 'malformed action accepted';
   END IF;
-  IF (public.respond_courier_quote(v_quote2, 'accept') ->> 'reason') <> 'FORBIDDEN' THEN
+  IF (public.respond_courier_quote(v_quote2, 'accept') ->> 'reason') IS DISTINCT FROM 'FORBIDDEN' THEN
     RAISE EXCEPTION 'rider accepted their own counter';
   END IF;
 
-  -- The driver cannot accept the below-baseline counter.
+  -- The driver rejects the counter. The accept-path floor still holds
+  -- as defense in depth: a below-baseline quote row inserted directly
+  -- (bypassing the RPC) cannot be accepted either.
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', du)::text, true);
-  a := public.respond_courier_quote(v_quote2, 'accept');
-  IF (a ->> 'reason') IS DISTINCT FROM 'BELOW_BASELINE' THEN
-    RAISE EXCEPTION 'below-baseline counter accepted: %', a;
-  END IF;
-  IF NOT (public.respond_courier_quote(v_quote2, 'reject') ->> 'ok')::boolean THEN
+  IF (public.respond_courier_quote(v_quote2, 'reject') ->> 'ok')::boolean IS DISTINCT FROM true THEN
     RAISE EXCEPTION 'driver could not reject the counter';
   END IF;
   PERFORM set_config('role', 'postgres', true);
+  -- 15 passes the table CHECK but is below this ride's 20 baseline.
+  INSERT INTO public.courier_quotes (ride_id, proposed_by_role, proposed_by, amount, note)
+  VALUES (v_ride, 'driver', du, 15, 'test-only below-floor quote')
+  RETURNING id INTO v_quote3;
+  PERFORM set_config('role', 'authenticated', true);
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', u)::text, true);
+  a := public.respond_courier_quote(v_quote3, 'accept');
+  IF (a ->> 'reason') IS DISTINCT FROM 'BELOW_BASELINE' THEN
+    RAISE EXCEPTION 'below-baseline quote accepted on the accept path: %', a;
+  END IF;
+  PERFORM set_config('role', 'postgres', true);
+  UPDATE public.courier_quotes SET status = 'superseded', decided_at = now()
+   WHERE id = v_quote3;
+  PERFORM set_config('role', 'authenticated', true);
+  PERFORM set_config('role', 'postgres', true);
   UPDATE public.courier_quotes SET created_at = now() - interval '1 minute' WHERE ride_id = v_ride;
   PERFORM set_config('role', 'authenticated', true);
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', du)::text, true);
   a := public.propose_courier_quote(v_ride, 45, 'سعر نهائي');
-  IF NOT (a ->> 'ok')::boolean THEN RAISE EXCEPTION 'final proposal failed: %', a; END IF;
+  IF (a ->> 'ok')::boolean IS DISTINCT FROM true THEN RAISE EXCEPTION 'final proposal failed: %', a; END IF;
   v_quote := (a ->> 'quote_id')::uuid;
 
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', u)::text, true);
   a := public.respond_courier_quote(v_quote, 'accept');
-  IF NOT (a ->> 'ok')::boolean OR NOT (a ->> 'locked')::boolean THEN
+  IF (a ->> 'ok')::boolean IS DISTINCT FROM true OR (a ->> 'locked')::boolean IS DISTINCT FROM true THEN
     RAISE EXCEPTION 'accept failed: %', a;
   END IF;
   PERFORM set_config('role', 'postgres', true);
@@ -209,20 +235,20 @@ BEGIN
   PERFORM set_config('role', 'authenticated', true);
 
   -- A decided quote cannot be answered again; no new quotes after lock.
-  IF (public.respond_courier_quote(v_quote, 'reject') ->> 'reason') <> 'QUOTE_ALREADY_LOCKED' THEN
+  IF (public.respond_courier_quote(v_quote, 'reject') ->> 'reason') IS DISTINCT FROM 'QUOTE_ALREADY_LOCKED' THEN
     RAISE EXCEPTION 'decided quote answered after lock';
   END IF;
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', du)::text, true);
-  IF (public.propose_courier_quote(v_ride, 50, NULL) ->> 'reason') <> 'QUOTE_ALREADY_LOCKED' THEN
+  IF (public.propose_courier_quote(v_ride, 50, NULL) ->> 'reason') IS DISTINCT FROM 'QUOTE_ALREADY_LOCKED' THEN
     RAISE EXCEPTION 'quote proposed after lock';
   END IF;
 
   -- ── Invoice flow ──
   a := public.add_courier_invoice_item(v_ride, 'سوبر ماركت النور', 'طماطم', 25.50, 'kilo', 1, NULL);
-  IF NOT (a ->> 'ok')::boolean THEN RAISE EXCEPTION 'add item 1 failed: %', a; END IF;
+  IF (a ->> 'ok')::boolean IS DISTINCT FROM true THEN RAISE EXCEPTION 'add item 1 failed: %', a; END IF;
   v_item1 := (a ->> 'item_id')::uuid;
   -- Throttle: an immediate second add is refused.
-  IF (public.add_courier_invoice_item(v_ride, 'x', 'y', 1, NULL, NULL, NULL) ->> 'reason') <> 'THROTTLED' THEN
+  IF (public.add_courier_invoice_item(v_ride, 'x', 'y', 1, NULL, NULL, NULL) ->> 'reason') IS DISTINCT FROM 'THROTTLED' THEN
     RAISE EXCEPTION 'item throttle missing';
   END IF;
   PERFORM set_config('role', 'postgres', true);
@@ -238,19 +264,19 @@ BEGIN
   v_item3 := (a ->> 'item_id')::uuid;
 
   -- Bounds matrix on items.
-  IF (public.add_courier_invoice_item(v_ride, 's', 'p', 'NaN'::numeric, NULL, NULL, NULL) ->> 'reason') <> 'INVALID_INPUT' THEN
+  IF (public.add_courier_invoice_item(v_ride, 's', 'p', 'NaN'::numeric, NULL, NULL, NULL) ->> 'reason') IS DISTINCT FROM 'INVALID_INPUT' THEN
     RAISE EXCEPTION 'NaN price accepted';
   END IF;
-  IF (public.add_courier_invoice_item(v_ride, 's', 'p', 10, NULL, 0, NULL) ->> 'reason') <> 'INVALID_INPUT' THEN
+  IF (public.add_courier_invoice_item(v_ride, 's', 'p', 10, NULL, 0, NULL) ->> 'reason') IS DISTINCT FROM 'INVALID_INPUT' THEN
     RAISE EXCEPTION 'zero quantity accepted';
   END IF;
-  IF (public.add_courier_invoice_item(v_ride, 's', 'p', 10, NULL, 2000, NULL) ->> 'reason') <> 'INVALID_INPUT' THEN
+  IF (public.add_courier_invoice_item(v_ride, 's', 'p', 10, NULL, 2000, NULL) ->> 'reason') IS DISTINCT FROM 'INVALID_INPUT' THEN
     RAISE EXCEPTION 'quantity 2000 accepted';
   END IF;
 
   -- Strangers and the rider cannot add items.
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', other)::text, true);
-  IF (public.add_courier_invoice_item(v_ride, 'x', 'y', 1, NULL, NULL, NULL) ->> 'reason') <> 'FORBIDDEN' THEN
+  IF (public.add_courier_invoice_item(v_ride, 'x', 'y', 1, NULL, NULL, NULL) ->> 'reason') IS DISTINCT FROM 'FORBIDDEN' THEN
     RAISE EXCEPTION 'stranger added an invoice item';
   END IF;
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', u)::text, true);
@@ -258,34 +284,34 @@ BEGIN
   IF (a ->> 'ok')::boolean THEN RAISE EXCEPTION 'rider added an invoice item'; END IF;
 
   -- RLS: the rider and the assigned driver read all three tables.
-  IF (SELECT count(*) FROM public.courier_invoice_items WHERE ride_id = v_ride) <> 3 THEN
+  IF (SELECT count(*) FROM public.courier_invoice_items WHERE ride_id = v_ride) IS DISTINCT FROM 3 THEN
     RAISE EXCEPTION 'RLS: rider cannot read invoice items';
   END IF;
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', du)::text, true);
-  IF (SELECT count(*) FROM public.courier_invoice_items WHERE ride_id = v_ride) <> 3
+  IF (SELECT count(*) FROM public.courier_invoice_items WHERE ride_id = v_ride) IS DISTINCT FROM 3
      OR (SELECT count(*) FROM public.courier_quotes WHERE ride_id = v_ride) < 1
-     OR (SELECT count(*) FROM public.courier_request_items WHERE ride_id = v_ride) <> 2 THEN
+     OR (SELECT count(*) FROM public.courier_request_items WHERE ride_id = v_ride) IS DISTINCT FROM 2 THEN
     RAISE EXCEPTION 'RLS: assigned driver cannot read ask-anything rows';
   END IF;
 
   -- The rider decides item by item.
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', u)::text, true);
-  IF (public.decide_courier_invoice_item(v_item1, NULL) ->> 'reason') <> 'INVALID_INPUT' THEN
+  IF (public.decide_courier_invoice_item(v_item1, NULL) ->> 'reason') IS DISTINCT FROM 'INVALID_INPUT' THEN
     RAISE EXCEPTION 'NULL decide action did not fail closed';
   END IF;
-  IF NOT (public.decide_courier_invoice_item(v_item1, 'approve') ->> 'ok')::boolean THEN
+  IF (public.decide_courier_invoice_item(v_item1, 'approve') ->> 'ok')::boolean IS DISTINCT FROM true THEN
     RAISE EXCEPTION 'approve failed';
   END IF;
-  IF NOT (public.decide_courier_invoice_item(v_item2, 'reject') ->> 'ok')::boolean THEN
+  IF (public.decide_courier_invoice_item(v_item2, 'reject') ->> 'ok')::boolean IS DISTINCT FROM true THEN
     RAISE EXCEPTION 'reject failed';
   END IF;
-  IF (public.decide_courier_invoice_item(v_item1, 'reject') ->> 'reason') <> 'ITEM_NOT_PENDING' THEN
+  IF (public.decide_courier_invoice_item(v_item1, 'reject') ->> 'reason') IS DISTINCT FROM 'ITEM_NOT_PENDING' THEN
     RAISE EXCEPTION 'decided item re-decided';
   END IF;
 
   -- B2: while the rejection awaits cancellation the driver adds nothing.
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', du)::text, true);
-  IF (public.add_courier_invoice_item(v_ride, 's', 'p', 1, NULL, NULL, NULL) ->> 'reason') <> 'REJECTED_ITEMS_OPEN' THEN
+  IF (public.add_courier_invoice_item(v_ride, 's', 'p', 1, NULL, NULL, NULL) ->> 'reason') IS DISTINCT FROM 'REJECTED_ITEMS_OPEN' THEN
     RAISE EXCEPTION 'driver added an item with an open rejection';
   END IF;
   -- The driver cannot approve items himself.
@@ -297,10 +323,10 @@ BEGIN
     RAISE EXCEPTION 'shopping finished with a pending item: %', a;
   END IF;
   -- Cancel the rejected item; finish still blocks on item3.
-  IF NOT (public.cancel_courier_invoice_item(v_item2) ->> 'ok')::boolean THEN
+  IF (public.cancel_courier_invoice_item(v_item2) ->> 'ok')::boolean IS DISTINCT FROM true THEN
     RAISE EXCEPTION 'driver could not cancel the rejected item';
   END IF;
-  IF (public.cancel_courier_invoice_item(v_item1) ->> 'reason') <> 'INVALID_STATE' THEN
+  IF (public.cancel_courier_invoice_item(v_item1) ->> 'reason') IS DISTINCT FROM 'INVALID_STATE' THEN
     RAISE EXCEPTION 'approved item cancelled';
   END IF;
 
@@ -309,26 +335,26 @@ BEGIN
 
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', du)::text, true);
   a := public.finish_courier_shopping(v_ride);
-  IF NOT (a ->> 'ok')::boolean THEN RAISE EXCEPTION 'finish failed: %', a; END IF;
+  IF (a ->> 'ok')::boolean IS DISTINCT FROM true THEN RAISE EXCEPTION 'finish failed: %', a; END IF;
   v_goods := (a ->> 'goods_total')::numeric;
   IF v_goods IS DISTINCT FROM 55.50::numeric THEN
     RAISE EXCEPTION 'goods total should be 25.50 + 30 = 55.50, got %', v_goods;
   END IF;
-  IF (a ->> 'shops')::int <> 2 THEN
+  IF (a ->> 'shops')::int IS DISTINCT FROM 2 THEN
     RAISE EXCEPTION 'expected 2 distinct shops, got %', a;
   END IF;
   IF (a ->> 'customer_total')::numeric IS DISTINCT FROM 100.50::numeric THEN
     RAISE EXCEPTION 'customer total should be 45 + 55.50 = 100.50, got %', a;
   END IF;
   -- #208: finish is not repeatable; no adds or decisions after close.
-  IF (public.finish_courier_shopping(v_ride) ->> 'reason') <> 'INVALID_STATE' THEN
+  IF (public.finish_courier_shopping(v_ride) ->> 'reason') IS DISTINCT FROM 'INVALID_STATE' THEN
     RAISE EXCEPTION 'finish repeated';
   END IF;
-  IF (public.add_courier_invoice_item(v_ride, 's', 'p', 1, NULL, NULL, NULL) ->> 'reason') <> 'INVALID_STATE' THEN
+  IF (public.add_courier_invoice_item(v_ride, 's', 'p', 1, NULL, NULL, NULL) ->> 'reason') IS DISTINCT FROM 'INVALID_STATE' THEN
     RAISE EXCEPTION 'item added after shopping closed';
   END IF;
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', u)::text, true);
-  IF (public.decide_courier_invoice_item(v_item1, 'reject') ->> 'reason') <> 'INVALID_STATE' THEN
+  IF (public.decide_courier_invoice_item(v_item1, 'reject') ->> 'reason') IS DISTINCT FROM 'INVALID_STATE' THEN
     RAISE EXCEPTION 'item decided after shopping closed';
   END IF;
 
@@ -345,7 +371,7 @@ BEGIN
   SELECT v_ride4, 'متجر واحد', 'صنف ' || g, 10 FROM generate_series(1, 50) g;
   PERFORM set_config('role', 'authenticated', true);
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', du)::text, true);
-  IF (public.add_courier_invoice_item(v_ride4, 'متجر واحد', 'زيادة', 1, NULL, NULL, NULL) ->> 'reason') <> 'ITEM_CAP' THEN
+  IF (public.add_courier_invoice_item(v_ride4, 'متجر واحد', 'زيادة', 1, NULL, NULL, NULL) ->> 'reason') IS DISTINCT FROM 'ITEM_CAP' THEN
     RAISE EXCEPTION '51st item accepted';
   END IF;
   PERFORM set_config('role', 'postgres', true);
@@ -354,11 +380,11 @@ BEGIN
   SELECT v_ride4, 'متجر ' || g, 'صنف', 10 FROM generate_series(1, 20) g;
   UPDATE public.courier_invoice_items SET created_at = now() - interval '1 minute' WHERE ride_id = v_ride4;
   PERFORM set_config('role', 'authenticated', true);
-  IF (public.add_courier_invoice_item(v_ride4, 'متجر 21', 'زيادة', 1, NULL, NULL, NULL) ->> 'reason') <> 'SHOP_CAP' THEN
+  IF (public.add_courier_invoice_item(v_ride4, 'متجر 21', 'زيادة', 1, NULL, NULL, NULL) ->> 'reason') IS DISTINCT FROM 'SHOP_CAP' THEN
     RAISE EXCEPTION '21st distinct shop accepted';
   END IF;
   -- Same-shop add under the shop cap still works.
-  IF NOT (public.add_courier_invoice_item(v_ride4, 'متجر 1', 'زيادة', 1, NULL, NULL, NULL) ->> 'ok')::boolean THEN
+  IF (public.add_courier_invoice_item(v_ride4, 'متجر 1', 'زيادة', 1, NULL, NULL, NULL) ->> 'ok')::boolean IS DISTINCT FROM true THEN
     RAISE EXCEPTION 'same-shop add under the cap refused';
   END IF;
   PERFORM set_config('role', 'postgres', true);
@@ -368,9 +394,61 @@ BEGIN
   UPDATE public.courier_invoice_items SET created_at = now() - interval '1 minute' WHERE ride_id = v_ride4;
   PERFORM set_config('role', 'authenticated', true);
   -- 49 x 100,000 = 4,900,000; one more legal item reaches 5,000,000.
-  IF (public.add_courier_invoice_item(v_ride4, 'متجر واحد', 'زيادة', 100000, NULL, NULL, NULL) ->> 'reason') <> 'GOODS_CAP' THEN
+  IF (public.add_courier_invoice_item(v_ride4, 'متجر واحد', 'زيادة', 100000, NULL, NULL, NULL) ->> 'reason') IS DISTINCT FROM 'GOODS_CAP' THEN
     RAISE EXCEPTION 'goods aggregate reaching 5,000,000 accepted';
   END IF;
+  -- #209 abuse: cancelled rows still count toward the cap and keep the
+  -- cadence busy, so add-cancel-readd loops get nowhere. 49 attempted
+  -- rows exist; cancel one (money-active drops to 48 x 100,000).
+  PERFORM set_config('role', 'postgres', true);
+  UPDATE public.courier_invoice_items
+     SET status = 'cancelled', cancelled_at = now()
+   WHERE id = (SELECT id FROM public.courier_invoice_items
+                WHERE ride_id = v_ride4 ORDER BY created_at LIMIT 1);
+  PERFORM set_config('role', 'authenticated', true);
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', du)::text, true);
+  a := public.add_courier_invoice_item(v_ride4, 'متجر واحد', 'زيادة', 1, NULL, NULL, NULL);
+  IF (a ->> 'ok')::boolean IS DISTINCT FROM true THEN
+    RAISE EXCEPTION '50th attempted row refused: %', a;
+  END IF;
+  -- Cancel row 50 and age every row: the 50 attempted rows (2 of them
+  -- cancelled) still refuse row 51 - a cancel never frees cap space.
+  PERFORM set_config('role', 'postgres', true);
+  UPDATE public.courier_invoice_items
+     SET status = 'cancelled', cancelled_at = now()
+   WHERE id = (a ->> 'item_id')::uuid;
+  UPDATE public.courier_invoice_items SET created_at = now() - interval '1 minute'
+   WHERE ride_id = v_ride4;
+  PERFORM set_config('role', 'authenticated', true);
+  IF (public.add_courier_invoice_item(v_ride4, 'متجر واحد', 'زيادة', 1, NULL, NULL, NULL) ->> 'reason')
+       IS DISTINCT FROM 'ITEM_CAP' THEN
+    RAISE EXCEPTION 'cancel freed item-cap space';
+  END IF;
+  -- Cadence half on a fresh ride (cap space free): add, cancel,
+  -- immediate re-add - the cancelled row still holds the 1s cadence.
+  PERFORM set_config('role', 'postgres', true);
+  INSERT INTO public.rides (rider_id, driver_id, pickup_latitude, pickup_longitude,
+    pickup_address, dropoff_latitude, dropoff_longitude, dropoff_address,
+    ride_type, service_type, status, is_ask_anything, courier_quote_locked,
+    courier_shop_count, fare, payment_method)
+  VALUES (u, d, 30.0, 31.0, 'p', 30.1, 31.1, 'd', 'motorcycle', 'courier',
+          'matched', true, true, 1, 20, 'cash')
+  RETURNING id INTO v_ride6;
+  PERFORM set_config('role', 'authenticated', true);
+  a := public.add_courier_invoice_item(v_ride6, 'متجر', 'صنف', 1, NULL, NULL, NULL);
+  IF (a ->> 'ok')::boolean IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'cadence-ride first add failed: %', a;
+  END IF;
+  PERFORM set_config('role', 'postgres', true);
+  UPDATE public.courier_invoice_items
+     SET status = 'cancelled', cancelled_at = now()
+   WHERE id = (a ->> 'item_id')::uuid;
+  PERFORM set_config('role', 'authenticated', true);
+  IF (public.add_courier_invoice_item(v_ride6, 'متجر', 'صنف', 1, NULL, NULL, NULL) ->> 'reason')
+       IS DISTINCT FROM 'THROTTLED' THEN
+    RAISE EXCEPTION 'cancel reset the add cadence';
+  END IF;
+
   -- Quote cap: 20 quotes per ride (unlock the fare so the cap check
   -- is what answers, not QUOTE_ALREADY_LOCKED).
   PERFORM set_config('role', 'postgres', true);
@@ -379,7 +457,7 @@ BEGIN
   SELECT v_ride4, 'driver', du, 20, 'superseded' FROM generate_series(1, 20) g;
   UPDATE public.courier_quotes SET created_at = now() - interval '1 minute' WHERE ride_id = v_ride4;
   PERFORM set_config('role', 'authenticated', true);
-  IF (public.propose_courier_quote(v_ride4, 25, NULL) ->> 'reason') <> 'QUOTE_CAP' THEN
+  IF (public.propose_courier_quote(v_ride4, 25, NULL) ->> 'reason') IS DISTINCT FROM 'QUOTE_CAP' THEN
     RAISE EXCEPTION '21st quote accepted';
   END IF;
 
@@ -424,7 +502,7 @@ BEGIN
   PERFORM set_config('role', 'postgres', true);
   v_rate := COALESCE(public.get_commission_rate('driver', NULL, du), 0);
   v_expected := 45 - public.calculate_commission(45, v_rate);
-  IF (SELECT count(*) FROM public.driver_earnings WHERE ride_id = v_ride) <> 1 THEN
+  IF (SELECT count(*) FROM public.driver_earnings WHERE ride_id = v_ride) IS DISTINCT FROM 1 THEN
     RAISE EXCEPTION 'expected exactly one driver earning';
   END IF;
   IF (SELECT amount FROM public.driver_earnings WHERE ride_id = v_ride)
@@ -432,7 +510,7 @@ BEGIN
     RAISE EXCEPTION 'driver earning != 45 less the rule commission';
   END IF;
   IF (SELECT count(*) FROM public.platform_commissions
-       WHERE reference_type = 'ride' AND reference_id = v_ride) <> 1 THEN
+       WHERE reference_type = 'ride' AND reference_id = v_ride) IS DISTINCT FROM 1 THEN
     RAISE EXCEPTION 'platform commission row missing';
   END IF;
   IF EXISTS (SELECT 1 FROM public.driver_obligations
@@ -441,14 +519,14 @@ BEGIN
   END IF;
   IF (SELECT count(*) FROM public.trip_events
        WHERE ride_id = v_ride AND event_type = 'courier_goods_recorded'
-         AND (metadata ->> 'goods_total')::numeric = 55.50) <> 1 THEN
+         AND (metadata ->> 'goods_total')::numeric = 55.50) IS DISTINCT FROM 1 THEN
     RAISE EXCEPTION 'goods pass-through trip event missing or duplicated';
   END IF;
   -- Idempotence: a second run adds nothing.
   PERFORM public._record_delivery_earnings(v_ride);
-  IF (SELECT count(*) FROM public.driver_earnings WHERE ride_id = v_ride) <> 1
+  IF (SELECT count(*) FROM public.driver_earnings WHERE ride_id = v_ride) IS DISTINCT FROM 1
      OR (SELECT count(*) FROM public.trip_events
-          WHERE ride_id = v_ride AND event_type = 'courier_goods_recorded') <> 1 THEN
+          WHERE ride_id = v_ride AND event_type = 'courier_goods_recorded') IS DISTINCT FROM 1 THEN
     RAISE EXCEPTION 'earnings not idempotent';
   END IF;
   PERFORM set_config('role', 'authenticated', true);
@@ -523,6 +601,56 @@ BEGIN
   END IF;
   PERFORM set_config('role', 'authenticated', true);
 
+  -- ── Security note (a): an admin can close a stuck ask-anything ride ──
+  -- A ride with approved goods refuses plain cancels (the B2a matrix
+  -- above); the incident path is the way out: the rider reports, an
+  -- admin resolves, and the ride is cancelled with the goods records
+  -- intact for ops settlement.
+  -- The auth.users trigger already made the public.users row (default
+  -- role); promote it to owner for the admin path.
+  PERFORM set_config('role', 'postgres', true);
+  UPDATE public.users SET role = 'owner' WHERE id = admin_u;
+  INSERT INTO public.rides (rider_id, driver_id, pickup_latitude, pickup_longitude,
+    pickup_address, dropoff_latitude, dropoff_longitude, dropoff_address,
+    ride_type, service_type, status, is_ask_anything, courier_quote_locked,
+    courier_shop_count, fare, courier_goods_total, payment_method)
+  VALUES (u, d, 30.0, 31.0, 'p', 30.1, 31.1, 'd', 'motorcycle', 'courier',
+          'matched', true, true, 1, 20, 10, 'cash')
+  RETURNING id INTO v_ride5;
+  INSERT INTO public.courier_invoice_items (ride_id, shop_name, product_name, price, status)
+  VALUES (v_ride5, 'متجر', 'صنف', 10, 'approved');
+  PERFORM set_config('role', 'authenticated', true);
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', u)::text, true);
+  a := public.report_delivery_incident(v_ride5, 'customer_unreachable', 'stuck after goods bought');
+  IF (a ->> 'ok')::boolean IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'incident report failed: %', a;
+  END IF;
+  v_incident := (a ->> 'incident_id')::uuid;
+  -- A non-admin cannot resolve it.
+  a := public.resolve_delivery_incident(v_incident, 'cancelled', 'x');
+  IF (a ->> 'ok')::boolean IS DISTINCT FROM false
+     OR (a ->> 'reason') IS DISTINCT FROM 'forbidden' THEN
+    RAISE EXCEPTION 'non-admin resolved an incident: %', a;
+  END IF;
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', admin_u)::text, true);
+  a := public.resolve_delivery_incident(v_incident, 'cancelled', 'ops settled with the driver');
+  IF (a ->> 'ok')::boolean IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'admin could not resolve the stuck ride: %', a;
+  END IF;
+  PERFORM set_config('role', 'postgres', true);
+  IF (SELECT status FROM public.rides WHERE id = v_ride5) IS DISTINCT FROM 'cancelled'
+     OR (SELECT cancelled_by FROM public.rides WHERE id = v_ride5) IS DISTINCT FROM 'system'
+     OR NOT EXISTS (SELECT 1 FROM public.courier_invoice_items
+                     WHERE ride_id = v_ride5 AND status = 'approved') THEN
+    RAISE EXCEPTION 'incident resolution lost the ride or the goods records';
+  END IF;
+  -- And resolving again is refused.
+  PERFORM set_config('role', 'authenticated', true);
+  a := public.resolve_delivery_incident(v_incident, 'dismissed', NULL);
+  IF (a ->> 'reason') IS DISTINCT FROM 'already_resolved' THEN
+    RAISE EXCEPTION 'incident resolved twice: %', a;
+  END IF;
+
   -- ── Reassignment / terminal-state matrix on responses ──
   PERFORM set_config('role', 'postgres', true);
   INSERT INTO public.rides (rider_id, driver_id, pickup_latitude, pickup_longitude,
@@ -545,7 +673,7 @@ BEGIN
   PERFORM set_config('role', 'postgres', true);
   UPDATE public.rides SET status = 'cancelled' WHERE id = v_ride4;
   PERFORM set_config('role', 'authenticated', true);
-  IF (public.respond_courier_quote(v_quote, 'accept') ->> 'reason') <> 'INVALID_STATE' THEN
+  IF (public.respond_courier_quote(v_quote, 'accept') ->> 'reason') IS DISTINCT FROM 'INVALID_STATE' THEN
     RAISE EXCEPTION 'quote answered on a cancelled ride';
   END IF;
 
@@ -574,6 +702,10 @@ BEGIN
   IF has_function_privilege('authenticated',
        'public._record_delivery_earnings(uuid)', 'EXECUTE') THEN
     RAISE EXCEPTION 'authenticated can execute _record_delivery_earnings';
+  END IF;
+  IF has_function_privilege('anon',
+       'public.resolve_delivery_incident(uuid,text,text)', 'EXECUTE') THEN
+    RAISE EXCEPTION 'anon can execute resolve_delivery_incident';
   END IF;
 
   RAISE NOTICE '436 ask-anything flow: ALL CHECKS PASSED';

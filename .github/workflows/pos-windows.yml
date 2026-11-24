@@ -31,7 +31,8 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - id: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ inputs.ref }}
           persist-credentials: false
@@ -55,16 +56,39 @@ jobs:
           -c Release -f net48
           -o publish/shop-net48 --nologo
 
+      - name: Checkout the same commit again for the tour build
+        # First real run (45381504825) proved -p:BaseIntermediateOutputPath
+        # cannot separate intermediates: MSBuild applies it to the Core project
+        # reference too, so the shipped build's stale obj/*.cs got globbed into
+        # the tour compile (CS0518/CS0234). A pristine second checkout gives
+        # the tour build its own untouched obj/bin tree instead.
+        # #204: pinned to the exact commit the first checkout resolved (never
+        # the movable trigger ref), and it must not persist the job token into
+        # a tree that runs source code.
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: tour-src
+          ref: ${{ steps.checkout.outputs.commit }}
+          persist-credentials: false
+
+      - name: Assert both checkouts resolved the same commit
+        shell: pwsh
+        run: |
+          $a = (git rev-parse HEAD)
+          $b = (git -C tour-src rev-parse HEAD)
+          if ($a -ne $b) { throw "checkout mismatch: $a vs $b" }
+          "both trees at $a"
+
       - name: Publish screenshot-tour build (CI instrumentation, never shipped)
-        # Compiles the SAME commit with SCREENSHOT_TOUR defined, into a separate
-        # output dir AND a separate intermediate (obj-tour) so nothing is shared
-        # with the shipped publish. Only this dir runs on the runner.
+        # Compiles the SAME commit with SCREENSHOT_TOUR defined from the
+        # pristine second checkout, so not a single intermediate is shared
+        # with the shipped publish. Only the tour output dir runs on the
+        # runner; the fail-closed scan below proves the shipped binaries
+        # carry no tour marker.
         run: >-
-          dotnet publish pos/Delwaqty.Pos.Wpf/Delwaqty.Pos.Wpf.csproj
+          dotnet publish tour-src/pos/Delwaqty.Pos.Wpf/Delwaqty.Pos.Wpf.csproj
           -c Release -f net8.0-windows -r win-x64 --self-contained true
           -p:DefineConstants="SCREENSHOT_TOUR%3BTRACE%3BRELEASE"
-          -p:BaseIntermediateOutputPath=obj-tour\
-          -p:MSBuildProjectExtensionsPath=obj-tour\
           -o publish/tour-net8 --nologo
 
       - name: Prove the shipped builds contain no tour code (#202/#203 fail-closed)

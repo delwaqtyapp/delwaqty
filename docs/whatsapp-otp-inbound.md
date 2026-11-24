@@ -14,7 +14,8 @@ through Meta's platform from the user's own number.
 ```
 app                          Supabase                         Meta Cloud API
  |-- request_whatsapp_otp -->|                                 |
- |<-- ok (NO otp_code) ------|                                 |
+ |<-- ok + otp_code ---------|  (today, by design; cutover      |
+ |                           |   below stops returning it)     |
  |-- open wa.me prefilled ---|------------ user sends code --->|
  |                            |<-- POST /whatsapp-webhook -----|
  |                            |  mark verified (228)           |
@@ -37,7 +38,7 @@ app                          Supabase                         Meta Cloud API
      `whatsapp_webhook_mark_verified` (228) with the Meta message id.
    - Always 200 after signature validation so Meta does not retry forever.
 3. **`whatsapp_webhook_mark_verified` (migration 228):** service-role only
-   (anon + authenticated get 42501, verified). Idempotent per Meta message
+   by grant design (anon and authenticated have no EXECUTE). Idempotent per Meta message
    id via `whatsapp_webhook_messages`; atomically sets `verified = true`
    only for an unexpired, unlocked, unverified matching code.
 4. **Cutover (follow-up, after the webhook is live):**
@@ -63,12 +64,23 @@ app                          Supabase                         Meta Cloud API
 ## Operations: the destination number (Nov 24, 2026)
 
 `request_whatsapp_otp` reads the destination from
-`platform_settings.whatsapp_otp_number` (migration 429), falling back to
-`support_phone` when unset. The OTP destination is infrastructure — the
-Meta Cloud API number this webhook watches — not the customer support
-contact; keep them in separate columns and change them independently.
-An override that is set but malformed fails closed
-(`WHATSAPP_NOT_CONFIGURED`) rather than falling back silently.
+`platform_settings.whatsapp_otp_number` (migration 434). There is NO
+fallback to `support_phone`: migration 434 removed the fallback that 414
+carried, because the production `support_phone` is the protected support
+line (+201555570885) and routing OTP traffic there was the bug being
+fixed. When the override is unset or malformed the RPC fails closed with
+`WHATSAPP_NOT_CONFIGURED` instead of guessing a destination.
+
+Rules that keep this safe:
+
+- The protected support line (+201555570885) must NEVER be set as
+  `whatsapp_otp_number` and must NEVER be used for OTP smoke tests.
+- `whatsapp_otp_number` is owner-only: the
+  `guard_platform_settings_owner_fields` trigger rejects changes from
+  anyone but the platform owner (same pattern as migration 393).
+- The OTP destination is infrastructure — the Meta Cloud API number this
+  webhook watches — not the customer support contact; keep them in
+  separate columns and change them independently.
 
 ### Why sign-in with WhatsApp was dead (root cause, Nov 24)
 
@@ -79,14 +91,22 @@ webhook (all deliveries in `whatsapp_webhook_messages` before the fix are
 synthetic `wamid.demoNNN` test posts). Everything else — this function,
 the secrets, the challenge flow — was already live and correct.
 
+Removing the `support_phone` fallback (434) therefore cannot break a
+working sign-in: that path never delivered a webhook event in production.
+
 ### Interim: Meta's free Cloud API test number
 
 Until the platform has its own SIM, point `whatsapp_otp_number` at the
 Meta app's test number (any country code — the +1 test number is why the
-migration validates generic E.164, not `^\+201`). Inbound messages to a
-test number fire webhooks normally; the test-number limits apply to
-outbound sends, which this design never uses. Verify inbound capability
-with one real WhatsApp send after wiring (see checklist).
+migration validates generic E.164, not `^\+201`).
+
+CAVEAT: whether Meta's test number delivers INBOUND messages to webhooks
+is claimed by Meta's documentation but is not yet verified for this app.
+Treat it as unproven until confirmed by a Meta documentation citation or
+one approved smoke test: a single real WhatsApp send to the test number
+on an approved line (see checklist), never to the protected support
+line. The test-number limits apply to outbound sends, which this design
+never uses.
 
 ### End state: dedicated Egyptian SIM
 
@@ -112,6 +132,7 @@ app: Cloud API registration revokes the app session on that line.
 3. Supabase secrets per project: `WHATSAPP_VERIFY_TOKEN`,
    `WHATSAPP_APP_SECRET` (Meta app secret; rotating it requires updating
    the secret on every project).
-4. Smoke test: Meta's "Send test message" webhook sample, then one real
-   WhatsApp send; expect `ok:true` in the function response log and a
-   `verified_via='webhook'` row.
+4. Smoke test (on an approved line, never the protected support line):
+   Meta's "Send test message" webhook sample, then one real WhatsApp
+   send; expect the function's `received`/`results` JSON response shape
+   and a `verified_via='webhook'` row.

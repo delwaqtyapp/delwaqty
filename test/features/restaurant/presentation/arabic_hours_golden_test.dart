@@ -56,6 +56,10 @@ void main() {
     await tester.pumpWidget(
       app(
         WorkingHoursCard(
+          // Pin "today" to a Monday (Cairo) so the day highlight matches the
+          // golden on any day of the week; the card defaults to the real
+          // Cairo clock.
+          at: DateTime.utc(2026, 11, 23, 12),
           hours: [
             row('1', 6, '12:00:00', '01:00:00'),
             row('2', 0, '09:00:00', '23:00:00', closed: true),

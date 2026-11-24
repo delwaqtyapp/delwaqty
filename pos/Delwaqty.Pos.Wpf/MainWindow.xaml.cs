@@ -64,6 +64,20 @@ namespace Delwaqty.Pos.Wpf
         public MainWindow(ActivationService activation, ActivationState state)
         {
             InitializeComponent();
+#if SCREENSHOT_TOUR
+            // CI screenshot tour: cycle through every tab on a 3s timer so the
+            // runner's captures cover each one. Compiled only into the tour build.
+            if (Environment.GetEnvironmentVariable("DELWAQTY_SCREENSHOT_TOUR") == "1")
+            {
+                var tourTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+                tourTimer.Tick += (_, _) =>
+                {
+                    Tabs.SelectedIndex = (Tabs.SelectedIndex + 1) % Tabs.Items.Count;
+                };
+                tourTimer.Start();
+            }
+#endif
+
             _activation = activation;
             _dataDir = activation.CurrentScopeDir;
             _state = state;

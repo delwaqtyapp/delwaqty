@@ -55,6 +55,57 @@ jobs:
           -c Release -f net48
           -o publish/shop-net48 --nologo
 
+      - name: Publish screenshot-tour build (CI instrumentation, never shipped)
+        # Compiles the SAME commit with SCREENSHOT_TOUR defined: activation is
+        # skipped and the main window cycles its tabs on a timer. Only this
+        # separate output directory runs on the runner - the shipped ZIP is
+        # built without the symbol and contains no activation bypass.
+        run: >-
+          dotnet publish pos/Delwaqty.Pos.Wpf/Delwaqty.Pos.Wpf.csproj
+          -c Release -f net8.0-windows -r win-x64 --self-contained true
+          -p:DefineConstants="SCREENSHOT_TOUR%3BTRACE%3BRELEASE"
+          -o publish/tour-net8 --nologo
+
+      - name: Capture the activation window (normal build, first run)
+        shell: pwsh
+        run: |
+          try { Set-DisplayResolution -Width 1920 -Height 1080 -Force } catch { "display resolution unchanged: $($_.Exception.Message)" }
+          New-Item -ItemType Directory -Force screenshots | Out-Null
+          Add-Type -AssemblyName System.Windows.Forms
+          Add-Type -AssemblyName System.Drawing
+          $proc = Start-Process (Join-Path $PWD "publish\shop-net8\DelwaqtyShopPos.exe") -PassThru
+          Start-Sleep -Seconds 15
+          $bounds = [System.Windows.Forms.SystemInformation]::VirtualScreen
+          $bmp = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height
+          $g = [System.Drawing.Graphics]::FromImage($bmp)
+          $g.CopyFromScreen($bounds.Left, $bounds.Top, 0, 0, $bmp.Size)
+          $bmp.Save((Join-Path $PWD "screenshots\window-0-activation.png"), [System.Drawing.Imaging.ImageFormat]::Png)
+          $g.Dispose(); $bmp.Dispose()
+          $proc.Kill()
+
+      - name: Capture every main-window tab (tour build)
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.Windows.Forms
+          Add-Type -AssemblyName System.Drawing
+          $env:DELWAQTY_SCREENSHOT_TOUR = "1"
+          $proc = Start-Process (Join-Path $PWD "publish\tour-net8\DelwaqtyShopPos.exe") -PassThru
+          # local db init + first render, then one capture per tab (3s cycle)
+          Start-Sleep -Seconds 15
+          $bounds = [System.Windows.Forms.SystemInformation]::VirtualScreen
+          for ($i = 1; $i -le 6; $i++) {
+            $bmp = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height
+            $g = [System.Drawing.Graphics]::FromImage($bmp)
+            $g.CopyFromScreen($bounds.Left, $bounds.Top, 0, 0, $bmp.Size)
+            $bmp.Save((Join-Path $PWD ("screenshots\window-{0}-tab.png" -f $i)), [System.Drawing.Imaging.ImageFormat]::Png)
+            $g.Dispose(); $bmp.Dispose()
+            Start-Sleep -Seconds 3
+          }
+          $proc.Kill()
+          $count = (Get-ChildItem screenshots\*.png).Count
+          if ($count -lt 6) { throw "expected at least 6 screenshots, got $count" }
+          Get-ChildItem screenshots | ForEach-Object { "captured: $($_.Name) ($($_.Length) bytes)" }
+
       - name: Add first-run README and zip the net8 build
         shell: pwsh
         run: |
@@ -122,6 +173,7 @@ jobs:
             delwaqty-cashier-windows-EXPERIMENTAL.zip
             installer-output/delwaqty-cashier-setup-net8-EXPERIMENTAL.exe
             installer-output/delwaqty-cashier-setup-net48-EXPERIMENTAL.exe
+            screenshots/*.png
           if-no-files-found: error
           retention-days: 7
 

@@ -16,6 +16,36 @@ namespace Delwaqty.Pos.Wpf
             var rootDir = AppPaths.DataDir();
             DataDirSecurity.Harden(rootDir); // #114: tighten the shared dir ACL (Windows)
             var activation = new ActivationService(rootDir, PosConfig.BuildFlavor);
+#if SCREENSHOT_TOUR
+            // CI screenshot instrumentation - compiled ONLY into the dedicated
+            // tour build (pos-windows.yml passes -p:DefineConstants). The shipped
+            // cashier ZIP contains none of this: activation cannot be skipped at
+            // runtime. The tour synthesizes an active state and opens the main
+            // window straight away so the runner can capture every tab.
+            if (Environment.GetEnvironmentVariable("DELWAQTY_SCREENSHOT_TOUR") == "1")
+            {
+                var tourState = new ActivationState
+                {
+                    LicenseKey = "SCREENSHOT-TOUR",
+                    Plan = "pro",
+                    Pro = true,
+                    Status = "active",
+                    ExpiresAt = DateTimeOffset.UtcNow.AddDays(30),
+                    MerchantId = "screenshot-tour",
+                    MerchantName = "متجر تجريبي",
+                    MerchantType = "grocery",
+                    MerchantPhone = "01000000000",
+                    MerchantAddress = "شارع التجربة ١",
+                    DeviceId = "screenshot-device",
+                    ValidatedAtUtc = DateTimeOffset.UtcNow,
+                    Flavor = PosConfig.BuildFlavor,
+                };
+                var tourWin = new MainWindow(activation, tourState);
+                MainWindow = tourWin;
+                tourWin.Show();
+                return;
+            }
+#endif
             var state = activation.Restore();
 
             if (state != null && LicenseGuard.Evaluate(state, DateTimeOffset.UtcNow) == PosMode.Locked)

@@ -13,6 +13,9 @@ abstract final class StorageKeys {
   static const String providerThemeMode = 'provider_theme_mode';
   static const String userId = 'user_id';
   static const String onboardingComplete = 'onboarding_complete';
+  static const String firstUseTourCustomer = 'first_use_tour_customer_v1';
+  static const String merchantProductGuideSeen =
+      'merchant_product_guide_seen_v1';
   static const String savedAccounts = 'saved_accounts';
   static const String shareWithDrivers = 'share_with_drivers';
   static const String shareWithMerchants = 'share_with_merchants';

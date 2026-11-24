@@ -317,4 +317,26 @@ abstract final class AppColors {
 
   /// Amber color used for star ratings.
   static const Color rating = Color(0xFFFFC107);
+
+  // ---------------------------------------------------------------------------
+  // Feature Tour Colors
+  // ---------------------------------------------------------------------------
+
+  /// Teal accent for the tour welcome/storefront slides.
+  static const Color tourTeal = Color(0xFF2E7D6B);
+
+  /// Blue accent for the tour ordering/add-product slides.
+  static const Color tourBlue = Color(0xFF1565C0);
+
+  /// Purple accent for the tour tracking/photo slides.
+  static const Color tourPurple = Color(0xFF6A3FB5);
+
+  /// Orange accent for the tour wallet/pricing slides.
+  static const Color tourOrange = Color(0xFFC25E10);
+
+  /// Rose accent for the tour notifications slide.
+  static const Color tourRose = Color(0xFFB03A5B);
+
+  /// Green accent for the tour completion slide.
+  static const Color tourGreen = Color(0xFF3E8E41);
 }

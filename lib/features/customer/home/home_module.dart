@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/features/customer/home/presentation/pages/all_services_page.dart';
 import 'package:delwaqty/features/customer/home/presentation/pages/home_page.dart';
+import 'package:delwaqty/features/_shared/feature_tour/feature_tour_gate.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class HomeModule extends FeatureModule {
@@ -28,7 +29,8 @@ class HomeModule extends FeatureModule {
         GoRoute(
           path: '/home',
           name: 'home',
-          builder: (context, state) => const HomePage(),
+          builder: (context, state) =>
+              const CustomerFirstUseTourGate(child: HomePage()),
         ),
       ],
     );

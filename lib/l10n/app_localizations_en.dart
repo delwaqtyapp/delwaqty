@@ -8492,4 +8492,77 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminManagement => 'Admin management';
+
+  @override
+  String get customerTourStep1Title => 'Explore everything around you';
+
+  @override
+  String get customerTourStep1Body =>
+      'Restaurants, markets, home services and more, all from the main screen in front of you.';
+
+  @override
+  String get customerTourStep2Title => 'Ask for anything';
+
+  @override
+  String get customerTourStep2Body =>
+      'Need something from any store? Write what you want and the nearest captain will buy it and bring it to you.';
+
+  @override
+  String get customerTourStep3Title => 'Track your order live';
+
+  @override
+  String get customerTourStep3Body =>
+      'Follow your order on the map and get a notification at every step until it reaches your door.';
+
+  @override
+  String get customerTourStep4Title => 'Your wallet and rewards';
+
+  @override
+  String get customerTourStep4Body =>
+      'Keep an eye on your wallet balance and collect reward points with every order.';
+
+  @override
+  String get customerTourStep5Title => 'Menu and notifications';
+
+  @override
+  String get customerTourStep5Body =>
+      'From the side menu you reach your orders, profile and complaints, and the bell keeps you up to date.';
+
+  @override
+  String get merchantGuideStep1Title => 'Open your products';
+
+  @override
+  String get merchantGuideStep1Body =>
+      'From your dashboard, open the products screen to see and manage everything you sell.';
+
+  @override
+  String get merchantGuideStep2Title => 'Tap the add button';
+
+  @override
+  String get merchantGuideStep2Body =>
+      'Tap the + button to start adding a new product to your catalog.';
+
+  @override
+  String get merchantGuideStep3Title => 'A real photo and a clear name';
+
+  @override
+  String get merchantGuideStep3Body =>
+      'Add a real photo, a clear name and a short description so customers buy faster.';
+
+  @override
+  String get merchantGuideStep4Title => 'Price and stock';
+
+  @override
+  String get merchantGuideStep4Body =>
+      'Set the right price and keep the quantity up to date so customers always see what is available.';
+
+  @override
+  String get merchantGuideStep5Title => 'Save and start selling';
+
+  @override
+  String get merchantGuideStep5Body =>
+      'Once you save, the product is in your catalog and customers see it whenever it\'s available - you can edit or pause it anytime.';
+
+  @override
+  String get merchantGuideOpenTooltip => 'How to add products';
 }

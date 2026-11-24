@@ -76,10 +76,12 @@ class MockNotificationRepository implements NotificationRepository {
   }
 
   @override
-  Future<void> markAllAsRead() async {
+  Future<BulkNotificationResult> markAllAsRead() async {
+    final processed = _notifications.length;
     for (var i = 0; i < _notifications.length; i++) {
       _notifications[i] = _notifications[i].copyWith(isRead: true);
     }
+    return BulkNotificationResult(completed: true, processed: processed);
   }
 
   @override
@@ -88,8 +90,10 @@ class MockNotificationRepository implements NotificationRepository {
   }
 
   @override
-  Future<void> clearAll() async {
+  Future<BulkNotificationResult> clearAll() async {
+    final processed = _notifications.length;
     _notifications.clear();
+    return BulkNotificationResult(completed: true, processed: processed);
   }
 
   @override

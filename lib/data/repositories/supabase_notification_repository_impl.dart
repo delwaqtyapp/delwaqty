@@ -51,9 +51,9 @@ class SupabaseNotificationRepositoryImpl implements NotificationRepository {
   }
 
   @override
-  Future<void> markAllAsRead() async {
+  Future<BulkNotificationResult> markAllAsRead() async {
     try {
-      await _dataSource.markAllAsRead();
+      return await _dataSource.markAllAsRead();
     } catch (e) {
       throw ServerException(message: e.toString());
     }
@@ -69,9 +69,9 @@ class SupabaseNotificationRepositoryImpl implements NotificationRepository {
   }
 
   @override
-  Future<void> clearAll() async {
+  Future<BulkNotificationResult> clearAll() async {
     try {
-      await _dataSource.clearAll();
+      return await _dataSource.clearAll();
     } catch (e) {
       throw ServerException(message: e.toString());
     }

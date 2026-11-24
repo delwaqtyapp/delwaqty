@@ -217,6 +217,15 @@ class _GlassNotificationsPanel extends ConsumerWidget {
     ref.invalidate(notificationsProvider);
   }
 
+  void _showActionError() {
+    if (!hostContext.mounted) return;
+    ScaffoldMessenger.of(hostContext).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(hostContext).somethingWentWrong),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -328,11 +337,17 @@ class _GlassNotificationsPanel extends ConsumerWidget {
                         icon: const Icon(Icons.done_all_rounded, size: 19),
                         onPressed: () async {
                           try {
-                            await ref
+                            final result = await ref
                                 .read(notificationRepositoryProvider)
                                 .markAllAsRead();
+                            // Always reload: on a partial result the
+                            // optimistic state would be stale.
                             _invalidateAll(ref);
-                          } catch (_) {}
+                            if (!result.completed) _showActionError();
+                          } catch (_) {
+                            _invalidateAll(ref);
+                            _showActionError();
+                          }
                         },
                       ),
                       IconButton(
@@ -341,11 +356,15 @@ class _GlassNotificationsPanel extends ConsumerWidget {
                         icon: const Icon(Icons.delete_sweep_rounded, size: 19),
                         onPressed: () async {
                           try {
-                            await ref
+                            final result = await ref
                                 .read(notificationRepositoryProvider)
                                 .clearAll();
                             _invalidateAll(ref);
-                          } catch (_) {}
+                            if (!result.completed) _showActionError();
+                          } catch (_) {
+                            _invalidateAll(ref);
+                            _showActionError();
+                          }
                         },
                       ),
                     ],

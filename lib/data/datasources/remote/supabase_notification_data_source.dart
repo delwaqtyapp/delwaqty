@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/domain/entities/app_notification.dart';
+import 'package:delwaqty/domain/repositories/notification_repository.dart';
 import 'package:delwaqty/shared/notifications/notification_route_resolver.dart';
 
 final supabaseNotificationDataSourceProvider =
@@ -10,8 +11,39 @@ final supabaseNotificationDataSourceProvider =
     });
 
 class SupabaseNotificationDataSource {
-  SupabaseNotificationDataSource(this._client);
+  SupabaseNotificationDataSource(
+    this._client, {
+    String? Function()? currentUserId,
+    this.sessionRetryCount = 5,
+    this.sessionRetryDelay = const Duration(milliseconds: 150),
+  }) : _currentUserId = currentUserId ?? (() => _client.auth.currentUser?.id);
   final SupabaseClient _client;
+  final String? Function() _currentUserId;
+  final int sessionRetryCount;
+  final Duration sessionRetryDelay;
+
+  /// RLS on notifications is NOT owner-only: admin policies
+  /// ('Admins can select/delete notifications') let an admin read and
+  /// delete other members' rows in their scope. Every query in this
+  /// class - reads AND mutations - therefore carries an explicit
+  /// .eq('user_id', currentUserId) filter, so an admin using the app can
+  /// never bulk-touch another member's notifications.
+  ///
+  /// When the session is still restoring, currentUser can be null; in
+  /// that case we wait briefly for auth and then throw. We never run a
+  /// query without the user filter.
+  Future<String> _requireUserId() async {
+    for (var attempt = 0; attempt < sessionRetryCount; attempt++) {
+      final id = _currentUserId();
+      if (id != null && id.isNotEmpty) return id;
+      if (attempt + 1 < sessionRetryCount) {
+        await Future<void>.delayed(sessionRetryDelay);
+      }
+    }
+    throw StateError(
+      'notifications: no signed-in user; refusing to run an unscoped query',
+    );
+  }
 
   static const Map<String, NotificationType> _dbTypeMap = {
     'system': NotificationType.system,
@@ -99,7 +131,8 @@ class SupabaseNotificationDataSource {
     int offset = 0,
   }) async {
     if (limit <= 0) return const [];
-    var query = _client.from('notifications').select();
+    final userId = await _requireUserId();
+    var query = _client.from('notifications').select().eq('user_id', userId);
 
     if (unreadOnly == true) {
       query = query.eq('is_read', false);
@@ -125,10 +158,8 @@ class SupabaseNotificationDataSource {
   }
 
   Future<int> getUnreadCount() async {
-    final userId = _client.auth.currentUser?.id;
-    if (userId == null) return 0;
-
     try {
+      final userId = await _requireUserId();
       final rows = await _client
           .from('notifications')
           .select('id, type, deep_link, data, audience')
@@ -150,79 +181,167 @@ class SupabaseNotificationDataSource {
   }
 
   Future<void> markAsRead(String id) async {
+    final userId = await _requireUserId();
     await _client
         .from('notifications')
         .update({'is_read': true, 'read_at': DateTime.now().toIso8601String()})
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', userId);
   }
 
-  Future<void> markAllAsRead() async {
-    final userId = _client.auth.currentUser?.id;
-    if (userId == null) return;
+  /// Bulk operations (mark-all-read / clear-all).
+  ///
+  /// The very first implementation fetched every id and sent them all in
+  /// a single `in.(...)` filter, which broke past ~150 notifications
+  /// (request URI limits, then PostgREST max-rows). The next one paged a
+  /// 200-row window from offset 0 and filtered the app context in Dart,
+  /// which broke differently: a window full of rows from other app
+  /// contexts looked like "nothing to do" while visible rows sat behind
+  /// the barrier.
+  ///
+  /// This version uses scan-then-mutate: it first pages through the
+  /// caller's rows WITHOUT mutating them (offset paging is stable on an
+  /// unmutated set, and hidden rows of other contexts can no longer form
+  /// a barrier), collecting the ids visible in this app context; then it
+  /// mutates the collected ids in small in-filter chunks. The round
+  /// repeats until a scan collects nothing visible, which also catches
+  /// rows inserted while the operation was running.
+  static const int _bulkFetchBatchSize = 200;
+  static const int _bulkMutationChunkSize = 50;
 
-    final rows = await _client
-        .from('notifications')
-        .select('id, type, deep_link, data, audience')
-        .eq('user_id', userId)
-        .eq('is_read', false);
+  /// Hard caps so a server that keeps returning rows cannot spin the
+  /// loop forever (200 fetch batches x 200 rows = 40k notifications
+  /// scanned; at most 20 scan rounds). Reaching a cap returns a
+  /// structured limit result - it never throws after partial work.
+  static const int _bulkMaxBatches = 200;
+  static const int _bulkMaxRounds = 20;
 
-    final matchingIds = (rows as List)
-        .cast<Map<String, dynamic>>()
-        .where(
-          (r) => NotificationChannels.isRowVisibleInContext(
-            r,
-            context: NotificationRouteResolver.appContext,
-          ),
-        )
-        .map((r) => r['id'] as String)
-        .toList();
+  Future<BulkNotificationResult> _bulkVisible({
+    required String userId,
+    required bool unreadOnly,
+    required Future<void> Function(List<String> chunk) mutateChunk,
+  }) async {
+    var processed = 0;
+    var batches = 0;
+    try {
+      for (var round = 0; round < _bulkMaxRounds; round++) {
+        // Phase 1: scan without mutating; offset paging is consistent on
+        // this static set.
+        final visibleIds = <String>[];
+        var offset = 0;
+        while (true) {
+          if (++batches > _bulkMaxBatches) {
+            return BulkNotificationResult(
+              completed: false,
+              processed: processed,
+              limitReached: true,
+            );
+          }
+          var query = _client
+              .from('notifications')
+              .select('id, type, deep_link, data, audience')
+              .eq('user_id', userId);
+          if (unreadOnly) {
+            query = query.eq('is_read', false);
+          }
+          final rows = await query
+              // Deterministic order: created_at alone ties, and a tie
+              // spanning a page boundary could skip or repeat a row.
+              .order('created_at', ascending: false)
+              .order('id', ascending: false)
+              .range(offset, offset + _bulkFetchBatchSize - 1);
+          final list = (rows as List).cast<Map<String, dynamic>>();
+          for (final r in list) {
+            if (NotificationChannels.isRowVisibleInContext(
+              r,
+              context: NotificationRouteResolver.appContext,
+            )) {
+              visibleIds.add(r['id'] as String);
+            }
+          }
+          if (list.length < _bulkFetchBatchSize) break;
+          offset += _bulkFetchBatchSize;
+        }
 
-    if (matchingIds.isEmpty) return;
+        if (visibleIds.isEmpty) {
+          return BulkNotificationResult(completed: true, processed: processed);
+        }
 
-    await _client
-        .from('notifications')
-        .update({'is_read': true, 'read_at': DateTime.now().toIso8601String()})
-        .eq('user_id', userId)
-        .inFilter('id', matchingIds);
+        // Phase 2: mutate the collected ids in bounded chunks. The user
+        // filter rides along as defense in depth on top of the RLS
+        // policies (which are not owner-only for admins).
+        for (var i = 0; i < visibleIds.length; i += _bulkMutationChunkSize) {
+          final chunk = visibleIds.sublist(
+            i,
+            i + _bulkMutationChunkSize > visibleIds.length
+                ? visibleIds.length
+                : i + _bulkMutationChunkSize,
+          );
+          await mutateChunk(chunk);
+          processed += chunk.length;
+        }
+        // Next round re-scans from the top; rows handled above no longer
+        // match, so a clean round ends the loop.
+      }
+      return BulkNotificationResult(
+        completed: false,
+        processed: processed,
+        limitReached: true,
+      );
+    } catch (e) {
+      // Partial failure: report how far we got so callers can reload
+      // instead of trusting their optimistic local state.
+      return BulkNotificationResult(
+        completed: false,
+        processed: processed,
+        error: e,
+      );
+    }
+  }
+
+  Future<BulkNotificationResult> markAllAsRead() async {
+    final userId = await _requireUserId();
+    final readAt = DateTime.now().toUtc().toIso8601String();
+    return _bulkVisible(
+      userId: userId,
+      unreadOnly: true,
+      mutateChunk: (chunk) => _client
+          .from('notifications')
+          .update({'is_read': true, 'read_at': readAt})
+          .eq('user_id', userId)
+          .eq('is_read', false)
+          .inFilter('id', chunk),
+    );
   }
 
   Future<void> deleteNotification(String id) async {
-    await _client.from('notifications').delete().eq('id', id);
-  }
-
-  Future<void> clearAll() async {
-    final userId = _client.auth.currentUser?.id;
-    if (userId == null) return;
-
-    final rows = await _client
-        .from('notifications')
-        .select('id, type, deep_link, data, audience')
-        .eq('user_id', userId);
-
-    final matchingIds = (rows as List)
-        .cast<Map<String, dynamic>>()
-        .where(
-          (r) => NotificationChannels.isRowVisibleInContext(
-            r,
-            context: NotificationRouteResolver.appContext,
-          ),
-        )
-        .map((r) => r['id'] as String)
-        .toList();
-
-    if (matchingIds.isEmpty) return;
-
+    final userId = await _requireUserId();
     await _client
         .from('notifications')
         .delete()
-        .eq('user_id', userId)
-        .inFilter('id', matchingIds);
+        .eq('id', id)
+        .eq('user_id', userId);
+  }
+
+  Future<BulkNotificationResult> clearAll() async {
+    final userId = await _requireUserId();
+    return _bulkVisible(
+      userId: userId,
+      unreadOnly: false,
+      mutateChunk: (chunk) => _client
+          .from('notifications')
+          .delete()
+          .eq('user_id', userId)
+          .inFilter('id', chunk),
+    );
   }
 
   Future<bool> existsByIdempotencyKey(String key) async {
+    final userId = await _requireUserId();
     final data = await _client
         .from('notifications')
         .select('id')
+        .eq('user_id', userId)
         .eq('idempotency_key', key)
         .maybeSingle();
     return data != null;

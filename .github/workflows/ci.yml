@@ -5,7 +5,7 @@ on:
   pull_request:
     # Cashier stack PRs merge into each other / work/pos-cashier before the
     # line ever targets master; they need the same CI proof on their heads.
-    branches: [master, work/pos-cashier, feat/pos-purge, feat/pos-ci-installer]
+    branches: [master, work/pos-cashier, feat/pos-purge, feat/pos-ci-installer, feat/pos-drop-drug-catalog]
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

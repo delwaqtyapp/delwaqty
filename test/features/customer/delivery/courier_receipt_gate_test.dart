@@ -56,6 +56,23 @@ void main() {
     },
   );
 
+  testWidgets(
+    'a failed outer stream on a LIVE ride renders nothing (the negotiation section owns the retry)',
+    (tester) async {
+      await tester.pumpWidget(
+        _app(
+          AsyncValue.error(StateError('boom'), StackTrace.empty),
+          terminal: false,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Retry'), findsNothing);
+      expect(find.text('GENERIC RECEIPT'), findsNothing);
+      expect(find.byType(CourierReceiptCard), findsNothing);
+    },
+  );
+
   testWidgets('loading shows no receipt at all', (tester) async {
     await tester.pumpWidget(_app(const AsyncValue.loading()));
     await tester.pump();

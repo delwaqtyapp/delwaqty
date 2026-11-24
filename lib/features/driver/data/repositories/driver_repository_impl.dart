@@ -4,6 +4,7 @@ import 'package:delwaqty/features/driver/domain/entities/vehicle.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_document.dart';
 import 'package:delwaqty/features/driver/domain/entities/wallet_detail.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_performance.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/courier_shopping_item.dart';
 import 'package:delwaqty/features/driver/domain/repositories/driver_repository.dart';
 import 'package:delwaqty/features/driver/data/datasources/remote/supabase_driver_data_source.dart';
 import 'package:delwaqty/features/driver/data/datasources/remote/supabase_driver_platform_data_source.dart';
@@ -71,6 +72,48 @@ class DriverRepositoryImpl implements DriverRepository {
     if (profile == null) throw Exception('Driver profile not found');
     return profile;
   }
+
+  @override
+  Future<void> proposeCourierQuote(
+    String rideId,
+    double amount, {
+    String? note,
+  }) => _dataSource.proposeCourierQuote(rideId, amount, note: note);
+
+  @override
+  Future<void> respondCourierQuote(String quoteId, String action) =>
+      _dataSource.respondCourierQuote(quoteId, action);
+
+  @override
+  Future<void> addCourierInvoiceItem(
+    String rideId, {
+    required String shopName,
+    required String productName,
+    required double price,
+    String? unit,
+    double? quantity,
+    String? receiptPhotoUrl,
+  }) => _dataSource.addCourierInvoiceItem(
+    rideId,
+    shopName: shopName,
+    productName: productName,
+    price: price,
+    unit: unit,
+    quantity: quantity,
+    receiptPhotoUrl: receiptPhotoUrl,
+  );
+
+  @override
+  Future<void> cancelCourierInvoiceItem(String itemId) =>
+      _dataSource.cancelCourierInvoiceItem(itemId);
+
+  @override
+  Future<void> finishCourierShopping(String rideId) =>
+      _dataSource.finishCourierShopping(rideId);
+
+  @override
+  Stream<List<CourierShoppingItem>> watchCourierRequestItems(String rideId) =>
+      _dataSource.watchCourierRequestItems(rideId);
 
   // M6: Onboarding
   @override

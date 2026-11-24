@@ -8759,6 +8759,63 @@ class AppLocalizationsEn extends AppLocalizations {
       'Goods are already bought - cancellation goes through a problem report.';
 
   @override
+  String get courierErrShoppingNotFinished =>
+      'Shopping isn\'t finished yet - record every item and finish shopping first.';
+
+  @override
+  String get driverProposePrice => 'Propose the delivery price';
+
+  @override
+  String get driverQuoteSent =>
+      'Price sent - waiting for the customer\'s answer.';
+
+  @override
+  String get customerCounter => 'The customer\'s counter';
+
+  @override
+  String get addItemAtShop => 'Add an item at the shop';
+
+  @override
+  String get shopNameLabel => 'Shop name';
+
+  @override
+  String get productLabel => 'Item';
+
+  @override
+  String get priceEgpLabel => 'Price (EGP)';
+
+  @override
+  String get quantityLabel => 'Quantity (optional)';
+
+  @override
+  String get receiptLinkLabel => 'Receipt photo link (optional)';
+
+  @override
+  String get cancelAtShop => 'Cancel at the shop';
+
+  @override
+  String get finishShopping => 'Finish shopping';
+
+  @override
+  String get finishShoppingConfirm =>
+      'Finish only when every item is decided and the rejected ones are cancelled. This locks the goods total.';
+
+  @override
+  String get shoppingFinishedTitle =>
+      'Shopping finished - collect the delivery price plus the goods on delivery.';
+
+  @override
+  String get courierCancelledRecordsTitle =>
+      'Ride cancelled - shopping records below, settlement goes through the problem report.';
+
+  @override
+  String get driverInvoiceHint =>
+      'Add each item with its real price; the customer approves it before you buy it.';
+
+  @override
+  String get shoppingListTitle => 'The customer\'s shopping list';
+
+  @override
   String counterFloor(String floor) {
     return 'The minimum is $floor EGP: 15 for the first shop + 5 for each extra shop.';
   }

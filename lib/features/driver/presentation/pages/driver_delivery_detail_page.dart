@@ -22,6 +22,7 @@ import 'package:delwaqty/features/customer/driver/presentation/providers/dispatc
 import 'package:delwaqty/features/customer/ride/presentation/widgets/ride_map.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
 import 'package:delwaqty/features/driver/presentation/widgets/cash_collection_card.dart';
+import 'package:delwaqty/features/driver/presentation/widgets/driver_courier_section.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/services/maps/maps_service.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
@@ -49,8 +50,12 @@ class _DriverDeliveryDetailPageState
       return true;
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
+        // 436 courier reasons (goods in progress, shopping not
+        // finished, ...) get their specific localized texts; anything
+        // else falls back to the generic mapping.
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(courierErrorText(context, e))));
       }
       return false;
     } finally {
@@ -568,6 +573,10 @@ class _DriverDeliveryDetailPageState
                     ),
                   ),
                   const SizedBox(height: 16),
+                  // Ask-anything (436): the captain's price negotiation,
+                  // item recording and finish-shopping. Self-gating: it
+                  // renders nothing on plain rides.
+                  DriverCourierSection(rideId: order.id),
                   // Cash handoff: once delivered, the captain collects the
                   // cash here. The card flips to a collected confirmation.
                   // Fail closed: if the collection state cannot be read, a

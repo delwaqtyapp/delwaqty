@@ -4,6 +4,7 @@ import 'package:delwaqty/features/driver/domain/entities/vehicle.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_document.dart';
 import 'package:delwaqty/features/driver/domain/entities/wallet_detail.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_performance.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/courier_shopping_item.dart';
 
 abstract interface class DriverRepository {
   Future<DriverProfile?> getProfile(String userId);
@@ -25,6 +26,28 @@ abstract interface class DriverRepository {
   Future<void> acceptDelivery(String deliveryId, String profileId);
   Future<void> rejectDelivery(String deliveryId);
   Future<void> updateDeliveryStatus(String deliveryId, String status);
+
+  // Ask-anything courier flow (436): the captain's side.
+  Future<void> proposeCourierQuote(
+    String rideId,
+    double amount, {
+    String? note,
+  });
+  Future<void> respondCourierQuote(String quoteId, String action);
+  Future<void> addCourierInvoiceItem(
+    String rideId, {
+    required String shopName,
+    required String productName,
+    required double price,
+    String? unit,
+    double? quantity,
+    String? receiptPhotoUrl,
+  });
+  Future<void> cancelCourierInvoiceItem(String itemId);
+  Future<void> finishCourierShopping(String rideId);
+
+  /// The customer's structured ask-anything request items (#217).
+  Stream<List<CourierShoppingItem>> watchCourierRequestItems(String rideId);
   Future<DriverProfile> getStats(String profileId);
 
   // M6: Onboarding

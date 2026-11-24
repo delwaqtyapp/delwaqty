@@ -21,7 +21,7 @@
 
         <TabControl Grid.Row="1" x:Name="Tabs">
             <!-- ============ SELL ============ -->
-            <TabItem Header="صرف / بيع">
+            <TabItem Header="بيع">
                 <Grid Margin="12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="2*"/>

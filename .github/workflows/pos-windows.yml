@@ -1,0 +1,147 @@
+name: POS Windows cashier (experimental)
+# Builds the WPF shop cashier (Delwaqty.Pos.Wpf, single shop build) from the
+# selected ref WITHOUT committing to it, and attaches the zipped build plus
+# the Inno Setup installers to the rolling 'development' release. Manual
+# dispatch only: the cashier is pre-merge and its Windows runtime proof is
+# still outstanding, so these are experimental artifacts for a first real
+# run on the owner's machine.
+#
+# Security split (#148): the job that touches the selected ref's code has no
+# write token and no persisted git credentials; the job that holds
+# contents:write never checks out or executes source - it only moves
+# fixed-name artifacts to the release.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Ref to build the cashier from (restricted to protected/default refs - the publish job clobbers release assets)'
+        required: true
+        default: 'work/pos-cashier'
+        type: choice
+        options:
+          - work/pos-cashier
+          - master
+
+permissions:
+  contents: read
+
+jobs:
+  build-cashier:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Unit tests (Pos.Core)
+        run: dotnet test pos/Delwaqty.Pos.Core.Tests/Delwaqty.Pos.Core.Tests.csproj -c Release --nologo
+
+      - name: Publish shop cashier (net8.0-windows, win-x64, self-contained)
+        run: >-
+          dotnet publish pos/Delwaqty.Pos.Wpf/Delwaqty.Pos.Wpf.csproj
+          -c Release -f net8.0-windows -r win-x64 --self-contained true
+          -o publish/shop-net8 --nologo
+
+      - name: Publish shop cashier (net48, Win7 SP1 fallback)
+        run: >-
+          dotnet publish pos/Delwaqty.Pos.Wpf/Delwaqty.Pos.Wpf.csproj
+          -c Release -f net48
+          -o publish/shop-net48 --nologo
+
+      - name: Add first-run README and zip the net8 build
+        shell: pwsh
+        run: |
+          $sha = (git rev-parse HEAD)
+          @"
+          Delwaqty Cashier (Windows) - EXPERIMENTAL FIRST-RUN BUILD
+          ==========================================================
+          Built from commit: $sha
+          This is the first Windows build of the Delwaqty shop cashier.
+          It compiles and passes its unit tests, but it has NOT yet completed
+          the manual Windows proof checklist.
+
+          - Run it on a real Windows 10/11 machine.
+          - Use TEST DATA ONLY. Do not run a real shop day on this build.
+          - After installing, run through pos/docs/windows-proof-checklist.md
+            in the repo (cross-user protection, copy-to-another-PC,
+            uninstall/reinstall recovery) and report anything unexpected.
+
+          Start: DelwaqtyShopPos.exe
+          Data dir: C:\ProgramData\DelwaqtyPos
+          "@ | Out-File -Encoding utf8 publish/shop-net8/README-FIRST-RUN.txt
+          Compress-Archive -Path publish/shop-net8/* -DestinationPath delwaqty-cashier-windows-EXPERIMENTAL.zip
+
+      - name: Download the .NET Framework 4.8 web bootstrapper
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force artifacts | Out-Null
+          Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/?linkid=2088631" -OutFile artifacts/ndp48-web.exe
+          # The bootstrapper ships inside the net48 installer: it must be a
+          # validly Microsoft-signed binary, not whatever the CDN handed us.
+          $sig = Get-AuthenticodeSignature artifacts/ndp48-web.exe
+          if ($sig.Status -ne 'Valid') { throw "ndp48-web.exe signature invalid: $($sig.Status)" }
+          if ($sig.SignerCertificate.Subject -notmatch 'Microsoft') { throw "ndp48-web.exe unexpected signer: $($sig.SignerCertificate.Subject)" }
+          "bootstrapper signed by: $($sig.SignerCertificate.Subject)"
+
+      - name: Install Inno Setup 6
+        run: choco install innosetup --version=6.7.1 --no-progress -y
+
+      - name: Compile installers
+        shell: pwsh
+        run: |
+          # #195: the .iss resolves every path macro relative to its own
+          # directory, so pass ABSOLUTE paths for payload, bootstrapper and
+          # output, then assert the exact files the upload step expects.
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\iscc.exe"
+          $out = "$PWD\installer-output"
+          & $iscc "/DSourceDir=$PWD\publish\shop-net8" "/DOutputDir=$out" "/DOutputBase=delwaqty-cashier-setup-net8-EXPERIMENTAL" pos\installer\delwaqty.iss
+          if ($LASTEXITCODE -ne 0) { throw "iscc net8 failed: $LASTEXITCODE" }
+          & $iscc "/DSourceDir=$PWD\publish\shop-net48" "/DNet48Bootstrapper=$PWD\artifacts\ndp48-web.exe" "/DOutputDir=$out" "/DOutputBase=delwaqty-cashier-setup-net48-EXPERIMENTAL" pos\installer\delwaqty.iss
+          if ($LASTEXITCODE -ne 0) { throw "iscc net48 failed: $LASTEXITCODE" }
+          $expect = @(
+            "$out\delwaqty-cashier-setup-net8-EXPERIMENTAL.exe",
+            "$out\delwaqty-cashier-setup-net48-EXPERIMENTAL.exe"
+          )
+          foreach ($f in $expect) {
+            if (-not (Test-Path $f)) { throw "expected installer missing: $f" }
+          }
+          $expect | ForEach-Object { "built: $_" }
+
+      - name: Hand off the zip and installers as workflow artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: delwaqty-cashier-windows-EXPERIMENTAL
+          path: |
+            delwaqty-cashier-windows-EXPERIMENTAL.zip
+            installer-output/delwaqty-cashier-setup-net8-EXPERIMENTAL.exe
+            installer-output/delwaqty-cashier-setup-net48-EXPERIMENTAL.exe
+          if-no-files-found: error
+          retention-days: 7
+
+  publish-cashier:
+    needs: build-cashier
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # gh release upload only; no source checkout here
+    steps:
+      - name: Download the fixed-name artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: delwaqty-cashier-windows-EXPERIMENTAL
+
+      - name: Attach to the development release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release upload development
+          delwaqty-cashier-windows-EXPERIMENTAL.zip
+          delwaqty-cashier-setup-net8-EXPERIMENTAL.exe
+          delwaqty-cashier-setup-net48-EXPERIMENTAL.exe
+          --clobber -R delwaqtyapp/delwaqty

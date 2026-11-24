@@ -131,6 +131,10 @@ class SupabaseDeliveryDataSource {
 
   // ── Customer courier request ──
 
+  // Server-side creation only (migration 430): the RPC takes the rider
+  // from the JWT and sets every money/linkage field itself, so the client
+  // can no longer price a ride or attach it to someone else's order.
+  // [riderId] stays on the signature for callers but is not sent.
   Future<String> requestCourierDelivery({
     required String riderId,
     required double pickupLatitude,
@@ -143,26 +147,23 @@ class SupabaseDeliveryDataSource {
     String? notes,
     String priority = 'standard',
   }) async {
-    final data = await _client
-        .from('rides')
-        .insert({
-          'rider_id': riderId,
-          'service_type': 'courier',
-          'ride_type': 'motorcycle',
-          'status': 'searching',
-          'pickup_latitude': pickupLatitude,
-          'pickup_longitude': pickupLongitude,
-          'pickup_address': pickupAddress,
-          'dropoff_latitude': dropoffLatitude,
-          'dropoff_longitude': dropoffLongitude,
-          'dropoff_address': dropoffAddress,
-          'items_summary': itemsSummary,
-          'dropoff_notes': notes,
-          'priority': priority,
-        })
-        .select()
-        .single();
-    return data['id'] as String;
+    final data = _checkRpc(
+      await _client.rpc(
+        'request_courier_delivery',
+        params: {
+          'p_pickup_latitude': pickupLatitude,
+          'p_pickup_longitude': pickupLongitude,
+          'p_pickup_address': pickupAddress,
+          'p_dropoff_latitude': dropoffLatitude,
+          'p_dropoff_longitude': dropoffLongitude,
+          'p_dropoff_address': dropoffAddress,
+          'p_items_summary': itemsSummary,
+          'p_dropoff_notes': notes,
+          'p_priority': priority,
+        },
+      ),
+    );
+    return data['delivery_id'] as String;
   }
 
   // ── Dispatch ──

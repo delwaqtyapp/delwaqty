@@ -454,6 +454,50 @@ END $g$;
 
 REVOKE EXECUTE ON FUNCTION public.confirm_cash_collection(cash_ref_type,uuid) FROM PUBLIC, anon;
 
+-- ── ACL + property postchecks (436 pattern) ───────────────────────────
+DO $$
+DECLARE
+  v_sigs regprocedure[] := ARRAY[
+    'public.driver_cash_collection_state(uuid)'::regprocedure,
+    'public.confirm_cash_collection(cash_ref_type,uuid)'::regprocedure
+  ];
+  v_sig regprocedure;
+BEGIN
+  FOREACH v_sig IN ARRAY v_sigs LOOP
+    IF EXISTS (
+      SELECT 1 FROM pg_proc p,
+           aclexplode(COALESCE(p.proacl, acldefault('f', p.proowner))) a
+      WHERE p.oid = v_sig::oid
+        AND a.grantee = 0
+        AND a.privilege_type = 'EXECUTE'
+    ) THEN
+      RAISE EXCEPTION '437: % executable by PUBLIC', v_sig;
+    END IF;
+    IF has_function_privilege('anon', v_sig, 'EXECUTE') THEN
+      RAISE EXCEPTION '437: % executable by anon', v_sig;
+    END IF;
+    IF NOT has_function_privilege('authenticated', v_sig, 'EXECUTE') THEN
+      RAISE EXCEPTION '437: authenticated lost EXECUTE on %', v_sig;
+    END IF;
+  END LOOP;
+
+  -- Both replaced globals keep SECURITY DEFINER, their search_path and
+  -- the rides owner.
+  IF EXISTS (
+    SELECT 1 FROM pg_proc p
+     WHERE p.oid IN (
+       'public.driver_cash_collection_state(uuid)'::regprocedure,
+       'public.confirm_cash_collection(cash_ref_type,uuid)'::regprocedure)
+       AND (NOT p.prosecdef
+            OR p.proconfig IS DISTINCT FROM ARRAY['search_path=public, pg_temp']::text[]
+            OR pg_get_userbyid(p.proowner) IS DISTINCT FROM
+               (SELECT pg_get_userbyid(t.relowner) FROM pg_class t
+                 WHERE t.relname = 'rides' AND t.relnamespace = 'public'::regnamespace))
+  ) THEN
+    RAISE EXCEPTION '437: a replaced global lost secdef/search_path/owner';
+  END IF;
+END $$;
+
 COMMIT;
 
 NOTIFY pgrst, 'reload schema';

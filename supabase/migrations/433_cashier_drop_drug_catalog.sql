@@ -3,8 +3,8 @@
 -- sale line items no longer carry drug_catalog_id and the app never calls
 -- the drug RPCs. This migration removes the server side.
 --
--- NUMBERING: unnumbered on purpose - the builder assigns the next number
--- after 431 and renames this file to NNN_cashier_drop_drug_catalog.sql.
+-- NUMBERING: assigned 433 by the builder (432 is reserved for the
+-- overhaul agent's #16). Moved from pos/docs/server-migrations/.
 --
 -- ORDERING: independent of the UI keeper's pharmacy purge PR. Dependent
 -- objects that PR also removes (pharmacy network column, MoH/PRO price

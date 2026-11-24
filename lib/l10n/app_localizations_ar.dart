@@ -3800,6 +3800,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get suggestionLinkTooLong => 'الرابط لازم ميزيدش عن 500 حرف';
 
   @override
+  String get suggestionSaveUnconfirmed =>
+      'مش متأكدين إن الحفظ تم - ممكن يكون اتحفظ بالفعل. راجع القايمة وحاول تاني.';
+
+  @override
   String get adminSuggestionsTitle => 'اقتراحات المستخدمين';
 
   @override

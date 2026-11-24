@@ -3833,6 +3833,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get suggestionLinkTooLong => 'Link must be 500 characters or fewer';
 
   @override
+  String get suggestionSaveUnconfirmed =>
+      'Couldn\'t confirm the save - it may have gone through. Check the list and try again.';
+
+  @override
   String get adminSuggestionsTitle => 'User Suggestions';
 
   @override

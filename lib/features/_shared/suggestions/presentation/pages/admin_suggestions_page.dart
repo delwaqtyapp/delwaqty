@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/features/_shared/suggestions/domain/entities/suggestion.dart';
 import 'package:delwaqty/features/_shared/suggestions/presentation/suggestions_providers.dart';
 import 'package:delwaqty/features/_shared/suggestions/presentation/pages/new_suggestion_page.dart';
@@ -340,6 +341,11 @@ class _SuggestionTriageSheetState
   String _selectedStatus = '';
   bool _saving = false;
 
+  /// Sheet-owned error: validation and save failures must be visible
+  /// INSIDE the sheet (a SnackBar lands on the page ScaffoldMessenger,
+  /// which this modal covers).
+  String? _saveError;
+
   @override
   void initState() {
     super.initState();
@@ -448,6 +454,37 @@ class _SuggestionTriageSheetState
                 ),
               ),
               const SizedBox(height: 12),
+              if (_saveError != null) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.errorContainer,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.error_outline_rounded,
+                        color: Theme.of(context).colorScheme.onErrorContainer,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _saveError!,
+                          style: TextStyle(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onErrorContainer,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -475,29 +512,21 @@ class _SuggestionTriageSheetState
   }
 
   Future<void> _save() async {
+    final l10n = AppLocalizations.of(context);
     final link = _linkController.text.trim();
+    setState(() => _saveError = null);
     if (link.isNotEmpty) {
       final uri = Uri.tryParse(link);
       if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context).suggestionLinkInvalid),
-          ),
-        );
+        setState(() => _saveError = l10n.suggestionLinkInvalid);
         return;
       }
       if (link.length > 500) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context).suggestionLinkTooLong),
-          ),
-        );
+        setState(() => _saveError = l10n.suggestionLinkTooLong);
         return;
       }
     }
     setState(() => _saving = true);
-    final l10n = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     try {
       final repo = ref.read(suggestionsRepositoryProvider);
@@ -517,10 +546,12 @@ class _SuggestionTriageSheetState
       widget.onStatusChanged();
       if (mounted) navigator.pop();
     } catch (e) {
+      // A transport failure is ambiguous: the atomic write may still have
+      // landed server-side. Say so honestly (never claim nothing changed)
+      // and reload the list behind the sheet so it shows the truth.
+      widget.onStatusChanged();
       if (mounted) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.somethingWentWrong)),
-        );
+        setState(() => _saveError = l10n.suggestionSaveUnconfirmed);
       }
     } finally {
       if (mounted) setState(() => _saving = false);

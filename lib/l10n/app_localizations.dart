@@ -7370,6 +7370,12 @@ abstract class AppLocalizations {
   /// **'Link must be 500 characters or fewer'**
   String get suggestionLinkTooLong;
 
+  /// No description provided for @suggestionSaveUnconfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t confirm the save - it may have gone through. Check the list and try again.'**
+  String get suggestionSaveUnconfirmed;
+
   /// No description provided for @adminSuggestionsTitle.
   ///
   /// In en, this message translates to:

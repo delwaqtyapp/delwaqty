@@ -247,7 +247,7 @@ void main() {
     ).called(1);
   });
 
-  testWidgets('failed triage keeps the sheet open and never reloads (#185)', (
+  testWidgets('failed triage shows an in-sheet error and reloads (#185)', (
     tester,
   ) async {
     _tallScreen(tester);
@@ -287,14 +287,22 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 800));
 
-    // Error surfaced, sheet still open for correction, no list reload:
-    // the failed write was atomic, so the queue cannot be stale.
+    // Error surfaced INSIDE the sheet (a SnackBar would hide behind the
+    // modal), sheet still open for correction. The list was reloaded
+    // behind it: a transport failure is ambiguous - the atomic write may
+    // have landed - so the page must show the server truth.
     expect(
-      find.text('Something went wrong. Please try again.'),
+      find.descendant(
+        of: find.byType(DraggableScrollableSheet),
+        matching: find.text(
+          "Couldn't confirm the save - it may have gone through. Check the "
+          'list and try again.',
+        ),
+      ),
       findsOneWidget,
     );
     expect(find.widgetWithText(ElevatedButton, 'Save'), findsOneWidget);
-    expect(listCalls, 1);
+    expect(listCalls, greaterThan(1));
   });
 
   testWidgets('a link over 500 chars is rejected before any RPC (#185)', (
@@ -328,7 +336,13 @@ void main() {
     await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text('Link must be 500 characters or fewer'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(DraggableScrollableSheet),
+        matching: find.text('Link must be 500 characters or fewer'),
+      ),
+      findsOneWidget,
+    );
     verifyNever(
       () => repo.adminTriageSuggestion(
         any(),
@@ -340,11 +354,15 @@ void main() {
     );
   });
 
-  testWidgets('Arabic RTL at 360x800: queue and triage sheet render '
+  testWidgets('Arabic RTL at 320x640 @1.6: queue and triage sheet render '
       'without overflow', (tester) async {
-    tester.view.physicalSize = const Size(360, 800);
+    tester.view.physicalSize = const Size(320, 640);
     tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
+    tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+    addTearDown(() {
+      tester.platformDispatcher.clearTextScaleFactorTestValue();
+      tester.view.reset();
+    });
     final repo = _MockSuggestionsRepository();
     when(
       () => repo.adminListSuggestions(
@@ -380,5 +398,58 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(tester.takeException(), isNull);
     expect(find.byType(DropdownButtonFormField<String>), findsWidgets);
+
+    // A rejected save shows its error INSIDE the sheet, in Arabic.
+    // At 320x640 @1.6 the link field starts below the fold: scroll to it.
+    final linkField = find.widgetWithText(
+      TextField,
+      'رابط المهمة أو الـ issue (https)',
+      skipOffstage: false,
+    );
+    await tester.dragUntilVisible(
+      linkField,
+      find.byType(ListView).last,
+      const Offset(0, -150),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.enterText(
+      linkField,
+      'https://github.com/x/y/issues/${'9' * 500}',
+    );
+    final saveButton = find.widgetWithText(
+      ElevatedButton,
+      'حفظ',
+      skipOffstage: false,
+    );
+    await tester.dragUntilVisible(
+      saveButton,
+      find.byType(ListView).last,
+      const Offset(0, -150),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(saveButton);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(tester.takeException(), isNull);
+    expect(
+      find.descendant(
+        of: find.byType(DraggableScrollableSheet),
+        matching: find.text('الرابط لازم ميزيدش عن 500 حرف'),
+      ),
+      findsOneWidget,
+    );
+    if (const bool.fromEnvironment('CAPTURE_SHEET_SHOT')) {
+      // Bring the error banner fully into view for the pixel record.
+      await tester.drag(find.byType(ListView).last, const Offset(0, -250));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(tester.takeException(), isNull);
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('goldens/triage_sheet_error_320_ar16.png'),
+      );
+    }
   });
 }

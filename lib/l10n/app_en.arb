@@ -1233,6 +1233,7 @@
   "suggestionOpenLink": "Open link",
   "suggestionLinkInvalid": "Enter a valid https link or leave it empty",
   "suggestionLinkTooLong": "Link must be 500 characters or fewer",
+  "suggestionSaveUnconfirmed": "Couldn't confirm the save - it may have gone through. Check the list and try again.",
   "adminSuggestionsTitle": "User Suggestions",
   "complaintType": "Complaint Type",
   "complaintSubmitted": "Complaint submitted successfully",

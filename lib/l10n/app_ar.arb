@@ -1231,6 +1231,7 @@
   "suggestionOpenLink": "افتح الرابط",
   "suggestionLinkInvalid": "اكتب رابط https صحيح أو سيبه فاضي",
   "suggestionLinkTooLong": "الرابط لازم ميزيدش عن 500 حرف",
+  "suggestionSaveUnconfirmed": "مش متأكدين إن الحفظ تم - ممكن يكون اتحفظ بالفعل. راجع القايمة وحاول تاني.",
   "adminSuggestionsTitle": "اقتراحات المستخدمين",
   "complaintType": "نوع الشكوى",
   "complaintSubmitted": "تم تقديم الشكوى بنجاح",

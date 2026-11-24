@@ -54,7 +54,7 @@ BEGIN
  a:=public.complete_driver_onboarding(d);
  IF a->>'success' <> 'true' THEN RAISE EXCEPTION 'valid onboarding failed: %',a; END IF;
  PERFORM set_config('role','none',true);
- ASSERT (SELECT service_types FROM public.drivers WHERE id=d)=ARRAY['food','grocery','pharmacy','parcel']::text[],'delivery capabilities initialized';
+ ASSERT (SELECT service_types FROM public.drivers WHERE id=d)=ARRAY['food','grocery','parcel']::text[],'delivery capabilities initialized';
  ASSERT (SELECT accepts_deliveries FROM public.drivers WHERE id=d),'delivery opt-in initialized';
  PERFORM set_config('role','authenticated',true);
  a:=public.update_driver_capabilities(d,ARRAY['ride'],true,15,20);

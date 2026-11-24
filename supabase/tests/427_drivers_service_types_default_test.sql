@@ -12,7 +12,7 @@ DO $g$
 DECLARE
   v_def text;
   c_pre    constant text := 'ARRAY[]::text[]';
-  c_target constant text := 'ARRAY[''food''::text, ''grocery''::text, ''pharmacy''::text, ''parcel''::text]';
+  c_target constant text := 'ARRAY[''food''::text, ''grocery''::text, ''parcel''::text]';
 BEGIN
   SELECT pg_get_expr(a.adbin, a.adrelid) INTO v_def
     FROM pg_attrdef a
@@ -30,7 +30,7 @@ BEGIN
     RAISE EXCEPTION '427: drivers.service_types default drifted - aborting WITHOUT mutation: %', v_def;
   ELSE
     ALTER TABLE public.drivers ALTER COLUMN service_types
-      SET DEFAULT ARRAY['food','grocery','pharmacy','parcel']::text[];
+      SET DEFAULT ARRAY['food','grocery','parcel']::text[];
   END IF;
 END $g$;
 
@@ -48,14 +48,14 @@ BEGIN
   -- omitted service_types, accepts_deliveries defaulted (false): full array
   INSERT INTO public.drivers(id,user_id,full_name) VALUES (d1,u1,'427 D1');
   SELECT service_types INTO v_types FROM public.drivers WHERE id=d1;
-  ASSERT v_types = ARRAY['food','grocery','pharmacy','parcel']::text[],
+  ASSERT v_types = ARRAY['food','grocery','parcel']::text[],
     '427: omitted service_types did not default to the full array: ' || coalesce(v_types::text,'<null>');
 
   -- omitted service_types with accepts_deliveries=true: previously the
   -- guard rejected this (empty array); now succeeds with the full array
   INSERT INTO public.drivers(id,user_id,full_name,accepts_deliveries) VALUES (d2,u2,'427 D2',true);
   SELECT service_types INTO v_types FROM public.drivers WHERE id=d2;
-  ASSERT v_types = ARRAY['food','grocery','pharmacy','parcel']::text[],
+  ASSERT v_types = ARRAY['food','grocery','parcel']::text[],
     '427: accepts_deliveries insert did not get the full array';
 
   -- explicit subset untouched
@@ -88,7 +88,7 @@ BEGIN
    WHERE a.adrelid = 'public.drivers'::regclass
      AND a.adnum = (SELECT attnum FROM pg_attribute
                      WHERE attrelid = 'public.drivers'::regclass AND attname = 'service_types');
-  ASSERT v_def = 'ARRAY[''food''::text, ''grocery''::text, ''pharmacy''::text, ''parcel''::text]',
+  ASSERT v_def = 'ARRAY[''food''::text, ''grocery''::text, ''parcel''::text]',
     '427: catalog default is not the canonical target: ' || v_def;
 END $$;
 
@@ -97,7 +97,7 @@ DO $g$
 DECLARE
   v_def text;
   c_pre    constant text := 'ARRAY[]::text[]';
-  c_target constant text := 'ARRAY[''food''::text, ''grocery''::text, ''pharmacy''::text, ''parcel''::text]';
+  c_target constant text := 'ARRAY[''food''::text, ''grocery''::text, ''parcel''::text]';
 BEGIN
   SELECT pg_get_expr(a.adbin, a.adrelid) INTO v_def
     FROM pg_attrdef a
@@ -115,7 +115,7 @@ BEGIN
     RAISE EXCEPTION '427: drivers.service_types default drifted - aborting WITHOUT mutation: %', v_def;
   ELSE
     ALTER TABLE public.drivers ALTER COLUMN service_types
-      SET DEFAULT ARRAY['food','grocery','pharmacy','parcel']::text[];
+      SET DEFAULT ARRAY['food','grocery','parcel']::text[];
   END IF;
 END $g$;
 
@@ -134,7 +134,7 @@ BEGIN
     DECLARE
       v_def text;
       c_pre    constant text := 'ARRAY[]::text[]';
-      c_target constant text := 'ARRAY[''food''::text, ''grocery''::text, ''pharmacy''::text, ''parcel''::text]';
+      c_target constant text := 'ARRAY[''food''::text, ''grocery''::text, ''parcel''::text]';
     BEGIN
       SELECT pg_get_expr(a.adbin, a.adrelid) INTO v_def
         FROM pg_attrdef a
@@ -152,7 +152,7 @@ BEGIN
         RAISE EXCEPTION '427: drivers.service_types default drifted - aborting WITHOUT mutation: %', v_def;
       ELSE
         ALTER TABLE public.drivers ALTER COLUMN service_types
-          SET DEFAULT ARRAY['food','grocery','pharmacy','parcel']::text[];
+          SET DEFAULT ARRAY['food','grocery','parcel']::text[];
       END IF;
     END;
   EXCEPTION WHEN raise_exception THEN

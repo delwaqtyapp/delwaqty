@@ -24,8 +24,10 @@ app                          Supabase                         Meta Cloud API
  |<-- verified=true ----------|                                 |
 ```
 
-1. **Meta setup (dashboard action, one time):** WhatsApp Business app on
-   the platform support number; webhook URL
+1. **Meta setup (dashboard action, one time):** a dedicated Cloud API
+   number (the `whatsapp_otp_number` destination — interim test number or
+   the platform's own SIM, see Operations; NEVER the protected support
+   line); webhook URL
    `https://bttnlkmwhorjamzemwda.supabase.co/functions/v1/whatsapp-webhook`;
    subscribe to `messages`.
 2. **Edge function `whatsapp-webhook`** (supabase/functions/whatsapp-webhook):
@@ -41,7 +43,7 @@ app                          Supabase                         Meta Cloud API
    by grant design (anon and authenticated have no EXECUTE). Idempotent per Meta message
    id via `whatsapp_webhook_messages`; atomically sets `verified = true`
    only for an unexpired, unlocked, unverified matching code.
-4. **Cutover (follow-up, after the webhook is live):**
+4. **Cutover (future direction, unscheduled - NOT part of this change):**
    - Stop returning `otp_code` from `request_whatsapp_otp` to clients
      (keep it for owner/admin test tooling only).
    - Register flow: after the user sends the WhatsApp message, the app
@@ -86,13 +88,19 @@ Rules that keep this safe:
 
 The number in `support_phone` was registered on the consumer WhatsApp
 Business app, not the Cloud API. Meta only delivers webhook events for
-numbers onboarded to the Cloud API, so no real message ever reached this
-webhook (all deliveries in `whatsapp_webhook_messages` before the fix are
-synthetic `wamid.demoNNN` test posts). Everything else — this function,
-the secrets, the challenge flow — was already live and correct.
+numbers onboarded to the Cloud API, so no real message should ever have
+reached this webhook. Consistent with that: an inspection of
+`whatsapp_webhook_messages` on Nov 24, 2026 found only synthetic
+`wamid.demoNNN` test posts and no real inbound delivery. The webhook
+function, secrets, and challenge flow were deployed, but because Meta
+never delivered an event, the end-to-end path has never been observed
+working in production.
 
-Removing the `support_phone` fallback (434) therefore cannot break a
-working sign-in: that path never delivered a webhook event in production.
+Removing the `support_phone` fallback (434) is therefore not expected to
+break a working sign-in: the Nov 24 inspection found no real delivery and
+no `verified_via='webhook'` row attributable to one. If a working login
+did somehow depend on that path, the failure mode is a clear
+`WHATSAPP_NOT_CONFIGURED` error, recoverable by setting the override.
 
 ### Interim: Meta's free Cloud API test number
 
@@ -101,12 +109,12 @@ Meta app's test number (any country code — the +1 test number is why the
 migration validates generic E.164, not `^\+201`).
 
 CAVEAT: whether Meta's test number delivers INBOUND messages to webhooks
-is claimed by Meta's documentation but is not yet verified for this app.
-Treat it as unproven until confirmed by a Meta documentation citation or
-one approved smoke test: a single real WhatsApp send to the test number
-on an approved line (see checklist), never to the protected support
-line. The test-number limits apply to outbound sends, which this design
-never uses.
+is UNVERIFIED - this PR cites no Meta documentation for it. Treat it as
+unproven until confirmed by a Meta documentation citation or one approved
+smoke test: a single real WhatsApp send to the test number on an approved
+line (see checklist), never to the protected support line. The
+test-number limits apply to outbound sends, which this design never
+uses.
 
 ### End state: dedicated Egyptian SIM
 

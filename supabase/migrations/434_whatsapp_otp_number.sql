@@ -15,10 +15,11 @@
 --    support_phone is deliberately REMOVED: it preserved existing prod
 --    behavior (414 returned support_phone as the destination), but the
 --    current support_phone value is the platform's protected support
---    line, which must never be an OTP destination, and that path never
---    delivered webhook events anyway (see the runbook root cause), so
---    removing it cannot break a working login. Unset override now fails
---    closed (WHATSAPP_NOT_CONFIGURED).
+--    line, which must never be an OTP destination. A Nov 24, 2026
+--    inspection of prod whatsapp_webhook_messages found no real inbound
+--    delivery over that path (synthetic test posts only), so no working
+--    login is known to depend on it; the failure mode while unset is a
+--    clear, recoverable WHATSAPP_NOT_CONFIGURED (see runbook).
 -- 3) An override that is set but malformed also fails closed.
 -- 4) whatsapp_otp_number joins the owner-only guard
 --    (guard_platform_settings_owner_fields, 393 pattern): it steers where

@@ -1,8 +1,16 @@
--- Rollback suite for migration 434 (dedicated WhatsApp OTP destination).
+-- Suite for migration 434 (dedicated WhatsApp OTP destination).
 -- Synthetic fixtures only: sender numbers +201000000xx (never a real or
 -- protected line), destination +15550001111 (Meta test-number shape), IP
 -- 203.0.113.x (TEST-NET-3, documentation range). Run with
 -- psql -v ON_ERROR_STOP=1; any failed assert aborts non-zero.
+--
+-- DISPOSABLE-DATABASE-ONLY. The fixture rows below (auth.users, role
+-- changes, admin_management, admin_region_assignments) are written BEFORE
+-- the first BEGIN and PERSIST - this is not a rollback-only suite. Run it
+-- only on a throwaway database created for the run (the
+-- supabase/harness/434_atomicity_harness.sh case-1 DB or an equivalent
+-- fresh clone), never on staging or prod. Each numbered block still rolls
+-- back its own mutations; only the shared fixtures persist.
 --
 -- Covers: override-only destination (NO support_phone fallback - the
 -- protected line must never come back), malformed/empty override fails

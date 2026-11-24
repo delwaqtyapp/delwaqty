@@ -9,3 +9,5 @@ case4-column-refused: OK (refused by expected guard)
 case4-state-unchanged: OK
 case5-acl-refused: OK (refused by expected guard)
 case5-state-unchanged: OK
+case6-postcheck-refused: OK (refused by expected guard)
+case6-state-unchanged: OK

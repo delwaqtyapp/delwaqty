@@ -1,21 +1,31 @@
 #!/usr/bin/env bash
-# 434 atomicity harness (code review #192): executes the EXACT migration
-# file supabase/migrations/434_whatsapp_otp_number.sql against freshly
-# created THROWAWAY databases - a correct pre-image and deliberately
-# drifted pre-images - and proves that (a) the real file succeeds on the
-# real pre-image and (b) every induced A0 failure aborts with the exact
-# expected reason and leaves column/function/guard/ACL state UNCHANGED.
-# Nothing is re-typed: the real file is applied with psql -f under
+# 434 atomicity harness (code review #192/#194): executes the EXACT
+# migration file supabase/migrations/434_whatsapp_otp_number.sql against
+# freshly created THROWAWAY databases - a correct pre-image and
+# deliberately broken pre-images - and proves that (a) the real file
+# succeeds on the real pre-image and (b) every induced failure aborts
+# with the exact expected reason and leaves FULL state (whole function
+# bodies, both ACL sets, the owner guard, the platform_settings column
+# set) byte-identical to before. One case fails AFTER the DDL (a
+# postcheck failure), proving the BEGIN/COMMIT wrapper rolls the DDL
+# back. Nothing is re-typed: the real file is applied with psql -f under
 # ON_ERROR_STOP, and every assertion is enforced with an exit code.
 #
-# SAFETY (hard gate, same pattern as 435_purge_harness.sh):
-#   - Only localhost / 127.0.0.1 / ::1 hosts are accepted.
-#   - The PROD project ref bttnlkmwhorjamzemwda is refused outright.
-#   - Staging (adcgqoccrgauqdoplsgg) is NOT disposable and is refused too.
+# SAFETY (hard gate, code review #194):
+#   - The endpoint host must parse as EXACTLY localhost, 127.0.0.1, or
+#     ::1 (bracketed [::1] when a port is given), with an optional
+#     numeric port and nothing else. Supplied host text is never trusted
+#     beyond that parse: no prefix matching, no suffixes, no query
+#     string, no fragments, no non-default path segments.
+#   - The PROD project ref bttnlkmwhorjamzemwda and the staging ref
+#     adcgqoccrgauqdoplsgg are refused outright anywhere in the URL.
 #   - Requires HARNESS_CONFIRM_DISPOSABLE=yes in the environment.
-#   - Never mutates a pre-existing database: each case runs in a NEW
-#     database with a random name, cloned from the prepared template
-#     database h435_template, and dropped afterwards.
+#   - Never touches a pre-existing database: databases are CREATE-first
+#     (no DROP IF EXISTS before create; a name collision retries with a
+#     new random name), and only databases THIS run created successfully
+#     are dropped afterwards.
+#   - Every PG* environment variable that could redirect the connection
+#     must be unset.
 #
 # Usage:
 #   HARNESS_CONFIRM_DISPOSABLE=yes ./434_atomicity_harness.sh \
@@ -45,192 +55,257 @@ case "$ADMIN_URL" in
   *adcgqoccrgauqdoplsgg*) fail_safety "staging project ref detected; staging is not disposable";;
 esac
 case "$ADMIN_URL" in
-  *\?*|*'&'*) fail_safety "URI query parameters are not allowed (host/hostaddr/service overrides)";;
+  *\?*|*'&'*|*'#'*) fail_safety "URI query parameters and fragments are not allowed (host/hostaddr/service overrides)";;
 esac
 for V in PGHOST PGHOSTADDR PGPORT PGUSER PGDATABASE PGSERVICE PGSERVICEFILE PGPASSFILE PGOPTIONS PGCONNECT_TIMEOUT PGSSLMODE PGTARGETSESSIONATTRS; do
   if [ -n "${!V:-}" ]; then
     fail_safety "environment variable $V is set; unset every PG* variable before running the harness (the URI is the only endpoint)"
   fi
 done
+
+# Exact endpoint parse: postgres://[userinfo@]HOST[:PORT]/dbname where
+# HOST is exactly a loopback and PORT is digits only. Nothing else.
 case "$ADMIN_URL" in
   postgres://*|postgresql://*) ;;
   *) fail_safety "ADMIN_URL must be a postgres:// URI";;
 esac
-HOSTPORT="$(printf '%s' "$ADMIN_URL" | sed -E 's#^postgres(ql)?://([^@]*@)?([^/]*)/.*#\3#')"
+NOPROTO="${ADMIN_URL#postgres://}"; NOPROTO="${NOPROTO#postgresql://}"
+NOUSER="${NOPROTO##*@}"            # userinfo, if any, ends at the LAST @
+HOSTPORT="${NOUSER%%/*}"           # authority ends at the first /
+DBPATH="${NOUSER#*/}"
+case "$DBPATH" in
+  */*|'') fail_safety "database path must be a single non-empty segment";;
+esac
+[ -n "$HOSTPORT" ] || fail_safety "missing host"
 case "$HOSTPORT" in
-  localhost*|127.0.0.1*|::1*|"[::1]"*) ;;
-  *) fail_safety "only localhost targets are allowed, got host: $HOSTPORT";;
+  localhost|127.0.0.1|::1|\[::1\]) ;;                    # exact host, no port
+  localhost:*|127.0.0.1:*|\[::1\]:*)
+    H="${HOSTPORT%:*}"; P="${HOSTPORT##*:}"
+    case "$H" in localhost|127.0.0.1|\[::1\]) ;; *) fail_safety "host is not an exact loopback: $H";; esac
+    case "$P" in ''|*[!0-9]*) fail_safety "port must be numeric, got: $P";; esac
+    ;;
+  *) fail_safety "host is not an exact loopback (localhost, 127.0.0.1, ::1): $HOSTPORT";;
 esac
 
 [ -f "$MIG" ] || fail_safety "migration file not found: $MIG"
 [ -f "$SUITE" ] || fail_safety "suite file not found: $SUITE"
 
 ADMIN_DB="${ADMIN_URL%/postgres}/postgres"
+FN_OID="public.request_whatsapp_otp(text,text)"
+GUARD_OID="public.guard_platform_settings_owner_fields()"
 
 say() { printf '%s\n' "$1"; }
 OUT=()
 record() { OUT+=("$1"); say "$1"; }
 fail_case() { record "$1: FAIL ($2)"; }
 
-db_url() { printf '%s/%s' "${ADMIN_URL%/postgres}" "$1"; }
-
 q() { # q <db> <sql> -> stdout (tA)
-  psql "$(db_url "$1")" -X -q -tA -v ON_ERROR_STOP=1 -c "$2"
+  psql "${ADMIN_URL%/postgres}/$1" -X -q -tA -v ON_ERROR_STOP=1 -c "$2"
 }
 admin_q() { psql "$ADMIN_DB" -X -q -tA -v ON_ERROR_STOP=1 -c "$1"; }
 
-mk_db() { # mk_db <name>
-  admin_q "CREATE DATABASE $1 TEMPLATE $TEMPLATE" >/dev/null || return 1
+CREATED=()
+mk_db() { # mk_db <name-var> : create-first, retry on name collision only
+  local attempt name err
+  for attempt in 1 2 3 4 5; do
+    name="t434h_${RANDOM}${RANDOM}${RANDOM}"
+    err="$(admin_q "CREATE DATABASE $name TEMPLATE $TEMPLATE" 2>&1)"
+    if [ $? -eq 0 ]; then
+      CREATED+=("$name")
+      printf -v "$1" '%s' "$name"
+      return 0
+    fi
+    case "$err" in
+      *"already exists"*) continue;;   # collision: new random name, never drop
+      *) say "CREATE DATABASE failed: $err" >&2; return 1;;
+    esac
+  done
+  say "CREATE DATABASE: too many name collisions" >&2
+  return 1
 }
-drop_db() { admin_q "DROP DATABASE IF EXISTS $1" >/dev/null 2>&1 || true; }
+cleanup() {
+  local db
+  for db in ${CREATED[@]+"${CREATED[@]}"}; do
+    admin_q "DROP DATABASE $db" >/dev/null 2>&1 || true
+  done
+}
+trap cleanup EXIT
 
-FN_OID="public.request_whatsapp_otp(text,text)"
-GUARD_OID="public.guard_platform_settings_owner_fields()"
-
-# state <db> -> "col_exists|body_md5|body_has_rateguard|body_has_override|
-#                guard_md5|guard_covers|acl_set"
+# Full state: the WHOLE platform_settings column set, both whole function
+# bodies (md5 over the complete pg_get_functiondef text), and both full
+# EXECUTE ACL sets. '~' separates fields; ',' separates set members.
 state() {
-  q "$1" "SELECT (SELECT count(*) FROM information_schema.columns
-                    WHERE table_schema='public' AND table_name='platform_settings'
-                      AND column_name='whatsapp_otp_number')
-          || '|' || md5(pg_get_functiondef('$FN_OID'::regprocedure))
-          || '|' || (pg_get_functiondef('$FN_OID'::regprocedure) LIKE '%_lookup_rate_allow%')
-          || '|' || (pg_get_functiondef('$FN_OID'::regprocedure) LIKE '%whatsapp_otp_number%')
-          || '|' || md5(pg_get_functiondef('$GUARD_OID'::regprocedure))
-          || '|' || (pg_get_functiondef('$GUARD_OID'::regprocedure) LIKE '%whatsapp_otp_number%')
-          || '|' || coalesce((SELECT string_agg(g, ',' ORDER BY g) FROM (
+  q "$1" "SELECT (SELECT coalesce(string_agg(column_name||':'||data_type, ',' ORDER BY column_name), '')
+                    FROM information_schema.columns
+                   WHERE table_schema='public' AND table_name='platform_settings')
+          || '~' || md5(pg_get_functiondef('$FN_OID'::regprocedure))
+          || '~' || coalesce((SELECT string_agg(g, ',' ORDER BY g) FROM (
                         SELECT CASE WHEN a.grantee = 0 THEN 'PUBLIC'
                                     ELSE a.grantee::regrole::text END AS g
                           FROM aclexplode(p.proacl) a
                          WHERE a.privilege_type = 'EXECUTE') z), '')
-           FROM pg_proc p WHERE p.oid = '$FN_OID'::regprocedure"
+          || '~' || md5(pg_get_functiondef('$GUARD_OID'::regprocedure))
+          || '~' || coalesce((SELECT string_agg(g, ',' ORDER BY g) FROM (
+                        SELECT CASE WHEN a.grantee = 0 THEN 'PUBLIC'
+                                    ELSE a.grantee::regrole::text END AS g
+                          FROM aclexplode(p2.proacl) a
+                         WHERE a.privilege_type = 'EXECUTE') z), '')
+           FROM pg_proc p, pg_proc p2
+          WHERE p.oid = '$FN_OID'::regprocedure AND p2.oid = '$GUARD_OID'::regprocedure"
 }
 
-apply_migration() { # apply_migration <db> -> captures stderr in APPLY_ERR, returns psql code
-  APPLY_ERR="$(psql "$(db_url "$1")" -X -q -v ON_ERROR_STOP=1 -f "$MIG" 2>&1 >/dev/null)"
+colset_has() { # colset_has <state> <column>
+  printf '%s' "$1" | cut -d'~' -f1 | tr ',' '\n' | grep -q "^$2:"
+}
+
+APPLY_ERR=""
+APPLY_RC=0
+apply_migration() { # apply_migration <db>
+  APPLY_ERR="$(psql "${ADMIN_URL%/postgres}/$1" -X -q -v ON_ERROR_STOP=1 -f "$MIG" 2>&1 >/dev/null)"
+  APPLY_RC=$?
 }
 
 # ---------- case 1: clean apply on the correct pre-image + real suite ----------
-DB1="t434h_c1_$RANDOM$RANDOM"
-drop_db "$DB1"
-mk_db "$DB1" || { record "case1-clean-apply: FAIL (create db)"; exit 2; }
+mk_db DB1 || { record "case1-clean-apply: FAIL (create db)"; exit 2; }
 apply_migration "$DB1"
-if [ $? -eq 0 ]; then
+if [ $APPLY_RC -eq 0 ]; then
   record "case1-clean-apply: OK"
   S="$(state "$DB1")"
-  if [ "$(printf '%s' "$S" | cut -d'|' -f1)" = "1" ] \
-     && [ "$(printf '%s' "$S" | cut -d'|' -f3)" = "true" ] \
-     && [ "$(printf '%s' "$S" | cut -d'|' -f4)" = "true" ] \
-     && [ "$(printf '%s' "$S" | cut -d'|' -f6)" = "true" ] \
-     && [ "$(printf '%s' "$S" | cut -d'|' -f7)" = "anon,authenticated,postgres,service_role" ]; then
+  if colset_has "$S" "whatsapp_otp_number" \
+     && [ "$(printf '%s' "$S" | cut -d'~' -f3)" = "anon,authenticated,postgres,service_role" ] \
+     && q "$DB1" "SELECT pg_get_functiondef('$FN_OID'::regprocedure) LIKE '%_lookup_rate_allow%'
+                    AND pg_get_functiondef('$FN_OID'::regprocedure) LIKE '%whatsapp_otp_number%'
+                    AND pg_get_functiondef('$GUARD_OID'::regprocedure) LIKE '%whatsapp_otp_number%'" | grep -qx "t"; then
     record "case1-post-state: OK"
   else
     fail_case "case1-post-state" "unexpected state $S"
   fi
-  if psql "$(db_url "$DB1")" -X -q -v ON_ERROR_STOP=1 -f "$SUITE" >/dev/null 2>&1; then
+  if psql "${ADMIN_URL%/postgres}/$DB1" -X -q -v ON_ERROR_STOP=1 -f "$SUITE" >/dev/null 2>&1; then
     record "case1-suite: OK"
   else
     fail_case "case1-suite" "rollback suite non-zero on applied DB"
   fi
 else
-  fail_case "case1-clean-apply" "exit=$? err=$APPLY_ERR"
+  fail_case "case1-clean-apply" "exit=$APPLY_RC err=$APPLY_ERR"
 fi
-drop_db "$DB1"
 
-# ---------- case 2: drifted function body -> exact abort, state unchanged ----------
-DB2="t434h_c2_$RANDOM$RANDOM"
-drop_db "$DB2"
-mk_db "$DB2" || { record "case2-drift-refused: FAIL (create db)"; exit 2; }
+# ---------- case 2: drifted function body -> exact abort, FULL state unchanged ----------
+mk_db DB2 || { record "case2-drift-refused: FAIL (create db)"; exit 2; }
 q "$DB2" "CREATE OR REPLACE FUNCTION public.request_whatsapp_otp(p_phone text, p_purpose text DEFAULT 'register'::text)
            RETURNS jsonb LANGUAGE plpgsql AS \$f\$ BEGIN RETURN '{}'::jsonb; END; \$f\$;" >/dev/null
 BEFORE2="$(state "$DB2")"
 apply_migration "$DB2"
-RC=$?
-if [ $RC -ne 0 ] && printf '%s' "$APPLY_ERR" | grep -qF "434 precondition failed: request_whatsapp_otp drifted from the pinned 414 pre-image"; then
+if [ $APPLY_RC -ne 0 ] && printf '%s' "$APPLY_ERR" | grep -qF "434 precondition failed: request_whatsapp_otp drifted from the pinned 414 pre-image"; then
   record "case2-drift-refused: OK (refused by expected guard)"
 else
-  fail_case "case2-drift-refused" "exit=$RC err=$APPLY_ERR"
+  fail_case "case2-drift-refused" "exit=$APPLY_RC err=$APPLY_ERR"
 fi
 AFTER2="$(state "$DB2")"
-# body md5 must equal the drifted stub, column absent, guard untouched
-if [ "$AFTER2" = "$BEFORE2" ] \
-   && [ "$(printf '%s' "$AFTER2" | cut -d'|' -f1)" = "0" ] \
-   && [ "$(printf '%s' "$AFTER2" | cut -d'|' -f5)" = "797da2f7a1fb8c6eaf14b33121345bb8" ]; then
+if [ "$AFTER2" = "$BEFORE2" ] && ! colset_has "$AFTER2" "whatsapp_otp_number"; then
   record "case2-state-unchanged: OK"
 else
-  fail_case "case2-state-unchanged" "before=$BEFORE2 after=$AFTER2"
+  fail_case "case2-state-unchanged" "state drifted"
 fi
-drop_db "$DB2"
 
-# ---------- case 3: drifted owner-guard -> exact abort, state unchanged ----------
-DB3="t434h_c3_$RANDOM$RANDOM"
-drop_db "$DB3"
-mk_db "$DB3" || { record "case3-guard-refused: FAIL (create db)"; exit 2; }
+# ---------- case 3: drifted owner-guard -> exact abort, FULL state unchanged ----------
+mk_db DB3 || { record "case3-guard-refused: FAIL (create db)"; exit 2; }
 q "$DB3" "CREATE OR REPLACE FUNCTION public.guard_platform_settings_owner_fields()
            RETURNS trigger LANGUAGE plpgsql AS \$f\$ BEGIN RETURN NEW; END; \$f\$;" >/dev/null
+BEFORE3="$(state "$DB3")"
 apply_migration "$DB3"
-RC=$?
-if [ $RC -ne 0 ] && printf '%s' "$APPLY_ERR" | grep -qF "434 precondition failed: guard_platform_settings_owner_fields drifted from its pinned pre-image"; then
+if [ $APPLY_RC -ne 0 ] && printf '%s' "$APPLY_ERR" | grep -qF "434 precondition failed: guard_platform_settings_owner_fields drifted from its pinned pre-image"; then
   record "case3-guard-refused: OK (refused by expected guard)"
 else
-  fail_case "case3-guard-refused" "exit=$RC err=$APPLY_ERR"
+  fail_case "case3-guard-refused" "exit=$APPLY_RC err=$APPLY_ERR"
 fi
 AFTER3="$(state "$DB3")"
-if [ "$(printf '%s' "$AFTER3" | cut -d'|' -f1)" = "0" ] \
-   && [ "$(printf '%s' "$AFTER3" | cut -d'|' -f2)" = "2e2f0086c65bac716c937af718debf86" ] \
-   && [ "$(printf '%s' "$AFTER3" | cut -d'|' -f6)" = "false" ]; then
+if [ "$AFTER3" = "$BEFORE3" ] && ! colset_has "$AFTER3" "whatsapp_otp_number"; then
   record "case3-state-unchanged: OK"
 else
-  fail_case "case3-state-unchanged" "after=$AFTER3"
+  fail_case "case3-state-unchanged" "state drifted"
 fi
-drop_db "$DB3"
 
-# ---------- case 4: column already present -> exact abort, function unchanged ----------
-DB4="t434h_c4_$RANDOM$RANDOM"
-drop_db "$DB4"
-mk_db "$DB4" || { record "case4-column-refused: FAIL (create db)"; exit 2; }
+# ---------- case 4: column already present -> exact abort, FULL state unchanged ----------
+mk_db DB4 || { record "case4-column-refused: FAIL (create db)"; exit 2; }
 q "$DB4" "ALTER TABLE public.platform_settings ADD COLUMN whatsapp_otp_number text" >/dev/null
+BEFORE4="$(state "$DB4")"
 apply_migration "$DB4"
-RC=$?
-if [ $RC -ne 0 ] && printf '%s' "$APPLY_ERR" | grep -qF "whatsapp_otp_number already exists; aborting"; then
+if [ $APPLY_RC -ne 0 ] && printf '%s' "$APPLY_ERR" | grep -qF "whatsapp_otp_number already exists; aborting"; then
   record "case4-column-refused: OK (refused by expected guard)"
 else
-  fail_case "case4-column-refused" "exit=$RC err=$APPLY_ERR"
+  fail_case "case4-column-refused" "exit=$APPLY_RC err=$APPLY_ERR"
 fi
 AFTER4="$(state "$DB4")"
-if [ "$(printf '%s' "$AFTER4" | cut -d'|' -f2)" = "2e2f0086c65bac716c937af718debf86" ] \
-   && [ "$(printf '%s' "$AFTER4" | cut -d'|' -f4)" = "false" ] \
-   && [ "$(printf '%s' "$AFTER4" | cut -d'|' -f6)" = "false" ]; then
+if [ "$AFTER4" = "$BEFORE4" ]; then
   record "case4-state-unchanged: OK"
 else
-  fail_case "case4-state-unchanged" "after=$AFTER4"
+  fail_case "case4-state-unchanged" "state drifted"
 fi
-drop_db "$DB4"
 
-# ---------- case 5: ACL drift -> exact abort, state unchanged ----------
-DB5="t434h_c5_$RANDOM$RANDOM"
-drop_db "$DB5"
-mk_db "$DB5" || { record "case5-acl-refused: FAIL (create db)"; exit 2; }
+# ---------- case 5: ACL drift -> exact abort, FULL state unchanged ----------
+mk_db DB5 || { record "case5-acl-refused: FAIL (create db)"; exit 2; }
 q "$DB5" "REVOKE EXECUTE ON FUNCTION public.request_whatsapp_otp(text,text) FROM anon" >/dev/null
 BEFORE5="$(state "$DB5")"
 apply_migration "$DB5"
-RC=$?
-if [ $RC -ne 0 ] && printf '%s' "$APPLY_ERR" | grep -qF "434 precondition failed: request_whatsapp_otp EXECUTE ACL drifted"; then
+if [ $APPLY_RC -ne 0 ] && printf '%s' "$APPLY_ERR" | grep -qF "434 precondition failed: request_whatsapp_otp EXECUTE ACL drifted"; then
   record "case5-acl-refused: OK (refused by expected guard)"
 else
-  fail_case "case5-acl-refused" "exit=$RC err=$APPLY_ERR"
+  fail_case "case5-acl-refused" "exit=$APPLY_RC err=$APPLY_ERR"
 fi
 AFTER5="$(state "$DB5")"
-if [ "$AFTER5" = "$BEFORE5" ] && [ "$(printf '%s' "$AFTER5" | cut -d'|' -f1)" = "0" ]; then
+if [ "$AFTER5" = "$BEFORE5" ] && ! colset_has "$AFTER5" "whatsapp_otp_number"; then
   record "case5-state-unchanged: OK"
 else
-  fail_case "case5-state-unchanged" "before=$BEFORE5 after=$AFTER5"
+  fail_case "case5-state-unchanged" "state drifted"
 fi
-drop_db "$DB5"
+
+# ---------- case 6: failure AFTER the DDL (postcheck) -> full rollback ----------
+# An event trigger (harness scaffolding, not part of the compared state)
+# swaps the guard back to its pre-434 body the moment the migration
+# re-creates it, so the migration's OWN postcheck is what fails - after
+# ADD COLUMN and both function replacements already ran. The BEGIN/COMMIT
+# wrapper must roll ALL of it back.
+mk_db DB6 || { record "case6-postcheck-refused: FAIL (create db)"; exit 2; }
+q "$DB6" "CREATE OR REPLACE FUNCTION public.zz_434_sabotage_guard() RETURNS event_trigger
+           LANGUAGE plpgsql AS \$f\$
+           DECLARE obj record;
+           BEGIN
+             -- one-shot: the sabotage's own CREATE OR REPLACE re-fires this
+             -- trigger; the GUC stops the recursion.
+             IF current_setting('zz_434.sabotage_done', true) IS NOT NULL THEN
+               RETURN;
+             END IF;
+             FOR obj IN SELECT * FROM pg_event_trigger_ddl_commands() LOOP
+               IF obj.object_identity = 'public.guard_platform_settings_owner_fields()' THEN
+                 PERFORM set_config('zz_434.sabotage_done', '1', true);
+                 EXECUTE 'CREATE OR REPLACE FUNCTION public.guard_platform_settings_owner_fields()
+                            RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER
+                            SET search_path TO ''public'', ''pg_temp''
+                            AS \$g\$ BEGIN RETURN NEW; END; \$g\$';
+               END IF;
+             END LOOP;
+           END \$f\$;" >/dev/null \
+  && q "$DB6" "CREATE EVENT TRIGGER zz_434_sabotage ON ddl_command_end
+                WHEN TAG IN ('CREATE FUNCTION')
+                EXECUTE FUNCTION public.zz_434_sabotage_guard()" >/dev/null \
+  || { record "case6-postcheck-refused: FAIL (event trigger setup)"; exit 2; }
+BEFORE6="$(state "$DB6")"
+apply_migration "$DB6"
+if [ $APPLY_RC -ne 0 ] && printf '%s' "$APPLY_ERR" | grep -qF "434 post-check failed: owner guard does not cover whatsapp_otp_number"; then
+  record "case6-postcheck-refused: OK (refused by expected guard)"
+else
+  fail_case "case6-postcheck-refused" "exit=$APPLY_RC err=$APPLY_ERR"
+fi
+AFTER6="$(state "$DB6")"
+if [ "$AFTER6" = "$BEFORE6" ] && ! colset_has "$AFTER6" "whatsapp_otp_number"; then
+  record "case6-state-unchanged: OK"
+else
+  fail_case "case6-state-unchanged" "state drifted"
+fi
 
 # ---------- verdict ----------
 FAILED=0
-for L in "${OUT[@]}"; do
+for L in ${OUT[@]+"${OUT[@]}"}; do
   case "$L" in *FAIL*) FAILED=1;; esac
 done
 
@@ -240,7 +315,7 @@ if [ "$SELFCHECK" = "--selfcheck" ]; then
     exit 3
   fi
   TMP="$(mktemp)"
-  printf '%s\n' "${OUT[@]}" > "$TMP"
+  printf '%s\n' ${OUT[@]+"${OUT[@]}"} > "$TMP"
   if ! diff -u "$EXPECTED" "$TMP"; then
     rm -f "$TMP"
     say "selfcheck: output drifted from $(basename "$EXPECTED")"

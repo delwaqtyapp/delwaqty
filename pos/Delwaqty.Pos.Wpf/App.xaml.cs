@@ -1,6 +1,9 @@
 using System;
 using System.Net.Http;
 using System.Windows;
+#if SCREENSHOT_TOUR
+using System.IO;
+#endif
 using Delwaqty.Pos.Core.Auth;
 using Delwaqty.Pos.Core.Licensing;
 using Delwaqty.Pos.Core.Protection;
@@ -18,12 +21,18 @@ namespace Delwaqty.Pos.Wpf
             var activation = new ActivationService(rootDir, PosConfig.BuildFlavor);
 #if SCREENSHOT_TOUR
             // CI screenshot instrumentation - compiled ONLY into the dedicated
-            // tour build (pos-windows.yml passes -p:DefineConstants). The shipped
-            // cashier ZIP contains none of this: activation cannot be skipped at
-            // runtime. The tour synthesizes an active state and opens the main
-            // window straight away so the runner can capture every tab.
+            // tour build (pos-windows.yml passes -p:DefineConstants to a separate
+            // output dir; a workflow step scans the shipped binaries to prove no
+            // tour marker survives). Review #201: the tour runs in an explicitly
+            // isolated synthetic scope - a temp root dir, no activation, no seal,
+            // no production data - through the narrow test-only init path
+            // ActivationService.UseSyntheticScopeForTour.
             if (Environment.GetEnvironmentVariable("DELWAQTY_SCREENSHOT_TOUR") == "1")
             {
+                var tourRoot = Path.Combine(Path.GetTempPath(), "delwaqty-screenshot-tour");
+                Directory.CreateDirectory(tourRoot);
+                var tourActivation = new ActivationService(tourRoot, PosConfig.BuildFlavor);
+                tourActivation.UseSyntheticScopeForTour("screenshot-tour-merchant");
                 var tourState = new ActivationState
                 {
                     LicenseKey = "SCREENSHOT-TOUR",
@@ -31,7 +40,7 @@ namespace Delwaqty.Pos.Wpf
                     Pro = true,
                     Status = "active",
                     ExpiresAt = DateTimeOffset.UtcNow.AddDays(30),
-                    MerchantId = "screenshot-tour",
+                    MerchantId = "screenshot-tour-merchant",
                     MerchantName = "متجر تجريبي",
                     MerchantType = "grocery",
                     MerchantPhone = "01000000000",
@@ -40,7 +49,7 @@ namespace Delwaqty.Pos.Wpf
                     ValidatedAtUtc = DateTimeOffset.UtcNow,
                     Flavor = PosConfig.BuildFlavor,
                 };
-                var tourWin = new MainWindow(activation, tourState);
+                var tourWin = new MainWindow(tourActivation, tourState);
                 MainWindow = tourWin;
                 tourWin.Show();
                 return;

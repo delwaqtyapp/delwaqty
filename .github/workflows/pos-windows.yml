@@ -55,56 +55,81 @@ jobs:
           -c Release -f net48
           -o publish/shop-net48 --nologo
 
+      - name: Prove the shipped builds contain no tour code (#202 fail-closed)
+        shell: pwsh
+        run: |
+          foreach ($dll in @("publish\shop-net8\Delwaqty.Pos.Wpf.dll", "publish\shop-net48\Delwaqty.Pos.Wpf.dll")) {
+            $text = [System.Text.Encoding]::Unicode.GetString([System.IO.File]::ReadAllBytes((Join-Path $PWD $dll)))
+            if ($text.Contains("DELWAQTY_SCREENSHOT_TOUR") -or $text.Contains("SCREENSHOT-TOUR")) {
+              throw "tour marker found in shipped binary: $dll"
+            }
+          }
+          "shipped binaries clean of tour markers"
+
       - name: Publish screenshot-tour build (CI instrumentation, never shipped)
-        # Compiles the SAME commit with SCREENSHOT_TOUR defined: activation is
-        # skipped and the main window cycles its tabs on a timer. Only this
-        # separate output directory runs on the runner - the shipped ZIP is
-        # built without the symbol and contains no activation bypass.
+        # Compiles the SAME commit with SCREENSHOT_TOUR defined, into a separate
+        # output dir AND a separate intermediate (obj-tour) so nothing is shared
+        # with the shipped publish. Only this dir runs on the runner.
         run: >-
           dotnet publish pos/Delwaqty.Pos.Wpf/Delwaqty.Pos.Wpf.csproj
           -c Release -f net8.0-windows -r win-x64 --self-contained true
           -p:DefineConstants="SCREENSHOT_TOUR%3BTRACE%3BRELEASE"
+          -p:BaseIntermediateOutputPath=obj-tour\
+          -p:MSBuildProjectExtensionsPath=obj-tour\
           -o publish/tour-net8 --nologo
 
       - name: Capture the activation window (normal build, first run)
         shell: pwsh
         run: |
           try { Set-DisplayResolution -Width 1920 -Height 1080 -Force } catch { "display resolution unchanged: $($_.Exception.Message)" }
-          New-Item -ItemType Directory -Force screenshots | Out-Null
+          New-Item -ItemType Directory -Force screenshots, tour-markers | Out-Null
           Add-Type -AssemblyName System.Windows.Forms
           Add-Type -AssemblyName System.Drawing
           $proc = Start-Process (Join-Path $PWD "publish\shop-net8\DelwaqtyShopPos.exe") -PassThru
-          Start-Sleep -Seconds 15
+          $deadline = (Get-Date).AddSeconds(60)
+          while ($proc.MainWindowHandle -eq 0 -and (Get-Date) -lt $deadline) { Start-Sleep -Milliseconds 500; $proc.Refresh() }
+          if ($proc.HasExited -or $proc.MainWindowHandle -eq 0) { throw "activation window never appeared" }
+          Start-Sleep -Seconds 3
           $bounds = [System.Windows.Forms.SystemInformation]::VirtualScreen
           $bmp = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height
           $g = [System.Drawing.Graphics]::FromImage($bmp)
           $g.CopyFromScreen($bounds.Left, $bounds.Top, 0, 0, $bmp.Size)
-          $bmp.Save((Join-Path $PWD "screenshots\window-0-activation.png"), [System.Drawing.Imaging.ImageFormat]::Png)
+          $bmp.Save((Join-Path $PWD "screenshots\window-activation.png"), [System.Drawing.Imaging.ImageFormat]::Png)
           $g.Dispose(); $bmp.Dispose()
           $proc.Kill()
 
-      - name: Capture every main-window tab (tour build)
+      - name: Capture every tab and dialog (tour build, marker-synchronized)
         shell: pwsh
         run: |
           Add-Type -AssemblyName System.Windows.Forms
           Add-Type -AssemblyName System.Drawing
           $env:DELWAQTY_SCREENSHOT_TOUR = "1"
+          $env:DELWAQTY_TOUR_DIR = Join-Path $PWD "tour-markers"
           $proc = Start-Process (Join-Path $PWD "publish\tour-net8\DelwaqtyShopPos.exe") -PassThru
-          # local db init + first render, then one capture per tab (3s cycle)
-          Start-Sleep -Seconds 15
           $bounds = [System.Windows.Forms.SystemInformation]::VirtualScreen
-          for ($i = 1; $i -le 6; $i++) {
+          $slugs = @("tab-sales","tab-inventory","tab-customers","tab-shifts","tab-settings","dialog-payment","dialog-addproduct","dialog-receipt")
+          foreach ($slug in $slugs) {
+            $ready = Join-Path $env:DELWAQTY_TOUR_DIR "ready-$slug"
+            $deadline = (Get-Date).AddSeconds(60)
+            while (-not (Test-Path $ready) -and (Get-Date) -lt $deadline) {
+              if ($proc.HasExited) { throw "tour app exited before $slug" }
+              Start-Sleep -Milliseconds 500
+            }
+            if (-not (Test-Path $ready)) { throw "timeout waiting for ready-$slug" }
+            $proc.Refresh()
+            if ($proc.HasExited -or $proc.MainWindowHandle -eq 0 -or [string]::IsNullOrEmpty($proc.MainWindowTitle)) { throw "tour window not alive at $slug" }
+            Start-Sleep -Milliseconds 700
             $bmp = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height
             $g = [System.Drawing.Graphics]::FromImage($bmp)
             $g.CopyFromScreen($bounds.Left, $bounds.Top, 0, 0, $bmp.Size)
-            $bmp.Save((Join-Path $PWD ("screenshots\window-{0}-tab.png" -f $i)), [System.Drawing.Imaging.ImageFormat]::Png)
+            $bmp.Save((Join-Path $PWD "screenshots\$slug.png"), [System.Drawing.Imaging.ImageFormat]::Png)
             $g.Dispose(); $bmp.Dispose()
-            Start-Sleep -Seconds 3
+            "captured: $slug.png <- $(Get-Content $ready -Raw)"
+            New-Item -ItemType File -Force (Join-Path $env:DELWAQTY_TOUR_DIR "ack-$slug") | Out-Null
           }
           $proc.Kill()
           $count = (Get-ChildItem screenshots\*.png).Count
-          if ($count -lt 6) { throw "expected at least 6 screenshots, got $count" }
-          Get-ChildItem screenshots | ForEach-Object { "captured: $($_.Name) ($($_.Length) bytes)" }
+          if ($count -lt 9) { throw "expected at least 9 screenshots, got $count" }
 
       - name: Add first-run README and zip the net8 build
         shell: pwsh
@@ -191,9 +216,11 @@ jobs:
       - name: Attach to the development release
         env:
           GH_TOKEN: ${{ github.token }}
+        # The artifact preserves relative paths: the installers live under
+        # installer-output/, so upload them from there (asset names stay flat).
         run: >-
           gh release upload development
           delwaqty-cashier-windows-EXPERIMENTAL.zip
-          delwaqty-cashier-setup-net8-EXPERIMENTAL.exe
-          delwaqty-cashier-setup-net48-EXPERIMENTAL.exe
+          installer-output/delwaqty-cashier-setup-net8-EXPERIMENTAL.exe
+          installer-output/delwaqty-cashier-setup-net48-EXPERIMENTAL.exe
           --clobber -R delwaqtyapp/delwaqty

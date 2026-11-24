@@ -65,17 +65,10 @@ namespace Delwaqty.Pos.Wpf
         {
             InitializeComponent();
 #if SCREENSHOT_TOUR
-            // CI screenshot tour: cycle through every tab on a 3s timer so the
-            // runner's captures cover each one. Compiled only into the tour build.
+            // CI screenshot tour (compiled only into the tour build): seed the
+            // sample dataset and start the marker-synchronized capture walk.
             if (Environment.GetEnvironmentVariable("DELWAQTY_SCREENSHOT_TOUR") == "1")
-            {
-                var tourTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
-                tourTimer.Tick += (_, _) =>
-                {
-                    Tabs.SelectedIndex = (Tabs.SelectedIndex + 1) % Tabs.Items.Count;
-                };
-                tourTimer.Start();
-            }
+                StartScreenshotTour();
 #endif
 
             _activation = activation;

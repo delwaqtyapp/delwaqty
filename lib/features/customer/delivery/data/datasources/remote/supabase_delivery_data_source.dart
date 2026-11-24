@@ -2,7 +2,11 @@ import 'package:delwaqty/core/utils/rpc_result.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/ask_anything_ride_state.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/cash_collection.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/courier_invoice_item.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/courier_quote.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/courier_shopping_item.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_order.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/merchant_profile.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/driver_capability.dart';
@@ -626,6 +630,128 @@ class SupabaseDeliveryDataSource {
               );
           if (eligible.isEmpty) return null;
           return OrderDeliveryRide.fromRow(eligible.first);
+        });
+  }
+
+  // ── Ask-anything courier flow (436) ──
+
+  /// Structured courier request: unit/amount items + declared shop count.
+  /// fare, order_id and merchant_id stay server-controlled exactly as in
+  /// request_courier_delivery; the ride is cash-only and the fare is
+  /// locked later by quote acceptance.
+  Future<({String deliveryId, double quoteBaseline})> requestCourierShopping({
+    required double pickupLatitude,
+    required double pickupLongitude,
+    required String pickupAddress,
+    required double dropoffLatitude,
+    required double dropoffLongitude,
+    required String dropoffAddress,
+    required List<CourierShoppingItem> items,
+    required int estimatedShops,
+    String? notes,
+    String priority = 'standard',
+  }) async {
+    final data = _checkRpc(
+      await _client.rpc(
+        'request_courier_shopping',
+        params: {
+          'p_pickup_latitude': pickupLatitude,
+          'p_pickup_longitude': pickupLongitude,
+          'p_pickup_address': pickupAddress,
+          'p_dropoff_latitude': dropoffLatitude,
+          'p_dropoff_longitude': dropoffLongitude,
+          'p_dropoff_address': dropoffAddress,
+          'p_items': items.map((i) => i.toJson()).toList(),
+          'p_estimated_shops': estimatedShops,
+          'p_dropoff_notes': notes,
+          'p_priority': priority,
+        },
+      ),
+    );
+    return (
+      deliveryId: data['delivery_id'] as String,
+      quoteBaseline: (data['quote_baseline'] as num).toDouble(),
+    );
+  }
+
+  /// The driver opens the negotiation; the customer's counters go through
+  /// the same RPC (the server derives the role from the ride).
+  Future<void> proposeCourierQuote(
+    String rideId,
+    double amount, {
+    String? note,
+  }) async {
+    _checkRpc(
+      await _client.rpc(
+        'propose_courier_quote',
+        params: {'p_ride_id': rideId, 'p_amount': amount, 'p_note': note},
+      ),
+    );
+  }
+
+  /// accept | reject the open quote; only the counterparty may answer.
+  Future<void> respondCourierQuote(String quoteId, String action) async {
+    _checkRpc(
+      await _client.rpc(
+        'respond_courier_quote',
+        params: {'p_quote_id': quoteId, 'p_action': action},
+      ),
+    );
+  }
+
+  /// approve | reject a pending invoice item (customer only).
+  Future<void> decideCourierInvoiceItem(String itemId, String action) async {
+    _checkRpc(
+      await _client.rpc(
+        'decide_courier_invoice_item',
+        params: {'p_item_id': itemId, 'p_action': action},
+      ),
+    );
+  }
+
+  /// The ask-anything columns of one ride; empty when the ride is not an
+  /// ask-anything courier ride.
+  Stream<AskAnythingRideState?> watchAskAnythingRide(String rideId) {
+    return _client
+        .from('rides')
+        .stream(primaryKey: ['id'])
+        .eq('id', rideId)
+        .map((rows) {
+          final mine = rows.where((r) => r['is_ask_anything'] == true).toList();
+          if (mine.isEmpty) return null;
+          return AskAnythingRideState.fromRow(mine.first);
+        });
+  }
+
+  Stream<List<CourierQuote>> watchCourierQuotes(String rideId) {
+    return _client
+        .from('courier_quotes')
+        .stream(primaryKey: ['id'])
+        .eq('ride_id', rideId)
+        .map((rows) {
+          final quotes = rows.map(CourierQuote.fromRow).toList()
+            ..sort(
+              (a, b) => (b.createdAt ?? DateTime(1970)).compareTo(
+                a.createdAt ?? DateTime(1970),
+              ),
+            );
+          return quotes;
+        });
+  }
+
+  Stream<List<CourierInvoiceItem>> watchCourierInvoiceItems(String rideId) {
+    return _client
+        .from('courier_invoice_items')
+        .stream(primaryKey: ['id'])
+        .eq('ride_id', rideId)
+        .map((rows) {
+          final items = rows.map(CourierInvoiceItem.fromRow).toList()
+            ..sort(
+              (a, b) => (a.createdAt ?? DateTime(1970)).compareTo(
+                b.createdAt ?? DateTime(1970),
+              ),
+            );
+          return items;
         });
   }
 }

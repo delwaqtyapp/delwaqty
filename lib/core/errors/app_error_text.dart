@@ -187,6 +187,71 @@ String checkoutErrorMessage(AppLocalizations l10n, Object? error) {
 String checkoutErrorText(BuildContext context, Object? error) =>
     checkoutErrorMessage(AppLocalizations.of(context), error);
 
+/// Ask-anything courier (436) errors: the RPCs answer
+/// `{ok: false, reason: CODE}` and the data source throws
+/// `DeliveryException(code)`. Map every code the 436 migration can raise
+/// (plus the two lowercase cancel/start guards) to a specific localized
+/// sentence instead of the generic "something went wrong" (#215).
+String courierErrorMessage(AppLocalizations l10n, Object? error) {
+  final raw = _readStringField(error, 'message') ?? error.toString();
+  final match = RegExp(
+    r'(BELOW_BASELINE|QUOTE_CAP|GOODS_CAP|SHOP_CAP|ITEM_CAP|THROTTLED|INVALID_AMOUNT|INVALID_ITEMS|INVALID_INPUT|INVALID_STATE|ITEMS_PENDING|ITEM_NOT_PENDING|NO_QUOTE_TO_COUNTER|QUOTE_ALREADY_LOCKED|QUOTE_NOT_LOCKED|QUOTE_NOT_PENDING|REJECTED_ITEMS_OPEN|DRIVER_CHANGED|RIDER_CHANGED|TOO_MANY_OPEN_RIDES|ask_anything_cash_only|ask_anything_goods_in_progress)\b',
+  ).firstMatch(raw);
+  if (match == null) return appErrorMessage(l10n, error);
+  switch (match.group(1)!) {
+    case 'BELOW_BASELINE':
+      return l10n.courierErrBelowBaseline;
+    case 'QUOTE_CAP':
+      return l10n.courierErrQuoteCap;
+    case 'GOODS_CAP':
+      return l10n.courierErrGoodsCap;
+    case 'SHOP_CAP':
+      return l10n.courierErrShopCap;
+    case 'ITEM_CAP':
+      return l10n.courierItemsLimit;
+    case 'THROTTLED':
+      return l10n.courierErrThrottled;
+    case 'INVALID_AMOUNT':
+      return l10n.courierErrInvalidAmount;
+    case 'INVALID_ITEMS':
+      return l10n.courierErrInvalidItems;
+    case 'INVALID_STATE':
+      return l10n.courierErrInvalidState;
+    case 'ITEMS_PENDING':
+      return l10n.courierErrItemsPending;
+    case 'ITEM_NOT_PENDING':
+      return l10n.courierErrItemNotPending;
+    case 'NO_QUOTE_TO_COUNTER':
+      return l10n.courierErrNoQuoteToCounter;
+    case 'QUOTE_ALREADY_LOCKED':
+      return l10n.courierErrQuoteAlreadyLocked;
+    case 'QUOTE_NOT_LOCKED':
+      return l10n.courierErrQuoteNotLocked;
+    case 'QUOTE_NOT_PENDING':
+      return l10n.courierErrQuoteNotPending;
+    case 'REJECTED_ITEMS_OPEN':
+      return l10n.courierErrRejectedItemsOpen;
+    case 'DRIVER_CHANGED':
+    case 'RIDER_CHANGED':
+      return l10n.courierErrPartyChanged;
+    case 'TOO_MANY_OPEN_RIDES':
+      return l10n.courierErrTooManyOpenRides;
+    case 'ask_anything_cash_only':
+      return l10n.courierErrCashOnly;
+    case 'ask_anything_goods_in_progress':
+      return l10n.courierErrGoodsInProgress;
+    default:
+      // INVALID_INPUT and anything unlisted.
+      return match.group(1) == 'INVALID_INPUT'
+          ? l10n.courierErrInvalidInput
+          : appErrorMessage(l10n, error);
+  }
+}
+
+/// Convenience wrapper for call sites that hold a [BuildContext].
+String courierErrorText(BuildContext context, Object? error) =>
+    courierErrorMessage(AppLocalizations.of(context), error);
+
 /// Convenience wrapper for call sites that hold a [BuildContext].
 String appErrorText(BuildContext context, Object? error) =>
     appErrorMessage(AppLocalizations.of(context), error);

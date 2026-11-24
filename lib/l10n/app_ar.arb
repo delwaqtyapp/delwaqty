@@ -3011,5 +3011,71 @@
   "merchantGuideStep4Body": "حدد السعر الصح وحدّث الكمية أول بأول عشان العميل يشوف المتاح دايمًا.",
   "merchantGuideStep5Title": "احفظ وابدأ البيع",
   "merchantGuideStep5Body": "أول ما تحفظ، المنتج بيتسجل في الكتالوج بتاعك والعملاء بيشوفوه طالما متاح، وتقدر تعدله أو توقفه في أي وقت.",
-  "merchantGuideOpenTooltip": "إزاي تضيف منتج"
+  "merchantGuideOpenTooltip": "إزاي تضيف منتج",
+  "unitKilo": "كيلو",
+  "unitHalf": "نص كيلو",
+  "unitQuarter": "ربع كيلو",
+  "unitAmount": "بالمبلغ",
+  "amountEgp": "المبلغ (جنيه)",
+  "estimatedShops": "كام محل تقريبًا؟",
+  "askAnythingPriceNote": "التوصيل يبدأ من 15 جنيه لأول محل + 5 جنيه لكل محل زيادة. الكابتن بيقترح السعر النهائي وانت بتوافق عليه، والمشتريات بتتدفع لوحدها بأسعارها الحقيقية.",
+  "waitingForDriverQuote": "أول ما كابتن يقبل الطلب، هيقترح سعر توصيل تقدر تقبله أو تفاوض عليه.",
+  "driverQuoteTitle": "سعر التوصيل من الكابتن",
+  "yourCounterTitle": "عرضك المضاد",
+  "negotiate": "فاوض",
+  "counterPrompt": "تعرض كام للتوصيل؟",
+  "sendCounter": "ابعت",
+  "counterSentWaiting": "عرضك اتبعت - مستنيين رد الكابتن.",
+  "priceAgreed": "اتفقنا على سعر التوصيل",
+  "liveInvoiceTitle": "الفاتورة أول بأول",
+  "approveItemHint": "وافق على كل صنف قبل ما الكابتن يشتريه.",
+  "itemStatusPending": "مستني",
+  "itemStatusApproved": "اتوافق عليه",
+  "itemStatusRejected": "اترفض - الكابتن هيلغيه في المحل",
+  "itemStatusCancelled": "اتلغى",
+  "goodsLabel": "مشتريات",
+  "cashOnDeliveryTotal": "تدفع عند الاستلام (كاش)",
+  "addAtLeastOneItem": "ضيف صنف واحد على الأقل بالوحدة أو المبلغ.",
+  "courierItemsLimit": "لحد 20 صنف في الطلب الواحد.",
+  "viewReceipt": "شوف الإيصال",
+  "receiptPhotoTitle": "الإيصال",
+  "askAnythingReceiptTitle": "فاتورة اطلب أي حاجة",
+  "provisionalTotal": "إجمالي مبدئي - مش الحساب النهائي لسه",
+  "incidentSettlementNote": "الرحلة اتلغت والمشتريات اتشترت بالفعل. أي تسوية بتتم من خلال بلاغ المشكلة، مش من الإجمالي ده.",
+  "courierErrBelowBaseline": "أقل من الحد الأدنى: التوصيل يبدأ من 15 جنيه لأول محل + 5 جنيه لكل محل زيادة.",
+  "courierErrQuoteCap": "سعر التوصيل ده أعلى من الحد الأقصى المسموح.",
+  "courierErrGoodsCap": "إجمالي المشتريات أعلى من الحد المسموح.",
+  "courierErrShopCap": "عدد المحلات كبير لطلب واحد.",
+  "courierErrThrottled": "محاولات كتير بسرعة - استنى لحظة وجرب تاني.",
+  "courierErrInvalidAmount": "اكتب مبلغ صحيح.",
+  "courierErrInvalidItems": "راجع الأصناف: في اسم ناقص أو طويل، أو مبلغ مش مظبوط.",
+  "courierErrInvalidInput": "في بيانات مش صحيحة - راجعها وجرب تاني.",
+  "courierErrInvalidState": "الخطوة دي مش متاحة دلوقتي.",
+  "courierErrItemsPending": "كل صنف محتاج قرارك قبل ما التسوق يخلص.",
+  "courierErrItemNotPending": "الصنف ده اتخذ فيه قرار قبل كده.",
+  "courierErrNoQuoteToCounter": "مفيش سعر مفتوح تفاوض عليه - استنى عرض الكابتن.",
+  "courierErrQuoteAlreadyLocked": "سعر التوصيل اتفق عليه خلاص.",
+  "courierErrQuoteNotLocked": "اتفقوا على سعر التوصيل الأول.",
+  "courierErrQuoteNotPending": "العرض ده اترد عليه خلاص.",
+  "courierErrRejectedItemsOpen": "الكابتن لسه لازم يلغي الأصناف المرفوضة في المحل.",
+  "courierErrPartyChanged": "حالة الرحلة اتغيرت - راجع آخر حالة.",
+  "courierErrTooManyOpenRides": "عندك طلب مفتوح بالفعل - خلصه الأول.",
+  "courierErrCashOnly": "طلبات اطلب أي حاجة كاش فقط.",
+  "courierErrGoodsInProgress": "المشتريات اتشترت بالفعل - الإلغاء بيتم ببلاغ مشكلة.",
+  "counterFloor": "الحد الأدنى {floor} جنيه: 15 لأول محل + 5 لكل محل زيادة.",
+  "@counterFloor": {
+    "placeholders": {
+      "floor": {
+        "type": "String"
+      }
+    }
+  },
+  "shopsCount": "{count, plural, =1{محل واحد} =2{محلين} few{{count} محلات} many{{count} محلًا} other{{count} محل}}",
+  "@shopsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

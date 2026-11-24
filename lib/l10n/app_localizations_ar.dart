@@ -8513,4 +8513,184 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get merchantGuideOpenTooltip => 'إزاي تضيف منتج';
+
+  @override
+  String get unitKilo => 'كيلو';
+
+  @override
+  String get unitHalf => 'نص كيلو';
+
+  @override
+  String get unitQuarter => 'ربع كيلو';
+
+  @override
+  String get unitAmount => 'بالمبلغ';
+
+  @override
+  String get amountEgp => 'المبلغ (جنيه)';
+
+  @override
+  String get estimatedShops => 'كام محل تقريبًا؟';
+
+  @override
+  String get askAnythingPriceNote =>
+      'التوصيل يبدأ من 15 جنيه لأول محل + 5 جنيه لكل محل زيادة. الكابتن بيقترح السعر النهائي وانت بتوافق عليه، والمشتريات بتتدفع لوحدها بأسعارها الحقيقية.';
+
+  @override
+  String get waitingForDriverQuote =>
+      'أول ما كابتن يقبل الطلب، هيقترح سعر توصيل تقدر تقبله أو تفاوض عليه.';
+
+  @override
+  String get driverQuoteTitle => 'سعر التوصيل من الكابتن';
+
+  @override
+  String get yourCounterTitle => 'عرضك المضاد';
+
+  @override
+  String get negotiate => 'فاوض';
+
+  @override
+  String get counterPrompt => 'تعرض كام للتوصيل؟';
+
+  @override
+  String get sendCounter => 'ابعت';
+
+  @override
+  String get counterSentWaiting => 'عرضك اتبعت - مستنيين رد الكابتن.';
+
+  @override
+  String get priceAgreed => 'اتفقنا على سعر التوصيل';
+
+  @override
+  String get liveInvoiceTitle => 'الفاتورة أول بأول';
+
+  @override
+  String get approveItemHint => 'وافق على كل صنف قبل ما الكابتن يشتريه.';
+
+  @override
+  String get itemStatusPending => 'مستني';
+
+  @override
+  String get itemStatusApproved => 'اتوافق عليه';
+
+  @override
+  String get itemStatusRejected => 'اترفض - الكابتن هيلغيه في المحل';
+
+  @override
+  String get itemStatusCancelled => 'اتلغى';
+
+  @override
+  String get goodsLabel => 'مشتريات';
+
+  @override
+  String get cashOnDeliveryTotal => 'تدفع عند الاستلام (كاش)';
+
+  @override
+  String get addAtLeastOneItem => 'ضيف صنف واحد على الأقل بالوحدة أو المبلغ.';
+
+  @override
+  String get courierItemsLimit => 'لحد 20 صنف في الطلب الواحد.';
+
+  @override
+  String get viewReceipt => 'شوف الإيصال';
+
+  @override
+  String get receiptPhotoTitle => 'الإيصال';
+
+  @override
+  String get askAnythingReceiptTitle => 'فاتورة اطلب أي حاجة';
+
+  @override
+  String get provisionalTotal => 'إجمالي مبدئي - مش الحساب النهائي لسه';
+
+  @override
+  String get incidentSettlementNote =>
+      'الرحلة اتلغت والمشتريات اتشترت بالفعل. أي تسوية بتتم من خلال بلاغ المشكلة، مش من الإجمالي ده.';
+
+  @override
+  String get courierErrBelowBaseline =>
+      'أقل من الحد الأدنى: التوصيل يبدأ من 15 جنيه لأول محل + 5 جنيه لكل محل زيادة.';
+
+  @override
+  String get courierErrQuoteCap =>
+      'سعر التوصيل ده أعلى من الحد الأقصى المسموح.';
+
+  @override
+  String get courierErrGoodsCap => 'إجمالي المشتريات أعلى من الحد المسموح.';
+
+  @override
+  String get courierErrShopCap => 'عدد المحلات كبير لطلب واحد.';
+
+  @override
+  String get courierErrThrottled =>
+      'محاولات كتير بسرعة - استنى لحظة وجرب تاني.';
+
+  @override
+  String get courierErrInvalidAmount => 'اكتب مبلغ صحيح.';
+
+  @override
+  String get courierErrInvalidItems =>
+      'راجع الأصناف: في اسم ناقص أو طويل، أو مبلغ مش مظبوط.';
+
+  @override
+  String get courierErrInvalidInput => 'في بيانات مش صحيحة - راجعها وجرب تاني.';
+
+  @override
+  String get courierErrInvalidState => 'الخطوة دي مش متاحة دلوقتي.';
+
+  @override
+  String get courierErrItemsPending => 'كل صنف محتاج قرارك قبل ما التسوق يخلص.';
+
+  @override
+  String get courierErrItemNotPending => 'الصنف ده اتخذ فيه قرار قبل كده.';
+
+  @override
+  String get courierErrNoQuoteToCounter =>
+      'مفيش سعر مفتوح تفاوض عليه - استنى عرض الكابتن.';
+
+  @override
+  String get courierErrQuoteAlreadyLocked => 'سعر التوصيل اتفق عليه خلاص.';
+
+  @override
+  String get courierErrQuoteNotLocked => 'اتفقوا على سعر التوصيل الأول.';
+
+  @override
+  String get courierErrQuoteNotPending => 'العرض ده اترد عليه خلاص.';
+
+  @override
+  String get courierErrRejectedItemsOpen =>
+      'الكابتن لسه لازم يلغي الأصناف المرفوضة في المحل.';
+
+  @override
+  String get courierErrPartyChanged => 'حالة الرحلة اتغيرت - راجع آخر حالة.';
+
+  @override
+  String get courierErrTooManyOpenRides =>
+      'عندك طلب مفتوح بالفعل - خلصه الأول.';
+
+  @override
+  String get courierErrCashOnly => 'طلبات اطلب أي حاجة كاش فقط.';
+
+  @override
+  String get courierErrGoodsInProgress =>
+      'المشتريات اتشترت بالفعل - الإلغاء بيتم ببلاغ مشكلة.';
+
+  @override
+  String counterFloor(String floor) {
+    return 'الحد الأدنى $floor جنيه: 15 لأول محل + 5 لكل محل زيادة.';
+  }
+
+  @override
+  String shopsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count محل',
+      many: '$count محلًا',
+      few: '$count محلات',
+      two: 'محلين',
+      one: 'محل واحد',
+    );
+    return '$_temp0';
+  }
 }

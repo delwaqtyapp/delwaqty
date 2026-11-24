@@ -31,6 +31,11 @@
 -- exist, no stock move references a drug, pos_insurance_sales is empty,
 -- and all four insurance-web functions are present.
 --
+-- Sequencing (security option a): the admin client stopped calling
+-- admin_insurance_mismatches in the pharmacy purge (admin insurance-mismatch
+-- panel removed), which must ship BEFORE this migration is applied to prod.
+-- Older fielded admin builds lose that one panel call after apply.
+--
 -- Verified against origin/master 7d4eb2ac + live prod reads 2026-11-24:
 -- cashier_sync_push md5(pg_get_functiondef) 394f0dab71b0fac6a682f9d4848e0604;
 -- _cashier_has_pro e991fc6131f44d7482db08524ff919b9;
@@ -41,12 +46,35 @@
 
 BEGIN;
 
+-- Write freeze for the destructive section (#197): lock every table this
+-- migration reads as an export boundary or drops/alters, in this documented
+-- order, so no concurrent write can land between the A0 checks and the
+-- drops. ACCESS EXCLUSIVE is the level DROP/ALTER takes anyway; taking it
+-- here first makes the check-to-drop window atomic. Apply in a maintenance
+-- window: cashier sync pushes block on pos_stock_moves until COMMIT.
+-- Order: drug_catalog, pharmacy_transfer_requests (if present),
+-- pos_insurance_companies, pos_insurance_sales, pos_stock_moves.
+LOCK TABLE public.drug_catalog IN ACCESS EXCLUSIVE MODE;
+DO $lock$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname='public' AND tablename='pharmacy_transfer_requests') THEN
+    EXECUTE 'LOCK TABLE public.pharmacy_transfer_requests IN ACCESS EXCLUSIVE MODE';
+  END IF;
+END
+$lock$;
+LOCK TABLE public.pos_insurance_companies IN ACCESS EXCLUSIVE MODE;
+LOCK TABLE public.pos_insurance_sales IN ACCESS EXCLUSIVE MODE;
+LOCK TABLE public.pos_stock_moves IN ACCESS EXCLUSIVE MODE;
+
 -- A0 pre-image guard.
 DO $a0$
 DECLARE
   v_def text;
   v_proc record;
   v_inv text;
+  v_name text;
+  v_sig text;
+  v_md5 text;
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_tables WHERE schemaname='public' AND tablename='drug_catalog') THEN
     RAISE EXCEPTION '433 precondition failed: drug_catalog already absent';
@@ -94,13 +122,34 @@ BEGIN
     RAISE EXCEPTION '433 precondition failed: cashier_sync_push EXECUTE ACL drifted';
   END IF;
 
-  -- The insurance web must be present to be dropped.
-  IF 'public._cashier_has_pro(uuid)'::regprocedure IS NULL
-     OR 'public.pos_insurance_statement(uuid,uuid,timestamp with time zone,timestamp with time zone)'::regprocedure IS NULL
-     OR 'public.admin_insurance_mismatches(timestamp with time zone)'::regprocedure IS NULL
-     OR 'public.cashier_shortage_list(uuid,integer)'::regprocedure IS NULL THEN
-    RAISE EXCEPTION '433 precondition failed: insurance web partially absent';
-  END IF;
+  -- Pin and verify every dropped definition (#197): each function this
+  -- migration drops must still be its exact live prod body (md5 of
+  -- pg_get_functiondef, verified against prod 2026-11-24). Anything
+  -- missing or drifted aborts before any DDL.
+  FOR v_name, v_sig, v_md5 IN
+    SELECT * FROM (VALUES
+      ('_cashier_has_pro', 'uuid', 'e991fc6131f44d7482db08524ff919b9'),
+      ('pos_insurance_statement', 'uuid,uuid,timestamp with time zone,timestamp with time zone', 'b3bc61a5bc711fb1b1b80b94634e9c83'),
+      ('admin_insurance_mismatches', 'timestamp with time zone', '9ce17bc41d1fdad5b30e181b16658591'),
+      ('cashier_shortage_list', 'uuid,integer', '940b3d2afe70a1e7c3e82067fb77e0ec'),
+      ('moh_price_import', 'jsonb', '21340954480d3c5f1adef1637caa0a9d'),
+      ('drug_catalog_search', 'text,integer', 'b13e55e3a4b70a86a7658679f1d8a1e4'),
+      ('cashier_apply_moh_prices', 'uuid', 'e4edca724815245b7ce3e7ba1d812bda')
+    ) AS t(n, s, m)
+  LOOP
+    EXECUTE format('SELECT md5(pg_get_functiondef(to_regprocedure(%L)))',
+                   'public.' || v_name || '(' || v_sig || ')')
+      INTO v_def;
+    IF v_def IS NULL THEN
+      RAISE EXCEPTION '433 precondition failed: %(%) absent - destructive web partially missing', v_name, v_sig;
+    END IF;
+    IF v_def <> v_md5 THEN
+      RAISE EXCEPTION '433 precondition failed: %(%) drifted from the pinned pre-image', v_name, v_sig;
+    END IF;
+  END LOOP;
+  -- pharmacy_import_drug has no prod pre-image to pin: verified ABSENT on
+  -- live prod 2026-11-24 (it exists only in the local template). Its drop
+  -- below stays IF EXISTS and the inventory notice records what was found.
 
   -- Drug RPC inventory (informational; the drops below are IF EXISTS).
   SELECT coalesce(string_agg(proname, ', ' ORDER BY proname), '<none>') INTO v_inv

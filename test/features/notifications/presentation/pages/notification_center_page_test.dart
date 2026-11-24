@@ -54,13 +54,17 @@ class _OtaNotificationRepository implements NotificationRepository {
   }
 
   @override
-  Future<void> markAllAsRead() async => markAsRead(ota.id);
+  Future<BulkNotificationResult> markAllAsRead() async {
+    await markAsRead(ota.id);
+    return const BulkNotificationResult(completed: true, processed: 1);
+  }
 
   @override
   Future<void> deleteNotification(String id) async {}
 
   @override
-  Future<void> clearAll() async {}
+  Future<BulkNotificationResult> clearAll() async =>
+      const BulkNotificationResult(completed: true, processed: 0);
 
   @override
   Future<bool> existsByIdempotencyKey(String key) async => false;

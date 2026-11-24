@@ -245,7 +245,10 @@ class SupabaseNotificationDataSource {
             query = query.eq('is_read', false);
           }
           final rows = await query
+              // Deterministic order: created_at alone ties, and a tie
+              // spanning a page boundary could skip or repeat a row.
               .order('created_at', ascending: false)
+              .order('id', ascending: false)
               .range(offset, offset + _bulkFetchBatchSize - 1);
           final list = (rows as List).cast<Map<String, dynamic>>();
           for (final r in list) {

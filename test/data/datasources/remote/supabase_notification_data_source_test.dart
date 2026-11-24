@@ -237,6 +237,16 @@ void main() {
             if (uri.queryParameters['is_read'] == 'eq.false') {
               result = result.where((r) => r['is_read'] == false);
             }
+            // Honor the deterministic ordering the data source asks
+            // for: created_at DESC, id DESC (ties broken by id).
+            result = result.toList()
+              ..sort((a, b) {
+                final byCreated = (b['created_at'] as String).compareTo(
+                  a['created_at'] as String,
+                );
+                if (byCreated != 0) return byCreated;
+                return (b['id'] as String).compareTo(a['id'] as String);
+              });
             final offset =
                 int.tryParse(uri.queryParameters['offset'] ?? '') ?? 0;
             final limit = int.tryParse(uri.queryParameters['limit'] ?? '');
@@ -511,6 +521,25 @@ void main() {
         for (final uri in [...patchCalls, ...deleteCalls]) {
           expect(userFilter(uri), 'admin-1', reason: 'unscoped mutation: $uri');
         }
+      },
+    );
+
+    test(
+      'equal timestamps across page boundaries: every row is reached',
+      () async {
+        // 250 rows with identical created_at: without the id tiebreaker a
+        // page boundary inside the tie could skip or repeat rows.
+        for (var i = 0; i < 250; i++) {
+          serverRows.add(unreadRow('tie-${i.toString().padLeft(3, '0')}'));
+        }
+
+        final result = await dataSource.markAllAsRead();
+
+        expect(result.completed, isTrue);
+        expect(result.processed, 250);
+        expect(serverRows.every((r) => r['is_read'] == true), isTrue);
+        final marked = patchCalls.expand(parseInFilter).toSet();
+        expect(marked, hasLength(250));
       },
     );
 

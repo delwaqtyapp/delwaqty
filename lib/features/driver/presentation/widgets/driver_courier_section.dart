@@ -704,6 +704,11 @@ class _ShoppingDone extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final fare = state.fare ?? 0;
     final goods = state.goodsTotal;
+    // #219: an incident-cancelled ride keeps its shopping records, but
+    // settlement goes through the incident report - never show a
+    // collection instruction or an amount due here (matches the
+    // customer receipt).
+    final cancelled = state.status == 'cancelled';
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -727,11 +732,18 @@ class _ShoppingDone extends StatelessWidget {
             const SizedBox(height: 10),
             _TotalLine(label: l10n.deliveryFeeLabel, amount: fare),
             _TotalLine(label: l10n.goodsLabel, amount: goods),
-            _TotalLine(
-              label: l10n.cashOnDeliveryTotal,
-              amount: fare + goods,
-              emphasize: true,
-            ),
+            if (cancelled)
+              Text(
+                l10n.incidentSettlementNote,
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: cs.onSurfaceVariant),
+              )
+            else
+              _TotalLine(
+                label: l10n.cashOnDeliveryTotal,
+                amount: fare + goods,
+                emphasize: true,
+              ),
           ],
         ),
       ),

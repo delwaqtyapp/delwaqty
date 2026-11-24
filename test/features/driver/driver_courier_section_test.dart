@@ -114,6 +114,30 @@ void main() {
     },
   );
 
+  testWidgets(
+    '#219: a cancelled ride shows records and the incident note, never an amount due',
+    (tester) async {
+      const cancelled = AskAnythingRideState(
+        rideId: 'r1',
+        status: 'cancelled',
+        shopCount: 1,
+        quoteLocked: true,
+        goodsTotal: 55.50,
+        shoppingFinished: true,
+        fare: 45,
+      );
+      await tester.pumpWidget(_app(cancelled, _FakeDriverRepository()));
+      await tester.pumpAndSettle();
+
+      // Records stay visible: fare and goods lines with cents.
+      expect(find.text('45.00 EGP'), findsOneWidget);
+      expect(find.text('55.50 EGP'), findsOneWidget);
+      // No collection instruction and no amount due.
+      expect(find.text('100.50 EGP'), findsNothing);
+      expect(find.textContaining('problem report'), findsOneWidget);
+    },
+  );
+
   testWidgets('#218: disposing mid-RPC never throws setState-after-dispose', (
     tester,
   ) async {

@@ -13,20 +13,11 @@ namespace Delwaqty.Pos.Wpf
 
         public const string AppVersion = "1.0.0";
 
-#if POS_RETAIL
         public const string BuildFlavor = "Retail";
         public const string DefaultTitle = "دلوقتي - كاشير المحلات";
         public const string ExeName = "DelwaqtyShopPos";
-#else
-        public const string BuildFlavor = "Pharmacy";
-        public const string DefaultTitle = "دلوقتي - كاشير الصيدليات";
-        public const string ExeName = "DelwaqtyPharmacyPos";
-#endif
 
         /// <summary>How often the background sync flushes the outbox and pulls.</summary>
         public const int SyncIntervalSeconds = 60;
-
-        /// <summary>Expiry warning window for pharmacy batches (days).</summary>
-        public const int ExpiryWarnDays = 90;
     }
 }

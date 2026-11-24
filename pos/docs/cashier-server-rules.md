@@ -7,7 +7,7 @@ payloads are unchanged; the server's interpretation is not.
 - Any line whose `product_id` resolves to a store product is priced by the
   SERVER (products.price via the shared pricing helper). The client's
   unit_price/total for that line is replaced; `repriced: true` on the line.
-- Lines with no resolvable product (catalog-only drugs sold offline) keep
+- Lines with no resolvable product (quick lines sold offline) keep
   the client price and are stored with `client_priced: true` — quarantine
   flag for review dashboards.
 - pos_sales.subtotal/discount/total_amount are server-computed; commission
@@ -41,11 +41,3 @@ payloads are unchanged; the server's interpretation is not.
 - Owners can self-issue `trial` only. Paid plans return
   `PAID_PLANS_REQUIRE_ADMIN` and are issued by the platform after payment.
 
-## Pharmacy network (#29 / 348)
-- pharmacy_links / transfer_requests / transfer_ledger / messages are
-  read-only over REST. All changes go through the RPCs.
-- Settlement is two-phase: `pharmacy_transfer_settle` proposes (status
-  `settlement_pending`); `pharmacy_transfer_settle_confirm(id, accept)` from
-  the OTHER side writes the ledger entry and settles (or returns the deal to
-  `handed_over` on reject). Self-confirmation returns
-  `OTHER_SIDE_MUST_CONFIRM` (platform admins may confirm either side).

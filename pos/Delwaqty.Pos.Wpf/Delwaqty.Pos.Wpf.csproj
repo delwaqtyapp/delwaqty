@@ -7,13 +7,7 @@
     <LangVersion>7.3</LangVersion>
     <Nullable>disable</Nullable>
     <RootNamespace>Delwaqty.Pos.Wpf</RootNamespace>
-    <!-- Flavor: Pharmacy (default) or Retail. Build the shop app with
-         dotnet build -p:PosFlavor=Retail  -->
-    <PosFlavor Condition="'$(PosFlavor)' == ''">Pharmacy</PosFlavor>
-    <AssemblyName Condition="'$(PosFlavor)' == 'Pharmacy'">DelwaqtyPharmacyPos</AssemblyName>
-    <AssemblyName Condition="'$(PosFlavor)' == 'Retail'">DelwaqtyShopPos</AssemblyName>
-    <DefineConstants Condition="'$(PosFlavor)' == 'Pharmacy'">$(DefineConstants);POS_PHARMACY</DefineConstants>
-    <DefineConstants Condition="'$(PosFlavor)' == 'Retail'">$(DefineConstants);POS_RETAIL</DefineConstants>
+    <AssemblyName>DelwaqtyShopPos</AssemblyName>
     <ApplicationIcon></ApplicationIcon>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
   </PropertyGroup>

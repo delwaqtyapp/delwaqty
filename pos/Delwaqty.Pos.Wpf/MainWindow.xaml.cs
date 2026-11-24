@@ -11,9 +11,6 @@ using Delwaqty.Pos.Core.Auth;
 using Delwaqty.Pos.Core.Catalog;
 using Delwaqty.Pos.Core.Close;
 using Delwaqty.Pos.Core.Licensing;
-using Delwaqty.Pos.Core.Network;
-using Delwaqty.Pos.Core.Pharmacy;
-using Delwaqty.Pos.Core.Pro;
 using Delwaqty.Pos.Core.Sales;
 using Delwaqty.Pos.Core.Sync;
 
@@ -28,32 +25,28 @@ namespace Delwaqty.Pos.Wpf
     /// </summary>
     public partial class MainWindow : Window
     {
-        /// <summary>One search hit, wrapping either a store product or a catalog drug.</summary>
+        /// <summary>One search hit, wrapping a store product.</summary>
         public sealed class SearchRow
         {
-            public string ProductId;        // store product id (null = catalog-only)
-            public string DrugCatalogId;
+            public string ProductId;        // store product id
             public string DisplayName { get; set; }
             public string DisplayPrice { get; set; }
             public string DisplayStock { get; set; }
             public string Barcode { get; set; }
             public decimal Price;
-            public string Ingredient;       // pharmacy: for the controlled check
         }
 
         private readonly ActivationService _activation;
         private readonly ActivationState _state;
         private readonly string _dataDir;   // the merchant+flavor scope dir (#116)
-        private readonly bool _isPharmacy;
 
         private readonly HttpClientFactory _http = new HttpClientFactory();
         private readonly SyncClient _sync;
         private readonly AuthClient _auth;
         private AuthSession _session;
 
-        private readonly CatalogCache _drugs;            // pharmacy
-        private readonly RetailCatalogCache _products;   // store products (both flavors)
-        private readonly PosLocalDb _localDb;            // outbox + journal + batches, one db (#120)
+        private readonly RetailCatalogCache _products;   // store products
+        private readonly PosLocalDb _localDb;            // outbox + journal, one db (#120)
         private readonly SyncEngine _engine;
         private readonly LicenseRefresher _licenseRefresher;
         private PosMode _mode = PosMode.Full;
@@ -74,11 +67,9 @@ namespace Delwaqty.Pos.Wpf
             _activation = activation;
             _dataDir = activation.CurrentScopeDir;
             _state = state;
-            _isPharmacy = state.IsPharmacy;
 
             _sync = new SyncClient(PosConfig.SupabaseUrl, PosConfig.SupabaseAnonKey, _http.Client);
             _auth = new AuthClient(PosConfig.SupabaseUrl, PosConfig.SupabaseAnonKey, _http.Client);
-            _drugs = new CatalogCache(Path.Combine(_dataDir, "catalog.db"));
             _products = new RetailCatalogCache(Path.Combine(_dataDir, "products.db"));
             _localDb = new PosLocalDb(Path.Combine(_dataDir, "pos.db"));
             _engine = new SyncEngine(_localDb.Outbox, _sync, state.MerchantId);
@@ -145,19 +136,9 @@ namespace Delwaqty.Pos.Wpf
 
         private void ConfigureFlavor()
         {
-            TitleText.Text = _isPharmacy ? "دلوقتي - كاشير الصيدلية" : "دلوقتي - كاشير المحل";
+            TitleText.Text = PosConfig.DefaultTitle;
             StoreText.Text = _state.MerchantName ?? "";
-            SearchHint.Text = _isPharmacy
-                ? "ابحث بالاسم أو الباركود أو المادة الفعالة — Enter يضيف أول نتيجة"
-                : "ابحث بالاسم أو الباركود — Enter يضيف أول نتيجة";
-            BatchButton.Visibility = _isPharmacy ? Visibility.Visible : Visibility.Collapsed;
-            ExpiryHeader.Visibility = _isPharmacy ? Visibility.Visible : Visibility.Collapsed;
-            ExpiryGrid.Visibility = _isPharmacy ? Visibility.Visible : Visibility.Collapsed;
-            AddProductButton.Visibility = _isPharmacy ? Visibility.Collapsed : Visibility.Visible;
-            NetworkButton.Visibility = _isPharmacy ? Visibility.Visible : Visibility.Collapsed;
-            ProButton.Visibility = _isPharmacy && _state.Pro ? Visibility.Visible : Visibility.Collapsed;
-            CatalogButton.Visibility = _isPharmacy ? Visibility.Visible : Visibility.Collapsed;
-            if (_isPharmacy) RefreshExpiryAlerts();
+            SearchHint.Text = "ابحث بالاسم أو الباركود — Enter يضيف أول نتيجة";
         }
 
         // ==================== SELL ====================
@@ -178,27 +159,6 @@ namespace Delwaqty.Pos.Wpf
                     Barcode = h.Product.Barcode,
                     Price = h.Product.Price,
                 });
-            }
-            // ...then the MoH catalog in the pharmacy flavor.
-            if (_isPharmacy)
-            {
-                var seen = new HashSet<string>(rows.Select(r => r.Barcode).Where(b => b != null));
-                foreach (var h in _drugs.Search(q, 15))
-                {
-                    if (h.Product.Barcode != null && seen.Contains(h.Product.Barcode)) continue;
-                    rows.Add(new SearchRow
-                    {
-                        DrugCatalogId = h.Product.Id,
-                        DisplayName = (h.Product.NameAr ?? h.Product.NameEn) +
-                            (h.Product.Strength != null ? " " + h.Product.Strength : ""),
-                        DisplayPrice = h.Product.OfficialPriceEgp.HasValue
-                            ? h.Product.OfficialPriceEgp.Value.ToString("0.##") + " (رسمي)" : "-",
-                        DisplayStock = "-",
-                        Barcode = h.Product.Barcode,
-                        Price = h.Product.OfficialPriceEgp ?? 0,
-                        Ingredient = h.Product.ActiveIngredient,
-                    });
-                }
             }
             return rows;
         }
@@ -227,17 +187,9 @@ namespace Delwaqty.Pos.Wpf
         private void AddRow(SearchRow row)
         {
             if (row == null) return;
-            // #120: convenience reminder only (never compliance); null OR
-            // empty ingredient falls back to the display name.
-            if (_isPharmacy && ControlledSubstances.ShouldWarn(row.Ingredient, row.DisplayName))
-            {
-                MessageBox.Show(this, ControlledSubstances.WarningAr, ControlledSubstances.TitleAr,
-                    MessageBoxButton.OK, MessageBoxImage.Exclamation);
-            }
             var line = new SaleLine
             {
                 ProductId = row.ProductId,
-                DrugCatalogId = row.DrugCatalogId,
                 Name = row.DisplayName,
                 Qty = 1,
                 UnitPrice = row.Price,
@@ -253,13 +205,6 @@ namespace Delwaqty.Pos.Wpf
             if (string.IsNullOrWhiteSpace(name)) return;
             var price = InputDialog.AskAmount(this, "صنف سريع", "السعر:", "");
             if (!price.HasValue) return;
-            // #120: the convenience controlled-substance reminder applies to
-            // quick lines too (checked by the entered name).
-            if (_isPharmacy && ControlledSubstances.IsControlled(name))
-            {
-                MessageBox.Show(this, ControlledSubstances.WarningAr, ControlledSubstances.TitleAr,
-                    MessageBoxButton.OK, MessageBoxImage.Exclamation);
-            }
             var qty = InputDialog.AskAmount(this, "صنف سريع", "الكمية (للوزن: بالكيلو مثل 0.5):", "1");
             if (!qty.HasValue || qty.Value <= 0) return;
             var line = new SaleLine
@@ -321,42 +266,6 @@ namespace Delwaqty.Pos.Wpf
                 CartNote.Text = "الفاتورة فارغة";
                 return;
             }
-            // #120: never sell tracked stock the batches cannot cover (and
-            // never from an expired batch). Quantities are AGGREGATED per
-            // item key (#120b: two lines of one product share the same
-            // batches) and tracked means HasTrackedBatches (#120a: an item
-            // sold exactly to zero is still tracked). Untracked items sell
-            // freely. The transaction inside CommitSale re-checks all of
-            // this race-safely; this is the friendly pre-check.
-            if (_isPharmacy)
-            {
-                var byKey = new Dictionary<string, decimal>();
-                var nameOf = new Dictionary<string, string>();
-                foreach (var line in _sale.Lines)
-                {
-                    var key = line.ProductId ?? line.DrugCatalogId;
-                    if (key == null) continue;
-                    decimal cur;
-                    byKey.TryGetValue(key, out cur);
-                    byKey[key] = cur + line.Qty;
-                    nameOf[key] = line.Name;
-                }
-                foreach (var kv in byKey)
-                {
-                    if (!_localDb.Batches.HasTrackedBatches(kv.Key)) continue; // untracked
-                    var plan = _localDb.Batches.AllocateFefo(kv.Key, kv.Value);
-                    if (!plan.Covered)
-                    {
-                        var sellable = _localDb.Batches.SellableQty(kv.Key);
-                        MessageBox.Show(this,
-                            "لا يمكن صرف " + nameOf[kv.Key] + ": المتتبع الصالح " + sellable.ToString("0.##") +
-                            " فقط والمطلوب " + kv.Value.ToString("0.##") +
-                            ". راجع التشغيلات (قد يوجد مخزون منتهي الصلاحية).",
-                            "مخزون غير كافٍ", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
-                    }
-                }
-            }
             // The payload carries the server shift id when known, else the
             // local shift op id — the sync engine rewrites it through the
             // shift map before pushing (#117).
@@ -378,23 +287,9 @@ namespace Delwaqty.Pos.Wpf
             }
 
             var op = OutboxPayloads.Sale(_sale);
-            // #120: outbox op + journal + FEFO batch dispensing in ONE
-            // transaction — a crash cannot record a sale without its stock,
-            // and a tracked-stock shortfall aborts the whole sale atomically
-            // (the pre-check above normally catches it; this is the race-safe
-            // enforcement inside the transaction).
-            try
-            {
-                _localDb.CommitSale(op, _sale, _currentShiftId, dispenseBatches: _isPharmacy);
-            }
-            catch (InvalidOperationException ex) when (ex.Message.StartsWith("INSUFFICIENT_TRACKED_STOCK"))
-            {
-                MessageBox.Show(this,
-                    "المخزون المتتبع لا يغطي البيع — راجع التشغيلات. لم يُسجَّل أي بيع.",
-                    "مخزون غير كافٍ", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-            if (_isPharmacy) RefreshExpiryAlerts();
+            // #120: outbox op + journal row in ONE transaction — a crash
+            // cannot record a sale without its outbox op.
+            _localDb.CommitSale(op, _sale, _currentShiftId);
 
             var receipt = ReceiptBuilder.Build(new ReceiptBuilder.Context
             {
@@ -404,7 +299,6 @@ namespace Delwaqty.Pos.Wpf
                 SaleId = op.OpId.Substring(0, 8),
                 When = DateTimeOffset.Now,
                 CustomerName = _sale.CustomerName,
-                IsPharmacy = _isPharmacy,
             }, _sale);
             var phone = dlg.NewCustomer != null
                 ? dlg.NewCustomer.NewCustomerPhone
@@ -455,29 +349,6 @@ namespace Delwaqty.Pos.Wpf
             StockResults.ItemsSource = DoSearch(StockSearchBox.Text);
         }
 
-        private void AddBatch_Click(object sender, RoutedEventArgs e)
-        {
-            if (!EnsureSellingAllowed()) return; // stock mutation: license-gated
-            var row = StockResults.SelectedItem as SearchRow;
-            if (row == null) { StatusText.Text = "اختر صنفاً أولاً"; return; }
-            var dlg = new BatchDialog(row.DisplayName) { Owner = this };
-            if (dlg.ShowDialog() != true) return;
-            var key = row.ProductId ?? row.DrugCatalogId;
-            _localDb.Batches.AddBatch(key, row.DisplayName, dlg.Qty, dlg.Expiry, dlg.BatchNo);
-            // Absolute stock correction rides the normal stock-count op when
-            // the item is a tracked store product.
-            if (row.ProductId != null)
-            {
-                var cached = _products.ById(row.ProductId);
-                var newTotal = (cached != null && cached.Stock.HasValue ? cached.Stock.Value : 0) + dlg.Qty;
-                _localDb.Outbox.Enqueue(OutboxPayloads.StockCount(row.ProductId, newTotal, "توريد تشغيلة"));
-                if (cached != null) { cached.Stock = newTotal; _products.Upsert(cached); }
-            }
-            StatusText.Text = "سُجل توريد: " + row.DisplayName;
-            RefreshExpiryAlerts();
-            UpdateSyncBadge();
-        }
-
         private void AddProduct_Click(object sender, RoutedEventArgs e)
         {
             var creator = new ProductCreator(_sync, _state.MerchantId);
@@ -511,13 +382,6 @@ namespace Delwaqty.Pos.Wpf
             _localDb.Outbox.Enqueue(OutboxPayloads.BulkPricePct(pct.Value));
             StatusText.Text = "سُجلت زيادة " + pct.Value + "% (تُطبق عند المزامنة)";
             UpdateSyncBadge();
-        }
-
-        private void RefreshExpiryAlerts()
-        {
-            if (!_isPharmacy) return;
-            ExpiryGrid.ItemsSource = _localDb.Batches.ExpiringSoon(
-                DateTime.Today.AddDays(PosConfig.ExpiryWarnDays), 100);
         }
 
         // ==================== CUSTOMERS & DEBTS ====================
@@ -695,9 +559,8 @@ namespace Delwaqty.Pos.Wpf
             if (row.StatusAr == "ملغاة") { StatusText.Text = "الفاتورة ملغاة بالفعل"; return; }
             var reason = InputDialog.Ask(this, "إلغاء فاتورة", "سبب الإلغاء:", "خطأ في الإدخال");
             if (reason == null) return;
-            // #120: void op + journal mark + batch quantity restore, atomically.
+            // #120: void op + journal mark, atomically.
             _localDb.VoidSale(OutboxPayloads.SaleVoid(row.OpId, reason), row.OpId);
-            if (_isPharmacy) RefreshExpiryAlerts();
             StatusText.Text = "سُجل إلغاء الفاتورة (يُرفع عند الاتصال)";
             RefreshShiftSales();
             RefreshExpectedCash();
@@ -824,7 +687,6 @@ namespace Delwaqty.Pos.Wpf
                 return;
             }
             var planAr = _state.Plan == "trial" ? "تجريبي" : "مفعل";
-            if (_state.Pro) planAr += " PRO";
             if (_state.ExpiresAt.HasValue)
             {
                 var days = (int)(_state.ExpiresAt.Value - DateTimeOffset.UtcNow).TotalDays;
@@ -836,44 +698,6 @@ namespace Delwaqty.Pos.Wpf
         private async void SyncNow_Click(object sender, RoutedEventArgs e)
         {
             await SyncNow();
-        }
-
-        private async void DownloadCatalog_Click(object sender, RoutedEventArgs e)
-        {
-            if (!_isPharmacy) return;
-            CatalogButton.IsEnabled = false;
-            try
-            {
-                if (!await EnsureSession()) { CatalogStateText.Text = "سجّل الدخول أولاً (يحتاج إنترنت)"; return; }
-                var syncer = new DrugCatalogSync(_sync);
-                var total = 0;
-                string after = null;
-                for (var round = 0; round < 40; round++)
-                {
-                    var res = await syncer.DownloadAsync(_drugs, after, 1);
-                    total += res.Rows;
-                    after = res.LastId;
-                    CatalogStateText.Text = "حُمل " + total + " دواء...";
-                    if (res.Complete || res.Rows == 0) break;
-                }
-                CatalogStateText.Text = "اكتمل: " + _drugs.Count() + " دواء متاح بدون إنترنت";
-            }
-            catch (Exception ex)
-            {
-                CatalogStateText.Text = "تعذر التحميل: " + ex.Message;
-            }
-            finally { CatalogButton.IsEnabled = true; }
-        }
-
-        private void Network_Click(object sender, RoutedEventArgs e)
-        {
-            new NetworkWindow(new PharmacyNetworkClient(_sync, _state.MerchantId), _state.MerchantId)
-            { Owner = this }.Show();
-        }
-
-        private void Pro_Click(object sender, RoutedEventArgs e)
-        {
-            new ProWindow(new ProClient(_sync, _state.MerchantId)) { Owner = this }.Show();
         }
 
         private void SignOut_Click(object sender, RoutedEventArgs e)

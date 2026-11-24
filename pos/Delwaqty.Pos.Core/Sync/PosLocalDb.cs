@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Delwaqty.Pos.Core.Pharmacy;
 using Delwaqty.Pos.Core.Sales;
 using Microsoft.Data.Sqlite;
 
@@ -9,15 +8,13 @@ namespace Delwaqty.Pos.Core.Sync
 {
     /// <summary>
     /// One SQLite file (pos.db) hosting every per-merchant local store over a
-    /// single connection, so a sale commit — outbox op + sales journal +
-    /// batch movements + allocation rows — is ONE transaction (review #120:
-    /// dispensing must be atomic with the local sale, not after the outbox
-    /// commit). A void is equally atomic (void op + journal mark + batch
-    /// restore).
+    /// single connection, so a sale commit — outbox op + sales journal — is
+    /// ONE transaction (review #120). A void is equally atomic (void op +
+    /// journal mark).
     ///
-    /// Upgrade path: legacy installs had outbox.db / sales.db / batches.db as
-    /// separate files in the same directory; ImportLegacyDb copies their rows
-    /// in once and renames the old file aside.
+    /// Upgrade path: legacy installs had outbox.db / sales.db as separate
+    /// files in the same directory; ImportLegacyDb copies their rows in once
+    /// and renames the old file aside.
     /// </summary>
     public sealed class PosLocalDb : IDisposable
     {
@@ -25,7 +22,6 @@ namespace Delwaqty.Pos.Core.Sync
 
         public readonly OutboxStore Outbox;
         public readonly LocalSalesLog Sales;
-        public readonly BatchStore Batches;
 
         /// <summary>
         /// Non-null when a legacy import failed or its row counts did not add
@@ -48,7 +44,6 @@ namespace Delwaqty.Pos.Core.Sync
             {
                 Outbox = new OutboxStore(_db, false);
                 Sales = new LocalSalesLog(_db, false);
-                Batches = new BatchStore(_db, false);
                 if (importLegacy)
                 {
                     var dir = Path.GetDirectoryName(path);
@@ -56,7 +51,6 @@ namespace Delwaqty.Pos.Core.Sync
                     {
                         ImportLegacyDb(dir, "outbox.db", "outbox", "op_id");
                         ImportLegacyDb(dir, "sales.db", "local_sales", "op_id");
-                        ImportLegacyDb(dir, "batches.db", "batches", "id");
                     }
                 }
             }
@@ -78,7 +72,7 @@ namespace Delwaqty.Pos.Core.Sync
         {
             using (var tx = _db.BeginTransaction())
             {
-                Outbox.Tx = tx; Sales.Tx = tx; Batches.Tx = tx;
+                Outbox.Tx = tx; Sales.Tx = tx;
                 try
                 {
                     body();
@@ -86,70 +80,27 @@ namespace Delwaqty.Pos.Core.Sync
                 }
                 finally
                 {
-                    Outbox.Tx = null; Sales.Tx = null; Batches.Tx = null;
+                    Outbox.Tx = null; Sales.Tx = null;
                 }
             }
         }
 
         /// <summary>
-        /// The one way a sale lands locally (review #120): outbox op, sales
-        /// journal row and FEFO batch dispensing commit together.
-        /// Batch movements are recorded per sale so a void restores exactly.
+        /// The one way a sale lands locally (review #120): the outbox op and
+        /// the sales journal row commit together — a crash cannot record one
+        /// without the other.
         /// </summary>
-        public void CommitSale(OutboxOp op, SaleBuilder sale, string localShiftId, bool dispenseBatches)
+        public void CommitSale(OutboxOp op, SaleBuilder sale, string localShiftId)
         {
             Tx(() =>
             {
-                // #120a/b: coverage is decided per ITEM KEY on the AGGREGATED
-                // quantity (two lines of one product share the same batches),
-                // and tracked means "has batch rows" (HasTrackedBatches),
-                // never "qty > 0" — an item sold exactly to zero is still
-                // tracked and still blocks on shortfall. Untracked items (no
-                // batch rows ever) are the explicit exception: they sell
-                // without batch dispensing, as documented for quick lines.
-                // Everything runs in this one transaction: a shortfall aborts
-                // the WHOLE sale (op, journal row, batch movements roll back
-                // together), and each Dispense result is asserted Covered as
-                // the race-safe check.
-                if (dispenseBatches)
-                {
-                    var byKey = new Dictionary<string, decimal>();
-                    foreach (var line in sale.Lines)
-                    {
-                        var key = line.ProductId ?? line.DrugCatalogId;
-                        if (key == null) continue;
-                        decimal cur;
-                        byKey.TryGetValue(key, out cur);
-                        byKey[key] = cur + line.Qty;
-                    }
-                    foreach (var kv in byKey)
-                    {
-                        if (!Batches.HasTrackedBatches(kv.Key)) continue; // untracked: sells freely
-                        var plan = Batches.AllocateFefo(kv.Key, kv.Value);
-                        if (!plan.Covered)
-                            throw new InvalidOperationException(
-                                "INSUFFICIENT_TRACKED_STOCK:" + kv.Key + ":missing " + plan.Missing);
-                    }
-                    Outbox.Enqueue(op);
-                    Sales.Add(new LocalSalesLog.OutboxOpRef(op.OpId), sale, localShiftId);
-                    foreach (var kv in byKey)
-                    {
-                        if (!Batches.HasTrackedBatches(kv.Key)) continue;
-                        var dispensed = Batches.Dispense(kv.Key, kv.Value, op.OpId);
-                        if (!dispensed.Covered)
-                            throw new InvalidOperationException(
-                                "INSUFFICIENT_TRACKED_STOCK:" + kv.Key + ":missing " + dispensed.Missing);
-                    }
-                    return;
-                }
                 Outbox.Enqueue(op);
                 Sales.Add(new LocalSalesLog.OutboxOpRef(op.OpId), sale, localShiftId);
             });
         }
 
         /// <summary>
-        /// Atomic void: void op enqueued, journal marked, batch quantities
-        /// restored — all or nothing.
+        /// Atomic void: void op enqueued and journal marked — all or nothing.
         /// </summary>
         public void VoidSale(OutboxOp voidOp, string saleOpId)
         {
@@ -157,7 +108,6 @@ namespace Delwaqty.Pos.Core.Sync
             {
                 Outbox.Enqueue(voidOp);
                 Sales.MarkVoided(saleOpId);
-                Batches.RestoreForVoid(saleOpId);
             });
         }
 
@@ -247,8 +197,6 @@ namespace Delwaqty.Pos.Core.Sync
                     return "op_id, type, payload, created_offline_at, attempts, synced";
                 case "local_sales":
                     return "op_id, shift_id, total, payments, customer_id, customer_name, status, created_at";
-                case "batches":
-                    return "id, item_key, item_name, qty, expiry, batch_no, created_at";
                 default:
                     throw new ArgumentException(table);
             }

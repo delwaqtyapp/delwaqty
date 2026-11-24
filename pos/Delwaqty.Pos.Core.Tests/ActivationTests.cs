@@ -80,7 +80,7 @@ namespace Delwaqty.Pos.Core.Tests
         private const string LinkOk =
             "{\"ok\":true,\"plan\":\"trial\",\"pro\":false,\"status\":\"active\"," +
             "\"expires_at\":\"2026-12-22 00:00:00+00\",\"grace_until\":\"2026-12-25 00:00:00+00\"," +
-            "\"merchant\":{\"id\":\"m-1\",\"name\":\"صيدلية الشفاء\",\"type\":\"pharmacy\"," +
+            "\"merchant\":{\"id\":\"m-1\",\"name\":\"ماركت الشفاء\",\"type\":\"grocery\"," +
             "\"phone\":\"010\",\"address\":\"ميت غمر\"},\"product_count\":42}";
 
         [Fact]
@@ -90,8 +90,8 @@ namespace Delwaqty.Pos.Core.Tests
             Assert.True(r.Ok);
             Assert.Equal("trial", r.State.Plan);
             Assert.False(r.State.Pro);
-            Assert.Equal("صيدلية الشفاء", r.State.MerchantName);
-            Assert.True(r.State.IsPharmacy);
+            Assert.Equal("ماركت الشفاء", r.State.MerchantName);
+            Assert.Equal("grocery", r.State.MerchantType);
             Assert.Equal(new DateTimeOffset(2026, 12, 22, 0, 0, 0, TimeSpan.Zero), r.State.ExpiresAt);
         }
 
@@ -124,7 +124,7 @@ namespace Delwaqty.Pos.Core.Tests
             var http = new HttpClient(stub);
             var auth = new AuthClient("https://x.supabase.co", "anon", http);
             var sync = new SyncClient("https://x.supabase.co", "anon", http);
-            var svc = new ActivationService(_dir, "Pharmacy");
+            var svc = new ActivationService(_dir, "Retail");
             var deviceId = svc.LocalDeviceId;
             var res = await svc.ActivateAsync(auth, sync, "m@example.com", "pw", MakeTrialKey(), deviceId);
             Assert.True(res.Ok, res.Reason + " " + res.Error);
@@ -135,11 +135,11 @@ namespace Delwaqty.Pos.Core.Tests
             // Data lives in the merchant+flavor scope dir (#116), not the root.
             Assert.NotNull(svc.CurrentScopeDir);
             Assert.Contains("m-1", svc.CurrentScopeDir);
-            Assert.Contains("pharmacy", svc.CurrentScopeDir);
+            Assert.Contains("retail", svc.CurrentScopeDir);
 
             var restored = svc.Restore();
             Assert.NotNull(restored);
-            Assert.Equal("صيدلية الشفاء", restored.MerchantName);
+            Assert.Equal("ماركت الشفاء", restored.MerchantName);
             Assert.Equal("trial", restored.Plan);
             Assert.True(svc.TryLoadRefreshToken(out var rt, out _));
             Assert.Equal("rt", rt);
@@ -148,7 +148,7 @@ namespace Delwaqty.Pos.Core.Tests
         [Fact]
         public void Restore_Rejects_A_Tampered_Or_Foreign_Seal()
         {
-            var svc = new ActivationService(_dir, "Pharmacy");
+            var svc = new ActivationService(_dir, "Retail");
             File.WriteAllText(svc.SealPath,
                 "{\"Payload\":\"a|b|trial|lifetime|dev|2026-01-01\",\"Seal\":\"" + new string('0', 64) +
                 "\",\"StateJson\":\"{}\"}");
@@ -161,7 +161,7 @@ namespace Delwaqty.Pos.Core.Tests
             var state = new ActivationState
             {
                 LicenseKey = "k", Plan = "trial", Pro = true, Status = "active",
-                MerchantId = "m-9", MerchantType = "pharmacy", DeviceId = svc.LocalDeviceId,
+                MerchantId = "m-9", MerchantType = "grocery", DeviceId = svc.LocalDeviceId,
                 ValidatedAtUtc = DateTimeOffset.UtcNow,
             };
             var json = System.Text.Json.JsonSerializer.Serialize(state,

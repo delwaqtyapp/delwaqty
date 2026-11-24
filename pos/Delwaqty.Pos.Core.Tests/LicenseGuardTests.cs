@@ -21,7 +21,7 @@ namespace Delwaqty.Pos.Core.Tests
             {
                 LicenseKey = "k", Plan = "core_annual", Status = status,
                 ExpiresAt = lifetime ? (DateTimeOffset?)null : DateTimeOffset.UtcNow.AddDays(expiresInDays),
-                MerchantId = "m-1", MerchantType = "pharmacy", DeviceId = "dev-1",
+                MerchantId = "m-1", MerchantType = "grocery", DeviceId = "dev-1",
                 ValidatedAtUtc = DateTimeOffset.UtcNow,
             };
         }
@@ -92,11 +92,11 @@ namespace Delwaqty.Pos.Core.Tests
                 .Ok("{\"access_token\":\"at\",\"refresh_token\":\"rt\",\"expires_in\":3600,\"user\":{\"id\":\"u\"}}")
                 .Ok("{\"ok\":true,\"plan\":\"trial\",\"pro\":false,\"status\":\"active\"," +
                     "\"expires_at\":\"" + DateTimeOffset.UtcNow.AddDays(5).ToString("yyyy-MM-dd HH:mm:ss+00") + "\"," +
-                    "\"merchant\":{\"id\":\"m-1\",\"name\":\"ص\",\"type\":\"pharmacy\"}}");
+                    "\"merchant\":{\"id\":\"m-1\",\"name\":\"ص\",\"type\":\"grocery\"}}");
             var http = new HttpClient(stub);
             var auth = new Auth.AuthClient("https://x.supabase.co", "anon", http);
             var sync = new SyncClient("https://x.supabase.co", "anon", http);
-            var svc = new ActivationService(_dir, "Pharmacy");
+            var svc = new ActivationService(_dir, "Retail");
             var key = "DLWQ1." + LicenseKey.Base64UrlEncode(
                 System.Text.Encoding.UTF8.GetBytes(
                     Guid.NewGuid() + "|" + Guid.NewGuid() + "|trial|lifetime")) + "." + new string('a', 64);
@@ -129,7 +129,7 @@ namespace Delwaqty.Pos.Core.Tests
 
             stub.Ok("{\"ok\":true,\"plan\":\"core_annual\",\"pro\":true,\"status\":\"active\"," +
                 "\"expires_at\":\"" + DateTimeOffset.UtcNow.AddDays(300).ToString("yyyy-MM-dd HH:mm:ss+00") + "\"," +
-                "\"merchant\":{\"id\":\"m-1\",\"name\":\"ص\",\"type\":\"pharmacy\"}}");
+                "\"merchant\":{\"id\":\"m-1\",\"name\":\"ص\",\"type\":\"grocery\"}}");
             var refresher = new LicenseRefresher(svc,
                 new SyncClient("https://x.supabase.co", "anon", new HttpClient(stub)));
             var now = DateTimeOffset.UtcNow;
@@ -142,7 +142,7 @@ namespace Delwaqty.Pos.Core.Tests
             Assert.Equal(now, state.ValidatedAtUtc);
             Assert.Equal(PosMode.Full, res.Mode);
             // The resealed state survives a cold restore (still #115-sealed).
-            var restored = new ActivationService(_dir, "Pharmacy").Restore();
+            var restored = new ActivationService(_dir, "Retail").Restore();
             Assert.NotNull(restored);
             Assert.True(restored.Pro);
         }
@@ -165,7 +165,7 @@ namespace Delwaqty.Pos.Core.Tests
             Assert.Equal(PosMode.Locked, res.Mode);
             Assert.Equal("suspended", state.Status);
             // And the verdict persisted: a fresh restore stays locked.
-            var restored = new ActivationService(_dir, "Pharmacy").Restore();
+            var restored = new ActivationService(_dir, "Retail").Restore();
             Assert.Equal(PosMode.Locked, LicenseGuard.Evaluate(restored, DateTimeOffset.UtcNow));
         }
 
@@ -188,7 +188,7 @@ namespace Delwaqty.Pos.Core.Tests
             Assert.True(res.Contacted);
             Assert.Equal(PosMode.Locked, res.Mode);
             Assert.Equal("revoked", state.Status);
-            var restored = new ActivationService(_dir, "Pharmacy").Restore();
+            var restored = new ActivationService(_dir, "Retail").Restore();
             Assert.Equal(PosMode.Locked, LicenseGuard.Evaluate(restored, DateTimeOffset.UtcNow));
         }
 

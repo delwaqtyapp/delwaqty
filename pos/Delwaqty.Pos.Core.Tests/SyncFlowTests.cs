@@ -1,46 +1,12 @@
 using System;
 using System.IO;
 using System.Net.Http;
-using Delwaqty.Pos.Core.Catalog;
 using Delwaqty.Pos.Core.Sales;
 using Delwaqty.Pos.Core.Sync;
 using Xunit;
 
 namespace Delwaqty.Pos.Core.Tests
 {
-    public class DrugCatalogSyncTests : IDisposable
-    {
-        private readonly string _path = Path.Combine(Path.GetTempPath(), "cat-" + Guid.NewGuid() + ".db");
-        public void Dispose() { Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); if (File.Exists(_path)) File.Delete(_path); }
-
-        [Fact]
-        public async System.Threading.Tasks.Task Downloads_Pages_Until_Short_Page()
-        {
-            var page1 = "[" +
-                "{\"id\":\"d-1\",\"name_en\":\"PANADOL EXTRA\",\"name_ar\":\"بنادول اكسترا\"," +
-                "\"active_ingredient\":\"Paracetamol\",\"official_price_egp\":45.5,\"barcode\":\"6221\"," +
-                "\"is_active\":true}," +
-                "{\"id\":\"d-2\",\"name_en\":\"ANTINAL\",\"name_ar\":\"انتينال\",\"is_active\":true}]";
-            var page2 = "[{\"id\":\"d-3\",\"name_en\":\"OLD\",\"is_active\":false}]";
-            var stub = new StubHandler().Ok(page1).Ok(page2);
-            var client = new SyncClient("https://x.supabase.co", "anon", new HttpClient(stub));
-            var syncer = new DrugCatalogSync(client);
-            using (var cache = new CatalogCache(_path))
-            {
-                // Tiny pages (2 rows) so the test exercises pagination.
-                var res = await syncer.DownloadAsync(cache, null, 10, 2);
-                Assert.True(res.Complete);
-                Assert.Equal(3, res.Rows);
-                Assert.Equal(2, cache.Count()); // d-3 inactive
-                var hits = cache.Search("بنادول", 5);
-                Assert.Single(hits);
-                Assert.Equal(45.5m, hits[0].Product.OfficialPriceEgp);
-            }
-            Assert.Contains("order=id.asc", stub.Requests[0].Url);
-            Assert.Contains("id=gt.d-2", stub.Requests[1].Url); // keyset pagination
-        }
-    }
-
     public class SyncEngineLocalRpcTests : IDisposable
     {
         private readonly string _path = Path.Combine(Path.GetTempPath(), "outbox-" + Guid.NewGuid() + ".db");
@@ -92,7 +58,7 @@ namespace Delwaqty.Pos.Core.Tests
             using (var store = new OutboxStore(_path))
             {
                 var s = new SaleBuilder();
-                s.AddLine(new SaleLine { Name = "كونتافيفير", Qty = 2, UnitPrice = 33 });
+                s.AddLine(new SaleLine { Name = "زيت عافية", Qty = 2, UnitPrice = 33 });
                 s.AddPayment("cash", 66);
                 s.Close();
                 var op = OutboxPayloads.Sale(s);

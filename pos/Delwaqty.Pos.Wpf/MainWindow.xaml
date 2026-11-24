@@ -21,7 +21,7 @@
 
         <TabControl Grid.Row="1" x:Name="Tabs">
             <!-- ============ SELL ============ -->
-            <TabItem Header="صرف / بيع">
+            <TabItem Header="بيع">
                 <Grid Margin="12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="2*"/>
@@ -102,22 +102,12 @@
                             <TextBox x:Name="CountedBox" Width="100" FontSize="18" Margin="8,0"/>
                             <Button Content="تسجيل الجرد" Padding="14,8" Click="RecordCount_Click" Background="#1565C0" Foreground="White"/>
                         </StackPanel>
-                        <Button x:Name="BatchButton" Content="توريد تشغيلة (صلاحية) 📦" Padding="14,8" Margin="0,8"
-                                Click="AddBatch_Click" Background="#6A1B9A" Foreground="White"/>
-                        <Button x:Name="AddProductButton" Content="إضافة صنف جديد ➕" Padding="14,8" Margin="0,0,0,8"
+                        <Button x:Name="AddProductButton" Content="إضافة صنف جديد ➕" Padding="14,8" Margin="0,8"
                                 Click="AddProduct_Click" Background="#2E7D32" Foreground="White"/>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                             <Button Content="تغيير السعر" Padding="14,8" Click="PriceChange_Click" Background="#37474F" Foreground="White"/>
                             <Button Content="زيادة أسعار %" Padding="14,8" Margin="8,0,0,0" Click="BulkPrice_Click" Background="#37474F" Foreground="White"/>
                         </StackPanel>
-                        <TextBlock x:Name="ExpiryHeader" Text="تنبيهات الصلاحية (90 يوم):" FontWeight="Bold" Margin="0,8,0,4"/>
-                        <DataGrid x:Name="ExpiryGrid" AutoGenerateColumns="False" IsReadOnly="True" Height="170">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="الصنف" Width="2*" Binding="{Binding ItemName}"/>
-                                <DataGridTextColumn Header="الكمية" Width="*" Binding="{Binding QtyOnHand}"/>
-                                <DataGridTextColumn Header="الصلاحية" Width="*" Binding="{Binding ExpiryDate, StringFormat=yyyy-MM}"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
                     </StackPanel>
                 </Grid>
             </TabItem>
@@ -198,13 +188,6 @@
                     <Button Content="مزامنة الآن 🔄" FontSize="17" Padding="14,10" HorizontalAlignment="Left"
                             Click="SyncNow_Click" Background="#1565C0" Foreground="White"/>
                     <TextBlock x:Name="SyncDetailText" TextWrapping="Wrap" Margin="0,8"/>
-                    <Button x:Name="CatalogButton" Content="تحميل/تحديث كتالوج الأدوية (أول مرة)" Padding="14,8"
-                            HorizontalAlignment="Left" Click="DownloadCatalog_Click" Background="#6A1B9A" Foreground="White"/>
-                    <TextBlock x:Name="CatalogStateText" TextWrapping="Wrap" Margin="0,8"/>
-                    <Button x:Name="NetworkButton" Content="شبكة الصيدليات 🤝" Padding="14,8" Margin="0,0,0,8"
-                            HorizontalAlignment="Left" Click="Network_Click" Background="#4527A0" Foreground="White"/>
-                    <Button x:Name="ProButton" Content="مميزات PRO ⭐" Padding="14,8" Margin="0,0,0,8"
-                            HorizontalAlignment="Left" Click="Pro_Click" Background="#E65100" Foreground="White"/>
                     <TextBlock x:Name="DeviceText" Foreground="#777" TextWrapping="Wrap" Margin="0,8"/>
                     <Button Content="تسجيل الخروج من الجهاز" Padding="14,8" HorizontalAlignment="Left"
                             Click="SignOut_Click" Background="#B71C1C" Foreground="White"/>

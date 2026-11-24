@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -37,6 +38,37 @@ namespace Delwaqty.Pos.Core.Text
             }
             var collapsed = Runs.Replace(sb.ToString(), " ").Trim();
             return collapsed.Length == 0 ? null : collapsed;
+        }
+    }
+
+    /// <summary>Fuzzy text similarity for catalog search scoring.</summary>
+    public static class TextSimilarity
+    {
+        /// <summary>Best trigram Dice similarity between the query and any single word of the target.</summary>
+        internal static double WordSimilarity(string query, string target)
+        {
+            var q = Trigrams(query);
+            if (q.Count == 0) return 0;
+            var best = 0.0;
+            foreach (var word in target.Split(' '))
+            {
+                var w = Trigrams(word);
+                if (w.Count == 0) continue;
+                var shared = 0;
+                foreach (var t in q) if (w.Contains(t)) shared++;
+                var sim = 2.0 * shared / (q.Count + w.Count);
+                if (sim > best) best = sim;
+            }
+            return best;
+        }
+
+        private static HashSet<string> Trigrams(string s)
+        {
+            var set = new HashSet<string>();
+            if (string.IsNullOrEmpty(s)) return set;
+            if (s.Length < 3) { set.Add(s); return set; }
+            for (var i = 0; i <= s.Length - 3; i++) set.Add(s.Substring(i, 3));
+            return set;
         }
     }
 }

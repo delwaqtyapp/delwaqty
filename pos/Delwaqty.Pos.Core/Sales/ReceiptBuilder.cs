@@ -24,7 +24,6 @@ namespace Delwaqty.Pos.Core.Sales
             public DateTimeOffset When;
             public string CustomerName;      // for deferred sales
             public string CashierNote;
-            public bool IsPharmacy;
         }
 
         public static string MethodLabel(string method)
@@ -69,8 +68,6 @@ namespace Delwaqty.Pos.Core.Sales
             if (!string.IsNullOrWhiteSpace(ctx.CashierNote)) sb.AppendLine(ctx.CashierNote);
             sb.AppendLine(Line('='));
             sb.AppendLine(Center("شكراً لتعاملكم معنا"));
-            if (ctx.IsPharmacy)
-                sb.AppendLine(Center("الاستعمال حسب إرشادات الطبيب أو الصيدلي"));
             return sb.ToString();
         }
 

@@ -1,0 +1,13 @@
+case1-clean-apply: OK
+case1-post-state: OK
+case1-suite: OK
+case2-drift-refused: OK (refused by expected guard)
+case2-state-unchanged: OK
+case3-guard-refused: OK (refused by expected guard)
+case3-state-unchanged: OK
+case4-column-refused: OK (refused by expected guard)
+case4-state-unchanged: OK
+case5-acl-refused: OK (refused by expected guard)
+case5-state-unchanged: OK
+case6-postcheck-refused: OK (refused by expected guard)
+case6-state-unchanged: OK

@@ -16526,6 +16526,84 @@ abstract class AppLocalizations {
   /// **'Goods are already bought - cancellation goes through a problem report.'**
   String get courierErrGoodsInProgress;
 
+  /// No description provided for @driverProposePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Propose the delivery price'**
+  String get driverProposePrice;
+
+  /// No description provided for @driverQuoteSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Price sent - waiting for the customer\'s answer.'**
+  String get driverQuoteSent;
+
+  /// No description provided for @customerCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'The customer\'s counter'**
+  String get customerCounter;
+
+  /// No description provided for @addItemAtShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an item at the shop'**
+  String get addItemAtShop;
+
+  /// No description provided for @shopNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop name'**
+  String get shopNameLabel;
+
+  /// No description provided for @productLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Item'**
+  String get productLabel;
+
+  /// No description provided for @priceEgpLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Price (EGP)'**
+  String get priceEgpLabel;
+
+  /// No description provided for @quantityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity (optional)'**
+  String get quantityLabel;
+
+  /// No description provided for @receiptLinkLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt photo link (optional)'**
+  String get receiptLinkLabel;
+
+  /// No description provided for @cancelAtShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel at the shop'**
+  String get cancelAtShop;
+
+  /// No description provided for @finishShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish shopping'**
+  String get finishShopping;
+
+  /// No description provided for @finishShoppingConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish only when every item is decided and the rejected ones are cancelled. This locks the goods total.'**
+  String get finishShoppingConfirm;
+
+  /// No description provided for @shoppingFinishedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping finished - collect the delivery price plus the goods on delivery.'**
+  String get shoppingFinishedTitle;
+
   /// No description provided for @counterFloor.
   ///
   /// In en, this message translates to:

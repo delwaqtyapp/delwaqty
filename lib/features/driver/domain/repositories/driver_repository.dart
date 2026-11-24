@@ -25,6 +25,25 @@ abstract interface class DriverRepository {
   Future<void> acceptDelivery(String deliveryId, String profileId);
   Future<void> rejectDelivery(String deliveryId);
   Future<void> updateDeliveryStatus(String deliveryId, String status);
+
+  // Ask-anything courier flow (436): the captain's side.
+  Future<void> proposeCourierQuote(
+    String rideId,
+    double amount, {
+    String? note,
+  });
+  Future<void> respondCourierQuote(String quoteId, String action);
+  Future<void> addCourierInvoiceItem(
+    String rideId, {
+    required String shopName,
+    required String productName,
+    required double price,
+    String? unit,
+    double? quantity,
+    String? receiptPhotoUrl,
+  });
+  Future<void> cancelCourierInvoiceItem(String itemId);
+  Future<void> finishCourierShopping(String rideId);
   Future<DriverProfile> getStats(String profileId);
 
   // M6: Onboarding

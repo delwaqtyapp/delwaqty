@@ -223,6 +223,96 @@ class SupabaseDriverDataSource {
     }
   }
 
+  // ── Ask-anything courier flow (436) ──
+  //
+  // The captain's side of the negotiation and the live invoice. All five
+  // RPCs answer `{ok: false, reason: CODE}` instead of throwing; the
+  // reason is re-thrown so the page can localize it (courierErrorText).
+
+  Map<String, dynamic> _checkCourierRpc(dynamic data) {
+    final map = Map<String, dynamic>.from(data as Map);
+    if (map['ok'] != true) {
+      throw DriverCourierException((map['reason'] ?? 'unknown').toString());
+    }
+    return map;
+  }
+
+  /// Propose the delivery price (the opening quote) or answer the
+  /// customer's counter with a new one. Server bounds: 15 + 5 per extra
+  /// shop floor, 50000 cap.
+  Future<void> proposeCourierQuote(
+    String rideId,
+    double amount, {
+    String? note,
+  }) async {
+    _checkCourierRpc(
+      await _client.rpc(
+        'propose_courier_quote',
+        params: {'p_ride_id': rideId, 'p_amount': amount, 'p_note': note},
+      ),
+    );
+  }
+
+  /// Answer the customer's pending counter: 'accept' locks the price,
+  /// 'reject' reopens the negotiation.
+  Future<void> respondCourierQuote(String quoteId, String action) async {
+    _checkCourierRpc(
+      await _client.rpc(
+        'respond_courier_quote',
+        params: {'p_quote_id': quoteId, 'p_action': action},
+      ),
+    );
+  }
+
+  /// Record one item at the shop with its real price. The customer must
+  /// approve it before it is bought.
+  Future<void> addCourierInvoiceItem(
+    String rideId, {
+    required String shopName,
+    required String productName,
+    required double price,
+    String? unit,
+    double? quantity,
+    String? receiptPhotoUrl,
+  }) async {
+    _checkCourierRpc(
+      await _client.rpc(
+        'add_courier_invoice_item',
+        params: {
+          'p_ride_id': rideId,
+          'p_shop_name': shopName,
+          'p_product_name': productName,
+          'p_price': price,
+          'p_unit': unit,
+          'p_quantity': quantity,
+          'p_receipt_photo_url': receiptPhotoUrl,
+        },
+      ),
+    );
+  }
+
+  /// Cancel a rejected (or still pending) item at the shop so
+  /// finish_courier_shopping can lock the goods total.
+  Future<void> cancelCourierInvoiceItem(String itemId) async {
+    _checkCourierRpc(
+      await _client.rpc(
+        'cancel_courier_invoice_item',
+        params: {'p_item_id': itemId},
+      ),
+    );
+  }
+
+  /// End shopping: allowed only when every item is decided and every
+  /// rejected item is cancelled; locks the approved goods total.
+  Future<void> finishCourierShopping(String rideId) async {
+    _checkCourierRpc(
+      await _client.rpc(
+        'finish_courier_shopping',
+        params: {'p_ride_id': rideId},
+      ),
+    );
+  }
+
   Future<void> updateDeliveryStatus(String deliveryId, String status) async {
     try {
       final updates = <String, dynamic>{'status': status};
@@ -237,4 +327,13 @@ class SupabaseDriverDataSource {
       rethrow;
     }
   }
+}
+
+/// A 436 courier RPC rejected the operation; [reason] is the server's
+/// machine code, localized for the driver by courierErrorText.
+class DriverCourierException implements Exception {
+  DriverCourierException(this.reason);
+  final String reason;
+  @override
+  String toString() => 'DriverCourierException($reason)';
 }

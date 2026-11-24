@@ -8676,6 +8676,47 @@ class AppLocalizationsAr extends AppLocalizations {
       'المشتريات اتشترت بالفعل - الإلغاء بيتم ببلاغ مشكلة.';
 
   @override
+  String get driverProposePrice => 'اقترح سعر التوصيل';
+
+  @override
+  String get driverQuoteSent => 'السعر اتبعت - مستنيين رد العميل.';
+
+  @override
+  String get customerCounter => 'العرض المضاد من العميل';
+
+  @override
+  String get addItemAtShop => 'ضيف صنف من المحل';
+
+  @override
+  String get shopNameLabel => 'اسم المحل';
+
+  @override
+  String get productLabel => 'الصنف';
+
+  @override
+  String get priceEgpLabel => 'السعر (جنيه)';
+
+  @override
+  String get quantityLabel => 'الكمية (اختياري)';
+
+  @override
+  String get receiptLinkLabel => 'لينك صورة الإيصال (اختياري)';
+
+  @override
+  String get cancelAtShop => 'إلغاء في المحل';
+
+  @override
+  String get finishShopping => 'خلّصت التسوق';
+
+  @override
+  String get finishShoppingConfirm =>
+      'اخلص لما كل الأصناف يكون اتخذ فيها قرار والمرفوض اتلغى. ده هيقفل إجمالي المشتريات.';
+
+  @override
+  String get shoppingFinishedTitle =>
+      'التسوق خلص - حصل سعر التوصيل + المشتريات عند التسليم.';
+
+  @override
   String counterFloor(String floor) {
     return 'الحد الأدنى $floor جنيه: 15 لأول محل + 5 لكل محل زيادة.';
   }

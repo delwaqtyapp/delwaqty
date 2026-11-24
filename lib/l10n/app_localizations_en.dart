@@ -8759,6 +8759,48 @@ class AppLocalizationsEn extends AppLocalizations {
       'Goods are already bought - cancellation goes through a problem report.';
 
   @override
+  String get driverProposePrice => 'Propose the delivery price';
+
+  @override
+  String get driverQuoteSent =>
+      'Price sent - waiting for the customer\'s answer.';
+
+  @override
+  String get customerCounter => 'The customer\'s counter';
+
+  @override
+  String get addItemAtShop => 'Add an item at the shop';
+
+  @override
+  String get shopNameLabel => 'Shop name';
+
+  @override
+  String get productLabel => 'Item';
+
+  @override
+  String get priceEgpLabel => 'Price (EGP)';
+
+  @override
+  String get quantityLabel => 'Quantity (optional)';
+
+  @override
+  String get receiptLinkLabel => 'Receipt photo link (optional)';
+
+  @override
+  String get cancelAtShop => 'Cancel at the shop';
+
+  @override
+  String get finishShopping => 'Finish shopping';
+
+  @override
+  String get finishShoppingConfirm =>
+      'Finish only when every item is decided and the rejected ones are cancelled. This locks the goods total.';
+
+  @override
+  String get shoppingFinishedTitle =>
+      'Shopping finished - collect the delivery price plus the goods on delivery.';
+
+  @override
   String counterFloor(String floor) {
     return 'The minimum is $floor EGP: 15 for the first shop + 5 for each extra shop.';
   }

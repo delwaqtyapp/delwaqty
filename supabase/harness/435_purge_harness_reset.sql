@@ -1,0 +1,8 @@
+-- DEPRECATED (code review #176c): the harness no longer reuses a
+-- database between cases, so no in-place reset exists. Each case clones
+-- a FRESH database from the h435_template database (migrations 000..430
+-- applied, 431 NOT applied), which by construction restores the full
+-- pre-431 state including the network tables and RPCs that case 1
+-- drops. Recreate the template if it was ever contaminated:
+--   DROP DATABASE IF EXISTS h435_template;
+--   CREATE DATABASE h435_template;  -- then apply 000..430 only

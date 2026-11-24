@@ -1,0 +1,12 @@
+case1-clean-apply: OK
+case2-second-run: OK
+case3-drift-guard0: OK (refused by expected guard)
+case3-fixture-survived: OK (1)
+case4a-paid-ride-guard: OK (refused by expected guard)
+case4a-rides-unchanged: OK (1)
+case4b-intrip-guard: OK (refused by expected guard)
+case4b-rides-unchanged: OK (1)
+case4c-network-guard: OK (refused by expected guard)
+case4c-network-unchanged: OK (1)
+case4c-merchants-unchanged: OK (2)
+case5-gateA-without-431: OK (refused by expected guard)

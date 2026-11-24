@@ -87,11 +87,23 @@ jobs:
       - name: Compile installers
         shell: pwsh
         run: |
+          # #195: the .iss resolves every path macro relative to its own
+          # directory, so pass ABSOLUTE paths for payload, bootstrapper and
+          # output, then assert the exact files the upload step expects.
           $iscc = "C:\Program Files (x86)\Inno Setup 6\iscc.exe"
-          & $iscc "/DSourceDir=publish\shop-net8" "/DOutputBase=delwaqty-cashier-setup-net8-EXPERIMENTAL" pos\installer\delwaqty.iss
+          $out = "$PWD\installer-output"
+          & $iscc "/DSourceDir=$PWD\publish\shop-net8" "/DOutputDir=$out" "/DOutputBase=delwaqty-cashier-setup-net8-EXPERIMENTAL" pos\installer\delwaqty.iss
           if ($LASTEXITCODE -ne 0) { throw "iscc net8 failed: $LASTEXITCODE" }
-          & $iscc "/DSourceDir=publish\shop-net48" "/DNet48Bootstrapper=artifacts\ndp48-web.exe" "/DOutputBase=delwaqty-cashier-setup-net48-EXPERIMENTAL" pos\installer\delwaqty.iss
+          & $iscc "/DSourceDir=$PWD\publish\shop-net48" "/DNet48Bootstrapper=$PWD\artifacts\ndp48-web.exe" "/DOutputDir=$out" "/DOutputBase=delwaqty-cashier-setup-net48-EXPERIMENTAL" pos\installer\delwaqty.iss
           if ($LASTEXITCODE -ne 0) { throw "iscc net48 failed: $LASTEXITCODE" }
+          $expect = @(
+            "$out\delwaqty-cashier-setup-net8-EXPERIMENTAL.exe",
+            "$out\delwaqty-cashier-setup-net48-EXPERIMENTAL.exe"
+          )
+          foreach ($f in $expect) {
+            if (-not (Test-Path $f)) { throw "expected installer missing: $f" }
+          }
+          $expect | ForEach-Object { "built: $_" }
 
       - name: Hand off the zip and installers as workflow artifacts
         uses: actions/upload-artifact@v4

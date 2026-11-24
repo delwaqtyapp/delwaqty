@@ -8,11 +8,18 @@
 ;   iscc /DSourceDir=publish\shop-net8 /DOutputBase=delwaqty-cashier-setup-net8-EXPERIMENTAL pos\installer\delwaqty.iss
 ;   iscc /DSourceDir=publish\shop-net48 /DNet48Bootstrapper=artifacts\ndp48-web.exe /DOutputBase=delwaqty-cashier-setup-net48-EXPERIMENTAL pos\installer\delwaqty.iss
 
+; Path macros (SourceDir, Net48Bootstrapper, OutputDir) are resolved
+; RELATIVE TO THIS SCRIPT'S DIRECTORY when passed relative - callers must
+; pass ABSOLUTE paths (the CI workflow does, from $PWD). The defaults below
+; are for local experiments only and follow the same rule.
 #ifndef SourceDir
   #define SourceDir "publish\shop-net8"
 #endif
 #ifndef OutputBase
   #define OutputBase "delwaqty-cashier-setup-EXPERIMENTAL"
+#endif
+#ifndef OutputDir
+  #define OutputDir "installer-output"
 #endif
 #define AppVersion "1.0.0"
 
@@ -24,7 +31,7 @@ AppVersion={#AppVersion}
 AppPublisher=Delwaqty
 DefaultDirName={autopf}\DelwaqtyPos
 DefaultGroupName=Delwaqty POS
-OutputDir=installer-output
+OutputDir={#OutputDir}
 OutputBaseFilename={#OutputBase}
 ; Per-machine install (NOT per-user): every Windows user on the shop PC runs
 ; the same app and the same data dir - per-user installs scatter the SQLite

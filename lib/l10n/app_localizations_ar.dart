@@ -8513,4 +8513,97 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get merchantGuideOpenTooltip => 'إزاي تضيف منتج';
+
+  @override
+  String get unitKilo => 'كيلو';
+
+  @override
+  String get unitHalf => 'نص كيلو';
+
+  @override
+  String get unitQuarter => 'ربع كيلو';
+
+  @override
+  String get unitAmount => 'بالمبلغ';
+
+  @override
+  String get amountEgp => 'المبلغ (جنيه)';
+
+  @override
+  String get estimatedShops => 'كام محل تقريبًا؟';
+
+  @override
+  String get askAnythingPriceNote =>
+      'التوصيل يبدأ من 15 جنيه لأول محل + 5 جنيه لكل محل زيادة. الكابتن بيقترح السعر النهائي وانت بتوافق عليه، والمشتريات بتتدفع لوحدها بأسعارها الحقيقية.';
+
+  @override
+  String get waitingForDriverQuote =>
+      'أول ما كابتن يقبل الطلب، هيقترح سعر توصيل تقدر تقبله أو تفاوض عليه.';
+
+  @override
+  String get driverQuoteTitle => 'سعر التوصيل من الكابتن';
+
+  @override
+  String get yourCounterTitle => 'عرضك المضاد';
+
+  @override
+  String get negotiate => 'فاوض';
+
+  @override
+  String get counterPrompt => 'تعرض كام للتوصيل؟';
+
+  @override
+  String get sendCounter => 'ابعت';
+
+  @override
+  String get counterSentWaiting => 'عرضك اتبعت - مستنيين رد الكابتن.';
+
+  @override
+  String get priceAgreed => 'اتفقنا على سعر التوصيل';
+
+  @override
+  String get liveInvoiceTitle => 'الفاتورة أول بأول';
+
+  @override
+  String get approveItemHint => 'وافق على كل صنف قبل ما الكابتن يشتريه.';
+
+  @override
+  String get itemStatusPending => 'مستني';
+
+  @override
+  String get itemStatusApproved => 'اتوافق عليه';
+
+  @override
+  String get itemStatusRejected => 'اترفض - الكابتن هيلغيه في المحل';
+
+  @override
+  String get itemStatusCancelled => 'اتلغى';
+
+  @override
+  String get goodsLabel => 'مشتريات';
+
+  @override
+  String get cashOnDeliveryTotal => 'تدفع عند الاستلام (كاش)';
+
+  @override
+  String get addAtLeastOneItem => 'ضيف صنف واحد على الأقل بالوحدة أو المبلغ.';
+
+  @override
+  String counterFloor(String floor) {
+    return 'الحد الأدنى $floor جنيه: 15 لأول محل + 5 لكل محل زيادة.';
+  }
+
+  @override
+  String shopsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count محل',
+      many: '$count محلًا',
+      few: '$count محلات',
+      two: 'محلين',
+      one: 'محل واحد',
+    );
+    return '$_temp0';
+  }
 }

@@ -16225,6 +16225,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'How to add products'**
   String get merchantGuideOpenTooltip;
+
+  /// No description provided for @unitKilo.
+  ///
+  /// In en, this message translates to:
+  /// **'Kilo'**
+  String get unitKilo;
+
+  /// No description provided for @unitHalf.
+  ///
+  /// In en, this message translates to:
+  /// **'Half kilo'**
+  String get unitHalf;
+
+  /// No description provided for @unitQuarter.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarter kilo'**
+  String get unitQuarter;
+
+  /// No description provided for @unitAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'By amount'**
+  String get unitAmount;
+
+  /// No description provided for @amountEgp.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (EGP)'**
+  String get amountEgp;
+
+  /// No description provided for @estimatedShops.
+  ///
+  /// In en, this message translates to:
+  /// **'How many shops, roughly?'**
+  String get estimatedShops;
+
+  /// No description provided for @askAnythingPriceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery starts at 15 EGP for the first shop + 5 EGP for each extra shop. The captain proposes the final price and you agree on it; goods are paid separately at their real prices.'**
+  String get askAnythingPriceNote;
+
+  /// No description provided for @waitingForDriverQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'Once a captain accepts, they\'ll propose a delivery price you can accept or negotiate.'**
+  String get waitingForDriverQuote;
+
+  /// No description provided for @driverQuoteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The captain\'s delivery price'**
+  String get driverQuoteTitle;
+
+  /// No description provided for @yourCounterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your counter'**
+  String get yourCounterTitle;
+
+  /// No description provided for @negotiate.
+  ///
+  /// In en, this message translates to:
+  /// **'Negotiate'**
+  String get negotiate;
+
+  /// No description provided for @counterPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'How much do you offer for the delivery?'**
+  String get counterPrompt;
+
+  /// No description provided for @sendCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get sendCounter;
+
+  /// No description provided for @counterSentWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Counter sent - waiting for the captain\'s answer.'**
+  String get counterSentWaiting;
+
+  /// No description provided for @priceAgreed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery price agreed'**
+  String get priceAgreed;
+
+  /// No description provided for @liveInvoiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Live invoice'**
+  String get liveInvoiceTitle;
+
+  /// No description provided for @approveItemHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve each item before the captain buys it.'**
+  String get approveItemHint;
+
+  /// No description provided for @itemStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get itemStatusPending;
+
+  /// No description provided for @itemStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get itemStatusApproved;
+
+  /// No description provided for @itemStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected - the captain cancels it at the shop'**
+  String get itemStatusRejected;
+
+  /// No description provided for @itemStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get itemStatusCancelled;
+
+  /// No description provided for @goodsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Goods'**
+  String get goodsLabel;
+
+  /// No description provided for @cashOnDeliveryTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'You pay on delivery (cash)'**
+  String get cashOnDeliveryTotal;
+
+  /// No description provided for @addAtLeastOneItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one item with its unit or amount.'**
+  String get addAtLeastOneItem;
+
+  /// No description provided for @counterFloor.
+  ///
+  /// In en, this message translates to:
+  /// **'The minimum is {floor} EGP: 15 for the first shop + 5 for each extra shop.'**
+  String counterFloor(String floor);
+
+  /// No description provided for @shopsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 shop} other{{count} shops}}'**
+  String shopsCount(int count);
 }
 
 class _AppLocalizationsDelegate

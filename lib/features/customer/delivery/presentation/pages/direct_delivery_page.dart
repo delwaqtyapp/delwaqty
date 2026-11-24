@@ -10,6 +10,7 @@ import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
 import 'package:delwaqty/features/customer/location/presentation/widgets/smart_map_picker_sheet.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/courier_shopping_item.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
 import 'package:delwaqty/features/customer/search/domain/entities/geo_point.dart';
 import 'package:delwaqty/features/customer/search/domain/entities/search_session.dart';
@@ -21,6 +22,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 
+/// The ask-anything courier request (436): the same entry point and
+/// button name as before, now with structured items (unit or EGP amount
+/// per the owner's product decision), a declared shop count, and the
+/// quote negotiation that follows on the tracking screen.
 class DirectDeliveryPage extends ConsumerStatefulWidget {
   const DirectDeliveryPage({super.key});
 
@@ -34,34 +39,24 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
   final _placeDescController = TextEditingController();
   final _phoneController = TextEditingController();
   final _itemNameController = TextEditingController();
-  final _itemQtyController = TextEditingController(text: '1');
-  final _qtyFocusNode = FocusNode();
+  final _itemAmountController = TextEditingController();
 
-  final List<_ShoppingItem> _items = [];
+  final List<CourierShoppingItem> _items = [];
+  String _selectedUnit = 'kilo';
+  int _estimatedShops = 1;
   bool _saveNumber = true;
   bool _loadingLocation = false;
   bool _submitting = false;
   double? _pickedDropoffLat;
   double? _pickedDropoffLng;
 
-  String _selectedUnit = 'none';
-  String _selectedWeight = 'none';
-  String _selectedPieceUnit = 'none';
-
   static const _savedPhoneKey = 'direct_delivery_saved_phone';
+  static const _maxShops = 20;
 
   @override
   void initState() {
     super.initState();
     unawaited(_loadPhoneNumber());
-    _qtyFocusNode.addListener(() {
-      if (_qtyFocusNode.hasFocus) {
-        _itemQtyController.selection = TextSelection(
-          baseOffset: 0,
-          extentOffset: _itemQtyController.text.length,
-        );
-      }
-    });
   }
 
   Future<void> _loadPhoneNumber() async {
@@ -87,37 +82,29 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     _placeDescController.dispose();
     _phoneController.dispose();
     _itemNameController.dispose();
-    _itemQtyController.dispose();
-    _qtyFocusNode.dispose();
+    _itemAmountController.dispose();
     super.dispose();
   }
 
   void _addItem() {
     final name = _itemNameController.text.trim();
-    final qty = int.tryParse(_itemQtyController.text.trim()) ?? 1;
     if (name.isEmpty) return;
-
-    String? subUnit;
-    if (_selectedUnit == 'kg') {
-      subUnit = _selectedWeight;
-    } else if (_selectedUnit == 'piece') {
-      subUnit = _selectedPieceUnit;
+    double? amount;
+    if (_selectedUnit == 'amount') {
+      amount = double.tryParse(_itemAmountController.text.trim());
+      if (amount == null || amount <= 0) return;
     }
-
     setState(() {
       _items.add(
-        _ShoppingItem(
-          name: name,
-          quantity: qty,
+        CourierShoppingItem(
+          productName: name,
           unit: _selectedUnit,
-          subUnit: subUnit,
+          amountEgp: amount,
         ),
       );
       _itemNameController.clear();
-      _itemQtyController.text = '1';
-      _selectedUnit = 'none';
-      _selectedWeight = 'none';
-      _selectedPieceUnit = 'none';
+      _itemAmountController.clear();
+      _selectedUnit = 'kilo';
     });
   }
 
@@ -181,6 +168,10 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     final l10n = AppLocalizations.of(context);
     final dropoffText = _dropoffController.text.trim();
     final phone = _phoneController.text.trim();
+    if (_items.isEmpty) {
+      context.showAppSnackBar(l10n.addAtLeastOneItem, isError: true);
+      return;
+    }
     if (dropoffText.isEmpty) {
       context.showAppSnackBar(l10n.deliverTo, isError: true);
       return;
@@ -238,9 +229,6 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
         dropoffAddress = details.formattedAddress;
       }
 
-      final itemsSummary = _items.isEmpty
-          ? null
-          : _items.map((i) => '${i.name} x${i.quantity}').join(', ');
       final notes = [
         if (_descriptionController.text.trim().isNotEmpty)
           _descriptionController.text.trim(),
@@ -249,26 +237,28 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
         phone,
       ].join(' | ');
 
-      final deliveryId = await ref
+      final result = await ref
           .read(deliveryRepositoryProvider)
-          .requestCourierDelivery(
-            riderId: authState.user.id,
+          .requestCourierShopping(
             pickupLatitude: location.latitude,
             pickupLongitude: location.longitude,
             pickupAddress: location.detailedAddress,
             dropoffLatitude: dropoffLat,
             dropoffLongitude: dropoffLng,
             dropoffAddress: dropoffAddress,
-            itemsSummary: itemsSummary,
+            items: List.unmodifiable(_items),
+            estimatedShops: _estimatedShops,
             notes: notes,
           );
       try {
-        await ref.read(deliveryRepositoryProvider).dispatchDelivery(deliveryId);
+        await ref
+            .read(deliveryRepositoryProvider)
+            .dispatchDelivery(result.deliveryId);
       } catch (e, st) {
         // The ride was created; driver matching can be retried from tracking.
         ref
             .read(loggerProvider)
-            .e('Failed to dispatch delivery $deliveryId', e, st);
+            .e('Failed to dispatch delivery ${result.deliveryId}', e, st);
       }
       if (!mounted) return;
       if (_saveNumber) {
@@ -277,7 +267,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
         if (!mounted) return;
         context.showAppSnackBar(l10n.numberSaved);
       }
-      unawaited(context.push('/delivery-tracking/$deliveryId'));
+      unawaited(context.push('/delivery-tracking/${result.deliveryId}'));
     } catch (e) {
       if (mounted) {
         context.showAppSnackBar(appErrorText(context, e), isError: true);
@@ -287,34 +277,14 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     }
   }
 
-  String _itemDisplayText(_ShoppingItem item, AppLocalizations l10n) {
-    if (item.unit == 'kg' && item.subUnit != null && item.subUnit != 'none') {
-      final label = switch (item.subUnit) {
-        'eighth' => l10n.weightEighth,
-        'quarter' => l10n.weightQuarter,
-        'third' => l10n.weightThird,
-        'half' => l10n.weightHalf,
-        'three_quarters' => l10n.weightThreeQuarters,
-        'fifth' => l10n.weightFifth,
-        'bundle' => l10n.weightBundle,
-        _ => l10n.unitKg,
-      };
-      return '${item.quantity} $label';
-    }
-    if (item.unit == 'piece' &&
-        item.subUnit != null &&
-        item.subUnit != 'none') {
-      final label = switch (item.subUnit) {
-        'box' => l10n.pieceUnitBox,
-        'carton' => l10n.pieceUnitCarton,
-        'liter' => l10n.pieceUnitLiter,
-        _ => l10n.unitPiece,
-      };
-      return '${item.quantity} $label';
-    }
-    if (item.unit == 'kg') return '${item.quantity} ${l10n.unitKg}';
-    if (item.unit == 'piece') return '${item.quantity} ${l10n.unitPiece}';
-    return '${item.quantity}';
+  String _itemDisplayText(CourierShoppingItem item, AppLocalizations l10n) {
+    return switch (item.unit) {
+      'kilo' => l10n.unitKilo,
+      'half' => l10n.unitHalf,
+      'quarter' => l10n.unitQuarter,
+      'amount' => '${item.amountEgp} ${l10n.egp}',
+      _ => item.unit,
+    };
   }
 
   @override
@@ -332,7 +302,10 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  _buildShoppingListSection(context, l10n, cs),
+                  _buildItemsSection(context, l10n, cs),
+                  const SizedBox(height: 12),
+
+                  _buildShopsSection(context, l10n, cs),
                   const SizedBox(height: 12),
 
                   _buildField(
@@ -453,12 +426,13 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     );
   }
 
-  Widget _buildShoppingListSection(
+  /// The structured item composer: product name + unit (kilo / half /
+  /// quarter) or an EGP amount, exactly as the customer tells the shop.
+  Widget _buildItemsSection(
     BuildContext context,
     AppLocalizations l10n,
     ColorScheme cs,
   ) {
-    final showSubUnits = _selectedUnit == 'kg' || _selectedUnit == 'piece';
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -489,7 +463,10 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                   children: [
                     Expanded(
                       flex: 4,
-                      child: Text(item.name, style: AppTextStyles.bodyMedium),
+                      child: Text(
+                        item.productName,
+                        style: AppTextStyles.bodyMedium,
+                      ),
                     ),
                     Expanded(
                       flex: 2,
@@ -524,198 +501,116 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
             const SizedBox(height: 4),
           ],
 
-          Column(
+          TextField(
+            controller: _itemNameController,
+            decoration: InputDecoration(
+              hintText: l10n.itemName,
+              border: const OutlineInputBorder(),
+              isDense: true,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              TextField(
-                controller: _itemNameController,
-                decoration: InputDecoration(
-                  hintText: l10n.itemName,
-                  border: const OutlineInputBorder(),
-                  isDense: true,
+              for (final (value, label) in [
+                ('kilo', l10n.unitKilo),
+                ('half', l10n.unitHalf),
+                ('quarter', l10n.unitQuarter),
+                ('amount', l10n.unitAmount),
+              ])
+                ChoiceChip(
+                  label: Text(label),
+                  selected: _selectedUnit == value,
+                  onSelected: (_) => setState(() => _selectedUnit = value),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 6,
-                runSpacing: 8,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 48,
-                    child: TextField(
-                      controller: _itemQtyController,
-                      focusNode: _qtyFocusNode,
-                      keyboardType: const TextInputType.numberWithOptions(),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(4),
-                      ],
-                      decoration: const InputDecoration(
-                        hintText: '1',
-                        border: OutlineInputBorder(),
-                        isDense: true,
-                      ),
-                      textAlign: TextAlign.center,
+              if (_selectedUnit == 'amount')
+                SizedBox(
+                  width: 110,
+                  child: TextField(
+                    controller: _itemAmountController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                      LengthLimitingTextInputFormatter(8),
+                    ],
+                    decoration: InputDecoration(
+                      hintText: l10n.amountEgp,
+                      border: const OutlineInputBorder(),
+                      isDense: true,
                     ),
                   ),
-                  const SizedBox(width: 6),
-                  _buildUnitSelector(l10n, cs),
-                  const SizedBox(width: 4),
-                  IconButton.filled(
-                    tooltip: l10n.addItem,
-                    onPressed: _addItem,
-                    icon: const Icon(Icons.add_rounded, size: 20),
-                    constraints: const BoxConstraints(
-                      minWidth: 40,
-                      minHeight: 40,
-                    ),
-                  ),
-                ],
+                ),
+              IconButton.filled(
+                tooltip: l10n.addItem,
+                onPressed: _addItem,
+                icon: const Icon(Icons.add_rounded, size: 20),
+                constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
               ),
             ],
           ),
-
-          if (showSubUnits) ...[
-            const SizedBox(height: 8),
-            _buildSubUnitSelector(l10n, cs),
-          ],
         ],
       ),
     );
   }
 
-  Widget _buildUnitSelector(AppLocalizations l10n, ColorScheme cs) {
+  /// The declared shop count drives the 15 + 5 per extra shop baseline
+  /// both sides negotiate from (15 EGP first shop, +5 per extra shop).
+  Widget _buildShopsSection(
+    BuildContext context,
+    AppLocalizations l10n,
+    ColorScheme cs,
+  ) {
+    final baseline = 15 + 5 * (_estimatedShops - 1);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(color: cs.outline),
-        borderRadius: BorderRadius.circular(8),
+        color: cs.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
       ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedUnit,
-          isDense: true,
-          style: AppTextStyles.labelSmall.copyWith(color: cs.onSurface),
-          items: [
-            DropdownMenuItem(value: 'none', child: Text(l10n.unitNone)),
-            DropdownMenuItem(value: 'piece', child: Text(l10n.unitPiece)),
-            DropdownMenuItem(value: 'kg', child: Text(l10n.unitKg)),
-          ],
-          onChanged: (v) {
-            if (v != null) {
-              setState(() {
-                _selectedUnit = v;
-                _selectedWeight = 'none';
-                _selectedPieceUnit = 'none';
-              });
-            }
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSubUnitSelector(AppLocalizations l10n, ColorScheme cs) {
-    if (_selectedUnit == 'kg') {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerHighest.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.scale_outlined, size: 16, color: cs.primary),
-            const SizedBox(width: 8),
-            Expanded(
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: _selectedWeight,
-                  isDense: true,
-                  isExpanded: true,
-                  style: AppTextStyles.bodySmall.copyWith(color: cs.onSurface),
-                  items: [
-                    DropdownMenuItem(
-                      value: 'none',
-                      child: Text(l10n.weightNone),
-                    ),
-                    DropdownMenuItem(
-                      value: 'bundle',
-                      child: Text(l10n.weightBundle),
-                    ),
-                    DropdownMenuItem(
-                      value: 'eighth',
-                      child: Text(l10n.weightEighth),
-                    ),
-                    DropdownMenuItem(
-                      value: 'quarter',
-                      child: Text(l10n.weightQuarter),
-                    ),
-                    DropdownMenuItem(
-                      value: 'third',
-                      child: Text(l10n.weightThird),
-                    ),
-                    DropdownMenuItem(
-                      value: 'half',
-                      child: Text(l10n.weightHalf),
-                    ),
-                    DropdownMenuItem(
-                      value: 'three_quarters',
-                      child: Text(l10n.weightThreeQuarters),
-                    ),
-                    DropdownMenuItem(
-                      value: 'fifth',
-                      child: Text(l10n.weightFifth),
-                    ),
-                  ],
-                  onChanged: (v) {
-                    if (v != null) setState(() => _selectedWeight = v);
-                  },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.storefront_outlined, color: cs.primary, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.estimatedShops,
+                  style: AppTextStyles.titleMedium.copyWith(
+                    color: cs.onSurface,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.straighten_rounded, size: 16, color: cs.primary),
-          const SizedBox(width: 8),
-          Expanded(
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _selectedPieceUnit,
-                isDense: true,
-                isExpanded: true,
-                style: AppTextStyles.bodySmall.copyWith(color: cs.onSurface),
-                items: [
-                  DropdownMenuItem(value: 'none', child: Text(l10n.unitNone)),
-                  DropdownMenuItem(
-                    value: 'box',
-                    child: Text(l10n.pieceUnitBox),
-                  ),
-                  DropdownMenuItem(
-                    value: 'carton',
-                    child: Text(l10n.pieceUnitCarton),
-                  ),
-                  DropdownMenuItem(
-                    value: 'liter',
-                    child: Text(l10n.pieceUnitLiter),
-                  ),
-                ],
-                onChanged: (v) {
-                  if (v != null) setState(() => _selectedPieceUnit = v);
-                },
+              IconButton(
+                onPressed: _estimatedShops > 1
+                    ? () => setState(() => _estimatedShops--)
+                    : null,
+                icon: const Icon(Icons.remove_circle_outline_rounded),
               ),
-            ),
+              Text(l10n.shopsCount(_estimatedShops)),
+              IconButton(
+                onPressed: _estimatedShops < _maxShops
+                    ? () => setState(() => _estimatedShops++)
+                    : null,
+                icon: const Icon(Icons.add_circle_outline_rounded),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            l10n.counterFloor(baseline.toString()),
+            style: AppTextStyles.bodySmall.copyWith(color: cs.onSurfaceVariant),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.askAnythingPriceNote,
+            style: AppTextStyles.bodySmall.copyWith(color: cs.onSurfaceVariant),
           ),
         ],
       ),
@@ -833,17 +728,4 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
       ),
     );
   }
-}
-
-class _ShoppingItem {
-  const _ShoppingItem({
-    required this.name,
-    required this.quantity,
-    required this.unit,
-    this.subUnit,
-  });
-  final String name;
-  final int quantity;
-  final String unit;
-  final String? subUnit;
 }

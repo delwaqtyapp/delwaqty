@@ -13,6 +13,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
+import 'package:delwaqty/features/customer/delivery/presentation/widgets/courier_invoice_card.dart';
+import 'package:delwaqty/features/customer/delivery/presentation/widgets/courier_negotiation_card.dart';
 import 'package:delwaqty/features/customer/delivery/data/datasources/remote/delivery_trip_tracking_source.dart';
 import 'package:delwaqty/features/customer/ride/presentation/widgets/ride_map.dart';
 import 'package:delwaqty/features/customer/ride/domain/entities/ride.dart';
@@ -154,7 +156,12 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
                     .cancelDelivery(ride.id);
                 if (context.mounted) context.pop();
               } catch (e) {
-                if (context.mounted) {
+                if (!context.mounted) return;
+                // 436: goods already bought - a plain cancel would erase
+                // custody; the server refuses it, so file an incident.
+                if (e.toString().contains('ask_anything_goods_in_progress')) {
+                  await _reportIncident(context, ref, ride);
+                } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(appErrorText(context, e))),
                   );
@@ -202,6 +209,7 @@ class _TrackingBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final delivery = ref.watch(deliveryOrderByIdProvider(deliveryId)).value;
+    final askState = ref.watch(askAnythingRideProvider(deliveryId)).value;
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -219,6 +227,22 @@ class _TrackingBody extends ConsumerWidget {
             delay: const Duration(milliseconds: 50),
             child: _DriverInfoCard(ride: ride),
           ),
+        // Ask-anything (436): the price negotiation while the ride is
+        // live, then the live itemized invoice once the price is locked.
+        if (askState != null && !ride.status.isTerminal) ...[
+          const SizedBox(height: 16),
+          AnimatedFadeIn(
+            delay: const Duration(milliseconds: 60),
+            child: CourierNegotiationCard(state: askState),
+          ),
+          if (askState.quoteLocked) ...[
+            const SizedBox(height: 16),
+            AnimatedFadeIn(
+              delay: const Duration(milliseconds: 70),
+              child: CourierInvoiceCard(state: askState),
+            ),
+          ],
+        ],
         const SizedBox(height: 16),
         AnimatedFadeIn(
           delay: const Duration(milliseconds: 150),

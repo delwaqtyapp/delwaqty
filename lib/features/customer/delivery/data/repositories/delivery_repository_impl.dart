@@ -1,5 +1,9 @@
 import 'package:delwaqty/features/customer/delivery/data/datasources/remote/supabase_delivery_data_source.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/ask_anything_ride_state.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/cash_collection.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/courier_invoice_item.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/courier_quote.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/courier_shopping_item.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_order.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/merchant_profile.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/driver_capability.dart';
@@ -44,6 +48,58 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
     double radiusKm = 10,
     int limit = 5,
   }) => _dataSource.dispatchDelivery(rideId, radiusKm: radiusKm, limit: limit);
+
+  @override
+  Future<({String deliveryId, double quoteBaseline})> requestCourierShopping({
+    required double pickupLatitude,
+    required double pickupLongitude,
+    required String pickupAddress,
+    required double dropoffLatitude,
+    required double dropoffLongitude,
+    required String dropoffAddress,
+    required List<CourierShoppingItem> items,
+    required int estimatedShops,
+    String? notes,
+    String priority = 'standard',
+  }) => _dataSource.requestCourierShopping(
+    pickupLatitude: pickupLatitude,
+    pickupLongitude: pickupLongitude,
+    pickupAddress: pickupAddress,
+    dropoffLatitude: dropoffLatitude,
+    dropoffLongitude: dropoffLongitude,
+    dropoffAddress: dropoffAddress,
+    items: items,
+    estimatedShops: estimatedShops,
+    notes: notes,
+    priority: priority,
+  );
+
+  @override
+  Future<void> proposeCourierQuote(
+    String rideId,
+    double amount, {
+    String? note,
+  }) => _dataSource.proposeCourierQuote(rideId, amount, note: note);
+
+  @override
+  Future<void> respondCourierQuote(String quoteId, String action) =>
+      _dataSource.respondCourierQuote(quoteId, action);
+
+  @override
+  Future<void> decideCourierInvoiceItem(String itemId, String action) =>
+      _dataSource.decideCourierInvoiceItem(itemId, action);
+
+  @override
+  Stream<AskAnythingRideState?> watchAskAnythingRide(String rideId) =>
+      _dataSource.watchAskAnythingRide(rideId);
+
+  @override
+  Stream<List<CourierQuote>> watchCourierQuotes(String rideId) =>
+      _dataSource.watchCourierQuotes(rideId);
+
+  @override
+  Stream<List<CourierInvoiceItem>> watchCourierInvoiceItems(String rideId) =>
+      _dataSource.watchCourierInvoiceItems(rideId);
 
   @override
   Future<String> acceptDeliveryRequest(String rideId, String driverId) =>

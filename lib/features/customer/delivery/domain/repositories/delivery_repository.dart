@@ -1,4 +1,8 @@
+import 'package:delwaqty/features/customer/delivery/domain/entities/ask_anything_ride_state.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/cash_collection.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/courier_invoice_item.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/courier_quote.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/courier_shopping_item.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_order.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/merchant_profile.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/driver_capability.dart';
@@ -25,6 +29,30 @@ abstract interface class DeliveryRepository {
     double radiusKm = 10,
     int limit = 5,
   });
+
+  /// Ask-anything courier flow (436).
+  Future<({String deliveryId, double quoteBaseline})> requestCourierShopping({
+    required double pickupLatitude,
+    required double pickupLongitude,
+    required String pickupAddress,
+    required double dropoffLatitude,
+    required double dropoffLongitude,
+    required String dropoffAddress,
+    required List<CourierShoppingItem> items,
+    required int estimatedShops,
+    String? notes,
+    String priority = 'standard',
+  });
+  Future<void> proposeCourierQuote(
+    String rideId,
+    double amount, {
+    String? note,
+  });
+  Future<void> respondCourierQuote(String quoteId, String action);
+  Future<void> decideCourierInvoiceItem(String itemId, String action);
+  Stream<AskAnythingRideState?> watchAskAnythingRide(String rideId);
+  Stream<List<CourierQuote>> watchCourierQuotes(String rideId);
+  Stream<List<CourierInvoiceItem>> watchCourierInvoiceItems(String rideId);
   Future<String> acceptDeliveryRequest(String rideId, String driverId);
   Future<void> rejectDeliveryRequest(String rideId, String driverId);
   Stream<List<RideOffer>> watchDeliveryOffers(String driverId);

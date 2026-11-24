@@ -3095,5 +3095,45 @@
   "merchantGuideStep4Body": "Set the right price and keep the quantity up to date so customers always see what is available.",
   "merchantGuideStep5Title": "Save and start selling",
   "merchantGuideStep5Body": "Once you save, the product is in your catalog and customers see it whenever it's available - you can edit or pause it anytime.",
-  "merchantGuideOpenTooltip": "How to add products"
+  "merchantGuideOpenTooltip": "How to add products",
+  "unitKilo": "Kilo",
+  "unitHalf": "Half kilo",
+  "unitQuarter": "Quarter kilo",
+  "unitAmount": "By amount",
+  "amountEgp": "Amount (EGP)",
+  "estimatedShops": "How many shops, roughly?",
+  "askAnythingPriceNote": "Delivery starts at 15 EGP for the first shop + 5 EGP for each extra shop. The captain proposes the final price and you agree on it; goods are paid separately at their real prices.",
+  "waitingForDriverQuote": "Once a captain accepts, they'll propose a delivery price you can accept or negotiate.",
+  "driverQuoteTitle": "The captain's delivery price",
+  "yourCounterTitle": "Your counter",
+  "negotiate": "Negotiate",
+  "counterPrompt": "How much do you offer for the delivery?",
+  "sendCounter": "Send",
+  "counterSentWaiting": "Counter sent - waiting for the captain's answer.",
+  "priceAgreed": "Delivery price agreed",
+  "liveInvoiceTitle": "Live invoice",
+  "approveItemHint": "Approve each item before the captain buys it.",
+  "itemStatusPending": "Pending",
+  "itemStatusApproved": "Approved",
+  "itemStatusRejected": "Rejected - the captain cancels it at the shop",
+  "itemStatusCancelled": "Cancelled",
+  "goodsLabel": "Goods",
+  "cashOnDeliveryTotal": "You pay on delivery (cash)",
+  "addAtLeastOneItem": "Add at least one item with its unit or amount.",
+  "counterFloor": "The minimum is {floor} EGP: 15 for the first shop + 5 for each extra shop.",
+  "@counterFloor": {
+    "placeholders": {
+      "floor": {
+        "type": "String"
+      }
+    }
+  },
+  "shopsCount": "{count, plural, =1{1 shop} other{{count} shops}}",
+  "@shopsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

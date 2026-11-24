@@ -8588,4 +8588,97 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get merchantGuideOpenTooltip => 'How to add products';
+
+  @override
+  String get unitKilo => 'Kilo';
+
+  @override
+  String get unitHalf => 'Half kilo';
+
+  @override
+  String get unitQuarter => 'Quarter kilo';
+
+  @override
+  String get unitAmount => 'By amount';
+
+  @override
+  String get amountEgp => 'Amount (EGP)';
+
+  @override
+  String get estimatedShops => 'How many shops, roughly?';
+
+  @override
+  String get askAnythingPriceNote =>
+      'Delivery starts at 15 EGP for the first shop + 5 EGP for each extra shop. The captain proposes the final price and you agree on it; goods are paid separately at their real prices.';
+
+  @override
+  String get waitingForDriverQuote =>
+      'Once a captain accepts, they\'ll propose a delivery price you can accept or negotiate.';
+
+  @override
+  String get driverQuoteTitle => 'The captain\'s delivery price';
+
+  @override
+  String get yourCounterTitle => 'Your counter';
+
+  @override
+  String get negotiate => 'Negotiate';
+
+  @override
+  String get counterPrompt => 'How much do you offer for the delivery?';
+
+  @override
+  String get sendCounter => 'Send';
+
+  @override
+  String get counterSentWaiting =>
+      'Counter sent - waiting for the captain\'s answer.';
+
+  @override
+  String get priceAgreed => 'Delivery price agreed';
+
+  @override
+  String get liveInvoiceTitle => 'Live invoice';
+
+  @override
+  String get approveItemHint => 'Approve each item before the captain buys it.';
+
+  @override
+  String get itemStatusPending => 'Pending';
+
+  @override
+  String get itemStatusApproved => 'Approved';
+
+  @override
+  String get itemStatusRejected =>
+      'Rejected - the captain cancels it at the shop';
+
+  @override
+  String get itemStatusCancelled => 'Cancelled';
+
+  @override
+  String get goodsLabel => 'Goods';
+
+  @override
+  String get cashOnDeliveryTotal => 'You pay on delivery (cash)';
+
+  @override
+  String get addAtLeastOneItem =>
+      'Add at least one item with its unit or amount.';
+
+  @override
+  String counterFloor(String floor) {
+    return 'The minimum is $floor EGP: 15 for the first shop + 5 for each extra shop.';
+  }
+
+  @override
+  String shopsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count shops',
+      one: '1 shop',
+    );
+    return '$_temp0';
+  }
 }

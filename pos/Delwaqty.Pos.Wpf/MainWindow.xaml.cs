@@ -64,12 +64,6 @@ namespace Delwaqty.Pos.Wpf
         public MainWindow(ActivationService activation, ActivationState state)
         {
             InitializeComponent();
-#if SCREENSHOT_TOUR
-            // CI screenshot tour (compiled only into the tour build): seed the
-            // sample dataset and start the marker-synchronized capture walk.
-            if (Environment.GetEnvironmentVariable("DELWAQTY_SCREENSHOT_TOUR") == "1")
-                StartScreenshotTour();
-#endif
 
             _activation = activation;
             _dataDir = activation.CurrentScopeDir;
@@ -92,14 +86,27 @@ namespace Delwaqty.Pos.Wpf
             DeviceText.Text = "الجهاز: " + state.DeviceId + "  |  الإصدار " + PosConfig.AppVersion +
                 "  |  نسخة " + PosConfig.BuildFlavor;
 
+#if !SCREENSHOT_TOUR
+            // Tour build: no periodic sync - SyncNow is the only path that
+            // touches the license refresher / sync engine / Supabase, and the
+            // tour must never talk to production (security review).
             _syncTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(PosConfig.SyncIntervalSeconds) };
             _syncTimer.Tick += async (s, e) => await SyncNow();
             _syncTimer.Start();
+#endif
             _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
             _clockTimer.Tick += (s, e) => ClockText.Text = DateTime.Now.ToString("yyyy/MM/dd HH:mm");
             _clockTimer.Start();
+#if SCREENSHOT_TOUR
+            // CI screenshot tour: start the marker-synchronized capture walk on
+            // Loaded, once every field, control and dataset is initialized -
+            // and NEVER SyncNow, so the tour cannot lock on the synthetic key
+            // or reach production (security review).
+            Loaded += OnScreenshotTourLoaded;
+#else
             Loaded += async (s, e) => await SyncNow();
-            Closed += (s, e) => { _syncTimer.Stop(); _clockTimer.Stop(); _localDb.Dispose(); };
+#endif
+            Closed += (s, e) => { _syncTimer?.Stop(); _clockTimer.Stop(); _localDb.Dispose(); };
             ApplyMode();
         }
 

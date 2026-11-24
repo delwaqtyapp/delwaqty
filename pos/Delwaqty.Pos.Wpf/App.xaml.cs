@@ -16,9 +16,6 @@ namespace Delwaqty.Pos.Wpf
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            var rootDir = AppPaths.DataDir();
-            DataDirSecurity.Harden(rootDir); // #114: tighten the shared dir ACL (Windows)
-            var activation = new ActivationService(rootDir, PosConfig.BuildFlavor);
 #if SCREENSHOT_TOUR
             // CI screenshot instrumentation - compiled ONLY into the dedicated
             // tour build (pos-windows.yml passes -p:DefineConstants to a separate
@@ -26,7 +23,9 @@ namespace Delwaqty.Pos.Wpf
             // tour marker survives). Review #201: the tour runs in an explicitly
             // isolated synthetic scope - a temp root dir, no activation, no seal,
             // no production data - through the narrow test-only init path
-            // ActivationService.UseSyntheticScopeForTour.
+            // ActivationService.UseSyntheticScopeForTour. This branch runs
+            // BEFORE any normal initialization, so the tour never creates,
+            // hardens or even resolves the real ProgramData root (code review).
             if (Environment.GetEnvironmentVariable("DELWAQTY_SCREENSHOT_TOUR") == "1")
             {
                 var tourRoot = Path.Combine(Path.GetTempPath(), "delwaqty-screenshot-tour");
@@ -55,6 +54,9 @@ namespace Delwaqty.Pos.Wpf
                 return;
             }
 #endif
+            var rootDir = AppPaths.DataDir();
+            DataDirSecurity.Harden(rootDir); // #114: tighten the shared dir ACL (Windows)
+            var activation = new ActivationService(rootDir, PosConfig.BuildFlavor);
             var state = activation.Restore();
 
             if (state != null && LicenseGuard.Evaluate(state, DateTimeOffset.UtcNow) == PosMode.Locked)

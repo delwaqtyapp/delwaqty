@@ -45,6 +45,15 @@ namespace Delwaqty.Pos.Wpf
         private bool _tourWaitingAck;
         private Window _tourDialog;
 
+        // Started from the window's Loaded event (wired in MainWindow.xaml.cs),
+        // after every field, control and dataset is initialized - never from
+        // the constructor (reviewer order-of-init blocker).
+        private void OnScreenshotTourLoaded(object sender, RoutedEventArgs e)
+        {
+            Loaded -= OnScreenshotTourLoaded;
+            StartScreenshotTour();
+        }
+
         internal void StartScreenshotTour()
         {
             _tourDir = Environment.GetEnvironmentVariable("DELWAQTY_TOUR_DIR")

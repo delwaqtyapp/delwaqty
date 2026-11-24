@@ -55,17 +55,6 @@ jobs:
           -c Release -f net48
           -o publish/shop-net48 --nologo
 
-      - name: Prove the shipped builds contain no tour code (#202 fail-closed)
-        shell: pwsh
-        run: |
-          foreach ($dll in @("publish\shop-net8\Delwaqty.Pos.Wpf.dll", "publish\shop-net48\Delwaqty.Pos.Wpf.dll")) {
-            $text = [System.Text.Encoding]::Unicode.GetString([System.IO.File]::ReadAllBytes((Join-Path $PWD $dll)))
-            if ($text.Contains("DELWAQTY_SCREENSHOT_TOUR") -or $text.Contains("SCREENSHOT-TOUR")) {
-              throw "tour marker found in shipped binary: $dll"
-            }
-          }
-          "shipped binaries clean of tour markers"
-
       - name: Publish screenshot-tour build (CI instrumentation, never shipped)
         # Compiles the SAME commit with SCREENSHOT_TOUR defined, into a separate
         # output dir AND a separate intermediate (obj-tour) so nothing is shared
@@ -78,11 +67,48 @@ jobs:
           -p:MSBuildProjectExtensionsPath=obj-tour\
           -o publish/tour-net8 --nologo
 
+      - name: Prove the shipped builds contain no tour code (#202/#203 fail-closed)
+        shell: pwsh
+        run: |
+          $utf16 = [System.Text.Encoding]::Unicode
+          $ascii = [System.Text.Encoding]::ASCII
+          function Test-Markers([string]$path, [string[]]$markers) {
+            $bytes = [System.IO.File]::ReadAllBytes((Join-Path $PWD $path))
+            # .NET #US literals are UTF-16 and can sit at ODD byte offsets, so
+            # scan from offsets 0 and 1; metadata member names are ASCII.
+            $views = @(
+              $utf16.GetString($bytes, 0, $bytes.Length),
+              $utf16.GetString($bytes, 1, $bytes.Length - 1),
+              $ascii.GetString($bytes)
+            )
+            foreach ($m in $markers) { foreach ($v in $views) { if ($v.Contains($m)) { return $true } } }
+            return $false
+          }
+          $markers = @("DELWAQTY_SCREENSHOT_TOUR", "SCREENSHOT-TOUR", "UseSyntheticScopeForTour")
+          $shipped = @(
+            "publish\shop-net8\DelwaqtyShopPos.dll",
+            "publish\shop-net8\Delwaqty.Pos.Core.dll",
+            "publish\shop-net48\DelwaqtyShopPos.exe",
+            "publish\shop-net48\Delwaqty.Pos.Core.dll"
+          )
+          foreach ($dll in $shipped) {
+            if (Test-Markers $dll $markers) { throw "tour marker found in shipped binary: $dll" }
+          }
+          # Positive control: the same scan MUST find the markers in the tour
+          # build, or the scan is blind and the clean result proves nothing.
+          if (-not (Test-Markers "publish\tour-net8\DelwaqtyShopPos.dll" @("DELWAQTY_SCREENSHOT_TOUR", "SCREENSHOT-TOUR"))) {
+            throw "scan blind: tour WPF payload has no tour marker"
+          }
+          if (-not (Test-Markers "publish\tour-net8\Delwaqty.Pos.Core.dll" @("UseSyntheticScopeForTour"))) {
+            throw "scan blind: tour Core assembly has no test-only init path"
+          }
+          "shipped binaries clean of tour markers; positive control passed"
+
       - name: Capture the activation window (normal build, first run)
         shell: pwsh
         run: |
           try { Set-DisplayResolution -Width 1920 -Height 1080 -Force } catch { "display resolution unchanged: $($_.Exception.Message)" }
-          New-Item -ItemType Directory -Force screenshots, tour-markers | Out-Null
+          New-Item -ItemType Directory -Force screenshots | Out-Null
           Add-Type -AssemblyName System.Windows.Forms
           Add-Type -AssemblyName System.Drawing
           $proc = Start-Process (Join-Path $PWD "publish\shop-net8\DelwaqtyShopPos.exe") -PassThru
@@ -104,7 +130,10 @@ jobs:
           Add-Type -AssemblyName System.Windows.Forms
           Add-Type -AssemblyName System.Drawing
           $env:DELWAQTY_SCREENSHOT_TOUR = "1"
-          $env:DELWAQTY_TOUR_DIR = Join-Path $PWD "tour-markers"
+          # Unique per-run marker dir so a retry can never mistake stale
+          # ready/ack files from a previous attempt for this run's state.
+          $env:DELWAQTY_TOUR_DIR = Join-Path $PWD ("tour-markers-" + $env:GITHUB_RUN_ID + "-" + $env:GITHUB_RUN_ATTEMPT)
+          New-Item -ItemType Directory -Force $env:DELWAQTY_TOUR_DIR | Out-Null
           $proc = Start-Process (Join-Path $PWD "publish\tour-net8\DelwaqtyShopPos.exe") -PassThru
           $bounds = [System.Windows.Forms.SystemInformation]::VirtualScreen
           $slugs = @("tab-sales","tab-inventory","tab-customers","tab-shifts","tab-settings","dialog-payment","dialog-addproduct","dialog-receipt")

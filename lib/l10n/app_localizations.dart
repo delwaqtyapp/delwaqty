@@ -16526,6 +16526,12 @@ abstract class AppLocalizations {
   /// **'Goods are already bought - cancellation goes through a problem report.'**
   String get courierErrGoodsInProgress;
 
+  /// No description provided for @courierErrShoppingNotFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping isn\'t finished yet - record every item and finish shopping first.'**
+  String get courierErrShoppingNotFinished;
+
   /// No description provided for @driverProposePrice.
   ///
   /// In en, this message translates to:
@@ -16609,6 +16615,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add each item with its real price; the customer approves it before you buy it.'**
   String get driverInvoiceHint;
+
+  /// No description provided for @shoppingListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The customer\'s shopping list'**
+  String get shoppingListTitle;
 
   /// No description provided for @counterFloor.
   ///

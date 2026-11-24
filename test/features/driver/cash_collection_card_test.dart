@@ -66,7 +66,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('مبلغ مطلوب تحصيله'), findsOneWidget);
-    expect(find.text('115 EGP'), findsOneWidget);
+    expect(find.text('115.00 EGP'), findsOneWidget);
     expect(find.text('تم التحصيل'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('cashCollectButton')));

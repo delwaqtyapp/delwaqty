@@ -8676,6 +8676,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'المشتريات اتشترت بالفعل - الإلغاء بيتم ببلاغ مشكلة.';
 
   @override
+  String get courierErrShoppingNotFinished =>
+      'التسوق لسه ما خلصش - سجل كل الأصناف واخلص التسوق الأول.';
+
+  @override
   String get driverProposePrice => 'اقترح سعر التوصيل';
 
   @override
@@ -8719,6 +8723,9 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get driverInvoiceHint =>
       'ضيف كل صنف بسعره الحقيقي والعميل بيوافق عليه قبل ما تشتريه.';
+
+  @override
+  String get shoppingListTitle => 'قايمة مشتريات العميل';
 
   @override
   String counterFloor(String floor) {

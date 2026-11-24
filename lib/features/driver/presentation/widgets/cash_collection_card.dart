@@ -31,7 +31,7 @@ class CashCollectionCard extends StatelessWidget {
     final cs = theme.colorScheme;
     final amount = state.amount == null
         ? null
-        : '${state.amount!.toStringAsFixed(0)} ${state.currency}';
+        : '${state.amount!.toStringAsFixed(2)} ${state.currency}';
 
     return Card(
       key: const ValueKey('cashCollectionCard'),

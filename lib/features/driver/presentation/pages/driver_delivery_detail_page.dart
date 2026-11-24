@@ -50,8 +50,12 @@ class _DriverDeliveryDetailPageState
       return true;
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
+        // 436 courier reasons (goods in progress, shopping not
+        // finished, ...) get their specific localized texts; anything
+        // else falls back to the generic mapping.
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(courierErrorText(context, e))));
       }
       return false;
     } finally {

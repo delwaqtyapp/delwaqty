@@ -4,6 +4,7 @@ import 'package:delwaqty/features/driver/domain/entities/vehicle.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_document.dart';
 import 'package:delwaqty/features/driver/domain/entities/wallet_detail.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_performance.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/courier_shopping_item.dart';
 
 abstract interface class DriverRepository {
   Future<DriverProfile?> getProfile(String userId);
@@ -44,6 +45,9 @@ abstract interface class DriverRepository {
   });
   Future<void> cancelCourierInvoiceItem(String itemId);
   Future<void> finishCourierShopping(String rideId);
+
+  /// The customer's structured ask-anything request items (#217).
+  Stream<List<CourierShoppingItem>> watchCourierRequestItems(String rideId);
   Future<DriverProfile> getStats(String profileId);
 
   // M6: Onboarding

@@ -3062,6 +3062,7 @@
   "courierErrTooManyOpenRides": "عندك طلب مفتوح بالفعل - خلصه الأول.",
   "courierErrCashOnly": "طلبات اطلب أي حاجة كاش فقط.",
   "courierErrGoodsInProgress": "المشتريات اتشترت بالفعل - الإلغاء بيتم ببلاغ مشكلة.",
+  "courierErrShoppingNotFinished": "التسوق لسه ما خلصش - سجل كل الأصناف واخلص التسوق الأول.",
   "driverProposePrice": "اقترح سعر التوصيل",
   "driverQuoteSent": "السعر اتبعت - مستنيين رد العميل.",
   "customerCounter": "العرض المضاد من العميل",
@@ -3076,6 +3077,7 @@
   "finishShoppingConfirm": "اخلص لما كل الأصناف يكون اتخذ فيها قرار والمرفوض اتلغى. ده هيقفل إجمالي المشتريات.",
   "shoppingFinishedTitle": "التسوق خلص - حصل سعر التوصيل + المشتريات عند التسليم.",
   "driverInvoiceHint": "ضيف كل صنف بسعره الحقيقي والعميل بيوافق عليه قبل ما تشتريه.",
+  "shoppingListTitle": "قايمة مشتريات العميل",
   "counterFloor": "الحد الأدنى {floor} جنيه: 15 لأول محل + 5 لكل محل زيادة.",
   "@counterFloor": {
     "placeholders": {

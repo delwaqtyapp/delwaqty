@@ -195,7 +195,7 @@ String checkoutErrorText(BuildContext context, Object? error) =>
 String courierErrorMessage(AppLocalizations l10n, Object? error) {
   final raw = _readStringField(error, 'message') ?? error.toString();
   final match = RegExp(
-    r'(BELOW_BASELINE|QUOTE_CAP|GOODS_CAP|SHOP_CAP|ITEM_CAP|THROTTLED|INVALID_AMOUNT|INVALID_ITEMS|INVALID_INPUT|INVALID_STATE|ITEMS_PENDING|ITEM_NOT_PENDING|NO_QUOTE_TO_COUNTER|QUOTE_ALREADY_LOCKED|QUOTE_NOT_LOCKED|QUOTE_NOT_PENDING|REJECTED_ITEMS_OPEN|DRIVER_CHANGED|RIDER_CHANGED|TOO_MANY_OPEN_RIDES|ask_anything_cash_only|ask_anything_goods_in_progress)\b',
+    r'(BELOW_BASELINE|QUOTE_CAP|GOODS_CAP|SHOP_CAP|ITEM_CAP|THROTTLED|INVALID_AMOUNT|INVALID_ITEMS|INVALID_INPUT|INVALID_STATE|ITEMS_PENDING|ITEM_NOT_PENDING|NO_QUOTE_TO_COUNTER|QUOTE_ALREADY_LOCKED|QUOTE_NOT_LOCKED|QUOTE_NOT_PENDING|REJECTED_ITEMS_OPEN|DRIVER_CHANGED|RIDER_CHANGED|TOO_MANY_OPEN_RIDES|ask_anything_cash_only|ask_anything_goods_in_progress|shopping_not_finished)\b',
   ).firstMatch(raw);
   if (match == null) return appErrorMessage(l10n, error);
   switch (match.group(1)!) {
@@ -240,6 +240,8 @@ String courierErrorMessage(AppLocalizations l10n, Object? error) {
       return l10n.courierErrCashOnly;
     case 'ask_anything_goods_in_progress':
       return l10n.courierErrGoodsInProgress;
+    case 'shopping_not_finished':
+      return l10n.courierErrShoppingNotFinished;
     default:
       // INVALID_INPUT and anything unlisted.
       return match.group(1) == 'INVALID_INPUT'

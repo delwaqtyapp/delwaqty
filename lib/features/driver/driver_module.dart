@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/core/auth/platform_capabilities.dart';
 import 'package:delwaqty/features/driver/domain/repositories/driver_repository.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/courier_shopping_item.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_profile.dart';
 import 'package:delwaqty/features/driver/data/datasources/remote/supabase_driver_data_source.dart';
 import 'package:delwaqty/features/driver/data/datasources/remote/supabase_driver_platform_data_source.dart';
@@ -33,6 +34,15 @@ final supabaseDriverRepositoryImplProvider = Provider<DriverRepositoryImpl>((
 final driverRepositoryProvider = Provider<DriverRepository>(
   (ref) => ref.watch(supabaseDriverRepositoryImplProvider),
 );
+
+/// #217: the customer's structured ask-anything shopping list, streamed
+/// for the assigned captain (RLS + the realtime publication both permit
+/// it - see migration 436).
+final driverCourierRequestItemsProvider =
+    StreamProvider.family<List<CourierShoppingItem>, String>((ref, rideId) {
+      final repo = ref.watch(driverRepositoryProvider);
+      return repo.watchCourierRequestItems(rideId);
+    });
 
 final driverProfileProvider = FutureProvider.family<DriverProfile?, String>((
   ref,

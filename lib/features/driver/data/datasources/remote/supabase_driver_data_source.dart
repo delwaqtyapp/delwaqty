@@ -4,6 +4,7 @@ import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_profile.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_delivery.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/courier_shopping_item.dart';
 
 final supabaseDriverDataSourceProvider = Provider<SupabaseDriverDataSource>((
   ref,
@@ -14,11 +15,20 @@ final supabaseDriverDataSourceProvider = Provider<SupabaseDriverDataSource>((
   );
 });
 
+/// The RPC transport seam: tests inject a fake caller and capture the
+/// function name and params instead of standing up a PostgREST client.
+typedef RpcCaller = Future<dynamic> Function(
+  String fn,
+  Map<String, dynamic> params,
+);
+
 class SupabaseDriverDataSource {
-  SupabaseDriverDataSource(this._client, this._logger);
+  SupabaseDriverDataSource(this._client, this._logger, {RpcCaller? rpcCaller})
+    : _rpc = rpcCaller ?? ((fn, params) => _client.rpc(fn, params: params));
 
   final SupabaseClient _client;
   final AppLogger _logger;
+  final RpcCaller _rpc;
 
   static const String _driversTable = 'drivers';
   static const String _deliveriesTable = 'deliveries';
@@ -223,6 +233,22 @@ class SupabaseDriverDataSource {
     }
   }
 
+  /// The customer's structured ask-anything request (#217): what to buy,
+  /// in which unit or for which EGP amount. RLS scopes the read to the
+  /// assigned captain; the table is in the realtime publication.
+  Stream<List<CourierShoppingItem>> watchCourierRequestItems(String rideId) {
+    return _client
+        .from('courier_request_items')
+        .stream(primaryKey: ['id'])
+        .eq('ride_id', rideId)
+        .order('created_at')
+        .map(
+          (rows) => rows
+              .map((r) => CourierShoppingItem.fromRow(r))
+              .toList(growable: false),
+        );
+  }
+
   // ── Ask-anything courier flow (436) ──
   //
   // The captain's side of the negotiation and the live invoice. All five
@@ -246,10 +272,11 @@ class SupabaseDriverDataSource {
     String? note,
   }) async {
     _checkCourierRpc(
-      await _client.rpc(
-        'propose_courier_quote',
-        params: {'p_ride_id': rideId, 'p_amount': amount, 'p_note': note},
-      ),
+      await _rpc('propose_courier_quote', {
+        'p_ride_id': rideId,
+        'p_amount': amount,
+        'p_note': note,
+      }),
     );
   }
 
@@ -257,10 +284,10 @@ class SupabaseDriverDataSource {
   /// 'reject' reopens the negotiation.
   Future<void> respondCourierQuote(String quoteId, String action) async {
     _checkCourierRpc(
-      await _client.rpc(
-        'respond_courier_quote',
-        params: {'p_quote_id': quoteId, 'p_action': action},
-      ),
+      await _rpc('respond_courier_quote', {
+        'p_quote_id': quoteId,
+        'p_action': action,
+      }),
     );
   }
 
@@ -276,18 +303,15 @@ class SupabaseDriverDataSource {
     String? receiptPhotoUrl,
   }) async {
     _checkCourierRpc(
-      await _client.rpc(
-        'add_courier_invoice_item',
-        params: {
-          'p_ride_id': rideId,
-          'p_shop_name': shopName,
-          'p_product_name': productName,
-          'p_price': price,
-          'p_unit': unit,
-          'p_quantity': quantity,
-          'p_receipt_photo_url': receiptPhotoUrl,
-        },
-      ),
+      await _rpc('add_courier_invoice_item', {
+        'p_ride_id': rideId,
+        'p_shop_name': shopName,
+        'p_product_name': productName,
+        'p_price': price,
+        'p_unit': unit,
+        'p_quantity': quantity,
+        'p_receipt_photo_url': receiptPhotoUrl,
+      }),
     );
   }
 
@@ -295,10 +319,7 @@ class SupabaseDriverDataSource {
   /// finish_courier_shopping can lock the goods total.
   Future<void> cancelCourierInvoiceItem(String itemId) async {
     _checkCourierRpc(
-      await _client.rpc(
-        'cancel_courier_invoice_item',
-        params: {'p_item_id': itemId},
-      ),
+      await _rpc('cancel_courier_invoice_item', {'p_item_id': itemId}),
     );
   }
 
@@ -306,10 +327,7 @@ class SupabaseDriverDataSource {
   /// rejected item is cancelled; locks the approved goods total.
   Future<void> finishCourierShopping(String rideId) async {
     _checkCourierRpc(
-      await _client.rpc(
-        'finish_courier_shopping',
-        params: {'p_ride_id': rideId},
-      ),
+      await _rpc('finish_courier_shopping', {'p_ride_id': rideId}),
     );
   }
 

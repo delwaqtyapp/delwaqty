@@ -5,6 +5,7 @@ import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/ask_anything_ride_state.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/courier_invoice_item.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/courier_shopping_item.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/courier_quote.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
@@ -62,6 +63,9 @@ class _DriverCourierSectionState extends ConsumerState<DriverCourierSection> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // What the customer asked for, with units or EGP amounts
+            // (#217): the captain prices and shops from this list.
+            _RequestItemsCard(rideId: state.rideId),
             if (live && !state.quoteLocked)
               _Negotiation(state: state, busy: _busy, run: _run),
             if (live && state.quoteLocked && !state.shoppingFinished)
@@ -70,11 +74,15 @@ class _DriverCourierSectionState extends ConsumerState<DriverCourierSection> {
                 busy: _busy,
                 busyItemIds: _busyItemIds,
                 run: _run,
-                onItemBusy: (id, isBusy) => setState(
-                  () => isBusy ? _busyItemIds.add(id) : _busyItemIds.remove(id),
-                ),
+                onItemBusy: (id, isBusy) {
+                  if (!mounted) return;
+                  setState(
+                    () =>
+                        isBusy ? _busyItemIds.add(id) : _busyItemIds.remove(id),
+                  );
+                },
               ),
-            if (state.shoppingFinished) const _ShoppingDone(),
+            if (state.shoppingFinished) _ShoppingDone(state: state),
           ],
         );
       },
@@ -236,37 +244,43 @@ class _Negotiation extends ConsumerWidget {
         return StatefulBuilder(
           builder: (ctx, setState) => AlertDialog(
             title: Text(l10n.driverProposePrice),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: amountController,
-                  autofocus: true,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
+            // Scrollable: at 320px with 1.6x text and the keyboard open
+            // the fixed column overflowed and hid the floor note; the
+            // error text wraps instead of ellipsizing (UI review).
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: amountController,
+                    autofocus: true,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                      LengthLimitingTextInputFormatter(8),
+                    ],
+                    decoration: InputDecoration(
+                      hintText: l10n.amountEgp,
+                      errorText: errorText,
+                      errorMaxLines: 3,
+                    ),
+                    onChanged: (_) => setState(() => errorText = null),
                   ),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                    LengthLimitingTextInputFormatter(8),
-                  ],
-                  decoration: InputDecoration(
-                    hintText: l10n.amountEgp,
-                    errorText: errorText,
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: noteController,
+                    inputFormatters: [LengthLimitingTextInputFormatter(300)],
+                    decoration: InputDecoration(hintText: l10n.notes),
                   ),
-                  onChanged: (_) => setState(() => errorText = null),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: noteController,
-                  inputFormatters: [LengthLimitingTextInputFormatter(300)],
-                  decoration: InputDecoration(hintText: l10n.notes),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.counterFloor(floor.toStringAsFixed(0)),
-                  style: Theme.of(ctx).textTheme.bodySmall,
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.counterFloor(floor.toStringAsFixed(0)),
+                    style: Theme.of(ctx).textTheme.bodySmall,
+                  ),
+                ],
+              ),
             ),
             actions: [
               TextButton(
@@ -300,7 +314,7 @@ class _Negotiation extends ConsumerWidget {
         );
       },
     );
-    if (result == null) return;
+    if (result == null || !context.mounted) return;
     await run(
       () => ref
           .read(driverRepositoryProvider)
@@ -416,7 +430,8 @@ class _Shopping extends ConsumerWidget {
       () =>
           ref.read(driverRepositoryProvider).cancelCourierInvoiceItem(item.id),
     );
-    onItemBusy(item.id, false);
+    // The parent clears the flag only while it is still mounted (#218).
+    if (context.mounted) onItemBusy(item.id, false);
   }
 
   Future<void> _finish(BuildContext context, WidgetRef ref) async {
@@ -438,7 +453,7 @@ class _Shopping extends ConsumerWidget {
         ],
       ),
     );
-    if (confirmed != true) return;
+    if (confirmed != true || !context.mounted) return;
     await run(
       () => ref
           .read(driverRepositoryProvider)
@@ -563,14 +578,21 @@ class _Shopping extends ConsumerWidget {
                       final price = double.tryParse(
                         priceController.text.trim(),
                       );
-                      final quantity = quantityController.text.trim().isEmpty
+                      final quantityText = quantityController.text.trim();
+                      final quantity = quantityText.isEmpty
                           ? null
-                          : double.tryParse(quantityController.text.trim());
+                          : double.tryParse(quantityText);
                       if (shop.isEmpty || product.isEmpty) return;
                       if (price == null || price < 0 || price > 100000) {
                         setState(
                           () => errorText = l10n.courierErrInvalidAmount,
                         );
+                        return;
+                      }
+                      // "1.." parses to null: that is a malformed
+                      // quantity, not an absent one - say so.
+                      if (quantityText.isNotEmpty && quantity == null) {
+                        setState(() => errorText = l10n.courierErrInvalidInput);
                         return;
                       }
                       if (quantity != null &&
@@ -595,7 +617,7 @@ class _Shopping extends ConsumerWidget {
             );
           },
         );
-    if (added == null) return;
+    if (added == null || !context.mounted) return;
     await run(
       () => ref
           .read(driverRepositoryProvider)
@@ -672,23 +694,175 @@ class _DriverItemRow extends StatelessWidget {
 }
 
 class _ShoppingDone extends StatelessWidget {
-  const _ShoppingDone();
+  const _ShoppingDone({required this.state});
+
+  final AskAnythingRideState state;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
+    final fare = state.fare ?? 0;
+    final goods = state.goodsTotal;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.check_circle_outline, color: cs.primary, size: 20),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                l10n.shoppingFinishedTitle,
-                style: AppTextStyles.bodyMedium.copyWith(color: cs.onSurface),
+            Row(
+              children: [
+                Icon(Icons.check_circle_outline, color: cs.primary, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.shoppingFinishedTitle,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: cs.onSurface,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            _TotalLine(label: l10n.deliveryFeeLabel, amount: fare),
+            _TotalLine(label: l10n.goodsLabel, amount: goods),
+            _TotalLine(
+              label: l10n.cashOnDeliveryTotal,
+              amount: fare + goods,
+              emphasize: true,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TotalLine extends StatelessWidget {
+  const _TotalLine({
+    required this.label,
+    required this.amount,
+    this.emphasize = false,
+  });
+
+  final String label;
+  final double amount;
+  final bool emphasize;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final style = emphasize
+        ? AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold)
+        : AppTextStyles.bodyMedium;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Expanded(child: Text(label, style: style)),
+          Text('${amount.toStringAsFixed(2)} ${l10n.egp}', style: style),
+        ],
+      ),
+    );
+  }
+}
+
+/// The customer's structured request (#217): each item with its
+/// localized unit or its EGP amount, so the captain knows what to buy
+/// before pricing the ride.
+class _RequestItemsCard extends ConsumerWidget {
+  const _RequestItemsCard({required this.rideId});
+
+  final String rideId;
+
+  String _unitText(AppLocalizations l10n, CourierShoppingItem item) {
+    return switch (item.unit) {
+      'kilo' => l10n.unitKilo,
+      'half' => l10n.unitHalf,
+      'quarter' => l10n.unitQuarter,
+      'amount' => '${(item.amountEgp ?? 0).toStringAsFixed(2)} ${l10n.egp}',
+      _ => item.unit,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final itemsAsync = ref.watch(driverCourierRequestItemsProvider(rideId));
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.shopping_cart_outlined, color: cs.primary, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.shoppingListTitle,
+                    style: AppTextStyles.titleMedium.copyWith(
+                      color: cs.onSurface,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            itemsAsync.when(
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(12),
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+              error: (_, _) => Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.somethingWentWrong,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => ref.invalidate(
+                      driverCourierRequestItemsProvider(rideId),
+                    ),
+                    child: Text(l10n.retry),
+                  ),
+                ],
+              ),
+              data: (items) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final item in items)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              item.productName,
+                              style: AppTextStyles.bodyMedium,
+                            ),
+                          ),
+                          Text(
+                            _unitText(l10n, item),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
               ),
             ),
           ],

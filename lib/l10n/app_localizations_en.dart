@@ -8759,6 +8759,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Goods are already bought - cancellation goes through a problem report.';
 
   @override
+  String get courierErrShoppingNotFinished =>
+      'Shopping isn\'t finished yet - record every item and finish shopping first.';
+
+  @override
   String get driverProposePrice => 'Propose the delivery price';
 
   @override
@@ -8803,6 +8807,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get driverInvoiceHint =>
       'Add each item with its real price; the customer approves it before you buy it.';
+
+  @override
+  String get shoppingListTitle => 'The customer\'s shopping list';
 
   @override
   String counterFloor(String floor) {

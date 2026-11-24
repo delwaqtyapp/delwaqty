@@ -3146,6 +3146,7 @@
   "courierErrTooManyOpenRides": "You already have an open request - finish it first.",
   "courierErrCashOnly": "Ask-anything rides are cash only.",
   "courierErrGoodsInProgress": "Goods are already bought - cancellation goes through a problem report.",
+  "courierErrShoppingNotFinished": "Shopping isn't finished yet - record every item and finish shopping first.",
   "driverProposePrice": "Propose the delivery price",
   "driverQuoteSent": "Price sent - waiting for the customer's answer.",
   "customerCounter": "The customer's counter",
@@ -3160,6 +3161,7 @@
   "finishShoppingConfirm": "Finish only when every item is decided and the rejected ones are cancelled. This locks the goods total.",
   "shoppingFinishedTitle": "Shopping finished - collect the delivery price plus the goods on delivery.",
   "driverInvoiceHint": "Add each item with its real price; the customer approves it before you buy it.",
+  "shoppingListTitle": "The customer's shopping list",
   "counterFloor": "The minimum is {floor} EGP: 15 for the first shop + 5 for each extra shop.",
   "@counterFloor": {
     "placeholders": {

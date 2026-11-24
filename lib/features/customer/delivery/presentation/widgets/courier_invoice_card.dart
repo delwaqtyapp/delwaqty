@@ -305,8 +305,8 @@ class InvoiceItemRow extends StatelessWidget {
   }
 
   /// The only storage hosts a receipt photo may load from: the
-  /// project's prod and staging Supabase refs over https. Anything else
-  /// shows as plain text (security review, PR #45).
+  /// project's prod and staging Supabase refs over https. A photo on any
+  /// other host never renders its link at all (security review, PR #45).
   static const _receiptHosts = {
     'bttnlkmwhorjamzemwda.supabase.co', // prod
     'adcgqoccrgauqdoplsgg.supabase.co', // staging

@@ -77,8 +77,7 @@ void main() {
         _item(
           quantity: 2,
           unit: 'kilo',
-          receiptPhotoUrl:
-              'https://proj.supabase.co/storage/v1/object/public/receipts/r.jpg',
+          receiptPhotoUrl: 'https://bttnlkmwhorjamzemwda.supabase.co/storage/v1/object/public/receipts/r.jpg',
         ),
       ], _FakeDeliveryRepository()),
     );

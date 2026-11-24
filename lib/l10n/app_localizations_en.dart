@@ -8801,6 +8801,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Shopping finished - collect the delivery price plus the goods on delivery.';
 
   @override
+  String get driverInvoiceHint =>
+      'Add each item with its real price; the customer approves it before you buy it.';
+
+  @override
   String counterFloor(String floor) {
     return 'The minimum is $floor EGP: 15 for the first shop + 5 for each extra shop.';
   }

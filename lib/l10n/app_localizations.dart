@@ -16604,6 +16604,12 @@ abstract class AppLocalizations {
   /// **'Shopping finished - collect the delivery price plus the goods on delivery.'**
   String get shoppingFinishedTitle;
 
+  /// No description provided for @driverInvoiceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add each item with its real price; the customer approves it before you buy it.'**
+  String get driverInvoiceHint;
+
   /// No description provided for @counterFloor.
   ///
   /// In en, this message translates to:

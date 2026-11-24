@@ -10,7 +10,8 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 /// - loading or error: NO money receipt at all - a failed or loading
 ///   stream must never fall back to the generic fare-only receipt,
 ///   which would hide the goods total of a completed courier ride.
-///   Error shows a retry.
+///   Error shows a retry on terminal rides; on a live ride the
+///   negotiation section already shows it, so nothing renders here.
 /// - data(null): the ride is proven to be a plain ride, so [fallback]
 ///   (the generic receipt) may render.
 /// - data(state): terminal rides get the ask-anything receipt (#212);
@@ -34,7 +35,9 @@ class CourierReceiptGate extends StatelessWidget {
   Widget build(BuildContext context) {
     return askAsync.when(
       loading: () => const SizedBox.shrink(),
-      error: (_, _) => AskStateLoadError(onRetry: onRetry),
+      error: (_, _) => isTerminal
+          ? AskStateLoadError(onRetry: onRetry)
+          : const SizedBox.shrink(),
       data: (askState) {
         if (askState != null) {
           return isTerminal

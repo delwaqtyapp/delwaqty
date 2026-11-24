@@ -304,16 +304,21 @@ class InvoiceItemRow extends StatelessWidget {
     );
   }
 
-  /// Render the receipt image only when it is an https URL on this
-  /// project's Supabase storage host; anything else shows as plain text
-  /// (security review, PR #45).
+  /// The only storage hosts a receipt photo may load from: the
+  /// project's prod and staging Supabase refs over https. Anything else
+  /// shows as plain text (security review, PR #45).
+  static const _receiptHosts = {
+    'bttnlkmwhorjamzemwda.supabase.co', // prod
+    'adcgqoccrgauqdoplsgg.supabase.co', // staging
+  };
+
   bool get _hasSafeReceipt {
     final url = item.receiptPhotoUrl;
     if (url == null || url.isEmpty) return false;
     final uri = Uri.tryParse(url);
     return uri != null &&
         uri.scheme == 'https' &&
-        uri.host.endsWith('.supabase.co');
+        _receiptHosts.contains(uri.host);
   }
 
   void _showReceipt(BuildContext context) {

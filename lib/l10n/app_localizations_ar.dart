@@ -8717,6 +8717,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'التسوق خلص - حصل سعر التوصيل + المشتريات عند التسليم.';
 
   @override
+  String get driverInvoiceHint =>
+      'ضيف كل صنف بسعره الحقيقي والعميل بيوافق عليه قبل ما تشتريه.';
+
+  @override
   String counterFloor(String floor) {
     return 'الحد الأدنى $floor جنيه: 15 لأول محل + 5 لكل محل زيادة.';
   }

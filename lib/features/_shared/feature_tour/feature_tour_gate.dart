@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/constants/storage_keys.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/features/_shared/feature_tour/feature_tour_page.dart';
@@ -10,31 +11,31 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 List<FeatureTourStep> buildCustomerTourSteps(AppLocalizations l10n) => [
   FeatureTourStep(
     icon: Icons.grid_view_rounded,
-    color: const Color(0xFF2E7D6B),
+    color: AppColors.tourTeal,
     title: l10n.customerTourStep1Title,
     body: l10n.customerTourStep1Body,
   ),
   FeatureTourStep(
     icon: Icons.electric_moped_rounded,
-    color: const Color(0xFF1565C0),
+    color: AppColors.tourBlue,
     title: l10n.customerTourStep2Title,
     body: l10n.customerTourStep2Body,
   ),
   FeatureTourStep(
     icon: Icons.map_rounded,
-    color: const Color(0xFF6A3FB5),
+    color: AppColors.tourPurple,
     title: l10n.customerTourStep3Title,
     body: l10n.customerTourStep3Body,
   ),
   FeatureTourStep(
     icon: Icons.account_balance_wallet_rounded,
-    color: const Color(0xFFC25E10),
+    color: AppColors.tourOrange,
     title: l10n.customerTourStep4Title,
     body: l10n.customerTourStep4Body,
   ),
   FeatureTourStep(
     icon: Icons.notifications_active_rounded,
-    color: const Color(0xFFB03A5B),
+    color: AppColors.tourRose,
     title: l10n.customerTourStep5Title,
     body: l10n.customerTourStep5Body,
   ),
@@ -44,31 +45,31 @@ List<FeatureTourStep> buildCustomerTourSteps(AppLocalizations l10n) => [
 List<FeatureTourStep> buildMerchantProductGuideSteps(AppLocalizations l10n) => [
   FeatureTourStep(
     icon: Icons.storefront_rounded,
-    color: const Color(0xFF2E7D6B),
+    color: AppColors.tourTeal,
     title: l10n.merchantGuideStep1Title,
     body: l10n.merchantGuideStep1Body,
   ),
   FeatureTourStep(
     icon: Icons.add_circle_outline_rounded,
-    color: const Color(0xFF1565C0),
+    color: AppColors.tourBlue,
     title: l10n.merchantGuideStep2Title,
     body: l10n.merchantGuideStep2Body,
   ),
   FeatureTourStep(
     icon: Icons.photo_camera_rounded,
-    color: const Color(0xFF6A3FB5),
+    color: AppColors.tourPurple,
     title: l10n.merchantGuideStep3Title,
     body: l10n.merchantGuideStep3Body,
   ),
   FeatureTourStep(
     icon: Icons.sell_rounded,
-    color: const Color(0xFFC25E10),
+    color: AppColors.tourOrange,
     title: l10n.merchantGuideStep4Title,
     body: l10n.merchantGuideStep4Body,
   ),
   FeatureTourStep(
     icon: Icons.check_circle_outline_rounded,
-    color: const Color(0xFF3E8E41),
+    color: AppColors.tourGreen,
     title: l10n.merchantGuideStep5Title,
     body: l10n.merchantGuideStep5Body,
   ),

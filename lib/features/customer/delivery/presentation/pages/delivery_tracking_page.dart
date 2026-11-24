@@ -14,7 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/widgets/courier_invoice_card.dart';
-import 'package:delwaqty/features/customer/delivery/presentation/widgets/courier_receipt_card.dart';
+import 'package:delwaqty/features/customer/delivery/presentation/widgets/courier_receipt_gate.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/widgets/courier_negotiation_card.dart';
 import 'package:delwaqty/features/customer/delivery/data/datasources/remote/delivery_trip_tracking_source.dart';
 import 'package:delwaqty/features/customer/ride/presentation/widgets/ride_map.dart';
@@ -210,7 +210,7 @@ class _TrackingBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final delivery = ref.watch(deliveryOrderByIdProvider(deliveryId)).value;
-    final askState = ref.watch(askAnythingRideProvider(deliveryId)).value;
+    final askAsync = ref.watch(askAnythingRideProvider(deliveryId));
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -230,20 +230,37 @@ class _TrackingBody extends ConsumerWidget {
           ),
         // Ask-anything (436): the price negotiation while the ride is
         // live, then the live itemized invoice once the price is locked.
-        if (askState != null && !ride.status.isTerminal) ...[
-          const SizedBox(height: 16),
-          AnimatedFadeIn(
-            delay: const Duration(milliseconds: 60),
-            child: CourierNegotiationCard(state: askState),
-          ),
-          if (askState.quoteLocked) ...[
-            const SizedBox(height: 16),
-            AnimatedFadeIn(
-              delay: const Duration(milliseconds: 70),
-              child: CourierInvoiceCard(state: askState),
+        if (!ride.status.isTerminal)
+          askAsync.when(
+            // A stream hiccup must not hide the negotiation: show a
+            // retry instead of falling back to a plain ride (#213).
+            loading: () => const SizedBox.shrink(),
+            error: (_, _) => Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: AskStateLoadError(
+                onRetry: () =>
+                    ref.invalidate(askAnythingRideProvider(deliveryId)),
+              ),
             ),
-          ],
-        ],
+            data: (askState) => askState == null
+                ? const SizedBox.shrink()
+                : Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      AnimatedFadeIn(
+                        delay: const Duration(milliseconds: 60),
+                        child: CourierNegotiationCard(state: askState),
+                      ),
+                      if (askState.quoteLocked) ...[
+                        const SizedBox(height: 16),
+                        AnimatedFadeIn(
+                          delay: const Duration(milliseconds: 70),
+                          child: CourierInvoiceCard(state: askState),
+                        ),
+                      ],
+                    ],
+                  ),
+          ),
         const SizedBox(height: 16),
         AnimatedFadeIn(
           delay: const Duration(milliseconds: 150),
@@ -266,16 +283,15 @@ class _TrackingBody extends ConsumerWidget {
         // Ask-anything rides get their own receipt once terminal (#212):
         // the agreed fare plus the approved invoice, never baseFare
         // alone. During the ride the live invoice card is the summary.
-        if (askState != null && ride.status.isTerminal)
-          AnimatedFadeIn(
-            delay: const Duration(milliseconds: 200),
-            child: CourierReceiptCard(state: askState),
-          )
-        else if (askState == null)
-          AnimatedFadeIn(
+        CourierReceiptGate(
+          askAsync: askAsync,
+          isTerminal: ride.status.isTerminal,
+          onRetry: () => ref.invalidate(askAnythingRideProvider(deliveryId)),
+          fallback: AnimatedFadeIn(
             delay: const Duration(milliseconds: 200),
             child: _ReceiptCard(ride: ride),
           ),
+        ),
       ],
     );
   }

@@ -283,7 +283,9 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
       unawaited(context.push('/delivery-tracking/${result.deliveryId}'));
     } catch (e) {
       if (mounted) {
-        context.showAppSnackBar(appErrorText(context, e), isError: true);
+        // 436 reasons (TOO_MANY_OPEN_RIDES, INVALID_ITEMS, ...) get
+        // their specific localized messages (#215).
+        context.showAppSnackBar(courierErrorText(context, e), isError: true);
       }
     } finally {
       if (mounted) setState(() => _submitting = false);

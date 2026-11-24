@@ -74,7 +74,12 @@ void main() {
   ) async {
     await tester.pumpWidget(
       _app([
-        _item(quantity: 2, unit: 'kilo', receiptPhotoUrl: 'https://x/r.jpg'),
+        _item(
+          quantity: 2,
+          unit: 'kilo',
+          receiptPhotoUrl:
+              'https://proj.supabase.co/storage/v1/object/public/receipts/r.jpg',
+        ),
       ], _FakeDeliveryRepository()),
     );
     await tester.pumpAndSettle();

@@ -22,9 +22,9 @@ class CourierInvoiceCard extends ConsumerStatefulWidget {
 }
 
 class _CourierInvoiceCardState extends ConsumerState<CourierInvoiceCard> {
-  /// The item whose decision RPC is in flight; its buttons stay disabled
-  /// until the server answers (#213).
-  String? _busyItemId;
+  /// The items whose decision RPCs are in flight; each item's buttons
+  /// stay disabled until its own server answer lands (#213).
+  final Set<String> _busyItemIds = {};
 
   AskAnythingRideState get state => widget.state;
 
@@ -125,8 +125,8 @@ class _CourierInvoiceCardState extends ConsumerState<CourierInvoiceCard> {
           ...items.map(
             (item) => InvoiceItemRow(
               item: item,
-              busy: _busyItemId == item.id,
-              onDecide: item.isPending
+              busy: _busyItemIds.contains(item.id),
+              onDecide: _canDecide(item)
                   ? (action) => _decide(item, action)
                   : null,
             ),
@@ -147,8 +147,17 @@ class _CourierInvoiceCardState extends ConsumerState<CourierInvoiceCard> {
     );
   }
 
+  /// Decisions are only possible while shopping is open on a live ride;
+  /// the server re-checks the same conditions.
+  bool _canDecide(CourierInvoiceItem item) =>
+      item.isPending &&
+      !state.shoppingFinished &&
+      (state.status == 'matched' || state.status == 'arrived') &&
+      !_busyItemIds.contains(item.id);
+
   Future<void> _decide(CourierInvoiceItem item, String action) async {
-    setState(() => _busyItemId = item.id);
+    if (!_canDecide(item)) return;
+    setState(() => _busyItemIds.add(item.id));
     try {
       await ref
           .read(deliveryRepositoryProvider)
@@ -160,7 +169,7 @@ class _CourierInvoiceCardState extends ConsumerState<CourierInvoiceCard> {
         ).showSnackBar(SnackBar(content: Text(courierErrorText(context, e))));
       }
     } finally {
-      if (mounted) setState(() => _busyItemId = null);
+      if (mounted) setState(() => _busyItemIds.remove(item.id));
     }
   }
 }
@@ -251,8 +260,7 @@ class InvoiceItemRow extends StatelessWidget {
                 ),
             ],
           ),
-          if (item.receiptPhotoUrl != null &&
-              item.receiptPhotoUrl!.isNotEmpty) ...[
+          if (_hasSafeReceipt) ...[
             const SizedBox(height: 6),
             InkWell(
               onTap: () => _showReceipt(context),
@@ -294,6 +302,18 @@ class InvoiceItemRow extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Render the receipt image only when it is an https URL on this
+  /// project's Supabase storage host; anything else shows as plain text
+  /// (security review, PR #45).
+  bool get _hasSafeReceipt {
+    final url = item.receiptPhotoUrl;
+    if (url == null || url.isEmpty) return false;
+    final uri = Uri.tryParse(url);
+    return uri != null &&
+        uri.scheme == 'https' &&
+        uri.host.endsWith('.supabase.co');
   }
 
   void _showReceipt(BuildContext context) {

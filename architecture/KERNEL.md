@@ -62,7 +62,7 @@ The Platform Kernel is the **logical core** of Delwaqty. It is NOT an operating 
 │                                                  │
 ├─────────────────────────────────────────────────┤
 │              PLUGIN LAYER                       │
-│  Restaurant │ Pharmacy │ Grocery │ Ride │ ...   │
+│  Restaurant │ Grocery  │ Bakery  │ ...         │
 └─────────────────────────────────────────────────┘
 ```
 

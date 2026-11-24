@@ -258,14 +258,6 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
     );
   }
 
-  bool _isPharmacyWorkspace() {
-    final profilesState = ref.read(providerProfilesProvider).value;
-    final cat = profilesState != null && profilesState.activeCategory.isNotEmpty
-        ? profilesState.activeCategory
-        : '';
-    return cat == 'pharmacy';
-  }
-
   bool _isServiceCategory(String category) =>
       isServiceProviderCategory(category);
 
@@ -583,13 +575,6 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
           icon: Icons.inventory_2_rounded,
           color: AppColors.brandPurple,
           onTap: () => context.push('/merchant-dashboard/products'),
-        ),
-      if (caps.contains(ProviderCapability.drugCatalog))
-        _QuickActionItem(
-          title: l10n.drugImportTitle,
-          icon: Icons.medication_rounded,
-          color: AppColors.infoLight,
-          onTap: () => context.push('/merchant-dashboard/drugs'),
         ),
       if (caps.contains(ProviderCapability.cashier))
         _QuickActionItem(

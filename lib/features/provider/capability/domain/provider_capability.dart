@@ -3,7 +3,7 @@
 /// Capabilities are a UX-composition layer ONLY. They never replace backend
 /// authorization (RLS / RPC / ownership / region scope). The canonical source
 /// of a provider's classification is the database:
-///   - `merchants.type`      (restaurant/food, pharmacy, grocery, marketplace,
+///   - `merchants.type`      (restaurant/food, grocery, marketplace,
 ///                            electronics, fashion, flowers, bakery, general)
 ///   - `service_providers.category_type` (plumbing, electrical, cleaning, ...)
 /// These DB literals are preserved and normalized to [ProviderCategory].
@@ -30,14 +30,12 @@ enum ProviderCapability {
   storefront,
   banners,
   inventory,
-  drugCatalog,
   barcode,
 }
 
 /// Canonical provider categories derived from the database vocabulary.
 enum ProviderCategory {
   restaurant,
-  pharmacy,
   grocery,
   marketplace,
   retail,
@@ -59,8 +57,6 @@ enum ProviderCategory {
       case 'restaurant':
       case 'cafe':
         return ProviderCategory.restaurant;
-      case 'pharmacy':
-        return ProviderCategory.pharmacy;
       case 'grocery':
       case 'supermarket':
         return ProviderCategory.grocery;
@@ -135,29 +131,6 @@ Set<ProviderCapability> resolveCapabilities(ProviderCategory category) {
         ProviderCapability.availability,
         ProviderCapability.deliveries,
         ProviderCapability.bookings,
-        ProviderCapability.verification,
-        ProviderCapability.wallet,
-        ProviderCapability.earnings,
-        ProviderCapability.commission,
-        ProviderCapability.financial,
-        ProviderCapability.notifications,
-        ProviderCapability.support,
-      };
-    case ProviderCategory.pharmacy:
-      return {
-        ProviderCapability.dashboard,
-        ProviderCapability.orders,
-        ProviderCapability.catalog,
-        ProviderCapability.cashier,
-        ProviderCapability.barcode,
-        ProviderCapability.drugCatalog,
-        ProviderCapability.inventory,
-        ProviderCapability.storefront,
-        ProviderCapability.banners,
-        ProviderCapability.branches,
-        ProviderCapability.offers,
-        ProviderCapability.reviews,
-        ProviderCapability.availability,
         ProviderCapability.verification,
         ProviderCapability.wallet,
         ProviderCapability.earnings,
@@ -242,7 +215,6 @@ Set<ProviderCapability> resolveCapabilities(ProviderCategory category) {
         ProviderCapability.storefront,
         ProviderCapability.banners,
         ProviderCapability.inventory,
-        ProviderCapability.drugCatalog,
         ProviderCapability.barcode,
       };
   }

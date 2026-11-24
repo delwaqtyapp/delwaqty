@@ -7,7 +7,7 @@
 
 ## What is a Plugin?
 
-A Plugin is a business capability that runs on top of the Platform Kernel. Plugins represent specific verticals (Restaurant, Pharmacy, Ride, etc.) that use Platform Engines to deliver their functionality.
+A Plugin is a business capability that runs on top of the Platform Kernel. Plugins represent specific verticals (Restaurant, Grocery, Courier, etc.) that use Platform Engines to deliver their functionality.
 
 ---
 
@@ -90,19 +90,7 @@ Register → Initialize → Activate → [Running] → Deactivate → Dispose
 | **Optional Engines** | AI (recommendations), Analytics (ordering patterns) |
 | **Permissions** | `merchant.create`, `order.create`, `delivery.track` |
 
-### Pharmacy Plugin
-
-| Aspect | Detail |
-|--------|--------|
-| **Capabilities** | Prescription management, medication catalog, delivery, consultation |
-| **Required Engines** | Identity, Commerce, Notifications |
-| **Optional Engines** | AI (drug interactions), Maps (delivery) |
-| **Permissions** | `merchant.create`, `order.create`, `prescription.manage` |
-
-### Ride Plugin
-
-| Aspect | Detail |
-|--------|--------|
+--------|--------|
 | **Capabilities** | Ride request, driver matching, real-time tracking, fare calculation |
 | **Required Engines** | Identity, Mobility, Maps, Payments, Notifications |
 | **Optional Engines** | AI (route optimization), Analytics (demand prediction) |

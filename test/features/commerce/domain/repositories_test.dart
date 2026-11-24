@@ -63,14 +63,14 @@ final _testMerchants = [
   ),
   Merchant(
     id: 'm3',
-    name: 'Al Nahdi',
-    type: MerchantType.pharmacy,
+    name: 'Al Forn',
+    type: MerchantType.bakery,
     latitude: 24.5,
     longitude: 46.7,
     city: 'Riyadh',
     rating: 4.8,
     isFeatured: true,
-    tags: ['pharmacy'],
+    tags: ['bakery'],
     createdAt: DateTime(2024),
   ),
   Merchant(
@@ -327,9 +327,9 @@ void main() {
     });
 
     test('getMerchantsByType returns matching merchants', () async {
-      final pharmacies = await repo.getMerchantsByType(MerchantType.pharmacy);
-      expect(pharmacies.length, 1);
-      expect(pharmacies.first.type, MerchantType.pharmacy);
+      final bakeries = await repo.getMerchantsByType(MerchantType.bakery);
+      expect(bakeries.length, 1);
+      expect(bakeries.first.type, MerchantType.bakery);
     });
   });
 

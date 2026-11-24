@@ -92,10 +92,8 @@ void main() {
 
     test('all service types', () {
       final types = [
-        'ride',
         'food_delivery',
         'grocery_delivery',
-        'pharmacy_delivery',
         'marketplace_delivery',
         'courier',
         'package_delivery',

@@ -44,9 +44,6 @@ abstract final class AppIcons {
   /// Icon for grocery merchants.
   static const IconData merchantGrocery = Icons.local_grocery_store_rounded;
 
-  /// Icon for pharmacy merchants.
-  static const IconData merchantPharmacy = Icons.local_pharmacy_rounded;
-
   /// Icon for electronics merchants.
   static const IconData merchantElectronics = Icons.devices_rounded;
 

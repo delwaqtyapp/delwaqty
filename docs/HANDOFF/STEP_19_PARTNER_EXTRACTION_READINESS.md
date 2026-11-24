@@ -20,11 +20,6 @@ Based on database and code inspection:
 - Order + delivery workflow
 - Time-based availability
 
-### Pharmacy
-- Medicine catalog
-- Prescription handling
-- Regulatory compliance
-
 ### Delivery
 - Driver/delivery operations
 - Trip lifecycle
@@ -66,7 +61,7 @@ Based on database and code inspection:
 ## Commission Architecture
 Current defaults:
 - Provider / Delivery = 7%
-- Restaurant / Pharmacy = 3%
+- Restaurant = 3%
 
 Future Partner App must:
 - Consume commission configuration from backend
@@ -78,7 +73,7 @@ Future Partner App must:
 Admin Delwaqty remains central authority for:
 - Platform Default
 - Provider Default / Delivery Default
-- Merchant Default / Restaurant Default / Pharmacy Default
+- Merchant Default / Restaurant Default
 - Per-entity overrides
 
 ## Partner vs Merchant
@@ -86,7 +81,6 @@ Do NOT assume every service provider is a merchant:
 - Service Provider: bookings, availability, scheduling
 - Merchant: catalog, inventory, orders
 - Restaurant: menu, food delivery, time-based
-- Pharmacy: medicine, prescriptions, regulatory
 - Delivery: trips, GPS, proof of delivery
 
 ## Workflows Overlap

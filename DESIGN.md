@@ -110,7 +110,7 @@ Source: `lib/core/theme/app_animation.dart`.
 
 ## Copy (ar-EG voice)
 
-- Egyptian Arabic, short and warm: "دوّر على أكل، ماركت، صيدلية…",
+- Egyptian Arabic, short and warm: "دوّر على أكل، ماركت…",
   "اطلب دلوقتي", "حاول تاني", "مش متاح حالياً".
 - Relative time on cards ("منذ ٣ دقائق"), machine formats
   (`yyyy-MM-dd HH:mm`) only in admin tables.

@@ -200,9 +200,9 @@ void main() {
         ),
         const PlatformCategory(
           id: 'c4',
-          name: 'صيدلية',
-          nameAr: 'صيدلية',
-          nameEn: 'Pharmacy',
+          name: 'حلويات',
+          nameAr: 'حلويات',
+          nameEn: 'Sweets',
           sortOrder: 3,
         ),
         const PlatformCategory(

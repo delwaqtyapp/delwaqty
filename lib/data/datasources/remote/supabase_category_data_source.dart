@@ -46,6 +46,7 @@ class SupabaseCategoryDataSource {
           .order('sort_order');
       return (data as List)
           .map((row) => _fromRow(row as Map<String, dynamic>))
+          .where(_isSupportedCategory)
           .toList();
     } catch (e, stack) {
       _logger.e('Failed to get active categories', e, stack);
@@ -53,11 +54,38 @@ class SupabaseCategoryDataSource {
     }
   }
 
+  /// Customer-facing category boundary: retired categories (e.g. the
+  /// pre-purge pharmacy row) must never render on discovery surfaces even
+  /// while a legacy is_active row still exists in the database. The DB
+  /// cleanup migration (431) deactivates the row; this is the client-side
+  /// guard. Terms mirror tool/pharmacy_purge_guard.sh.
+  static final RegExp _retiredCategoryTerms = RegExp(
+    'pharmac|صيدل|دواء|أدوية|دوائي|drug|medicine|medication|dosage|prescription|active_ingredient',
+    caseSensitive: false,
+  );
+
+  static bool _isSupportedCategory(PlatformCategory category) {
+    for (final value in [
+      category.id,
+      category.name,
+      category.nameEn,
+      category.nameAr,
+    ]) {
+      final v = value?.toLowerCase();
+      if (v == null) continue;
+      if (_retiredCategoryTerms.hasMatch(v)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   Future<List<PlatformCategory>> getAllCategories() async {
     try {
       final data = await _client.from(_tableName).select().order('sort_order');
       return (data as List)
           .map((row) => _fromRow(row as Map<String, dynamic>))
+          .where(_isSupportedCategory)
           .toList();
     } catch (e, stack) {
       _logger.e('Failed to get all categories', e, stack);
@@ -73,7 +101,10 @@ class SupabaseCategoryDataSource {
           .eq('id', id)
           .maybeSingle();
       if (data == null) return null;
-      return _fromRow(data);
+      final category = _fromRow(data);
+      // Fail closed on retired categories, same boundary as the lists.
+      if (!_isSupportedCategory(category)) return null;
+      return category;
     } catch (e, stack) {
       _logger.e('Failed to get category: $id', e, stack);
       rethrow;

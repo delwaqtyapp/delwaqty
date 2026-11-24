@@ -1023,8 +1023,6 @@ String _merchantTypeLabel(AppLocalizations l10n, String type) {
       return l10n.restaurant;
     case 'grocery':
       return l10n.grocery;
-    case 'pharmacy':
-      return l10n.pharmacy;
     case 'market':
       return l10n.market;
     case 'bakery':

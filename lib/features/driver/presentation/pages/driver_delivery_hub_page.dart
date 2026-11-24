@@ -835,7 +835,6 @@ class _CapabilitiesBottomSheetState
   static const _serviceTypes = [
     ('food_delivery', Icons.restaurant_rounded),
     ('grocery_delivery', Icons.shopping_cart_rounded),
-    ('pharmacy_delivery', Icons.local_pharmacy_rounded),
     ('marketplace_delivery', Icons.store_rounded),
     ('courier', Icons.local_shipping_rounded),
     ('package_delivery', Icons.inventory_2_rounded),
@@ -850,8 +849,6 @@ class _CapabilitiesBottomSheetState
         return l10n.food;
       case 'grocery_delivery':
         return l10n.grocery;
-      case 'pharmacy_delivery':
-        return l10n.pharmacy;
       case 'marketplace_delivery':
         return l10n.shopping;
       case 'courier':

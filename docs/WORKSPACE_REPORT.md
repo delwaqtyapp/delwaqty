@@ -221,7 +221,7 @@ GITHUB_REMOTE_URL=git@github.com:yourorg/delwaqty.git ./scripts/setup_git_remote
 - 8 repository interfaces + mock implementations
 - 7 reusable presentation widgets
 - 6 presentation screens
-- Supports: Food, Grocery, Pharmacy, Electronics, Furniture, Fashion, Flowers, Bakery
+- Supports: Food, Grocery, Electronics, Furniture, Fashion, Flowers, Bakery
 - Merchant-type agnostic — one codebase for all types
 
 ### Admin Panel

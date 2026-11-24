@@ -14,7 +14,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 /// Camera permission is requested explicitly so the merchant sees an Arabic
 /// explanation and a settings shortcut when access was denied permanently,
 /// instead of a dead preview. Typing the barcode by hand is always offered:
-/// phone cameras struggle with wrinkled pharmacy foil and dim shelves.
+/// phone cameras struggle with wrinkled foil and dim shelves.
 class BarcodeScannerPage extends StatefulWidget {
   const BarcodeScannerPage({super.key});
 
@@ -36,7 +36,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
   final MobileScannerController _controller = MobileScannerController(
     // One good read is enough; duplicates would pop the page twice.
     detectionSpeed: DetectionSpeed.noDuplicates,
-    // Retail/pharmacy reality: EAN-13/UPC on packaging, Code128 on shelves,
+    // Retail reality: EAN-13/UPC on packaging, Code128 on shelves,
     // QR on some suppliers. Leaving formats empty also enables PDF417 etc.
     // which mis-fires on IDs and cards, so keep the set explicit.
     formats: const [

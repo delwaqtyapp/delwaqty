@@ -28,11 +28,11 @@ One application. Unlimited services. Everyday needs.
 | Domain | Services |
 |--------|----------|
 | **Food** | Restaurants, Food Delivery |
-| **Commerce** | Marketplace, Buy & Sell, Electronics, Fashion, Furniture, Groceries, Pharmacy |
+| **Commerce** | Marketplace, Buy & Sell, Electronics, Fashion, Furniture, Groceries |
 | **Mobility** | Ride Hailing, Taxi, Courier |
 | **Services** | Cleaning, Laundry, Plumbing, Electricity, Air Conditioning, Pest Control |
 | **Travel** | Hotels, Travel Booking |
-| **Health** | Medical Appointments, Pharmacy |
+| **Health** | Medical Appointments |
 | **Finance** | Wallet, Payments, Bills, QR, Subscriptions |
 | **Engagement** | Offers, Coupons |
 | **Intelligence** | AI Assistant |
@@ -365,7 +365,7 @@ The Platform Kernel is organized around reusable Engines. Each Engine owns a cro
 
 Every business capability becomes a Plugin. Plugins communicate only through Platform APIs.
 
-**Plugin Examples:** Restaurant, Pharmacy, Grocery, Marketplace, Cars, Furniture, Electronics, Home Services, Laundry, Cleaning, Ride, Courier, Travel, Hotels, Medical, Bills, Wallet.
+**Plugin Examples:** Restaurant, Grocery, Marketplace, Cars, Furniture, Electronics, Home Services, Laundry, Cleaning, Courier, Travel, Hotels, Medical, Bills, Wallet.
 
 **Plugin Rules:**
 - No Plugin may bypass the Platform Kernel

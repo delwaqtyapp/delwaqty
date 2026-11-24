@@ -422,9 +422,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get seafood => 'مأكولات بحرية';
 
   @override
-  String get pharmacy => 'الصيدلية';
-
-  @override
   String get bakery => 'المخبوزات';
 
   @override
@@ -829,12 +826,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get provManageItems => 'إدارة الأصناف';
-
-  @override
-  String get provTabMedicines => 'الأدوية';
-
-  @override
-  String get provManageMedicines => 'إدارة الأدوية';
 
   @override
   String get provTabTableBookings => 'حجز الطاولات';
@@ -2873,7 +2864,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get placeDescription => 'اشرح عنوان المكان';
 
   @override
-  String get placeDescriptionHint => 'مثال: جنب الصيدلية، عماره ٥، شقه ٣';
+  String get placeDescriptionHint => 'مثال: جنب السوبر ماركت، عماره ٥، شقه ٣';
 
   @override
   String get customerPhone => 'رقم التليفون';
@@ -3097,7 +3088,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get aboutDescription =>
-      'دلوقتي هو تطبيقك الشامل للخدمات والتوصيل. نوصلك بأفضل المطاعم والصيدليات والمتاجر في منطقتك لخدمة سريعة وموثوقة.';
+      'دلوقتي هو تطبيقك الشامل للخدمات والتوصيل. نوصلك بأفضل المطاعم والمتاجر في منطقتك لخدمة سريعة وموثوقة.';
 
   @override
   String get supportEmailAddress => 'support@delwaqty.com';
@@ -3276,7 +3267,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get tosSection2Body =>
-      'توفر دلوقتي منصة حسب الطلب تربط المستخدمين بالمطاعم والصيدليات والمتاجر ومزودي خدمات التوصيل المحليين لتوصيل الطعام، وتوصيل الطلبات، وخدمات التوصيل. نعمل كوسيط بين العملاء ومزودي الخدمات ولا نقدم خدمات التوصيل بأنفسنا.';
+      'توفر دلوقتي منصة حسب الطلب تربط المستخدمين بالمطاعم والمتاجر ومزودي خدمات التوصيل المحليين لتوصيل الطعام، وتوصيل الطلبات، وخدمات التوصيل. نعمل كوسيط بين العملاء ومزودي الخدمات ولا نقدم خدمات التوصيل بأنفسنا.';
 
   @override
   String get tosSection3Title => '3. حسابات المستخدمين';
@@ -3510,9 +3501,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get typeGrocery => 'بقالة';
-
-  @override
-  String get typePharmacy => 'صيدلية';
 
   @override
   String get typeFlowers => 'زهور';
@@ -4394,15 +4382,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get preparationTime => 'وقت التحضير';
 
   @override
-  String get dosageForm => 'شكل الجرعة';
-
-  @override
-  String get activeIngredient => 'المادة الفعالة';
-
-  @override
-  String get prescriptionRequired => 'يتطلب وصفة طبية';
-
-  @override
   String get warnings => 'تحذيرات';
 
   @override
@@ -5011,9 +4990,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get commissionCategoryRestaurant => 'المطاعم';
-
-  @override
-  String get commissionCategoryPharmacy => 'الصيدليات';
 
   @override
   String get commissionCategoryGrocery => 'البقالة';
@@ -7687,7 +7663,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get searchHintServices => 'ابحث عن خدمة أو صيانة...';
 
   @override
-  String get searchHintDelivery => 'ابحث عن صيدلية أو توصيل...';
+  String get searchHintDelivery => 'ابحث عن أكل أو توصيل...';
 
   @override
   String get orderNowFast => 'اطلب الآن وسيصلك المندوب فوراً';
@@ -7866,24 +7842,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get posNoProducts => 'لا توجد منتجات قابلة للبيع بعد';
-
-  @override
-  String get drugImportTitle => 'دليل الأدوية';
-
-  @override
-  String get drugImportSearchHint => 'ابحث بالاسم أو المادة الفعالة...';
-
-  @override
-  String get drugImportAction => 'أضف للمخزون';
-
-  @override
-  String get drugImportSuccess => 'تمت الإضافة إلى منتجاتك';
-
-  @override
-  String get drugImportFailed => 'فشل الاستيراد';
-
-  @override
-  String get drugImportInvalidPrice => 'أدخل سعرًا صحيحًا';
 
   @override
   String get each => 'للقطعة';
@@ -8076,12 +8034,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get posScanAdded => 'تمت الإضافة إلى السلة';
-
-  @override
-  String get posDrugFoundTitle => 'موجود في كتالوج الأدوية';
-
-  @override
-  String get posDrugImportAdd => 'استيراد وإضافة';
 
   @override
   String get posQuickAddTitle => 'منتج جديد لهذا الباركود';

@@ -10,7 +10,7 @@ DELWAQTY - GLOBAL SUPER PLATFORM
 
 ## Project Vision
 
-Delwaqty is a **Global Super Platform** — a "Service Operating System" where every service (commerce, delivery, payments, maps, AI) is a plug-in on a shared platform kernel. Think of it as a super-app that unifies food delivery, grocery, pharmacy, electronics, furniture, fashion, flowers, and bakery into one platform with shared infrastructure.
+Delwaqty is a **Global Super Platform** — a "Service Operating System" where every service (commerce, delivery, payments, maps, AI) is a plug-in on a shared platform kernel. Think of it as a super-app that unifies food delivery, grocery, electronics, furniture, fashion, flowers, and bakery into one platform with shared infrastructure.
 
 **Target Markets:** Middle East (Arabic + English)
 **Platform:** Mobile-first (Android, iOS) with web and desktop support

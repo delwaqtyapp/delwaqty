@@ -194,7 +194,7 @@ Define abstract interfaces for all external services. Concrete implementations a
 **Deciders:** Core team
 
 ### Context
-The commerce engine needs to support restaurants, grocery stores, pharmacies, electronics, furniture, fashion, and future merchant types — without code branching per type.
+The commerce engine needs to support restaurants, grocery stores, electronics, furniture, fashion, and future merchant types — without code branching per type.
 
 ### Decision
 Build a single, type-agnostic commerce engine. MerchantType is a data flag that drives display labels/icons only, not business logic branches.
@@ -671,7 +671,7 @@ Portable toolchain under `E:\app\` with environment variables set per-session. F
 
 ### Context
 
-Through M6 the platform had a complete ride-hailing ecosystem but no delivery capability. M7 required supporting food, grocery, pharmacy, marketplace, courier, package, document, flower, and retail delivery — without duplicating the dispatch engine, driver platform, wallet, realtime, or tracking infrastructure already built.
+Through M6 the platform had a complete ride-hailing ecosystem but no delivery capability. M7 required supporting food, grocery, marketplace, courier, package, document, flower, and retail delivery — without duplicating the dispatch engine, driver platform, wallet, realtime, or tracking infrastructure already built.
 
 ### Decision
 
@@ -3446,18 +3446,18 @@ After ADR-093/095/096 the ratings entry was the compact gold STAR icon (AppBar +
 **Deciders:** Owner (finish round-49 gaps) + Lead Architect
 
 ### Context
-Round 49 rated provider cards and restaurants, but a live audit (DB + code) found two remaining gaps: (1) generic merchants (pharmacy, grocery, bakery, food, butcher) could NOT write reviews — `merchant_detail_page.dart` showed a READ-ONLY reviews block that is hidden entirely when empty (`SizedBox.shrink()`) and had no star entry; (2) eight home-labor categories (pestControl, painting, dishRepair, applianceRepair, carpetCleaning, pipeChange, plastering, acMaintenance) exist in `service_categories` (17 total) but have NO providers and NO seeded reviews, so their category reviews pages were empty.
+Round 49 rated provider cards and restaurants, but a live audit (DB + code) found two remaining gaps: (1) generic merchants (grocery, bakery, food, butcher) could NOT write reviews — `merchant_detail_page.dart` showed a READ-ONLY reviews block that is hidden entirely when empty (`SizedBox.shrink()`) and had no star entry; (2) eight home-labor categories (pestControl, painting, dishRepair, applianceRepair, carpetCleaning, pipeChange, plastering, acMaintenance) exist in `service_categories` (17 total) but have NO providers and NO seeded reviews, so their category reviews pages were empty.
 
 ### Decision
 (1) **Star on every merchant detail page.** `merchant_detail_page.dart` SliverAppBar gained a gold star action (tooltip `l10n.reviews`) before the `CartBadge` that pushes `/restaurant/{merchantId}/reviews` — the existing generic merchant reviews page (paginated list + 5-star write sheet + summary), reused from ADR-093/095. Every merchant type now has a write-capable rating entry.
-(2) **Migration 086 applied LIVE.** (a) Eight category-level `service_reviews` seeds — one per home-labor category, named reviewers, `provider_id` NULL, `user_id` NULL (anonymous, like the existing demo seeds). Postgres UNIQUE treats NULLs as distinct, so multiple category-level anonymous rows for the same category never conflict under `uq_service_reviews_user`. (b) One real merchant review per remaining type (pharmacy, grocery, bakery, food) inserted into the commerce `reviews` table.
+(2) **Migration 086 applied LIVE.** (a) Eight category-level `service_reviews` seeds — one per home-labor category, named reviewers, `provider_id` NULL, `user_id` NULL (anonymous, like the existing demo seeds). Postgres UNIQUE treats NULLs as distinct, so multiple category-level anonymous rows for the same category never conflict under `uq_service_reviews_user`. (b) One real merchant review per remaining type (grocery, bakery, food) inserted into the commerce `reviews` table.
 
 ### Rationale
 - Reuse > rebuild: the merchant reviews page, repository, and write sheet already existed and are merchant-generic (keyed only by merchantId) — only the entry point was missing on the generic merchant page.
 - The unique index decision in ADR-095 naturally supports category-level anonymous seeds; no schema change was needed to cover the 8 provider-less categories.
 
 ### Consequences
-- Coverage is now complete and verified live: **17/17** service categories have reviews rows and a reachable reviews UI; **all 6** merchant types (restaurant ×2, pharmacy ×1, grocery ×1, bakery ×1, food ×1, butcher ×1) show real merchant reviews.
+- Coverage is now complete and verified live: **17/17** service categories have reviews rows and a reachable reviews UI; **all 5** merchant types (restaurant ×2, grocery ×1, bakery ×1, food ×1, butcher ×1) show real merchant reviews.
 - A reviewer can still rate a home-labor category at category level (providerId NULL scope); per-provider ratings will become available automatically the moment a provider is added for those categories.
 - Gate: `flutter analyze` **0 issues**; `flutter test` **941/941**; APK `releases/delwaqty_1.0.0+1_debug_20260924_1940.apk` installed + relaunched clean (pid 28397) — logcat NO RenderFlex/FATAL.
 
@@ -3985,7 +3985,7 @@ The user's «صفحه ال Services» is the providers page (`ServiceProvidersPa
 **Deciders:** Lead Software Architect (after user request «مفيش فيها غير بعض الخدمات ومتحطش فيها كل الى فى Main Categories... خلى الزر سيمبل بدون الوان حواليه»)
 
 ### Context
-The `/services` (All Services) page rendered only the 16 booking categories via `cachedServiceBookingRepositoryProvider.getCategories()` — a data set completely separate from the home «الفئات الرئيسية» strip, which merges `activeCategoriesProvider` (platform categories: restaurants, grocery, bakery, pharmacy, produce, cafe…) with the booking services. The page therefore looked like a partial list and never contained the Main Categories the user sees on Home. Additionally, the ROUND-63 vivid-gradient tile (colored rounded-square with a white icon circle + star overlay) read as «colored square / not the best shape», and the user asked for a plain button.
+The `/services` (All Services) page rendered only the 16 booking categories via `cachedServiceBookingRepositoryProvider.getCategories()` — a data set completely separate from the home «الفئات الرئيسية» strip, which merges `activeCategoriesProvider` (platform categories: restaurants, grocery, bakery, produce, cafe…) with the booking services. The page therefore looked like a partial list and never contained the Main Categories the user sees on Home. Additionally, the ROUND-63 vivid-gradient tile (colored rounded-square with a white icon circle + star overlay) read as «colored square / not the best shape», and the user asked for a plain button.
 
 ### Decision
 1. **One merged provider** `_allCategoriesProvider` in `all_services_page.dart`: awaits `activeCategoriesProvider.future` first (sorted by the shared `categoryRank` daily-demand order) and then the booking repo list (sorted by the fixed priority) — with graceful degradation (platform failure → services-only, so the page still works fully offline for booking). The provider therefore stays in `loading` until BOTH sources settle; no "partial-then-full" flash.

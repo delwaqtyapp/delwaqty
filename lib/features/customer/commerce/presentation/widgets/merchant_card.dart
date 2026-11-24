@@ -27,8 +27,6 @@ class MerchantCard extends StatelessWidget {
         return l10n.typeMeat;
       case MerchantType.seafood:
         return l10n.typeSeafood;
-      case MerchantType.pharmacy:
-        return l10n.typePharmacy;
       case MerchantType.flowers:
         return l10n.typeFlowers;
       case MerchantType.bakery:
@@ -92,8 +90,6 @@ class MerchantCard extends StatelessWidget {
         return Icons.set_meal;
       case MerchantType.seafood:
         return Icons.phishing;
-      case MerchantType.pharmacy:
-        return Icons.local_pharmacy;
       case MerchantType.bakery:
         return Icons.bakery_dining;
       case MerchantType.sweets:

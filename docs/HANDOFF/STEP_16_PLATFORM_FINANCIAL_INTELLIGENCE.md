@@ -105,7 +105,7 @@ All 14 RPCs return data for owner ✅
 ## Live DB State
 
 - 17 users (16 customers, 1 provider)
-- 9 merchants (5 food, 2 grocery, 1 pharmacy, 1 bakery)
+- 8 merchants (5 food, 2 grocery, 1 bakery)
 - 1 complaint (pending), 1 escalation
 - 0 orders, 0 rides, 0 wallets, 0 commissions (empty financial tables)
 - Commission rules: 19 active (7% provider/driver + 3% merchant + per-category)

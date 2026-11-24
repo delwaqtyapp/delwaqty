@@ -44,7 +44,7 @@ Unified visual identity layer with semantic tokens.
 | Core Brand | primaryLight/Dark, secondaryLight/Dark, tertiaryLight/Dark, errorLight/Dark |
 | Semantic | success, warning, info, link (light/dark variants) |
 | Surface Variants | surface, surfaceDim, surfaceBright, surfaceContainer (lowest/low/mid/high/highest) |
-| Merchant Types | food, grocery, pharmacy, electronics, fashion, furniture |
+| Merchant Types | food, grocery, electronics, fashion, furniture |
 | Order Status | pending, confirmed, preparing, ready, inTransit, delivered, cancelled |
 | Rating | amber star rating color |
 
@@ -232,7 +232,7 @@ Widgets: MerchantCard, ProductCard, CartBadge, RatingStars, PriceTag, DeliveryIn
 Screens: CommerceDiscoveryPage, MerchantDetailPage, ProductDetailPage, CartPage, CheckoutPage, OrdersPage
 
 ### Supported Merchant Types
-Food (restaurants), Grocery, Pharmacy, Electronics, Furniture, Fashion, Flowers, Bakery
+Food (restaurants), Grocery, Electronics, Furniture, Fashion, Flowers, Bakery
 
 ---
 

@@ -12,8 +12,6 @@ import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
-import 'package:delwaqty/features/provider/capability/domain/provider_capability.dart';
-import 'package:delwaqty/features/provider/capability/presentation/providers/provider_capability_providers.dart';
 import 'package:delwaqty/features/provider/merchant/domain/pos_product_lookup.dart';
 import 'package:delwaqty/features/provider/merchant/merchant_module.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/pages/barcode_scanner_page.dart';
@@ -219,9 +217,7 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
 
   /// Handles a scanned or typed barcode in priority order:
   /// 1. exact match in the store's own products -> add to cart;
-  /// 2. pharmacy accounts: match in the shared drug catalog -> import with
-  ///    the official MoH price pre-filled, then add;
-  /// 3. otherwise offer quick product creation with the barcode pre-filled.
+  /// 2. otherwise offer quick product creation with the barcode pre-filled.
   Future<void> _onBarcode(String code) async {
     final l10n = AppLocalizations.of(context);
     final barcode = normalizeBarcode(code);
@@ -251,161 +247,7 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
       return;
     }
 
-    if (ref.read(providerCategoryProvider) == ProviderCategory.pharmacy) {
-      final drug = await _findDrugByBarcode(barcode);
-      if (!mounted) return;
-      if (drug != null) {
-        await _confirmDrugImport(drug, barcode);
-        return;
-      }
-    }
-
     await _quickAddProduct(barcode);
-  }
-
-  /// Barcode lookup into the shared drug catalog (drug_catalog.barcode).
-  Future<Map<String, dynamic>?> _findDrugByBarcode(String barcode) async {
-    try {
-      final rows = await Supabase.instance.client
-          .from('drug_catalog')
-          .select(
-            'id, name_en, name_ar, strength, dosage_form, official_price_egp',
-          )
-          .eq('is_active', true)
-          .eq('barcode', barcode)
-          .limit(1);
-      final list = (rows as List).cast<Map<String, dynamic>>();
-      return list.isEmpty ? null : list.first;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  /// Pharmacy path: confirm importing a catalog drug scanned at the till.
-  /// pharmacy_import_drug is idempotent per store (it returns the existing
-  /// product on a duplicate barcode), so a double scan stays safe.
-  Future<void> _confirmDrugImport(
-    Map<String, dynamic> drug,
-    String barcode,
-  ) async {
-    final l10n = AppLocalizations.of(context);
-    final official = (drug['official_price_egp'] as num?)?.toDouble();
-    final priceCtrl = TextEditingController(
-      text: official != null ? official.toStringAsFixed(2) : '',
-    );
-    final stockCtrl = TextEditingController(text: '0');
-    final nameEn = (drug['name_en'] ?? '').toString();
-    final strength = (drug['strength'] ?? '').toString();
-    final nameAr = (drug['name_ar'] ?? '').toString();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(AppLocalizations.of(ctx).posDrugFoundTitle),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              '$nameEn${strength.isEmpty ? '' : ' $strength'}',
-              style: AppTextStyles.titleMedium,
-            ),
-            if (nameAr.isNotEmpty) Text(nameAr),
-            const SizedBox(height: AppSpacing.md),
-            TextField(
-              controller: priceCtrl,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: InputDecoration(
-                labelText:
-                    '${AppLocalizations.of(ctx).price} (${AppLocalizations.of(ctx).currencySymbol})',
-                border: const OutlineInputBorder(),
-                isDense: true,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            TextField(
-              controller: stockCtrl,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: AppLocalizations.of(ctx).quantity,
-                border: const OutlineInputBorder(),
-                isDense: true,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(AppLocalizations.of(ctx).cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(AppLocalizations.of(ctx).posDrugImportAdd),
-          ),
-        ],
-      ),
-    );
-    final priceText = priceCtrl.text.trim();
-    final stockText = stockCtrl.text.trim();
-    // The dialog route is still animating out and rebuilding its fields;
-    // dispose the controllers only after it has fully closed.
-    unawaited(
-      Future<void>.delayed(const Duration(milliseconds: 400), () {
-        priceCtrl.dispose();
-        stockCtrl.dispose();
-      }),
-    );
-    if (confirmed != true || !mounted) return;
-
-    final messenger = ScaffoldMessenger.of(context);
-    try {
-      final merchantId = await ref.read(providerMerchantIdProvider.future);
-      final price = double.tryParse(priceText);
-      final stock = int.tryParse(stockText) ?? 0;
-      if (price == null || price < 0) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.drugImportInvalidPrice),
-            backgroundColor: AppColors.errorLight,
-          ),
-        );
-        return;
-      }
-      await Supabase.instance.client.rpc(
-        'pharmacy_import_drug',
-        params: {
-          'p_drug_id': drug['id'],
-          'p_merchant_id': merchantId,
-          'p_price': price,
-          'p_stock': stock,
-        },
-      );
-      if (!mounted) return;
-      ref.invalidate(merchantProductsProvider);
-      await _addFreshProductByBarcode(merchantId, barcode);
-    } catch (e) {
-      if (!mounted) return;
-      // Lost a race with another till importing the same drug: the unique
-      // index rejected the insert (the server also maps this to
-      // duplicate:true), so just re-read and add the product that won.
-      final msg = e.toString();
-      if (msg.contains('products_merchant_barcode_uq') ||
-          msg.contains('duplicate key')) {
-        try {
-          final merchantId = await ref.read(providerMerchantIdProvider.future);
-          if (!mounted) return;
-          ref.invalidate(merchantProductsProvider);
-          await _addFreshProductByBarcode(merchantId, barcode);
-        } catch (_) {}
-        return;
-      }
-      _showSnack(
-        '${l10n.drugImportFailed}: ${appErrorText(context, e)}',
-        isError: true,
-      );
-    }
   }
 
   /// Unknown barcode: let the merchant create the product on the spot with
@@ -657,9 +499,9 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
                     // Scanner, manual sheet and typed submit all funnel
                     // through the same handler. A typed value counts as a
                     // barcode when it matches a product barcode exactly, or
-                    // when it is a bare numeric code worth looking up in the
-                    // drug catalog / quick-create (a name search stays a
-                    // search: onChanged already filters the grid).
+                    // when it is a bare numeric code worth quick-creating
+                    // (a name search stays a search: onChanged already
+                    // filters the grid).
                     onSubmitted: (v) {
                       final q = normalizeBarcode(v);
                       if (q.isEmpty) return;

@@ -78,7 +78,7 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
       MerchantType.carwash,
       MerchantType.gas,
     },
-    {MerchantType.pharmacy, MerchantType.fitness},
+    {MerchantType.fitness},
   ];
 
   @override

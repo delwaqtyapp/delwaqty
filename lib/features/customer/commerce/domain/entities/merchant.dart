@@ -16,8 +16,6 @@ enum MerchantType {
   meat,
   @JsonValue('seafood')
   seafood,
-  @JsonValue('pharmacy')
-  pharmacy,
   @JsonValue('bakery')
   bakery,
   @JsonValue('sweets')
@@ -71,7 +69,9 @@ abstract class Merchant with _$Merchant {
   const factory Merchant({
     required String id,
     required String name,
-    required MerchantType type,
+    // Rows or cached payloads written before a type was retired must decode
+    // without throwing; the data source filters retired types out entirely.
+    @JsonKey(unknownEnumValue: MerchantType.other) required MerchantType type,
     required double latitude,
     required double longitude,
     String? address,
@@ -95,4 +95,14 @@ abstract class Merchant with _$Merchant {
 
   factory Merchant.fromJson(Map<String, dynamic> json) =>
       _$MerchantFromJson(json);
+}
+
+/// True when a serialized merchant payload carries a currently supported
+/// type. Retired or unknown types (e.g. pre-purge pharmacy caches) return
+/// false so callers drop the payload instead of decoding a retired merchant
+/// into a generic one.
+bool isSupportedMerchantJson(Map<String, dynamic> json) {
+  final raw = (json['type'] as String?)?.trim();
+  if (raw == null || raw.isEmpty) return false;
+  return MerchantType.values.any((t) => t.name == raw);
 }

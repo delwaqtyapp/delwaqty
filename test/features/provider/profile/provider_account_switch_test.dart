@@ -195,16 +195,16 @@ void main() {
         expect(repo.serviceCalls, ['sp-plumbing']);
         expect(repo.bookingCalls, ['sp-plumbing']);
 
-        // Sign A out, sign B in: a pharmacy shop.
+        // Sign A out, sign B in: a grocery shop.
         directory['uid-b'] = ProviderProfilesState(
-          activeCategory: 'pharmacy',
-          profiles: [businessProfile('pharmacy', merchantId: 'm-1')],
+          activeCategory: 'grocery',
+          profiles: [businessProfile('grocery', merchantId: 'm-1')],
         );
         auth.signInAs('uid-b');
 
         profile = await currentProfile();
-        expect(profile.family, ProviderFamily.pharmacy);
-        expect(profile.category, ProviderCategory.pharmacy);
+        expect(profile.family, ProviderFamily.retail);
+        expect(profile.category, ProviderCategory.grocery);
         expect(
           profile.tabs,
           containsAllInOrder([
@@ -217,7 +217,6 @@ void main() {
         );
         // B's guard: cashier opens, plumber surfaces close.
         expect(profile.allowsRoute('/provider-cashier'), isTrue);
-        expect(profile.allowsRoute('/merchant-dashboard/drugs'), isTrue);
         expect(profile.allowsRoute('/provider-services'), isFalse);
         expect(profile.allowsRoute('/provider-bookings'), isFalse);
 

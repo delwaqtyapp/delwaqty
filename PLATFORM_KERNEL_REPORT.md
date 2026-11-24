@@ -68,7 +68,6 @@ Register → Initialize → Activate → [Running] → Deactivate → Dispose
 | Plugin | Required Engines | Optional Engines |
 |--------|-----------------|-----------------|
 | Restaurant | Identity, Commerce, Maps, Notifications, Payments | AI, Analytics |
-| Pharmacy | Identity, Commerce, Notifications | AI, Maps |
 | Ride | Identity, Mobility, Maps, Payments, Notifications | AI, Analytics |
 | Marketplace | Identity, Commerce, Search | AI, Analytics |
 

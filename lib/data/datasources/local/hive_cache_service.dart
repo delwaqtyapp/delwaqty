@@ -82,12 +82,17 @@ class HiveCacheService {
   }) {
     try {
       if (_isStale('merchants_$key', ttl: ttl)) return [];
-      return _merchants.values.where((m) => m.containsKey('cached_at')).map((
-        m,
-      ) {
-        final json = Map<String, dynamic>.from(m)..remove('cached_at');
-        return Merchant.fromJson(json);
-      }).toList();
+      // Skip payloads written before a merchant type was retired: they must
+      // never come back as generic merchants if this cache gains callers.
+      return _merchants.values
+          .where((m) => m.containsKey('cached_at'))
+          .map((m) {
+            final json = Map<String, dynamic>.from(m)..remove('cached_at');
+            return json;
+          })
+          .where(isSupportedMerchantJson)
+          .map(Merchant.fromJson)
+          .toList();
     } catch (e) {
       _logger.e('Get cached merchants failed', e);
       return [];

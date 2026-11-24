@@ -721,7 +721,9 @@ class _ShoppingDone extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    l10n.shoppingFinishedTitle,
+                    cancelled
+                        ? l10n.courierCancelledRecordsTitle
+                        : l10n.shoppingFinishedTitle,
                     style: AppTextStyles.bodyMedium.copyWith(
                       color: cs.onSurface,
                     ),

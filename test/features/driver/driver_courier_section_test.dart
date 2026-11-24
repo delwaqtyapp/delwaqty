@@ -132,9 +132,15 @@ void main() {
       // Records stay visible: fare and goods lines with cents.
       expect(find.text('45.00 EGP'), findsOneWidget);
       expect(find.text('55.50 EGP'), findsOneWidget);
-      // No collection instruction and no amount due.
+      // No collection instruction and no amount due: neither the total
+      // nor the collect-instruction title may render.
       expect(find.text('100.50 EGP'), findsNothing);
-      expect(find.textContaining('problem report'), findsOneWidget);
+      expect(find.textContaining('collect the delivery price'), findsNothing);
+      expect(
+        find.textContaining('Ride cancelled - shopping records'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('problem report'), findsWidgets);
     },
   );
 

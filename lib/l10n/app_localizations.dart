@@ -16610,6 +16610,12 @@ abstract class AppLocalizations {
   /// **'Shopping finished - collect the delivery price plus the goods on delivery.'**
   String get shoppingFinishedTitle;
 
+  /// No description provided for @courierCancelledRecordsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride cancelled - shopping records below, settlement goes through the problem report.'**
+  String get courierCancelledRecordsTitle;
+
   /// No description provided for @driverInvoiceHint.
   ///
   /// In en, this message translates to:

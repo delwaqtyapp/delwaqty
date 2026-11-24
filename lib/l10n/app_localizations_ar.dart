@@ -8721,6 +8721,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'التسوق خلص - حصل سعر التوصيل + المشتريات عند التسليم.';
 
   @override
+  String get courierCancelledRecordsTitle =>
+      'الرحلة اتلغت - سجل المشتريات تحت، والتسوية بتتم من بلاغ المشكلة.';
+
+  @override
   String get driverInvoiceHint =>
       'ضيف كل صنف بسعره الحقيقي والعميل بيوافق عليه قبل ما تشتريه.';
 

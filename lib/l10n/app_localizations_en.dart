@@ -8805,6 +8805,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Shopping finished - collect the delivery price plus the goods on delivery.';
 
   @override
+  String get courierCancelledRecordsTitle =>
+      'Ride cancelled - shopping records below, settlement goes through the problem report.';
+
+  @override
   String get driverInvoiceHint =>
       'Add each item with its real price; the customer approves it before you buy it.';
 

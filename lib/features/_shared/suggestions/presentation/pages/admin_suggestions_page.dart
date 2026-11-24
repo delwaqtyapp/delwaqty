@@ -486,6 +486,14 @@ class _SuggestionTriageSheetState
         );
         return;
       }
+      if (link.length > 500) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context).suggestionLinkTooLong),
+          ),
+        );
+        return;
+      }
     }
     setState(() => _saving = true);
     final l10n = AppLocalizations.of(context);
@@ -494,20 +502,18 @@ class _SuggestionTriageSheetState
     try {
       final repo = ref.read(suggestionsRepositoryProvider);
       final note = _noteController.text.trim();
-      // An empty note is sent as NULL, which clears a previous note.
-      await repo.adminUpdateSuggestionStatus(
+      // One atomic triage write: status + note + (changed) link land or
+      // roll back together, so a failed save never leaves a half-saved row.
+      // An empty note is sent as NULL, which clears a previous note. The
+      // link is touched only when it changed, so a status-only save never
+      // stamps a link write.
+      await repo.adminTriageSuggestion(
         widget.suggestion.id,
         _selectedStatus,
         resolutionNote: note.isEmpty ? null : note,
+        linkedUrl: link.isEmpty ? null : link,
+        updateLink: link != (widget.suggestion.linkedUrl ?? ''),
       );
-      // Only touch the link when it changed, so a status-only save never
-      // stamps a link write.
-      if (link != (widget.suggestion.linkedUrl ?? '')) {
-        await repo.adminSetSuggestionLink(
-          widget.suggestion.id,
-          link.isEmpty ? null : link,
-        );
-      }
       widget.onStatusChanged();
       if (mounted) navigator.pop();
     } catch (e) {

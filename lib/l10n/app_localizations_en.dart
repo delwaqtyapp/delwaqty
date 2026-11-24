@@ -3830,6 +3830,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter a valid https link or leave it empty';
 
   @override
+  String get suggestionLinkTooLong => 'Link must be 500 characters or fewer';
+
+  @override
   String get adminSuggestionsTitle => 'User Suggestions';
 
   @override

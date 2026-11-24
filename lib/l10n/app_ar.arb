@@ -1230,6 +1230,7 @@
   "suggestionLinkedUrl": "رابط المهمة أو الـ issue (https)",
   "suggestionOpenLink": "افتح الرابط",
   "suggestionLinkInvalid": "اكتب رابط https صحيح أو سيبه فاضي",
+  "suggestionLinkTooLong": "الرابط لازم ميزيدش عن 500 حرف",
   "adminSuggestionsTitle": "اقتراحات المستخدمين",
   "complaintType": "نوع الشكوى",
   "complaintSubmitted": "تم تقديم الشكوى بنجاح",

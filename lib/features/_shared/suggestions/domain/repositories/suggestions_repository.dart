@@ -27,6 +27,14 @@ abstract class SuggestionsRepository {
     String? resolutionNote,
   });
 
-  /// Sets the issue/task link (https only); null or blank clears it.
-  Future<void> adminSetSuggestionLink(String id, String? url);
+  /// Atomic triage: status + note + optional link write in one call.
+  /// [linkedUrl] is https-only (max 500 chars); null or blank clears it.
+  /// Pass [updateLink] only when the link actually changed.
+  Future<void> adminTriageSuggestion(
+    String id,
+    String status, {
+    String? resolutionNote,
+    String? linkedUrl,
+    bool updateLink = false,
+  });
 }

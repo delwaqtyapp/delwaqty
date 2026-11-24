@@ -55,7 +55,19 @@ class SuggestionsRepositoryImpl implements SuggestionsRepository {
   }
 
   @override
-  Future<void> adminSetSuggestionLink(String id, String? url) {
-    return _dataSource.adminSetSuggestionLink(id, url);
+  Future<void> adminTriageSuggestion(
+    String id,
+    String status, {
+    String? resolutionNote,
+    String? linkedUrl,
+    bool updateLink = false,
+  }) {
+    return _dataSource.adminTriageSuggestion(
+      id,
+      status,
+      resolutionNote: resolutionNote,
+      linkedUrl: linkedUrl,
+      updateLink: updateLink,
+    );
   }
 }

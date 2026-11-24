@@ -7364,6 +7364,12 @@ abstract class AppLocalizations {
   /// **'Enter a valid https link or leave it empty'**
   String get suggestionLinkInvalid;
 
+  /// No description provided for @suggestionLinkTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Link must be 500 characters or fewer'**
+  String get suggestionLinkTooLong;
+
   /// No description provided for @adminSuggestionsTitle.
   ///
   /// In en, this message translates to:

@@ -1232,6 +1232,7 @@
   "suggestionLinkedUrl": "Linked issue or task (https link)",
   "suggestionOpenLink": "Open link",
   "suggestionLinkInvalid": "Enter a valid https link or leave it empty",
+  "suggestionLinkTooLong": "Link must be 500 characters or fewer",
   "adminSuggestionsTitle": "User Suggestions",
   "complaintType": "Complaint Type",
   "complaintSubmitted": "Complaint submitted successfully",

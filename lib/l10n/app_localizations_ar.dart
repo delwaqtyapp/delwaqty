@@ -3797,6 +3797,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get suggestionLinkInvalid => 'اكتب رابط https صحيح أو سيبه فاضي';
 
   @override
+  String get suggestionLinkTooLong => 'الرابط لازم ميزيدش عن 500 حرف';
+
+  @override
   String get adminSuggestionsTitle => 'اقتراحات المستخدمين';
 
   @override

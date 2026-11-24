@@ -72,10 +72,25 @@ class SupabaseSuggestionsDataSource {
     );
   }
 
-  Future<void> adminSetSuggestionLink(String id, String? url) async {
+  /// Atomic triage: status + note + optional link write in one RPC, so a
+  /// save can never half-land. Pass [updateLink] only when the link field
+  /// actually changed; a status-only save never touches the link.
+  Future<void> adminTriageSuggestion(
+    String id,
+    String status, {
+    String? resolutionNote,
+    String? linkedUrl,
+    bool updateLink = false,
+  }) async {
     await _client.rpc(
-      'admin_set_suggestion_link',
-      params: {'p_suggestion_id': id, 'p_linked_url': url},
+      'admin_triage_suggestion',
+      params: {
+        'p_suggestion_id': id,
+        'p_status': status,
+        'p_resolution_note': resolutionNote,
+        'p_linked_url': linkedUrl,
+        'p_update_link': updateLink,
+      },
     );
   }
 }

@@ -14,6 +14,7 @@ abstract class SuggestionsRepository {
 
   Future<List<Suggestion>> adminListSuggestions({
     String? status,
+    String? appRole,
     int limit = 100,
     int offset = 0,
   });
@@ -24,5 +25,16 @@ abstract class SuggestionsRepository {
     String id,
     String status, {
     String? resolutionNote,
+  });
+
+  /// Atomic triage: status + note + optional link write in one call.
+  /// [linkedUrl] is https-only (max 500 chars); null or blank clears it.
+  /// Pass [updateLink] only when the link actually changed.
+  Future<void> adminTriageSuggestion(
+    String id,
+    String status, {
+    String? resolutionNote,
+    String? linkedUrl,
+    bool updateLink = false,
   });
 }

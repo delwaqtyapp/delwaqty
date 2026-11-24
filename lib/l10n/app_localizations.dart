@@ -7316,6 +7316,66 @@ abstract class AppLocalizations {
   /// **'Resolution note'**
   String get suggestionResolutionNote;
 
+  /// No description provided for @suggestionFromApp.
+  ///
+  /// In en, this message translates to:
+  /// **'From app'**
+  String get suggestionFromApp;
+
+  /// No description provided for @suggestionAppCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer'**
+  String get suggestionAppCustomer;
+
+  /// No description provided for @suggestionAppDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Captain'**
+  String get suggestionAppDriver;
+
+  /// No description provided for @suggestionAppProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get suggestionAppProvider;
+
+  /// No description provided for @suggestionAppAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get suggestionAppAdmin;
+
+  /// No description provided for @suggestionLinkedUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked issue or task (https link)'**
+  String get suggestionLinkedUrl;
+
+  /// No description provided for @suggestionOpenLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Open link'**
+  String get suggestionOpenLink;
+
+  /// No description provided for @suggestionLinkInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid https link or leave it empty'**
+  String get suggestionLinkInvalid;
+
+  /// No description provided for @suggestionLinkTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Link must be 500 characters or fewer'**
+  String get suggestionLinkTooLong;
+
+  /// No description provided for @suggestionSaveUnconfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t confirm the save - it may have gone through. Check the list and try again.'**
+  String get suggestionSaveUnconfirmed;
+
   /// No description provided for @adminSuggestionsTitle.
   ///
   /// In en, this message translates to:

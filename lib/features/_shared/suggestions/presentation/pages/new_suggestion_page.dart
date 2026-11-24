@@ -166,3 +166,18 @@ String suggestionStatusLabel(AppLocalizations l10n, String status) {
       return status;
   }
 }
+
+String suggestionAppLabel(AppLocalizations l10n, String appRole) {
+  switch (appRole) {
+    case 'customer':
+      return l10n.suggestionAppCustomer;
+    case 'driver':
+      return l10n.suggestionAppDriver;
+    case 'provider':
+      return l10n.suggestionAppProvider;
+    case 'admin':
+      return l10n.suggestionAppAdmin;
+    default:
+      return appRole;
+  }
+}

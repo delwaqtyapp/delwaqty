@@ -39,12 +39,18 @@ class SupabaseSuggestionsDataSource {
 
   Future<List<Suggestion>> adminListSuggestions({
     String? status,
+    String? appRole,
     int limit = 100,
     int offset = 0,
   }) async {
     final rows = await _client.rpc(
       'admin_list_suggestions',
-      params: {'p_status': status, 'p_limit': limit, 'p_offset': offset},
+      params: {
+        'p_status': status,
+        'p_limit': limit,
+        'p_offset': offset,
+        'p_app_role': appRole,
+      },
     );
     return (rows as List<dynamic>)
         .map((r) => Suggestion.fromJson(Map<String, dynamic>.from(r as Map)))
@@ -62,6 +68,28 @@ class SupabaseSuggestionsDataSource {
         'p_suggestion_id': id,
         'p_status': status,
         'p_resolution_note': resolutionNote,
+      },
+    );
+  }
+
+  /// Atomic triage: status + note + optional link write in one RPC, so a
+  /// save can never half-land. Pass [updateLink] only when the link field
+  /// actually changed; a status-only save never touches the link.
+  Future<void> adminTriageSuggestion(
+    String id,
+    String status, {
+    String? resolutionNote,
+    String? linkedUrl,
+    bool updateLink = false,
+  }) async {
+    await _client.rpc(
+      'admin_triage_suggestion',
+      params: {
+        'p_suggestion_id': id,
+        'p_status': status,
+        'p_resolution_note': resolutionNote,
+        'p_linked_url': linkedUrl,
+        'p_update_link': updateLink,
       },
     );
   }

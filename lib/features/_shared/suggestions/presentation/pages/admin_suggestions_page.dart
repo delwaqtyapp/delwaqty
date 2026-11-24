@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/features/_shared/suggestions/domain/entities/suggestion.dart';
 import 'package:delwaqty/features/_shared/suggestions/presentation/suggestions_providers.dart';
 import 'package:delwaqty/features/_shared/suggestions/presentation/pages/new_suggestion_page.dart';
@@ -20,6 +22,9 @@ class AdminSuggestionsPage extends ConsumerStatefulWidget {
 
 class _AdminSuggestionsPageState extends ConsumerState<AdminSuggestionsPage> {
   String _statusFilter = 'all';
+  String _appFilter = 'all';
+
+  static const _apps = ['customer', 'driver', 'provider', 'admin'];
 
   static const _statuses = [
     'pending',
@@ -54,6 +59,7 @@ class _AdminSuggestionsPageState extends ConsumerState<AdminSuggestionsPage> {
     if (!reset && (_loading || _loadingMore)) return; // no overlapping pages
     final generation = ++_generation; // invalidates any in-flight load
     final status = _statusFilter == 'all' ? null : _statusFilter;
+    final appRole = _appFilter == 'all' ? null : _appFilter;
     final offset = reset ? 0 : _offset;
     if (reset) {
       setState(() {
@@ -71,6 +77,7 @@ class _AdminSuggestionsPageState extends ConsumerState<AdminSuggestionsPage> {
           .read(suggestionsRepositoryProvider)
           .adminListSuggestions(
             status: status,
+            appRole: appRole,
             limit: _pageSize,
             offset: offset,
           );
@@ -134,6 +141,38 @@ class _AdminSuggestionsPageState extends ConsumerState<AdminSuggestionsPage> {
                         .toList(),
                     onChanged: (v) {
                       setState(() => _statusFilter = v!);
+                      _load(reset: true);
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    initialValue: _appFilter,
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      labelText: l10n.suggestionFromApp,
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      border: const OutlineInputBorder(),
+                    ),
+                    items: ['all', ..._apps]
+                        .map(
+                          (a) => DropdownMenuItem(
+                            value: a,
+                            child: Text(
+                              a == 'all'
+                                  ? l10n.all
+                                  : suggestionAppLabel(l10n, a),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) {
+                      setState(() => _appFilter = v!);
                       _load(reset: true);
                     },
                   ),
@@ -270,7 +309,7 @@ class _SuggestionTile extends StatelessWidget {
               subtitle: Text(
                 '${suggestionCategoryLabel(l10n, suggestion.category)} · '
                 '${suggestionStatusLabel(l10n, suggestion.status)} · '
-                '${suggestion.appRole}',
+                '${suggestionAppLabel(l10n, suggestion.appRole)}',
                 maxLines: 1,
               ),
               onTap: onTap,
@@ -298,19 +337,27 @@ class _SuggestionTriageSheet extends ConsumerStatefulWidget {
 class _SuggestionTriageSheetState
     extends ConsumerState<_SuggestionTriageSheet> {
   final _noteController = TextEditingController();
+  final _linkController = TextEditingController();
   String _selectedStatus = '';
   bool _saving = false;
+
+  /// Sheet-owned error: validation and save failures must be visible
+  /// INSIDE the sheet (a SnackBar lands on the page ScaffoldMessenger,
+  /// which this modal covers).
+  String? _saveError;
 
   @override
   void initState() {
     super.initState();
     _selectedStatus = widget.suggestion.status;
     _noteController.text = widget.suggestion.resolutionNote ?? '';
+    _linkController.text = widget.suggestion.linkedUrl ?? '';
   }
 
   @override
   void dispose() {
     _noteController.dispose();
+    _linkController.dispose();
     super.dispose();
   }
 
@@ -357,7 +404,7 @@ class _SuggestionTriageSheetState
                       '${suggestionCategoryLabel(l10n, s.category)}',
                     ),
                   ),
-                  Chip(label: Text(s.appRole)),
+                  Chip(label: Text(suggestionAppLabel(l10n, s.appRole))),
                 ],
               ),
               const SizedBox(height: 16),
@@ -391,6 +438,53 @@ class _SuggestionTriageSheetState
                 ),
               ),
               const SizedBox(height: 12),
+              TextField(
+                controller: _linkController,
+                keyboardType: TextInputType.url,
+                textDirection: TextDirection.ltr,
+                decoration: InputDecoration(
+                  labelText: l10n.suggestionLinkedUrl,
+                  hintText: 'https://github.com/…',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    tooltip: l10n.suggestionOpenLink,
+                    icon: const Icon(Icons.open_in_new_rounded),
+                    onPressed: _openLink,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              if (_saveError != null) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.errorContainer,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.error_outline_rounded,
+                        color: Theme.of(context).colorScheme.onErrorContainer,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _saveError!,
+                          style: TextStyle(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onErrorContainer,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -411,27 +505,53 @@ class _SuggestionTriageSheetState
     );
   }
 
+  Future<void> _openLink() async {
+    final uri = Uri.tryParse(_linkController.text.trim());
+    if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) return;
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
   Future<void> _save() async {
-    setState(() => _saving = true);
     final l10n = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
+    final link = _linkController.text.trim();
+    setState(() => _saveError = null);
+    if (link.isNotEmpty) {
+      final uri = Uri.tryParse(link);
+      if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) {
+        setState(() => _saveError = l10n.suggestionLinkInvalid);
+        return;
+      }
+      if (link.length > 500) {
+        setState(() => _saveError = l10n.suggestionLinkTooLong);
+        return;
+      }
+    }
+    setState(() => _saving = true);
     final navigator = Navigator.of(context);
     try {
       final repo = ref.read(suggestionsRepositoryProvider);
       final note = _noteController.text.trim();
-      // An empty note is sent as NULL, which clears a previous note.
-      await repo.adminUpdateSuggestionStatus(
+      // One atomic triage write: status + note + (changed) link land or
+      // roll back together, so a failed save never leaves a half-saved row.
+      // An empty note is sent as NULL, which clears a previous note. The
+      // link is touched only when it changed, so a status-only save never
+      // stamps a link write.
+      await repo.adminTriageSuggestion(
         widget.suggestion.id,
         _selectedStatus,
         resolutionNote: note.isEmpty ? null : note,
+        linkedUrl: link.isEmpty ? null : link,
+        updateLink: link != (widget.suggestion.linkedUrl ?? ''),
       );
       widget.onStatusChanged();
       if (mounted) navigator.pop();
     } catch (e) {
+      // A transport failure is ambiguous: the atomic write may still have
+      // landed server-side. Say so honestly (never claim nothing changed)
+      // and reload the list behind the sheet so it shows the truth.
+      widget.onStatusChanged();
       if (mounted) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.somethingWentWrong)),
-        );
+        setState(() => _saveError = l10n.suggestionSaveUnconfirmed);
       }
     } finally {
       if (mounted) setState(() => _saving = false);

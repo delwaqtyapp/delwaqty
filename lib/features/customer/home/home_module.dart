@@ -30,7 +30,7 @@ class HomeModule extends FeatureModule {
           path: '/home',
           name: 'home',
           builder: (context, state) =>
-          const CustomerFirstUseTourGate(child: HomePage()),
+              const CustomerFirstUseTourGate(child: HomePage()),
         ),
       ],
     );

@@ -185,9 +185,7 @@ class _FeatureTourPageState extends State<FeatureTourPage>
                     width: active ? 22 : 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: active
-                          ? onTint
-                          : onTint.withValues(alpha: 0.4),
+                      color: active ? onTint : onTint.withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   );

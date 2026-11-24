@@ -77,6 +77,21 @@ namespace Delwaqty.Pos.Core.Licensing
         /// <summary>The active merchant's scope dir (valid after Restore/Activate).</summary>
         public string CurrentScopeDir { get { return _scopeDir; } }
 
+#if SCREENSHOT_TOUR
+        /// <summary>
+        /// CI screenshot tour ONLY (compiled into the tour build exclusively;
+        /// review #201): point the scope at the synthetic merchant's isolated
+        /// directory so MainWindow can open. No activation, no seal write, no
+        /// persisted state, no production data - the tour passes its own temp
+        /// root to the constructor, so the real data dir is never touched.
+        /// </summary>
+        public void UseSyntheticScopeForTour(string merchantId)
+        {
+            _scopeDir = ScopeDirFor(merchantId);
+            Directory.CreateDirectory(_scopeDir);
+        }
+#endif
+
         public string ScopeDirFor(string merchantId)
         {
             return MerchantScope.ScopeDir(_rootDir, merchantId, _flavor);

@@ -1,6 +1,9 @@
 using System;
 using System.Net.Http;
 using System.Windows;
+#if SCREENSHOT_TOUR
+using System.IO;
+#endif
 using Delwaqty.Pos.Core.Auth;
 using Delwaqty.Pos.Core.Licensing;
 using Delwaqty.Pos.Core.Protection;
@@ -13,6 +16,44 @@ namespace Delwaqty.Pos.Wpf
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+#if SCREENSHOT_TOUR
+            // CI screenshot instrumentation - compiled ONLY into the dedicated
+            // tour build (pos-windows.yml passes -p:DefineConstants to a separate
+            // output dir; a workflow step scans the shipped binaries to prove no
+            // tour marker survives). Review #201: the tour runs in an explicitly
+            // isolated synthetic scope - a temp root dir, no activation, no seal,
+            // no production data - through the narrow test-only init path
+            // ActivationService.UseSyntheticScopeForTour. This branch runs
+            // BEFORE any normal initialization, so the tour never creates,
+            // hardens or even resolves the real ProgramData root (code review).
+            if (Environment.GetEnvironmentVariable("DELWAQTY_SCREENSHOT_TOUR") == "1")
+            {
+                var tourRoot = Path.Combine(Path.GetTempPath(), "delwaqty-screenshot-tour");
+                Directory.CreateDirectory(tourRoot);
+                var tourActivation = new ActivationService(tourRoot, PosConfig.BuildFlavor);
+                tourActivation.UseSyntheticScopeForTour("screenshot-tour-merchant");
+                var tourState = new ActivationState
+                {
+                    LicenseKey = "SCREENSHOT-TOUR",
+                    Plan = "pro",
+                    Pro = true,
+                    Status = "active",
+                    ExpiresAt = DateTimeOffset.UtcNow.AddDays(30),
+                    MerchantId = "screenshot-tour-merchant",
+                    MerchantName = "متجر تجريبي",
+                    MerchantType = "grocery",
+                    MerchantPhone = "01000000000",
+                    MerchantAddress = "شارع التجربة ١",
+                    DeviceId = "screenshot-device",
+                    ValidatedAtUtc = DateTimeOffset.UtcNow,
+                    Flavor = PosConfig.BuildFlavor,
+                };
+                var tourWin = new MainWindow(tourActivation, tourState);
+                MainWindow = tourWin;
+                tourWin.Show();
+                return;
+            }
+#endif
             var rootDir = AppPaths.DataDir();
             DataDirSecurity.Harden(rootDir); // #114: tighten the shared dir ACL (Windows)
             var activation = new ActivationService(rootDir, PosConfig.BuildFlavor);

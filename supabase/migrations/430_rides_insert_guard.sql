@@ -25,6 +25,7 @@ DROP POLICY IF EXISTS "riders update own rides" ON public.rides;
 
 REVOKE INSERT ON public.rides FROM anon, authenticated;
 REVOKE UPDATE ON public.rides FROM anon;
+REVOKE DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.rides FROM anon, authenticated;
 
 CREATE OR REPLACE FUNCTION public.request_courier_delivery(
   p_pickup_latitude numeric,
@@ -45,19 +46,42 @@ AS $function$
 DECLARE
   v_uid uuid := auth.uid();
   v_delivery_id uuid;
+  v_open int;
 BEGIN
   IF v_uid IS NULL THEN
     RETURN jsonb_build_object('ok', false, 'reason', 'UNAUTHENTICATED');
   END IF;
 
+  -- Input bounds: real coordinates, finite values, non-blank addresses,
+  -- length caps, a known priority.
   IF p_pickup_latitude IS NULL OR p_pickup_longitude IS NULL
      OR p_dropoff_latitude IS NULL OR p_dropoff_longitude IS NULL
-     OR p_dropoff_address IS NULL THEN
+     OR p_pickup_latitude NOT BETWEEN -90 AND 90
+     OR p_dropoff_latitude NOT BETWEEN -90 AND 90
+     OR p_pickup_longitude NOT BETWEEN -180 AND 180
+     OR p_dropoff_longitude NOT BETWEEN -180 AND 180
+     OR p_pickup_latitude::float8 IN ('Infinity'::float8, '-Infinity'::float8, 'NaN'::float8)
+     OR p_dropoff_latitude::float8 IN ('Infinity'::float8, '-Infinity'::float8, 'NaN'::float8)
+     OR p_pickup_longitude::float8 IN ('Infinity'::float8, '-Infinity'::float8, 'NaN'::float8)
+     OR p_dropoff_longitude::float8 IN ('Infinity'::float8, '-Infinity'::float8, 'NaN'::float8)
+     OR p_pickup_address IS NULL OR btrim(p_pickup_address) = ''
+     OR p_dropoff_address IS NULL OR btrim(p_dropoff_address) = ''
+     OR length(p_pickup_address) > 500 OR length(p_dropoff_address) > 500
+     OR length(COALESCE(p_items_summary, '')) > 500
+     OR length(COALESCE(p_dropoff_notes, '')) > 500 THEN
     RETURN jsonb_build_object('ok', false, 'reason', 'INVALID_INPUT');
   END IF;
 
   IF p_priority NOT IN ('standard', 'priority', 'express') THEN
     RETURN jsonb_build_object('ok', false, 'reason', 'INVALID_INPUT');
+  END IF;
+
+  -- Abuse cap: at most 5 open (searching) courier rides per rider.
+  SELECT count(*) INTO v_open
+    FROM public.rides
+   WHERE rider_id = v_uid AND status = 'searching';
+  IF v_open >= 5 THEN
+    RETURN jsonb_build_object('ok', false, 'reason', 'TOO_MANY_OPEN_RIDES');
   END IF;
 
   -- Every field is server-controlled: rider from the JWT, service_type
@@ -87,6 +111,22 @@ END;
 $function$;
 
 REVOKE ALL ON FUNCTION public.request_courier_delivery(numeric, numeric, text, numeric, numeric, text, text, text, text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.request_courier_delivery(numeric, numeric, text, numeric, numeric, text, text, text, text) FROM anon;
+REVOKE ALL ON FUNCTION public.request_courier_delivery(numeric, numeric, text, numeric, numeric, text, text, text, text) FROM authenticated;
 GRANT EXECUTE ON FUNCTION public.request_courier_delivery(numeric, numeric, text, numeric, numeric, text, text, text, text) TO authenticated;
+
+-- ACL postcheck: only authenticated (besides the owner) may hold EXECUTE.
+DO $$
+DECLARE
+  v_sig regprocedure := 'public.request_courier_delivery(numeric,numeric,text,numeric,numeric,text,text,text,text)'::regprocedure;
+BEGIN
+  IF has_function_privilege('PUBLIC', v_sig, 'EXECUTE')
+     OR has_function_privilege('anon', v_sig, 'EXECUTE') THEN
+    RAISE EXCEPTION '430: request_courier_delivery executable by PUBLIC/anon';
+  END IF;
+  IF NOT has_function_privilege('authenticated', v_sig, 'EXECUTE') THEN
+    RAISE EXCEPTION '430: authenticated lost EXECUTE on request_courier_delivery';
+  END IF;
+END $$;
 
 COMMIT;

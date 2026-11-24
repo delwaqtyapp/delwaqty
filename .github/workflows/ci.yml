@@ -91,7 +91,6 @@ jobs:
           -v ON_ERROR_STOP=1
           -f supabase/tests/redteam_pgtap_negative_rls.sql
           -f supabase/tests/430_rides_insert_guard_test.sql
-          retention-days: 7
   build:
     name: Build APK (${{ matrix.flavor }})
     needs: [analyze, test]

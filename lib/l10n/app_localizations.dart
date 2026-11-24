@@ -16097,7 +16097,7 @@ abstract class AppLocalizations {
   /// No description provided for @customerTourStep4Body.
   ///
   /// In en, this message translates to:
-  /// **'Charge your wallet, pay easily, and collect reward points with every order.'**
+  /// **'Keep an eye on your wallet balance and collect reward points with every order.'**
   String get customerTourStep4Body;
 
   /// No description provided for @customerTourStep5Title.
@@ -16169,7 +16169,7 @@ abstract class AppLocalizations {
   /// No description provided for @merchantGuideStep5Body.
   ///
   /// In en, this message translates to:
-  /// **'Once you save, the product appears to customers right away, and you can edit or pause it anytime.'**
+  /// **'Once you save, the product is in your catalog and customers see it whenever it\'s available - you can edit or pause it anytime.'**
   String get merchantGuideStep5Body;
 
   /// No description provided for @merchantGuideOpenTooltip.

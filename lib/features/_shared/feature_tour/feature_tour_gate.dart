@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/constants/storage_keys.dart';
 import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
+import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/features/_shared/feature_tour/feature_tour_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
@@ -73,12 +74,22 @@ List<FeatureTourStep> buildMerchantProductGuideSteps(AppLocalizations l10n) => [
   ),
 ];
 
+/// Single-flight guard shared by automatic (first-use) and manual
+/// presentations: while a tour dialog is open (or opening), every other
+/// request joins/ignores instead of stacking a second dialog.
+Future<void>? _inFlightTour;
+
 /// Shows [FeatureTourPage] as a full-screen dialog with a soft fade/scale in.
+///
+/// If a tour is already showing, returns the existing future instead of
+/// opening a second dialog.
 Future<void> showFeatureTour(
   BuildContext context, {
   required List<FeatureTourStep> Function(AppLocalizations l10n) stepsBuilder,
 }) {
-  return showGeneralDialog<void>(
+  final inFlight = _inFlightTour;
+  if (inFlight != null) return inFlight;
+  final future = showGeneralDialog<void>(
     context: context,
     barrierDismissible: false,
     barrierLabel: AppLocalizations.of(context).onboardingSkip,
@@ -102,25 +113,83 @@ Future<void> showFeatureTour(
       );
     },
   );
+  _inFlightTour = future;
+  future.whenComplete(() {
+    if (identical(_inFlightTour, future)) _inFlightTour = null;
+  });
+  return future;
 }
 
-/// Shows the tour once per install, remembered under [storageKey].
+/// Waits briefly for a signed-in user id (the session may still be
+/// restoring); returns null when there is none. The tour is never shown
+/// or marked seen without a user id: completion flags are per account.
+Future<String?> _resolveUserId(
+  WidgetRef ref,
+  String? Function()? currentUserId,
+) async {
+  final resolve =
+      currentUserId ??
+      () {
+        try {
+          return ref.read(supabaseClientProvider).auth.currentUser?.id;
+        } catch (_) {
+          // Supabase is not initialized (early startup, widget tests) or
+          // the gate was unmounted mid-retry: treat as signed out.
+          return null;
+        }
+      };
+  for (var attempt = 0; attempt < 3; attempt++) {
+    final id = resolve();
+    if (id != null && id.isNotEmpty) return id;
+    if (attempt < 2) {
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+    }
+  }
+  return null;
+}
+
+/// Shows the tour once per account, remembered under
+/// `storageKey@userId`.
 ///
-/// The flag is saved before the dialog opens so a fast rebuild can never
-/// double-show it; worst case a killed app simply never shows the tour.
+/// Presentation is deferred until the underlying route is actually the
+/// current one and the app is resumed, so the dialog can never cover an
+/// active flow the user navigated to. If the route never settles, the
+/// show is cancelled and NOTHING is written, so the next opportunity
+/// tries again. The seen flag is saved only after the tour was actually
+/// shown and dismissed - never on a cancelled or never-presented show.
 Future<void> showFeatureTourOnce(
   BuildContext context,
   WidgetRef ref, {
   required String storageKey,
   required List<FeatureTourStep> Function(AppLocalizations l10n) stepsBuilder,
+  String? Function()? currentUserId,
 }) async {
+  if (_inFlightTour != null) return;
   final prefs = ref.read(sharedPreferencesProvider);
-  if (prefs.getBool(key: storageKey)) return;
-  await prefs.saveBool(key: storageKey, value: true);
-  // Let the underlying page settle before covering it.
-  await Future<void>.delayed(const Duration(milliseconds: 500));
-  if (!context.mounted) return;
-  await showFeatureTour(context, stepsBuilder: stepsBuilder);
+  final userId = await _resolveUserId(ref, currentUserId);
+  if (userId == null || !context.mounted) return;
+  final key = '$storageKey@$userId';
+  if (prefs.getBool(key: key)) return;
+
+  final route = ModalRoute.of(context);
+  // Let the underlying page settle; re-check that it is still the
+  // current route and the app is resumed before covering it. A few
+  // bounded retries, then cancel unmarked.
+  for (var attempt = 0; attempt < 3; attempt++) {
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    if (!context.mounted) return;
+    final currentRoute = ModalRoute.of(context);
+    final sameRoute = currentRoute == route && (route?.isCurrent ?? true);
+    final lifecycle = WidgetsBinding.instance.lifecycleState;
+    final resumed = lifecycle == null || lifecycle == AppLifecycleState.resumed;
+    if (!sameRoute || !resumed) continue;
+    if (_inFlightTour != null) return; // someone else opened a tour
+    await showFeatureTour(context, stepsBuilder: stepsBuilder);
+    // The tour was actually shown and dismissed: only now mark it seen.
+    await prefs.saveBool(key: key, value: true);
+    return;
+  }
+  // Route never settled: cancelled, nothing written.
 }
 
 /// Wraps a page and auto-shows a first-use tour over it once per install.
@@ -130,11 +199,15 @@ class FeatureTourGate extends ConsumerStatefulWidget {
     required this.storageKey,
     required this.stepsBuilder,
     required this.child,
+    this.currentUserId,
   });
 
   final String storageKey;
   final List<FeatureTourStep> Function(AppLocalizations l10n) stepsBuilder;
   final Widget child;
+
+  /// Test seam: overrides reading the signed-in user from Supabase auth.
+  final String? Function()? currentUserId;
 
   @override
   ConsumerState<FeatureTourGate> createState() => _FeatureTourGateState();
@@ -154,6 +227,7 @@ class _FeatureTourGateState extends ConsumerState<FeatureTourGate> {
         ref,
         storageKey: widget.storageKey,
         stepsBuilder: widget.stepsBuilder,
+        currentUserId: widget.currentUserId,
       );
     });
   }

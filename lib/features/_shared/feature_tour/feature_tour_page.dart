@@ -133,44 +133,74 @@ class _FeatureTourPageState extends State<FeatureTourPage>
                   },
                   itemBuilder: (context, index) {
                     final s = widget.steps[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 132,
-                            height: 132,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.18),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.35),
-                                width: 1.2,
-                              ),
+                    // Adaptive slide: the icon disc scales with the screen
+                    // instead of a fixed 132px, gaps shrink on short
+                    // screens, and the whole slide scrolls so large text
+                    // scales, landscape and narrow RTL layouts can never
+                    // overflow. Skip stays pinned above, dots and the
+                    // Next/Done button stay pinned below.
+                    return LayoutBuilder(
+                      builder: (context, constraints) {
+                        final shortest = MediaQuery.of(context)
+                            .size
+                            .shortestSide;
+                        final disc = (shortest * 0.26).clamp(64.0, 132.0);
+                        final horizontal = constraints.maxWidth < 360
+                            ? 20.0
+                            : 32.0;
+                        final gap = constraints.maxHeight < 480 ? 16.0 : 36.0;
+                        return SingleChildScrollView(
+                          padding: EdgeInsets.symmetric(horizontal: horizontal),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight,
                             ),
-                            child: Icon(s.icon, size: 62, color: onTint),
-                          ),
-                          const SizedBox(height: 36),
-                          Text(
-                            s.title,
-                            textAlign: TextAlign.center,
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: onTint,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: disc,
+                                  height: disc,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.18),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.35,
+                                      ),
+                                      width: 1.2,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    s.icon,
+                                    size: disc * 0.47,
+                                    color: onTint,
+                                  ),
+                                ),
+                                SizedBox(height: gap),
+                                Text(
+                                  s.title,
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.headlineSmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        color: onTint,
+                                      ),
+                                ),
+                                SizedBox(height: gap * 0.4),
+                                Text(
+                                  s.body,
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    color: onTint.withValues(alpha: 0.92),
+                                    height: 1.55,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 14),
-                          Text(
-                            s.body,
-                            textAlign: TextAlign.center,
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              color: onTint.withValues(alpha: 0.92),
-                              height: 1.55,
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     );
                   },
                 ),

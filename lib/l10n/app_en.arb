@@ -3074,7 +3074,7 @@
   "customerTourStep3Title": "Track your order live",
   "customerTourStep3Body": "Follow your order on the map and get a notification at every step until it reaches your door.",
   "customerTourStep4Title": "Your wallet and rewards",
-  "customerTourStep4Body": "Charge your wallet, pay easily, and collect reward points with every order.",
+  "customerTourStep4Body": "Keep an eye on your wallet balance and collect reward points with every order.",
   "customerTourStep5Title": "Menu and notifications",
   "customerTourStep5Body": "From the side menu you reach your orders, profile and complaints, and the bell keeps you up to date.",
   "merchantGuideStep1Title": "Open your products",
@@ -3086,6 +3086,6 @@
   "merchantGuideStep4Title": "Price and stock",
   "merchantGuideStep4Body": "Set the right price and keep the quantity up to date so customers always see what is available.",
   "merchantGuideStep5Title": "Save and start selling",
-  "merchantGuideStep5Body": "Once you save, the product appears to customers right away, and you can edit or pause it anytime.",
+  "merchantGuideStep5Body": "Once you save, the product is in your catalog and customers see it whenever it's available - you can edit or pause it anytime.",
   "merchantGuideOpenTooltip": "How to add products"
 }

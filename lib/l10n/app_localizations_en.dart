@@ -8519,7 +8519,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get customerTourStep4Body =>
-      'Charge your wallet, pay easily, and collect reward points with every order.';
+      'Keep an eye on your wallet balance and collect reward points with every order.';
 
   @override
   String get customerTourStep5Title => 'Menu and notifications';
@@ -8561,7 +8561,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get merchantGuideStep5Body =>
-      'Once you save, the product appears to customers right away, and you can edit or pause it anytime.';
+      'Once you save, the product is in your catalog and customers see it whenever it\'s available - you can edit or pause it anytime.';
 
   @override
   String get merchantGuideOpenTooltip => 'How to add products';

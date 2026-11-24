@@ -2990,7 +2990,7 @@
   "customerTourStep3Title": "تابع طلبك لحظة بلحظة",
   "customerTourStep3Body": "تابع طلبك على الخريطة ويوصلك إشعار بكل خطوة لحد ما يوصل لباب البيت.",
   "customerTourStep4Title": "محفظتك ونقاطك",
-  "customerTourStep4Body": "اشحن محفظتك وادفع بسهولة واجمع نقاط مكافآت مع كل طلب.",
+  "customerTourStep4Body": "تابع رصيد محفظتك واجمع نقاط مكافآت مع كل طلب.",
   "customerTourStep5Title": "القائمة والإشعارات",
   "customerTourStep5Body": "من القائمة الجانبية توصل لطلباتك وحسابك وشكاويك، وجرس الإشعارات يخليك على اطلاع دائم.",
   "merchantGuideStep1Title": "افتح المنتجات",
@@ -3002,6 +3002,6 @@
   "merchantGuideStep4Title": "السعر والكمية",
   "merchantGuideStep4Body": "حدد السعر الصح وحدّث الكمية أول بأول عشان العميل يشوف المتاح دايمًا.",
   "merchantGuideStep5Title": "احفظ وابدأ البيع",
-  "merchantGuideStep5Body": "أول ما تحفظ، المنتج هيظهر للعملاء فورًا، وتقدر تعدله أو توقفه في أي وقت.",
+  "merchantGuideStep5Body": "أول ما تحفظ، المنتج بيتسجل في الكتالوج بتاعك والعملاء بيشوفوه طالما متاح، وتقدر تعدله أو توقفه في أي وقت.",
   "merchantGuideOpenTooltip": "إزاي تضيف منتج"
 }

@@ -8445,7 +8445,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get customerTourStep4Body =>
-      'اشحن محفظتك وادفع بسهولة واجمع نقاط مكافآت مع كل طلب.';
+      'تابع رصيد محفظتك واجمع نقاط مكافآت مع كل طلب.';
 
   @override
   String get customerTourStep5Title => 'القائمة والإشعارات';
@@ -8487,7 +8487,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get merchantGuideStep5Body =>
-      'أول ما تحفظ، المنتج هيظهر للعملاء فورًا، وتقدر تعدله أو توقفه في أي وقت.';
+      'أول ما تحفظ، المنتج بيتسجل في الكتالوج بتاعك والعملاء بيشوفوه طالما متاح، وتقدر تعدله أو توقفه في أي وقت.';
 
   @override
   String get merchantGuideOpenTooltip => 'إزاي تضيف منتج';

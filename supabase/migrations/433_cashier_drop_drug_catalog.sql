@@ -1,25 +1,115 @@
--- Cashier drug-catalog removal (owner decision 2026-11-24: no pharmacy
--- anywhere). The Windows cashier purge PR removed every client reference:
--- sale line items no longer carry drug_catalog_id and the app never calls
--- the drug RPCs. This migration removes the server side.
+-- Cashier drug-catalog + insurance removal (pharmacy purge program:
+-- no pharmacy anywhere). The Windows cashier purge PR removed every
+-- client reference: sale line items no longer carry drug_catalog_id, the
+-- insurance_sale op type is gone from the outbox, and the app never
+-- calls the drug or insurance RPCs. This migration removes the server
+-- side:
+--   1. cashier_sync_push: drug_catalog_id line key AND the insurance_sale
+--      arm removed (body otherwise exactly the live 420 body).
+--   2. pos_stock_moves.drug_catalog_id dropped.
+--   3. Drug RPCs dropped: pharmacy_import_drug (IF EXISTS - already gone
+--      on prod), drug_catalog_search, moh_price_import,
+--      cashier_apply_moh_prices.
+--   4. Insurance web dropped: cashier_shortage_list, pos_insurance_statement,
+--      admin_insurance_mismatches, _cashier_has_pro (its only remaining
+--      callers are these plus the old sync_push), pos_insurance_sales and
+--      pos_insurance_companies (both 0 rows live; their RLS policies -
+--      which reference _cashier_has_pro - drop with the tables).
+--   5. drug_catalog dropped (RLS policies drop with it).
 --
 -- NUMBERING: assigned 433 by the builder (432 is reserved for the
 -- overhaul agent's #16). Moved from pos/docs/server-migrations/.
 --
--- ORDERING: independent of the UI keeper's pharmacy purge PR. Dependent
--- objects that PR also removes (pharmacy network column, MoH/PRO price
--- RPCs, import RPC) are dropped here with IF EXISTS guards so either
--- landing order applies cleanly. Both PRs must land before publish.
+-- PRE-APPLY CHECKLIST (external, enforced by process not by this file):
+-- a FULL export of public.drug_catalog (live: 25,131 rows, ~17 MB, the
+-- MoH reference dataset) with row count and checksum recorded BEFORE
+-- apply. pos_insurance_sales is empty live and A0 aborts if it is not.
 --
--- DATA: drug_catalog holds the MoH reference dataset. The UI keeper dumps
--- it to backup before this runs (their stated pre-destructive step).
+-- A0 pre-image guard (414/434 pattern): aborts without mutation unless
+-- cashier_sync_push is EXACTLY the pinned live body (md5), secdef,
+-- search_path, owner and ACL set match, both tables and the column
+-- exist, no stock move references a drug, pos_insurance_sales is empty,
+-- and all four insurance-web functions are present.
 --
--- Verified against origin/master 7d4eb2ac: cashier_sync_push body is
--- exactly 420's (the latest), with the drug_catalog_id line-item key
--- removed and two comments reworded. Grants on the function survive
--- CREATE OR REPLACE.
+-- Verified against origin/master 7d4eb2ac + live prod reads 2026-11-24:
+-- cashier_sync_push md5(pg_get_functiondef) 394f0dab71b0fac6a682f9d4848e0604;
+-- _cashier_has_pro e991fc6131f44d7482db08524ff919b9;
+-- pos_insurance_statement b3bc61a5bc711fb1b1b80b94634e9c83;
+-- admin_insurance_mismatches 9ce17bc41d1fdad5b30e181b16658591;
+-- cashier_shortage_list 940b3d2afe70a1e7c3e82067fb77e0ec.
+-- Grants on the rewritten function survive CREATE OR REPLACE.
 
 BEGIN;
+
+-- A0 pre-image guard.
+DO $a0$
+DECLARE
+  v_def text;
+  v_proc record;
+  v_inv text;
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_tables WHERE schemaname='public' AND tablename='drug_catalog') THEN
+    RAISE EXCEPTION '433 precondition failed: drug_catalog already absent';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_tables WHERE schemaname='public' AND tablename='pos_insurance_sales') THEN
+    RAISE EXCEPTION '433 precondition failed: pos_insurance_sales already absent';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                  WHERE table_schema='public' AND table_name='pos_stock_moves'
+                    AND column_name='drug_catalog_id') THEN
+    RAISE EXCEPTION '433 precondition failed: pos_stock_moves.drug_catalog_id already absent';
+  END IF;
+  IF EXISTS (SELECT 1 FROM public.pos_stock_moves WHERE drug_catalog_id IS NOT NULL) THEN
+    RAISE EXCEPTION '433 precondition failed: pos_stock_moves still references drug_catalog rows';
+  END IF;
+  IF EXISTS (SELECT 1 FROM public.pos_insurance_sales) THEN
+    RAISE EXCEPTION '433 precondition failed: pos_insurance_sales is not empty - export before drop';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_tables WHERE schemaname='public' AND tablename='pos_insurance_companies') THEN
+    RAISE EXCEPTION '433 precondition failed: pos_insurance_companies already absent';
+  END IF;
+  IF EXISTS (SELECT 1 FROM public.pos_insurance_companies) THEN
+    RAISE EXCEPTION '433 precondition failed: pos_insurance_companies is not empty - export before drop';
+  END IF;
+
+  SELECT pg_get_functiondef('public.cashier_sync_push(uuid,jsonb)'::regprocedure) INTO v_def;
+  IF v_def IS NULL THEN
+    RAISE EXCEPTION '433 precondition failed: cashier_sync_push missing';
+  END IF;
+  IF md5(v_def) <> '394f0dab71b0fac6a682f9d4848e0604' THEN
+    RAISE EXCEPTION '433 precondition failed: cashier_sync_push drifted from the pinned pre-image';
+  END IF;
+  SELECT prosecdef, proconfig, proacl, pg_get_userbyid(proowner) AS owner
+    INTO v_proc FROM pg_proc
+   WHERE oid = 'public.cashier_sync_push(uuid,jsonb)'::regprocedure;
+  IF NOT v_proc.prosecdef
+     OR v_proc.proconfig <> ARRAY['search_path=public, pg_temp']::text[]
+     OR v_proc.owner <> 'postgres' THEN
+    RAISE EXCEPTION '433 precondition failed: cashier_sync_push properties drifted (secdef/search_path/owner)';
+  END IF;
+  IF (SELECT coalesce(array_agg(g ORDER BY g), '{}'::text[]) FROM (
+        SELECT CASE WHEN a.grantee = 0 THEN 'PUBLIC' ELSE a.grantee::regrole::text END AS g
+          FROM aclexplode(v_proc.proacl) a WHERE a.privilege_type = 'EXECUTE') z)
+     <> '{authenticated,postgres,service_role}'::text[] THEN
+    RAISE EXCEPTION '433 precondition failed: cashier_sync_push EXECUTE ACL drifted';
+  END IF;
+
+  -- The insurance web must be present to be dropped.
+  IF 'public._cashier_has_pro(uuid)'::regprocedure IS NULL
+     OR 'public.pos_insurance_statement(uuid,uuid,timestamp with time zone,timestamp with time zone)'::regprocedure IS NULL
+     OR 'public.admin_insurance_mismatches(timestamp with time zone)'::regprocedure IS NULL
+     OR 'public.cashier_shortage_list(uuid,integer)'::regprocedure IS NULL THEN
+    RAISE EXCEPTION '433 precondition failed: insurance web partially absent';
+  END IF;
+
+  -- Drug RPC inventory (informational; the drops below are IF EXISTS).
+  SELECT coalesce(string_agg(proname, ', ' ORDER BY proname), '<none>') INTO v_inv
+    FROM pg_proc
+   WHERE pronamespace = 'public'::regnamespace
+     AND proname IN ('pharmacy_import_drug','drug_catalog_search','moh_price_import','cashier_apply_moh_prices');
+  RAISE NOTICE '433 drug RPC inventory at apply time: %', v_inv;
+END
+$a0$;
 
 -- 1. cashier_sync_push: no drug_catalog_id in stored line items.
 CREATE OR REPLACE FUNCTION public.cashier_sync_push(p_merchant_id uuid, p_ops jsonb)
@@ -49,7 +139,6 @@ DECLARE
   v_subtotal numeric;
   v_rate numeric;
   v_primary_method text;
-  v_company uuid;
   v_server_price numeric;
   v_unit numeric;
   v_line_disc numeric;
@@ -63,8 +152,6 @@ DECLARE
   v_line_repriced boolean;
   v_client_priced integer;
   v_repriced integer;
-  v_server_total numeric;
-  v_mismatch boolean;
   v_license_code text;
   v_cust uuid;
 BEGIN
@@ -360,60 +447,6 @@ BEGIN
            SET price = round(price * (1 + v_pct / 100), 2), updated_at = now()
          WHERE merchant_id = p_merchant_id AND is_available;
         v_results := v_results || jsonb_build_object('op_id', v_op_id, 'ok', true);
-      WHEN 'insurance_sale' THEN
-        IF NOT public._cashier_has_pro(p_merchant_id) THEN
-          v_results := v_results || jsonb_build_object('op_id', v_op_id, 'ok', false,
-            'reason', 'PRO_REQUIRED');
-          CONTINUE;
-        END IF;
-        -- Insured sale (تأمين): the insured part is billed to the company,
-        -- the patient pays their share. Idempotent on the client op id.
-        v_company := (v_op->'payload'->>'company_id')::uuid;
-        v_sale_id := NULL;
-        IF NULLIF(v_op->'payload'->>'sale_op_id','') IS NOT NULL THEN
-          SELECT id INTO v_sale_id FROM public.pos_sales
-           WHERE merchant_id = p_merchant_id
-             AND idempotency_key = (v_op->'payload'->>'sale_op_id');
-        END IF;
-        -- Review #32: the shares are client-claimed and feed
-        -- pos_insurance_statement. They must at least sum to the claimed
-        -- total; otherwise the op is rejected.
-        IF abs(COALESCE((v_op->'payload'->>'company_share')::numeric, 0)
-             + COALESCE((v_op->'payload'->>'patient_share')::numeric, 0)
-             - (v_op->'payload'->>'total')::numeric) > 0.01 THEN
-          v_results := v_results || jsonb_build_object('op_id', v_op_id, 'ok', false,
-            'reason', 'INSURANCE_SHARE_MISMATCH');
-          CONTINUE;
-        END IF;
-        -- Review #32: when the linked sale resolved, compare the claimed
-        -- total with the SERVER-repriced pos_sales total. A mismatch is
-        -- quarantined (recorded with total_mismatch + the server total),
-        -- same pattern as client_priced, never silently trusted.
-        v_server_total := NULL;
-        v_mismatch := false;
-        IF v_sale_id IS NOT NULL THEN
-          SELECT s.total_amount INTO v_server_total
-            FROM public.pos_sales s WHERE s.id = v_sale_id;
-          IF v_server_total IS NOT NULL
-             AND abs(v_server_total - (v_op->'payload'->>'total')::numeric) > 0.01 THEN
-            v_mismatch := true;
-          END IF;
-        END IF;
-        INSERT INTO public.pos_insurance_sales
-          (merchant_id, company_id, sale_id, client_op_id, member_name, member_card_no,
-           total, company_share, patient_share, created_by, created_offline_at,
-           server_total, total_mismatch)
-        VALUES
-          (p_merchant_id, v_company, v_sale_id, v_op_id,
-           v_op->'payload'->>'member_name', v_op->'payload'->>'member_card_no',
-           (v_op->'payload'->>'total')::numeric,
-           (v_op->'payload'->>'company_share')::numeric,
-           (v_op->'payload'->>'patient_share')::numeric,
-           v_uid, (v_op->>'created_offline_at')::timestamptz,
-           v_server_total, v_mismatch)
-        ON CONFLICT (merchant_id, client_op_id) DO NOTHING;
-        v_results := v_results || jsonb_build_object('op_id', v_op_id, 'ok', true,
-          'server_total', v_server_total, 'total_mismatch', v_mismatch);
       ELSE
         v_results := v_results || jsonb_build_object('op_id', v_op_id, 'ok', false, 'reason', 'UNKNOWN_OP');
       END CASE;
@@ -437,10 +470,64 @@ DROP FUNCTION IF EXISTS public.moh_price_import(jsonb);
 DROP FUNCTION IF EXISTS public.cashier_apply_moh_prices(uuid);
 -- The pharmacy network table carries a drug_catalog FK; the keeper's PR
 -- drops that table - this guard makes the order irrelevant.
-ALTER TABLE public.pharmacy_transfer_requests DROP COLUMN IF EXISTS drug_catalog_id;
+ALTER TABLE IF EXISTS public.pharmacy_transfer_requests DROP COLUMN IF EXISTS drug_catalog_id;
 
--- 4. The MoH reference dataset itself. Its RLS policies
+-- 4. The insurance web (client never sends insurance_sale anymore;
+--    _cashier_has_pro's only other callers are these three RPCs plus the
+--    RLS policies on the two insurance tables, which drop with them).
+DROP FUNCTION public.cashier_shortage_list(uuid, integer);
+DROP FUNCTION public.pos_insurance_statement(uuid, uuid, timestamp with time zone, timestamp with time zone);
+DROP FUNCTION public.admin_insurance_mismatches(timestamp with time zone);
+DROP TABLE public.pos_insurance_sales;
+DROP TABLE public.pos_insurance_companies;
+DROP FUNCTION public._cashier_has_pro(uuid);
+
+-- 5. The MoH reference dataset itself. Its RLS policies
 --    (drug_catalog_read, drug_catalog_admin) drop with the table.
 DROP TABLE public.drug_catalog;
+
+-- Postchecks: the rewrite carries no drug/insurance reference, function
+-- properties/ACL unchanged, and every dropped object is gone.
+DO $v433$
+DECLARE
+  v_def text;
+  v_proc record;
+BEGIN
+  SELECT pg_get_functiondef('public.cashier_sync_push(uuid,jsonb)'::regprocedure) INTO v_def;
+  IF v_def LIKE '%drug_catalog%' OR v_def LIKE '%insurance_sale%'
+     OR v_def LIKE '%_cashier_has_pro%' OR v_def LIKE '%pos_insurance_sales%' THEN
+    RAISE EXCEPTION '433 post-check failed: pharmacy/insurance reference survived in cashier_sync_push';
+  END IF;
+  SELECT prosecdef, proconfig, proacl, pg_get_userbyid(proowner) AS owner
+    INTO v_proc FROM pg_proc
+   WHERE oid = 'public.cashier_sync_push(uuid,jsonb)'::regprocedure;
+  IF NOT v_proc.prosecdef
+     OR v_proc.proconfig <> ARRAY['search_path=public, pg_temp']::text[]
+     OR v_proc.owner <> 'postgres' THEN
+    RAISE EXCEPTION '433 post-check failed: cashier_sync_push properties changed';
+  END IF;
+  IF (SELECT coalesce(array_agg(g ORDER BY g), '{}'::text[]) FROM (
+        SELECT CASE WHEN a.grantee = 0 THEN 'PUBLIC' ELSE a.grantee::regrole::text END AS g
+          FROM aclexplode(v_proc.proacl) a WHERE a.privilege_type = 'EXECUTE') z)
+     <> '{authenticated,postgres,service_role}'::text[] THEN
+    RAISE EXCEPTION '433 post-check failed: cashier_sync_push EXECUTE ACL changed';
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname='public'
+              AND tablename IN ('drug_catalog','pos_insurance_sales','pos_insurance_companies')) THEN
+    RAISE EXCEPTION '433 post-check failed: a dropped table survived';
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns
+              WHERE table_schema='public' AND table_name='pos_stock_moves'
+                AND column_name='drug_catalog_id') THEN
+    RAISE EXCEPTION '433 post-check failed: pos_stock_moves.drug_catalog_id survived';
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_proc WHERE pronamespace='public'::regnamespace
+              AND proname IN ('pharmacy_import_drug','drug_catalog_search','moh_price_import',
+                              'cashier_apply_moh_prices','cashier_shortage_list',
+                              'pos_insurance_statement','admin_insurance_mismatches','_cashier_has_pro')) THEN
+    RAISE EXCEPTION '433 post-check failed: a dropped function survived';
+  END IF;
+END
+$v433$;
 
 COMMIT;

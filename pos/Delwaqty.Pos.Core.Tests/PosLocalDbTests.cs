@@ -59,6 +59,51 @@ namespace Delwaqty.Pos.Core.Tests
         }
 
         [Fact]
+        public void Commit_Rolls_Back_Outbox_And_Journal_On_Failure()
+        {
+            // Failure-injected rollback: if anything inside the commit
+            // transaction throws after the first write, NEITHER the outbox
+            // op nor the journal row may survive.
+            using (var db = new PosLocalDb(DbPath))
+            {
+                var sale = MakeSale("item-1", 2);
+                var op = OutboxPayloads.Sale(sale);
+                Assert.Throws<InvalidOperationException>(() => db.Tx(() =>
+                {
+                    db.Outbox.Enqueue(op);
+                    db.Sales.Add(new LocalSalesLog.OutboxOpRef(op.OpId), sale, "shift-1");
+                    throw new InvalidOperationException("simulated crash mid-commit");
+                }));
+                Assert.Equal(0, db.Outbox.PendingCount());
+                Assert.Empty(db.Sales.Recent(5));
+            }
+        }
+
+        [Fact]
+        public void Void_Rolls_Back_On_Second_Write_Failure()
+        {
+            // A void is two writes (void op + journal mark). A failure
+            // between them must leave the sale untouched: no extra outbox
+            // op, no voided status.
+            using (var db = new PosLocalDb(DbPath))
+            {
+                var sale = MakeSale("item-1", 1);
+                var op = OutboxPayloads.Sale(sale);
+                db.CommitSale(op, sale, "shift-1");
+                Assert.Equal(1, db.Outbox.PendingCount());
+
+                var voidOp = OutboxPayloads.SaleVoid(op.OpId, "خطأ");
+                Assert.Throws<InvalidOperationException>(() => db.Tx(() =>
+                {
+                    db.Outbox.Enqueue(voidOp);
+                    throw new InvalidOperationException("simulated crash before journal mark");
+                }));
+                Assert.Equal(1, db.Outbox.PendingCount()); // only the original sale op
+                Assert.Equal("completed", db.Sales.Recent(5).Single().Status);
+            }
+        }
+
+        [Fact]
         public void Corrupt_Legacy_Db_Sets_Repair_State_And_Keeps_The_File()
         {
             // #120 migration follow-up: an unreadable legacy file must surface

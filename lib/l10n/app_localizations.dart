@@ -16370,6 +16370,162 @@ abstract class AppLocalizations {
   /// **'Add at least one item with its unit or amount.'**
   String get addAtLeastOneItem;
 
+  /// No description provided for @courierItemsLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to 20 items in one request.'**
+  String get courierItemsLimit;
+
+  /// No description provided for @viewReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'View receipt'**
+  String get viewReceipt;
+
+  /// No description provided for @receiptPhotoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt'**
+  String get receiptPhotoTitle;
+
+  /// No description provided for @askAnythingReceiptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask-anything receipt'**
+  String get askAnythingReceiptTitle;
+
+  /// No description provided for @provisionalTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisional total - not the final bill yet'**
+  String get provisionalTotal;
+
+  /// No description provided for @incidentSettlementNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This ride was cancelled with goods already bought. Any settlement is handled through your problem report, not through this total.'**
+  String get incidentSettlementNote;
+
+  /// No description provided for @courierErrBelowBaseline.
+  ///
+  /// In en, this message translates to:
+  /// **'Below the minimum: delivery starts at 15 EGP for the first shop + 5 EGP for each extra shop.'**
+  String get courierErrBelowBaseline;
+
+  /// No description provided for @courierErrQuoteCap.
+  ///
+  /// In en, this message translates to:
+  /// **'That delivery price is above the allowed maximum.'**
+  String get courierErrQuoteCap;
+
+  /// No description provided for @courierErrGoodsCap.
+  ///
+  /// In en, this message translates to:
+  /// **'The goods total is above the allowed limit.'**
+  String get courierErrGoodsCap;
+
+  /// No description provided for @courierErrShopCap.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many shops for one request.'**
+  String get courierErrShopCap;
+
+  /// No description provided for @courierErrThrottled.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts - wait a moment and try again.'**
+  String get courierErrThrottled;
+
+  /// No description provided for @courierErrInvalidAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid amount.'**
+  String get courierErrInvalidAmount;
+
+  /// No description provided for @courierErrInvalidItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the items: a name is missing or too long, or an amount is off.'**
+  String get courierErrInvalidItems;
+
+  /// No description provided for @courierErrInvalidInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Some details aren\'t valid - check them and try again.'**
+  String get courierErrInvalidInput;
+
+  /// No description provided for @courierErrInvalidState.
+  ///
+  /// In en, this message translates to:
+  /// **'This step isn\'t available right now.'**
+  String get courierErrInvalidState;
+
+  /// No description provided for @courierErrItemsPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Every item needs your decision before shopping can finish.'**
+  String get courierErrItemsPending;
+
+  /// No description provided for @courierErrItemNotPending.
+  ///
+  /// In en, this message translates to:
+  /// **'This item was already decided.'**
+  String get courierErrItemNotPending;
+
+  /// No description provided for @courierErrNoQuoteToCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'There\'s no open price to counter - wait for the captain\'s offer.'**
+  String get courierErrNoQuoteToCounter;
+
+  /// No description provided for @courierErrQuoteAlreadyLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'The delivery price is already agreed.'**
+  String get courierErrQuoteAlreadyLocked;
+
+  /// No description provided for @courierErrQuoteNotLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Agree on the delivery price first.'**
+  String get courierErrQuoteNotLocked;
+
+  /// No description provided for @courierErrQuoteNotPending.
+  ///
+  /// In en, this message translates to:
+  /// **'This offer was already answered.'**
+  String get courierErrQuoteNotPending;
+
+  /// No description provided for @courierErrRejectedItemsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'The captain still has to cancel the rejected items at the shop.'**
+  String get courierErrRejectedItemsOpen;
+
+  /// No description provided for @courierErrPartyChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'This ride changed - check the latest state.'**
+  String get courierErrPartyChanged;
+
+  /// No description provided for @courierErrTooManyOpenRides.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have an open request - finish it first.'**
+  String get courierErrTooManyOpenRides;
+
+  /// No description provided for @courierErrCashOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask-anything rides are cash only.'**
+  String get courierErrCashOnly;
+
+  /// No description provided for @courierErrGoodsInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Goods are already bought - cancellation goes through a problem report.'**
+  String get courierErrGoodsInProgress;
+
   /// No description provided for @counterFloor.
   ///
   /// In en, this message translates to:

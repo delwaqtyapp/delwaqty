@@ -10,21 +10,33 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 
 /// The live price negotiation of an ask-anything ride (436): the captain
 /// proposes a delivery price; the customer accepts, rejects or counters.
-/// The 15 + 5 per extra shop floor is enforced here on counters (#211)
-/// and again by the server.
-class CourierNegotiationCard extends ConsumerWidget {
+/// The 15 + 5 per extra shop floor and the 50000 cap are enforced here
+/// on counters (#211, #215) and again by the server.
+class CourierNegotiationCard extends ConsumerStatefulWidget {
   const CourierNegotiationCard({required this.state, super.key});
 
   final AskAnythingRideState state;
 
+  /// Server bound (436): no quote or counter above this.
+  static const maxQuote = 50000;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CourierNegotiationCard> createState() =>
+      _CourierNegotiationCardState();
+}
+
+class _CourierNegotiationCardState
+    extends ConsumerState<CourierNegotiationCard> {
+  bool _busy = false;
+
+  AskAnythingRideState get state => widget.state;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final quotes = ref.watch(courierQuotesProvider(state.rideId)).value;
-
-    final pending = quotes?.where((q) => q.isPending).firstOrNull;
+    final quotesAsync = ref.watch(courierQuotesProvider(state.rideId));
 
     return Card(
       child: Padding(
@@ -40,11 +52,7 @@ class CourierNegotiationCard extends ConsumerWidget {
                   child: Text(
                     state.quoteLocked
                         ? l10n.priceAgreed
-                        : pending == null
-                        ? l10n.driverQuoteTitle
-                        : pending.isFromDriver
-                        ? l10n.driverQuoteTitle
-                        : l10n.yourCounterTitle,
+                        : l10n.driverQuoteTitle,
                     style: AppTextStyles.titleMedium.copyWith(
                       color: cs.onSurface,
                     ),
@@ -55,105 +63,133 @@ class CourierNegotiationCard extends ConsumerWidget {
             const SizedBox(height: 10),
             if (state.quoteLocked && state.fare != null)
               Text(
-                '${state.fare} ${l10n.egp}',
+                '${state.fare!.toStringAsFixed(2)} ${l10n.egp}',
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               )
-            else if (pending == null)
-              Text(
-                l10n.waitingForDriverQuote,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
-              )
-            else ...[
-              Text(
-                '${pending.amount} ${l10n.egp}',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              if (pending.note != null && pending.note!.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  pending.note!,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: cs.onSurfaceVariant,
+            else
+              quotesAsync.when(
+                loading: () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   ),
                 ),
-              ],
-              const SizedBox(height: 4),
-              Text(
-                l10n.counterFloor(state.quoteBaseline.toString()),
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: cs.onSurfaceVariant,
+                error: (_, _) => _LoadError(
+                  onRetry: () =>
+                      ref.invalidate(courierQuotesProvider(state.rideId)),
                 ),
+                data: (quotes) => _buildNegotiation(context, l10n, cs, quotes),
               ),
-              const SizedBox(height: 12),
-              if (pending.isFromDriver)
-                Row(
-                  children: [
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: () =>
-                            _respond(context, ref, pending, 'accept'),
-                        child: Text(l10n.accept),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () =>
-                            _respond(context, ref, pending, 'reject'),
-                        child: Text(l10n.reject),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => _counter(context, ref),
-                        child: Text(l10n.negotiate),
-                      ),
-                    ),
-                  ],
-                )
-              else
-                Text(
-                  l10n.counterSentWaiting,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-            ],
           ],
         ),
       ),
     );
   }
 
-  Future<void> _respond(
+  Widget _buildNegotiation(
     BuildContext context,
-    WidgetRef ref,
-    CourierQuote quote,
-    String action,
-  ) async {
+    AppLocalizations l10n,
+    ColorScheme cs,
+    List<CourierQuote> quotes,
+  ) {
+    final theme = Theme.of(context);
+    final pending = quotes.where((q) => q.isPending).firstOrNull;
+
+    if (pending == null) {
+      return Text(
+        l10n.waitingForDriverQuote,
+        style: AppTextStyles.bodyMedium.copyWith(color: cs.onSurfaceVariant),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          pending.isFromDriver ? l10n.driverQuoteTitle : l10n.yourCounterTitle,
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: cs.onSurfaceVariant,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '${pending.amount.toStringAsFixed(2)} ${l10n.egp}',
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        if (pending.note != null && pending.note!.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Text(
+            pending.note!,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+        ],
+        const SizedBox(height: 4),
+        Text(
+          l10n.counterFloor(state.quoteBaseline.toStringAsFixed(0)),
+          style: AppTextStyles.bodySmall.copyWith(color: cs.onSurfaceVariant),
+        ),
+        const SizedBox(height: 12),
+        if (pending.isFromDriver)
+          // Wrap keeps every action readable at 320px and large text
+          // scales instead of squeezing three buttons into one row.
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              FilledButton(
+                onPressed: _busy ? null : () => _respond(pending, 'accept'),
+                child: Text(l10n.accept),
+              ),
+              OutlinedButton(
+                onPressed: _busy ? null : () => _respond(pending, 'reject'),
+                child: Text(l10n.reject),
+              ),
+              OutlinedButton(
+                onPressed: _busy ? null : _counter,
+                child: Text(l10n.negotiate),
+              ),
+            ],
+          )
+        else
+          Text(
+            l10n.counterSentWaiting,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _respond(CourierQuote quote, String action) async {
+    setState(() => _busy = true);
     try {
       await ref
           .read(deliveryRepositoryProvider)
           .respondCourierQuote(quote.id, action);
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(courierErrorText(context, e))));
       }
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
-  Future<void> _counter(BuildContext context, WidgetRef ref) async {
+  Future<void> _counter() async {
     final l10n = AppLocalizations.of(context);
     final controller = TextEditingController();
     final floor = state.quoteBaseline;
+    const cap = CourierNegotiationCard.maxQuote;
     final amount = await showDialog<double>(
       context: context,
       builder: (ctx) {
@@ -182,7 +218,7 @@ class CourierNegotiationCard extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  l10n.counterFloor(floor.toString()),
+                  l10n.counterFloor(floor.toStringAsFixed(0)),
                   style: Theme.of(ctx).textTheme.bodySmall,
                 ),
               ],
@@ -194,13 +230,19 @@ class CourierNegotiationCard extends ConsumerWidget {
               ),
               FilledButton(
                 onPressed: () {
-                  // #211: the client-side floor check; the server
-                  // enforces the same bound.
+                  // #211: the client-side floor check; #215: the server
+                  // cap. The server enforces both bounds again.
                   final value = double.tryParse(controller.text.trim());
                   if (value == null || value < floor) {
                     setState(
-                      () => errorText = l10n.counterFloor(floor.toString()),
+                      () => errorText = l10n.counterFloor(
+                        floor.toStringAsFixed(0),
+                      ),
                     );
+                    return;
+                  }
+                  if (value > cap) {
+                    setState(() => errorText = l10n.courierErrQuoteCap);
                     return;
                   }
                   Navigator.of(ctx).pop(value);
@@ -212,16 +254,46 @@ class CourierNegotiationCard extends ConsumerWidget {
         );
       },
     );
-    if (amount == null) return;
+    if (amount == null || !mounted) return;
+    setState(() => _busy = true);
     try {
       await ref
           .read(deliveryRepositoryProvider)
           .proposeCourierQuote(state.rideId, amount);
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(courierErrorText(context, e))));
       }
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
+  }
+}
+
+/// Inline load-failure state with a retry, so a failed stream never
+/// renders as empty data (#213).
+class _LoadError extends StatelessWidget {
+  const _LoadError({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            l10n.somethingWentWrong,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        TextButton(onPressed: onRetry, child: Text(l10n.retry)),
+      ],
+    );
   }
 }

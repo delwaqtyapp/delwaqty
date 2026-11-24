@@ -12,23 +12,27 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 /// approves or rejects it before it is bought. Rejected items are
 /// cancelled by the captain at the shop. Final charge = the agreed
 /// delivery price + the approved items total, paid in cash on delivery.
-class CourierInvoiceCard extends ConsumerWidget {
+class CourierInvoiceCard extends ConsumerStatefulWidget {
   const CourierInvoiceCard({required this.state, super.key});
 
   final AskAnythingRideState state;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final items = ref.watch(courierInvoiceItemsProvider(state.rideId)).value;
+  ConsumerState<CourierInvoiceCard> createState() => _CourierInvoiceCardState();
+}
 
-    final approved = (items ?? [])
-        .where((i) => i.isApproved)
-        .fold<double>(0, (sum, i) => sum + i.price);
-    final goods = state.shoppingFinished ? state.goodsTotal : approved;
-    final fare = state.fare ?? 0;
+class _CourierInvoiceCardState extends ConsumerState<CourierInvoiceCard> {
+  /// The item whose decision RPC is in flight; its buttons stay disabled
+  /// until the server answers (#213).
+  String? _busyItemId;
+
+  AskAnythingRideState get state => widget.state;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final cs = Theme.of(context).colorScheme;
+    final itemsAsync = ref.watch(courierInvoiceItemsProvider(state.rideId));
 
     return Card(
       child: Padding(
@@ -58,40 +62,32 @@ class CourierInvoiceCard extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 10),
-            if (items == null)
-              const Center(
+            itemsAsync.when(
+              loading: () => const Center(
                 child: Padding(
                   padding: EdgeInsets.all(12),
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
-              )
-            else if (items.isEmpty)
-              Text(
-                l10n.itemStatusPending,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
-              )
-            else
-              ...items.map(
-                (item) => _InvoiceItemRow(
-                  item: item,
-                  onDecide: item.isPending
-                      ? (action) => _decide(context, ref, item, action)
-                      : null,
-                ),
               ),
-            const Divider(height: 24),
-            _TotalRow(
-              label: l10n.deliveryFeeLabel,
-              amount: state.quoteLocked ? fare : null,
-              pendingLabel: state.quoteLocked ? null : l10n.itemStatusPending,
-            ),
-            _TotalRow(label: l10n.goodsLabel, amount: goods),
-            _TotalRow(
-              label: l10n.cashOnDeliveryTotal,
-              amount: (state.quoteLocked ? fare : 0) + goods,
-              emphasize: true,
+              error: (_, _) => Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.somethingWentWrong,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => ref.invalidate(
+                      courierInvoiceItemsProvider(state.rideId),
+                    ),
+                    child: Text(l10n.retry),
+                  ),
+                ],
+              ),
+              data: (items) => _buildInvoice(context, l10n, cs, items),
             ),
           ],
         ),
@@ -99,30 +95,99 @@ class CourierInvoiceCard extends ConsumerWidget {
     );
   }
 
-  Future<void> _decide(
+  Widget _buildInvoice(
     BuildContext context,
-    WidgetRef ref,
-    CourierInvoiceItem item,
-    String action,
-  ) async {
+    AppLocalizations l10n,
+    ColorScheme cs,
+    List<CourierInvoiceItem> items,
+  ) {
+    final approved = items
+        .where((i) => i.isApproved)
+        .fold<double>(0, (sum, i) => sum + i.price);
+    final goods = state.shoppingFinished ? state.goodsTotal : approved;
+    final fare = state.fare ?? 0;
+    // The total is provisional until shopping is finished and no item
+    // awaits a decision; never present it as the final bill before.
+    final provisional =
+        !state.shoppingFinished || items.any((i) => i.isPending);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (items.isEmpty)
+          Text(
+            l10n.itemStatusPending,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: cs.onSurfaceVariant,
+            ),
+          )
+        else
+          ...items.map(
+            (item) => InvoiceItemRow(
+              item: item,
+              busy: _busyItemId == item.id,
+              onDecide: item.isPending
+                  ? (action) => _decide(item, action)
+                  : null,
+            ),
+          ),
+        const Divider(height: 24),
+        InvoiceTotalRow(
+          label: l10n.deliveryFeeLabel,
+          amount: state.quoteLocked ? fare : null,
+          pendingLabel: state.quoteLocked ? null : l10n.itemStatusPending,
+        ),
+        InvoiceTotalRow(label: l10n.goodsLabel, amount: goods),
+        InvoiceTotalRow(
+          label: provisional ? l10n.provisionalTotal : l10n.cashOnDeliveryTotal,
+          amount: (state.quoteLocked ? fare : 0) + goods,
+          emphasize: true,
+        ),
+      ],
+    );
+  }
+
+  Future<void> _decide(CourierInvoiceItem item, String action) async {
+    setState(() => _busyItemId = item.id);
     try {
       await ref
           .read(deliveryRepositoryProvider)
           .decideCourierInvoiceItem(item.id, action);
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(courierErrorText(context, e))));
       }
+    } finally {
+      if (mounted) setState(() => _busyItemId = null);
     }
   }
 }
 
-class _InvoiceItemRow extends StatelessWidget {
-  const _InvoiceItemRow({required this.item, this.onDecide});
+/// One invoice line: product, shop, quantity with a localized unit, the
+/// receipt photo when the captain attached one, and the approval
+/// actions while pending (#214).
+class InvoiceItemRow extends StatelessWidget {
+  const InvoiceItemRow({
+    required this.item,
+    required this.busy,
+    this.onDecide,
+    super.key,
+  });
 
   final CourierInvoiceItem item;
+  final bool busy;
   final void Function(String action)? onDecide;
+
+  String _unitLabel(AppLocalizations l10n, String unit) => switch (unit) {
+    'kilo' => l10n.unitKilo,
+    'half' => l10n.unitHalf,
+    'quarter' => l10n.unitQuarter,
+    'piece' => l10n.unitPiece,
+    'amount' => l10n.unitAmount,
+    _ => unit,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -135,6 +200,8 @@ class _InvoiceItemRow extends StatelessWidget {
       'cancelled' => (l10n.itemStatusCancelled, cs.onSurfaceVariant),
       _ => (l10n.itemStatusPending, cs.tertiary),
     };
+    final quantity = item.quantity;
+    final unit = item.unit;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Column(
@@ -153,7 +220,7 @@ class _InvoiceItemRow extends StatelessWidget {
                 ),
               ),
               Text(
-                '${item.price} ${l10n.egp}',
+                '${item.price.toStringAsFixed(2)} ${l10n.egp}',
                 style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -165,7 +232,13 @@ class _InvoiceItemRow extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  item.shopName,
+                  [
+                    item.shopName,
+                    if (quantity != null && unit != null)
+                      '${quantity % 1 == 0 ? quantity.toInt() : quantity} × ${_unitLabel(l10n, unit)}'
+                    else if (unit != null)
+                      _unitLabel(l10n, unit),
+                  ].join(' - '),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: cs.onSurfaceVariant,
                   ),
@@ -178,20 +251,40 @@ class _InvoiceItemRow extends StatelessWidget {
                 ),
             ],
           ),
+          if (item.receiptPhotoUrl != null &&
+              item.receiptPhotoUrl!.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            InkWell(
+              onTap: () => _showReceipt(context),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.receipt_outlined, size: 16, color: cs.primary),
+                  const SizedBox(width: 4),
+                  Text(
+                    l10n.viewReceipt,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: cs.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           if (onDecide != null) ...[
             const SizedBox(height: 6),
             Row(
               children: [
                 Expanded(
                   child: FilledButton.tonal(
-                    onPressed: () => onDecide!('approve'),
+                    onPressed: busy ? null : () => onDecide!('approve'),
                     child: Text(l10n.approve),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () => onDecide!('reject'),
+                    onPressed: busy ? null : () => onDecide!('reject'),
                     child: Text(l10n.reject),
                   ),
                 ),
@@ -202,14 +295,48 @@ class _InvoiceItemRow extends StatelessWidget {
       ),
     );
   }
+
+  void _showReceipt(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.receiptPhotoTitle),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400, maxHeight: 480),
+          child: InteractiveViewer(
+            child: Image.network(
+              item.receiptPhotoUrl!,
+              fit: BoxFit.contain,
+              loadingBuilder: (context, child, progress) => progress == null
+                  ? child
+                  : const Center(
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+              errorBuilder: (context, _, _) =>
+                  Center(child: Text(l10n.somethingWentWrong)),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(l10n.close),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _TotalRow extends StatelessWidget {
-  const _TotalRow({
+/// One totals line; shared by the live invoice and the final receipt.
+class InvoiceTotalRow extends StatelessWidget {
+  const InvoiceTotalRow({
     required this.label,
     this.amount,
     this.pendingLabel,
     this.emphasize = false,
+    super.key,
   });
 
   final String label;

@@ -86,13 +86,26 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     super.dispose();
   }
 
+  static const _maxItems = 20;
+  static const _maxItemAmount = 100000;
+
   void _addItem() {
+    final l10n = AppLocalizations.of(context);
+    // The server bounds (436): at most 20 items, each amount <= 100000.
+    if (_items.length >= _maxItems) {
+      context.showAppSnackBar(l10n.courierItemsLimit);
+      return;
+    }
     final name = _itemNameController.text.trim();
     if (name.isEmpty) return;
     double? amount;
     if (_selectedUnit == 'amount') {
       amount = double.tryParse(_itemAmountController.text.trim());
       if (amount == null || amount <= 0) return;
+      if (amount > _maxItemAmount) {
+        context.showAppSnackBar(l10n.courierErrInvalidAmount);
+        return;
+      }
     }
     setState(() {
       _items.add(
@@ -503,6 +516,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
 
           TextField(
             controller: _itemNameController,
+            inputFormatters: [LengthLimitingTextInputFormatter(200)],
             decoration: InputDecoration(
               hintText: l10n.itemName,
               border: const OutlineInputBorder(),
@@ -547,12 +561,22 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                 ),
               IconButton.filled(
                 tooltip: l10n.addItem,
-                onPressed: _addItem,
+                onPressed: _items.length >= _maxItems ? null : _addItem,
                 icon: const Icon(Icons.add_rounded, size: 20),
                 constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
               ),
             ],
           ),
+          if (_items.length >= _maxItems)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                l10n.courierItemsLimit,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -587,6 +611,14 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                   ),
                 ),
               ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          // The controls sit on their own row so the title never shares
+          // width with two 48px buttons at 320px / large text scales.
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
               IconButton(
                 onPressed: _estimatedShops > 1
                     ? () => setState(() => _estimatedShops--)

@@ -8667,6 +8667,98 @@ class AppLocalizationsEn extends AppLocalizations {
       'Add at least one item with its unit or amount.';
 
   @override
+  String get courierItemsLimit => 'Up to 20 items in one request.';
+
+  @override
+  String get viewReceipt => 'View receipt';
+
+  @override
+  String get receiptPhotoTitle => 'Receipt';
+
+  @override
+  String get askAnythingReceiptTitle => 'Ask-anything receipt';
+
+  @override
+  String get provisionalTotal => 'Provisional total - not the final bill yet';
+
+  @override
+  String get incidentSettlementNote =>
+      'This ride was cancelled with goods already bought. Any settlement is handled through your problem report, not through this total.';
+
+  @override
+  String get courierErrBelowBaseline =>
+      'Below the minimum: delivery starts at 15 EGP for the first shop + 5 EGP for each extra shop.';
+
+  @override
+  String get courierErrQuoteCap =>
+      'That delivery price is above the allowed maximum.';
+
+  @override
+  String get courierErrGoodsCap =>
+      'The goods total is above the allowed limit.';
+
+  @override
+  String get courierErrShopCap => 'Too many shops for one request.';
+
+  @override
+  String get courierErrThrottled =>
+      'Too many attempts - wait a moment and try again.';
+
+  @override
+  String get courierErrInvalidAmount => 'Enter a valid amount.';
+
+  @override
+  String get courierErrInvalidItems =>
+      'Check the items: a name is missing or too long, or an amount is off.';
+
+  @override
+  String get courierErrInvalidInput =>
+      'Some details aren\'t valid - check them and try again.';
+
+  @override
+  String get courierErrInvalidState => 'This step isn\'t available right now.';
+
+  @override
+  String get courierErrItemsPending =>
+      'Every item needs your decision before shopping can finish.';
+
+  @override
+  String get courierErrItemNotPending => 'This item was already decided.';
+
+  @override
+  String get courierErrNoQuoteToCounter =>
+      'There\'s no open price to counter - wait for the captain\'s offer.';
+
+  @override
+  String get courierErrQuoteAlreadyLocked =>
+      'The delivery price is already agreed.';
+
+  @override
+  String get courierErrQuoteNotLocked => 'Agree on the delivery price first.';
+
+  @override
+  String get courierErrQuoteNotPending => 'This offer was already answered.';
+
+  @override
+  String get courierErrRejectedItemsOpen =>
+      'The captain still has to cancel the rejected items at the shop.';
+
+  @override
+  String get courierErrPartyChanged =>
+      'This ride changed - check the latest state.';
+
+  @override
+  String get courierErrTooManyOpenRides =>
+      'You already have an open request - finish it first.';
+
+  @override
+  String get courierErrCashOnly => 'Ask-anything rides are cash only.';
+
+  @override
+  String get courierErrGoodsInProgress =>
+      'Goods are already bought - cancellation goes through a problem report.';
+
+  @override
   String counterFloor(String floor) {
     return 'The minimum is $floor EGP: 15 for the first shop + 5 for each extra shop.';
   }

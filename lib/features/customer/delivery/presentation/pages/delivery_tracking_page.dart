@@ -14,6 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/widgets/courier_invoice_card.dart';
+import 'package:delwaqty/features/customer/delivery/presentation/widgets/courier_receipt_card.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/widgets/courier_negotiation_card.dart';
 import 'package:delwaqty/features/customer/delivery/data/datasources/remote/delivery_trip_tracking_source.dart';
 import 'package:delwaqty/features/customer/ride/presentation/widgets/ride_map.dart';
@@ -262,10 +263,19 @@ class _TrackingBody extends ConsumerWidget {
             child: _EtaCard(estimatedMinutes: ride.estimatedMinutes!),
           ),
         const SizedBox(height: 16),
-        AnimatedFadeIn(
-          delay: const Duration(milliseconds: 200),
-          child: _ReceiptCard(ride: ride),
-        ),
+        // Ask-anything rides get their own receipt once terminal (#212):
+        // the agreed fare plus the approved invoice, never baseFare
+        // alone. During the ride the live invoice card is the summary.
+        if (askState != null && ride.status.isTerminal)
+          AnimatedFadeIn(
+            delay: const Duration(milliseconds: 200),
+            child: CourierReceiptCard(state: askState),
+          )
+        else if (askState == null)
+          AnimatedFadeIn(
+            delay: const Duration(milliseconds: 200),
+            child: _ReceiptCard(ride: ride),
+          ),
       ],
     );
   }

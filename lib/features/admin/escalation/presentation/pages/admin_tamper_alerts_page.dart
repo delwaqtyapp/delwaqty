@@ -15,7 +15,6 @@ class AdminTamperAlertsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final clientPricedAsync = ref.watch(clientPricedAlertsProvider);
-    final insuranceAsync = ref.watch(insuranceMismatchesProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.tamperAlertsTitle)),
@@ -44,32 +43,6 @@ class AdminTamperAlertsPage extends ConsumerWidget {
                     children: [
                       for (final alert in alerts)
                         _ClientPricedTile(alert: alert, l10n: l10n),
-                    ],
-                  ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            l10n.insuranceMismatchSection,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          insuranceAsync.when(
-            loading: () => const Center(child: AppLoaderCircular()),
-            error: (e, _) => PremiumEmptyState(
-              icon: Icons.error_outline,
-              title: l10n.error,
-              message: appErrorText(context, e),
-            ),
-            data: (mismatches) => mismatches.isEmpty
-                ? PremiumEmptyState(
-                    icon: Icons.verified_outlined,
-                    title: l10n.noTamperSignals,
-                    message: '',
-                  )
-                : Column(
-                    children: [
-                      for (final mismatch in mismatches)
-                        _InsuranceMismatchTile(mismatch: mismatch, l10n: l10n),
                     ],
                   ),
           ),
@@ -124,48 +97,6 @@ class _ClientPricedTile extends StatelessWidget {
               style: TextStyle(
                 color: Theme.of(context).colorScheme.error,
                 fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _InsuranceMismatchTile extends StatelessWidget {
-  const _InsuranceMismatchTile({required this.mismatch, required this.l10n});
-  final InsuranceMismatch mismatch;
-  final AppLocalizations l10n;
-
-  @override
-  Widget build(BuildContext context) {
-    return GlassCard(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            const Icon(Icons.health_and_safety_outlined),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(mismatch.merchantName),
-                  Text(
-                    l10n.claimedVsServer(
-                      mismatch.claimedTotal.toStringAsFixed(2),
-                      mismatch.serverTotal.toStringAsFixed(2),
-                    ),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  // Full sale id on its own line: a non-flex trailing
-                  // Text would eat the narrow row width.
-                  Text(
-                    '#${mismatch.insuranceSaleId}',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
               ),
             ),
           ],

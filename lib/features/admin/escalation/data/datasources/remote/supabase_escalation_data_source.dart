@@ -70,21 +70,6 @@ class SupabaseEscalationDataSource {
     }
   }
 
-  Future<List<InsuranceMismatch>> getInsuranceMismatches() async {
-    try {
-      final result = await _client.rpc('admin_insurance_mismatches');
-      final rows = (result as List?) ?? const [];
-      return rows
-          .map(
-            (r) =>
-                InsuranceMismatch.fromJson(Map<String, dynamic>.from(r as Map)),
-          )
-          .toList();
-    } catch (e) {
-      throw ServerException(message: _rpcError(e));
-    }
-  }
-
   String _rpcError(Object error) {
     if (error is PostgrestException) {
       final msg = error.message.trim();

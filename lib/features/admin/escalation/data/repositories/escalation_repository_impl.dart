@@ -38,9 +38,4 @@ class EscalationRepositoryImpl implements EscalationRepository {
   Future<List<ClientPricedAlert>> getClientPricedAlerts() {
     return _dataSource.getClientPricedAlerts();
   }
-
-  @override
-  Future<List<InsuranceMismatch>> getInsuranceMismatches() {
-    return _dataSource.getInsuranceMismatches();
-  }
 }

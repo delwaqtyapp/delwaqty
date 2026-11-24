@@ -15,6 +15,4 @@ abstract class EscalationRepository {
   Future<List<EscalationEvent>> getEscalationEvents({String? complaintId});
 
   Future<List<ClientPricedAlert>> getClientPricedAlerts();
-
-  Future<List<InsuranceMismatch>> getInsuranceMismatches();
 }

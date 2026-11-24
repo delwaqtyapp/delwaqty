@@ -3840,16 +3840,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get clientPricedSection => 'بنود سعّرها الكاشير (آخر ٣٠ يومًا)';
 
   @override
-  String get insuranceMismatchSection =>
-      'فروقات إجماليات التأمين (آخر ٣٠ يومًا)';
-
-  @override
   String get noTamperSignals => 'لا توجد مؤشرات عبث خلال آخر ٣٠ يومًا';
-
-  @override
-  String claimedVsServer(Object claimed, Object server) {
-    return 'المطالَب $claimed · الخادم $server';
-  }
 
   @override
   String clientPricedRatioLabel(Object lines, Object pct, Object total) {

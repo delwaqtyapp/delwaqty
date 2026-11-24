@@ -7448,23 +7448,11 @@ abstract class AppLocalizations {
   /// **'Cashier-priced lines (last 30 days)'**
   String get clientPricedSection;
 
-  /// No description provided for @insuranceMismatchSection.
-  ///
-  /// In en, this message translates to:
-  /// **'Insurance total mismatches (last 30 days)'**
-  String get insuranceMismatchSection;
-
   /// No description provided for @noTamperSignals.
   ///
   /// In en, this message translates to:
   /// **'No tamper signals in the last 30 days'**
   String get noTamperSignals;
-
-  /// No description provided for @claimedVsServer.
-  ///
-  /// In en, this message translates to:
-  /// **'Claimed {claimed} · server {server}'**
-  String claimedVsServer(Object claimed, Object server);
 
   /// No description provided for @clientPricedRatioLabel.
   ///

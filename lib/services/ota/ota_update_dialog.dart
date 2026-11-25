@@ -29,15 +29,17 @@ Future<bool> showOtaUpdateIfAvailable({
     await clearOtaInstallHandoff(flavor);
     if (!force) return false;
   } else if (!force) {
-    // The installer was already opened for this exact version and the
-    // running build still has not changed: do not re-offer on every
-    // resume (the update loop). The About-page manual check (force)
-    // still shows the dialog.
-    final handedOff = await otaInstallHandedOffVersion(flavor);
+    // The installer was already opened for this exact version within the
+    // cooldown and the running build still has not changed: do not re-offer
+    // on every resume (the update loop). After the cooldown the offer
+    // returns, and the About-page manual check (force) always shows it.
+    final handoff = await otaInstallHandoff(flavor);
     if (suppressAutoOtaOffer(
       current: result.current,
       latest: result.latest,
-      handedOff: handedOff,
+      handedOffVersion: handoff?.$1,
+      handedOffAt: handoff?.$2,
+      now: DateTime.now(),
     )) {
       return false;
     }

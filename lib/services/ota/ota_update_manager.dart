@@ -171,10 +171,15 @@ Future<OtaCheckResult> checkForOtaUpdate(AppFlavor flavor) async {
 final Map<String, String> _verifiedArtifactHashes = {};
 
 class OtaDownloadResult {
-  const OtaDownloadResult({this.file, this.error});
+  const OtaDownloadResult({this.file, this.error, this.version});
 
   final File? file;
   final String? error;
+
+  /// versionCode of the channel config the file was actually downloaded and
+  /// verified against. Callers must use THIS (not a later manifest snapshot)
+  /// when deciding whether an install completed.
+  final int? version;
 
   bool get ok => file != null;
 }
@@ -266,7 +271,7 @@ Future<OtaDownloadResult> downloadLatestApk(
 
     onProgress?.call(1.0);
     _verifiedArtifactHashes[target.path] = expectedHash;
-    return OtaDownloadResult(file: target);
+    return OtaDownloadResult(file: target, version: channel.version);
   } catch (_) {
     return const OtaDownloadResult();
   }
@@ -361,16 +366,32 @@ Future<(int?, String?)> downloadAndInstallLatest(
 
 const _kInstallHandoffPrefix = 'ota_install_handed_off_';
 
+/// How long the automatic offer stays quiet after the installer was opened
+/// without the running build changing. Matches the OTA fallback interval:
+/// long enough to stop a resume loop, short enough that a cancelled or
+/// failed install is offered again the same day.
+const kOtaInstallHandoffCooldown = Duration(hours: 8);
+
 /// Records that the system installer was opened for [version] of [flavor].
 Future<void> markOtaInstallHandedOff(AppFlavor flavor, int version) async {
   final prefs = await SharedPreferences.getInstance();
-  await prefs.setInt('$_kInstallHandoffPrefix${flavor.name}', version);
+  await prefs.setString(
+    '$_kInstallHandoffPrefix${flavor.name}',
+    '$version:${DateTime.now().millisecondsSinceEpoch}',
+  );
 }
 
-/// The version whose install was last handed off to the system installer.
-Future<int?> otaInstallHandedOffVersion(AppFlavor flavor) async {
+/// The last handoff as (version, timestamp), or null.
+Future<(int, DateTime)?> otaInstallHandoff(AppFlavor flavor) async {
   final prefs = await SharedPreferences.getInstance();
-  return prefs.getInt('$_kInstallHandoffPrefix${flavor.name}');
+  final raw = prefs.getString('$_kInstallHandoffPrefix${flavor.name}');
+  if (raw == null) return null;
+  final parts = raw.split(':');
+  if (parts.length != 2) return null;
+  final version = int.tryParse(parts[0]);
+  final millis = int.tryParse(parts[1]);
+  if (version == null || millis == null) return null;
+  return (version, DateTime.fromMillisecondsSinceEpoch(millis));
 }
 
 /// Clears the handoff record once the running build actually changed.
@@ -380,15 +401,25 @@ Future<void> clearOtaInstallHandoff(AppFlavor flavor) async {
 }
 
 /// Whether the automatic (non-forced) offer is suppressed: the installer
-/// was already opened for [latest] and the running build still has not
-/// changed, so re-offering on every resume would loop the same update.
-/// A newer [latest] than the handed-off one always offers again, and the
-/// manual About-page check (force) never consults this gate.
+/// was already opened for [latest] within [cooldown], and the running build
+/// still has not changed, so re-offering on every resume would loop the
+/// same update. The offer returns once the cooldown expires (a cancelled or
+/// failed install gets another chance), a newer [latest] than the
+/// handed-off one always offers again, and the manual About-page check
+/// (force) never consults this gate.
 bool suppressAutoOtaOffer({
   required int current,
   required int latest,
-  required int? handedOff,
-}) => handedOff != null && handedOff >= latest && current < latest;
+  required int? handedOffVersion,
+  required DateTime? handedOffAt,
+  required DateTime now,
+  Duration cooldown = kOtaInstallHandoffCooldown,
+}) =>
+    handedOffVersion != null &&
+    handedOffAt != null &&
+    handedOffVersion >= latest &&
+    current < latest &&
+    now.difference(handedOffAt) < cooldown;
 
 /// Streams [file] through SHA-256 and compares it with [expected].
 ///

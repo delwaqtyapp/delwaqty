@@ -21,6 +21,11 @@ final invitationDownloaderProvider =
               downloadLatestApk(flavor, onProgress: onProgress),
     );
 
+/// Fetches the release manifest used to compare installed versions.
+final invitationManifestProvider = Provider<Future<OtaManifest?> Function()>(
+  (ref) => fetchOtaManifest,
+);
+
 class AppInvitationsPage extends ConsumerStatefulWidget {
   const AppInvitationsPage({super.key});
   @override
@@ -71,7 +76,7 @@ class _AppInvitationsPageState extends ConsumerState<AppInvitationsPage>
   Future<void> _loadStatuses(List<AppFlavor> channels) async {
     OtaManifest? manifest;
     try {
-      manifest = await fetchOtaManifest();
+      manifest = await ref.read(invitationManifestProvider)();
     } catch (_) {
       manifest = null;
     }
@@ -138,7 +143,10 @@ class _AppInvitationsPageState extends ConsumerState<AppInvitationsPage>
       setState(() {
         _readyFile = file;
         _readyFlavor = flavor;
-        _readyVersion = _manifest?.forFlavor(flavor)?.version;
+        // The verified version of THIS artifact, not a later manifest
+        // snapshot: the ready state clears only when the installed
+        // versionCode reaches the version actually downloaded.
+        _readyVersion = result.version;
       });
     } catch (_) {
       if (mounted) {
@@ -345,6 +353,24 @@ class _AppInvitationsPageState extends ConsumerState<AppInvitationsPage>
             child: CircularProgressIndicator(strokeWidth: 2),
           ),
         ),
+      );
+    }
+    if (_manifest == null) {
+      // The release manifest could not be read: the installed/current state
+      // is unknown, so offer a retry instead of a bare Download.
+      return Row(
+        children: [
+          Expanded(
+            child: Text(
+              l10n.appInvitationsLoadFailed,
+              style: context.textTheme.bodySmall,
+            ),
+          ),
+          TextButton(
+            onPressed: () => _loadStatuses(_channels),
+            child: Text(l10n.retry),
+          ),
+        ],
       );
     }
     if (_downloading == flavor) {

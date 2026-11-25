@@ -15,12 +15,28 @@ Widget app(
   Future<List<AppFlavor>> Function() load, {
   Future<OtaDownloadResult> Function(AppFlavor, void Function(double))?
   download,
+  Future<OtaManifest?> Function()? manifest,
   Locale locale = const Locale('en'),
 }) => ProviderScope(
   overrides: [
     appInvitationsProvider.overrideWith((ref) => load()),
     if (download != null)
       invitationDownloaderProvider.overrideWithValue(download),
+    invitationManifestProvider.overrideWithValue(
+      manifest ??
+          () async => OtaManifest(
+            channels: {
+              for (final f in AppFlavor.values)
+                f.name: const OtaChannelConfig(
+                  version: 12,
+                  versionName: '1.0.0',
+                  apk: 'x.apk',
+                  notes: '',
+                ),
+            },
+            checkedAt: DateTime(2026, 11, 25),
+          ),
+    ),
   ],
   child: MaterialApp(
     locale: locale,
@@ -113,6 +129,17 @@ void main() {
     // The verified file now waits for an explicit Install tap (bug 1).
     expect(find.text('Install'), findsOneWidget);
   });
+  testWidgets('manifest failure shows retry, not a bare Download', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      app(() async => [AppFlavor.driver], manifest: () async => null),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Download the app'), findsNothing);
+    expect(find.text('Retry'), findsOneWidget);
+  });
+
   testWidgets('revocation between download and install blocks install', (
     tester,
   ) async {

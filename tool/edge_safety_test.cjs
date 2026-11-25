@@ -393,3 +393,169 @@ test('delete-user cross-account path must use approval lifecycle and never purge
   assert.equal((await response.json()).code,'APPROVAL_WORKFLOW_REQUIRED');
   assert.deepEqual(calls,[]);
 });
+
+// ---- auth-login-identifier: session-only login ----
+
+const loginFile = 'supabase/functions/auth-login-identifier/index.ts';
+
+function loadLoginHandler({ gateAllowed = true, gateError = false, resolvedEmail = null,
+    resolveError = false, signInError = false, calls = [] } = {}) {
+  let handler;
+  const source = fs.readFileSync(loginFile, 'utf8').replace(
+    /^import \{ createClient \} from .*;\r?\n/m, '',
+  );
+  const context = {
+    Request, Response, URL, TextEncoder, crypto: webcrypto,
+    setTimeout, Math, JSON, Number, String, Date, RegExp, Promise, console,
+    Deno: {
+      env: { get: (key) => ({
+        SUPABASE_URL: 'https://example.invalid',
+        SUPABASE_SERVICE_ROLE_KEY: 'test-only-key',
+        SUPABASE_ANON_KEY: 'test-anon-key',
+        AUTH_LOGIN_MIN_RESPONSE_MS: '40',
+      })[key] },
+      serve: (callback) => { handler = callback; },
+    },
+    createClient: (url, key) => {
+      if (key === 'test-anon-key') {
+        return {
+          auth: {
+            signInWithPassword: async ({ email, password }) => {
+              calls.push(`signIn:${email}`);
+              if (signInError) return { data: {}, error: { message: 'invalid' } };
+              return {
+                data: {
+                  session: {
+                    access_token: 'test-access',
+                    refresh_token: 'test-refresh',
+                    expires_in: 3600,
+                    token_type: 'bearer',
+                  },
+                  user: { id: 'u1', email }, // GoTrue returns this; must be dropped
+                },
+                error: null,
+              };
+            },
+          },
+        };
+      }
+      assert.equal(key, 'test-only-key');
+      return {
+        rpc: async (name, args) => {
+          calls.push(name);
+          if (name === 'auth_login_gate') {
+            return { data: gateError ? null : gateAllowed, error: gateError ? { message: 'x' } : null };
+          }
+          if (name === 'auth_login_resolve_email') {
+            return { data: resolveError ? null : resolvedEmail, error: resolveError ? { message: 'x' } : null };
+          }
+          assert.equal(name, 'auth_login_record');
+          assert.deepEqual(Object.keys(args), ['p_identifier_key', 'p_ip', 'p_success']);
+          return { data: null, error: null };
+        },
+      };
+    },
+  };
+  vm.runInNewContext(stripTypeScriptTypes(source), context, { filename: loginFile });
+  assert.equal(typeof handler, 'function');
+  return handler;
+}
+
+function loginRequest(identifier, password = 'TestOnlyPassword123') {
+  return new Request('https://example.invalid', {
+    method: 'POST',
+    headers: { 'x-forwarded-for': '203.0.113.7' },
+    body: JSON.stringify({ identifier, password }),
+  });
+}
+
+const EMAIL_RE = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+/;
+
+test('auth-login preflight and method guard carry CORS', async () => {
+  const handler = loadLoginHandler();
+  const pre = await handler(new Request('https://example.invalid', { method: 'OPTIONS' }));
+  assert.equal(pre.status, 200);
+  assert.equal(pre.headers.get('access-control-allow-origin'), '*');
+  const get = await handler(new Request('https://example.invalid'));
+  assert.equal(get.status, 405);
+  assert.equal(get.headers.get('access-control-allow-origin'), '*');
+});
+
+test('auth-login rejects malformed input before any backend call', async () => {
+  const calls = [];
+  const handler = loadLoginHandler({ calls });
+  const bad1 = await handler(new Request('https://example.invalid', { method: 'POST', body: '{' }));
+  assert.equal(bad1.status, 400);
+  const bad2 = await handler(new Request('https://example.invalid', {
+    method: 'POST', body: JSON.stringify({ identifier: '', password: 'x' }),
+  }));
+  assert.equal(bad2.status, 400);
+  assert.deepEqual(calls, []);
+});
+
+test('unknown identifier and wrong password are identical and email-free', async () => {
+  const unknownCalls = [];
+  const unknown = loadLoginHandler({ resolvedEmail: null, calls: unknownCalls });
+  const t1 = Date.now();
+  const r1 = await unknown(loginRequest('no_such_user'));
+  const e1 = Date.now() - t1;
+  const wrongCalls = [];
+  const wrong = loadLoginHandler({ resolvedEmail: 'real@example.com', signInError: true, calls: wrongCalls });
+  const t2 = Date.now();
+  const r2 = await wrong(loginRequest('some_user'));
+  const e2 = Date.now() - t2;
+  assert.equal(r1.status, 401);
+  assert.equal(r2.status, 401);
+  const t1Text = await r1.text();
+  const t2Text = await r2.text();
+  assert.equal(t1Text, t2Text);
+  assert.equal(JSON.parse(t2Text).error, 'invalid_credentials');
+  assert.ok(!EMAIL_RE.test(t1Text));
+  assert.ok(!EMAIL_RE.test(t2Text));
+  assert.ok(e1 >= 40, `unknown-identifier path not padded (${e1}ms)`);
+  assert.ok(e2 >= 40, `wrong-password path not padded (${e2}ms)`);
+  // both recorded as failures
+  assert.ok(unknownCalls.includes('auth_login_record'));
+  assert.ok(wrongCalls.includes('auth_login_record'));
+});
+
+test('successful username login returns only session tokens, never the email', async () => {
+  const calls = [];
+  const handler = loadLoginHandler({ resolvedEmail: 'hidden@example.com', calls });
+  const response = await handler(loginRequest('SuperAdmin'));
+  assert.equal(response.status, 200);
+  const text = await response.text();
+  assert.ok(!EMAIL_RE.test(text), `response leaked an email: ${text}`);
+  const body = JSON.parse(text);
+  assert.deepEqual(Object.keys(body).sort(), ['access_token', 'expires_in', 'refresh_token', 'token_type']);
+  assert.equal(body.access_token, 'test-access');
+  assert.ok(!('user' in body));
+  assert.ok(calls.includes('signIn:hidden@example.com'));
+});
+
+test('lockout gate stops before resolution or password check', async () => {
+  const calls = [];
+  const handler = loadLoginHandler({ gateAllowed: false, resolvedEmail: 'hidden@example.com', calls });
+  const response = await handler(loginRequest('SuperAdmin'));
+  assert.equal(response.status, 429);
+  assert.equal((await response.json()).error, 'too_many_attempts');
+  assert.deepEqual(calls, ['auth_login_gate']);
+});
+
+test('phone identifier success is email-free and normalizes the lockout key', async () => {
+  const calls = [];
+  let recordedKey = null;
+  const handler = loadLoginHandler({ resolvedEmail: 'phone_user@example.com', calls });
+  const response = await handler(loginRequest('01012345678'));
+  assert.equal(response.status, 200);
+  assert.ok(!EMAIL_RE.test(await response.text()));
+});
+
+test('backend errors fail closed without recording or leaking', async () => {
+  const gateErr = loadLoginHandler({ gateError: true });
+  const r1 = await gateErr(loginRequest('someone'));
+  assert.equal(r1.status, 503);
+  const resolveErr = loadLoginHandler({ resolveError: true });
+  const r2 = await resolveErr(loginRequest('someone'));
+  assert.equal(r2.status, 503);
+});

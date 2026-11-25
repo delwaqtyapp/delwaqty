@@ -8168,6 +8168,18 @@ abstract class AppLocalizations {
   /// **'Username'**
   String get username;
 
+  /// No description provided for @usernameInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Username must be 3-30 letters, digits or underscores, not only digits'**
+  String get usernameInvalid;
+
+  /// No description provided for @usernameTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'This username is taken. Try another one.'**
+  String get usernameTaken;
+
   /// No description provided for @changePhoto.
   ///
   /// In en, this message translates to:

@@ -12,6 +12,7 @@ import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
+import 'package:delwaqty/core/utils/validators.dart';
 import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/domain/usecases/profile/profile_usecases.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
@@ -1161,6 +1162,14 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
     final name = _nameController.text.trim();
     final username = _usernameController.text.trim();
 
+    if (username.isNotEmpty && !AppValidators.isValidUsername(username)) {
+      setState(() {
+        _saving = false;
+        _errorMessage = widget.l10n.usernameInvalid;
+      });
+      return;
+    }
+
     final data = <String, dynamic>{};
     if (name.isNotEmpty) {
       data['full_name'] = name;
@@ -1186,7 +1195,9 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
       if (mounted) {
         setState(() {
           _saving = false;
-          _errorMessage = appErrorText(context, e);
+          _errorMessage = e.toString().contains('users_username_unique_idx')
+              ? widget.l10n.usernameTaken
+              : appErrorText(context, e);
         });
       }
     }

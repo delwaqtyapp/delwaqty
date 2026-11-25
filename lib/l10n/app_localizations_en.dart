@@ -4254,6 +4254,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get username => 'Username';
 
   @override
+  String get usernameInvalid =>
+      'Username must be 3-30 letters, digits or underscores, not only digits';
+
+  @override
+  String get usernameTaken => 'This username is taken. Try another one.';
+
+  @override
   String get changePhoto => 'Change Photo';
 
   @override

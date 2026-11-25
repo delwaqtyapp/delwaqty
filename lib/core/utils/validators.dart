@@ -20,10 +20,12 @@ abstract final class AppValidators {
   }
 
   /// Accepts a phone number (e.g. 01012345678, +201012345678), an email, OR
-  /// a username (3–32 chars: letters, digits, underscore, dot — no spaces).
+  /// a username (3-30 chars: letters, digits, underscore - no spaces, never
+  /// all digits, which stay reserved for the phone login path). Must match
+  /// the server rule (migration 439) exactly.
   static String? loginIdentifier(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Phone, email, or username is required';
+      return 'Phone number or username is required';
     }
     final v = value.trim();
     if (v.contains('@')) return email(value);
@@ -31,11 +33,18 @@ abstract final class AppValidators {
     if (phoneRegex.hasMatch(v)) {
       return null;
     }
-    final usernameRegex = RegExp(r'^[\w.]{3,32}$');
-    if (!usernameRegex.hasMatch(v)) {
-      return 'Enter a valid phone number, email, or username';
+    if (!isValidUsername(v)) {
+      return 'Enter a valid phone number or username';
     }
     return null;
+  }
+
+  /// The single source of truth for username shape, client-side mirror of
+  /// the users_username_format_chk constraint (migration 439).
+  static bool isValidUsername(String v) {
+    if (!RegExp(r'^[a-zA-Z0-9_]{3,30}$').hasMatch(v)) return false;
+    if (RegExp(r'^[0-9]+$').hasMatch(v)) return false;
+    return true;
   }
 
   static String? phone(String? value) {

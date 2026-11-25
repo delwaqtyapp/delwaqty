@@ -193,6 +193,12 @@ class AuthStateNotifier extends Notifier<AuthState> {
       AppConfig.supabaseUrl,
       AppConfig.supabaseAnonKey,
     );
+    // Legacy email-era accounts keep signing in with their real email;
+    // the identifier field accepts it silently (the copy only advertises
+    // phone or username) so no existing account is locked out.
+    if (trimmed.contains('@')) {
+      return trimmed;
+    }
     final phonePattern = RegExp(r'^[+0-9][0-9\s\-]{7,}$');
     if (phonePattern.hasMatch(trimmed)) {
       return resolvePhoneAuthIdentifier(trimmed, (phone) async {

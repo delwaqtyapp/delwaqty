@@ -10,7 +10,12 @@
 //   WHATSAPP_VERIFY_TOKEN  - random string we choose, entered in Meta's
 //                            webhook config for the GET handshake.
 //   WHATSAPP_APP_SECRET    - Meta app secret, signs X-Hub-Signature-256.
+//   WHATSAPP_CLOUD_TOKEN   - Cloud API access token (sending replies).
+//   WHATSAPP_PHONE_NUMBER_ID - Cloud API phone number id of the OTP number.
 //   SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are provided by the runtime.
+//   Replies are best-effort: missing secrets or a send failure never break
+//   verification, and a user reply is free inside the 24h customer window
+//   that their own code message just opened (no template needed).
 //
 // Deploy: supabase functions deploy whatsapp-webhook --no-verify-jwt
 // (--no-verify-jwt: Meta cannot present a user JWT; the HMAC signature is
@@ -68,6 +73,44 @@ function normalizeEgyptPhone(raw: string): string {
   return `+${d}`;
 }
 
+// Replies sent from the platform number. Confirmation wording is the
+// owner's; the link uses the app's deep-link scheme.
+const CONFIRMATION_BODY =
+  "تم تفعيل حسابك في دلوقتي ✅\nارجع للتطبيق: io.delwaqty://home";
+const INVALID_CODE_BODY =
+  "الكود غير صالح أو انتهت صلاحيته. اطلب كودًا جديدًا من التطبيق.";
+
+// Best-effort Cloud API text reply. Never throws: verification must not
+// depend on Meta accepting our reply.
+async function sendWhatsAppText(toDigits: string, bodyText: string): Promise<void> {
+  const token = Deno.env.get("WHATSAPP_CLOUD_TOKEN") ?? "";
+  const phoneNumberId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID") ?? "";
+  if (token === "" || phoneNumberId === "") return; // not wired yet
+  try {
+    const resp = await fetch(
+      `https://graph.facebook.com/v21.0/${phoneNumberId}/messages`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          to: toDigits,
+          type: "text",
+          text: { body: bodyText },
+        }),
+      },
+    );
+    if (!resp.ok) {
+      console.error("whatsapp reply failed", resp.status);
+    }
+  } catch (e) {
+    console.error("whatsapp reply error", e);
+  }
+}
+
 Deno.serve(async (req) => {
   const verifyToken = Deno.env.get("WHATSAPP_VERIFY_TOKEN") ?? "";
   const appSecret = Deno.env.get("WHATSAPP_APP_SECRET") ?? "";
@@ -123,6 +166,20 @@ Deno.serve(async (req) => {
         const code = (text.match(/\b(\d{6})\b/) ?? [])[1];
         if (!messageId || !code) continue;
 
+        // Meta retries deliveries (slow ack, transient error). mark_verified
+        // guards replays internally, but for a retry of a code that DID
+        // verify it returns false, which we must not mistake for an invalid
+        // code. Skip deliveries already recorded instead.
+        const { data: seen } = await supabase
+          .from("whatsapp_webhook_messages")
+          .select("message_id")
+          .eq("message_id", messageId)
+          .maybeSingle();
+        if (seen) {
+          results.push({ messageId, from, ok: true, duplicate: true });
+          continue;
+        }
+
         const { data, error } = await supabase.rpc(
           "whatsapp_webhook_mark_verified",
           {
@@ -131,7 +188,25 @@ Deno.serve(async (req) => {
             p_message_id: messageId,
           },
         );
-        results.push({ messageId, from, ok: !error && data === true });
+        const ok = !error && data === true;
+        results.push({ messageId, from, ok });
+
+        const toDigits = from.replace(/^\+/, "");
+        if (ok) {
+          // Verified: tell the user they can go back to the app.
+          await sendWhatsAppText(toDigits, CONFIRMATION_BODY);
+        } else if (!error) {
+          // Wrong or expired code. Reply only when this phone actually has
+          // OTP rows: never answer random chats on a shared number.
+          const { data: otpRows } = await supabase
+            .from("whatsapp_otp_verifications")
+            .select("id")
+            .eq("phone", from)
+            .limit(1);
+          if (otpRows && otpRows.length > 0) {
+            await sendWhatsAppText(toDigits, INVALID_CODE_BODY);
+          }
+        }
       }
     }
   }

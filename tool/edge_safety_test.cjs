@@ -106,6 +106,143 @@ test('unsigned webhook POST is rejected before processing a message', async () =
   assert.equal(response.status, 401);
 });
 
+function loadWebhookHandler({
+  withSecrets = true, markVerified = true, rpcError = null, seen = null,
+  otpRows = [], fetchImpl = async () => new Response('{}', { status: 200 }),
+  sent = [], rpcCalls = [],
+} = {}) {
+  let handler;
+  const source = fs.readFileSync('supabase/functions/whatsapp-webhook/index.ts', 'utf8').replace(
+    /^import \{ createClient \} from .*;\r?\n/m, '',
+  );
+  const chain = (rows) => {
+    const self = {
+      select: () => self, eq: () => self, order: () => self,
+      limit: async () => ({ data: rows, error: null }),
+      maybeSingle: async () => ({ data: seen, error: null }),
+    };
+    return self;
+  };
+  const context = {
+    Request, Response, URL, TextEncoder, crypto: webcrypto, console,
+    Deno: {
+      env: { get: (key) => ({
+        WHATSAPP_VERIFY_TOKEN: 'test-verify-token',
+        WHATSAPP_APP_SECRET: 'test-app-secret',
+        SUPABASE_URL: 'https://example.invalid',
+        SUPABASE_SERVICE_ROLE_KEY: 'test-only-key',
+        ...(withSecrets ? {
+          WHATSAPP_CLOUD_TOKEN: 'test-cloud-token',
+          WHATSAPP_PHONE_NUMBER_ID: 'test-phone-number-id',
+        } : {}),
+      })[key] },
+      serve: (callback) => { handler = callback; },
+    },
+    createClient: () => ({
+      rpc: async (name, args) => {
+        rpcCalls.push({ name, args });
+        return { data: rpcError ? null : markVerified, error: rpcError };
+      },
+      from: (table) => chain(table === 'whatsapp_otp_verifications' ? otpRows : []),
+    }),
+    fetch: async (url, init) => {
+      sent.push({ url, init });
+      return fetchImpl(url, init);
+    },
+  };
+  vm.runInNewContext(stripTypeScriptTypes(source), context, { filename: 'whatsapp-webhook' });
+  return handler;
+}
+
+async function signedPost(handler, messages) {
+  const body = JSON.stringify({ entry: [{ changes: [{ value: { messages } }] }] });
+  const key = await webcrypto.subtle.importKey(
+    'raw', new TextEncoder().encode('test-app-secret'),
+    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'],
+  );
+  const sig = await webcrypto.subtle.sign('HMAC', key, new TextEncoder().encode(body));
+  const hex = Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, '0')).join('');
+  return handler(new Request('https://example.invalid', {
+    method: 'POST', body, headers: { 'x-hub-signature-256': `sha256=${hex}` },
+  }));
+}
+
+const codeMessage = { id: 'wamid.test1', from: '201000000001', text: { body: '123456' } };
+
+test('verified code sends exactly one Arabic confirmation from the Cloud API number', async () => {
+  const sent = [];
+  const handler = loadWebhookHandler({ markVerified: true, sent });
+  const response = await signedPost(handler, [codeMessage]);
+  assert.equal(response.status, 200);
+  assert.deepEqual((await response.json()).results, [{ messageId: 'wamid.test1', from: '+201000000001', ok: true }]);
+  assert.equal(sent.length, 1);
+  assert.equal(sent[0].url, 'https://graph.facebook.com/v21.0/test-phone-number-id/messages');
+  assert.equal(sent[0].init.headers.Authorization, 'Bearer test-cloud-token');
+  const payload = JSON.parse(sent[0].init.body);
+  assert.equal(payload.messaging_product, 'whatsapp');
+  assert.equal(payload.to, '201000000001');
+  assert.match(payload.text.body, /^تم تفعيل حسابك في دلوقتي ✅/u);
+  assert.match(payload.text.body, /io\.delwaqty:\/\//);
+});
+
+test('a reply send failure never breaks verification', async () => {
+  const sent = [];
+  const handler = loadWebhookHandler({
+    markVerified: true, sent,
+    fetchImpl: async () => { throw new Error('network down'); },
+  });
+  const response = await signedPost(handler, [codeMessage]);
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).results[0].ok, true);
+  assert.equal(sent.length, 1);
+});
+
+test('without Cloud API secrets no reply is attempted', async () => {
+  const sent = [];
+  const handler = loadWebhookHandler({ markVerified: true, sent, withSecrets: false });
+  const response = await signedPost(handler, [codeMessage]);
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).results[0].ok, true);
+  assert.equal(sent.length, 0);
+});
+
+test('wrong or expired code on a known phone gets a guidance reply', async () => {
+  const sent = [];
+  const handler = loadWebhookHandler({ markVerified: false, otpRows: [{ id: 1 }], sent });
+  const response = await signedPost(handler, [codeMessage]);
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).results[0].ok, false);
+  assert.equal(sent.length, 1);
+  assert.match(JSON.parse(sent[0].init.body).text.body, /الكود غير صالح/u);
+});
+
+test('an unknown phone gets no reply (never answer random chats)', async () => {
+  const sent = [];
+  const handler = loadWebhookHandler({ markVerified: false, otpRows: [], sent });
+  const response = await signedPost(handler, [codeMessage]);
+  assert.equal(response.status, 200);
+  assert.equal(sent.length, 0);
+});
+
+test('an RPC error never triggers the invalid-code reply', async () => {
+  const sent = [];
+  const handler = loadWebhookHandler({ markVerified: false, rpcError: { message: 'db down' }, otpRows: [{ id: 1 }], sent });
+  const response = await signedPost(handler, [codeMessage]);
+  assert.equal(response.status, 200);
+  assert.equal(sent.length, 0);
+});
+
+test('a repeated delivery is skipped before the RPC and never re-replies', async () => {
+  const sent = [];
+  const rpcCalls = [];
+  const handler = loadWebhookHandler({ seen: { message_id: 'wamid.test1' }, sent, rpcCalls });
+  const response = await signedPost(handler, [codeMessage]);
+  assert.equal(response.status, 200);
+  assert.deepEqual((await response.json()).results, [{ messageId: 'wamid.test1', from: '+201000000001', ok: true, duplicate: true }]);
+  assert.equal(rpcCalls.length, 0);
+  assert.equal(sent.length, 0);
+});
+
 
 test('session revocation failure cannot report a successful reset', async () => {
   const handler = loadHandler(resetFile, { verified: true, revokeError: true });

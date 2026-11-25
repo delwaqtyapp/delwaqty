@@ -491,23 +491,25 @@ class _AdminBottomNavBar extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.fromLTRB(14, 6, 14, 10),
         decoration: BoxDecoration(
+          // Frosted glass matching the customer search bar: clearly
+          // translucent instead of the near-opaque 0.92 gradient.
           gradient: LinearGradient(
             begin: AlignmentDirectional.topCenter,
             end: AlignmentDirectional.bottomCenter,
             colors: isDark
                 ? [
-                    const Color(0xFF2B2940).withValues(alpha: 0.92),
-                    const Color(0xFF1E1D2B).withValues(alpha: 0.92),
+                    const Color(0xFF2B2940).withValues(alpha: 0.55),
+                    const Color(0xFF1E1D2B).withValues(alpha: 0.55),
                   ]
                 : [
-                    const Color(0xFFFFFFFF).withValues(alpha: 0.92),
-                    const Color(0xFFF4F3FB).withValues(alpha: 0.92),
+                    const Color(0xFFFFFFFF).withValues(alpha: 0.72),
+                    const Color(0xFFF4F3FB).withValues(alpha: 0.72),
                   ],
           ),
           borderRadius: BorderRadius.circular(26),
           border: Border.all(
             color: isDark
-                ? Colors.white.withValues(alpha: 0.10)
+                ? Colors.white.withValues(alpha: 0.28)
                 : scheme.outlineVariant.withValues(alpha: 0.5),
             width: isDark ? 0.7 : 1,
           ),
@@ -524,17 +526,21 @@ class _AdminBottomNavBar extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(26),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+            // Light sigma-8 blur: frosted look without low-end jank; the
+            // translucent surface alone keeps labels readable.
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: List.generate(items.length, (i) {
-                  return _BottomNavTile(
-                    entry: items[i],
-                    isActive: currentIndex == i,
-                    onTap: () => onTap(i),
-                    isDark: isDark,
+                  return Expanded(
+                    child: _BottomNavTile(
+                      entry: items[i],
+                      isActive: currentIndex == i,
+                      onTap: () => onTap(i),
+                      isDark: isDark,
+                    ),
                   );
                 }),
               ),
@@ -570,70 +576,87 @@ class _BottomNavTile extends StatelessWidget {
         child: GestureDetector(
           onTap: onTap,
           behavior: HitTestBehavior.opaque,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 240),
-            curve: Curves.easeOutCubic,
-            width: isActive ? 92 : 60,
-            padding: const EdgeInsets.symmetric(vertical: 5),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              gradient: isActive
-                  ? const LinearGradient(
-                      begin: AlignmentDirectional.topStart,
-                      end: AlignmentDirectional.bottomEnd,
-                      colors: [AppColors.brandPurple, AppColors.brandViolet],
-                    )
-                  : null,
-              boxShadow: isActive
-                  ? [
-                      BoxShadow(
-                        color: AppColors.brandPurple.withValues(alpha: 0.35),
-                        blurRadius: 14,
-                        spreadRadius: -2,
-                        offset: const Offset(0, 5),
-                      ),
-                    ]
-                  : null,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  entry.icon,
-                  size: 20,
-                  color: isActive
-                      ? Colors.white
-                      : isDark
-                      ? Colors.white.withValues(alpha: 0.55)
-                      : Theme.of(context).colorScheme.onSurface
-                            .withValues(alpha: 0.5),
-                ),
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 240),
-                  curve: Curves.easeOutCubic,
-                  alignment: AlignmentDirectional.centerStart,
-                  child: isActive
-                      ? Padding(
-                          padding: const EdgeInsetsDirectional.only(start: 7),
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 64),
-                            child: Text(
-                              entry.label,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Narrow phones and large text scales: drop the label before
+              // it can overflow; Semantics and Tooltip still carry it.
+              final showLabel = isActive && constraints.maxWidth >= 72;
+              final labelMax = (constraints.maxWidth - 20 - 7 - 16).clamp(
+                0.0,
+                64.0,
+              );
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 240),
+                curve: Curves.easeOutCubic,
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(18),
+                  gradient: isActive
+                      ? const LinearGradient(
+                          begin: AlignmentDirectional.topStart,
+                          end: AlignmentDirectional.bottomEnd,
+                          colors: [
+                            AppColors.brandPurple,
+                            AppColors.brandViolet,
+                          ],
                         )
-                      : const SizedBox.shrink(),
+                      : null,
+                  boxShadow: isActive
+                      ? [
+                          BoxShadow(
+                            color: AppColors.brandPurple.withValues(
+                              alpha: 0.35,
+                            ),
+                            blurRadius: 14,
+                            spreadRadius: -2,
+                            offset: const Offset(0, 5),
+                          ),
+                        ]
+                      : null,
                 ),
-              ],
-            ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      entry.icon,
+                      size: 20,
+                      color: isActive
+                          ? Colors.white
+                          : isDark
+                          ? Colors.white.withValues(alpha: 0.55)
+                          : Theme.of(context).colorScheme.onSurface
+                                .withValues(alpha: 0.5),
+                    ),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 240),
+                      curve: Curves.easeOutCubic,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: showLabel
+                          ? Padding(
+                              padding: const EdgeInsetsDirectional.only(
+                                start: 7,
+                              ),
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(maxWidth: labelMax),
+                                child: Text(
+                                  entry.label,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),

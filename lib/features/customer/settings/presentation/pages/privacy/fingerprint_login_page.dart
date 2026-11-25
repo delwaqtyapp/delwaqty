@@ -22,7 +22,7 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
   final LocalAuthentication _localAuth = LocalAuthentication();
   bool _biometricAvailable = false;
   bool _enabled = false;
-  String? _email;
+  String? _loginIdentifier;
   String? _userId;
   List<BiometricCredentials> _allCredentials = [];
 
@@ -38,7 +38,12 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
     if (user != null && mounted) {
       setState(() {
         _userId = user.id;
-        _email = user.email;
+        // The LOGIN identifier (phone or username), never the account
+        // email: email is not a login identifier (441).
+        _loginIdentifier = biometricLoginIdentifier(
+          phone: user.phone,
+          username: user.username,
+        );
       });
     }
     await _loadStatus();
@@ -85,6 +90,18 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
         );
         return;
       }
+      final identifier = _loginIdentifier;
+      if (identifier == null || identifier.isEmpty) {
+        // No phone or username on the account: there is no login
+        // identifier to replay, so biometric login cannot work.
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.tryAgain),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
       final store = ref.read(biometricAuthStoreProvider);
       final existing = await store.credentialsFor(userId);
       if (existing == null) {
@@ -92,7 +109,7 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
         if (password == null) return;
         await store.saveCredentials(
           userId: userId,
-          email: _email ?? '',
+          identifier: identifier,
           password: password,
         );
       }
@@ -176,7 +193,10 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
       ),
     );
     final password = passwordController.text;
-    passwordController.dispose();
+    // Deliberately NOT disposed here: the dialog's exit animation still
+    // builds the field for a few frames after pop, and disposing the
+    // controller immediately races it (used-after-disposed). The
+    // controller is tiny and this dialog is rare, so it is left for GC.
     return confirmed == true && password.isNotEmpty ? password : null;
   }
 
@@ -185,7 +205,7 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
     final confirmed = await ConfirmDialog.show(
       context,
       title: l10n.delete,
-      message: l10n.removeSavedAccountConfirm(cred.email),
+      message: l10n.removeSavedAccountConfirm(cred.identifier),
       confirmLabel: l10n.delete,
       isDestructive: true,
     );
@@ -280,10 +300,11 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      if (_email != null && _email!.isNotEmpty) ...[
+                      if (_loginIdentifier != null &&
+                          _loginIdentifier!.isNotEmpty) ...[
                         const SizedBox(height: 4),
                         Text(
-                          _email!,
+                          _loginIdentifier!,
                           style: context.textTheme.bodySmall?.copyWith(
                             color: Colors.white.withValues(alpha: 0.85),
                           ),
@@ -356,8 +377,8 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      _allCredentials[i].email.isNotEmpty
-                          ? _allCredentials[i].email[0].toUpperCase()
+                      _allCredentials[i].identifier.isNotEmpty
+                          ? _allCredentials[i].identifier[0].toUpperCase()
                           : '?',
                       style: context.textTheme.titleSmall?.copyWith(
                         color: cs.primary,
@@ -366,7 +387,7 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
                     ),
                   ),
                   title: Text(
-                    _allCredentials[i].email,
+                    _allCredentials[i].identifier,
                     style: context.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),

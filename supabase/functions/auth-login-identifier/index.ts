@@ -1,7 +1,10 @@
 // auth-login-identifier: session-only login for phone or username.
 // Email is NOT a login identifier (441): email-shaped input resolves
 // to NULL server-side and is answered exactly like an unknown
-// identifier. Email remains for signup, password reset and contact.
+// identifier. Email remains for password reset and account contact
+// only; the username/phone rule is scoped to THIS function - the
+// direct GoTrue endpoint (old builds, admin web gate) still accepts
+// email until the legacy path is retired.
 //
 // Replaces the client-side resolve-then-sign-in flow: the app used to
 // call the anon-granted lookup_email_by_phone / lookup_email_by_username

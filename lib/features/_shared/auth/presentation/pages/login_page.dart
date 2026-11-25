@@ -183,7 +183,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       if (user != null) {
         await biometricStore.saveCredentials(
           userId: user.id,
-          email: email,
+          identifier: email,
           password: _passwordController.text,
         );
         if (mounted) setState(() => _biometricAvailable = true);
@@ -243,7 +243,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
     final email = _emailController.text.trim();
     BiometricCredentials? credentials;
     if (email.isNotEmpty) {
-      credentials = await store.credentialsForEmail(email);
+      credentials = await store.credentialsForIdentifier(email);
     }
     credentials ??= await store.activeCredentials();
     credentials ??= await _pickCredentialsFromAll();
@@ -265,14 +265,17 @@ class _LoginPageState extends ConsumerState<LoginPage>
         );
       }
       if (!didAuth || !mounted) return;
-      _emailController.text = credentials.email;
+      _emailController.text = credentials.identifier;
       _passwordController.text = credentials.password;
       _postLoginHandled = false;
       _pendingBiometricUserId = credentials.userId;
       unawaited(
         ref
             .read(authStateProvider.notifier)
-            .signIn(email: credentials.email, password: credentials.password),
+            .signIn(
+              email: credentials.identifier,
+              password: credentials.password,
+            ),
       );
     } on Exception catch (e) {
       if (!mounted) return;

@@ -389,7 +389,7 @@ void main() {
       Future<void> seedStoredCredentials() async {
         await biometricStore.saveCredentials(
           userId: 'user-123',
-          email: 'test@example.com',
+          identifier: '01001112233',
           password: 'stale-secret',
         );
       }

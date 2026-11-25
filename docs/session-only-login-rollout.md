@@ -23,7 +23,11 @@ Parts:
 - #64: migration 441 removes the legacy email bridge (owner decision
   2026-11-25: no email as a login identifier - username/phone only).
   Email-shaped input resolves to NULL and is answered exactly like an
-  unknown identifier; email stays for signup, reset and contact only.
+  unknown identifier; email stays for password reset and account
+  contact only. Scope: this rule applies to the NEW
+  auth-login-identifier function. The direct GoTrue endpoint still
+  accepts email - old builds and the admin web gate sign in that way
+  until part 3 retires that path.
 - PR 3 (later release): revoke anon/authenticated EXECUTE on
   `lookup_email_by_phone` / `lookup_email_by_username`. NOT before old
   builds are gone from the wild - old builds still depend on them, and

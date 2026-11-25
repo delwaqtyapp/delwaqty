@@ -42,7 +42,7 @@ class _DeviceUnlockPageState extends ConsumerState<DeviceUnlockPage> {
       for (final uid in userIds) {
         final creds = await store.credentialsFor(uid);
         if (creds != null) {
-          entries.add(_AccountEntry(userId: uid, email: creds.email));
+          entries.add(_AccountEntry(userId: uid, email: creds.identifier));
         }
       }
       if (!mounted) return;
@@ -88,7 +88,7 @@ class _DeviceUnlockPageState extends ConsumerState<DeviceUnlockPage> {
       }
       await ref
           .read(authStateProvider.notifier)
-          .signIn(email: creds.email, password: creds.password);
+          .signIn(email: creds.identifier, password: creds.password);
       final next = ref.read(authStateProvider);
       if (!mounted) return;
       if (next is AuthError) {

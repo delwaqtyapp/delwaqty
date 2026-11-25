@@ -4963,6 +4963,33 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commissionServiceTypeGroup => 'أنواع الخدمات';
 
   @override
+  String get commissionServiceTypeCourier => 'كورير';
+
+  @override
+  String get commissionServiceTypeDocumentDelivery => 'توصيل مستندات';
+
+  @override
+  String get commissionServiceTypeFlowerDelivery => 'توصيل زهور';
+
+  @override
+  String get commissionServiceTypeFoodDelivery => 'توصيل طعام';
+
+  @override
+  String get commissionServiceTypeGroceryDelivery => 'توصيل بقالة';
+
+  @override
+  String get commissionServiceTypeMarketplaceDelivery => 'توصيل متجر';
+
+  @override
+  String get commissionServiceTypePackageDelivery => 'توصيل طرود';
+
+  @override
+  String get commissionServiceTypeRetailDelivery => 'توصيل تجزئة';
+
+  @override
+  String get commissionServiceTypeRide => 'مشوار';
+
+  @override
   String get commissionServiceCategoryGroup => 'فئات الخدمات';
 
   @override

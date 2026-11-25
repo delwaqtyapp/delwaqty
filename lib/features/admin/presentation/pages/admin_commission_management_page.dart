@@ -41,6 +41,20 @@ class _AdminCommissionManagementPageState
           'cleaning' => l10n.commissionCategoryCleaning,
           _ => key,
         };
+      case 'service_type':
+        return switch (key) {
+          'courier' => l10n.commissionServiceTypeCourier,
+          'document_delivery' => l10n.commissionServiceTypeDocumentDelivery,
+          'flower_delivery' => l10n.commissionServiceTypeFlowerDelivery,
+          'food_delivery' => l10n.commissionServiceTypeFoodDelivery,
+          'grocery_delivery' => l10n.commissionServiceTypeGroceryDelivery,
+          'marketplace_delivery' =>
+            l10n.commissionServiceTypeMarketplaceDelivery,
+          'package_delivery' => l10n.commissionServiceTypePackageDelivery,
+          'retail_delivery' => l10n.commissionServiceTypeRetailDelivery,
+          'ride' => l10n.commissionServiceTypeRide,
+          _ => key,
+        };
       default:
         return key.replaceAll('_', ' ');
     }

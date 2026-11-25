@@ -9584,6 +9584,60 @@ abstract class AppLocalizations {
   /// **'Service Types'**
   String get commissionServiceTypeGroup;
 
+  /// No description provided for @commissionServiceTypeCourier.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier'**
+  String get commissionServiceTypeCourier;
+
+  /// No description provided for @commissionServiceTypeDocumentDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Document delivery'**
+  String get commissionServiceTypeDocumentDelivery;
+
+  /// No description provided for @commissionServiceTypeFlowerDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Flower delivery'**
+  String get commissionServiceTypeFlowerDelivery;
+
+  /// No description provided for @commissionServiceTypeFoodDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Food delivery'**
+  String get commissionServiceTypeFoodDelivery;
+
+  /// No description provided for @commissionServiceTypeGroceryDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Grocery delivery'**
+  String get commissionServiceTypeGroceryDelivery;
+
+  /// No description provided for @commissionServiceTypeMarketplaceDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Marketplace delivery'**
+  String get commissionServiceTypeMarketplaceDelivery;
+
+  /// No description provided for @commissionServiceTypePackageDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Package delivery'**
+  String get commissionServiceTypePackageDelivery;
+
+  /// No description provided for @commissionServiceTypeRetailDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Retail delivery'**
+  String get commissionServiceTypeRetailDelivery;
+
+  /// No description provided for @commissionServiceTypeRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride'**
+  String get commissionServiceTypeRide;
+
   /// No description provided for @commissionServiceCategoryGroup.
   ///
   /// In en, this message translates to:

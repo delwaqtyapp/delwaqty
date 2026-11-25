@@ -5002,6 +5002,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commissionServiceTypeGroup => 'Service Types';
 
   @override
+  String get commissionServiceTypeCourier => 'Courier';
+
+  @override
+  String get commissionServiceTypeDocumentDelivery => 'Document delivery';
+
+  @override
+  String get commissionServiceTypeFlowerDelivery => 'Flower delivery';
+
+  @override
+  String get commissionServiceTypeFoodDelivery => 'Food delivery';
+
+  @override
+  String get commissionServiceTypeGroceryDelivery => 'Grocery delivery';
+
+  @override
+  String get commissionServiceTypeMarketplaceDelivery => 'Marketplace delivery';
+
+  @override
+  String get commissionServiceTypePackageDelivery => 'Package delivery';
+
+  @override
+  String get commissionServiceTypeRetailDelivery => 'Retail delivery';
+
+  @override
+  String get commissionServiceTypeRide => 'Ride';
+
+  @override
   String get commissionServiceCategoryGroup => 'Service Categories';
 
   @override

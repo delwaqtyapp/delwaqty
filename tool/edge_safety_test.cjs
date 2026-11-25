@@ -393,3 +393,253 @@ test('delete-user cross-account path must use approval lifecycle and never purge
   assert.equal((await response.json()).code,'APPROVAL_WORKFLOW_REQUIRED');
   assert.deepEqual(calls,[]);
 });
+
+// ---- auth-login-identifier: session-only login ----
+
+const loginFile = 'supabase/functions/auth-login-identifier/index.ts';
+
+function loadLoginHandler({ beginId = 7, beginError = false, resolveEmail = null,
+    resolveError = false, signInError = null, signInDelayMs = 0, signInThrow = false,
+    finishOk = true, finishError = false, calls = [], rpcArgs = [] } = {}) {
+  let handler;
+  const source = fs.readFileSync(loginFile, 'utf8').replace(
+    /^import \{ createClient \} from .*;\r?\n/m, '',
+  );
+  const context = {
+    Request, Response, URL, TextEncoder, crypto: webcrypto,
+    setTimeout, Math, JSON, Number, String, Date, RegExp, Promise, console,
+    AbortSignal, fetch: async () => new Response(null, { status: 204 }),
+    Deno: {
+      env: { get: (key) => ({
+        SUPABASE_URL: 'https://example.invalid',
+        SUPABASE_SERVICE_ROLE_KEY: 'test-only-key',
+        SUPABASE_ANON_KEY: 'test-anon-key',
+        AUTH_LOGIN_MIN_RESPONSE_MS: '40',
+      })[key] },
+      serve: (callback) => { handler = callback; },
+    },
+    createClient: (url, key) => {
+      if (key === 'test-anon-key') {
+        return {
+          auth: {
+            signInWithPassword: async ({ email, password }) => {
+              calls.push(`signIn:${email}`);
+              if (signInDelayMs) await new Promise(r => setTimeout(r, signInDelayMs));
+              if (signInThrow) throw new Error('socket hangup');
+              if (signInError) return { data: {}, error: signInError };
+              return {
+                data: {
+                  session: {
+                    access_token: 'test-access',
+                    refresh_token: 'test-refresh',
+                    expires_in: 3600,
+                    token_type: 'bearer',
+                  },
+                  user: { id: 'u1', email }, // GoTrue returns this; must be dropped
+                },
+                error: null,
+              };
+            },
+          },
+        };
+      }
+      assert.equal(key, 'test-only-key');
+      return {
+        rpc: async (name, args) => {
+          calls.push(name);
+          rpcArgs.push([name, args]);
+          if (name === 'auth_login_begin') {
+            return { data: beginError ? null : beginId, error: beginError ? { message: 'x' } : null };
+          }
+          if (name === 'auth_login_resolve_email') {
+            return { data: resolveError ? null : resolveEmail, error: resolveError ? { message: 'x' } : null };
+          }
+          assert.equal(name, 'auth_login_finish');
+          assert.deepEqual(Object.keys(args), ['p_attempt_id', 'p_success']);
+          return { data: finishError ? null : finishOk, error: finishError ? { message: 'x' } : null };
+        },
+      };
+    },
+  };
+  vm.runInNewContext(stripTypeScriptTypes(source), context, { filename: loginFile });
+  assert.equal(typeof handler, 'function');
+  return handler;
+}
+
+function loginRequest(identifier, password = 'TestOnlyPassword123', xff = '203.0.113.7') {
+  return new Request('https://example.invalid', {
+    method: 'POST',
+    headers: { 'x-forwarded-for': xff },
+    body: JSON.stringify({ identifier, password }),
+  });
+}
+
+const EMAIL_RE = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+/;
+
+test('auth-login preflight and method guard carry CORS incl. supabase-js headers', async () => {
+  const handler = loadLoginHandler();
+  const pre = await handler(new Request('https://example.invalid', { method: 'OPTIONS' }));
+  assert.equal(pre.status, 200);
+  assert.equal(pre.headers.get('access-control-allow-origin'), '*');
+  const allow = pre.headers.get('access-control-allow-headers');
+  for (const h of ['content-type', 'authorization', 'apikey', 'x-client-info']) {
+    assert.ok(allow.includes(h), `missing CORS header ${h}`);
+  }
+  const get = await handler(new Request('https://example.invalid'));
+  assert.equal(get.status, 405);
+  assert.equal(get.headers.get('access-control-allow-origin'), '*');
+});
+
+test('auth-login rejects malformed input before any backend call', async () => {
+  const calls = [];
+  const handler = loadLoginHandler({ calls });
+  const bad1 = await handler(new Request('https://example.invalid', { method: 'POST', body: '{' }));
+  assert.equal(bad1.status, 400);
+  const bad2 = await handler(new Request('https://example.invalid', {
+    method: 'POST', body: JSON.stringify({ identifier: '', password: 'x' }),
+  }));
+  assert.equal(bad2.status, 400);
+  assert.deepEqual(calls, []);
+});
+
+test('unknown identifier and wrong password are identical, padded, and email-free', async () => {
+  const credError = { message: 'invalid', status: 400 }; // GoTrue credential rejection
+  const unknownCalls = [];
+  const unknown = loadLoginHandler({ resolveEmail: null, signInError: credError, calls: unknownCalls });
+  const t1 = Date.now();
+  const r1 = await unknown(loginRequest('no_such_user'));
+  const e1 = Date.now() - t1;
+  const wrongCalls = [];
+  const wrong = loadLoginHandler({ resolveEmail: 'real@example.com', signInError: credError, calls: wrongCalls });
+  const t2 = Date.now();
+  const r2 = await wrong(loginRequest('some_user'));
+  const e2 = Date.now() - t2;
+  assert.equal(r1.status, 401);
+  assert.equal(r2.status, 401);
+  const t1Text = await r1.text();
+  const t2Text = await r2.text();
+  assert.equal(t1Text, t2Text);
+  assert.equal(JSON.parse(t2Text).error, 'invalid_credentials');
+  assert.ok(!EMAIL_RE.test(t1Text));
+  assert.ok(!EMAIL_RE.test(t2Text));
+  assert.ok(e1 >= 40, `unknown-identifier path not padded (${e1}ms)`);
+  assert.ok(e2 >= 40, `wrong-password path not padded (${e2}ms)`);
+  // unknown identifier still ran the dummy GoTrue password check
+  assert.ok(unknownCalls.some(c => c.startsWith('signIn:missing-')), `no dummy signIn: ${unknownCalls}`);
+  // both attempts recorded as failures
+  assert.ok(unknownCalls.includes('auth_login_finish'));
+  assert.ok(wrongCalls.includes('auth_login_finish'));
+});
+
+test('successful login returns session tokens only: no user object, no standalone email', async () => {
+  const calls = [];
+  const handler = loadLoginHandler({ resolveEmail: 'hidden@example.com', calls });
+  const response = await handler(loginRequest('SuperAdmin'));
+  assert.equal(response.status, 200);
+  const text = await response.text();
+  assert.ok(!EMAIL_RE.test(text), `response leaked a standalone email: ${text}`);
+  const body = JSON.parse(text);
+  assert.deepEqual(Object.keys(body).sort(), ['access_token', 'expires_in', 'refresh_token', 'token_type']);
+  assert.equal(body.access_token, 'test-access');
+  assert.ok(!('user' in body));
+  assert.ok(calls.includes('signIn:hidden@example.com'));
+});
+
+test('lockout stops before resolution or password check', async () => {
+  const calls = [];
+  const handler = loadLoginHandler({ beginId: null, resolveEmail: 'hidden@example.com', calls });
+  const response = await handler(loginRequest('SuperAdmin'));
+  assert.equal(response.status, 429);
+  assert.equal((await response.json()).error, 'too_many_attempts');
+  assert.deepEqual(calls, ['auth_login_begin']);
+});
+
+test('every accepted phone spelling collapses to one normalized last-10 lockout key', async () => {
+  for (const spelling of ['01001112233', '+201001112233', '+20 100 111 2233', '00201001112233']) {
+    const rpcArgs = [];
+    const handler = loadLoginHandler({ resolveEmail: 'p@example.com', rpcArgs });
+    const response = await handler(loginRequest(spelling));
+    assert.equal(response.status, 200);
+    const begin = rpcArgs.find(([name]) => name === 'auth_login_begin');
+    assert.equal(begin[1].p_identifier_key, 'phone:1001112233', `spelling ${spelling}`);
+  }
+});
+
+test('caller IP is the trusted last XFF entry, spoofed leading entries ignored', async () => {
+  const rpcArgs = [];
+  const handler = loadLoginHandler({ resolveEmail: null, rpcArgs });
+  await handler(loginRequest('someone', 'TestOnlyPassword123', '1.1.1.1, 2.2.2.2, 9.9.9.9'));
+  const begin = rpcArgs.find(([name]) => name === 'auth_login_begin');
+  assert.equal(begin[1].p_ip, '9.9.9.9');
+});
+
+test('tokens are denied when success accounting fails', async () => {
+  for (const opts of [{ finishOk: false }, { finishError: true }]) {
+    const handler = loadLoginHandler({ resolveEmail: 'hidden@example.com', ...opts });
+    const response = await handler(loginRequest('SuperAdmin'));
+    assert.equal(response.status, 503);
+    const text = await response.text();
+    assert.ok(!text.includes('test-access'), 'tokens issued without accounting');
+  }
+});
+
+test('accounting failure on the failure path maps to 503, not 401', async () => {
+  const handler = loadLoginHandler({ resolveEmail: null, finishError: true });
+  const response = await handler(loginRequest('no_such_user'));
+  assert.equal(response.status, 503);
+});
+
+test('shared classifier: every non-credential signIn failure is an identical 503 on both branches', async () => {
+  const availabilityFailures = [
+    { name: 'AuthRetryableFetchError status 0', signInError: { message: 'fetch failed', name: 'AuthRetryableFetchError', status: 0 } },
+    { name: 'AuthRetryableFetchError no status', signInError: { message: 'fetch failed', name: 'AuthRetryableFetchError' } },
+    { name: 'GoTrue 429', signInError: { message: 'rate limited', status: 429 } },
+    { name: 'GoTrue 500', signInError: { message: 'internal', status: 500 } },
+    { name: 'GoTrue 503', signInError: { message: 'down', status: 503 } },
+    { name: 'thrown fetch', signInThrow: true },
+  ];
+  for (const branch of [{ label: 'known', resolveEmail: 'real@example.com' }, { label: 'unknown', resolveEmail: null }]) {
+    for (const f of availabilityFailures) {
+      const calls = [];
+      const rpcArgs = [];
+      const handler = loadLoginHandler({ resolveEmail: branch.resolveEmail, calls, rpcArgs,
+        signInError: f.signInError ?? null, signInThrow: !!f.signInThrow });
+      const response = await handler(loginRequest('some_user'));
+      assert.equal(response.status, 503, `${branch.label}/${f.name}`);
+      assert.equal((await response.json()).error, 'temporarily_unavailable', `${branch.label}/${f.name}`);
+      const finishes = rpcArgs.filter(([name]) => name === 'auth_login_finish');
+      assert.equal(finishes.length, 1, `${branch.label}/${f.name}: finish called once`);
+      assert.equal(finishes[0][1].p_success, false, `${branch.label}/${f.name}: recorded as failure`);
+    }
+  }
+});
+
+test('explicit credential rejections (400/401/422) are the only 401s, identical on both branches', async () => {
+  for (const status of [400, 401, 422]) {
+    for (const branch of [{ label: 'known', resolveEmail: 'real@example.com' }, { label: 'unknown', resolveEmail: null }]) {
+      const handler = loadLoginHandler({ resolveEmail: branch.resolveEmail, signInError: { message: 'invalid', status } });
+      const response = await handler(loginRequest('some_user'));
+      assert.equal(response.status, 401, `${branch.label}/status ${status}`);
+      assert.equal((await response.json()).error, 'invalid_credentials');
+    }
+  }
+});
+
+test('delayed GoTrue on the unknown-identifier dummy path still answers identically', async () => {
+  const credError = { message: 'invalid', status: 400 };
+  const calls = [];
+  const handler = loadLoginHandler({ resolveEmail: null, signInError: credError, signInDelayMs: 120, calls });
+  const t = Date.now();
+  const response = await handler(loginRequest('ghost_user'));
+  const elapsed = Date.now() - t;
+  assert.equal(response.status, 401);
+  assert.ok(elapsed >= 120, `dummy path did not wait for GoTrue (${elapsed}ms)`);
+  assert.ok(calls.some(c => c.startsWith('signIn:missing-')));
+});
+
+test('backend RPC errors fail closed with 503 before any tokens', async () => {
+  const r1 = await loadLoginHandler({ beginError: true })(loginRequest('someone'));
+  assert.equal(r1.status, 503);
+  const r2 = await loadLoginHandler({ resolveError: true })(loginRequest('someone'));
+  assert.equal(r2.status, 503);
+});

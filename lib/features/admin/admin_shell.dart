@@ -440,10 +440,19 @@ class _AdminCanvas extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: ResponsiveContent(
-              maxWidth: 1240,
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: child,
+            child: Builder(
+              builder: (context) {
+                // Narrow phones showed a 24px empty strip on both sides;
+                // keep the desktop gutter only where there is room for it.
+                final horizontal = MediaQuery.sizeOf(context).width < 600
+                    ? 12.0
+                    : 24.0;
+                return ResponsiveContent(
+                  maxWidth: 1240,
+                  padding: EdgeInsets.symmetric(horizontal: horizontal),
+                  child: child,
+                );
+              },
             ),
           ),
         ],

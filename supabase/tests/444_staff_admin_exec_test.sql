@@ -1,56 +1,45 @@
--- Suite for migration 444 (staff-admin executors + is_cashier_type, dark).
--- Applied by the harness AFTER 439-444 on a throwaway clone of
--- h435_template. Synthetic fixtures only: @example.invalid emails,
--- zz444-* usernames. DISPOSABLE-DATABASE-ONLY. Every expected-refusal
--- block uses the sentinel idiom AND asserts the intended error text.
+-- Suite for migration 444 round 2 (staff provisioning state machine,
+-- code #259-#265 + security S1-S7). Applied by the harness AFTER
+-- 439-444 on a throwaway clone of h435_template. Synthetic fixtures
+-- only. Caller-context sections run as the REAL authenticated role
+-- (SET LOCAL ROLE + claims GUC), never as the DB owner (#265).
+-- DISPOSABLE-DATABASE-ONLY.
 
 BEGIN;
 
 create temporary table zz444(
-  owner uuid, outsider uuid, staffuser uuid, staffuser2 uuid, pwuser uuid,
-  merchant uuid, svc_merchant uuid, branch1 uuid, other_branch uuid
+  owner uuid, outsider uuid, staffuser uuid, staffuser2 uuid, staleuser uuid,
+  merchant uuid, svc_merchant uuid, branch1 uuid, other_branch uuid, provision uuid
 );
 insert into zz444 select
   gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(),
   gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(),
-  gen_random_uuid();
+  gen_random_uuid(), gen_random_uuid();
 grant select on table zz444 to authenticated;
 
 insert into auth.users(id, email)
 select u, e from (values
   ((select owner from zz444), 'zz444.owner@example.invalid'),
-  ((select outsider from zz444), 'zz444.outsider@example.invalid'),
-  ((select staffuser from zz444), 'staff_zz444a@delwaqty.app'),
-  ((select staffuser2 from zz444), 'staff_zz444b@delwaqty.app'),
-  ((select pwuser from zz444), 'staff_zz444c@delwaqty.app')
+  ((select outsider from zz444), 'zz444.outsider@example.invalid')
 ) as x(u, e);
 
-insert into public.users(id, email, role, user_type, verification_status, username, account_status)
-select u, e, 'customer', 'customer', 'approved', NULL, 'active'
+insert into public.users(id, email, role, user_type, verification_status, account_status)
+select u, e, 'customer', 'customer', 'approved', 'active'
 from (values
   ((select owner from zz444), 'zz444.owner@example.invalid'),
-  ((select outsider from zz444), 'zz444.outsider@example.invalid'),
-  ((select staffuser from zz444), 'staff_zz444a@delwaqty.app'),
-  ((select staffuser2 from zz444), 'staff_zz444b@delwaqty.app'),
-  ((select pwuser from zz444), 'staff_zz444c@delwaqty.app')
+  ((select outsider from zz444), 'zz444.outsider@example.invalid')
 ) as x(u, e)
-on conflict (id) do update set email = excluded.email, user_type = 'customer', username = NULL;
+on conflict (id) do update set email = excluded.email;
 
--- restaurant = cashier-type; service = simple-service (both in the live CHECK).
 insert into public.merchants(id, name, owner_user_id, type, status) values
   ((select merchant from zz444), 'zz444-shop', (select owner from zz444), 'restaurant', 'active'),
   ((select svc_merchant from zz444), 'zz444-svc', (select owner from zz444), 'service', 'active');
-
--- Legacy-style uppercase username (pre-439 data can hold one): the
--- collision check must be case-insensitive even though new logins are
--- forced lowercase.
-update public.users set username = 'ZZ444TAKEN__B2C3D4' where id = (select outsider from zz444);
 
 insert into public.branches(id, merchant_id, name, is_primary) values
   ((select branch1 from zz444), (select merchant from zz444), 'zz444-b1', true),
   ((select other_branch from zz444), (select svc_merchant from zz444), 'zz444-ob', true);
 
--- ============ 0) is_cashier_type: exhaustive pinned partition (B2) ============
+-- ============ 0) is_cashier_type: exactly-one, disjoint, exhaustive (#264) ====
 DO $$
 DECLARE
   v_cashier text[] := ARRAY[
@@ -61,184 +50,396 @@ DECLARE
   v_simple text[] := ARRAY[
     'food','service','home_services','plumbing','electrical','cleaning','handyman',
     'carpentry','ac_maintenance','painting','pest_control','appliance_repair',
-    'doctor','clinic','fitness','carwash','gas','other'];
+    'doctor','clinic','fitness','carwash','gas','other','pharmacy'];
   v_def text;
-  v_val text;
   v_vals text[];
+  v_val text;
 BEGIN
-  -- invoker + immutable (B1)
   ASSERT (SELECT NOT p.prosecdef AND p.provolatile = 'i'
             FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
            WHERE n.nspname = 'public' AND p.proname = 'is_cashier_type'),
     'is_cashier_type must be IMMUTABLE SECURITY INVOKER';
-  -- every merchants_type_check value resolves to exactly one bucket
+  ASSERT NOT (v_cashier && v_simple), 'cashier/simple lists overlap';
   SELECT pg_get_constraintdef(oid) INTO v_def FROM pg_constraint
    WHERE conname = 'merchants_type_check' AND conrelid = 'public.merchants'::regclass;
   SELECT array_agg(m[1]) INTO v_vals
     FROM regexp_matches(v_def, '''([a-zA-Z_]+)''::text', 'g') AS m;
   ASSERT v_vals IS NOT NULL AND cardinality(v_vals) >= 40, 'could not parse merchants_type_check';
   FOREACH v_val IN ARRAY v_vals LOOP
+    ASSERT (v_val = ANY (v_cashier)) <> (v_val = ANY (v_simple)),
+      'type in neither or both partitions: ' || v_val;
     ASSERT public.is_cashier_type(v_val) = (v_val = ANY (v_cashier)),
       'is_cashier_type mismatch for type: ' || v_val;
   END LOOP;
-  -- fail closed on NULL/unknown
+  FOREACH v_val IN ARRAY (v_cashier || v_simple) LOOP
+    ASSERT v_val = 'juice_shop' OR v_val = ANY (v_vals),
+      'partition entry not in merchants_type_check: ' || v_val;
+  END LOOP;
+  ASSERT public.is_cashier_type('juice_shop') IS TRUE,
+    'juice_shop is cashier-eligible (not in merchants_type_check)';
   ASSERT public.is_cashier_type(NULL) IS FALSE, 'NULL must fail closed';
   ASSERT public.is_cashier_type('nonsense') IS FALSE, 'unknown type must fail closed';
-  ASSERT public.is_cashier_type('FOOD') IS FALSE, 'matching is case-sensitive by design';
+  ASSERT public.is_cashier_type('RESTAURANT') IS FALSE, 'case-sensitive by design';
 END $$;
 
--- ============ 1) create_staff: happy path on a cashier-type ============
+-- ============ 1) master flag off: begin refused as REAL authenticated =======
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+DO $$
+BEGIN
+  BEGIN PERFORM public.staff_admin_provision_begin(
+      (SELECT merchant FROM zz444), 'zz444cashier', 'Cashier One', 'cashier',
+      (SELECT branch1 FROM zz444), NULL);
+    RAISE EXCEPTION 'zz444 sentinel: begin with flag off';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'feature disabled', 'wrong error: ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+
+-- flag on for the rest (442's suite toggles flags the same way, as DB owner);
+-- clear the JWT claims GUC first: it survives RESET ROLE within the transaction
+-- and the platform_settings guard reads it.
+SELECT set_config('request.jwt.claims', '{}', true);
+update public.platform_settings
+   set feature_flags = feature_flags || '{"staff_accounts":true}'::jsonb
+ where id = 'default';
+
+-- ============ 2) provision_begin: refusal matrix (generic errors) ===========
+SET LOCAL ROLE authenticated;
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT outsider FROM zz444))::text, true);
+  BEGIN PERFORM public.staff_admin_provision_begin(
+      (SELECT merchant FROM zz444), 'zz444x', 'X', 'cashier', (SELECT branch1 FROM zz444), NULL);
+    RAISE EXCEPTION 'zz444 sentinel: outsider begin';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'staff creation refused', 'wrong error: ' || SQLERRM; END;
+
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  BEGIN PERFORM public.staff_admin_provision_begin(
+      (SELECT svc_merchant FROM zz444), 'zz444x', 'X', 'branch_manager', NULL, NULL);
+    RAISE EXCEPTION 'zz444 sentinel: service-type begin';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'staff creation refused', 'wrong error: ' || SQLERRM; END;
+
+  BEGIN PERFORM public.staff_admin_provision_begin(
+      (SELECT merchant FROM zz444), 'zz444x', 'X', 'owner', NULL, NULL);
+    RAISE EXCEPTION 'zz444 sentinel: owner-role begin';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'staff creation refused', 'wrong error: ' || SQLERRM; END;
+
+  BEGIN PERFORM public.staff_admin_provision_begin(
+      (SELECT merchant FROM zz444), 'admin', 'X', 'branch_manager', NULL, NULL);
+    RAISE EXCEPTION 'zz444 sentinel: reserved username';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'staff creation refused', 'wrong error: ' || SQLERRM; END;
+
+  BEGIN PERFORM public.staff_admin_provision_begin(
+      (SELECT merchant FROM zz444), 'zz444x', 'X', 'cashier', (SELECT other_branch FROM zz444), NULL);
+    RAISE EXCEPTION 'zz444 sentinel: cross-merchant branch';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'staff creation refused', 'wrong error: ' || SQLERRM; END;
+
+  BEGIN PERFORM public.staff_admin_provision_begin(
+      (SELECT merchant FROM zz444), 'zz444x', 'X', 'cashier', (SELECT branch1 FROM zz444), 'not-a-phone');
+    RAISE EXCEPTION 'zz444 sentinel: bad phone';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'staff creation refused', 'wrong error: ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+
+-- ============ 3) happy path: begin -> edge-simulated auth user -> complete ===
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+DO $$
+DECLARE
+  v_res jsonb;
+BEGIN
+  v_res := public.staff_admin_provision_begin(
+    (SELECT merchant FROM zz444), 'ZZ444Cashier', 'Cashier One', 'cashier',
+    (SELECT branch1 FROM zz444), '+201055501001');
+  -- canonical derived form: lowercase + __<6 hex of merchant id> (S5)
+  ASSERT v_res->>'login_username' =
+    'zz444cashier__' || substr(replace((SELECT merchant FROM zz444)::text, '-', ''), 1, 6),
+    'derived login username wrong: ' || (v_res->>'login_username');
+END $$;
+RESET ROLE;
+
+-- the auth user the edge would create (service key writes app_metadata, S3)
+update zz444 set provision = (select id from public.staff_provisioning
+  where merchant_id = (select merchant from zz444) and state = 'pending');
+insert into auth.users(id, email, created_at, raw_app_meta_data)
+select (select staffuser from zz444), 'staff_zz444a@delwaqty.app', now(),
+       jsonb_build_object('staff_provisioning', (select provision from zz444));
+
+-- complete as the owner (REAL authenticated role)
+SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
 DO $$
 DECLARE
   v_staff uuid;
 BEGIN
-  v_staff := public.staff_admin_create_staff(
-    (SELECT merchant FROM zz444), (SELECT staffuser FROM zz444),
-    'zz444cashier', 'Cashier One', 'cashier', (SELECT branch1 FROM zz444),
-    '+201055501001', 'zz444cashier__a1b2c3');
+  v_staff := public.staff_admin_provision_complete(
+    (SELECT provision FROM zz444), (SELECT staffuser FROM zz444));
   ASSERT EXISTS (SELECT 1 FROM public.merchant_staff s
     WHERE s.id = v_staff AND s.role = 'cashier' AND s.is_active
       AND s.must_change_password AND s.created_by = (SELECT owner FROM zz444)),
     'staff row missing or wrong';
+  ASSERT EXISTS (SELECT 1 FROM public.merchant_staff_events e
+    WHERE e.staff_id = v_staff AND e.kind = 'created'), 'created audit missing';
+END $$;
+RESET ROLE;
+DO $$
+BEGIN
   ASSERT EXISTS (SELECT 1 FROM public.users u
-    WHERE u.id = (SELECT staffuser FROM zz444) AND u.username = 'zz444cashier__a1b2c3'
+    WHERE u.id = (SELECT staffuser FROM zz444)
+      AND u.username = 'zz444cashier__' || substr(replace((SELECT merchant FROM zz444)::text, '-', ''), 1, 6)
       AND u.user_type = 'merchant_staff' AND u.phone IS NULL),
     'users row not claimed correctly (phone must stay NULL)';
-  ASSERT EXISTS (SELECT 1 FROM public.merchant_staff_events e
-    WHERE e.staff_id = v_staff AND e.kind = 'created' AND e.actor_id = (SELECT owner FROM zz444)),
-    'created audit row missing';
+  ASSERT (SELECT state FROM public.staff_provisioning WHERE id = (SELECT provision FROM zz444))
+    = 'consumed', 'provisioning row not consumed';
 END $$;
 
--- ============ 2) refusals (each audited, each error text asserted) ============
-CREATE FUNCTION pg_temp.zz444_refuse(p_sql text, p_err text) RETURNS void
- LANGUAGE plpgsql AS $r$
-BEGIN
-  EXECUTE p_sql;
-  RAISE EXCEPTION 'zz444 sentinel: % should have refused', p_err;
-EXCEPTION WHEN raise_exception THEN
-  IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
-  ASSERT SQLERRM = 'staff creation refused: ' || p_err, 'wrong error: ' || SQLERRM;
-END;
-$r$;
-
+-- ============ 4) provision_complete negatives ===============================
+SET LOCAL ROLE authenticated;
 DO $$
 BEGIN
-
-  -- outsider (not the owner)
-  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT outsider FROM zz444))::text, true);
-  PERFORM pg_temp.zz444_refuse(format('SELECT public.staff_admin_create_staff(%L::uuid, %L::uuid, %L, %L, %L, NULL, NULL, %L)',
-    (SELECT merchant FROM zz444), (SELECT staffuser2 FROM zz444), 'zz444x', 'X', 'cashier', 'zz444x__a1b2c3'),
-    'not the merchant owner');
-
-  -- owner, simple-service merchant
+  -- second consume of the same provisioning row: refused (one-use)
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
-  PERFORM pg_temp.zz444_refuse(format('SELECT public.staff_admin_create_staff(%L::uuid, %L::uuid, %L, %L, %L, %L::uuid, NULL, %L)',
-    (SELECT svc_merchant FROM zz444), (SELECT staffuser2 FROM zz444), 'zz444x', 'X', 'cashier', (SELECT other_branch FROM zz444), 'zz444x__a1b2c3'),
-    'merchant type is not cashier-eligible');
+  BEGIN PERFORM public.staff_admin_provision_complete(
+      (SELECT provision FROM zz444), (SELECT staffuser FROM zz444));
+    RAISE EXCEPTION 'zz444 sentinel: double consume';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'staff creation refused', 'wrong error: ' || SQLERRM; END;
 
-  -- invalid role (owner/above-caller can never be requested)
-  PERFORM pg_temp.zz444_refuse(format('SELECT public.staff_admin_create_staff(%L::uuid, %L::uuid, %L, %L, %L, %L::uuid, NULL, %L)',
-    (SELECT merchant FROM zz444), (SELECT staffuser2 FROM zz444), 'zz444x', 'X', 'owner', (SELECT branch1 FROM zz444), 'zz444x__a1b2c3'),
-    'invalid staff role');
-
-  -- cashier without a branch
-  PERFORM pg_temp.zz444_refuse(format('SELECT public.staff_admin_create_staff(%L::uuid, %L::uuid, %L, %L, %L, NULL, NULL, %L)',
-    (SELECT merchant FROM zz444), (SELECT staffuser2 FROM zz444), 'zz444x', 'X', 'cashier', 'zz444x__a1b2c3'),
-    'cashier/kitchen need a branch');
-
-  -- branch of another merchant
-  PERFORM pg_temp.zz444_refuse(format('SELECT public.staff_admin_create_staff(%L::uuid, %L::uuid, %L, %L, %L, %L::uuid, NULL, %L)',
-    (SELECT merchant FROM zz444), (SELECT staffuser2 FROM zz444), 'zz444x', 'X', 'cashier', (SELECT other_branch FROM zz444), 'zz444x__a1b2c3'),
-    'branch does not belong to the merchant');
-
-  -- bad phone
-  PERFORM pg_temp.zz444_refuse(format('SELECT public.staff_admin_create_staff(%L::uuid, %L::uuid, %L, %L, %L, %L::uuid, %L, %L)',
-    (SELECT merchant FROM zz444), (SELECT staffuser2 FROM zz444), 'zz444x', 'X', 'cashier', (SELECT branch1 FROM zz444), 'not-a-phone', 'zz444x__a1b2c3'),
-    'invalid phone');
-
-  -- pre-existing non-staff account (the owner row itself)
-  PERFORM pg_temp.zz444_refuse(format('SELECT public.staff_admin_create_staff(%L::uuid, %L::uuid, %L, %L, %L, %L::uuid, NULL, %L)',
-    (SELECT merchant FROM zz444), (SELECT owner FROM zz444), 'zz444x', 'X', 'branch_manager', (SELECT branch1 FROM zz444), 'zz444y__a1b2c3'),
-    'target is not a fresh staff auth user');
-
-  -- duplicate login username vs a legacy uppercase row (case-insensitive)
-  PERFORM pg_temp.zz444_refuse(format('SELECT public.staff_admin_create_staff(%L::uuid, %L::uuid, %L, %L, %L, %L::uuid, NULL, %L)',
-    (SELECT merchant FROM zz444), (SELECT staffuser2 FROM zz444), 'zz444x', 'X', 'branch_manager', (SELECT branch1 FROM zz444), 'zz444taken__b2c3d4'),
-    'login username taken');
-
-  -- uppercase login input is rejected by the format rule outright
-  PERFORM pg_temp.zz444_refuse(format('SELECT public.staff_admin_create_staff(%L::uuid, %L::uuid, %L, %L, %L, %L::uuid, NULL, %L)',
-    (SELECT merchant FROM zz444), (SELECT staffuser2 FROM zz444), 'zz444x', 'X', 'branch_manager', (SELECT branch1 FROM zz444), 'ZZ444CASHIER__A1B2C3'),
-    'invalid login username');
-
-  -- A10: refusals themselves cannot audit (their error rolls back), so the
-  -- edge function logs them through staff_admin_audit_refusal afterwards.
-  PERFORM public.staff_admin_audit_refusal((SELECT merchant FROM zz444), 'create_staff');
-  ASSERT EXISTS (SELECT 1 FROM public.merchant_staff_events e
-    WHERE e.merchant_id = (SELECT merchant FROM zz444) AND e.staff_id IS NULL
-      AND e.kind = 'created' AND e.detail->>'refused' = 'create_staff'
-      AND e.actor_id = (SELECT owner FROM zz444)),
-    'refusal audit row missing or wrong actor';
+  -- an auth user WITHOUT the app_metadata binding can never be attached (S3)
+  PERFORM set_config('request.jwt.claims', '{}'::text, true);
+END $$;
+RESET ROLE;
+-- fresh provision + plain auth user (self-signup style, no app_metadata)
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+DO $$
+DECLARE v_res jsonb;
+BEGIN
+  v_res := public.staff_admin_provision_begin(
+    (SELECT merchant FROM zz444), 'zz444second', 'Second', 'branch_manager', NULL, NULL);
+END $$;
+RESET ROLE;
+insert into auth.users(id, email, created_at)
+values ((select staffuser2 from zz444), 'staff_zz444b@delwaqty.app', now());
+update zz444 set provision = (select id from public.staff_provisioning
+  where merchant_id = (select merchant from zz444) and state = 'pending'
+  order by created_at desc limit 1);
+SET LOCAL ROLE authenticated;
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  BEGIN PERFORM public.staff_admin_provision_complete(
+      (SELECT provision FROM zz444),
+      (SELECT staffuser2 FROM zz444));
+    RAISE EXCEPTION 'zz444 sentinel: unbound auth user attached';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'staff creation refused', 'wrong error: ' || SQLERRM; END;
+END $$;
+-- the refused complete rolled back, so the edge aborts via a separate call
+-- (an abort written inside the raising call could never commit)
+SET LOCAL ROLE authenticated;
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  PERFORM public.staff_admin_provision_abort((SELECT provision FROM zz444), 'unbound_auth_user');
+END $$;
+RESET ROLE;
+DO $$
+BEGIN
+  -- the edge's abort call ABORTED the provisioning row (fail closed)
+  ASSERT (SELECT state FROM public.staff_provisioning WHERE id = (SELECT provision FROM zz444))
+         = 'aborted', 'failed complete must be aborted by the edge follow-up';
+  -- and no staff row / username was claimed for the unbound user
+  ASSERT NOT EXISTS (SELECT 1 FROM public.merchant_staff s WHERE s.user_id = (SELECT staffuser2 FROM zz444)),
+    'unbound user gained a staff row';
 END $$;
 
--- ============ 3) set_active + password_reset audit ============
+-- expired provisioning row cannot complete
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+DO $$
+DECLARE v_res jsonb;
+BEGIN
+  v_res := public.staff_admin_provision_begin(
+    (SELECT merchant FROM zz444), 'zz444third', 'Third', 'branch_manager', NULL, NULL);
+END $$;
+RESET ROLE;
+update public.staff_provisioning set expires_at = now() - interval '1 minute'
+ where merchant_id = (select merchant from zz444) and state = 'pending';
+update zz444 set provision = (select id from public.staff_provisioning
+  where merchant_id = (select merchant from zz444) and state = 'pending'
+  order by created_at desc limit 1);
+SET LOCAL ROLE authenticated;
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  BEGIN PERFORM public.staff_admin_provision_complete(
+      (SELECT provision FROM zz444),
+      (SELECT staffuser2 FROM zz444));
+    RAISE EXCEPTION 'zz444 sentinel: expired provision completed';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'staff creation refused', 'wrong error: ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+
+-- #260: one auth user = at most one staff row, platform-wide
+DO $$
+BEGIN
+  BEGIN
+    INSERT INTO public.merchant_staff (merchant_id, user_id, username, full_name, role)
+    VALUES ((SELECT svc_merchant FROM zz444), (SELECT staffuser FROM zz444), 'zz444dupe', 'Dupe', 'branch_manager');
+    RAISE EXCEPTION 'zz444 sentinel: duplicate user_id accepted';
+  EXCEPTION
+    WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+      ASSERT false, 'expected unique violation, got: ' || SQLERRM;
+    WHEN unique_violation THEN
+      ASSERT SQLERRM LIKE '%merchant_staff_user_id_key%', 'wrong unique violation: ' || SQLERRM;
+  END;
+END $$;
+
+-- ============ 5) set_active / reset / password_changed matrix ===============
+SET LOCAL ROLE authenticated;
 DO $$
 DECLARE
-  v_staff uuid;
+  v_staff uuid := (SELECT id FROM public.merchant_staff WHERE user_id = (SELECT staffuser FROM zz444));
 BEGIN
-  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
-  SELECT id INTO v_staff FROM public.merchant_staff WHERE user_id = (SELECT staffuser FROM zz444);
-
-  -- outsider cannot flip state, and the error is generic
+  -- outsider: generic refusal on every action
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT outsider FROM zz444))::text, true);
-  BEGIN
-    PERFORM public.staff_admin_set_active(v_staff, false);
+  BEGIN PERFORM public.staff_admin_set_active(v_staff, false);
     RAISE EXCEPTION 'zz444 sentinel: outsider set_active';
-  EXCEPTION WHEN raise_exception THEN
-    IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
-    ASSERT SQLERRM = 'staff not found', 'wrong error: ' || SQLERRM;
-  END;
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'staff not found', 'wrong error: ' || SQLERRM; END;
+  BEGIN PERFORM public.staff_admin_record_password_reset(v_staff);
+    RAISE EXCEPTION 'zz444 sentinel: outsider reset';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'staff not found', 'wrong error: ' || SQLERRM; END;
+  BEGIN PERFORM public.staff_password_changed();
+    RAISE EXCEPTION 'zz444 sentinel: outsider password_changed';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'staff not found', 'wrong error: ' || SQLERRM; END;
 
+  -- owner: disable/enable cycle with audit
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
   PERFORM public.staff_admin_set_active(v_staff, false);
-  ASSERT EXISTS (SELECT 1 FROM public.merchant_staff s
-    WHERE s.id = v_staff AND NOT s.is_active AND s.disabled_at IS NOT NULL
-      AND s.disabled_by = (SELECT owner FROM zz444)), 'disable did not stick';
-  ASSERT EXISTS (SELECT 1 FROM public.merchant_staff_events e
-    WHERE e.staff_id = v_staff AND e.kind = 'disabled'), 'disabled audit missing';
-  PERFORM public.staff_admin_set_active(v_staff, true);
-  ASSERT EXISTS (SELECT 1 FROM public.merchant_staff s
-    WHERE s.id = v_staff AND s.is_active AND s.disabled_at IS NULL), 'enable did not stick';
-
-  -- password reset: must_change_password set, audit written, no secrets stored
-  UPDATE public.merchant_staff SET must_change_password = false WHERE id = v_staff;
   PERFORM public.staff_admin_record_password_reset(v_staff);
+  PERFORM public.staff_admin_set_active(v_staff, true);
+END $$;
+RESET ROLE;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT id FROM public.merchant_staff WHERE user_id = (SELECT staffuser FROM zz444));
+BEGIN
   ASSERT EXISTS (SELECT 1 FROM public.merchant_staff s
-    WHERE s.id = v_staff AND s.must_change_password), 'must_change_password not re-armed';
+    WHERE s.id = v_staff AND s.is_active AND s.disabled_at IS NULL AND s.must_change_password),
+    'state after disable/reset/enable wrong';
+  ASSERT (SELECT count(*) FROM public.merchant_staff_events e
+    WHERE e.staff_id = v_staff AND e.kind IN ('disabled','enabled','password_reset')) = 3,
+    'missing state-change audits';
   ASSERT EXISTS (SELECT 1 FROM public.merchant_staff_events e
-    WHERE e.staff_id = v_staff AND e.kind = 'password_reset'
-      AND e.detail = '{}'::jsonb), 'password_reset audit must carry no detail';
+    WHERE e.staff_id = v_staff AND e.kind = 'password_reset' AND e.detail = '{}'::jsonb),
+    'password_reset audit must carry no detail';
 END $$;
 
--- ============ 4) grants: nothing new for anon/PUBLIC ============
+-- staff clears their OWN barrier (S7); a DISABLED staff cannot
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT id FROM public.merchant_staff WHERE user_id = (SELECT staffuser FROM zz444));
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT staffuser FROM zz444))::text, true);
+  PERFORM public.staff_password_changed();
+END $$;
+RESET ROLE;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT id FROM public.merchant_staff WHERE user_id = (SELECT staffuser FROM zz444));
+BEGIN
+  ASSERT EXISTS (SELECT 1 FROM public.merchant_staff s
+    WHERE s.id = v_staff AND NOT s.must_change_password), 'barrier not cleared';
+  ASSERT EXISTS (SELECT 1 FROM public.merchant_staff_events e
+    WHERE e.staff_id = v_staff AND e.kind = 'password_changed'), 'password_changed audit missing';
+END $$;
+
+-- ============ 6) audit_refusal routing (S1) =================================
+SET LOCAL ROLE authenticated;
 DO $$
 BEGIN
-  ASSERT NOT has_function_privilege('anon', 'public.staff_admin_create_staff(uuid,uuid,text,text,text,uuid,text,text)', 'EXECUTE'), 'anon can create staff';
-  ASSERT NOT has_function_privilege('anon', 'public.staff_admin_set_active(uuid,boolean)', 'EXECUTE'), 'anon can set_active';
-  ASSERT NOT has_function_privilege('anon', 'public.staff_admin_record_password_reset(uuid)', 'EXECUTE'), 'anon can record resets';
-  ASSERT NOT has_function_privilege('anon', 'public.is_cashier_type(text)', 'EXECUTE'), 'anon can call is_cashier_type';
-  -- PUBLIC via aclexplode grantee=0 (has_function_privilege('PUBLIC',...)
-  -- raises 42704 on PG17); default acldefault applies when proacl is NULL.
+  -- owner: lands in the MERCHANT log as kind 'refused'
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  PERFORM public.staff_admin_audit_refusal((SELECT merchant FROM zz444), 'create_staff');
+  -- outsider: NEVER in the merchant log; caller-keyed table instead
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT outsider FROM zz444))::text, true);
+  PERFORM public.staff_admin_audit_refusal((SELECT merchant FROM zz444), 'create_staff');
+  -- unlisted reasons are coerced to the bounded vocabulary (#263)
+  PERFORM public.staff_admin_audit_refusal((SELECT merchant FROM zz444), 'gibberish-reason');
+END $$;
+RESET ROLE;
+DO $$
+BEGIN
+  ASSERT (SELECT count(*) FROM public.merchant_staff_events e
+    WHERE e.merchant_id = (SELECT merchant FROM zz444) AND e.kind = 'refused'
+      AND e.actor_id = (SELECT owner FROM zz444)
+      AND e.detail->>'action' = 'create_staff') = 1,
+    'owner refusal missing from merchant log';
+  ASSERT NOT EXISTS (SELECT 1 FROM public.merchant_staff_events e
+    WHERE e.merchant_id = (SELECT merchant FROM zz444) AND e.kind = 'refused'
+      AND e.actor_id = (SELECT outsider FROM zz444)),
+    'non-owner refusal leaked into the merchant log';
+  ASSERT (SELECT count(*) FROM public.staff_admin_refusals r
+    WHERE r.caller_id = (SELECT outsider FROM zz444)
+      AND r.merchant_id = (SELECT merchant FROM zz444)) = 2,
+    'caller-keyed refusal rows missing';
+END $$;
+
+-- ============ 7) self-signup can never become staff (S3) ====================
+insert into auth.users(id, email, raw_user_meta_data)
+values (gen_random_uuid(), 'zz444.selfsignup@example.invalid',
+        '{"user_type":"merchant_staff","full_name":"Self Signup"}'::jsonb);
+DO $$
+BEGIN
+  ASSERT EXISTS (SELECT 1 FROM public.users u
+    WHERE u.email = 'zz444.selfsignup@example.invalid' AND u.user_type = 'customer'),
+    'handle_new_user accepted merchant_staff from client metadata';
+END $$;
+
+-- ============ 8) first-login usability: 440 resolves the derived username ====
+DO $$
+DECLARE
+  v_email text;
+BEGIN
+  v_email := public.auth_login_resolve_email(
+    'zz444cashier__' || substr(replace((SELECT merchant FROM zz444)::text, '-', ''), 1, 6));
+  ASSERT v_email = 'staff_zz444a@delwaqty.app',
+    'derived username does not resolve at login: ' || coalesce(v_email, '<null>');
+END $$;
+
+-- ============ 9) grants: nothing for anon/PUBLIC ============================
+DO $$
+BEGIN
   ASSERT NOT EXISTS (
     SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace,
          LATERAL aclexplode(coalesce(p.proacl, acldefault('f', p.proowner))) a
      WHERE n.nspname = 'public'
-       AND p.proname IN ('is_cashier_type', 'staff_admin_create_staff',
-                         'staff_admin_set_active', 'staff_admin_record_password_reset')
-       AND a.grantee = 0 AND a.privilege_type = 'EXECUTE'),
-    'PUBLIC has EXECUTE on a 444 function';
+       AND p.proname IN ('is_cashier_type', 'staff_admin_provision_begin',
+                         'staff_admin_provision_complete', 'staff_admin_provision_abort',
+                         'staff_admin_set_active', 'staff_admin_record_password_reset',
+                         'staff_admin_audit_refusal', 'staff_password_changed')
+       AND a.grantee IN (0, (SELECT oid FROM pg_roles WHERE rolname = 'anon'))
+       AND a.privilege_type = 'EXECUTE'),
+    'anon/PUBLIC has EXECUTE on a 444 function';
+  ASSERT NOT has_table_privilege('authenticated', 'public.staff_provisioning', 'SELECT'),
+    'authenticated can read staff_provisioning';
+  ASSERT NOT has_table_privilege('authenticated', 'public.staff_admin_refusals', 'SELECT'),
+    'authenticated can read staff_admin_refusals';
 END $$;
 
 SELECT set_config('request.jwt.claims', '{}', true);
+SELECT '444 suite OK' AS result;
 ROLLBACK;

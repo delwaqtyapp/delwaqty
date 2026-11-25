@@ -118,6 +118,12 @@ NEW_CHK="$(psql "$URL" -X -q -A -t -c "SELECT pg_get_constraintdef(oid) FROM pg_
   || fail_case "users_user_type_check post-image wrong: $NEW_CHK"
 echo "users_user_type_check old->new pinned OK"
 
+NEW_KIND="$(psql "$URL" -X -q -A -t -c "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname='merchant_staff_events_kind_check' AND conrelid='public.merchant_staff_events'::regclass")"
+case "$NEW_KIND" in
+  *"'refused'::text"*"'password_changed'::text"*) echo "kind CHECK extended OK";;
+  *) fail_case "merchant_staff_events_kind_check post-image wrong: $NEW_KIND";;
+esac
+
 echo "== pins after 444"
 snap after
 
@@ -145,14 +151,21 @@ changed = [k for k in before if k in after and before[k] != after[k]]
 gone = [k for k in before if k not in after]
 added = sorted(set(after) - set(before))
 expected = {("public", "is_cashier_type", "p_type text"),
-            ("public", "staff_admin_create_staff", "p_merchant_id uuid, p_auth_user_id uuid, p_username text, p_full_name text, p_role text, p_branch_id uuid, p_phone text, p_login_username text"),
+            ("public", "staff_admin_provision_begin", "p_merchant_id uuid, p_username text, p_full_name text, p_role text, p_branch_id uuid, p_phone text"),
+            ("public", "staff_admin_provision_complete", "p_provision_id uuid, p_auth_user_id uuid"),
+            ("public", "staff_admin_provision_abort", "p_provision_id uuid, p_reason text"),
             ("public", "staff_admin_set_active", "p_staff_id uuid, p_active boolean"),
             ("public", "staff_admin_record_password_reset", "p_staff_id uuid"),
-            ("public", "staff_admin_audit_refusal", "p_merchant_id uuid, p_reason text")}
-if changed or gone or set(added) != expected:
-    print("CHANGED:", changed, "GONE:", gone, "ADDED:", added)
+            ("public", "staff_admin_audit_refusal", "p_merchant_id uuid, p_reason text"),
+            ("public", "staff_password_changed", "")}
+allowed_changed = {("public", "handle_new_user", ""): ("3bb10a3336503d4f558c27d66493e39e", "4c27ceff52867e83ead588c6951fc5c1")}
+bad_changed = [k for k in changed
+               if k not in allowed_changed
+               or allowed_changed[k] != (before[k], after[k])]
+if bad_changed or gone or set(added) != expected:
+    print("CHANGED:", bad_changed, "GONE:", gone, "ADDED:", added)
     sys.exit(1)
-print("function-body pin OK (only the 5 new 444 functions added)")
+print("function-body pin OK (8 added; handle_new_user pinned old->new)")
 PY
 
 echo "== 442 suite (regression)"
@@ -163,5 +176,58 @@ echo "442 suite OK"
 echo "== 444 suite"
 OUT="$(psql "$URL" -X -q -v ON_ERROR_STOP=1 -f "$SUITE444" 2>&1)" || { printf '%s\n' "$OUT" | tail -20; fail_case "444 suite failed"; }
 echo "444 suite OK"
+
+echo "== race H: concurrent provision_complete claims"
+IDS="$(psql "$URL" -X -q -A -t <<'SQL'
+BEGIN;
+insert into auth.users(id, email) values (gen_random_uuid(), 'zzh.owner@example.invalid') returning id;
+insert into public.users(id, email, role, user_type, verification_status, account_status)
+  select id, email, 'customer', 'customer', 'approved', 'active' from auth.users
+  where email = 'zzh.owner@example.invalid' on conflict (id) do nothing;
+insert into public.merchants(id, name, owner_user_id, type, status)
+  select gen_random_uuid(), 'zzh-shop', u.id, 'restaurant', 'active'
+  from public.users u where u.email = 'zzh.owner@example.invalid';
+insert into public.branches(id, merchant_id, name, is_primary)
+  select gen_random_uuid(), m.id, 'zzh-b1', true
+  from public.merchants m where m.name = 'zzh-shop';
+update public.platform_settings
+   set feature_flags = feature_flags || '{"staff_accounts":true}'::jsonb where id = 'default';
+select m.owner_user_id, m.id, b.id
+  from public.merchants m join public.branches b on b.merchant_id = m.id
+ where m.name = 'zzh-shop';
+COMMIT;
+SQL
+)"
+OWNER=$(echo "$IDS" | tail -1 | cut -d'|' -f1)
+MERCHANT=$(echo "$IDS" | tail -1 | cut -d'|' -f2)
+BRANCH=$(echo "$IDS" | tail -1 | cut -d'|' -f3)
+AUTHUSER="11111111-2222-4333-8444-555555555555"
+PROV="$(psql "$URL" -X -q -A -t <<SQL | grep -E '^[0-9a-f-]{36}$'
+BEGIN;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', '{"sub": "$OWNER"}', true);
+SELECT (public.staff_admin_provision_begin('$MERCHANT'::uuid, 'zzhracer', 'Racer', 'cashier', '$BRANCH'::uuid, NULL))->>'provision_id';
+COMMIT;
+SQL
+)"
+[ -n "$PROV" ] || fail_case "race H: provision_begin failed"
+psql "$URL" -X -q -c "INSERT INTO auth.users(id, email, created_at, raw_app_meta_data) VALUES ('$AUTHUSER', 'staff_zzh_race@delwaqty.app', now(), jsonb_build_object('staff_provisioning', '$PROV'::uuid))" >/dev/null
+for i in 1 2; do
+  ( psql "$URL" -X -q > "/tmp/zz444_race_$i.out" 2>&1 <<SQL
+BEGIN;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', '{"sub": "$OWNER"}', true);
+SELECT public.staff_admin_provision_complete('$PROV'::uuid, '$AUTHUSER'::uuid);
+COMMIT;
+SQL
+  ) &
+done
+wait
+WON=$(psql "$URL" -X -q -A -t -c "SELECT count(*) FROM public.merchant_staff WHERE user_id = '$AUTHUSER'")
+[ "$WON" = "1" ] || fail_case "race H: expected exactly one staff row, got $WON"
+STATE=$(psql "$URL" -X -q -A -t -c "SELECT state FROM public.staff_provisioning WHERE id = '$PROV'")
+[ "$STATE" = "consumed" ] || fail_case "race H: provisioning state $STATE"
+( grep -q 'staff creation refused' /tmp/zz444_race_1.out || grep -q 'staff creation refused' /tmp/zz444_race_2.out )   || fail_case "race H: the losing claim was not refused"
+echo "race H OK (exactly one concurrent claim won; loser refused)"
 
 echo "444 harness ALL OK"

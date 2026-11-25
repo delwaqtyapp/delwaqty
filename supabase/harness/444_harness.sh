@@ -164,8 +164,9 @@ expected = {("public", "is_cashier_type", "p_type text"),
             ("public", "staff_admin_set_active", "p_staff_id uuid, p_active boolean"),
             ("public", "staff_admin_record_password_reset", "p_staff_id uuid"),
             ("public", "staff_admin_audit_refusal", "p_merchant_id uuid, p_reason text"),
-            ("public", "staff_admin_sync_complete", "p_staff_id uuid, p_op text, p_ok boolean"),
-            ("public", "staff_admin_mark_password_rotated", "p_staff_id uuid"),
+            ("public", "staff_admin_sync_complete", "p_staff_id uuid, p_generation uuid"),
+            ("public", "staff_admin_sync_failed", "p_staff_id uuid, p_generation uuid"),
+            ("public", "staff_admin_mark_password_rotated", "p_staff_id uuid, p_generation uuid"),
             ("public", "staff_password_changed", "")}
 allowed_changed = {("public", "handle_new_user", ""): ("3bb10a3336503d4f558c27d66493e39e", "4c27ceff52867e83ead588c6951fc5c1")}
 bad_changed = [k for k in changed
@@ -174,7 +175,7 @@ bad_changed = [k for k in changed
 if bad_changed or gone or set(added) != expected:
     print("CHANGED:", bad_changed, "GONE:", gone, "ADDED:", added)
     sys.exit(1)
-print("function-body pin OK (10 added; handle_new_user pinned old->new)")
+print("function-body pin OK (11 added; handle_new_user pinned old->new)")
 PY
 
 echo "== 442 suite (regression)"
@@ -238,5 +239,55 @@ STATE=$(psql "$URL" -X -q -A -t -c "SELECT state FROM public.staff_provisioning 
 [ "$STATE" = "consumed" ] || fail_case "race H: provisioning state $STATE"
 ( grep -q 'staff creation refused' /tmp/zz444_race_1.out || grep -q 'staff creation refused' /tmp/zz444_race_2.out )   || fail_case "race H: the losing claim was not refused"
 echo "race H OK (exactly one concurrent claim won; loser refused)"
+
+echo "== race I: ownership flip concurrent with provision_complete (#260)"
+IDS2="$(psql "$URL" -X -q -A -t <<'SQL'
+BEGIN;
+insert into auth.users(id, email) values (gen_random_uuid(), 'zzh.outsider@example.invalid');
+update public.platform_settings
+   set feature_flags = feature_flags || '{"staff_accounts":true}'::jsonb where id = 'default';
+select m.owner_user_id, m.id, b.id,
+       (select id from auth.users where email = 'zzh.outsider@example.invalid')
+  from public.merchants m join public.branches b on b.merchant_id = m.id
+ where m.name = 'zzh-shop';
+COMMIT;
+SQL
+)"
+OUTSIDER=$(echo "$IDS2" | tail -1 | cut -d'|' -f4)
+AUTHUSER2="21111111-2222-4333-8444-555555555555"
+PROV2="$(psql "$URL" -X -q -A -t <<SQL | grep -E '^[0-9a-f-]{36}$'
+BEGIN;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', '{"sub": "$OWNER"}', true);
+SELECT (public.staff_admin_provision_begin('$MERCHANT'::uuid, 'zzhrace2', 'Racer2', 'cashier', '$BRANCH'::uuid, NULL))->>'provision_id';
+COMMIT;
+SQL
+)"
+[ -n "$PROV2" ] || fail_case "race I: provision_begin failed"
+psql "$URL" -X -q -c "INSERT INTO auth.users(id, email, created_at, raw_app_meta_data) VALUES ('$AUTHUSER2', 'staff_zzh_race2@delwaqty.app', now(), jsonb_build_object('staff_provisioning', '$PROV2'::uuid))" >/dev/null
+# session A holds an uncommitted ownership flip
+mkfifo /tmp/zz444_raceI_fifo 2>/dev/null || true
+psql "$URL" -X -q > /tmp/zz444_raceI_flip.out 2>&1 <<SQL &
+BEGIN;
+UPDATE public.merchants SET owner_user_id = '$OUTSIDER' WHERE id = '$MERCHANT';
+SELECT pg_sleep(2);
+COMMIT;
+SQL
+FLIPPID=$!
+sleep 1
+# session B consumes concurrently: must block on the FOR SHARE lock, then refuse
+psql "$URL" -X -q > /tmp/zz444_raceI_complete.out 2>&1 <<SQL
+BEGIN;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', '{"sub": "$OWNER"}', true);
+SELECT public.staff_admin_provision_complete('$PROV2'::uuid, '$AUTHUSER2'::uuid);
+COMMIT;
+SQL
+wait $FLIPPID
+grep -q 'staff creation refused' /tmp/zz444_raceI_complete.out   || fail_case "race I: complete after the committed flip was not refused"
+WON2=$(psql "$URL" -X -q -A -t -c "SELECT count(*) FROM public.merchant_staff WHERE user_id = '$AUTHUSER2'")
+[ "$WON2" = "0" ] || fail_case "race I: flipped consume created a staff row"
+psql "$URL" -X -q -c "UPDATE public.merchants SET owner_user_id = '$OWNER' WHERE id = '$MERCHANT'" >/dev/null
+echo "race I OK (FOR SHARE serialized the flip; consume refused)"
 
 echo "444 harness ALL OK"

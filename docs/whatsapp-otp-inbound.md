@@ -203,7 +203,11 @@ OTP flow from an approved phone - request a code in the app, send it by
 WhatsApp to +201550692655, and assert `verified_via='webhook'` on the
 OTP row plus the matching Meta message id in
 `whatsapp_webhook_messages`. (A code-less message proves nothing here:
-the webhook skips it before the RPC, and ids are recorded only after a
-successful pending-OTP verify.) To verify code-less transport itself,
+the webhook skips it before the RPC. Note that a message id can also be
+recorded without a successful verify: a wrong or expired code from a
+phone with a recent pending OTP claims its Meta message id in
+`whatsapp_webhook_messages` before the guidance reply is sent, so the
+table alone does not prove verification - `verified_via='webhook'` on
+the OTP row does.) To verify code-less transport itself,
 use raw Meta delivery evidence (Graph API responses, Meta dashboard
 webhook logs) instead.

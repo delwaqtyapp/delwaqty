@@ -104,6 +104,10 @@ did somehow depend on that path, the failure mode is a clear
 
 ### Interim: Meta's free Cloud API test number
 
+Superseded Nov 25, 2026: the dedicated Egyptian SIM is registered on the
+Cloud API (see the registration record below); the interim test-number
+path is no longer the plan of record.
+
 Until the platform has its own SIM, point `whatsapp_otp_number` at the
 Meta app's test number (any country code — the +1 test number is why the
 migration validates generic E.164, not `^\+201`).
@@ -144,3 +148,62 @@ app: Cloud API registration revokes the app session on that line.
    Meta's "Send test message" webhook sample, then one real WhatsApp
    send; expect the function's `received`/`results` JSON response shape
    and a `verified_via='webhook'` row.
+
+## Registration record (Nov 25, 2026): dedicated number live on Cloud API
+
+The platform number +201550692655 (dedicated Egyptian SIM) is registered
+on the Cloud API under the business portfolio "دلوقتي"
+(business_id 999347779858871):
+
+- WABA "دلوقتي": id 2210575052859324
+- Phone number: id 1538371209348768 (+20 15 50692655, display name
+  "دلوقتي", category Shopping & Retail, display-name review pending —
+  Meta reviews within ~24h; inbound works meanwhile)
+- App-level webhook subscription ACTIVE: object
+  `whatsapp_business_account`, field `messages`, callback
+  `https://bttnlkmwhorjamzemwda.supabase.co/functions/v1/whatsapp-webhook`
+
+Actual flow that worked (the Delwaqty app has no WhatsApp product/use
+case in the new developer dashboard, so App Dashboard > WhatsApp setup
+does not exist for it):
+
+1. Business Manager > business info: Meta required full legal business
+   details before any WhatsApp setup.
+2. Business Settings > Messaging accounts (حسابات المراسلة) > create
+   WhatsApp account: creates the WABA and onboards the SIM; Meta texts
+   the SIM a 6-digit code (relayed by the owner).
+3. Business Settings > Apps > Add > link the Delwaqty app id to the
+   portfolio (auto-approved as app admin).
+4. Business Settings > System users: created "Delwaqty API" (Admin) and
+   assigned the WhatsApp account asset with full control. NOTE: the BM
+   token wizard shows "no permissions available" for the Delwaqty app
+   (an app needs the WhatsApp product for `whatsapp_business_management`
+   scope, and this app's type cannot add it), so `POST
+   /{waba}/subscribed_apps` cannot be driven by API from the app token.
+   For this inbound-only OTP design the app-level webhook subscription
+   (step 5) plus same-portfolio app linking is what makes events flow.
+5. App-level webhook subscription via Graph API
+   (`POST /{app-id}/subscriptions`, app access token): object
+   `whatsapp_business_account`, field `messages`. This is the piece that
+   was already live since Nov 24.
+
+Platform setting: `platform_settings.whatsapp_otp_number =
+'+201550692655'` applied on staging (adcgqoccrgauqdoplsgg) Nov 25;
+prod apply pending owner approval and reviewer GO.
+
+This section is a historical registration/staging record only. It is NOT
+authorization for any prod deploy or apply; prod keeps its own gates
+(both reviewer GOs, green CI, explicit owner/main order). Operational
+Meta claims above (webhook subscription active, live inbound, ~24h
+display-name review) are as reported by the registration agent, not
+independently verified.
+
+Verify inbound delivery after any wiring change: run the real pending
+OTP flow from an approved phone - request a code in the app, send it by
+WhatsApp to +201550692655, and assert `verified_via='webhook'` on the
+OTP row plus the matching Meta message id in
+`whatsapp_webhook_messages`. (A code-less message proves nothing here:
+the webhook skips it before the RPC, and ids are recorded only after a
+successful pending-OTP verify.) To verify code-less transport itself,
+use raw Meta delivery evidence (Graph API responses, Meta dashboard
+webhook logs) instead.

@@ -245,6 +245,21 @@ ALTER TABLE public.merchant_staff_events ADD CONSTRAINT merchant_staff_events_ki
 -- Refusal error text is GENERIC to the caller (#263); the specific reason is
 -- only in the server-side log the edge writes afterwards.
 
+-- #261/#262: GoTrue completion protocol state on the staff row. Enable is
+-- FAIL CLOSED: is_active flips true only in staff_admin_sync_complete after
+-- the edge verifies the GoTrue side. sync_state 'failed' is the actionable
+-- blocked state the owner retries from. password_digest is the server-side
+-- proof anchor for staff_password_changed (security blocking 1 / #266).
+ALTER TABLE public.merchant_staff
+  ADD COLUMN password_digest text,
+  ADD COLUMN sync_state text NOT NULL DEFAULT 'ok',
+  ADD COLUMN sync_op text;
+ALTER TABLE public.merchant_staff
+  ADD CONSTRAINT merchant_staff_sync_state_check
+    CHECK (sync_state IN ('ok', 'pending', 'failed')),
+  ADD CONSTRAINT merchant_staff_sync_op_check
+    CHECK (sync_op IN ('enable', 'disable', 'reset'));
+
 CREATE FUNCTION public.staff_admin_provision_begin(
   p_merchant_id uuid,
   p_username text,
@@ -353,6 +368,26 @@ BEGIN
     RAISE EXCEPTION 'staff creation refused';
   END IF;
 
+  -- Re-validate CURRENT state at consume time (#260): ownership, merchant
+  -- status/type and branch validity may have changed since begin.
+  IF NOT public.is_merchant_owner(v_prov.merchant_id) THEN
+    RAISE EXCEPTION 'staff creation refused';
+  END IF;
+  PERFORM 1 FROM public.merchants m
+   WHERE m.id = v_prov.merchant_id AND m.status = 'active'
+     AND public.is_cashier_type(m.type);
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'staff creation refused';
+  END IF;
+  IF nullif(v_prov.payload->>'branch_id', '') IS NOT NULL THEN
+    PERFORM 1 FROM public.branches b
+     WHERE b.id = (v_prov.payload->>'branch_id')::uuid
+       AND b.merchant_id = v_prov.merchant_id;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'staff creation refused';
+    END IF;
+  END IF;
+
   -- The auth user must be the one the edge just created FOR THIS provision:
   -- raw_app_meta_data is writable only by the service key (S3).
   SELECT id, created_at, raw_app_meta_data INTO v_auth
@@ -445,19 +480,120 @@ BEGIN
   IF NOT FOUND OR NOT public.is_merchant_owner(v_staff.merchant_id) THEN
     RAISE EXCEPTION 'staff not found';  -- generic: no tenant enumeration
   END IF;
+  -- FOR UPDATE serializes a concurrent enable/disable pair (#262): the
+  -- second caller observes the first's pending op and overwrites it.
   IF p_active THEN
+    -- FAIL CLOSED (#261): the row stays inactive until the edge verifies
+    -- the GoTrue side (revoke + unban) and calls staff_admin_sync_complete.
+    -- A direct-RPC enable can never activate the account.
     UPDATE public.merchant_staff
-       SET is_active = true, disabled_at = NULL, disabled_by = NULL, updated_at = now()
+       SET sync_state = 'pending', sync_op = 'enable', updated_at = now()
      WHERE id = p_staff_id;
-    INSERT INTO public.merchant_staff_events (staff_id, merchant_id, kind, actor_id)
-    VALUES (p_staff_id, v_staff.merchant_id, 'enabled', v_caller);
   ELSE
+    -- Disable is safe to apply immediately (fail closed): access is cut in
+    -- the same transaction; the GoTrue side catches up via the sync op.
     UPDATE public.merchant_staff
-       SET is_active = false, disabled_at = now(), disabled_by = v_caller, updated_at = now()
+       SET is_active = false, disabled_at = now(), disabled_by = v_caller,
+           sync_state = 'pending', sync_op = 'disable', updated_at = now()
      WHERE id = p_staff_id;
     INSERT INTO public.merchant_staff_events (staff_id, merchant_id, kind, actor_id)
     VALUES (p_staff_id, v_staff.merchant_id, 'disabled', v_caller);
   END IF;
+END;
+$function$;
+
+-- #261/#262: the edge reports the GoTrue outcome for the pending op; only a
+-- verified completion activates an enable. 'failed' is the actionable
+-- blocked state: re-calling the executor re-arms the op and the edge
+-- re-drives the GoTrue side (bounded, owner-initiated retries).
+CREATE FUNCTION public.staff_admin_sync_complete(p_staff_id uuid, p_op text, p_ok boolean)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE
+  v_caller uuid := auth.uid();
+  v_staff public.merchant_staff%ROWTYPE;
+BEGIN
+  IF v_caller IS NULL THEN
+    RAISE EXCEPTION 'not authenticated';
+  END IF;
+  IF NOT public.feature_enabled('staff_accounts') THEN
+    RAISE EXCEPTION 'feature disabled';
+  END IF;
+  IF NOT public._lookup_rate_allow('staffadm:sync:' || v_caller, 120) THEN
+    RAISE EXCEPTION 'rate limited';
+  END IF;
+  SELECT * INTO v_staff FROM public.merchant_staff WHERE id = p_staff_id FOR UPDATE;
+  IF NOT FOUND OR NOT public.is_merchant_owner(v_staff.merchant_id) THEN
+    RAISE EXCEPTION 'staff not found';
+  END IF;
+  IF p_op NOT IN ('enable', 'disable', 'reset')
+     OR v_staff.sync_state <> 'pending'
+     OR v_staff.sync_op IS DISTINCT FROM p_op THEN
+    RAISE EXCEPTION 'no pending sync operation';
+  END IF;
+  IF p_ok THEN
+    IF p_op = 'enable' THEN
+      UPDATE public.merchant_staff
+         SET is_active = true, disabled_at = NULL, disabled_by = NULL,
+             sync_state = 'ok', sync_op = NULL, updated_at = now()
+       WHERE id = p_staff_id;
+      INSERT INTO public.merchant_staff_events (staff_id, merchant_id, kind, actor_id)
+      VALUES (p_staff_id, v_staff.merchant_id, 'enabled', v_caller);
+    ELSE
+      UPDATE public.merchant_staff
+         SET sync_state = 'ok', sync_op = NULL, updated_at = now()
+       WHERE id = p_staff_id;
+    END IF;
+  ELSE
+    UPDATE public.merchant_staff
+       SET sync_state = 'failed', updated_at = now()
+     WHERE id = p_staff_id;
+    INSERT INTO public.merchant_staff_events (staff_id, merchant_id, kind, detail, actor_id)
+    VALUES (p_staff_id, v_staff.merchant_id, 'refused',
+            jsonb_build_object('action', 'sync', 'op', p_op), v_caller);
+  END IF;
+END;
+$function$;
+
+-- Security blocking 1 / #266: owner-checked digest snapshot taken AFTER a
+-- verified GoTrue rotation (user creation or password reset). Stored digest
+-- = md5(auth.users.encrypted_password); staff_password_changed requires the
+-- live digest to differ.
+CREATE FUNCTION public.staff_admin_mark_password_rotated(p_staff_id uuid)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE
+  v_caller uuid := auth.uid();
+  v_staff public.merchant_staff%ROWTYPE;
+  v_digest text;
+BEGIN
+  IF v_caller IS NULL THEN
+    RAISE EXCEPTION 'not authenticated';
+  END IF;
+  IF NOT public.feature_enabled('staff_accounts') THEN
+    RAISE EXCEPTION 'feature disabled';
+  END IF;
+  IF NOT public._lookup_rate_allow('staffadm:markrot:' || v_caller, 120) THEN
+    RAISE EXCEPTION 'rate limited';
+  END IF;
+  SELECT * INTO v_staff FROM public.merchant_staff WHERE id = p_staff_id;
+  IF NOT FOUND OR NOT public.is_merchant_owner(v_staff.merchant_id) THEN
+    RAISE EXCEPTION 'staff not found';
+  END IF;
+  SELECT md5(u.encrypted_password) INTO v_digest
+    FROM auth.users u WHERE u.id = v_staff.user_id;
+  IF v_digest IS NULL THEN
+    RAISE EXCEPTION 'staff not found';
+  END IF;
+  UPDATE public.merchant_staff
+     SET password_digest = v_digest, updated_at = now()
+   WHERE id = p_staff_id;
 END;
 $function$;
 
@@ -487,7 +623,8 @@ BEGIN
     RAISE EXCEPTION 'staff not found';
   END IF;
   UPDATE public.merchant_staff
-     SET must_change_password = true, updated_at = now()
+     SET must_change_password = true,
+         sync_state = 'pending', sync_op = 'reset', updated_at = now()
    WHERE id = p_staff_id;
   INSERT INTO public.merchant_staff_events (staff_id, merchant_id, kind, actor_id)
   VALUES (p_staff_id, v_staff.merchant_id, 'password_reset', v_caller);
@@ -515,9 +652,18 @@ BEGIN
                       'rate_limited', 'invalid_role', 'gotrue_failure', 'provision') THEN
     v_reason := 'provision';
   END IF;
+  -- The advisory lock serializes the check-then-insert per caller so
+  -- concurrent refusals cannot overrun the 100/day cap (#263).
+  PERFORM pg_advisory_xact_lock(hashtext('staffref:' || v_caller::text));
   IF public.is_merchant_owner(p_merchant_id) THEN
-    INSERT INTO public.merchant_staff_events (staff_id, merchant_id, kind, detail, actor_id)
-    VALUES (NULL, p_merchant_id, 'refused', jsonb_build_object('action', v_reason), v_caller);
+    -- Owner branch capped too (#263): a compromised owner session must not
+    -- flood the merchant audit trail either.
+    IF (SELECT count(*) FROM public.merchant_staff_events e
+         WHERE e.actor_id = v_caller AND e.kind = 'refused'
+           AND e.created_at > now() - interval '1 day') < 100 THEN
+      INSERT INTO public.merchant_staff_events (staff_id, merchant_id, kind, detail, actor_id)
+      VALUES (NULL, p_merchant_id, 'refused', jsonb_build_object('action', v_reason), v_caller);
+    END IF;
   ELSE
     IF (SELECT count(*) FROM public.staff_admin_refusals r
          WHERE r.caller_id = v_caller AND r.created_at > now() - interval '1 day') < 100 THEN
@@ -546,11 +692,23 @@ BEGIN
   IF NOT public.feature_enabled('staff_accounts') THEN
     RAISE EXCEPTION 'feature disabled';
   END IF;
+  IF NOT public._lookup_rate_allow('staffadm:pwdchg:' || v_caller, 30) THEN
+    RAISE EXCEPTION 'rate limited';
+  END IF;
   SELECT * INTO v_staff FROM public.merchant_staff
    WHERE user_id = v_caller AND is_active
    ORDER BY created_at LIMIT 1;
   IF NOT FOUND THEN
     RAISE EXCEPTION 'staff not found';
+  END IF;
+  -- Proof of change (security blocking 1 / #266): the live GoTrue password
+  -- digest must differ from the digest staff_admin_mark_password_rotated
+  -- stored after the last creation/reset. Fail closed when none is stored:
+  -- without a baseline, no clear is possible until the next reset.
+  IF v_staff.password_digest IS NULL
+     OR (SELECT md5(u.encrypted_password) FROM auth.users u WHERE u.id = v_caller)
+        IS NOT DISTINCT FROM v_staff.password_digest THEN
+    RAISE EXCEPTION 'password change not verified';
   END IF;
   UPDATE public.merchant_staff
      SET must_change_password = false, updated_at = now()
@@ -572,6 +730,10 @@ REVOKE ALL ON FUNCTION public.staff_admin_record_password_reset(uuid) FROM PUBLI
 REVOKE ALL ON FUNCTION public.staff_admin_record_password_reset(uuid) FROM anon;
 REVOKE ALL ON FUNCTION public.staff_admin_audit_refusal(uuid, text) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.staff_admin_audit_refusal(uuid, text) FROM anon;
+REVOKE ALL ON FUNCTION public.staff_admin_sync_complete(uuid, text, boolean) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.staff_admin_sync_complete(uuid, text, boolean) FROM anon;
+REVOKE ALL ON FUNCTION public.staff_admin_mark_password_rotated(uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.staff_admin_mark_password_rotated(uuid) FROM anon;
 REVOKE ALL ON FUNCTION public.staff_password_changed() FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.staff_password_changed() FROM anon;
 GRANT EXECUTE ON FUNCTION public.staff_admin_provision_begin(uuid, text, text, text, uuid, text) TO authenticated;
@@ -580,6 +742,8 @@ GRANT EXECUTE ON FUNCTION public.staff_admin_provision_abort(uuid, text) TO auth
 GRANT EXECUTE ON FUNCTION public.staff_admin_set_active(uuid, boolean) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.staff_admin_record_password_reset(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.staff_admin_audit_refusal(uuid, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.staff_admin_sync_complete(uuid, text, boolean) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.staff_admin_mark_password_rotated(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.staff_password_changed() TO authenticated;
 
 COMMIT;

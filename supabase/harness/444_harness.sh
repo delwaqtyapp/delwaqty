@@ -72,6 +72,13 @@ run() { psql "$URL" -X -q -v ON_ERROR_STOP=1 -f "$1" >/dev/null || fail_case "ap
 
 echo "== chain apply 439..443"
 for m in 439_username_login_identifier 440_auth_login_identifier 441_login_identifier_no_email 442_shop_staff_core 443_whatsapp_otp_number_rebased; do
+
+# Real Supabase auth.users always has encrypted_password; the local stub
+# schema predates the stub's use here. Add it so the digest proof in
+# mark_password_rotated / staff_password_changed exercises the real shape.
+psql "$URL" -X -q -v ON_ERROR_STOP=1 -c \
+  "ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS encrypted_password text NOT NULL DEFAULT 'zz-local-stub'" \
+  || fail_case "could not add local auth.users.encrypted_password stub"
   run "$MIG/$m.sql" || exit 2
   echo "$m OK"
 done
@@ -157,6 +164,8 @@ expected = {("public", "is_cashier_type", "p_type text"),
             ("public", "staff_admin_set_active", "p_staff_id uuid, p_active boolean"),
             ("public", "staff_admin_record_password_reset", "p_staff_id uuid"),
             ("public", "staff_admin_audit_refusal", "p_merchant_id uuid, p_reason text"),
+            ("public", "staff_admin_sync_complete", "p_staff_id uuid, p_op text, p_ok boolean"),
+            ("public", "staff_admin_mark_password_rotated", "p_staff_id uuid"),
             ("public", "staff_password_changed", "")}
 allowed_changed = {("public", "handle_new_user", ""): ("3bb10a3336503d4f558c27d66493e39e", "4c27ceff52867e83ead588c6951fc5c1")}
 bad_changed = [k for k in changed
@@ -165,7 +174,7 @@ bad_changed = [k for k in changed
 if bad_changed or gone or set(added) != expected:
     print("CHANGED:", bad_changed, "GONE:", gone, "ADDED:", added)
     sys.exit(1)
-print("function-body pin OK (8 added; handle_new_user pinned old->new)")
+print("function-body pin OK (10 added; handle_new_user pinned old->new)")
 PY
 
 echo "== 442 suite (regression)"

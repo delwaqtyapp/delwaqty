@@ -9,7 +9,8 @@ BEGIN;
 
 create temporary table zz444(
   owner uuid, outsider uuid, staffuser uuid, staffuser2 uuid, staleuser uuid,
-  merchant uuid, svc_merchant uuid, branch1 uuid, other_branch uuid, provision uuid
+  merchant uuid, svc_merchant uuid, branch1 uuid, other_branch uuid, provision uuid,
+  staff uuid
 );
 insert into zz444 select
   gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(),
@@ -199,6 +200,28 @@ BEGIN
   ASSERT (SELECT state FROM public.staff_provisioning WHERE id = (SELECT provision FROM zz444))
     = 'consumed', 'provisioning row not consumed';
 END $$;
+update zz444 set staff = (select id from public.merchant_staff where user_id = (select staffuser from zz444));
+
+-- the edge marks the verified rotation AFTER creation (#266): baseline digest
+SET LOCAL ROLE authenticated;
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  PERFORM public.staff_admin_mark_password_rotated((SELECT staff FROM zz444));
+  -- outsider can never mark
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT outsider FROM zz444))::text, true);
+  BEGIN PERFORM public.staff_admin_mark_password_rotated((SELECT staff FROM zz444));
+    RAISE EXCEPTION 'zz444 sentinel: outsider mark';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'staff not found', 'wrong error: ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+DO $$
+BEGIN
+  ASSERT (SELECT s.password_digest FROM public.merchant_staff s WHERE s.id = (SELECT staff FROM zz444))
+         = (SELECT md5(u.encrypted_password) FROM auth.users u WHERE u.id = (SELECT staffuser FROM zz444)),
+    'baseline digest not stored';
+END $$;
 
 -- ============ 4) provision_complete negatives ===============================
 SET LOCAL ROLE authenticated;
@@ -304,11 +327,66 @@ BEGIN
   END;
 END $$;
 
--- ============ 5) set_active / reset / password_changed matrix ===============
+-- ============ 4b) consume re-validates CURRENT ownership and type (#260) ====
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+DO $$
+DECLARE v_res jsonb;
+BEGIN
+  v_res := public.staff_admin_provision_begin(
+    (SELECT merchant FROM zz444), 'zz444flip', 'Flip', 'branch_manager', NULL, NULL);
+END $$;
+RESET ROLE;
+update zz444 set provision = (select id from public.staff_provisioning
+  where merchant_id = (select merchant from zz444) and state = 'pending'
+  order by created_at desc limit 1);
+insert into auth.users(id, email, created_at, raw_app_meta_data)
+select (select staleuser from zz444), 'staff_zz444c@delwaqty.app', now(),
+       jsonb_build_object('staff_provisioning', (select provision from zz444));
+-- ownership flips AFTER begin: complete must refuse
+update public.merchants set owner_user_id = (select outsider from zz444)
+ where id = (select merchant from zz444);
+SET LOCAL ROLE authenticated;
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  BEGIN PERFORM public.staff_admin_provision_complete(
+      (SELECT provision FROM zz444), (SELECT staleuser FROM zz444));
+    RAISE EXCEPTION 'zz444 sentinel: complete after ownership flip';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'staff creation refused', 'wrong error: ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+-- flip back, then the TYPE flips to a non-cashier type: still refused
+update public.merchants set owner_user_id = (select owner from zz444), type = 'plumbing'
+ where id = (select merchant from zz444);
+SET LOCAL ROLE authenticated;
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  BEGIN PERFORM public.staff_admin_provision_complete(
+      (SELECT provision FROM zz444), (SELECT staleuser FROM zz444));
+    RAISE EXCEPTION 'zz444 sentinel: complete after type flip';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'staff creation refused', 'wrong error: ' || SQLERRM; END;
+  -- edge follow-up: abort the stale provision
+  PERFORM public.staff_admin_provision_abort((SELECT provision FROM zz444), 'revalidation_failed');
+END $$;
+RESET ROLE;
+update public.merchants set type = 'restaurant' where id = (select merchant from zz444);
+DO $$
+BEGIN
+  ASSERT NOT EXISTS (SELECT 1 FROM public.merchant_staff sm WHERE sm.user_id = (SELECT staleuser FROM zz444)),
+    'flipped complete created a staff row';
+  ASSERT (SELECT state FROM public.staff_provisioning WHERE id = (SELECT provision FROM zz444))
+    = 'aborted', 'stale provision not aborted';
+END $$;
+
+-- ============ 5) set_active / reset / sync / password_changed matrix ========
 SET LOCAL ROLE authenticated;
 DO $$
 DECLARE
-  v_staff uuid := (SELECT id FROM public.merchant_staff WHERE user_id = (SELECT staffuser FROM zz444));
+  v_staff uuid := (SELECT staff FROM zz444);
 BEGIN
   -- outsider: generic refusal on every action
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT outsider FROM zz444))::text, true);
@@ -320,25 +398,76 @@ BEGIN
     RAISE EXCEPTION 'zz444 sentinel: outsider reset';
   EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
     ASSERT SQLERRM = 'staff not found', 'wrong error: ' || SQLERRM; END;
-  BEGIN PERFORM public.staff_password_changed();
-    RAISE EXCEPTION 'zz444 sentinel: outsider password_changed';
+  BEGIN PERFORM public.staff_admin_sync_complete(v_staff, 'enable', true);
+    RAISE EXCEPTION 'zz444 sentinel: outsider sync_complete';
   EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
     ASSERT SQLERRM = 'staff not found', 'wrong error: ' || SQLERRM; END;
 
-  -- owner: disable/enable cycle with audit
+  -- owner: DIRECT-RPC enable must NOT activate (#261: fail closed pending sync)
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
-  PERFORM public.staff_admin_set_active(v_staff, false);
-  PERFORM public.staff_admin_record_password_reset(v_staff);
-  PERFORM public.staff_admin_set_active(v_staff, true);
+  PERFORM public.staff_admin_set_active(v_staff, false);   -- immediate disable (fail closed)
+  PERFORM public.staff_admin_sync_complete(v_staff, 'disable', true);  -- edge: ban+revoke ok
+  PERFORM public.staff_admin_set_active(v_staff, true);    -- arms pending enable only
 END $$;
 RESET ROLE;
 DO $$
 DECLARE
-  v_staff uuid := (SELECT id FROM public.merchant_staff WHERE user_id = (SELECT staffuser FROM zz444));
+  v_staff uuid := (SELECT staff FROM zz444);
 BEGIN
   ASSERT EXISTS (SELECT 1 FROM public.merchant_staff s
-    WHERE s.id = v_staff AND s.is_active AND s.disabled_at IS NULL AND s.must_change_password),
-    'state after disable/reset/enable wrong';
+    WHERE s.id = v_staff AND NOT s.is_active AND s.sync_state = 'pending' AND s.sync_op = 'enable'),
+    'direct-RPC enable must stay inactive + pending';
+  -- a mismatched or premature sync_complete is refused
+END $$;
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  BEGIN PERFORM public.staff_admin_sync_complete(v_staff, 'disable', true);
+    RAISE EXCEPTION 'zz444 sentinel: mismatched sync op';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'no pending sync operation', 'wrong error: ' || SQLERRM; END;
+  -- GoTrue failure path: marked failed, stays inactive (#262 blocked state)
+  PERFORM public.staff_admin_sync_complete(v_staff, 'enable', false);
+END $$;
+RESET ROLE;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  ASSERT EXISTS (SELECT 1 FROM public.merchant_staff s
+    WHERE s.id = v_staff AND NOT s.is_active AND s.sync_state = 'failed' AND s.sync_op = 'enable'),
+    'failed sync must leave the blocked state';
+  ASSERT EXISTS (SELECT 1 FROM public.merchant_staff_events e
+    WHERE e.staff_id = v_staff AND e.kind = 'refused' AND e.detail->>'action' = 'sync'),
+    'failed sync not audited';
+END $$;
+-- owner retries the same op: re-armed and re-driven, this time verified
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  PERFORM public.staff_admin_set_active(v_staff, true);
+  PERFORM public.staff_admin_sync_complete(v_staff, 'enable', true);
+  -- reset arms its own sync op; rotation+revoke verified afterwards
+  PERFORM public.staff_admin_record_password_reset(v_staff);
+  PERFORM public.staff_admin_sync_complete(v_staff, 'reset', true);
+  -- the edge marks the verified rotation (#266)
+  PERFORM public.staff_admin_mark_password_rotated(v_staff);
+END $$;
+RESET ROLE;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  ASSERT EXISTS (SELECT 1 FROM public.merchant_staff s
+    WHERE s.id = v_staff AND s.is_active AND s.disabled_at IS NULL AND s.must_change_password
+      AND s.sync_state = 'ok' AND s.sync_op IS NULL),
+    'state after sync-verified enable/reset wrong';
   ASSERT (SELECT count(*) FROM public.merchant_staff_events e
     WHERE e.staff_id = v_staff AND e.kind IN ('disabled','enabled','password_reset')) = 3,
     'missing state-change audits';
@@ -347,11 +476,29 @@ BEGIN
     'password_reset audit must carry no detail';
 END $$;
 
--- staff clears their OWN barrier (S7); a DISABLED staff cannot
+-- #266: the barrier clears ONLY on a server-observed password change
 SET LOCAL ROLE authenticated;
 DO $$
 DECLARE
-  v_staff uuid := (SELECT id FROM public.merchant_staff WHERE user_id = (SELECT staffuser FROM zz444));
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT staffuser FROM zz444))::text, true);
+  -- no change since the mark: refused (direct clear without change)
+  BEGIN PERFORM public.staff_password_changed();
+    RAISE EXCEPTION 'zz444 sentinel: clear without change';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'password change not verified', 'wrong error: ' || SQLERRM; END;
+  BEGIN PERFORM public.staff_password_changed();
+    RAISE EXCEPTION 'zz444 sentinel: outsider password_changed';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'password change not verified', 'wrong error: ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+-- the staff member actually changes the password in GoTrue
+update auth.users set encrypted_password = 'zz444-rotated-hash'
+ where id = (select staffuser from zz444);
+SET LOCAL ROLE authenticated;
+DO $$
 BEGIN
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT staffuser FROM zz444))::text, true);
   PERFORM public.staff_password_changed();
@@ -359,13 +506,52 @@ END $$;
 RESET ROLE;
 DO $$
 DECLARE
-  v_staff uuid := (SELECT id FROM public.merchant_staff WHERE user_id = (SELECT staffuser FROM zz444));
+  v_staff uuid := (SELECT staff FROM zz444);
 BEGIN
   ASSERT EXISTS (SELECT 1 FROM public.merchant_staff s
     WHERE s.id = v_staff AND NOT s.must_change_password), 'barrier not cleared';
   ASSERT EXISTS (SELECT 1 FROM public.merchant_staff_events e
     WHERE e.staff_id = v_staff AND e.kind = 'password_changed'), 'password_changed audit missing';
 END $$;
+
+-- stale proof after a reset (#266: clear racing a reset fails closed):
+-- reset re-arms the barrier and the mark stores the NEW one-time digest;
+-- the staff member's earlier change no longer proves anything.
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  PERFORM public.staff_admin_record_password_reset(v_staff);
+  PERFORM public.staff_admin_sync_complete(v_staff, 'reset', true);
+  PERFORM public.staff_admin_mark_password_rotated(v_staff);
+END $$;
+RESET ROLE;
+SET LOCAL ROLE authenticated;
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT staffuser FROM zz444))::text, true);
+  BEGIN PERFORM public.staff_password_changed();
+    RAISE EXCEPTION 'zz444 sentinel: stale clear after reset';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'password change not verified', 'wrong error: ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+-- fail closed on NULL digest: wipe it and even a real change cannot clear
+update public.merchant_staff set password_digest = NULL where id = (select staff from zz444);
+update auth.users set encrypted_password = 'zz444-another-hash'
+ where id = (select staffuser from zz444);
+SET LOCAL ROLE authenticated;
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT staffuser FROM zz444))::text, true);
+  BEGIN PERFORM public.staff_password_changed();
+    RAISE EXCEPTION 'zz444 sentinel: clear with NULL digest';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'password change not verified', 'wrong error: ' || SQLERRM; END;
+END $$;
+RESET ROLE;
 
 -- ============ 6) audit_refusal routing (S1) =================================
 SET LOCAL ROLE authenticated;
@@ -396,6 +582,47 @@ BEGIN
     WHERE r.caller_id = (SELECT outsider FROM zz444)
       AND r.merchant_id = (SELECT merchant FROM zz444)) = 2,
     'caller-keyed refusal rows missing';
+END $$;
+
+-- #263: BOTH branches are capped at 100/caller/day
+DO $$
+BEGIN
+  -- the events table is append-only, so track the pre-existing owner
+  -- 'refused' rows instead of deleting them
+  CREATE TEMPORARY TABLE zz444_caps ON COMMIT DROP AS
+  SELECT (SELECT count(*) FROM public.merchant_staff_events e
+           WHERE e.merchant_id = (SELECT merchant FROM zz444) AND e.kind = 'refused'
+             AND e.actor_id = (SELECT owner FROM zz444)) AS owner_base,
+         (SELECT count(*) FROM public.staff_admin_refusals r
+           WHERE r.caller_id = (SELECT outsider FROM zz444)) AS outsider_base;
+  INSERT INTO public.merchant_staff_events (staff_id, merchant_id, kind, detail, actor_id)
+  SELECT NULL, (SELECT merchant FROM zz444), 'refused',
+         jsonb_build_object('action', 'create_staff'), (SELECT owner FROM zz444)
+    FROM generate_series(1, 100);
+  INSERT INTO public.staff_admin_refusals (caller_id, merchant_id, action)
+  SELECT (SELECT outsider FROM zz444), (SELECT merchant FROM zz444), 'create_staff'
+    FROM generate_series(1, 100);
+END $$;
+SET LOCAL ROLE authenticated;
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  PERFORM public.staff_admin_audit_refusal((SELECT merchant FROM zz444), 'create_staff');
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT outsider FROM zz444))::text, true);
+  PERFORM public.staff_admin_audit_refusal((SELECT merchant FROM zz444), 'create_staff');
+END $$;
+RESET ROLE;
+DO $$
+BEGIN
+  ASSERT (SELECT count(*) FROM public.merchant_staff_events e
+    WHERE e.merchant_id = (SELECT merchant FROM zz444) AND e.kind = 'refused'
+      AND e.actor_id = (SELECT owner FROM zz444))
+      = 100 + (SELECT owner_base FROM zz444_caps),
+    'owner-branch cap not enforced';
+  ASSERT (SELECT count(*) FROM public.staff_admin_refusals r
+    WHERE r.caller_id = (SELECT outsider FROM zz444))
+      = 100 + (SELECT outsider_base FROM zz444_caps),
+    'caller-keyed cap not enforced';
 END $$;
 
 -- ============ 7) self-signup can never become staff (S3) ====================

@@ -8,14 +8,17 @@ name: POS Windows cashier (experimental)
 # publish=true. Validation and screenshot runs leave the release untouched.
 #
 # Security split (#148): the job that touches the selected ref's code has no
-# write token and no persisted git credentials; the job that holds
-# contents:write never checks out or executes source - it only moves
-# fixed-name artifacts to the release.
+# write token and no persisted git credentials. The publish job holds
+# contents:write and checks out the built ref (persist-credentials: false)
+# ONLY to run the reviewed, unit-tested, fail-closed publisher script
+# (tool/publish_cashier.py) instead of inline YAML; the ref input is
+# restricted to protected/default refs, so the script cannot come from an
+# arbitrary branch. Installer assets are immutable, version-pinned names.
 on:
   workflow_dispatch:
     inputs:
       ref:
-        description: 'Ref to build the cashier from (restricted to protected/default refs - the publish job clobbers release assets)'
+        description: 'Ref to build the cashier from (restricted to protected/default refs - the publish job runs its publisher script and uploads release assets)'
         required: true
         default: 'work/pos-cashier'
         type: choice
@@ -30,6 +33,12 @@ on:
 
 permissions:
   contents: read
+
+# Cashier publishes and Flutter publishes touch the same release manifest,
+# so they share the publisher serialization lock. Queue, never cancel.
+concurrency:
+  group: delwaqty-development-publisher
+  cancel-in-progress: false
 
 jobs:
   build-cashier:
@@ -58,8 +67,12 @@ jobs:
         run: |
           $p = "pos/Delwaqty.Pos.Wpf/PosConfig.cs"
           $t = [IO.File]::ReadAllText($p)
-          $t = $t -replace 'OtaBuildNumber = \d+', "OtaBuildNumber = ${{ github.run_number }}"
-          [IO.File]::WriteAllText($p, $t)
+          $new = $t -replace 'OtaBuildNumber = \d+', "OtaBuildNumber = ${{ github.run_number }}"
+          # Never ship an unstamped build: OtaBuildNumber 0 would consume
+          # every published update as "newer".
+          if ($new -eq $t) { throw "OTA build stamp did not match OtaBuildNumber in $p" }
+          if ($new -notmatch "OtaBuildNumber = ${{ github.run_number }};") { throw "OTA build stamp verification failed" }
+          [IO.File]::WriteAllText($p, $new)
 
       - name: Publish shop cashier (net8.0-windows, win-x64, self-contained)
         run: >-
@@ -222,7 +235,7 @@ jobs:
           Start: DelwaqtyShopPos.exe
           Data dir: C:\ProgramData\DelwaqtyPos
           "@ | Out-File -Encoding utf8 publish/shop-net8/README-FIRST-RUN.txt
-          Compress-Archive -Path publish/shop-net8/* -DestinationPath delwaqty-cashier-windows-EXPERIMENTAL.zip
+          Compress-Archive -Path publish/shop-net8/* -DestinationPath delwaqty-cashier-windows-b${{ github.run_number }}.zip
 
       - name: Download the .NET Framework 4.8 web bootstrapper
         shell: pwsh
@@ -247,13 +260,13 @@ jobs:
           # output, then assert the exact files the upload step expects.
           $iscc = "C:\Program Files (x86)\Inno Setup 6\iscc.exe"
           $out = "$PWD\installer-output"
-          & $iscc "/DSourceDir=$PWD\publish\shop-net8" "/DOutputDir=$out" "/DOutputBase=delwaqty-cashier-setup-net8-EXPERIMENTAL" pos\installer\delwaqty.iss
+          & $iscc "/DSourceDir=$PWD\publish\shop-net8" "/DOutputDir=$out" "/DOutputBase=delwaqty-cashier-setup-net8-b${{ github.run_number }}" pos\installer\delwaqty.iss
           if ($LASTEXITCODE -ne 0) { throw "iscc net8 failed: $LASTEXITCODE" }
-          & $iscc "/DSourceDir=$PWD\publish\shop-net48" "/DNet48Bootstrapper=$PWD\artifacts\ndp48-web.exe" "/DOutputDir=$out" "/DOutputBase=delwaqty-cashier-setup-net48-EXPERIMENTAL" pos\installer\delwaqty.iss
+          & $iscc "/DSourceDir=$PWD\publish\shop-net48" "/DNet48Bootstrapper=$PWD\artifacts\ndp48-web.exe" "/DOutputDir=$out" "/DOutputBase=delwaqty-cashier-setup-net48-b${{ github.run_number }}" pos\installer\delwaqty.iss
           if ($LASTEXITCODE -ne 0) { throw "iscc net48 failed: $LASTEXITCODE" }
           $expect = @(
-            "$out\delwaqty-cashier-setup-net8-EXPERIMENTAL.exe",
-            "$out\delwaqty-cashier-setup-net48-EXPERIMENTAL.exe"
+            "$out\delwaqty-cashier-setup-net8-b${{ github.run_number }}.exe",
+            "$out\delwaqty-cashier-setup-net48-b${{ github.run_number }}.exe"
           )
           foreach ($f in $expect) {
             if (-not (Test-Path $f)) { throw "expected installer missing: $f" }
@@ -263,55 +276,64 @@ jobs:
       - name: Hand off the zip and installers as workflow artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: delwaqty-cashier-windows-EXPERIMENTAL
+          name: delwaqty-cashier-windows-b${{ github.run_number }}
           path: |
-            delwaqty-cashier-windows-EXPERIMENTAL.zip
-            installer-output/delwaqty-cashier-setup-net8-EXPERIMENTAL.exe
-            installer-output/delwaqty-cashier-setup-net48-EXPERIMENTAL.exe
+            delwaqty-cashier-windows-b${{ github.run_number }}.zip
+            installer-output/delwaqty-cashier-setup-net8-b${{ github.run_number }}.exe
+            installer-output/delwaqty-cashier-setup-net48-b${{ github.run_number }}.exe
             screenshots/*.png
           if-no-files-found: error
           retention-days: 7
 
   publish-cashier:
     # Opt-in only: validation/screenshot dispatches (publish unset or false)
-    # must never touch the public release.
+    # must never touch the public release. Serialized against the Flutter
+    # publisher by the shared workflow concurrency group above.
     if: ${{ github.event.inputs.publish == 'true' }}
     needs: build-cashier
     runs-on: ubuntu-latest
     permissions:
-      contents: write # gh release upload only; no source checkout here
+      contents: write # gh release upload only
     steps:
-      - name: Download the fixed-name artifact
+      # The reviewed, fail-closed publisher script runs from the SAME ref
+      # that was built (dispatch restricts it to protected/default refs).
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref }}
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cashier publisher regression tests
+        run: python3 -m unittest discover -s tool -p test_publish_cashier.py
+
+      - name: Download the versioned build artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          name: delwaqty-cashier-windows-EXPERIMENTAL
+          name: delwaqty-cashier-windows-b${{ github.run_number }}
 
-      - name: Attach to the development release
+      - name: Attach the versioned zip to the development release
         env:
           GH_TOKEN: ${{ github.token }}
-        # The artifact preserves relative paths: the installers live under
-        # installer-output/, so upload them from there (asset names stay flat).
+        # The zip is informational (not an OTA asset) and version-pinned,
+        # so it is uploaded once and never clobbered.
         run: >-
           gh release upload development
-          delwaqty-cashier-windows-EXPERIMENTAL.zip
-          installer-output/delwaqty-cashier-setup-net8-EXPERIMENTAL.exe
-          installer-output/delwaqty-cashier-setup-net48-EXPERIMENTAL.exe
-          --clobber -R delwaqtyapp/delwaqty
+          delwaqty-cashier-windows-b${{ github.run_number }}.zip
+          -R delwaqtyapp/delwaqty
 
-      - name: Update the OTA manifest for the cashier channel
-        # Same channel contract the Flutter apps consume: versions.json on
-        # the rolling release gains/updates a "cashier" channel whose
-        # version is this run number and whose sha256 pins the installer.
-        # The app REFUSES to install without a matching digest, so the
-        # digest is computed here from the exact artifact just uploaded.
-        # Still under the publish opt-in: validation runs never touch this.
+      - name: Merge the cashier channels into the OTA manifest (fail-closed)
+        # tool/publish_cashier.py: downloads the live manifest (NO empty
+        # fallback), validates its schema, refuses non-forward versions,
+        # preserves every channel it does not own, uploads the immutable
+        # versioned installers with a post-upload hash proof, then uploads
+        # the merged manifest and round-trip verifies it. Any failure
+        # aborts BEFORE the manifest upload.
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          asset="installer-output/delwaqty-cashier-setup-net8-EXPERIMENTAL.exe"
-          sha="$(sha256sum "$asset" | cut -d' ' -f1)"
-          gh release download development -p versions.json --clobber -R delwaqtyapp/delwaqty             || echo '{"channels":{}}' > versions.json
-          jq --argjson v "${{ github.run_number }}"              --arg sha "$sha"              --arg name "1.0.0-b${{ github.run_number }}"              '.channels.cashier = {version: $v, versionName: $name, apk: "delwaqty-cashier-setup-net8-EXPERIMENTAL.exe", notes: "تحديث الكاشير", sha256: $sha}'              versions.json > versions.new.json
-          mv versions.new.json versions.json
-          gh release upload development versions.json --clobber -R delwaqtyapp/delwaqty
+        run: >-
+          python3 tool/publish_cashier.py ${{ github.run_number }}
+          installer-output/delwaqty-cashier-setup-net8-b${{ github.run_number }}.exe
+          installer-output/delwaqty-cashier-setup-net48-b${{ github.run_number }}.exe

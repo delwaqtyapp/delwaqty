@@ -5,6 +5,7 @@ APKs are cryptographically verified by Android apksigner. Immutable assets from
 all development generations remain available for clients with cached manifests.
 """
 import argparse
+import copy
 import hashlib
 import json
 import os
@@ -78,13 +79,32 @@ def digest(path):
 
 def validate_floor(build, manifest, allow_same=False):
     channels = manifest.get('channels', {})
-    if set(channels) != set(FLAVORS):
+    if not set(FLAVORS).issubset(set(channels)):
         raise SystemExit('Prior manifest must contain all four build floors')
-    for channel in channels.values():
-        floor = channel.get('version')
+    # Floors apply to the Flutter build counter; other channels (e.g. the
+    # cashier) use a different counter and are preserved, not compared.
+    for flavor in FLAVORS:
+        floor = channels[flavor].get('version')
         if (not isinstance(floor, int) or isinstance(floor, bool)
                 or build < floor or (build == floor and not allow_same)):
             raise SystemExit('Build code must exceed every prior latest build')
+
+
+def build_manifest(old, source_commit, flavor_entries):
+    """Merge new Flutter entries into the prior manifest.
+
+    Unknown channels (e.g. cashier-net8/cashier-net48, written by the POS
+    publisher under the same concurrency lock) and other top-level keys are
+    preserved verbatim; only the four Flutter channels are replaced.
+    """
+    manifest = copy.deepcopy(old) if old else {}
+    channels = manifest.setdefault('channels', {})
+    if not isinstance(channels, dict):
+        raise SystemExit('Prior manifest has a non-object channels field')
+    manifest['sourceCommit'] = source_commit
+    for flavor, entry in flavor_entries.items():
+        channels[flavor] = entry
+    return manifest
 
 
 def release_manifest(release):
@@ -148,7 +168,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix='delwaqty-development-') as temp:
         root = Path(temp)
         gh('run', 'download', args.run, '-R', REPO, '-p', '*-release-*', '-D', temp)
-        manifest = {'sourceCommit': run['headSha'], 'channels': {}}
+        entries = {}
         apks = []
         for flavor in FLAVORS:
             candidates = list(root.glob(f'**/app-{flavor}-release.apk'))
@@ -161,13 +181,14 @@ def main():
             target = root / name
             candidates[0].rename(target)
             apks.append(target)
-            manifest['channels'][flavor] = {
+            entries[flavor] = {
                 'version': build, 'versionName': version, 'apk': name,
                 'sha256': digest(target), 'notes': 'تحسينات وإصلاحات نسخة التطوير',
             }
-        if old and any(c['version'] == build for c in old['channels'].values()):
-            if old != manifest:
+        if old and any(old['channels'][f].get('version') == build for f in FLAVORS):
+            if old != build_manifest(old, run['headSha'], entries):
                 raise SystemExit('Different payload at an existing build code')
+        manifest = build_manifest(old, run['headSha'], entries)
         manifest_path = root / 'versions.json'
         manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
         if release is None:

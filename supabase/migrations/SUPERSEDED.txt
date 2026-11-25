@@ -1,0 +1,11 @@
+# Superseded migrations — NEVER apply these.
+#
+# A version listed here is archived OUTSIDE the executable migrations
+# directory at supabase/superseded/<file>, for history only. Nothing in
+# supabase/migrations/ may carry a listed version; CI
+# (tool/superseded_migrations_guard.sh) fails if a superseded file
+# reappears in the migrations dir or the archive loses its SUPERSEDED
+# marker header.
+#
+# Format: <file> | superseded-by | reason
+434_whatsapp_otp_number.sql | 443_whatsapp_otp_number_rebased.sql | prod applied 431 then 435 and skipped 434 (schema_migrations verified 2026-11-25); 434 and 442 both pin the 393-era guard_platform_settings_owner_fields pre-image, so applying both aborts the second. Release order: 442, then 443.

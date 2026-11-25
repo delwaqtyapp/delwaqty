@@ -1366,6 +1366,8 @@
   "orderDirectly": "Order Directly",
   "editProfile": "Edit Profile",
   "username": "Username",
+  "usernameInvalid": "Username must be 3-30 English letters, digits or underscores, not only digits",
+  "usernameTaken": "This username is taken. Try another one.",
   "changePhoto": "Change Photo",
   "chooseFromGallery": "Choose from Gallery",
   "takePhoto": "Take Photo",

@@ -4218,6 +4218,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get username => 'اسم المستخدم';
 
   @override
+  String get usernameInvalid =>
+      'اسم المستخدم لازم يكون من 3 لـ 30 حرف إنجليزي أو رقم أو _، وميكونش أرقام بس';
+
+  @override
+  String get usernameTaken => 'اسم المستخدم ده محجوز. جرب اسم تاني.';
+
+  @override
   String get changePhoto => 'تغيير الصورة';
 
   @override

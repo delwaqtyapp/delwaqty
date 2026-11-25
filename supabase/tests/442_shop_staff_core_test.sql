@@ -1017,5 +1017,215 @@ BEGIN
 END $$;
 RESET ROLE;
 
+-- ============ 20) round 3: legacy void gate, interop void, replay scope, dine_in policy ============
+
+-- Fixture: a table on branch2 and a LEGACY sale (no moves, items carry
+-- stock_applied) with a still-open commission posting.
+INSERT INTO public.dine_in_tables (merchant_id, branch_id, label) VALUES
+  ((SELECT merchant FROM zz442), (SELECT branch2 FROM zz442), 'zz442-t1');
+ALTER TABLE zz442 ADD COLUMN stock0 int;
+UPDATE zz442 SET stock0 = (SELECT stock_quantity FROM public.products WHERE id = (SELECT product FROM zz442));
+UPDATE public.products SET stock_quantity = stock_quantity - 3, updated_at = now()
+ WHERE id = (SELECT product FROM zz442);
+INSERT INTO public.pos_sales
+  (merchant_id, cashier_user_id, items, subtotal, discount, total_amount,
+   payment_method, status, branch_id)
+VALUES
+  ((SELECT merchant FROM zz442), (SELECT owner FROM zz442),
+   jsonb_build_array(jsonb_build_object('product_id', (SELECT product FROM zz442), 'qty', 3, 'stock_applied', 3)),
+   75, 0, 75, 'cash', 'completed', (SELECT branch1 FROM zz442));
+INSERT INTO public.platform_commissions
+  (member_id, reference_type, reference_id, gross_amount, commission_rate, commission_amount, net_amount, currency, status)
+SELECT (SELECT owner FROM zz442), 'pos_sale', s.id, 75, 0.1, 7.5, 67.5, 'EGP', 'computed'
+  FROM public.pos_sales s
+ WHERE s.merchant_id = (SELECT merchant FROM zz442) AND s.status = 'completed'
+   AND s.items::text LIKE '%stock_applied%';
+
+-- #258: ACTIVE staff cannot use the legacy void on their own sale.
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT cashier_b2 FROM zz442))::text, true);
+DO $$
+DECLARE v_res jsonb;
+BEGIN
+  v_res := public.staff_create_walk_in_sale(
+    ('[{"product_id":"' || (SELECT untracked_product FROM zz442) || '","qty":1}]')::jsonb,
+    '[{"method":"instapay","amount":15}]', '442dd000-0000-4000-8000-0000000000d3');
+  PERFORM set_config('app.zz442_legacy_sale', v_res ->> 'id', false);
+END $$;
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.pos_void_sale(current_setting('app.zz442_legacy_sale')::uuid, 'x');
+    RAISE EXCEPTION 'zz442 sentinel: staff used legacy void';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz442 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'shop staff must void through staff_void_sale', 'wrong error: ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+-- #258: DISABLED staff cannot either (the staff row alone bars them).
+SELECT set_config('app.zz442_cashier_sale',
+  (SELECT id::text FROM public.pos_sales
+    WHERE merchant_id = (SELECT merchant FROM zz442)
+      AND cashier_user_id = (SELECT cashier FROM zz442) AND status = 'completed' LIMIT 1), false);
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT cashier FROM zz442))::text, true);
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.pos_void_sale(current_setting('app.zz442_cashier_sale')::uuid, 'x');
+    RAISE EXCEPTION 'zz442 sentinel: disabled staff used legacy void';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz442 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'shop staff must void through staff_void_sale', 'wrong error: ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+-- Non-staff owner still voids through the legacy path (legacy sale).
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz442))::text, true);
+DO $$
+DECLARE
+  v_res jsonb;
+  v_sale uuid;
+BEGIN
+  SELECT id INTO v_sale FROM public.pos_sales
+   WHERE merchant_id = (SELECT merchant FROM zz442) AND status = 'completed'
+     AND items::text LIKE '%stock_applied%';
+  v_res := public.pos_void_sale(v_sale, 'owner legacy void');
+  ASSERT (v_res ->> 'ok')::boolean, 'owner legacy void refused: ' || v_res::text;
+END $$;
+RESET ROLE;
+DO $$
+BEGIN
+  -- Legacy void restored stock from stock_applied and reversed commission.
+  ASSERT (SELECT stock_quantity FROM public.products WHERE id = (SELECT product FROM zz442))
+       = (SELECT stock0 FROM zz442),
+    'legacy void did not restore stock';
+  ASSERT NOT EXISTS (SELECT 1 FROM public.platform_commissions c JOIN public.pos_sales s ON s.id = c.reference_id
+                      WHERE c.reference_type = 'pos_sale' AND c.status = 'computed'
+                        AND s.merchant_id = (SELECT merchant FROM zz442)),
+    'commission not reversed';
+END $$;
+
+-- #251: manager voids ANOTHER legacy sale through the NEW gate: stock
+-- restored from the stamped stock_applied fallback.
+UPDATE public.products SET stock_quantity = stock_quantity - 2, updated_at = now()
+ WHERE id = (SELECT product FROM zz442);
+INSERT INTO public.pos_sales
+  (merchant_id, cashier_user_id, items, subtotal, discount, total_amount,
+   payment_method, status, branch_id)
+VALUES
+  ((SELECT merchant FROM zz442), (SELECT owner FROM zz442),
+   jsonb_build_array(jsonb_build_object('product_id', (SELECT product FROM zz442), 'qty', 2, 'stock_applied', 2)),
+   50, 0, 50, 'cash', 'completed', (SELECT branch1 FROM zz442));
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT mgr FROM zz442))::text, true);
+DO $$
+BEGIN
+  PERFORM public.staff_void_sale((SELECT id FROM public.pos_sales
+     WHERE merchant_id = (SELECT merchant FROM zz442) AND status = 'completed'
+       AND items::text LIKE '%stock_applied%'), 'إلغاء قديم');
+END $$;
+RESET ROLE;
+DO $$
+BEGIN
+  ASSERT (SELECT stock_quantity FROM public.products WHERE id = (SELECT product FROM zz442))
+       = (SELECT stock0 FROM zz442),
+    'manager void of legacy sale did not restore stock';
+END $$;
+
+-- #256: debt replay reconciles note fingerprint and actor.
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT cashier_b2 FROM zz442))::text, true);
+DO $$
+BEGIN
+  PERFORM public.staff_shift_open(0, '442dd000-0000-4000-8000-0000000000d0');
+  PERFORM public.staff_record_debt_payment((SELECT customer FROM zz442), 10, '442dd000-0000-4000-8000-0000000000d1', 'first');
+  -- Same op, same payload: replay.
+  ASSERT (public.staff_record_debt_payment((SELECT customer FROM zz442), 10, '442dd000-0000-4000-8000-0000000000d1', 'first')
+          ->> 'idempotent_replay')::boolean, 'debt replay broke';
+  -- Same op, DIFFERENT note: conflict.
+  BEGIN
+    PERFORM public.staff_record_debt_payment((SELECT customer FROM zz442), 10, '442dd000-0000-4000-8000-0000000000d1', 'second');
+    RAISE EXCEPTION 'zz442 sentinel: note-swapped debt replay allowed';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz442 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM LIKE '%reused with a different request%', 'wrong error: ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+-- Same op, DIFFERENT actor (manager): conflict.
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT mgr FROM zz442))::text, true);
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.staff_record_debt_payment((SELECT customer FROM zz442), 10, '442dd000-0000-4000-8000-0000000000d1', 'first');
+    RAISE EXCEPTION 'zz442 sentinel: actor-swapped debt replay allowed';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz442 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM LIKE '%reused with a different request%', 'wrong error: ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+
+-- #256: sale request_hash covers notes.
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT mgr FROM zz442))::text, true);
+DO $$
+BEGIN
+  PERFORM public.staff_create_walk_in_sale(
+    ('[{"product_id":"' || (SELECT untracked_product FROM zz442) || '","qty":1}]')::jsonb,
+    '[{"method":"instapay","amount":15}]', '442dd000-0000-4000-8000-0000000000d2', 0, NULL,
+    (SELECT branch1 FROM zz442), 'note-a');
+  BEGIN
+    PERFORM public.staff_create_walk_in_sale(
+      ('[{"product_id":"' || (SELECT untracked_product FROM zz442) || '","qty":1}]')::jsonb,
+      '[{"method":"instapay","amount":15}]', '442dd000-0000-4000-8000-0000000000d2', 0, NULL,
+      (SELECT branch1 FROM zz442), 'note-b');
+    RAISE EXCEPTION 'zz442 sentinel: note-swapped sale replay allowed';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz442 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM LIKE '%reused with a different request%', 'wrong error: ' || SQLERRM; END;
+  -- Identical replay still replays.
+  ASSERT (public.staff_create_walk_in_sale(
+      ('[{"product_id":"' || (SELECT untracked_product FROM zz442) || '","qty":1}]')::jsonb,
+      '[{"method":"instapay","amount":15}]', '442dd000-0000-4000-8000-0000000000d2', 0, NULL,
+      (SELECT branch1 FROM zz442), 'note-a') ->> 'idempotent_replay')::boolean,
+    'identical sale replay broke';
+END $$;
+RESET ROLE;
+
+-- #256: shift replay reconciles branch.
+SELECT set_config('request.jwt.claims', '{}', true);
+UPDATE public.merchant_staff SET branch_id = (SELECT branch1 FROM zz442)
+ WHERE user_id = (SELECT cashier_b2 FROM zz442);
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT cashier_b2 FROM zz442))::text, true);
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.staff_shift_open(100, '442bb000-0000-4000-8000-000000000001');
+    RAISE EXCEPTION 'zz442 sentinel: branch-swapped shift replay allowed';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz442 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM LIKE '%reused with a different request%', 'wrong error: ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+SELECT set_config('request.jwt.claims', '{}', true);
+UPDATE public.merchant_staff SET branch_id = (SELECT branch2 FROM zz442)
+ WHERE user_id = (SELECT cashier_b2 FROM zz442);
+
+-- dine_in_tables read goes through the shared read helper (flags +
+-- barrier + branch): pwstaff (password-change pending) sees nothing,
+-- cashier_b2 sees only branch2's table.
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT pwstaff FROM zz442))::text, true);
+DO $$
+BEGIN
+  ASSERT NOT EXISTS (SELECT 1 FROM public.dine_in_tables t WHERE t.merchant_id = (SELECT merchant FROM zz442)),
+    'password-pending staff reads tables';
+END $$;
+RESET ROLE;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT cashier_b2 FROM zz442))::text, true);
+DO $$
+BEGIN
+  ASSERT (SELECT count(*) FROM public.dine_in_tables t WHERE t.merchant_id = (SELECT merchant FROM zz442)) = 1,
+    'branch cashier cannot read branch tables';
+END $$;
+RESET ROLE;
+
 SELECT '442 suite OK' AS result;
 ROLLBACK;

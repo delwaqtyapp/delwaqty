@@ -101,9 +101,10 @@ ANON_SQL="SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronam
 PUB_SQL="SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace,
        aclexplode(coalesce(p.proacl, acldefault('f', p.proowner))) a
  WHERE n.nspname = 'public' AND a.grantee = 0 AND a.privilege_type = 'EXECUTE';"
-FUNC_SQL="SELECT p.proname || '|' || pg_get_function_identity_arguments(p.oid) || '|' || md5(p.prosrc)
+FUNC_SQL="SELECT p.proname || '|' || pg_get_function_identity_arguments(p.oid) || '|' || md5(pg_get_functiondef(p.oid)) || '|' || pg_get_userbyid(p.proowner) || '|' || coalesce(p.proacl::text,'')
   FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
- WHERE n.nspname = 'public' ORDER BY 1;"
+  JOIN pg_language l ON l.oid = p.prolang AND l.lanname IN ('sql','plpgsql')
+ WHERE n.nspname = 'public' AND p.prokind = 'f' ORDER BY 1;"
 
 psql "$DB_URL" -X -q -At -c "$POLICY_SQL" > /tmp/.442_policies_before.txt \
   || fail_case "policy dump (before) failed"
@@ -141,14 +142,18 @@ ADDED_NAMES="$(printf '%s\n' "$ADDED" | awk -F'|' '{print $1 "/" $2}' | sort | t
 [ "$PUB_BEFORE" = "$PUB_AFTER" ] \
   || fail_case "PUBLIC execute-count changed: $PUB_BEFORE -> $PUB_AFTER"
 
-# 4) Function bodies: every pre-existing function is byte-identical after
-#    442 EXCEPT guard_platform_settings_owner_fields (the S4 extension,
-#    whose pre-image is md5-pinned inside the migration itself).
-CHANGED="$(comm -23 <(sort /tmp/.442_funcs_before.txt) <(sort /tmp/.442_funcs_after.txt) | grep -v '^guard_platform_settings_owner_fields|' || true)"
-[ -z "$CHANGED" ] || fail_case "442 changed an existing function body: $CHANGED"
+# 4) Function definitions (#257): every pre-existing function is
+#    byte-identical after 442 — full pg_get_functiondef md5, owner AND
+#    ACL — EXCEPT guard_platform_settings_owner_fields (the S4 extension)
+#    and pos_void_sale (the #258 hardening), both pre-image md5-pinned
+#    inside the migration itself.
+CHANGED="$(comm -23 <(sort /tmp/.442_funcs_before.txt) <(sort /tmp/.442_funcs_after.txt) | grep -v -E '^(guard_platform_settings_owner_fields|pos_void_sale)\|' || true)"
+[ -z "$CHANGED" ] || fail_case "442 changed an existing function: $CHANGED"
 grep -q '^guard_platform_settings_owner_fields|' /tmp/.442_funcs_before.txt \
   || fail_case "guard_platform_settings_owner_fields missing before 442"
-echo "policy + grant + function pins OK (anon=$ANON_AFTER, PUBLIC=$PUB_AFTER; added: $ADDED_NAMES; changed: guard_platform_settings_owner_fields only)"
+grep -q '^pos_void_sale|' /tmp/.442_funcs_before.txt \
+  || fail_case "pos_void_sale missing before 442"
+echo "policy + grant + function pins OK (anon=$ANON_AFTER, PUBLIC=$PUB_AFTER; added: $ADDED_NAMES; changed: guard_platform_settings_owner_fields + pos_void_sale only)"
 
 echo "== post-apply suite"
 OUT="$(psql "$DB_URL" -v ON_ERROR_STOP=1 -X -q -At -f "$SUITE" 2>&1)" \
@@ -162,8 +167,12 @@ echo "== concurrency races (two real sessions)"
 FIX_SQL=/tmp/.442_race_fixtures.sql
 cat > "$FIX_SQL" <<'SQL'
 insert into auth.users(id, email) values ('442ee000-0000-4000-8000-0000000000a1', 'zz442race.c@example.invalid');
+insert into auth.users(id, email) values ('442ee000-0000-4000-8000-0000000000a2', 'zz442race.m@example.invalid');
+insert into auth.users(id, email) values ('442ee000-0000-4000-8000-0000000000a3', 'zz442race.c2@example.invalid');
 insert into public.users(id, email, role, user_type, verification_status, username, account_status)
-values ('442ee000-0000-4000-8000-0000000000a1', 'zz442race.c@example.invalid', 'customer', 'customer', 'approved', 'zz442racec', 'active')
+values ('442ee000-0000-4000-8000-0000000000a1', 'zz442race.c@example.invalid', 'customer', 'customer', 'approved', 'zz442racec', 'active'),
+       ('442ee000-0000-4000-8000-0000000000a2', 'zz442race.m@example.invalid', 'customer', 'customer', 'approved', 'zz442racem', 'active'),
+       ('442ee000-0000-4000-8000-0000000000a3', 'zz442race.c2@example.invalid', 'customer', 'customer', 'approved', 'zz442racec2', 'active')
 on conflict (id) do nothing;
 insert into public.merchants(id, name, owner_user_id, type, status)
 values ('442ee000-0000-4000-8000-0000000000b1', 'zz442-race-shop', NULL, 'food', 'active');
@@ -173,6 +182,11 @@ insert into public.products(id, merchant_id, name, name_ar, price, stock_quantit
 values ('442ee000-0000-4000-8000-0000000000d1', '442ee000-0000-4000-8000-0000000000b1', 'zz442-race-tea', 'شاي', 25, 100);
 insert into public.merchant_staff(merchant_id, user_id, username, full_name, role, branch_id, must_change_password)
 values ('442ee000-0000-4000-8000-0000000000b1', '442ee000-0000-4000-8000-0000000000a1', 'zz442racecash', 'zz442 Race Cashier', 'cashier', '442ee000-0000-4000-8000-0000000000c1', false);
+insert into public.merchant_staff(merchant_id, user_id, username, full_name, role, branch_id, must_change_password)
+values ('442ee000-0000-4000-8000-0000000000b1', '442ee000-0000-4000-8000-0000000000a2', 'zz442racemgr', 'zz442 Race Manager', 'branch_manager', NULL, false);
+-- race cashier 2: NEVER opens a shift until race D (empty-staff first-open race).
+insert into public.merchant_staff(merchant_id, user_id, username, full_name, role, branch_id, must_change_password)
+values ('442ee000-0000-4000-8000-0000000000b1', '442ee000-0000-4000-8000-0000000000a3', 'zz442racecash2', 'zz442 Race Cashier 2', 'cashier', '442ee000-0000-4000-8000-0000000000c1', false);
 update public.platform_settings
    set feature_flags = feature_flags || '{"staff_accounts":true,"cashier_mode_mobile":true}'::jsonb
  where id = 'default';
@@ -219,5 +233,59 @@ SALE_COUNT="$(psql "$DB_URL" -X -q -At -c "SELECT count(*) FROM public.pos_sales
 STOCK="$(psql "$DB_URL" -X -q -At -c "SELECT stock_quantity FROM public.products WHERE id = '442ee000-0000-4000-8000-0000000000d1'")"
 [ "$STOCK" = "98" ] || fail_case "race C decremented stock to $STOCK (expected 98)"
 echo "race C OK (1 sale, stock 98)"
+
+# Race D: two DISTINCT first-opens on an EMPTY staff (race cashier 2):
+# exactly one wins; the loser gets the one-open-shift refusal (#252).
+CLAIMS2='{"sub":"442ee000-0000-4000-8000-0000000000a3"}'
+psql "$DB_URL" -X -q -At -c "SET ROLE authenticated; SELECT set_config('request.jwt.claims', '$CLAIMS2', true); SELECT public.staff_shift_open(0, '442ee000-0000-4000-8000-00000000f021');" > /tmp/.442_raceD1.txt 2>&1 &
+psql "$DB_URL" -X -q -At -c "SET ROLE authenticated; SELECT set_config('request.jwt.claims', '$CLAIMS2', true); SELECT public.staff_shift_open(0, '442ee000-0000-4000-8000-00000000f022');" > /tmp/.442_raceD2.txt 2>&1 &
+wait
+D_WINS=$(grep -l 'idempotent_replay' /tmp/.442_raceD1.txt /tmp/.442_raceD2.txt | wc -l)
+D_REFS=$(grep -l 'close your current shift' /tmp/.442_raceD1.txt /tmp/.442_raceD2.txt | wc -l)
+[ "$D_WINS" = "1" ] && [ "$D_REFS" = "1" ] || fail_case "race D: wins=$D_WINS refusals=$D_REFS ($(cat /tmp/.442_raceD1.txt) // $(cat /tmp/.442_raceD2.txt))"
+SHIFT_COUNT="$(psql "$DB_URL" -X -q -At -c "SELECT count(*) FROM public.pos_shifts s JOIN public.merchant_staff ms ON ms.id = s.opened_by_staff WHERE ms.username = 'zz442racecash2' AND s.closed_at IS NULL")"
+[ "$SHIFT_COUNT" = "1" ] || fail_case "race D left $SHIFT_COUNT open shifts"
+echo "race D OK (exactly one first open won)"
+
+# Race E: sale-vs-close on the same staff lock (#252). Cashier 2's shift
+# is open (float 0, no sales yet). One session sells 37 cash; the other
+# closes with 0. Serialized: either sale-then-close (expected 25) or
+# close-then-sale (expected 0 and the sale is refused).
+SALE_E="SET ROLE authenticated; SELECT set_config('request.jwt.claims', '$CLAIMS2', true); SELECT public.staff_create_walk_in_sale('[{\"product_id\":\"442ee000-0000-4000-8000-0000000000d1\",\"qty\":1}]', '[{\"method\":\"cash\",\"amount\":25}]', '442ee000-0000-4000-8000-00000000f030');"
+psql "$DB_URL" -X -q -At -c "$SALE_E" > /tmp/.442_raceE1.txt 2>&1 &
+psql "$DB_URL" -X -q -At -c "SET ROLE authenticated; SELECT set_config('request.jwt.claims', '$CLAIMS2', true); SELECT public.staff_shift_close(0);" > /tmp/.442_raceE2.txt 2>&1 &
+wait
+if grep -q '"expected": 25' /tmp/.442_raceE2.txt; then
+  grep -q 'idempotent_replay' /tmp/.442_raceE1.txt || fail_case "race E: close saw the sale but the sale failed: $(cat /tmp/.442_raceE1.txt)"
+elif grep -q '"expected": 0' /tmp/.442_raceE2.txt; then
+  grep -q 'open a shift' /tmp/.442_raceE1.txt || fail_case "race E: close beat the sale but the sale did not refuse: $(cat /tmp/.442_raceE1.txt)"
+else
+  fail_case "race E: close failed: $(cat /tmp/.442_raceE2.txt)"
+fi
+echo "race E OK (sale-vs-close serialized)"
+
+# Race F: void-vs-close (#252). Fresh shift for cashier 2, one committed
+# cash sale of 55; the MANAGER voids while the cashier closes. The void
+# takes the SALE OWNER's lock, so the outcomes are serialized:
+# void-then-close -> expected 0; close-then-void -> expected 25.
+psql "$DB_URL" -X -q -At -c "SET ROLE authenticated; SELECT set_config('request.jwt.claims', '$CLAIMS2', true); SELECT public.staff_shift_open(0, '442ee000-0000-4000-8000-00000000f040');" >/dev/null 2>&1 || true
+SALE_F_OUT="$(psql "$DB_URL" -X -q -At -c "SET ROLE authenticated; SELECT set_config('request.jwt.claims', '$CLAIMS2', true); SELECT public.staff_create_walk_in_sale('[{\"product_id\":\"442ee000-0000-4000-8000-0000000000d1\",\"qty\":1}]', '[{\"method\":\"cash\",\"amount\":25}]', '442ee000-0000-4000-8000-00000000f041');")"
+SALE_F="$(printf '%s' "$SALE_F_OUT" | sed -n 's/.*\"id\": \"\([0-9a-f-]*\)\".*/\1/p' | head -1)"
+[ -n "$SALE_F" ] || fail_case "race F setup sale failed: $SALE_F_OUT"
+CLAIMSM='{"sub":"442ee000-0000-4000-8000-0000000000a2"}'
+psql "$DB_URL" -X -q -At -c "SET ROLE authenticated; SELECT set_config('request.jwt.claims', '$CLAIMSM', true); SELECT public.staff_void_sale('$SALE_F', 'race void');" > /tmp/.442_raceF1.txt 2>&1 &
+psql "$DB_URL" -X -q -At -c "SET ROLE authenticated; SELECT set_config('request.jwt.claims', '$CLAIMS2', true); SELECT public.staff_shift_close(0);" > /tmp/.442_raceF2.txt 2>&1 &
+wait
+grep -q '"voided": true' /tmp/.442_raceF1.txt || fail_case "race F: void failed: $(cat /tmp/.442_raceF1.txt)"
+if grep -q '"expected": 0' /tmp/.442_raceF2.txt; then
+  : # void won; close saw the voided (excluded) sale
+elif grep -q '"expected": 25' /tmp/.442_raceF2.txt; then
+  : # close won; void followed
+else
+  fail_case "race F: close failed: $(cat /tmp/.442_raceF2.txt)"
+fi
+VOIDED="$(psql "$DB_URL" -X -q -At -c "SELECT status FROM public.pos_sales WHERE id = '$SALE_F'")"
+[ "$VOIDED" = "voided" ] || fail_case "race F: sale not voided at end ($VOIDED)"
+echo "race F OK (void-vs-close serialized)"
 
 echo "442 harness ALL OK"

@@ -342,6 +342,94 @@ BEGIN
 END
 $v442$;
 
+-- ===================== legacy void hardening (#258) =====================
+
+-- Legacy pos_void_sale authorizes sales.cashier_user_id directly; staff
+-- sales stamp auth.uid() there, so any staff identity (even disabled or
+-- password-change pending) could void their own sale through the OLD
+-- RPC, bypassing the manager-only gate, the shift lock, the audit event
+-- and the deferred reversal. Audit of the other pre-existing
+-- cashier-authorized functions (234/340/343/346/351/353/361/378):
+-- cashier_user_id appears only in sale-INSERT column lists, never as an
+-- authorization comparison; pos_void_sale is the only escape.
+-- Pin the live pre-image (md5 verified against prod), then replace:
+-- identical behavior for owners/admins/legacy cashiers, but ANY staff
+-- identity for the sale's merchant is refused and pointed at the gated
+-- path.
+DO $v442$
+BEGIN
+  IF md5(pg_get_functiondef('public.pos_void_sale(uuid,text)'::regprocedure))
+       <> '1d910dcad1c3cdec52c6d5fe41a48e7a' THEN
+    RAISE EXCEPTION '442 precondition failed: pos_void_sale drifted from its 365 pre-image';
+  END IF;
+END
+$v442$;
+
+CREATE OR REPLACE FUNCTION public.pos_void_sale(p_sale_id uuid, p_reason text DEFAULT NULL::text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE
+  v_uid uuid := auth.uid();
+  v_sale public.pos_sales%ROWTYPE;
+  v_merchant public.merchants%ROWTYPE;
+  v_line jsonb;
+BEGIN
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+  SELECT * INTO v_sale FROM public.pos_sales WHERE id = p_sale_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'SALE_NOT_FOUND';
+  END IF;
+  SELECT * INTO v_merchant FROM public.merchants WHERE id = v_sale.merchant_id;
+  IF v_sale.cashier_user_id <> v_uid
+     AND v_merchant.owner_user_id <> v_uid
+     AND NOT public._admin_write_scope(public._ops_scope_region(public._merchant_region_id(v_sale.merchant_id))) THEN
+    RAISE EXCEPTION 'NOT_AUTHORIZED';
+  END IF;
+  -- 442/#258: staff identities NEVER use the legacy void, whatever their
+  -- staff row state (active, disabled, password-change pending): the new
+  -- gate owns staff voids.
+  IF EXISTS (SELECT 1 FROM public.merchant_staff ms
+              WHERE ms.merchant_id = v_sale.merchant_id AND ms.user_id = v_uid) THEN
+    RAISE EXCEPTION 'shop staff must void through staff_void_sale';
+  END IF;
+  IF v_sale.status = 'voided' THEN
+    RETURN jsonb_build_object('ok', true, 'sale_id', v_sale.id, 'already_voided', true);
+  END IF;
+
+  -- Restore stock for tracked items only (NULL stock = untracked). #37:
+  -- restore the line's stamped stock_applied (clamped) decrement when
+  -- present, never the raw qty, and scope the write to this merchant (#36).
+  FOR v_line IN SELECT * FROM jsonb_array_elements(v_sale.items) LOOP
+    UPDATE public.products
+       SET stock_quantity = stock_quantity + COALESCE((v_line->>'stock_applied')::numeric,
+                                                      (v_line->>'qty')::numeric)::int,
+           updated_at = now()
+     WHERE id = (v_line->>'product_id')::uuid
+       AND merchant_id = v_sale.merchant_id
+       AND stock_quantity IS NOT NULL;
+  END LOOP;
+
+  -- Reverse the still-open platform commission posting, if any.
+  UPDATE public.platform_commissions
+     SET status = 'reversed'
+   WHERE reference_type = 'pos_sale'
+     AND reference_id = v_sale.id
+     AND status = 'computed';
+
+  UPDATE public.pos_sales
+     SET status = 'voided', voided_at = now(), voided_by = v_uid,
+         void_reason = NULLIF(btrim(COALESCE(p_reason, '')), '')
+   WHERE id = v_sale.id;
+
+  RETURN jsonb_build_object('ok', true, 'sale_id', v_sale.id);
+END;
+$function$;
+
 -- ===================== helpers (live state; never JWT claims) =====================
 
 -- Numeric parsing that never throws on hostile client jsonb.
@@ -539,7 +627,8 @@ CREATE POLICY merchant_staff_events_owner_read ON public.merchant_staff_events
   USING (public.is_merchant_owner(merchant_id) OR public.is_admin());
 
 CREATE POLICY dine_in_tables_read ON public.dine_in_tables FOR SELECT TO authenticated
-  USING (public.is_merchant_owner(merchant_id) OR public.is_active_staff(merchant_id));
+  USING (public.is_merchant_owner(merchant_id) OR public.is_admin()
+         OR public.staff_pos_read_ok(merchant_id, branch_id));
 CREATE POLICY dine_in_tables_owner_write ON public.dine_in_tables FOR ALL TO authenticated
   USING (public.is_merchant_owner(merchant_id))
   WITH CHECK (public.is_merchant_owner(merchant_id));
@@ -768,7 +857,7 @@ BEGIN
   -- WHOLE request, not just the op id.
   v_request_hash := md5(jsonb_build_object(
     'items', p_items, 'payments', p_payments, 'discount', v_discount,
-    'customer', p_pos_customer_id, 'branch', v_branch)::text);
+    'customer', p_pos_customer_id, 'branch', v_branch, 'notes', p_notes)::text);
 
   -- Same-staff serialization for this op id: concurrent first calls queue
   -- here instead of racing to unique_violation (#256).
@@ -996,6 +1085,7 @@ DECLARE
   v_staff public.merchant_staff%ROWTYPE;
   v_id uuid;
   v_float numeric;
+  v_branch uuid;
 BEGIN
   v_staff := public._authorize_staff('cashier_mode_mobile', ARRAY['cashier','branch_manager']);
   v_float := round(coalesce(p_opening_float, -1), 2);
@@ -1005,13 +1095,15 @@ BEGIN
   -- Serialize with sale/close for this staff member (#252).
   PERFORM pg_advisory_xact_lock(hashtextextended(v_staff.id::text, 442002));
   IF p_client_op_id IS NOT NULL THEN
-    SELECT s.id, s.opening_float INTO v_id, v_float FROM public.pos_shifts s
+    SELECT s.id, s.opening_float, s.branch_id INTO v_id, v_float, v_branch FROM public.pos_shifts s
      WHERE s.merchant_id = v_staff.merchant_id AND s.client_op_id = p_client_op_id
      LIMIT 1;
     IF FOUND THEN
       -- Replay must reconcile the payload (#256): same op id, different
-      -- float, or another staff member's shift is a conflict.
+      -- float, another staff member's shift, or a different branch is a
+      -- conflict.
       IF v_float IS DISTINCT FROM round(coalesce(p_opening_float, -1), 2)
+         OR v_branch IS DISTINCT FROM v_staff.branch_id
          OR NOT EXISTS (SELECT 1 FROM public.pos_shifts s2
                          WHERE s2.id = v_id AND s2.opened_by_staff = v_staff.id) THEN
         RAISE EXCEPTION 'idempotency key reused with a different request';
@@ -1113,6 +1205,8 @@ DECLARE
   v_staff public.merchant_staff%ROWTYPE;
   v_sale public.pos_sales%ROWTYPE;
   v_move record;
+  v_line jsonb;
+  v_moves_found int := 0;
 BEGIN
   v_staff := public._authorize_staff('cashier_mode_mobile', ARRAY['branch_manager']);
   IF p_reason IS NULL OR btrim(p_reason) = '' THEN
@@ -1128,6 +1222,11 @@ BEGIN
   IF v_sale.voided_at IS NOT NULL THEN
     RAISE EXCEPTION 'sale already voided';
   END IF;
+  -- Serialize against the SALE OWNER's sale/close path (#252): a manager
+  -- voiding a cashier's sale must not race that cashier's shift close.
+  IF v_sale.staff_id IS NOT NULL THEN
+    PERFORM pg_advisory_xact_lock(hashtextextended(v_sale.staff_id::text, 442002));
+  END IF;
   -- Restore stock from the sale's OWN moves (S3): exactly what was
   -- applied, per product, only where stock is tracked.
   FOR v_move IN
@@ -1136,6 +1235,7 @@ BEGIN
      WHERE m.sale_id = p_sale_id AND m.kind = 'sale' AND m.product_id IS NOT NULL
      GROUP BY m.product_id
   LOOP
+    v_moves_found := v_moves_found + 1;
     UPDATE public.products
        SET stock_quantity = stock_quantity + v_move.restore_qty, updated_at = now()
      WHERE id = v_move.product_id AND stock_quantity IS NOT NULL;
@@ -1145,6 +1245,28 @@ BEGIN
       (v_staff.merchant_id, v_move.product_id, 'void_restore',
        v_move.restore_qty, 'void ' || p_sale_id, auth.uid(), p_sale_id);
   END LOOP;
+  -- Legacy/desktop interop (#251): sales created before the moves link
+  -- have no sale_id-keyed moves; restore from the lines' stamped
+  -- stock_applied (clamped, merchant-scoped, tracked stock only) exactly
+  -- like the legacy void path (365).
+  IF v_moves_found = 0 THEN
+    FOR v_line IN SELECT * FROM jsonb_array_elements(v_sale.items) LOOP
+      UPDATE public.products
+         SET stock_quantity = stock_quantity + COALESCE((v_line->>'stock_applied')::numeric,
+                                                        (v_line->>'qty')::numeric)::int,
+             updated_at = now()
+       WHERE id = (v_line->>'product_id')::uuid
+         AND merchant_id = v_sale.merchant_id
+         AND stock_quantity IS NOT NULL;
+    END LOOP;
+  END IF;
+  -- Reverse the still-open platform commission posting, if any (legacy
+  -- sales carry one; staff sales never do).
+  UPDATE public.platform_commissions
+     SET status = 'reversed'
+   WHERE reference_type = 'pos_sale'
+     AND reference_id = v_sale.id
+     AND status = 'computed';
   -- Reverse deferred charges with explicit reversal rows (idempotent).
   INSERT INTO public.pos_debt_ledger
     (merchant_id, customer_id, sale_id, client_op_id, kind, amount, note, created_by)
@@ -1209,13 +1331,19 @@ BEGIN
   END IF;
   -- Same-staff serialization for this op id (#256).
   PERFORM pg_advisory_xact_lock(hashtextextended(v_staff.merchant_id::text || ':' || p_client_op_id::text, 442003));
-  -- Replay reconciles the payload: same customer + amount or conflict.
+  -- Replay reconciles the payload (#256): same customer + amount +
+  -- actor + branch (via the recorded shift) + note fingerprint, or
+  -- conflict.
   SELECT * INTO v_existing FROM public.pos_debt_ledger l
    WHERE l.merchant_id = v_staff.merchant_id AND l.client_op_id = p_client_op_id;
   IF FOUND THEN
     IF v_existing.customer_id IS DISTINCT FROM p_customer_id
        OR v_existing.amount IS DISTINCT FROM v_amount
-       OR v_existing.kind IS DISTINCT FROM 'payment' THEN
+       OR v_existing.kind IS DISTINCT FROM 'payment'
+       OR v_existing.created_by IS DISTINCT FROM auth.uid()
+       OR v_existing.note IS DISTINCT FROM p_note
+       OR (SELECT sh.branch_id FROM public.pos_shifts sh WHERE sh.id = v_existing.shift_id)
+            IS DISTINCT FROM v_staff.branch_id THEN
       RAISE EXCEPTION 'idempotency key reused with a different request';
     END IF;
     RETURN jsonb_build_object('id', v_existing.id, 'idempotent_replay', true);

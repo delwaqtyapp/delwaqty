@@ -24,6 +24,27 @@ class SignInUseCase {
   }
 }
 
+final signInWithIdentifierUseCaseProvider =
+    Provider<SignInWithIdentifierUseCase>((ref) {
+      return SignInWithIdentifierUseCase(ref.watch(authRepositoryProvider));
+    });
+
+class SignInWithIdentifierUseCase {
+  SignInWithIdentifierUseCase(this._repository);
+
+  final AuthRepository _repository;
+
+  Future<AuthResult> call({
+    required String identifier,
+    required String password,
+  }) {
+    return _repository.signInWithIdentifier(
+      identifier: identifier,
+      password: password,
+    );
+  }
+}
+
 final signUpUseCaseProvider = Provider<SignUpUseCase>((ref) {
   return SignUpUseCase(ref.watch(authRepositoryProvider));
 });

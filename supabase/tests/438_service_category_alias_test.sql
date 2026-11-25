@@ -82,4 +82,90 @@ BEGIN
     RAISE EXCEPTION '438 test: merchant type changed';
   END IF;
 END $$;
+
+-- 5. Authenticated admin approval through the real RPC (code reviewer ask):
+--    the zz-demo shape driven through decide_provider_profile_request, plus
+--    request status, link, notification and unauthorized denial.
+CREATE TEMP TABLE t438_e2e(u uuid, sp uuid, req uuid, adm uuid, intruder uuid);
+DO $$
+DECLARE
+  u uuid := gen_random_uuid();
+  sp uuid;
+  req uuid;
+  adm uuid := gen_random_uuid();
+  intruder uuid := gen_random_uuid();
+BEGIN
+  INSERT INTO auth.users(id, email) VALUES
+    (u, u::text || '@example.invalid'),
+    (adm, adm::text || '@example.invalid'),
+    (intruder, intruder::text || '@example.invalid');
+  UPDATE public.users SET role = 'provider' WHERE id = u;
+  UPDATE public.users SET role = 'owner' WHERE id = adm;
+
+  INSERT INTO public.service_providers (
+    user_id, name, category_type, description, rating, rating_count,
+    is_verified, is_available, hourly_rate
+  ) VALUES (
+    u, 'Demo Electrician', 'electrical', '', 5.0, 0, true, true, NULL
+  ) RETURNING id INTO sp;
+
+  INSERT INTO public.provider_business_profiles (user_id, category_type, display_name)
+  VALUES (u, 'electrician', 'Demo Electrician')
+  RETURNING id INTO req;
+
+  INSERT INTO t438_e2e VALUES (u, sp, req, adm, intruder);
+END $$;
+
+-- Approve as the owner over the authenticated role. Temp tables are not
+-- visible under SET ROLE, so carry the ids in transaction-local GUCs.
+SELECT set_config('request.jwt.claims',
+  (SELECT json_build_object('sub', adm)::text FROM t438_e2e), true);
+SELECT set_config('t438.req', (SELECT req::text FROM t438_e2e), true);
+SET LOCAL ROLE authenticated;
+SELECT public.decide_provider_profile_request(
+  current_setting('t438.req')::uuid, 'approved') AS decide_result;
+RESET ROLE;
+
+DO $$
+DECLARE
+  v record;
+BEGIN
+  SELECT * INTO v FROM t438_e2e;
+  -- Request approved and linked to the EXISTING canonical row.
+  IF (SELECT status FROM public.provider_business_profiles WHERE id = v.req)
+     IS DISTINCT FROM 'approved'
+     OR (SELECT service_provider_id FROM public.provider_business_profiles WHERE id = v.req)
+        IS DISTINCT FROM v.sp THEN
+    RAISE EXCEPTION '438 test: RPC approval did not attach the existing row';
+  END IF;
+  -- No duplicate provider, no merchant.
+  IF (SELECT count(*) FROM public.service_providers WHERE user_id = v.u) <> 1
+     OR EXISTS (SELECT 1 FROM public.merchants WHERE owner_user_id = v.u) THEN
+    RAISE EXCEPTION '438 test: RPC approval duplicated or merchant-provisioned';
+  END IF;
+  -- Notification recorded.
+  IF NOT EXISTS (
+    SELECT 1 FROM public.notifications
+     WHERE user_id = v.u AND type = 'provider_profile'
+  ) THEN
+    RAISE EXCEPTION '438 test: approval notification missing';
+  END IF;
+END $$;
+
+-- A non-admin authenticated caller is denied.
+SELECT set_config('request.jwt.claims',
+  (SELECT json_build_object('sub', intruder)::text FROM t438_e2e), true);
+SET LOCAL ROLE authenticated;
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.decide_provider_profile_request(
+      current_setting('t438.req')::uuid, 'approved');
+    RAISE EXCEPTION '438 test: unauthorized call succeeded';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM NOT ILIKE '%Not authorized%' THEN RAISE; END IF;
+  END;
+END $$;
+RESET ROLE;
+
 ROLLBACK;

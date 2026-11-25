@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:delwaqty/core/config/app_mode_provider.dart';
+import 'package:delwaqty/services/ota/ota_update_dialog.dart';
 import 'package:delwaqty/services/ota/ota_update_manager.dart';
 
 void main() {
@@ -52,6 +53,19 @@ void main() {
           latest: 13,
           handedOffVersion: 12,
           handedOffAt: t0,
+          now: t0,
+        ),
+        isFalse,
+      );
+    });
+
+    test('clock skew: a future handoff timestamp never suppresses', () {
+      expect(
+        suppressAutoOtaOffer(
+          current: 7,
+          latest: 12,
+          handedOffVersion: 12,
+          handedOffAt: t0.add(const Duration(minutes: 5)),
           now: t0,
         ),
         isFalse,
@@ -113,6 +127,63 @@ void main() {
       SharedPreferences.setMockInitialValues({
         'ota_install_handed_off_customer': 'garbage',
       });
+      expect(await otaInstallHandoff(AppFlavor.customer), isNull);
+    });
+
+    test('a legacy int record is dropped, not thrown on', () async {
+      SharedPreferences.setMockInitialValues({
+        'ota_install_handed_off_customer': 12,
+      });
+      expect(await otaInstallHandoff(AppFlavor.customer), isNull);
+      expect(
+        (await SharedPreferences.getInstance()).get(
+          'ota_install_handed_off_customer',
+        ),
+        isNull,
+      );
+    });
+  });
+
+  group('showOtaUpdateIfAvailable handoff lifecycle', () {
+    test('offline check keeps the record; restored manifest still suppresses '
+        'within the cooldown', () async {
+      SharedPreferences.setMockInitialValues({});
+      await markOtaInstallHandedOff(AppFlavor.customer, 12);
+      // Manifest unavailable: needsUpdate=false (latest mirrors current)
+      // must NOT wipe the handoff.
+      expect(
+        await showOtaUpdateIfAvailable(
+          flavor: AppFlavor.customer,
+          check: (_) async =>
+              const OtaCheckResult(current: 7, latest: 7, needsUpdate: false),
+        ),
+        isFalse,
+      );
+      expect(await otaInstallHandoff(AppFlavor.customer), isNotNull);
+      // Manifest restored, same version, still within cooldown: suppressed.
+      expect(
+        await showOtaUpdateIfAvailable(
+          flavor: AppFlavor.customer,
+          check: (_) async =>
+              const OtaCheckResult(current: 7, latest: 12, needsUpdate: true),
+        ),
+        isFalse,
+      );
+      expect(await otaInstallHandoff(AppFlavor.customer), isNotNull);
+    });
+
+    test('record clears when the running build reaches the handed-off '
+        'version', () async {
+      SharedPreferences.setMockInitialValues({});
+      await markOtaInstallHandedOff(AppFlavor.customer, 12);
+      expect(
+        await showOtaUpdateIfAvailable(
+          flavor: AppFlavor.customer,
+          check: (_) async =>
+              const OtaCheckResult(current: 12, latest: 12, needsUpdate: false),
+        ),
+        isFalse,
+      );
       expect(await otaInstallHandoff(AppFlavor.customer), isNull);
     });
   });

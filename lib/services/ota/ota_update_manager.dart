@@ -381,11 +381,17 @@ Future<void> markOtaInstallHandedOff(AppFlavor flavor, int version) async {
   );
 }
 
-/// The last handoff as (version, timestamp), or null.
+/// The last handoff as (version, timestamp), or null. A legacy record in
+/// another type (an int from the first iteration) is dropped instead of
+/// throwing, and reads as no handoff - failing open toward offering.
 Future<(int, DateTime)?> otaInstallHandoff(AppFlavor flavor) async {
   final prefs = await SharedPreferences.getInstance();
-  final raw = prefs.getString('$_kInstallHandoffPrefix${flavor.name}');
+  final raw = prefs.get('$_kInstallHandoffPrefix${flavor.name}');
   if (raw == null) return null;
+  if (raw is! String) {
+    await prefs.remove('$_kInstallHandoffPrefix${flavor.name}');
+    return null;
+  }
   final parts = raw.split(':');
   if (parts.length != 2) return null;
   final version = int.tryParse(parts[0]);
@@ -419,6 +425,8 @@ bool suppressAutoOtaOffer({
     handedOffAt != null &&
     handedOffVersion >= latest &&
     current < latest &&
+    // Clock skew: a handoff timestamped in the future must not suppress.
+    now.difference(handedOffAt) >= Duration.zero &&
     now.difference(handedOffAt) < cooldown;
 
 /// Streams [file] through SHA-256 and compares it with [expected].

@@ -165,6 +165,45 @@ void main() {
   );
 
   testWidgets(
+    'HomePage hero image covers the full hero height (no unpainted strip '
+    'under the location badge)',
+    (tester) async {
+      tester.view.physicalSize = const Size(366, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(_buildTestApp());
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // The hero background must fill the whole hero even when the overlay
+      // content forces the hero taller than the image's natural-fit height;
+      // fitWidth left a strip that clipped the location badge (bug 6).
+      final boxes = tester.widgetList<DecoratedBox>(find.byType(DecoratedBox));
+      final hero = boxes
+          .where(
+            (b) =>
+                b.decoration is BoxDecoration &&
+                (b.decoration as BoxDecoration).image != null &&
+                ((b.decoration as BoxDecoration).image!.image is AssetImage) &&
+                (((b.decoration as BoxDecoration).image!.image as AssetImage)
+                    .assetName
+                    .contains('home_egypt_hero')),
+          )
+          .toList();
+      expect(hero, hasLength(1));
+      final image = (hero.single.decoration as BoxDecoration).image!;
+      expect(image.fit, BoxFit.cover);
+
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+    },
+  );
+
+  testWidgets(
     'HomePage with real data renders without overflow on the real phone '
     '(1280x2800 @ dpr 2.975 = 430x941 logical, cutout 47.4, Arabic)',
     (tester) async {

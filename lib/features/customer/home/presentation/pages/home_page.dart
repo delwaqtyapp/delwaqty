@@ -290,7 +290,12 @@ class _EgyptHeroState extends State<_EgyptHero>
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/egypt/home_egypt_hero.webp'),
-                  fit: BoxFit.fitWidth,
+                  // Cover the full hero: when the overlay content (tall
+                  // status-bar inset or large text scale) forces the hero
+                  // taller than the image's natural-fit height, fitWidth
+                  // left an unpainted strip at the bottom and the location
+                  // badge sat half-clipped against the image edge.
+                  fit: BoxFit.cover,
                   alignment: Alignment.topCenter,
                 ),
               ),

@@ -50,6 +50,17 @@ jobs:
       - name: Unit tests (Pos.Core)
         run: dotnet test pos/Delwaqty.Pos.Core.Tests/Delwaqty.Pos.Core.Tests.csproj -c Release --nologo
 
+      - name: Stamp the OTA build number (working tree only, never committed)
+        # The cashier's OTA channel compares a monotonic build number, like
+        # the Flutter buildNumber. The workflow run number is that counter;
+        # only this runner's checkout is stamped, the ref stays untouched.
+        shell: pwsh
+        run: |
+          $p = "pos/Delwaqty.Pos.Wpf/PosConfig.cs"
+          $t = [IO.File]::ReadAllText($p)
+          $t = $t -replace 'OtaBuildNumber = \d+', "OtaBuildNumber = ${{ github.run_number }}"
+          [IO.File]::WriteAllText($p, $t)
+
       - name: Publish shop cashier (net8.0-windows, win-x64, self-contained)
         run: >-
           dotnet publish pos/Delwaqty.Pos.Wpf/Delwaqty.Pos.Wpf.csproj
@@ -286,3 +297,21 @@ jobs:
           installer-output/delwaqty-cashier-setup-net8-EXPERIMENTAL.exe
           installer-output/delwaqty-cashier-setup-net48-EXPERIMENTAL.exe
           --clobber -R delwaqtyapp/delwaqty
+
+      - name: Update the OTA manifest for the cashier channel
+        # Same channel contract the Flutter apps consume: versions.json on
+        # the rolling release gains/updates a "cashier" channel whose
+        # version is this run number and whose sha256 pins the installer.
+        # The app REFUSES to install without a matching digest, so the
+        # digest is computed here from the exact artifact just uploaded.
+        # Still under the publish opt-in: validation runs never touch this.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          asset="installer-output/delwaqty-cashier-setup-net8-EXPERIMENTAL.exe"
+          sha="$(sha256sum "$asset" | cut -d' ' -f1)"
+          gh release download development -p versions.json --clobber -R delwaqtyapp/delwaqty             || echo '{"channels":{}}' > versions.json
+          jq --argjson v "${{ github.run_number }}"              --arg sha "$sha"              --arg name "1.0.0-b${{ github.run_number }}"              '.channels.cashier = {version: $v, versionName: $name, apk: "delwaqty-cashier-setup-net8-EXPERIMENTAL.exe", notes: "تحديث الكاشير", sha256: $sha}'              versions.json > versions.new.json
+          mv versions.new.json versions.json
+          gh release upload development versions.json --clobber -R delwaqtyapp/delwaqty

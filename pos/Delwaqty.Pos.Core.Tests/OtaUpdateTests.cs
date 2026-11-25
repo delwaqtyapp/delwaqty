@@ -103,6 +103,7 @@ namespace Delwaqty.Pos.Core.Tests
             var done = await service.DownloadLatestAsync(check, _dir);
             Assert.True(done.Ok);
             Assert.Equal(Net48Asset, Path.GetFileName(done.Installer.File));
+            done.Installer.Dispose();
             Assert.Equal(3, bytes.Requests.Count); // release, manifest, installer - never the net8 asset
             Assert.DoesNotContain(bytes.Requests, r => r.Url.Contains("net8"));
         }
@@ -163,27 +164,31 @@ namespace Delwaqty.Pos.Core.Tests
 
         [Theory]
         [InlineData("delwaqty-cashier-setup-net8-b12.exe", true)]
-        [InlineData("delwaqty cashier setup b12.exe", true)] // spaces are fine in a plain name
         [InlineData("SETUP.EXE", true)]
+        [InlineData("delwaqty cashier setup b12.exe", false)] // spaces are outside the ASCII allowlist
         [InlineData("setup.exe.part", false)]
         [InlineData("..exe", false)]
+        [InlineData("evil:stream.exe", false)] // colon = alternate data stream
+        [InlineData("CON.exe", false)]
+        [InlineData("lpt3.exe", false)]
+        [InlineData("trailing..exe", false)] // trailing dot before the extension is a Windows file API hazard
         public void Asset_name_validation(string name, bool expected)
         {
             Assert.Equal(expected, OtaUpdateService.IsSafeAssetName(name));
         }
 
         [Fact]
-        public async Task Asset_and_tag_are_url_encoded_in_requests()
+        public async Task Request_url_targets_the_exact_pinned_asset()
         {
             var payload = Encoding.UTF8.GetBytes("installer");
-            var asset = "delwaqty cashier setup b12.exe";
-            var manifest = ManifestJson.Replace(Net8Asset, asset).Replace("{SHA}", Sha256Hex(payload));
+            var manifest = ManifestJson.Replace("{SHA}", Sha256Hex(payload));
             var bytes = new StubBytesHandler().OkText(ReleaseJson("development")).OkText(manifest).OkBytes(payload);
             var service = new OtaUpdateService(new HttpClient(bytes));
             var check = await service.CheckForUpdateAsync(10, "cashier-net8");
             var result = await service.DownloadLatestAsync(check, _dir);
             Assert.True(result.Ok);
-            Assert.Contains("%20", bytes.Requests[2].Url);
+            result.Installer.Dispose();
+            Assert.EndsWith("/development/" + Net8Asset, bytes.Requests[2].Url);
         }
 
         [Fact]
@@ -212,7 +217,7 @@ namespace Delwaqty.Pos.Core.Tests
         }
 
         [Fact]
-        public async Task Verified_download_holds_bytes_and_reverify_catches_a_swap()
+        public async Task Verified_download_holds_a_handle_and_reverify_catches_a_swap()
         {
             var payload = Encoding.UTF8.GetBytes("the real installer");
             var manifest = ManifestJson.Replace("{SHA}", Sha256Hex(payload));
@@ -221,11 +226,15 @@ namespace Delwaqty.Pos.Core.Tests
             var check = await service.CheckForUpdateAsync(10, "cashier-net8");
             var result = await service.DownloadLatestAsync(check, _dir);
             Assert.True(result.Ok);
-            Assert.True(result.Installer.Reverify());
+            using (result.Installer)
+            {
+                Assert.True(result.Installer.Reverify());
 
-            // An attacker swapping the file after the download is caught at launch time.
-            File.WriteAllBytes(result.Installer.File, Encoding.UTF8.GetBytes("swapped installer"));
-            Assert.False(result.Installer.Reverify());
+                // Bytes rewritten under the path are caught at launch time.
+                File.WriteAllBytes(result.Installer.File, Encoding.UTF8.GetBytes("swapped installer"));
+                Assert.False(result.Installer.Reverify());
+            }
+            Assert.False(result.Installer.Reverify()); // disposed handle never verifies
         }
 
         [Fact]
@@ -238,10 +247,12 @@ namespace Delwaqty.Pos.Core.Tests
             var check = await service.CheckForUpdateAsync(10, "cashier-net8");
             var first = await service.DownloadLatestAsync(check, _dir);
             Assert.True(first.Ok);
+            first.Installer.Dispose();
             Assert.Equal(3, bytes.Requests.Count);
 
             var second = await service.DownloadLatestAsync(check, _dir);
             Assert.True(second.Ok);
+            second.Installer.Dispose();
             Assert.Equal(3, bytes.Requests.Count); // cache hit, no second download
         }
 

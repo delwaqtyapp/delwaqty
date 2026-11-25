@@ -87,6 +87,44 @@ class CashierPublisherSafetyTest(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 cashier.verify_installer(rolling, 12)
 
+    def test_provenance_binds_artifacts_to_the_run(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / 'build-provenance.json'
+            path.write_text(json.dumps(
+                {'run_id': '1', 'run_number': 12, 'sha': 'a' * 40}))
+            with patch.dict(cashier.os.environ, {'GITHUB_RUN_ID': '1'}):
+                self.assertEqual(cashier.check_provenance(temp, 12), 'a' * 40)
+                with self.assertRaises(SystemExit):  # wrong run
+                    cashier.check_provenance(temp, 13)
+            with patch.dict(cashier.os.environ, {'GITHUB_RUN_ID': '2'}):
+                with self.assertRaises(SystemExit):  # wrong run id
+                    cashier.check_provenance(temp, 12)
+            path.write_text(json.dumps(
+                {'run_id': '1', 'run_number': 12, 'sha': 'notasha'}))
+            with patch.dict(cashier.os.environ, {'GITHUB_RUN_ID': '1'}):
+                with self.assertRaises(SystemExit):  # unbound commit
+                    cashier.check_provenance(temp, 12)
+            path.unlink()
+            with self.assertRaises(SystemExit):  # missing file fails closed
+                cashier.check_provenance(temp, 12)
+
+    def test_publisher_requires_default_branch_and_pinned_master_code(self):
+        self.assertTrue(cashier.WORKFLOW.endswith('@refs/heads/master'))
+        source = Path(cashier.__file__).read_text()
+        self.assertIn("os.environ.get('GITHUB_WORKFLOW_REF') != WORKFLOW", source)
+        self.assertIn('PUBLISHER_SHA', source)
+
+    def test_manifest_sample_is_never_a_release_asset(self):
+        # The contract sample must not share the live manifest's file name,
+        # so no wildcard upload can ever ship it.
+        self.assertFalse(Path('ota/versions.json').exists())
+        self.assertTrue(Path('ota/versions.sample.json').exists())
+        workflow = Path('.github/workflows/pos-windows.yml').read_text()
+        self.assertNotIn('ota/versions', workflow)
+        self.assertIn('PUBLISHER_SHA', workflow)
+        self.assertNotIn('github.event.inputs.ref', workflow.split('publish-cashier:')[1])
+
     def test_no_empty_manifest_fallback_and_no_clobbered_installers(self):
         source = Path(cashier.__file__).read_text()
         self.assertNotIn("echo '{\"channels\":{}}'", source)

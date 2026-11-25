@@ -7,13 +7,16 @@ name: POS Windows cashier (experimental)
 # attached to the rolling 'development' release ONLY when the dispatch sets
 # publish=true. Validation and screenshot runs leave the release untouched.
 #
-# Security split (#148): the job that touches the selected ref's code has no
-# write token and no persisted git credentials. The publish job holds
-# contents:write and checks out the built ref (persist-credentials: false)
-# ONLY to run the reviewed, unit-tested, fail-closed publisher script
-# (tool/publish_cashier.py) instead of inline YAML; the ref input is
-# restricted to protected/default refs, so the script cannot come from an
-# arbitrary branch. Installer assets are immutable, version-pinned names.
+# Security split (#148, restored after review #248): the job that touches
+# the selected ref's code has no write token and no persisted git
+# credentials; the job that holds contents:write NEVER checks out or
+# executes the published branch's code. It runs the fail-closed publisher
+# (tool/publish_cashier.py) checked out at PUBLISHER_SHA - a reviewed
+# commit on the default branch pinned below - and the artifacts are bound
+# to the build by build-provenance.json (run id + resolved build sha).
+# Until the cashier publisher reaches master and PUBLISHER_SHA is pinned
+# here, the publish job FAILS CLOSED: no cashier publishing before then.
+# Installer assets are immutable, version-pinned names.
 on:
   workflow_dispatch:
     inputs:
@@ -45,12 +48,18 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: read
+    outputs:
+      build_sha: ${{ steps.resolve.outputs.sha }}
     steps:
       - id: checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ inputs.ref }}
           persist-credentials: false
+
+      - name: Resolve the build commit
+        id: resolve
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with:
@@ -272,6 +281,10 @@ jobs:
             if (-not (Test-Path $f)) { throw "expected installer missing: $f" }
           }
           $expect | ForEach-Object { "built: $_" }
+          # Bind the payload to this run and commit for the publish job's
+          # provenance check.
+          @{ run_id = "${{ github.run_id }}"; run_number = ${{ github.run_number }}; sha = "${{ steps.resolve.outputs.build_sha }}" } |
+            ConvertTo-Json | Out-File -Encoding utf8 build-provenance.json
 
       - name: Hand off the zip and installers as workflow artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -281,6 +294,7 @@ jobs:
             delwaqty-cashier-windows-b${{ github.run_number }}.zip
             installer-output/delwaqty-cashier-setup-net8-b${{ github.run_number }}.exe
             installer-output/delwaqty-cashier-setup-net48-b${{ github.run_number }}.exe
+            build-provenance.json
             screenshots/*.png
           if-no-files-found: error
           retention-days: 7
@@ -294,46 +308,53 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write # gh release upload only
+    env:
+      # Reviewed publisher commit on the DEFAULT branch. Fails closed while
+      # unpinned: cashier publishing starts only after the cashier work
+      # reaches master and this is pinned to its reviewed master commit.
+      PUBLISHER_SHA: 'UNPINNED'
     steps:
-      # The reviewed, fail-closed publisher script runs from the SAME ref
-      # that was built (dispatch restricts it to protected/default refs).
+      - name: Refuse to publish without a pinned reviewed publisher
+        run: |
+          if ! printf '%s' "$PUBLISHER_SHA" | grep -qE '^[0-9a-f]{40}$'; then
+            echo "PUBLISHER_SHA is not pinned to a reviewed master commit; refusing to publish."
+            exit 1
+          fi
+          if [ "${{ github.ref }}" != "refs/heads/master" ]; then
+            echo "The cashier publisher only runs from the default branch."
+            exit 1
+          fi
+
+      # The pinned reviewed publisher code - NEVER the published branch's.
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.ref }}
+          ref: ${{ env.PUBLISHER_SHA }}
           persist-credentials: false
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Cashier publisher regression tests
-        run: python3 -m unittest discover -s tool -p test_publish_cashier.py
+      - name: Publisher regression tests (pinned code)
+        run: python3 -m unittest discover -s tool -p "test_publish_*.py"
 
       - name: Download the versioned build artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: delwaqty-cashier-windows-b${{ github.run_number }}
 
-      - name: Attach the versioned zip to the development release
+      - name: Publish installers and merge the cashier channels (fail-closed)
+        # tool/publish_cashier.py: validates build provenance (this run's id
+        # + the build job's resolved commit), uploads the immutable
+        # versioned zip and installers idempotently (existing assets are
+        # re-proven, never clobbered) with post-upload hash proofs, then
+        # downloads/validates/merges the shared manifest preserving every
+        # channel it does not own, and round-trip verifies the upload.
         env:
           GH_TOKEN: ${{ github.token }}
-        # The zip is informational (not an OTA asset) and version-pinned,
-        # so it is uploaded once and never clobbered.
-        run: >-
-          gh release upload development
-          delwaqty-cashier-windows-b${{ github.run_number }}.zip
-          -R delwaqtyapp/delwaqty
-
-      - name: Merge the cashier channels into the OTA manifest (fail-closed)
-        # tool/publish_cashier.py: downloads the live manifest (NO empty
-        # fallback), validates its schema, refuses non-forward versions,
-        # preserves every channel it does not own, uploads the immutable
-        # versioned installers with a post-upload hash proof, then uploads
-        # the merged manifest and round-trip verifies it. Any failure
-        # aborts BEFORE the manifest upload.
-        env:
-          GH_TOKEN: ${{ github.token }}
+          BUILD_SHA: ${{ needs.build-cashier.outputs.build_sha }}
         run: >-
           python3 tool/publish_cashier.py ${{ github.run_number }}
+          delwaqty-cashier-windows-b${{ github.run_number }}.zip
           installer-output/delwaqty-cashier-setup-net8-b${{ github.run_number }}.exe
           installer-output/delwaqty-cashier-setup-net48-b${{ github.run_number }}.exe

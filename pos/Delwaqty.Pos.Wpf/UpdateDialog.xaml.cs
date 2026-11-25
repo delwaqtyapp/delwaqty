@@ -16,7 +16,8 @@ namespace Delwaqty.Pos.Wpf
     /// install), then re-verifies the file one more time immediately before
     /// handing off to the Inno setup with /VERYSILENT /NORESTART (the path
     /// pos/installer/delwaqty.iss documents) and exits so the installer can
-    /// replace the running app.
+    /// replace the running app. The verified installer's open file handle is
+    /// disposed on every path (close, error, or after the handoff).
     /// </summary>
     public partial class UpdateDialog : Window
     {
@@ -31,7 +32,20 @@ namespace Delwaqty.Pos.Wpf
             InitializeComponent();
             _ota = ota;
             Loaded += async (s, e) => await CheckAsync();
-            Closed += (s, e) => _closing.Cancel();
+            Closed += (s, e) =>
+            {
+                _closing.Cancel();
+                ReleaseInstaller();
+            };
+        }
+
+        private void ReleaseInstaller()
+        {
+            if (_installer != null)
+            {
+                _installer.Dispose();
+                _installer = null;
+            }
         }
 
         private void SetState(string header, string notes, string primary, bool primaryEnabled,
@@ -147,11 +161,13 @@ namespace Delwaqty.Pos.Wpf
 
         private async Task InstallAsync()
         {
-            // Re-verify the exact bytes that passed the digest check right
-            // before launch: a swapped file must never be executed.
-            if (!_installer.Reverify())
+            // Re-verify through the held pin handle right before launch:
+            // bytes rewritten under the path must never be executed. Off the
+            // UI thread - a full installer hash takes a moment.
+            var verified = await Task.Run(() => _installer.Reverify());
+            if (!verified)
             {
-                _installer = null;
+                ReleaseInstaller();
                 SetState("فشل التحقق من سلامة التحديث",
                     "تغيّر ملف التحديث بعد تنزيله، لذلك أُلغي التثبيت حمايةً للجهاز.",
                     "إغلاق", true, primaryCloses: true);
@@ -169,11 +185,14 @@ namespace Delwaqty.Pos.Wpf
             }
             catch
             {
+                ReleaseInstaller();
                 SetState("تعذر بدء التثبيت", "لم يبدأ المثبّت — ربما رُفض إذن المسؤول.", "إغلاق", true,
                     primaryCloses: true);
-                _installer = null;
                 return;
             }
+            // Handoff done: the installer process was created; release the
+            // pin handle, then exit so the installer can replace the app.
+            ReleaseInstaller();
             Application.Current.Shutdown();
         }
 

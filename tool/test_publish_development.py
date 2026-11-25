@@ -100,6 +100,11 @@ class PublisherSafetyTest(unittest.TestCase):
         self.assertIn('cancel-in-progress: false', workflow)
         self.assertIn('GITHUB_WORKFLOW_REF', Path(publisher.__file__).read_text())
 
+    def test_no_unverifiable_one_off_reuse_exception(self):
+        source = Path(publisher.__file__).read_text()
+        self.assertNotIn('REUSE_', source)
+        self.assertIn("CI run must be for the current master commit", source)
+
 
 if __name__ == '__main__':
     unittest.main()

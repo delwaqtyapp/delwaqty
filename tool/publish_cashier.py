@@ -25,13 +25,18 @@ import tempfile
 REPO = 'delwaqtyapp/delwaqty'
 TAG = 'development'
 CHANNELS = ('cashier-net8', 'cashier-net48')
-WORKFLOW = f'{REPO}/.github/workflows/pos-windows.yml'
+# The workflow must run from the default branch, and the publisher code
+# itself is checked out at PUBLISHER_SHA - a reviewed master commit pinned
+# in pos-windows.yml - never from the branch being published.
+WORKFLOW = f'{REPO}/.github/workflows/pos-windows.yml@refs/heads/master'
 NOTES = 'تحديث الكاشير'
 MAX_INSTALLER_BYTES = 500 * 1024 * 1024
+SHA_RE = re.compile(r'[0-9a-f]{40}')
 # Immutable, version- and runtime-specific installer names. The manifest
 # entry points at exactly this artifact, so a cached client can never pick
 # up a silently replaced binary.
 ASSET_NAME = re.compile(r'^delwaqty-cashier-setup-(net8|net48)-b[0-9]+\.exe$')
+ZIP_NAME = re.compile(r'^delwaqty-cashier-windows-b[0-9]+\.zip$')
 
 
 def gh(*args):
@@ -109,6 +114,23 @@ def merge(manifest, build, assets):
     return validate_manifest(merged)
 
 
+def check_provenance(directory, build):
+    """The artifacts must come from THIS run's build job, which exported
+    the resolved build commit as a job output and wrote this file into the
+    artifact. Anything else is the wrong payload.
+    """
+    try:
+        prov = json.loads((Path(directory) / 'build-provenance.json').read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        raise SystemExit(f'Build provenance missing or unreadable: {exc}')
+    if (prov.get('run_id') != os.environ.get('GITHUB_RUN_ID')
+            or prov.get('run_number') != build
+            or not isinstance(prov.get('sha'), str)
+            or not SHA_RE.fullmatch(prov['sha'])):
+        raise SystemExit('Build provenance does not match this run and build')
+    return prov['sha']
+
+
 def verify_installer(path, build):
     name = Path(path).name
     match = ASSET_NAME.fullmatch(name)
@@ -121,17 +143,26 @@ def verify_installer(path, build):
 
 
 def main():
-    if len(os.sys.argv) != 4:
-        raise SystemExit('usage: publish_cashier.py BUILD NET8_INSTALLER NET48_INSTALLER')
+    if len(os.sys.argv) != 5:
+        raise SystemExit('usage: publish_cashier.py BUILD ZIP NET8_INSTALLER NET48_INSTALLER')
     build = int(os.sys.argv[1])
-    net8_path, net48_path = os.sys.argv[2], os.sys.argv[3]
+    zip_path, net8_path, net48_path = os.sys.argv[2], os.sys.argv[3], os.sys.argv[4]
     if build <= 0:
         raise SystemExit('Build number must be positive')
     # The supported execution path has a cross-run concurrency lock. Do not
     # run this script locally: an OS-only lock cannot serialize other machines.
+    # The workflow itself must run on the default branch and the publisher
+    # code must be pinned to a reviewed master commit - never the published
+    # branch's code.
     if (os.environ.get('GITHUB_ACTIONS') != 'true'
-            or not os.environ.get('GITHUB_WORKFLOW_REF', '').startswith(WORKFLOW)):
-        raise SystemExit('Use the serialized POS Windows cashier workflow')
+            or os.environ.get('GITHUB_WORKFLOW_REF') != WORKFLOW
+            or not SHA_RE.fullmatch(os.environ.get('PUBLISHER_SHA', ''))):
+        raise SystemExit('Use the serialized POS Windows cashier workflow on master, '
+                         'with PUBLISHER_SHA pinned to the reviewed publisher commit')
+    zip_name = Path(zip_path).name
+    if not ZIP_NAME.fullmatch(zip_name) or int(zip_name[:-4].rsplit('-b', 1)[1]) != build:
+        raise SystemExit(f'Zip name does not pin the build: {zip_name}')
+    check_provenance(str(Path(zip_path).parent), build)
     installers = {
         'cashier-net8': verify_installer(net8_path, build),
         'cashier-net48': verify_installer(net48_path, build),
@@ -141,20 +172,25 @@ def main():
         gh('release', 'view', TAG, '-R', REPO, '--json', 'assets'))['assets']}
     with tempfile.TemporaryDirectory(prefix='delwaqty-cashier-') as temp:
         root = Path(temp)
-        # Immutable, versioned installers are NEVER clobbered. On a retry an
-        # existing asset is kept and only re-proven. Post-upload hash proof
-        # covers the bytes clients will actually fetch.
-        for channel, name in installers.items():
-            local = digest(paths[channel])
+        # Immutable, versioned assets are NEVER clobbered. On a retry an
+        # existing asset is kept and only re-proven (idempotent). Post-upload
+        # hash proof covers the bytes clients will actually fetch.
+        payloads = dict(paths)
+        payloads['zip'] = Path(zip_path)
+        names = dict(installers)
+        names['zip'] = zip_name
+        for key, name in names.items():
+            local = digest(payloads[key])
             if name not in existing:
-                gh('release', 'upload', TAG, '-R', REPO, str(paths[channel]))
+                gh('release', 'upload', TAG, '-R', REPO, str(payloads[key]))
             check = root / 'verify'
             check.mkdir(exist_ok=True)
             gh('release', 'download', TAG, '-R', REPO, '-p', name,
                '--clobber', '-D', str(check))
             if digest(check / name) != local:
                 raise SystemExit(f'Post-upload hash proof failed: {name}')
-            installers[channel] = (name, local)
+            if key in installers:
+                installers[key] = (name, local)
         # Read/validate/merge/upload the shared manifest, then prove the
         # round trip. Every failure above this line left the manifest alone.
         manifest = fetch_manifest(root)

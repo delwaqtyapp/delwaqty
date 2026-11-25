@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
@@ -69,36 +68,43 @@ namespace Delwaqty.Pos.Core.Ota
 
     /// <summary>
     /// An installer whose bytes were SHA-256 verified against the manifest
-    /// digest. The verified bytes are HELD in memory; <see cref="Reverify"/>
-    /// re-hashes the file on disk right before it is launched, so a file
-    /// swapped after the download can never be executed.
+    /// digest. The file is held OPEN for the whole handoff with a read
+    /// handle opened with FileShare.Read (no Write/Delete sharing): on
+    /// Windows that pins the exact verified bytes - the file cannot be
+    /// modified, replaced or renamed while the handle lives.
+    /// <see cref="Reverify"/> re-hashes THROUGH that handle right before the
+    /// installer is launched, and <see cref="Dispose"/> releases it on every
+    /// path after the handoff.
     /// </summary>
-    public sealed class OtaVerifiedInstaller
+    public sealed class OtaVerifiedInstaller : IDisposable
     {
         public string File { get; private set; }
         public string ExpectedSha256 { get; private set; }
-        private readonly byte[] _verifiedBytes;
+        private FileStream _handle;
 
-        public OtaVerifiedInstaller(string file, string expectedSha256, byte[] verifiedBytes)
+        internal OtaVerifiedInstaller(string file, string expectedSha256, FileStream handle)
         {
             File = file;
             ExpectedSha256 = expectedSha256;
-            _verifiedBytes = verifiedBytes;
+            _handle = handle;
         }
 
         /// <summary>
-        /// Reads the file back and proves it is byte-identical to the bytes
-        /// that passed the manifest-digest check. Must be called immediately
-        /// before launching the installer.
+        /// Re-hashes the held handle and proves the launched file is still
+        /// the exact verified bytes. Must be called immediately before
+        /// Process.Start; the caller should wrap it in Task.Run off the UI
+        /// thread for large installers.
         /// </summary>
         public bool Reverify()
         {
             try
             {
-                if (string.IsNullOrEmpty(File) || !System.IO.File.Exists(File)) return false;
-                var onDisk = System.IO.File.ReadAllBytes(File);
-                if (onDisk.Length != _verifiedBytes.Length) return false;
-                return onDisk.SequenceEqual(_verifiedBytes) && Sha256Hex(onDisk) == ExpectedSha256;
+                lock (this)
+                {
+                    if (_handle == null) return false;
+                    _handle.Position = 0;
+                    return OtaUpdateService.Sha256Hex(_handle) == ExpectedSha256;
+                }
             }
             catch
             {
@@ -106,11 +112,15 @@ namespace Delwaqty.Pos.Core.Ota
             }
         }
 
-        internal static string Sha256Hex(byte[] content)
+        public void Dispose()
         {
-            using (var sha = SHA256.Create())
+            lock (this)
             {
-                return BitConverter.ToString(sha.ComputeHash(content)).Replace("-", "").ToLowerInvariant();
+                if (_handle != null)
+                {
+                    try { _handle.Dispose(); } catch { }
+                    _handle = null;
+                }
             }
         }
     }
@@ -234,18 +244,34 @@ namespace Delwaqty.Pos.Core.Ota
         }
 
         /// <summary>
-        /// The manifest's asset field must be a plain .exe FILE NAME: no
-        /// directories, no rooted paths, no parent traversal. Anything else
-        /// is a poisoned manifest and is refused before any URL is built.
+        /// The manifest's asset field must pass a strict ASCII allowlist: a
+        /// plain versioned .exe FILE NAME - letters, digits, dot, dash and
+        /// underscore only. No separators, rooted paths, parent traversal,
+        /// colons (no alternate data streams), spaces or shell-active
+        /// characters, and no reserved DOS device names. Anything else is a
+        /// poisoned manifest and is refused before any URL is built.
         /// </summary>
+        private static readonly System.Text.RegularExpressions.Regex AssetNamePattern =
+            new System.Text.RegularExpressions.Regex(
+                "^[A-Za-z0-9][A-Za-z0-9._-]{0,123}\\.exe$",
+                System.Text.RegularExpressions.RegexOptions.Compiled |
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        private static readonly HashSet<string> ReservedDeviceNames =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "CON", "PRN", "AUX", "NUL",
+                "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+                "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
+            };
+
         public static bool IsSafeAssetName(string name)
         {
-            if (string.IsNullOrEmpty(name) || name.Length > 128) return false;
-            if (!name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) return false;
-            if (name.IndexOf('/') >= 0 || name.IndexOf('\\') >= 0) return false;
-            if (name.IndexOf("..", StringComparison.Ordinal) >= 0) return false;
-            if (Path.IsPathRooted(name)) return false;
-            return Path.GetFileName(name) == name;
+            if (string.IsNullOrEmpty(name) || !AssetNamePattern.IsMatch(name)) return false;
+            var stem = name.Substring(0, name.Length - 4); // without .exe
+            if (ReservedDeviceNames.Contains(stem)) return false;
+            if (stem.EndsWith(".", StringComparison.Ordinal) || stem.EndsWith(" ", StringComparison.Ordinal)) return false;
+            return true;
         }
 
         private static string Encode(string value)
@@ -361,9 +387,11 @@ namespace Delwaqty.Pos.Core.Ota
         /// interrupted download is never mistaken for a finished one. Asset
         /// names are version-specific, so a verified file already on disk is
         /// a cache for exactly this version and is reused after a re-check of
-        /// its digest. Does NOT start the installer - the caller owns the
-        /// install step and must re-verify via
-        /// <see cref="OtaVerifiedInstaller.Reverify"/> first.
+        /// its digest. The returned installer HOLDS an open FileShare.Read
+        /// handle on the verified file: the caller MUST dispose it after the
+        /// install handoff, and MUST re-verify via
+        /// <see cref="OtaVerifiedInstaller.Reverify"/>. Does NOT start the
+        /// installer - the caller owns the install step.
         /// </summary>
         public async Task<OtaDownloadResult> DownloadLatestAsync(
             OtaCheckResult offered, string targetDir, IProgress<double> progress = null,
@@ -390,16 +418,19 @@ namespace Delwaqty.Pos.Core.Ota
 
             var target = Path.Combine(targetDir, channel.Asset);
             var partial = target + ".part";
+            OtaVerifiedInstaller installer = null;
             try
             {
                 Directory.CreateDirectory(targetDir);
                 if (File.Exists(target) && new FileInfo(target).Length > 0)
                 {
-                    // Version-keyed cache: verify before reusing.
-                    if (await VerifySha256Async(target, expectedHash, cancellationToken).ConfigureAwait(false))
+                    // Version-keyed cache: open the pin handle and verify
+                    // through it before reusing.
+                    installer = OpenAndVerify(target, expectedHash);
+                    if (installer != null)
                     {
                         if (progress != null) progress.Report(1.0);
-                        return new OtaDownloadResult { Installer = HoldVerified(target, expectedHash) };
+                        return new OtaDownloadResult { Installer = installer };
                     }
                     try { File.Delete(target); } catch { }
                 }
@@ -443,7 +474,8 @@ namespace Delwaqty.Pos.Core.Ota
                     File.Move(partial, target);
                 }
 
-                if (!await VerifySha256Async(target, expectedHash, cancellationToken).ConfigureAwait(false))
+                installer = OpenAndVerify(target, expectedHash);
+                if (installer == null)
                 {
                     // Tampered or truncated artifact: delete it and refuse.
                     try { File.Delete(target); } catch { }
@@ -451,14 +483,16 @@ namespace Delwaqty.Pos.Core.Ota
                 }
 
                 if (progress != null) progress.Report(1.0);
-                return new OtaDownloadResult { Installer = HoldVerified(target, expectedHash) };
+                return new OtaDownloadResult { Installer = installer };
             }
             catch (OperationCanceledException)
             {
+                if (installer != null) installer.Dispose();
                 return new OtaDownloadResult { Error = "cancelled" };
             }
             catch
             {
+                if (installer != null) installer.Dispose();
                 return new OtaDownloadResult { Error = "network" };
             }
             finally
@@ -468,10 +502,38 @@ namespace Delwaqty.Pos.Core.Ota
             }
         }
 
-        private static OtaVerifiedInstaller HoldVerified(string file, string expectedHash)
+        /// <summary>
+        /// Opens the verified-bytes pin handle (read-only, no Write/Delete
+        /// sharing) and hashes THROUGH it. Returns null on any failure; the
+        /// handle is then closed and the caller deletes the file.
+        /// </summary>
+        private static OtaVerifiedInstaller OpenAndVerify(string file, string expectedHash)
         {
-            var bytes = File.ReadAllBytes(file);
-            return new OtaVerifiedInstaller(file, expectedHash, bytes);
+            if (string.IsNullOrEmpty(expectedHash) || expectedHash.Length != 64) return null;
+            FileStream handle = null;
+            try
+            {
+                handle = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
+                if (Sha256Hex(handle) != expectedHash.ToLowerInvariant())
+                {
+                    handle.Dispose();
+                    return null;
+                }
+                return new OtaVerifiedInstaller(file, expectedHash.ToLowerInvariant(), handle);
+            }
+            catch
+            {
+                if (handle != null) try { handle.Dispose(); } catch { }
+                return null;
+            }
+        }
+
+        internal static string Sha256Hex(Stream stream)
+        {
+            using (var sha = SHA256.Create())
+            {
+                return BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
+            }
         }
 
         /// <summary>Streams a file through SHA-256 and compares with the expected hex digest.</summary>

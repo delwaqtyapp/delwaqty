@@ -189,9 +189,21 @@ does not exist for it):
 
 Platform setting: `platform_settings.whatsapp_otp_number =
 '+201550692655'` applied on staging (adcgqoccrgauqdoplsgg) Nov 25;
-prod applies with migration 434 (builder owns the prod apply).
+prod apply pending owner approval and reviewer GO.
 
-Verify inbound delivery after any wiring change: send one real WhatsApp
-message from any phone to +201550692655 and confirm the webhook logged a
-message id in `whatsapp_webhook_messages` (a code-less message yields
-`ok:false` on the RPC but proves delivery).
+This section is a historical registration/staging record only. It is NOT
+authorization for any prod deploy or apply; prod keeps its own gates
+(both reviewer GOs, green CI, explicit owner/main order). Operational
+Meta claims above (webhook subscription active, live inbound, ~24h
+display-name review) are as reported by the registration agent, not
+independently verified.
+
+Verify inbound delivery after any wiring change: run the real pending
+OTP flow from an approved phone - request a code in the app, send it by
+WhatsApp to +201550692655, and assert `verified_via='webhook'` on the
+OTP row plus the matching Meta message id in
+`whatsapp_webhook_messages`. (A code-less message proves nothing here:
+the webhook skips it before the RPC, and ids are recorded only after a
+successful pending-OTP verify.) To verify code-less transport itself,
+use raw Meta delivery evidence (Graph API responses, Meta dashboard
+webhook logs) instead.

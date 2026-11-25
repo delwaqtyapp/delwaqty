@@ -58,7 +58,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.39.0";
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "content-type",
+  "Access-Control-Allow-Headers": "content-type, authorization, apikey, x-client-info",
 };
 
 function json(data: unknown, status = 200): Response {
@@ -129,6 +129,40 @@ async function sha256Hex(text: string): Promise<string> {
   return Array.from(new Uint8Array(digest))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
+}
+
+// One shared classifier for BOTH the real and the dummy GoTrue calls:
+// a credential rejection is ONLY an explicit 400/401/422; everything
+// else - status 0/undefined (AuthRetryableFetchError, network), 429,
+// 5xx, a thrown fetch - is an availability failure and maps to a
+// controlled 503 with the attempt recorded as failed.
+type SignInOutcome =
+  | { kind: "success"; session: any }
+  | { kind: "credential" }
+  | { kind: "unavailable" };
+
+const CREDENTIAL_STATUSES = new Set([400, 401, 422]);
+
+async function trySignIn(
+  client: any,
+  email: string,
+  password: string,
+): Promise<SignInOutcome> {
+  try {
+    const { data, error } = await client.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (!error && data?.session) return { kind: "success", session: data.session };
+    if (error && CREDENTIAL_STATUSES.has(error.status)) {
+      return { kind: "credential" };
+    }
+    console.error("auth-login gotrue error", error?.name ?? "unknown");
+    return { kind: "unavailable" };
+  } catch (e) {
+    console.error("auth-login gotrue throw", e instanceof Error ? e.name : "unknown");
+    return { kind: "unavailable" };
+  }
 }
 
 Deno.serve(async (req) => {
@@ -220,37 +254,31 @@ Deno.serve(async (req) => {
       return json(UNAVAILABLE, 503);
     }
 
-    if (typeof email !== "string" || email === "") {
-      // Unknown identifier: run a dummy GoTrue password check so this
-      // path costs the same as a wrong password on a known account.
-      // The address is deterministic garbage that can never exist.
-      const fake = `missing-${await sha256Hex(key)}@login.invalid`;
-      await anon.auth.signInWithPassword({ email: fake, password }).catch(
-        () => {},
-      );
-      return await failCredentials();
+    // Unknown identifier: the real call is replaced by a dummy GoTrue
+    // password check against a deterministic address that can never
+    // exist, so timing matches the known-identifier path. The dummy
+    // result only steers availability handling - it can never issue
+    // tokens.
+    const resolved = typeof email === "string" && email !== "";
+    const targetEmail = resolved
+      ? email
+      : `missing-${await sha256Hex(key)}@login.invalid`;
+    const knownAccount = resolved;
+
+    const outcome = await trySignIn(anon, targetEmail, password);
+
+    if (outcome.kind === "unavailable") {
+      await finish(false);
+      return json(UNAVAILABLE, 503);
     }
-
-    const { data: session, error: signInError } =
-      await anon.auth.signInWithPassword({ email, password });
-
-    if (signInError || !session?.session) {
-      // A credential rejection carries an HTTP status (400/401);
-      // availability failures (timeouts, network) do not - those are
-      // 503, never a 401 an attacker could read as "wrong password".
-      const isCredentialRejection = typeof signInError?.status === "number";
-      if (!isCredentialRejection) {
-        console.error("auth-login gotrue error", signInError?.name ?? "unknown");
-        await finish(false);
-        return json(UNAVAILABLE, 503);
-      }
+    if (outcome.kind === "credential" || !knownAccount) {
       return await failCredentials();
     }
 
     // Deny tokens unless the success was durably recorded.
     if (!(await finish(true))) return json(UNAVAILABLE, 503);
 
-    const s = session.session;
+    const s = outcome.session;
     // Session tokens only: no user object, no standalone email.
     return json({
       access_token: s.access_token,

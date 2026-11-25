@@ -399,7 +399,7 @@ test('delete-user cross-account path must use approval lifecycle and never purge
 const loginFile = 'supabase/functions/auth-login-identifier/index.ts';
 
 function loadLoginHandler({ beginId = 7, beginError = false, resolveEmail = null,
-    resolveError = false, signInError = null, signInDelayMs = 0,
+    resolveError = false, signInError = null, signInDelayMs = 0, signInThrow = false,
     finishOk = true, finishError = false, calls = [], rpcArgs = [] } = {}) {
   let handler;
   const source = fs.readFileSync(loginFile, 'utf8').replace(
@@ -425,6 +425,7 @@ function loadLoginHandler({ beginId = 7, beginError = false, resolveEmail = null
             signInWithPassword: async ({ email, password }) => {
               calls.push(`signIn:${email}`);
               if (signInDelayMs) await new Promise(r => setTimeout(r, signInDelayMs));
+              if (signInThrow) throw new Error('socket hangup');
               if (signInError) return { data: {}, error: signInError };
               return {
                 data: {
@@ -475,11 +476,15 @@ function loginRequest(identifier, password = 'TestOnlyPassword123', xff = '203.0
 
 const EMAIL_RE = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+/;
 
-test('auth-login preflight and method guard carry CORS', async () => {
+test('auth-login preflight and method guard carry CORS incl. supabase-js headers', async () => {
   const handler = loadLoginHandler();
   const pre = await handler(new Request('https://example.invalid', { method: 'OPTIONS' }));
   assert.equal(pre.status, 200);
   assert.equal(pre.headers.get('access-control-allow-origin'), '*');
+  const allow = pre.headers.get('access-control-allow-headers');
+  for (const h of ['content-type', 'authorization', 'apikey', 'x-client-info']) {
+    assert.ok(allow.includes(h), `missing CORS header ${h}`);
+  }
   const get = await handler(new Request('https://example.invalid'));
   assert.equal(get.status, 405);
   assert.equal(get.headers.get('access-control-allow-origin'), '*');
@@ -584,12 +589,40 @@ test('accounting failure on the failure path maps to 503, not 401', async () => 
   assert.equal(response.status, 503);
 });
 
-test('GoTrue availability errors and timeouts map to a controlled 503, never 401', async () => {
-  const timeoutLike = { message: 'fetch failed', name: 'AuthRetryableFetchError' }; // no status
-  const handler = loadLoginHandler({ resolveEmail: 'real@example.com', signInError: timeoutLike });
-  const response = await handler(loginRequest('some_user'));
-  assert.equal(response.status, 503);
-  assert.equal((await response.json()).error, 'temporarily_unavailable');
+test('shared classifier: every non-credential signIn failure is an identical 503 on both branches', async () => {
+  const availabilityFailures = [
+    { name: 'AuthRetryableFetchError status 0', signInError: { message: 'fetch failed', name: 'AuthRetryableFetchError', status: 0 } },
+    { name: 'AuthRetryableFetchError no status', signInError: { message: 'fetch failed', name: 'AuthRetryableFetchError' } },
+    { name: 'GoTrue 429', signInError: { message: 'rate limited', status: 429 } },
+    { name: 'GoTrue 500', signInError: { message: 'internal', status: 500 } },
+    { name: 'GoTrue 503', signInError: { message: 'down', status: 503 } },
+    { name: 'thrown fetch', signInThrow: true },
+  ];
+  for (const branch of [{ label: 'known', resolveEmail: 'real@example.com' }, { label: 'unknown', resolveEmail: null }]) {
+    for (const f of availabilityFailures) {
+      const calls = [];
+      const rpcArgs = [];
+      const handler = loadLoginHandler({ resolveEmail: branch.resolveEmail, calls, rpcArgs,
+        signInError: f.signInError ?? null, signInThrow: !!f.signInThrow });
+      const response = await handler(loginRequest('some_user'));
+      assert.equal(response.status, 503, `${branch.label}/${f.name}`);
+      assert.equal((await response.json()).error, 'temporarily_unavailable', `${branch.label}/${f.name}`);
+      const finishes = rpcArgs.filter(([name]) => name === 'auth_login_finish');
+      assert.equal(finishes.length, 1, `${branch.label}/${f.name}: finish called once`);
+      assert.equal(finishes[0][1].p_success, false, `${branch.label}/${f.name}: recorded as failure`);
+    }
+  }
+});
+
+test('explicit credential rejections (400/401/422) are the only 401s, identical on both branches', async () => {
+  for (const status of [400, 401, 422]) {
+    for (const branch of [{ label: 'known', resolveEmail: 'real@example.com' }, { label: 'unknown', resolveEmail: null }]) {
+      const handler = loadLoginHandler({ resolveEmail: branch.resolveEmail, signInError: { message: 'invalid', status } });
+      const response = await handler(loginRequest('some_user'));
+      assert.equal(response.status, 401, `${branch.label}/status ${status}`);
+      assert.equal((await response.json()).error, 'invalid_credentials');
+    }
+  }
 });
 
 test('delayed GoTrue on the unknown-identifier dummy path still answers identically', async () => {

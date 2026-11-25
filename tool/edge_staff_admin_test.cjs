@@ -17,6 +17,7 @@ const STAFF_USER_ID = '00000000-0000-4000-8000-0000000000cc';
 const MERCHANT_ID = '00000000-0000-4000-8000-0000000000dd';
 const PROVISION_ID = '00000000-0000-4000-8000-0000000000ee';
 const AUTH_USER_ID = '00000000-0000-4000-8000-0000000000ff';
+const GENERATION = '00000000-0000-4000-8000-000000000099';
 const STAFF = { id: STAFF_ID, user_id: STAFF_USER_ID, merchant_id: MERCHANT_ID };
 
 const j = (v) => JSON.parse(JSON.stringify(v));
@@ -57,10 +58,16 @@ function loadHandler(fail = {}) {
               }
               return { error: null };
             },
+            getUserById: async (id) => {
+              calls.push(['gotrue:getUserById', id]);
+              if (fail.attestGet) return { data: null, error: { message: 'test failure' } };
+              return { data: { user: { id, app_metadata: { staff_provisioning: PROVISION_ID } } }, error: null };
+            },
             updateUserById: async (id, attrs) => {
               calls.push(['gotrue:updateUserById', attrs]);
               if (attrs.password && fail.rotate) return { error: { message: 'test failure' } };
               if ('ban_duration' in attrs && fail.ban) return { error: { message: 'test failure' } };
+              if (attrs.app_metadata && fail.attest) return { error: { message: 'test failure' } };
               return { error: null };
             },
           },
@@ -84,11 +91,13 @@ function loadHandler(fail = {}) {
             case 'staff_admin_audit_refusal':
               return { data: null, error: null };
             case 'staff_admin_set_active':
-              return fail.setActive ? err() : { data: null, error: null };
+              return fail.setActive ? err() : { data: GENERATION, error: null };
             case 'staff_admin_record_password_reset':
-              return fail.recordReset ? err() : { data: null, error: null };
+              return fail.recordReset ? err() : { data: GENERATION, error: null };
             case 'staff_admin_sync_complete':
               return fail.sync ? err() : { data: null, error: null };
+            case 'staff_admin_sync_failed':
+              return fail.syncFailed ? err() : { data: null, error: null };
             case 'staff_admin_mark_password_rotated':
               return fail.mark ? err() : { data: null, error: null };
             case 'revoke_user_sessions':
@@ -193,21 +202,12 @@ test('createUser carries the provision binding in app_metadata (S3)', async () =
   const body = await res.json();
   assert.equal(body.login_username, 'zzracer__0a1b2c');
   assert.equal(res.headers.get('cache-control'), 'no-store');
-  // the digest proof is marked AFTER the verified creation (#266)
+  // the baseline digest is captured INSIDE provision_complete (#266): no
+  // caller-asserted mark on the create path
   assert.deepEqual(names(calls), [
     ...RATE, 'staff_admin_provision_begin', 'gotrue:createUser',
-    'staff_admin_provision_complete', 'staff_admin_mark_password_rotated',
+    'staff_admin_provision_complete',
   ]);
-  assert.equal(j(calls[5][1]).p_staff_id, STAFF_ID);
-});
-
-test('a mark failure after creation is logged but does not fail creation', async () => {
-  const { handler, calls } = loadHandler({ mark: true });
-  const res = await handler(post(CREATE_BODY));
-  assert.equal(res.status, 200);
-  const audit = calls.filter(([n]) => n === 'staff_admin_audit_refusal');
-  assert.equal(audit.length, 1);
-  assert.equal(audit[0][1].p_reason, 'provision');
 });
 
 test('complete failure deletes the auth user, aborts, refuses generically', async () => {
@@ -240,48 +240,65 @@ test('a failing abort call is itself audited, never silently dropped (#262)', as
   assert.deepEqual(audits, ['provision', 'create_staff']);
 });
 
-test('set_active(disable): executor FIRST, ban, revoke, sync reported (S2/#261)', async () => {
+test('set_active(disable): executor FIRST, ban, revoke, attestation, verified completion', async () => {
   const { handler, calls } = loadHandler();
   const res = await handler(post({ action: 'set_active', staff_id: STAFF_ID, active: false }));
   assert.equal(res.status, 200);
   assert.deepEqual(await res.json(), { ok: true });
   assert.deepEqual(names(calls), [
     ...RATE, 'staff_admin_set_active', 'gotrue:updateUserById',
-    'admin:revoke_user_sessions', 'staff_admin_sync_complete',
+    'admin:revoke_user_sessions', 'gotrue:getUserById', 'gotrue:updateUserById',
+    'staff_admin_sync_complete',
   ]);
   assert.deepEqual(j(calls[3][1]), { ban_duration: '876000h' });
-  assert.deepEqual(j(calls[5][1]), { p_staff_id: STAFF_ID, p_op: 'disable', p_ok: true });
+  // the attestation is bound to the operation generation, merged into
+  // existing app_metadata (the staff_provisioning key survives)
+  const att = j(calls[6][1]).app_metadata;
+  assert.equal(att.staff_sync.generation, GENERATION);
+  assert.equal(att.staff_sync.op, 'disable');
+  assert.equal(att.staff_provisioning, PROVISION_ID);
+  assert.deepEqual(j(calls[7][1]), { p_staff_id: STAFF_ID, p_generation: GENERATION });
 });
 
-test('disable with ban failure: sync reported FALSE, 502, no revoke (S6/#262)', async () => {
+test('disable with ban failure: sync FAILED, 502, no revoke, no attestation (#262)', async () => {
   const { handler, calls } = loadHandler({ ban: true });
   const res = await handler(post({ action: 'set_active', staff_id: STAFF_ID, active: false }));
   assert.equal(res.status, 502);
   assert.ok(!('ok' in (await res.json())));
   assert.ok(!names(calls).includes('admin:revoke_user_sessions'));
-  assert.deepEqual(j(calls.find(([n]) => n === 'staff_admin_sync_complete')[1]),
-    { p_staff_id: STAFF_ID, p_op: 'disable', p_ok: false });
+  assert.ok(!names(calls).includes('gotrue:getUserById'));
+  assert.deepEqual(j(calls.find(([n]) => n === 'staff_admin_sync_failed')[1]),
+    { p_staff_id: STAFF_ID, p_generation: GENERATION });
 });
 
-test('set_active(enable): executor first, revoke + unban, verified completion (#261)', async () => {
+test('set_active(enable): executor first, revoke + unban + attestation, verified completion (#261)', async () => {
   const { handler, calls } = loadHandler();
   const res = await handler(post({ action: 'set_active', staff_id: STAFF_ID, active: true }));
   assert.equal(res.status, 200);
   assert.deepEqual(names(calls), [
     ...RATE, 'staff_admin_set_active', 'admin:revoke_user_sessions',
-    'gotrue:updateUserById', 'staff_admin_sync_complete',
+    'gotrue:updateUserById', 'gotrue:getUserById', 'gotrue:updateUserById',
+    'staff_admin_sync_complete',
   ]);
   assert.deepEqual(j(calls[4][1]), { ban_duration: 'none' });
-  assert.deepEqual(j(calls[5][1]), { p_staff_id: STAFF_ID, p_op: 'enable', p_ok: true });
+  assert.equal(j(calls[6][1]).app_metadata.staff_sync.op, 'enable');
+  assert.deepEqual(j(calls[7][1]), { p_staff_id: STAFF_ID, p_generation: GENERATION });
 });
 
-test('enable with revoke failure: sync reported FALSE and 502 (#262)', async () => {
+test('enable with revoke failure: sync FAILED and 502 (#262)', async () => {
   const { handler, calls } = loadHandler({ revoke: true });
   const res = await handler(post({ action: 'set_active', staff_id: STAFF_ID, active: true }));
   assert.equal(res.status, 502);
-  assert.ok(!names(calls).includes('gotrue:updateUserById'));
-  assert.deepEqual(j(calls.find(([n]) => n === 'staff_admin_sync_complete')[1]),
-    { p_staff_id: STAFF_ID, p_op: 'enable', p_ok: false });
+  assert.deepEqual(j(calls.find(([n]) => n === 'staff_admin_sync_failed')[1]),
+    { p_staff_id: STAFF_ID, p_generation: GENERATION });
+});
+
+test('an attestation write failure is a GoTrue failure: sync FAILED + 502', async () => {
+  const { handler, calls } = loadHandler({ attest: true });
+  const res = await handler(post({ action: 'set_active', staff_id: STAFF_ID, active: true }));
+  assert.equal(res.status, 502);
+  assert.deepEqual(j(calls.find(([n]) => n === 'staff_admin_sync_failed')[1]),
+    { p_staff_id: STAFF_ID, p_generation: GENERATION });
 });
 
 test('a sync_complete failure after GoTrue success surfaces 502', async () => {
@@ -300,26 +317,34 @@ test('reset_password: executor refusal means ZERO GoTrue rotation (S2)', async (
   ]);
 });
 
-test('reset_password rotation failure: 502, NO password, sync reported FALSE (S2/#262)', async () => {
+test('reset_password rotation failure: 502, NO password, sync FAILED (S2/#262)', async () => {
   const { handler, calls } = loadHandler({ rotate: true });
   const res = await handler(post({ action: 'reset_password', staff_id: STAFF_ID }));
   assert.equal(res.status, 502);
   assert.ok(!('password' in (await res.json())));
   assert.ok(!names(calls).includes('admin:revoke_user_sessions'));
-  assert.deepEqual(j(calls.find(([n]) => n === 'staff_admin_sync_complete')[1]),
-    { p_staff_id: STAFF_ID, p_op: 'reset', p_ok: false });
+  assert.deepEqual(j(calls.find(([n]) => n === 'staff_admin_sync_failed')[1]),
+    { p_staff_id: STAFF_ID, p_generation: GENERATION });
 });
 
-test('reset_password revoke failure: 502, NO password, sync reported FALSE', async () => {
+test('reset_password revoke failure: 502, NO password, sync FAILED', async () => {
   const { handler, calls } = loadHandler({ revoke: true });
   const res = await handler(post({ action: 'reset_password', staff_id: STAFF_ID }));
   assert.equal(res.status, 502);
   assert.ok(!('password' in (await res.json())));
-  assert.deepEqual(j(calls.find(([n]) => n === 'staff_admin_sync_complete')[1]),
-    { p_staff_id: STAFF_ID, p_op: 'reset', p_ok: false });
+  assert.deepEqual(j(calls.find(([n]) => n === 'staff_admin_sync_failed')[1]),
+    { p_staff_id: STAFF_ID, p_generation: GENERATION });
 });
 
-test('reset_password success: rotate, revoke, mark digest, close sync, no-store', async () => {
+test('a mark failure on the reset path is a FAILURE: 502, NO password (security r4)', async () => {
+  const { handler, calls } = loadHandler({ mark: true });
+  const res = await handler(post({ action: 'reset_password', staff_id: STAFF_ID }));
+  assert.equal(res.status, 502);
+  assert.ok(!('password' in (await res.json())));
+  assert.ok(names(calls).includes('staff_admin_sync_failed'));
+});
+
+test('reset_password success: rotate, revoke, attest, mark, complete, no-store', async () => {
   const { handler, calls } = loadHandler();
   const res = await handler(post({ action: 'reset_password', staff_id: STAFF_ID }));
   assert.equal(res.status, 200);
@@ -328,10 +353,12 @@ test('reset_password success: rotate, revoke, mark digest, close sync, no-store'
   assert.equal(typeof body.password, 'string');
   assert.deepEqual(names(calls), [
     ...RATE, 'staff_admin_record_password_reset', 'gotrue:updateUserById',
-    'admin:revoke_user_sessions', 'staff_admin_mark_password_rotated',
-    'staff_admin_sync_complete',
+    'admin:revoke_user_sessions', 'gotrue:getUserById', 'gotrue:updateUserById',
+    'staff_admin_mark_password_rotated', 'staff_admin_sync_complete',
   ]);
-  assert.deepEqual(j(calls[6][1]), { p_staff_id: STAFF_ID, p_op: 'reset', p_ok: true });
+  assert.equal(j(calls[6][1]).app_metadata.staff_sync.op, 'reset');
+  assert.deepEqual(j(calls[7][1]), { p_staff_id: STAFF_ID, p_generation: GENERATION });
+  assert.deepEqual(j(calls[8][1]), { p_staff_id: STAFF_ID, p_generation: GENERATION });
 });
 
 test('list_staff on an invisible merchant is a logged refusal, not an empty list (#263)', async () => {

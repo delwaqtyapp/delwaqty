@@ -23,15 +23,20 @@ import { createClient } from "npm:@supabase/supabase-js@2.39.0";
 //     is followed by staff_admin_provision_abort (its own errors are
 //     logged, never silently dropped).
 //   - Sync protocol (#261/#262): set_active and reset_password arm a
-//     pending sync op on the staff row; enable NEVER activates from the
-//     direct RPC. The edge performs the GoTrue effects and reports the
-//     outcome via staff_admin_sync_complete; only a verified completion
-//     activates an enable. A GoTrue failure marks the op 'failed' - the
-//     actionable blocked state the owner retries from.
-//   - Password proof (#266): after every verified rotation (creation or
-//     reset) the edge calls staff_admin_mark_password_rotated, which stores
-//     a digest of auth.users.encrypted_password; staff_password_changed
-//     clears the barrier only when the live digest differs.
+//     pending op with a fresh generation AND cut access immediately
+//     (pending/failed rows are inactive, so 442's is_active checks enforce
+//     the blocked state). After the GoTrue effects the edge writes a
+//     service-key-only app_metadata.staff_sync attestation bound to that
+//     generation; the caller-JWT staff_admin_sync_complete verifies it
+//     server-side. A direct-RPC enable can never activate, a forged or
+//     stale attestation is refused, and staff_admin_sync_failed (safe
+//     direction) marks the actionable blocked state the owner retries from.
+//   - Password proof (#266): creation captures the baseline digest inside
+//     provision_complete (the provision binding IS the verified rotation);
+//     a reset NULLs the digest atomically at arm, and the post-rotation
+//     staff_admin_mark_password_rotated is gated on the same attestation.
+//     staff_password_changed clears the barrier only when the live digest
+//     differs from the stored one.
 //   - One-time passwords are generated with crypto.getRandomValues,
 //     returned ONCE with Cache-Control: no-store, never logged and never
 //     written to audit rows.
@@ -124,6 +129,22 @@ Deno.serve(async (req) => {
     return json({ error: "rate_limited" }, 429);
   }
 
+  // Service-origin attestation (#261): after the GoTrue effects, the edge
+  // writes app_metadata.staff_sync bound to the op generation. Only the
+  // service key can write app_metadata; the DB completion verifies it.
+  const attest = async (userId: string, generation: string, op: string) => {
+    const { data: userRes, error: getErr } = await admin.auth.admin.getUserById(userId);
+    if (getErr || !userRes?.user) return { error: getErr ?? new Error("user lookup failed") };
+    const existing = (userRes.user.app_metadata ?? {}) as Record<string, unknown>;
+    const { error } = await admin.auth.admin.updateUserById(userId, {
+      app_metadata: {
+        ...existing,
+        staff_sync: { generation, op, at: new Date().toISOString() },
+      },
+    });
+    return { error };
+  };
+
   if (action === "create_staff") {
     const merchantId = String(body.merchant_id ?? "");
     const username = String(body.username ?? "").trim();
@@ -202,14 +223,9 @@ Deno.serve(async (req) => {
       return json(REFUSED, 403);
     }
 
-    // Password proof baseline (#266): store the digest of the one-time
-    // password the edge just set. A failure here fails CLOSED (no baseline,
-    // no clear) and self-heals on the next reset, so it is logged but does
-    // not fail the creation.
-    const { error: markErr } = await caller.rpc("staff_admin_mark_password_rotated", {
-      p_staff_id: staffId,
-    });
-    if (markErr) await logRefusal(merchantId, "provision");
+    // The baseline password digest was captured INSIDE provision_complete:
+    // the provision binding is the verified rotation (#266), so there is no
+    // caller-asserted mark on the create path.
 
     // The one-time password is shown exactly once. No-store, never logged.
     return json(
@@ -237,55 +253,57 @@ Deno.serve(async (req) => {
       await logRefusal(bodyMerchant, "set_active");
       return json(REFUSED, 403);
     }
-    // Executor FIRST (S2): arms the pending sync op under the caller.
-    // Enable is fail closed: the row stays inactive until sync_complete.
-    const { error: execErr } = await caller.rpc("staff_admin_set_active", {
+    // Executor FIRST (S2): arms the pending op under the caller and cuts
+    // access immediately; returns the generation this attempt must attest.
+    const { data: generation, error: execErr } = await caller.rpc("staff_admin_set_active", {
       p_staff_id: staffId,
       p_active: active,
     });
-    if (execErr) {
+    if (execErr || !generation) {
       await logRefusal(staff.merchant_id, "set_active");
       return json(REFUSED, 403);
     }
-    // GoTrue effects with CHECKED errors (S6); the outcome is ALWAYS
-    // reported back so the op never dangles (#261/#262).
-    const reportSync = async (ok: boolean) => {
-      const { error: syncErr } = await caller.rpc("staff_admin_sync_complete", {
-        p_staff_id: staffId,
-        p_op: active ? "enable" : "disable",
-        p_ok: ok,
-      });
-      return !syncErr;
-    };
+    // GoTrue effects with CHECKED errors (S6); ANY failure (including the
+    // attestation write) marks the op failed - the actionable blocked state
+    // (#261/#262) - and surfaces as 502, never a false ok.
     let goErr: unknown = null;
     if (active) {
       const { error: revErr } = await admin.rpc("revoke_user_sessions", {
         p_user_id: staff.user_id,
       });
-      if (!revErr) {
+      if (revErr) goErr = revErr;
+      if (!goErr) {
         const { error: banErr } = await admin.auth.admin.updateUserById(staff.user_id, {
           ban_duration: "none",
         });
         goErr = banErr;
-      } else {
-        goErr = revErr;
       }
     } else {
       const { error: banErr } = await admin.auth.admin.updateUserById(staff.user_id, {
         ban_duration: "876000h",
       });
-      if (!banErr) {
+      if (banErr) goErr = banErr;
+      if (!goErr) {
         const { error: revErr } = await admin.rpc("revoke_user_sessions", {
           p_user_id: staff.user_id,
         });
         goErr = revErr;
-      } else {
-        goErr = banErr;
       }
     }
-    const syncOk = await reportSync(!goErr);
-    if (goErr) return json({ error: "provision_failed" }, 502);
-    if (!syncOk) return json({ error: "provision_failed" }, 502);
+    if (!goErr) goErr = (await attest(staff.user_id, String(generation), active ? "enable" : "disable")).error;
+    if (goErr) {
+      await caller.rpc("staff_admin_sync_failed", {
+        p_staff_id: staffId,
+        p_generation: generation,
+      }).then(() => {}, () => {});
+      return json({ error: "provision_failed" }, 502);
+    }
+    // Completion is verified server-side against the attestation (#261).
+    const { error: syncErr } = await caller.rpc("staff_admin_sync_complete", {
+      p_staff_id: staffId,
+      p_generation: generation,
+    });
+    if (syncErr) return json({ error: "provision_failed" }, 502);
     return json({ ok: true });
   }
 
@@ -301,48 +319,48 @@ Deno.serve(async (req) => {
       return json(REFUSED, 403);
     }
     // Executor FIRST (S2): ownership and state are verified and recorded
-    // before GoTrue is touched; an executor refusal means ZERO rotation.
-    const { error: execErr } = await caller.rpc("staff_admin_record_password_reset", {
+    // before GoTrue is touched; the reset NULLs the old digest proof and
+    // cuts access in the same statement (#266). Returns the generation.
+    const { data: generation, error: execErr } = await caller.rpc("staff_admin_record_password_reset", {
       p_staff_id: staffId,
     });
-    if (execErr) {
+    if (execErr || !generation) {
       await logRefusal(staff.merchant_id, "reset_password");
       return json(REFUSED, 403);
     }
-    const reportReset = async (ok: boolean) => {
-      await caller.rpc("staff_admin_sync_complete", {
+    // Any failure after arming marks the op failed and returns NO password.
+    const fail502 = async () => {
+      await caller.rpc("staff_admin_sync_failed", {
         p_staff_id: staffId,
-        p_op: "reset",
-        p_ok: ok,
+        p_generation: generation,
       }).then(() => {}, () => {});
+      await logRefusal(staff.merchant_id, "reset_password");
+      return json({ error: "provision_failed" }, 502);
     };
     const password = randomPassword();
     const { error: upErr } = await admin.auth.admin.updateUserById(staff.user_id, {
       password,
     });
-    if (upErr) {
-      // Rotation failure = refusal: no password is ever returned (S2).
-      await reportReset(false);
-      await logRefusal(staff.merchant_id, "reset_password");
-      return json({ error: "provision_failed" }, 502);
-    }
+    if (upErr) return await fail502();  // rotation failure = refusal (S2)
     // Cut every session; the next login must use the new password.
     const { error: revErr } = await admin.rpc("revoke_user_sessions", {
       p_user_id: staff.user_id,
     });
-    if (revErr) {
-      // The password rotated but is withheld; the op is marked failed so
-      // the owner sees the blocked state and retries (#262).
-      await reportReset(false);
-      await logRefusal(staff.merchant_id, "reset_password");
-      return json({ error: "provision_failed" }, 502);
-    }
-    // Verified rotation: store the digest proof (#266) and close the op.
+    if (revErr) return await fail502();
+    // Attest the verified rotation, then the attestation-gated mark stores
+    // the NEW digest proof; a mark failure is a failure (#266/security).
+    const { error: attErr } = await attest(staff.user_id, String(generation), "reset");
+    if (attErr) return await fail502();
     const { error: markErr } = await caller.rpc("staff_admin_mark_password_rotated", {
       p_staff_id: staffId,
+      p_generation: generation,
     });
-    if (markErr) await logRefusal(staff.merchant_id, "reset_password");
-    await reportReset(true);
+    if (markErr) return await fail502();
+    const { error: syncErr } = await caller.rpc("staff_admin_sync_complete", {
+      p_staff_id: staffId,
+      p_generation: generation,
+    });
+    if (syncErr) return json({ error: "provision_failed" }, 502);
     return json({ password, must_change_password: true }, 200, {
       "Cache-Control": "no-store",
     });

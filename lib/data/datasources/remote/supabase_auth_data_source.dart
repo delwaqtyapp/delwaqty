@@ -50,6 +50,63 @@ class SupabaseAuthDataSource {
     }
   }
 
+  /// Signs in through the auth-login-identifier edge function: the
+  /// identifier (email, phone or username) and password go to the server,
+  /// which resolves the account and checks the password with GoTrue.
+  /// Scope: no email is disclosed before authentication, and the edge
+  /// response carries no standalone user object - only session tokens.
+  /// The adopted SDK session then holds the normal authenticated session
+  /// data, as with any Supabase sign-in.
+  Future<AuthResponse> signInWithIdentifier({
+    required String identifier,
+    required String password,
+  }) async {
+    try {
+      final res = await _client.functions.invoke(
+        'auth-login-identifier',
+        body: {'identifier': identifier, 'password': password},
+      );
+      // Adopt the session only from a well-formed 200 payload; anything
+      // else is a normalized, stable failure - never backend text.
+      final data = res.data;
+      final token = data is Map<String, dynamic> ? data['refresh_token'] : null;
+      if (res.status != 200 || token is! String || token.isEmpty) {
+        _logger.e(
+          'Identifier sign in malformed response, status ${res.status}',
+        );
+        throw const AuthException('Sign in is temporarily unavailable.');
+      }
+      try {
+        final session = await _auth.setSession(token);
+        _logger.i('Identifier sign in successful');
+        return session;
+      } catch (_) {
+        _logger.e('Identifier sign in session adoption failed');
+        throw const AuthException('Sign in is temporarily unavailable.');
+      }
+    } on FunctionException catch (e) {
+      _logger.e('Identifier sign in failed with status ${e.status}');
+      final code = e.details is Map ? (e.details as Map)['error'] : null;
+      if (e.status == 401 ||
+          code == 'invalid_credentials' ||
+          e.status == 400 ||
+          code == 'bad_request') {
+        throw const AuthException('Invalid username or password.');
+      }
+      if (e.status == 429 || code == 'too_many_attempts') {
+        throw const AuthException('Too many attempts. Please try again later.');
+      }
+      throw const AuthException('Sign in is temporarily unavailable.');
+    } on AuthException {
+      rethrow;
+    } catch (e) {
+      // Transport and unexpected failures: log only the safe error class,
+      // never the raw exception, payload or stack.
+      _logger.e('Identifier sign in ${e.runtimeType}');
+      throw const AuthException('Sign in is temporarily unavailable.');
+    }
+  }
+
   Future<AuthResponse> signUpWithEmail({
     required String email,
     required String password,

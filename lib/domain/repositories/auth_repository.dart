@@ -9,6 +9,16 @@ abstract class AuthRepository {
     required String email,
     required String password,
   });
+
+  /// Signs in through the auth-login-identifier edge function with an
+  /// email, phone number or username. The server resolves the account:
+  /// no email is disclosed before authentication and the edge response
+  /// carries no standalone user object; the adopted SDK session then
+  /// holds the normal authenticated session data.
+  Future<AuthResult> signInWithIdentifier({
+    required String identifier,
+    required String password,
+  });
   Future<AuthResult> signUpWithEmail({
     required String email,
     required String password,

@@ -47,6 +47,26 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<AuthResult> signInWithIdentifier({
+    required String identifier,
+    required String password,
+  }) async {
+    try {
+      final response = await _dataSource.signInWithIdentifier(
+        identifier: identifier,
+        password: password,
+      );
+      return _mapAuthResponse(response);
+    } on sb.AuthException catch (e) {
+      _logger.e('Identifier sign in error', e);
+      throw AuthException(message: e.message);
+    } catch (e) {
+      _logger.e('Unexpected identifier sign in error', e);
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
   Future<AuthResult> signUpWithEmail({
     required String email,
     required String password,

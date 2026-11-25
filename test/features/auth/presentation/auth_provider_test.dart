@@ -158,8 +158,8 @@ void main() {
           email: 'test@example.com',
         );
         when(
-          () => mockAuthRepo.signInWithEmail(
-            email: 'test@example.com',
+          () => mockAuthRepo.signInWithIdentifier(
+            identifier: 'test@example.com',
             password: 'password123',
           ),
         ).thenAnswer((_) async => session);
@@ -176,10 +176,44 @@ void main() {
         expect(state, isA<AuthAuthenticated>());
       });
 
-      test('sets error on failure', () async {
+      test('passes a username identifier through verbatim', () async {
+        const session = AuthResult(
+          userId: 'user-123',
+          email: 'test@example.com',
+        );
         when(
+          () => mockAuthRepo.signInWithIdentifier(
+            identifier: 'SuperAdmin',
+            password: 'password123',
+          ),
+        ).thenAnswer((_) async => session);
+        when(() => mockUserRepo.getCurrentUser())
+            .thenAnswer((_) async => testUser);
+
+        final container = buildTestContainer();
+
+        await container
+            .read(authStateProvider.notifier)
+            .signIn(email: 'SuperAdmin', password: 'password123');
+
+        verify(
+          () => mockAuthRepo.signInWithIdentifier(
+            identifier: 'SuperAdmin',
+            password: 'password123',
+          ),
+        ).called(1);
+        verifyNever(
           () => mockAuthRepo.signInWithEmail(
             email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        );
+      });
+
+      test('sets error on failure', () async {
+        when(
+          () => mockAuthRepo.signInWithIdentifier(
+            identifier: any(named: 'identifier'),
             password: any(named: 'password'),
           ),
         ).thenThrow(Exception('Invalid credentials'));
@@ -364,8 +398,8 @@ void main() {
           'stale stored credential', () async {
         await seedStoredCredentials();
         when(
-          () => mockAuthRepo.signInWithEmail(
-            email: 'test@example.com',
+          () => mockAuthRepo.signInWithIdentifier(
+            identifier: 'test@example.com',
             password: 'stale-secret',
           ),
         ).thenThrow(Exception('Invalid login credentials'));
@@ -392,8 +426,8 @@ void main() {
           email: 'test@example.com',
         );
         when(
-          () => mockAuthRepo.signInWithEmail(
-            email: 'test@example.com',
+          () => mockAuthRepo.signInWithIdentifier(
+            identifier: 'test@example.com',
             password: 'password123',
           ),
         ).thenAnswer((_) async => session);
@@ -445,8 +479,8 @@ void main() {
             email: 'test@example.com',
           );
           when(
-            () => mockAuthRepo.signInWithEmail(
-              email: 'test@example.com',
+            () => mockAuthRepo.signInWithIdentifier(
+              identifier: 'test@example.com',
               password: 'password123',
             ),
           ).thenAnswer((_) async => session);

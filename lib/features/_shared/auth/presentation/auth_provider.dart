@@ -2,10 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'
-    show Supabase, SupabaseClient;
-import 'package:delwaqty/config/app_config.dart';
-import 'package:delwaqty/core/utils/egypt_phone.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show Supabase;
 import 'package:delwaqty/data/datasources/local/biometric_auth_store.dart';
 import 'package:delwaqty/domain/enums/user_type.dart';
 import 'package:delwaqty/domain/entities/user.dart';
@@ -14,7 +11,6 @@ import 'package:delwaqty/domain/repositories/auth_repository.dart';
 import 'package:delwaqty/domain/usecases/auth/auth_usecases.dart';
 import 'package:delwaqty/domain/usecases/user/get_user.dart';
 import 'package:delwaqty/core/errors/error_handler.dart';
-import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 import 'package:delwaqty/services/push_notification/push_notification_service.dart';
 
@@ -49,7 +45,6 @@ class AuthStateNotifier extends Notifier<AuthState> {
     return const AuthState.initial();
   }
 
-  SignInUseCase get _signInUseCase => ref.read(signInUseCaseProvider);
   SignUpUseCase get _signUpUseCase => ref.read(signUpUseCaseProvider);
   SignInWithPhoneUseCase get _signInWithPhoneUseCase =>
       ref.read(signInWithPhoneUseCaseProvider);
@@ -134,18 +129,19 @@ class AuthStateNotifier extends Notifier<AuthState> {
     }
   }
 
-  /// Signs in with an email, phone number, OR a username. Usernames and phone
-  /// numbers are resolved to their auth email through security-definer RPCs
-  /// before Supabase auth.
+  /// Signs in with an email, phone number, OR a username through the
+  /// auth-login-identifier edge function: the identifier and password go
+  /// to the server, which resolves the account. No email is disclosed
+  /// before authentication; the adopted SDK session then holds the
+  /// normal authenticated session data.
   Future<void> signIn({required String email, required String password}) async {
     _isSignInInProgress = true;
     state = const AuthState.loading();
     try {
-      var identifier = email.trim();
-      if (!identifier.contains('@')) {
-        identifier = await _resolveUsernameToEmail(identifier);
-      }
-      await _signInUseCase(email: identifier, password: password);
+      await ref.read(signInWithIdentifierUseCaseProvider)(
+        identifier: email.trim(),
+        password: password,
+      );
       await _refreshRequireProviderDocuments();
       // Bound the profile fetch so a slow/hanging network after sign-in (e.g.
       // right after a logout) can never leave the app stuck on "loading".
@@ -183,39 +179,6 @@ class AuthStateNotifier extends Notifier<AuthState> {
       final failure = handleException(e);
       state = AuthState.error(message: failure.message);
     }
-  }
-
-  /// Looks up the auth email for a phone number or username through
-  /// security-definer RPCs (`lookup_email_by_phone` / `lookup_email_by_username`).
-  Future<String> _resolveUsernameToEmail(String identifier) async {
-    final trimmed = identifier.trim();
-    final client = SupabaseClient(
-      AppConfig.supabaseUrl,
-      AppConfig.supabaseAnonKey,
-    );
-    // Legacy email-era accounts keep signing in with their real email;
-    // the identifier field accepts it silently (the copy only advertises
-    // phone or username) so no existing account is locked out.
-    if (trimmed.contains('@')) {
-      return trimmed;
-    }
-    final phonePattern = RegExp(r'^[+0-9][0-9\s\-]{7,}$');
-    if (phonePattern.hasMatch(trimmed)) {
-      return resolvePhoneAuthIdentifier(trimmed, (phone) async {
-        return await client.rpc(
-          'lookup_email_by_phone',
-          params: {'p_phone': phone},
-        ) as String?;
-      });
-    }
-    final resolved = await client.rpc(
-      'lookup_email_by_username',
-      params: {'p_username': trimmed},
-    ) as String?;
-    if (resolved == null || resolved.isEmpty) {
-      throw const AuthException(message: 'Invalid username or password.');
-    }
-    return resolved;
   }
 
   Future<void> signUp({

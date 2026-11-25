@@ -1,6 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.39.0";
 
-// merchant-staff-admin: owner-only staff account management (design v3 PR-A).
+// merchant-staff-admin: owner-only staff account management (design v3 PR-A,
+// round 2: provisioning protocol).
 //
 // Security model:
 //   - JWT verification is ON for this function (default; see config.toml).
@@ -12,6 +13,17 @@ import { createClient } from "npm:@supabase/supabase-js@2.39.0";
 //     staff_admin_* executor RPCs under the CALLER's JWT, which re-check
 //     ownership and eligibility server-side and audit every action,
 //     including refusals.
+//   - Provisioning protocol: staff_admin_provision_begin authorizes and
+//     records a one-use, owner+merchant-bound provisioning row BEFORE any
+//     GoTrue call (a refused attempt performs ZERO GoTrue effects). The
+//     GoTrue user is created carrying app_metadata.staff_provisioning,
+//     which only the service key can set, and staff_admin_provision_complete
+//     consumes the row atomically only for that exact auth user. Any
+//     failure after begin is followed by staff_admin_provision_abort so
+//     the row can never be replayed.
+//   - Ordering: DB executor FIRST, GoTrue second (set_active and
+//     reset_password). A GoTrue failure is a surfaced 502, never a false
+//     ok, and never returns a password.
 //   - One-time passwords are generated with crypto.getRandomValues,
 //     returned ONCE with Cache-Control: no-store, never logged and never
 //     written to audit rows.
@@ -48,10 +60,6 @@ function randomPassword(): string {
   const bytes = new Uint8Array(16);
   crypto.getRandomValues(bytes);
   return Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
-}
-
-function loginUsername(username: string, merchantId: string): string {
-  return `${username.toLowerCase()}__${merchantId.replace(/-/g, "").slice(0, 6)}`;
 }
 
 const REFUSED = { error: "request_refused" };
@@ -92,6 +100,16 @@ Deno.serve(async (req) => {
   }
   const action = typeof body.action === "string" ? body.action : "";
 
+  // Refusals are always logged through the bounded audit RPC (S1/#263);
+  // failures of the logging call itself never change the response.
+  const logRefusal = (merchantId: unknown, reason: string) => {
+    if (typeof merchantId !== "string" || !merchantId) return Promise.resolve();
+    return caller.rpc("staff_admin_audit_refusal", {
+      p_merchant_id: merchantId,
+      p_reason: reason,
+    }).then(() => {}, () => {});
+  };
+
   if (action === "create_staff") {
     const merchantId = String(body.merchant_id ?? "");
     const username = String(body.username ?? "").trim();
@@ -101,58 +119,77 @@ Deno.serve(async (req) => {
     const phone = body.phone ? String(body.phone).trim() : null;
     // Role allowlist here too; the executor re-checks server-side. A staff
     // role can never be owner or above the caller.
-    if (!["branch_manager", "cashier", "kitchen"].includes(role)) return json(REFUSED, 403);
+    if (!["branch_manager", "cashier", "kitchen"].includes(role)) {
+      await logRefusal(merchantId, "invalid_role");
+      return json(REFUSED, 403);
+    }
 
-    // Eligibility from the CALLER's DB view (A10): RLS scopes this read to
-    // what the caller may see; a non-owner simply finds nothing.
-    const { data: merchant } = await caller
-      .from("merchants")
-      .select("id, type")
-      .eq("id", merchantId)
-      .maybeSingle();
-    // A10: refused attempts are logged (insert-only RPC; no reads, no secrets).
-    const logRefusal = () =>
-      caller.rpc("staff_admin_audit_refusal", {
+    // BEGIN authorizes and binds the attempt BEFORE any GoTrue effect
+    // (#259): ownership, eligibility, flag, rate and collisions are all
+    // decided at the DB boundary under the caller's JWT.
+    const { data: prov, error: beginErr } = await caller.rpc(
+      "staff_admin_provision_begin",
+      {
         p_merchant_id: merchantId,
-        p_reason: "create_staff",
-      }).then(() => {}, () => {});
-    if (!merchant) { await logRefusal(); return json(REFUSED, 403); }
-    const { data: eligible } = await caller.rpc("is_cashier_type", { p_type: merchant.type });
-    if (eligible !== true) { await logRefusal(); return json(REFUSED, 403); }
+        p_username: username,
+        p_full_name: fullName,
+        p_role: role,
+        p_branch_id: branchId,
+        p_phone: phone,
+      },
+    );
+    if (beginErr || !prov?.provision_id) {
+      await logRefusal(merchantId, "create_staff");
+      return json(REFUSED, 403);
+    }
 
-    // Fresh staff-only auth user. NO phone anywhere: staff phones are
-    // contact data in merchant_staff and must never reach users.phone.
+    // Fresh staff-only auth user, bound to this exact provision through
+    // app_metadata (service-key only, S3). NO phone anywhere: staff phones
+    // are contact data in merchant_staff and must never reach users.phone.
+    // user_metadata carries no user_type: handle_new_user never trusts it.
     const password = randomPassword();
     const email = `staff_${crypto.randomUUID()}@delwaqty.app`;
     const { data: created, error: createErr } = await admin.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
-      user_metadata: { user_type: "merchant_staff", full_name: fullName },
+      app_metadata: { staff_provisioning: prov.provision_id },
+      user_metadata: { full_name: fullName },
     });
-    if (createErr || !created?.user?.id) return json({ error: "provision_failed" }, 502);
+    if (createErr || !created?.user?.id) {
+      await caller.rpc("staff_admin_provision_abort", {
+        p_provision_id: prov.provision_id,
+        p_reason: "gotrue_failure",
+      }).then(() => {}, () => {});
+      await logRefusal(merchantId, "gotrue_failure");
+      return json({ error: "provision_failed" }, 502);
+    }
     const authUserId = created.user.id;
 
-    const login = loginUsername(username, merchantId);
-    const { data: staffId, error: execErr } = await caller.rpc("staff_admin_create_staff", {
-      p_merchant_id: merchantId,
-      p_auth_user_id: authUserId,
-      p_username: username,
-      p_full_name: fullName,
-      p_role: role,
-      p_branch_id: branchId,
-      p_phone: phone,
-      p_login_username: login,
-    });
-    if (execErr) {
-      // Roll back the orphaned auth user; log the refused attempt (A10).
-      await admin.auth.admin.deleteUser(authUserId);
-      await logRefusal();
+    const { data: staffId, error: completeErr } = await caller.rpc(
+      "staff_admin_provision_complete",
+      { p_provision_id: prov.provision_id, p_auth_user_id: authUserId },
+    );
+    if (completeErr || !staffId) {
+      // Roll back the orphaned auth user (one retry); a delete failure
+      // leaves a flagged orphan and is logged as its own reason (#262).
+      let delErr = (await admin.auth.admin.deleteUser(authUserId)).error;
+      if (delErr) delErr = (await admin.auth.admin.deleteUser(authUserId)).error;
+      await caller.rpc("staff_admin_provision_abort", {
+        p_provision_id: prov.provision_id,
+        p_reason: delErr ? "orphan_after_delete_failure" : "create_staff",
+      }).then(() => {}, () => {});
+      await logRefusal(merchantId, "create_staff");
       return json(REFUSED, 403);
     }
     // The one-time password is shown exactly once. No-store, never logged.
     return json(
-      { staff_id: staffId, login_username: login, password, must_change_password: true },
+      {
+        staff_id: staffId,
+        login_username: prov.login_username,
+        password,
+        must_change_password: true,
+      },
       200,
       { "Cache-Control": "no-store" },
     );
@@ -164,21 +201,43 @@ Deno.serve(async (req) => {
     // Resolve the staff row through the caller's view (owner-or-self RLS).
     const { data: staff } = await caller
       .from("merchant_staff")
-      .select("id, user_id")
+      .select("id, user_id, merchant_id")
       .eq("id", staffId)
       .maybeSingle();
-    if (!staff) return json(REFUSED, 403);
+    if (!staff) {
+      await logRefusal(body.merchant_id, "set_active");
+      return json(REFUSED, 403);
+    }
+    // Executor FIRST (S2): the DB state change is authorized and committed
+    // under the caller before any GoTrue effect.
     const { error: execErr } = await caller.rpc("staff_admin_set_active", {
       p_staff_id: staffId,
       p_active: active,
     });
-    if (execErr) return json(REFUSED, 403);
-    // Session hygiene via GoTrue + the 388 revocation RPC (never tables).
+    if (execErr) {
+      await logRefusal(staff.merchant_id, "set_active");
+      return json(REFUSED, 403);
+    }
+    // GoTrue session hygiene with CHECKED errors (S6): a failure surfaces
+    // as 502, never a false ok.
     if (active) {
-      await admin.auth.admin.updateUserById(staff.user_id, { ban_duration: "none" });
+      const { error: revErr } = await admin.rpc("revoke_user_sessions", {
+        p_user_id: staff.user_id,
+      });
+      if (revErr) return json({ error: "provision_failed" }, 502);
+      const { error: banErr } = await admin.auth.admin.updateUserById(staff.user_id, {
+        ban_duration: "none",
+      });
+      if (banErr) return json({ error: "provision_failed" }, 502);
     } else {
-      await admin.auth.admin.updateUserById(staff.user_id, { ban_duration: "876000h" });
-      await admin.rpc("revoke_user_sessions", { p_user_id: staff.user_id });
+      const { error: banErr } = await admin.auth.admin.updateUserById(staff.user_id, {
+        ban_duration: "876000h",
+      });
+      if (banErr) return json({ error: "provision_failed" }, 502);
+      const { error: revErr } = await admin.rpc("revoke_user_sessions", {
+        p_user_id: staff.user_id,
+      });
+      if (revErr) return json({ error: "provision_failed" }, 502);
     }
     return json({ ok: true });
   }
@@ -187,20 +246,39 @@ Deno.serve(async (req) => {
     const staffId = String(body.staff_id ?? "");
     const { data: staff } = await caller
       .from("merchant_staff")
-      .select("id, user_id")
+      .select("id, user_id, merchant_id")
       .eq("id", staffId)
       .maybeSingle();
-    if (!staff) return json(REFUSED, 403);
-    const password = randomPassword();
-    const { error: upErr } = await admin.auth.admin.updateUserById(staff.user_id, { password });
-    if (upErr) return json({ error: "provision_failed" }, 502);
-    // Cut every session; the next login must use the new password.
-    await admin.rpc("revoke_user_sessions", { p_user_id: staff.user_id });
+    if (!staff) {
+      await logRefusal(body.merchant_id, "reset_password");
+      return json(REFUSED, 403);
+    }
+    // Executor FIRST (S2): ownership and state are verified and recorded
+    // before GoTrue is touched; an executor refusal means ZERO rotation.
     const { error: execErr } = await caller.rpc("staff_admin_record_password_reset", {
       p_staff_id: staffId,
     });
-    if (execErr) return json(REFUSED, 403);
-    return json({ password, must_change_password: true }, 200, { "Cache-Control": "no-store" });
+    if (execErr) {
+      await logRefusal(staff.merchant_id, "reset_password");
+      return json(REFUSED, 403);
+    }
+    const password = randomPassword();
+    const { error: upErr } = await admin.auth.admin.updateUserById(staff.user_id, {
+      password,
+    });
+    if (upErr) {
+      // Rotation failure = refusal: no password is ever returned (S2).
+      await logRefusal(staff.merchant_id, "reset_password");
+      return json({ error: "provision_failed" }, 502);
+    }
+    // Cut every session; the next login must use the new password.
+    const { error: revErr } = await admin.rpc("revoke_user_sessions", {
+      p_user_id: staff.user_id,
+    });
+    if (revErr) return json({ error: "provision_failed" }, 502);
+    return json({ password, must_change_password: true }, 200, {
+      "Cache-Control": "no-store",
+    });
   }
 
   if (action === "list_staff") {
@@ -210,7 +288,10 @@ Deno.serve(async (req) => {
       .select("id, username, full_name, role, branch_id, is_active, must_change_password, created_at")
       .eq("merchant_id", merchantId)
       .order("created_at");
-    if (error) return json(REFUSED, 403);
+    if (error) {
+      await logRefusal(merchantId, "list_staff");
+      return json(REFUSED, 403);
+    }
     return json({ staff: data ?? [] });
   }
 

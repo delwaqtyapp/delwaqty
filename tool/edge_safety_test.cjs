@@ -107,24 +107,52 @@ test('unsigned webhook POST is rejected before processing a message', async () =
 });
 
 function loadWebhookHandler({
-  withSecrets = true, markVerified = true, rpcError = null, seen = null,
-  otpRows = [], fetchImpl = async () => new Response('{}', { status: 200 }),
-  sent = [], rpcCalls = [],
+  withSecrets = true, markVerified = true, rpcError = null, otpRows = [],
+  preClaimed = [], fetchImpl = async () => new Response('{}', { status: 200 }),
+  sent = [], rpcCalls = [], claimed = new Set(preClaimed),
 } = {}) {
   let handler;
   const source = fs.readFileSync('supabase/functions/whatsapp-webhook/index.ts', 'utf8').replace(
     /^import \{ createClient \} from .*;\r?\n/m, '',
   );
-  const chain = (rows) => {
+  // Filter-aware chain over the otpRows fixture: supports the exact filter
+  // shapes the webhook uses (eq, gt, or with is.null / lt.<iso>, limit).
+  const otpChain = () => {
+    const filters = [];
     const self = {
-      select: () => self, eq: () => self, order: () => self,
-      limit: async () => ({ data: rows, error: null }),
-      maybeSingle: async () => ({ data: seen, error: null }),
+      select: () => self,
+      eq: (col, val) => { filters.push((r) => r[col] === val); return self; },
+      gt: (col, val) => { filters.push((r) => r[col] > val); return self; },
+      or: (expr) => {
+        const options = expr.split(',').map((cond) => {
+          const [col, op, ...rest] = cond.split('.');
+          const val = rest.join('.');
+          if (op === 'is' && val === 'null') return (r) => r[col] == null;
+          if (op === 'lt') return (r) => r[col] != null && r[col] < val;
+          throw new Error(`unsupported or condition: ${cond}`);
+        });
+        filters.push((r) => options.some((f) => f(r)));
+        return self;
+      },
+      limit: async (n) => ({
+        data: otpRows.filter((r) => filters.every((f) => f(r))).slice(0, n),
+        error: null,
+      }),
     };
     return self;
   };
+  const messagesChain = {
+    insert: (rows, _opts) => ({
+      select: async () => {
+        const row = Array.isArray(rows) ? rows[0] : rows;
+        if (claimed.has(row.message_id)) return { data: [], error: null };
+        claimed.add(row.message_id);
+        return { data: [row], error: null };
+      },
+    }),
+  };
   const context = {
-    Request, Response, URL, TextEncoder, crypto: webcrypto, console,
+    Request, Response, URL, TextEncoder, crypto: webcrypto, console, AbortSignal,
     Deno: {
       env: { get: (key) => ({
         WHATSAPP_VERIFY_TOKEN: 'test-verify-token',
@@ -143,7 +171,7 @@ function loadWebhookHandler({
         rpcCalls.push({ name, args });
         return { data: rpcError ? null : markVerified, error: rpcError };
       },
-      from: (table) => chain(table === 'whatsapp_otp_verifications' ? otpRows : []),
+      from: (table) => (table === 'whatsapp_otp_verifications' ? otpChain() : messagesChain),
     }),
     fetch: async (url, init) => {
       sent.push({ url, init });
@@ -168,8 +196,12 @@ async function signedPost(handler, messages) {
 }
 
 const codeMessage = { id: 'wamid.test1', from: '201000000001', text: { body: '123456' } };
+const pendingOtp = (overrides = {}) => ({
+  id: 1, phone: '+201000000001', verified: false,
+  created_at: new Date().toISOString(), locked_until: null, ...overrides,
+});
 
-test('verified code sends exactly one Arabic confirmation from the Cloud API number', async () => {
+test('verified phone sends exactly one Arabic confirmation, no link', async () => {
   const sent = [];
   const handler = loadWebhookHandler({ markVerified: true, sent });
   const response = await signedPost(handler, [codeMessage]);
@@ -181,8 +213,8 @@ test('verified code sends exactly one Arabic confirmation from the Cloud API num
   const payload = JSON.parse(sent[0].init.body);
   assert.equal(payload.messaging_product, 'whatsapp');
   assert.equal(payload.to, '201000000001');
-  assert.match(payload.text.body, /^تم تفعيل حسابك في دلوقتي ✅/u);
-  assert.match(payload.text.body, /io\.delwaqty:\/\//);
+  assert.equal(payload.text.body, 'تم التحقق من رقمك ✅ ارجع للتطبيق');
+  assert.doesNotMatch(payload.text.body, /delwaqty|http/);
 });
 
 test('a reply send failure never breaks verification', async () => {
@@ -197,6 +229,26 @@ test('a reply send failure never breaks verification', async () => {
   assert.equal(sent.length, 1);
 });
 
+test('a hung reply fetch is aborted and never stalls the ack', async () => {
+  const handler = loadWebhookHandler({
+    markVerified: true,
+    fetchImpl: (_url, init) => new Promise((_resolve, reject) => {
+      init.signal.addEventListener('abort', () => reject(new DOMException('timed out', 'TimeoutError')));
+    }),
+  });
+  // AbortSignal.timeout's timer is unref'd: keep the loop alive so it fires.
+  const keepAlive = setInterval(() => {}, 500);
+  try {
+    const started = Date.now();
+    const response = await signedPost(handler, [codeMessage]);
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).results[0].ok, true);
+    assert.ok(Date.now() - started < 8000, 'webhook must ack shortly after the reply timeout');
+  } finally {
+    clearInterval(keepAlive);
+  }
+});
+
 test('without Cloud API secrets no reply is attempted', async () => {
   const sent = [];
   const handler = loadWebhookHandler({ markVerified: true, sent, withSecrets: false });
@@ -206,14 +258,37 @@ test('without Cloud API secrets no reply is attempted', async () => {
   assert.equal(sent.length, 0);
 });
 
-test('wrong or expired code on a known phone gets a guidance reply', async () => {
+test('wrong code with a currently pending OTP gets a guidance reply', async () => {
   const sent = [];
-  const handler = loadWebhookHandler({ markVerified: false, otpRows: [{ id: 1 }], sent });
+  const handler = loadWebhookHandler({ markVerified: false, otpRows: [pendingOtp()], sent });
   const response = await signedPost(handler, [codeMessage]);
   assert.equal(response.status, 200);
   assert.equal((await response.json()).results[0].ok, false);
   assert.equal(sent.length, 1);
   assert.match(JSON.parse(sent[0].init.body).text.body, /الكود غير صالح/u);
+});
+
+test('a verified OTP row gets no guidance reply', async () => {
+  const sent = [];
+  const handler = loadWebhookHandler({ markVerified: false, otpRows: [pendingOtp({ verified: true })], sent });
+  await signedPost(handler, [codeMessage]);
+  assert.equal(sent.length, 0);
+});
+
+test('an OTP row older than the 30 minute window gets no guidance reply', async () => {
+  const sent = [];
+  const old = new Date(Date.now() - 31 * 60 * 1000).toISOString();
+  const handler = loadWebhookHandler({ markVerified: false, otpRows: [pendingOtp({ created_at: old })], sent });
+  await signedPost(handler, [codeMessage]);
+  assert.equal(sent.length, 0);
+});
+
+test('a locked OTP row gets no guidance reply', async () => {
+  const sent = [];
+  const locked = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+  const handler = loadWebhookHandler({ markVerified: false, otpRows: [pendingOtp({ locked_until: locked })], sent });
+  await signedPost(handler, [codeMessage]);
+  assert.equal(sent.length, 0);
 });
 
 test('an unknown phone gets no reply (never answer random chats)', async () => {
@@ -226,20 +301,39 @@ test('an unknown phone gets no reply (never answer random chats)', async () => {
 
 test('an RPC error never triggers the invalid-code reply', async () => {
   const sent = [];
-  const handler = loadWebhookHandler({ markVerified: false, rpcError: { message: 'db down' }, otpRows: [{ id: 1 }], sent });
+  const handler = loadWebhookHandler({ markVerified: false, rpcError: { message: 'db down' }, otpRows: [pendingOtp()], sent });
   const response = await signedPost(handler, [codeMessage]);
   assert.equal(response.status, 200);
   assert.equal(sent.length, 0);
 });
 
-test('a repeated delivery is skipped before the RPC and never re-replies', async () => {
+test('a Meta retry of an invalid-code delivery claims nothing and re-sends nothing', async () => {
   const sent = [];
-  const rpcCalls = [];
-  const handler = loadWebhookHandler({ seen: { message_id: 'wamid.test1' }, sent, rpcCalls });
-  const response = await signedPost(handler, [codeMessage]);
-  assert.equal(response.status, 200);
-  assert.deepEqual((await response.json()).results, [{ messageId: 'wamid.test1', from: '+201000000001', ok: true, duplicate: true }]);
-  assert.equal(rpcCalls.length, 0);
+  const claimed = new Set();
+  const handler = loadWebhookHandler({ markVerified: false, otpRows: [pendingOtp()], sent, claimed });
+  const first = await signedPost(handler, [codeMessage]);
+  const second = await signedPost(handler, [codeMessage]);
+  assert.equal(first.status, 200);
+  assert.equal(second.status, 200);
+  assert.equal(sent.length, 1);
+});
+
+test('concurrent identical deliveries produce exactly one guidance reply', async () => {
+  const sent = [];
+  const claimed = new Set();
+  const handler = loadWebhookHandler({ markVerified: false, otpRows: [pendingOtp()], sent, claimed });
+  const [a, b] = await Promise.all([signedPost(handler, [codeMessage]), signedPost(handler, [codeMessage])]);
+  assert.equal(a.status, 200);
+  assert.equal(b.status, 200);
+  assert.equal(sent.length, 1);
+});
+
+test('a delivery id already claimed by a successful verify never gets guidance', async () => {
+  const sent = [];
+  const handler = loadWebhookHandler({
+    markVerified: false, otpRows: [pendingOtp()], sent, preClaimed: ['wamid.test1'],
+  });
+  await signedPost(handler, [codeMessage]);
   assert.equal(sent.length, 0);
 });
 

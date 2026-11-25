@@ -73,15 +73,24 @@ function normalizeEgyptPhone(raw: string): string {
   return `+${d}`;
 }
 
-// Replies sent from the platform number. Confirmation wording is the
-// owner's; the link uses the app's deep-link scheme.
-const CONFIRMATION_BODY =
-  "تم تفعيل حسابك في دلوقتي ✅\nارجع للتطبيق: io.delwaqty://home";
+// Replies sent from the platform number. Confirmation reflects the actual
+// state at this point: the phone number is verified; signup completes in
+// the app afterwards.
+const CONFIRMATION_BODY = "تم التحقق من رقمك ✅ ارجع للتطبيق";
 const INVALID_CODE_BODY =
   "الكود غير صالح أو انتهت صلاحيته. اطلب كودًا جديدًا من التطبيق.";
 
+// Guidance is offered only for a phone with a currently pending code:
+// unverified, created within the last 30 minutes, not locked. Any other
+// message is ignored.
+const GUIDANCE_WINDOW_MS = 30 * 60 * 1000;
+
+// A hung Graph request must not stall the webhook ack.
+const REPLY_TIMEOUT_MS = 3000;
+
 // Best-effort Cloud API text reply. Never throws: verification must not
-// depend on Meta accepting our reply.
+// depend on Meta accepting our reply. Logs only the error class or status,
+// never headers or exception bodies.
 async function sendWhatsAppText(toDigits: string, bodyText: string): Promise<void> {
   const token = Deno.env.get("WHATSAPP_CLOUD_TOKEN") ?? "";
   const phoneNumberId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID") ?? "";
@@ -101,13 +110,14 @@ async function sendWhatsAppText(toDigits: string, bodyText: string): Promise<voi
           type: "text",
           text: { body: bodyText },
         }),
+        signal: AbortSignal.timeout(REPLY_TIMEOUT_MS),
       },
     );
     if (!resp.ok) {
-      console.error("whatsapp reply failed", resp.status);
+      console.error("whatsapp reply failed with status", resp.status);
     }
   } catch (e) {
-    console.error("whatsapp reply error", e);
+    console.error("whatsapp reply error", e instanceof Error ? e.name : "unknown");
   }
 }
 
@@ -166,20 +176,6 @@ Deno.serve(async (req) => {
         const code = (text.match(/\b(\d{6})\b/) ?? [])[1];
         if (!messageId || !code) continue;
 
-        // Meta retries deliveries (slow ack, transient error). mark_verified
-        // guards replays internally, but for a retry of a code that DID
-        // verify it returns false, which we must not mistake for an invalid
-        // code. Skip deliveries already recorded instead.
-        const { data: seen } = await supabase
-          .from("whatsapp_webhook_messages")
-          .select("message_id")
-          .eq("message_id", messageId)
-          .maybeSingle();
-        if (seen) {
-          results.push({ messageId, from, ok: true, duplicate: true });
-          continue;
-        }
-
         const { data, error } = await supabase.rpc(
           "whatsapp_webhook_mark_verified",
           {
@@ -193,18 +189,40 @@ Deno.serve(async (req) => {
 
         const toDigits = from.replace(/^\+/, "");
         if (ok) {
-          // Verified: tell the user they can go back to the app.
+          // Phone verified: tell the user they can go back to the app. Only
+          // one delivery can win the verified=false UPDATE inside the RPC,
+          // so this fires exactly once per code.
           await sendWhatsAppText(toDigits, CONFIRMATION_BODY);
         } else if (!error) {
-          // Wrong or expired code. Reply only when this phone actually has
-          // OTP rows: never answer random chats on a shared number.
+          // Wrong or expired code. Reply only when this phone has a
+          // currently pending OTP: never answer random chats on a shared
+          // number, never on an RPC error.
+          const nowIso = new Date().toISOString();
           const { data: otpRows } = await supabase
             .from("whatsapp_otp_verifications")
             .select("id")
             .eq("phone", from)
+            .eq("verified", false)
+            .gt("created_at", new Date(Date.now() - GUIDANCE_WINDOW_MS).toISOString())
+            .or(`locked_until.is.null,locked_until.lt.${nowIso}`)
             .limit(1);
           if (otpRows && otpRows.length > 0) {
-            await sendWhatsAppText(toDigits, INVALID_CODE_BODY);
+            // Atomically claim this delivery id before replying: a Meta
+            // retry or a concurrent duplicate of the same message conflicts
+            // on unique(message_id) and sends nothing. The row the RPC
+            // wrote for a successful verify conflicts the same way, so a
+            // duplicate that lost the verify race can never nudge after a
+            // confirmation.
+            const { data: claim } = await supabase
+              .from("whatsapp_webhook_messages")
+              .insert(
+                { message_id: messageId, phone: from },
+                { onConflict: "message_id", ignoreDuplicates: true },
+              )
+              .select("message_id");
+            if (claim && claim.length > 0) {
+              await sendWhatsAppText(toDigits, INVALID_CODE_BODY);
+            }
           }
         }
       }

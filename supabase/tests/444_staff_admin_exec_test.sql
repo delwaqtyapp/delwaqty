@@ -657,6 +657,269 @@ BEGIN
     WHERE e.staff_id = v_staff AND e.kind = 'password_changed'), 'password_changed audit missing';
 END $$;
 
+-- ============ 5b) recovery routes + malformed attestations (#262) =========
+-- a STALE pending op (edge died) counts as failed after 10 minutes and the
+-- row can be re-armed (security's timeout)
+DO $$
+BEGIN
+  UPDATE public.merchant_staff
+     SET sync_state = 'pending', sync_op = 'enable', sync_generation = gen_random_uuid(),
+         is_active = false, updated_at = now() - interval '11 minutes'
+   WHERE id = (SELECT staff FROM zz444);
+END $$;
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  PERFORM public.staff_admin_set_active(v_staff, true);  -- re-arms over the stale pending
+END $$;
+RESET ROLE;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  ASSERT EXISTS (SELECT 1 FROM public.merchant_staff sm
+    WHERE sm.id = v_staff AND sm.sync_state = 'pending' AND sm.sync_op = 'enable'
+      AND sm.updated_at > now() - interval '5 minutes'),
+    'stale pending was not re-armed';
+END $$;
+-- tidy: fail the op so the next tests start from the blocked state
+update zz444 set gen = (select sync_generation from public.merchant_staff where id = (select staff from zz444));
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  PERFORM public.staff_admin_sync_failed(v_staff, (SELECT gen FROM zz444));
+END $$;
+RESET ROLE;
+
+-- a FAILED reset can be retried directly even though the row is inactive
+DO $$
+BEGIN
+  UPDATE public.merchant_staff
+     SET sync_state = 'failed', sync_op = 'reset', sync_generation = gen_random_uuid(),
+         is_active = false, must_change_password = true, password_digest = NULL
+   WHERE id = (SELECT staff FROM zz444);
+END $$;
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+  v_gen uuid;
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  v_gen := public.staff_admin_record_password_reset(v_staff);
+  ASSERT v_gen IS NOT NULL, 'failed-reset retry refused';
+END $$;
+RESET ROLE;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  ASSERT EXISTS (SELECT 1 FROM public.merchant_staff sm
+    WHERE sm.id = v_staff AND sm.sync_state = 'pending' AND sm.sync_op = 'reset'),
+    'failed-reset retry did not re-arm';
+END $$;
+update zz444 set gen = (select sync_generation from public.merchant_staff where id = (select staff from zz444));
+-- recover fully: attest + mark + complete so later sections see an active row
+update auth.users set encrypted_password = 'zz444-recovered-hash'
+ where id = (select staffuser from zz444);
+update auth.users
+   set raw_app_meta_data = coalesce(raw_app_meta_data,'{}'::jsonb)
+     || jsonb_build_object('staff_sync', jsonb_build_object(
+         'generation', (SELECT gen FROM zz444), 'op', 'reset', 'at', now()))
+ where id = (select staffuser from zz444);
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  PERFORM public.staff_admin_mark_password_rotated(v_staff, (SELECT gen FROM zz444));
+  PERFORM public.staff_admin_sync_complete(v_staff, (SELECT gen FROM zz444));
+END $$;
+RESET ROLE;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  ASSERT EXISTS (SELECT 1 FROM public.merchant_staff sm
+    WHERE sm.id = v_staff AND sm.is_active AND sm.sync_state = 'ok'
+      AND sm.password_digest = md5('zz444-recovered-hash')),
+    'failed-reset recovery did not restore the row';
+END $$;
+
+-- malformed attestations ALL fail closed (#262)
+DO $$
+BEGIN
+  UPDATE public.merchant_staff
+     SET sync_state = 'pending', sync_op = 'enable', sync_generation = gen_random_uuid(),
+         is_active = false
+   WHERE id = (SELECT staff FROM zz444);
+  UPDATE zz444 SET gen = (SELECT sync_generation FROM public.merchant_staff
+    WHERE id = (SELECT staff FROM zz444));
+END $$;
+-- case: missing 'at'
+DO $$
+BEGIN
+  UPDATE auth.users SET raw_app_meta_data = jsonb_build_object('staff_sync', jsonb_build_object('generation', (SELECT gen FROM zz444), 'op', 'enable'))
+   WHERE id = (SELECT staffuser FROM zz444);
+END $$;
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  BEGIN PERFORM public.staff_admin_sync_complete(v_staff, (SELECT gen FROM zz444));
+    RAISE EXCEPTION 'zz444 sentinel: malformed attestation accepted (missing at)';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'sync completion not verified', 'wrong error (missing at): ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+-- case: garbage 'at'
+DO $$
+BEGIN
+  UPDATE auth.users SET raw_app_meta_data = jsonb_build_object('staff_sync', jsonb_build_object('generation', (SELECT gen FROM zz444), 'op', 'enable', 'at', 'zzz'))
+   WHERE id = (SELECT staffuser FROM zz444);
+END $$;
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  BEGIN PERFORM public.staff_admin_sync_complete(v_staff, (SELECT gen FROM zz444));
+    RAISE EXCEPTION 'zz444 sentinel: malformed attestation accepted (garbage at)';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'sync completion not verified', 'wrong error (garbage at): ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+-- case: stale 'at'
+DO $$
+BEGIN
+  UPDATE auth.users SET raw_app_meta_data = jsonb_build_object('staff_sync', jsonb_build_object('generation', (SELECT gen FROM zz444), 'op', 'enable', 'at', (now() - interval '1 hour')::text))
+   WHERE id = (SELECT staffuser FROM zz444);
+END $$;
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  BEGIN PERFORM public.staff_admin_sync_complete(v_staff, (SELECT gen FROM zz444));
+    RAISE EXCEPTION 'zz444 sentinel: malformed attestation accepted (stale at)';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'sync completion not verified', 'wrong error (stale at): ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+-- case: future 'at'
+DO $$
+BEGIN
+  UPDATE auth.users SET raw_app_meta_data = jsonb_build_object('staff_sync', jsonb_build_object('generation', (SELECT gen FROM zz444), 'op', 'enable', 'at', (now() + interval '1 hour')::text))
+   WHERE id = (SELECT staffuser FROM zz444);
+END $$;
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  BEGIN PERFORM public.staff_admin_sync_complete(v_staff, (SELECT gen FROM zz444));
+    RAISE EXCEPTION 'zz444 sentinel: malformed attestation accepted (future at)';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'sync completion not verified', 'wrong error (future at): ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+-- case: missing generation key
+DO $$
+BEGIN
+  UPDATE auth.users SET raw_app_meta_data = jsonb_build_object('staff_sync', jsonb_build_object('op', 'enable', 'at', now()))
+   WHERE id = (SELECT staffuser FROM zz444);
+END $$;
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  BEGIN PERFORM public.staff_admin_sync_complete(v_staff, (SELECT gen FROM zz444));
+    RAISE EXCEPTION 'zz444 sentinel: malformed attestation accepted (missing generation key)';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'sync completion not verified', 'wrong error (missing generation key): ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+-- case: wrong op
+DO $$
+BEGIN
+  UPDATE auth.users SET raw_app_meta_data = jsonb_build_object('staff_sync', jsonb_build_object('generation', (SELECT gen FROM zz444), 'op', 'reset', 'at', now()))
+   WHERE id = (SELECT staffuser FROM zz444);
+END $$;
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  BEGIN PERFORM public.staff_admin_sync_complete(v_staff, (SELECT gen FROM zz444));
+    RAISE EXCEPTION 'zz444 sentinel: malformed attestation accepted (wrong op)';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'sync completion not verified', 'wrong error (wrong op): ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+-- case: non-object staff_sync
+DO $$
+BEGIN
+  UPDATE auth.users SET raw_app_meta_data = jsonb_build_object('staff_sync', to_jsonb('junk'::text))
+   WHERE id = (SELECT staffuser FROM zz444);
+END $$;
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  BEGIN PERFORM public.staff_admin_sync_complete(v_staff, (SELECT gen FROM zz444));
+    RAISE EXCEPTION 'zz444 sentinel: malformed attestation accepted (non-object staff_sync)';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'sync completion not verified', 'wrong error (non-object staff_sync): ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+-- and mark refuses a malformed attestation the same way
+update auth.users set raw_app_meta_data = jsonb_build_object('staff_sync',
+  jsonb_build_object('generation', (SELECT gen FROM zz444), 'op', 'enable', 'at', now()))
+ where id = (select staffuser from zz444);
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  BEGIN PERFORM public.staff_admin_mark_password_rotated(v_staff, (SELECT gen FROM zz444));
+    RAISE EXCEPTION 'zz444 sentinel: mark accepted a non-reset attestation';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'no pending sync operation', 'wrong error: ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+-- tidy: clear the pending op for later sections
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  PERFORM public.staff_admin_sync_failed(v_staff, (SELECT gen FROM zz444));
+END $$;
+RESET ROLE;
+update public.merchant_staff
+   set is_active = true, sync_state = 'ok', sync_op = NULL, sync_generation = NULL,
+       password_digest = md5('zz444-recovered-hash')
+ where id = (select staff from zz444);
+
 -- ============ 6) audit_refusal routing (S1) =================================
 SET LOCAL ROLE authenticated;
 DO $$

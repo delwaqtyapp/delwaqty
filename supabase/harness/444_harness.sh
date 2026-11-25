@@ -163,6 +163,7 @@ expected = {("public", "is_cashier_type", "p_type text"),
             ("public", "staff_admin_provision_abort", "p_provision_id uuid, p_reason text"),
             ("public", "staff_admin_set_active", "p_staff_id uuid, p_active boolean"),
             ("public", "staff_admin_record_password_reset", "p_staff_id uuid"),
+            ("public", "_staff_sync_attested", "p_user_id uuid, p_generation uuid, p_op text"),
             ("public", "staff_admin_audit_refusal", "p_merchant_id uuid, p_reason text"),
             ("public", "staff_admin_sync_complete", "p_staff_id uuid, p_generation uuid"),
             ("public", "staff_admin_sync_failed", "p_staff_id uuid, p_generation uuid"),
@@ -175,7 +176,7 @@ bad_changed = [k for k in changed
 if bad_changed or gone or set(added) != expected:
     print("CHANGED:", bad_changed, "GONE:", gone, "ADDED:", added)
     sys.exit(1)
-print("function-body pin OK (11 added; handle_new_user pinned old->new)")
+print("function-body pin OK (12 added; handle_new_user pinned old->new)")
 PY
 
 echo "== 442 suite (regression)"
@@ -289,5 +290,37 @@ WON2=$(psql "$URL" -X -q -A -t -c "SELECT count(*) FROM public.merchant_staff WH
 [ "$WON2" = "0" ] || fail_case "race I: flipped consume created a staff row"
 psql "$URL" -X -q -c "UPDATE public.merchants SET owner_user_id = '$OWNER' WHERE id = '$MERCHANT'" >/dev/null
 echo "race I OK (FOR SHARE serialized the flip; consume refused)"
+
+echo "== race J: staff_password_changed vs a concurrent reset (#266)"
+# fixture: race H created staff zzhracer (AUTHUSER); make a real change so the
+# clear WOULD succeed, then race the clear against the owner's reset.
+psql "$URL" -X -q -c "UPDATE auth.users SET encrypted_password = 'zzh-changed' WHERE id = '$AUTHUSER'" >/dev/null
+STAFFID=$(psql "$URL" -X -q -A -t -c "SELECT id FROM public.merchant_staff WHERE user_id = '$AUTHUSER'")
+[ -n "$STAFFID" ] || fail_case "race J: no staff row from race H fixture"
+( psql "$URL" -X -q > /tmp/zz444_raceJ_clear.out 2>&1 <<SQL
+BEGIN;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', '{"sub": "$AUTHUSER"}', true);
+SELECT public.staff_password_changed();
+SELECT pg_sleep(2);
+COMMIT;
+SQL
+) &
+CLEARPID=$!
+sleep 1
+psql "$URL" -X -q > /tmp/zz444_raceJ_reset.out 2>&1 <<SQL
+BEGIN;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', '{"sub": "$OWNER"}', true);
+SELECT public.staff_admin_record_password_reset('$STAFFID'::uuid);
+COMMIT;
+SQL
+wait $CLEARPID
+# the clear committed first (it held FOR UPDATE); the reset then armed AFTER
+# it, so the barrier must be armed again and the row cut.
+FINAL=$(psql "$URL" -X -q -A -t -c "SELECT must_change_password || '|' || is_active || '|' || sync_state FROM public.merchant_staff WHERE id = '$STAFFID'")
+[ "$FINAL" = "true|false|pending" ] || fail_case "race J: final state $FINAL (reset must win over the racing clear)"
+grep -q 'row' /tmp/zz444_raceJ_clear.out || grep -q 'staff_password_changed' /tmp/zz444_raceJ_clear.out   || fail_case "race J: clear output unexpected"
+echo "race J OK (clear held the lock; the reset re-armed the barrier)"
 
 echo "444 harness ALL OK"

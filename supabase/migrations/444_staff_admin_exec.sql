@@ -504,8 +504,15 @@ BEGIN
   END IF;
   -- One op slot (#262 / security note 4): a pending op must complete or
   -- fail before the next one arms; a 'failed' op may be re-armed (retry).
+  -- Recovery: if the edge died mid-op, a pending op older than 10 minutes
+  -- counts as failed and the row can be re-armed (security's timeout).
   IF v_staff.sync_state = 'pending' THEN
-    RAISE EXCEPTION 'operation already pending';
+    IF v_staff.updated_at < now() - interval '10 minutes' THEN
+      UPDATE public.merchant_staff SET sync_state = 'failed', updated_at = now()
+       WHERE id = p_staff_id;
+    ELSE
+      RAISE EXCEPTION 'operation already pending';
+    END IF;
   END IF;
   -- FAIL CLOSED (#261/#262): arming ANY op cuts access in the same
   -- transaction. The row stays inactive - and 442's is_active checks keep
@@ -558,11 +565,19 @@ BEGIN
   IF NOT FOUND OR NOT public.is_merchant_owner(v_staff.merchant_id) THEN
     RAISE EXCEPTION 'staff not found';
   END IF;
-  IF NOT v_staff.is_active THEN
+  -- Recovery (#262): a row left inactive by a FAILED reset can be re-armed
+  -- directly; any other inactive row (disabled, blocked) cannot be reset.
+  IF NOT v_staff.is_active
+     AND NOT (v_staff.sync_state = 'failed' AND v_staff.sync_op = 'reset') THEN
     RAISE EXCEPTION 'staff not found';  -- no reset on a disabled/blocked row
   END IF;
   IF v_staff.sync_state = 'pending' THEN
-    RAISE EXCEPTION 'operation already pending';
+    IF v_staff.updated_at < now() - interval '10 minutes' THEN
+      UPDATE public.merchant_staff SET sync_state = 'failed', updated_at = now()
+       WHERE id = p_staff_id;
+    ELSE
+      RAISE EXCEPTION 'operation already pending';
+    END IF;
   END IF;
   -- #266: password_digest = NULL in the SAME statement - from this instant
   -- the old proof is invalid and staff_password_changed fails closed until
@@ -579,6 +594,45 @@ BEGIN
 END;
 $function$;
 
+-- Fail-closed attestation check (#262): missing keys, wrong types and
+-- unparseable/out-of-window timestamps ALL reject; <> on JSON would pass
+-- NULLs through, so every comparison is IS DISTINCT FROM and the timestamp
+-- parse is wrapped.
+CREATE FUNCTION public._staff_sync_attested(p_user_id uuid, p_generation uuid, p_op text)
+ RETURNS boolean
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE
+  v_att jsonb;
+  v_at timestamptz;
+BEGIN
+  SELECT u.raw_app_meta_data->'staff_sync' INTO v_att
+    FROM auth.users u WHERE u.id = p_user_id;
+  IF v_att IS NULL OR jsonb_typeof(v_att) IS DISTINCT FROM 'object' THEN
+    RETURN false;
+  END IF;
+  IF v_att->>'generation' IS DISTINCT FROM p_generation::text
+     OR v_att->>'op' IS DISTINCT FROM p_op THEN
+    RETURN false;
+  END IF;
+  BEGIN
+    v_at := (v_att->>'at')::timestamptz;
+  EXCEPTION WHEN OTHERS THEN
+    RETURN false;
+  END;
+  IF v_at IS NULL OR v_at < now() - interval '10 minutes'
+     OR v_at > now() + interval '2 minutes' THEN
+    RETURN false;
+  END IF;
+  RETURN true;
+END;
+$function$;
+REVOKE ALL ON FUNCTION public._staff_sync_attested(uuid, uuid, text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public._staff_sync_attested(uuid, uuid, text) FROM anon;
+REVOKE ALL ON FUNCTION public._staff_sync_attested(uuid, uuid, text) FROM authenticated;
+
 -- #261: completion requires SERVICE-ORIGIN evidence, not a caller boolean.
 -- After the GoTrue effects the edge writes app_metadata.staff_sync (service
 -- key only) bound to the operation generation; this caller-JWT completion
@@ -593,7 +647,6 @@ AS $function$
 DECLARE
   v_caller uuid := auth.uid();
   v_staff public.merchant_staff%ROWTYPE;
-  v_att jsonb;
 BEGIN
   IF v_caller IS NULL THEN
     RAISE EXCEPTION 'not authenticated';
@@ -612,12 +665,7 @@ BEGIN
      OR v_staff.sync_generation IS DISTINCT FROM p_generation THEN
     RAISE EXCEPTION 'no pending sync operation';
   END IF;
-  SELECT u.raw_app_meta_data->'staff_sync' INTO v_att
-    FROM auth.users u WHERE u.id = v_staff.user_id;
-  IF v_att IS NULL
-     OR v_att->>'generation' <> p_generation::text
-     OR v_att->>'op' <> v_staff.sync_op
-     OR (v_att->>'at')::timestamptz < now() - interval '10 minutes' THEN
+  IF NOT public._staff_sync_attested(v_staff.user_id, p_generation, v_staff.sync_op) THEN
     RAISE EXCEPTION 'sync completion not verified';
   END IF;
   IF v_staff.sync_op = 'enable' THEN
@@ -693,7 +741,6 @@ AS $function$
 DECLARE
   v_caller uuid := auth.uid();
   v_staff public.merchant_staff%ROWTYPE;
-  v_att jsonb;
   v_digest text;
 BEGIN
   IF v_caller IS NULL THEN
@@ -705,7 +752,7 @@ BEGIN
   IF NOT public._lookup_rate_allow('staffadm:markrot:' || v_caller, 120) THEN
     RAISE EXCEPTION 'rate limited';
   END IF;
-  SELECT * INTO v_staff FROM public.merchant_staff WHERE id = p_staff_id;
+  SELECT * INTO v_staff FROM public.merchant_staff WHERE id = p_staff_id FOR UPDATE;
   IF NOT FOUND OR NOT public.is_merchant_owner(v_staff.merchant_id) THEN
     RAISE EXCEPTION 'staff not found';
   END IF;
@@ -713,12 +760,7 @@ BEGIN
      OR v_staff.sync_generation IS DISTINCT FROM p_generation THEN
     RAISE EXCEPTION 'no pending sync operation';
   END IF;
-  SELECT u.raw_app_meta_data->'staff_sync' INTO v_att
-    FROM auth.users u WHERE u.id = v_staff.user_id;
-  IF v_att IS NULL
-     OR v_att->>'generation' <> p_generation::text
-     OR v_att->>'op' <> 'reset'
-     OR (v_att->>'at')::timestamptz < now() - interval '10 minutes' THEN
+  IF NOT public._staff_sync_attested(v_staff.user_id, p_generation, 'reset') THEN
     RAISE EXCEPTION 'sync completion not verified';
   END IF;
   SELECT md5(u.encrypted_password) INTO v_digest
@@ -726,9 +768,15 @@ BEGIN
   IF v_digest IS NULL THEN
     RAISE EXCEPTION 'staff not found';
   END IF;
+  -- CAS: the row must still be in the exact armed state (#266 concurrency)
   UPDATE public.merchant_staff
      SET password_digest = v_digest, updated_at = now()
-   WHERE id = p_staff_id;
+   WHERE id = p_staff_id
+     AND sync_state = 'pending' AND sync_op = 'reset'
+     AND sync_generation = p_generation;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'no pending sync operation';
+  END IF;
 END;
 $function$;
 
@@ -796,9 +844,12 @@ BEGIN
   IF NOT public._lookup_rate_allow('staffadm:pwdchg:' || v_caller, 30) THEN
     RAISE EXCEPTION 'rate limited';
   END IF;
+  -- FOR UPDATE (#266 concurrency): a concurrent reset arms only AFTER this
+  -- transaction commits, so its must_change_password=true always wins.
   SELECT * INTO v_staff FROM public.merchant_staff
    WHERE user_id = v_caller AND is_active AND sync_state = 'ok'
-   ORDER BY created_at LIMIT 1;
+   ORDER BY created_at LIMIT 1
+   FOR UPDATE;
   IF NOT FOUND THEN
     RAISE EXCEPTION 'staff not found';
   END IF;
@@ -811,9 +862,17 @@ BEGIN
         IS NOT DISTINCT FROM v_staff.password_digest THEN
     RAISE EXCEPTION 'password change not verified';
   END IF;
+  -- CAS predicate: the row must STILL be active, settled and un-rotated
   UPDATE public.merchant_staff
      SET must_change_password = false, updated_at = now()
-   WHERE id = v_staff.id;
+   WHERE id = v_staff.id
+     AND is_active AND sync_state = 'ok'
+     AND password_digest IS NOT NULL
+     AND password_digest IS DISTINCT FROM
+         (SELECT md5(u.encrypted_password) FROM auth.users u WHERE u.id = v_caller);
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'password change not verified';
+  END IF;
   INSERT INTO public.merchant_staff_events (staff_id, merchant_id, kind, actor_id)
   VALUES (v_staff.id, v_staff.merchant_id, 'password_changed', v_caller);
 END;

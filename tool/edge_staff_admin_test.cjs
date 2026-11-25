@@ -102,6 +102,8 @@ function loadHandler(fail = {}) {
               return fail.mark ? err() : { data: null, error: null };
             case 'revoke_user_sessions':
               return fail.revoke ? err() : { data: null, error: null };
+            case 'is_merchant_owner':
+              return fail.notOwner ? { data: false } : { data: true };
             default:
               throw new Error(`unexpected rpc ${name}`);
           }
@@ -301,8 +303,25 @@ test('an attestation write failure is a GoTrue failure: sync FAILED + 502', asyn
     { p_staff_id: STAFF_ID, p_generation: GENERATION });
 });
 
-test('a sync_complete failure after GoTrue success surfaces 502', async () => {
-  const { handler } = loadHandler({ sync: true });
+test('a sync_complete failure marks the op FAILED and surfaces 502 (#262)', async () => {
+  const { handler, calls } = loadHandler({ sync: true });
+  const res = await handler(post({ action: 'set_active', staff_id: STAFF_ID, active: true }));
+  assert.equal(res.status, 502);
+  const tail = names(calls).slice(-2);
+  assert.deepEqual(tail, ['staff_admin_sync_complete', 'staff_admin_sync_failed']);
+});
+
+test('a reset-path sync_complete failure: 502, NO password, op marked FAILED (#262)', async () => {
+  const { handler, calls } = loadHandler({ sync: true });
+  const res = await handler(post({ action: 'reset_password', staff_id: STAFF_ID }));
+  assert.equal(res.status, 502);
+  assert.deepEqual(await res.json(), { error: 'provision_failed' });
+  const tail = names(calls).slice(-2);
+  assert.deepEqual(tail, ['staff_admin_sync_complete', 'staff_admin_sync_failed']);
+});
+
+test('a failing sync_failed call is swallowed; the 502 still stands', async () => {
+  const { handler } = loadHandler({ sync: true, syncFailed: true });
   const res = await handler(post({ action: 'set_active', staff_id: STAFF_ID, active: true }));
   assert.equal(res.status, 502);
 });
@@ -359,6 +378,22 @@ test('reset_password success: rotate, revoke, attest, mark, complete, no-store',
   assert.equal(j(calls[6][1]).app_metadata.staff_sync.op, 'reset');
   assert.deepEqual(j(calls[7][1]), { p_staff_id: STAFF_ID, p_generation: GENERATION });
   assert.deepEqual(j(calls[8][1]), { p_staff_id: STAFF_ID, p_generation: GENERATION });
+});
+
+test('list_staff on a visible but non-owned merchant is a logged refusal (#263)', async () => {
+  const { handler, calls } = loadHandler({ notOwner: true });
+  const res = await handler(post({ action: 'list_staff', merchant_id: MERCHANT_ID }));
+  assert.equal(res.status, 403);
+  assert.deepEqual(names(calls), [...RATE, 'is_merchant_owner', 'staff_admin_audit_refusal']);
+  assert.equal(calls[3][1].p_reason, 'list_staff');
+});
+
+test('list_staff for the owner: visibility check, ownership check, rows', async () => {
+  const { handler, calls } = loadHandler();
+  const res = await handler(post({ action: 'list_staff', merchant_id: MERCHANT_ID }));
+  assert.equal(res.status, 200);
+  assert.deepEqual(await res.json(), { staff: [] });
+  assert.deepEqual(names(calls), [...RATE, 'is_merchant_owner']);
 });
 
 test('list_staff on an invisible merchant is a logged refusal, not an empty list (#263)', async () => {

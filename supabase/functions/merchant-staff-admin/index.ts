@@ -303,7 +303,15 @@ Deno.serve(async (req) => {
       p_staff_id: staffId,
       p_generation: generation,
     });
-    if (syncErr) return json({ error: "provision_failed" }, 502);
+    if (syncErr) {
+      // A completion failure must not strand the op as pending (#262):
+      // mark it failed so the owner can re-arm after the DB timeout.
+      await caller.rpc("staff_admin_sync_failed", {
+        p_staff_id: staffId,
+        p_generation: generation,
+      }).then(() => {}, () => {});
+      return json({ error: "provision_failed" }, 502);
+    }
     return json({ ok: true });
   }
 
@@ -360,7 +368,13 @@ Deno.serve(async (req) => {
       p_staff_id: staffId,
       p_generation: generation,
     });
-    if (syncErr) return json({ error: "provision_failed" }, 502);
+    if (syncErr) {
+      await caller.rpc("staff_admin_sync_failed", {
+        p_staff_id: staffId,
+        p_generation: generation,
+      }).then(() => {}, () => {});
+      return json({ error: "provision_failed" }, 502);
+    }
     return json({ password, must_change_password: true }, 200, {
       "Cache-Control": "no-store",
     });
@@ -376,6 +390,14 @@ Deno.serve(async (req) => {
       .eq("id", merchantId)
       .maybeSingle();
     if (!merchant) {
+      await logRefusal(merchantId, "list_staff");
+      return json(REFUSED, 403);
+    }
+    // Visibility is not ownership (#263): staff management is owner-only.
+    const { data: isOwner } = await caller.rpc("is_merchant_owner", {
+      merchant_uuid: merchantId,
+    });
+    if (isOwner !== true) {
       await logRefusal(merchantId, "list_staff");
       return json(REFUSED, 403);
     }

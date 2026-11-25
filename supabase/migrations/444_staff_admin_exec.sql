@@ -565,19 +565,24 @@ BEGIN
   IF NOT FOUND OR NOT public.is_merchant_owner(v_staff.merchant_id) THEN
     RAISE EXCEPTION 'staff not found';
   END IF;
-  -- Recovery (#262): a row left inactive by a FAILED reset can be re-armed
-  -- directly; any other inactive row (disabled, blocked) cannot be reset.
+  -- Stale-pending sweep FIRST (#262): an armed reset leaves the row
+  -- inactive + pending, so the timeout recovery must run BEFORE the
+  -- eligibility check or an abandoned reset could never be re-armed.
+  IF v_staff.sync_state = 'pending'
+     AND v_staff.updated_at < now() - interval '10 minutes' THEN
+    UPDATE public.merchant_staff SET sync_state = 'failed', updated_at = now()
+     WHERE id = p_staff_id;
+    v_staff.sync_state := 'failed';
+  END IF;
+  -- Recovery (#262): a row left inactive by a FAILED (or timed-out) reset
+  -- can be re-armed directly; any other inactive row (disabled, blocked)
+  -- cannot be reset.
   IF NOT v_staff.is_active
      AND NOT (v_staff.sync_state = 'failed' AND v_staff.sync_op = 'reset') THEN
     RAISE EXCEPTION 'staff not found';  -- no reset on a disabled/blocked row
   END IF;
   IF v_staff.sync_state = 'pending' THEN
-    IF v_staff.updated_at < now() - interval '10 minutes' THEN
-      UPDATE public.merchant_staff SET sync_state = 'failed', updated_at = now()
-       WHERE id = p_staff_id;
-    ELSE
-      RAISE EXCEPTION 'operation already pending';
-    END IF;
+    RAISE EXCEPTION 'operation already pending';
   END IF;
   -- #266: password_digest = NULL in the SAME statement - from this instant
   -- the old proof is invalid and staff_password_changed fails closed until

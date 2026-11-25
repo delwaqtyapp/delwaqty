@@ -753,6 +753,89 @@ BEGIN
     'failed-reset recovery did not restore the row';
 END $$;
 
+-- a STALE PENDING reset (edge died mid-reset, row left inactive) re-arms
+-- after the 10-minute timeout; the eligibility check must not fire first
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  PERFORM public.staff_admin_record_password_reset(v_staff);  -- arm a real reset
+END $$;
+RESET ROLE;
+DO $$
+BEGIN
+  UPDATE public.merchant_staff SET updated_at = now() - interval '11 minutes'
+   WHERE id = (SELECT staff FROM zz444);
+  ASSERT EXISTS (SELECT 1 FROM public.merchant_staff sm
+    WHERE sm.id = (SELECT staff FROM zz444) AND NOT sm.is_active
+      AND sm.sync_state = 'pending' AND sm.sync_op = 'reset'),
+    'fixture wrong: armed reset should be inactive + pending + reset';
+END $$;
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+  v_gen uuid;
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  v_gen := public.staff_admin_record_password_reset(v_staff);  -- retry after timeout
+  ASSERT v_gen IS NOT NULL, 'stale pending reset was not re-armed';
+END $$;
+RESET ROLE;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  ASSERT EXISTS (SELECT 1 FROM public.merchant_staff sm
+    WHERE sm.id = v_staff AND sm.sync_state = 'pending' AND sm.sync_op = 'reset'
+      AND sm.updated_at > now() - interval '5 minutes'),
+    'stale pending reset retry did not re-arm';
+END $$;
+update zz444 set gen = (select sync_generation from public.merchant_staff where id = (select staff from zz444));
+-- tidy: fail the op and restore the active row for later sections
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  PERFORM public.staff_admin_sync_failed(v_staff, (SELECT gen FROM zz444));
+END $$;
+RESET ROLE;
+update public.merchant_staff
+   set is_active = true, sync_state = 'ok', sync_op = NULL, sync_generation = NULL,
+       password_digest = md5('zz444-recovered-hash')
+ where id = (select staff from zz444);
+
+-- a genuinely DISABLED row (completed disable, sync_state='ok') still refuses
+-- a reset even when the row is old
+DO $$
+BEGIN
+  UPDATE public.merchant_staff
+     SET is_active = false, disabled_at = now(), disabled_by = (SELECT owner FROM zz444),
+         sync_state = 'ok', sync_op = NULL, sync_generation = NULL,
+         updated_at = now() - interval '1 hour'
+   WHERE id = (SELECT staff FROM zz444);
+END $$;
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_staff uuid := (SELECT staff FROM zz444);
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz444))::text, true);
+  BEGIN PERFORM public.staff_admin_record_password_reset(v_staff);
+    RAISE EXCEPTION 'zz444 sentinel: reset on a disabled row accepted';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz444 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'staff not found', 'wrong error: ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+update public.merchant_staff
+   set is_active = true, disabled_at = NULL, disabled_by = NULL,
+       password_digest = md5('zz444-recovered-hash')
+ where id = (select staff from zz444);
+
 -- malformed attestations ALL fail closed (#262)
 DO $$
 BEGIN

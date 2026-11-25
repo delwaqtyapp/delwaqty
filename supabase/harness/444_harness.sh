@@ -291,36 +291,96 @@ WON2=$(psql "$URL" -X -q -A -t -c "SELECT count(*) FROM public.merchant_staff WH
 psql "$URL" -X -q -c "UPDATE public.merchants SET owner_user_id = '$OWNER' WHERE id = '$MERCHANT'" >/dev/null
 echo "race I OK (FOR SHARE serialized the flip; consume refused)"
 
-echo "== race J: staff_password_changed vs a concurrent reset (#266)"
-# fixture: race H created staff zzhracer (AUTHUSER); make a real change so the
-# clear WOULD succeed, then race the clear against the owner's reset.
-psql "$URL" -X -q -c "UPDATE auth.users SET encrypted_password = 'zzh-changed' WHERE id = '$AUTHUSER'" >/dev/null
+echo "== race J: reset lands between a clear's proof check and its UPDATE (#266)"
+# Two fixture copies of the clear, each with pg_sleep injected between the
+# read/proof check and the UPDATE so the reset is FORCED into the dangerous
+# window: zz444_old_clear is the pre-#266 body (no FOR UPDATE, no CAS) and
+# must LOSE the barrier (proving the test discriminates); zz444_new_clear is
+# the shipped body and must keep it.
+psql "$URL" -X -q -v ON_ERROR_STOP=1 >/dev/null <<'SQL'
+CREATE FUNCTION public.zz444_old_clear()
+ RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public', 'pg_temp' AS $$
+DECLARE
+  v_caller uuid := auth.uid();
+  v_staff public.merchant_staff%ROWTYPE;
+BEGIN
+  SELECT * INTO v_staff FROM public.merchant_staff
+   WHERE user_id = v_caller AND is_active AND sync_state = 'ok'
+   ORDER BY created_at LIMIT 1;                       -- no FOR UPDATE (pre-fix)
+  IF NOT FOUND THEN RAISE EXCEPTION 'staff not found'; END IF;
+  IF v_staff.password_digest IS NULL
+     OR (SELECT md5(u.encrypted_password) FROM auth.users u WHERE u.id = v_caller)
+        IS NOT DISTINCT FROM v_staff.password_digest THEN
+    RAISE EXCEPTION 'password change not verified'; END IF;
+  PERFORM pg_sleep(2);                                 -- injected race window
+  UPDATE public.merchant_staff SET must_change_password = false, updated_at = now()
+   WHERE id = v_staff.id;                              -- no CAS (pre-fix)
+END $$;
+CREATE FUNCTION public.zz444_new_clear()
+ RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public', 'pg_temp' AS $$
+DECLARE
+  v_caller uuid := auth.uid();
+  v_staff public.merchant_staff%ROWTYPE;
+BEGIN
+  SELECT * INTO v_staff FROM public.merchant_staff
+   WHERE user_id = v_caller AND is_active AND sync_state = 'ok'
+   ORDER BY created_at LIMIT 1
+   FOR UPDATE;                                         -- shipped body
+  IF NOT FOUND THEN RAISE EXCEPTION 'staff not found'; END IF;
+  IF v_staff.password_digest IS NULL
+     OR (SELECT md5(u.encrypted_password) FROM auth.users u WHERE u.id = v_caller)
+        IS NOT DISTINCT FROM v_staff.password_digest THEN
+    RAISE EXCEPTION 'password change not verified'; END IF;
+  PERFORM pg_sleep(2);                                 -- injected race window
+  UPDATE public.merchant_staff
+     SET must_change_password = false, updated_at = now()
+   WHERE id = v_staff.id
+     AND is_active AND sync_state = 'ok'
+     AND password_digest IS NOT NULL
+     AND password_digest IS DISTINCT FROM
+         (SELECT md5(u.encrypted_password) FROM auth.users u WHERE u.id = v_caller);
+  IF NOT FOUND THEN RAISE EXCEPTION 'password change not verified'; END IF;
+END $$;
+SQL
 STAFFID=$(psql "$URL" -X -q -A -t -c "SELECT id FROM public.merchant_staff WHERE user_id = '$AUTHUSER'")
 [ -n "$STAFFID" ] || fail_case "race J: no staff row from race H fixture"
-( psql "$URL" -X -q > /tmp/zz444_raceJ_clear.out 2>&1 <<SQL
+
+run_race_j() {  # $1 = fixture function, $2 = expected final state, $3 = label
+  psql "$URL" -X -q >/dev/null <<SQL
+UPDATE auth.users SET encrypted_password = 'zzj-live' WHERE id = '$AUTHUSER';
+UPDATE public.merchant_staff
+   SET is_active = true, sync_state = 'ok', sync_op = NULL, sync_generation = NULL,
+       must_change_password = true, password_digest = md5('zzj-old'), updated_at = now()
+ WHERE id = '$STAFFID';
+SQL
+  ( psql "$URL" -X -q > /tmp/zz444_raceJ_clear.out 2>&1 <<SQL
 BEGIN;
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims', '{"sub": "$AUTHUSER"}', true);
-SELECT public.staff_password_changed();
-SELECT pg_sleep(2);
+SELECT public.$1();
 COMMIT;
 SQL
-) &
-CLEARPID=$!
-sleep 1
-psql "$URL" -X -q > /tmp/zz444_raceJ_reset.out 2>&1 <<SQL
+  ) &
+  CLEARPID=$!
+  sleep 1
+  psql "$URL" -X -q > /tmp/zz444_raceJ_reset.out 2>&1 <<SQL
 BEGIN;
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims', '{"sub": "$OWNER"}', true);
 SELECT public.staff_admin_record_password_reset('$STAFFID'::uuid);
 COMMIT;
 SQL
-wait $CLEARPID
-# the clear committed first (it held FOR UPDATE); the reset then armed AFTER
-# it, so the barrier must be armed again and the row cut.
-FINAL=$(psql "$URL" -X -q -A -t -c "SELECT must_change_password || '|' || is_active || '|' || sync_state FROM public.merchant_staff WHERE id = '$STAFFID'")
-[ "$FINAL" = "true|false|pending" ] || fail_case "race J: final state $FINAL (reset must win over the racing clear)"
-grep -q 'row' /tmp/zz444_raceJ_clear.out || grep -q 'staff_password_changed' /tmp/zz444_raceJ_clear.out   || fail_case "race J: clear output unexpected"
-echo "race J OK (clear held the lock; the reset re-armed the barrier)"
+  wait $CLEARPID
+  FINAL=$(psql "$URL" -X -q -A -t -c "SELECT must_change_password || '|' || is_active || '|' || sync_state FROM public.merchant_staff WHERE id = '$STAFFID'")
+  [ "$FINAL" = "$2" ] || fail_case "race J ($3): final state $FINAL, expected $2"
+}
+
+# pre-#266 body: the clear's stale UPDATE overwrites the armed barrier
+run_race_j zz444_old_clear 'false|false|pending' "old body reproduces the bug"
+echo "race J discriminates (pre-#266 clear loses the barrier: $FINAL)"
+# shipped body: FOR UPDATE makes the reset wait; it arms AFTER the clear
+run_race_j zz444_new_clear 'true|false|pending' "shipped body keeps the barrier"
+echo "race J OK (shipped clear serializes; the reset re-arms the barrier)"
+psql "$URL" -X -q -c "DROP FUNCTION public.zz444_old_clear(); DROP FUNCTION public.zz444_new_clear();" >/dev/null
 
 echo "444 harness ALL OK"

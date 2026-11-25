@@ -491,23 +491,25 @@ class _AdminBottomNavBar extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.fromLTRB(14, 6, 14, 10),
         decoration: BoxDecoration(
+          // Frosted glass matching the customer search bar: clearly
+          // translucent instead of the near-opaque 0.92 gradient.
           gradient: LinearGradient(
             begin: AlignmentDirectional.topCenter,
             end: AlignmentDirectional.bottomCenter,
             colors: isDark
                 ? [
-                    const Color(0xFF2B2940).withValues(alpha: 0.92),
-                    const Color(0xFF1E1D2B).withValues(alpha: 0.92),
+                    const Color(0xFF2B2940).withValues(alpha: 0.55),
+                    const Color(0xFF1E1D2B).withValues(alpha: 0.55),
                   ]
                 : [
-                    const Color(0xFFFFFFFF).withValues(alpha: 0.92),
-                    const Color(0xFFF4F3FB).withValues(alpha: 0.92),
+                    const Color(0xFFFFFFFF).withValues(alpha: 0.72),
+                    const Color(0xFFF4F3FB).withValues(alpha: 0.72),
                   ],
           ),
           borderRadius: BorderRadius.circular(26),
           border: Border.all(
             color: isDark
-                ? Colors.white.withValues(alpha: 0.10)
+                ? Colors.white.withValues(alpha: 0.28)
                 : scheme.outlineVariant.withValues(alpha: 0.5),
             width: isDark ? 0.7 : 1,
           ),
@@ -524,7 +526,9 @@ class _AdminBottomNavBar extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(26),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+            // Light sigma-8 blur: frosted look without low-end jank; the
+            // translucent surface alone keeps labels readable.
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
               child: Row(

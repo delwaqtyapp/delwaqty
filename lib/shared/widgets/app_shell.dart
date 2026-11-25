@@ -273,18 +273,22 @@ class _TransparentBottomNav extends StatelessWidget {
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(26),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+          // Frosted glass matching the customer search bar: a light sigma-8
+          // blur stays smooth on low-end phones, and the translucent
+          // surface alone keeps the bar readable if a device throttles the
+          // filter.
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: isDark
                   ? Colors.white.withValues(alpha: 0.1)
-                  : Colors.white.withValues(alpha: 0.85),
-              borderRadius: BorderRadius.circular(28),
+                  : Colors.white.withValues(alpha: 0.72),
+              borderRadius: BorderRadius.circular(26),
               border: Border.all(
                 color: isDark
-                    ? Colors.white.withValues(alpha: 0.1)
+                    ? Colors.white.withValues(alpha: 0.28)
                     : Colors.black.withValues(alpha: 0.06),
                 width: 0.5,
               ),

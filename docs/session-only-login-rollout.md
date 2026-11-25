@@ -31,8 +31,9 @@ Parts:
 - PR 3 (later release): revoke anon/authenticated EXECUTE on
   `lookup_email_by_phone` / `lookup_email_by_username`, AND move the
   admin web gate off its direct email GoTrue sign-in onto the
-  auth-login-identifier function (owner decision 2026-11-25: it stays
-  on the direct path until then). NOT before old builds are gone from
+  auth-login-identifier function (main-agent decision under the
+  owner's standing delegation, 2026-11-25: it stays on the direct
+  path until then). NOT before old builds are gone from
   the wild - old builds still depend on the direct path, and after the
   revoke the old-build fallback no longer exists.
 

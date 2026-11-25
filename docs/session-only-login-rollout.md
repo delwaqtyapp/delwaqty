@@ -83,7 +83,10 @@ Parts:
       AND p.proname IN ('auth_login_begin', 'auth_login_finish', 'auth_login_resolve_email')
     ORDER BY 1;
    -- compare signatures (argument types), owner and md5 against the
-   -- values recorded when 440 was reviewed/applied on staging
+   -- values recorded when 440 was reviewed/applied on staging.
+   -- Note: md5(prosrc) covers the function BODY only - the signature,
+   -- owner, prosecdef, search_path and ACL checks above are what catch
+   -- a same-body replacement with different properties, so keep them.
    ```
 
    b. Named roles via has_function_privilege (PUBLIC is NOT a role and
@@ -135,7 +138,6 @@ Parts:
      FROM (VALUES ('SELECT'), ('INSERT'), ('UPDATE'), ('DELETE'),
                   ('TRUNCATE'), ('REFERENCES'), ('TRIGGER')) AS v(priv);
    -- every value false
-   ```
 
    SELECT c.relrowsecurity
      FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace

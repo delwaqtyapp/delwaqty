@@ -33,3 +33,7 @@ enabled = true
 
 [functions.send-push]
 verify_jwt = false
+
+# Explicit: staff management is a privileged surface; JWT verification ON.
+[functions.merchant-staff-admin]
+verify_jwt = true

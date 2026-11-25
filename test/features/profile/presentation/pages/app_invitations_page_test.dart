@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,16 +8,19 @@ import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/features/customer/profile/presentation/app_invitations_provider.dart';
 import 'package:delwaqty/features/customer/profile/presentation/pages/app_invitations_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/services/ota/ota_update_manager.dart';
 import 'package:delwaqty/shared/notifications/notification_route_resolver.dart';
 
 Widget app(
   Future<List<AppFlavor>> Function() load, {
-  Future<(int?, String?)> Function(AppFlavor)? install,
+  Future<OtaDownloadResult> Function(AppFlavor, void Function(double))?
+  download,
   Locale locale = const Locale('en'),
 }) => ProviderScope(
   overrides: [
     appInvitationsProvider.overrideWith((ref) => load()),
-    if (install != null) invitationInstallerProvider.overrideWithValue(install),
+    if (download != null)
+      invitationDownloaderProvider.overrideWithValue(download),
   ],
   child: MaterialApp(
     locale: locale,
@@ -78,9 +82,9 @@ void main() {
     await tester.pumpWidget(
       app(
         () async => ++checks == 1 ? [AppFlavor.driver] : [],
-        install: (_) async {
+        download: (_, _) async {
           installs++;
-          return (1, null);
+          return OtaDownloadResult(file: File('x.apk'));
         },
       ),
     );
@@ -96,9 +100,9 @@ void main() {
     await tester.pumpWidget(
       app(
         () async => [AppFlavor.provider],
-        install: (flavor) async {
+        download: (flavor, _) async {
           selected = flavor;
-          return (100, null);
+          return OtaDownloadResult(file: File('x.apk'));
         },
       ),
     );
@@ -106,13 +110,15 @@ void main() {
     await tester.tap(find.text('Download the app'));
     await tester.pumpAndSettle();
     expect(selected, AppFlavor.provider);
-    expect(find.textContaining('verified download is ready'), findsOneWidget);
+    // The verified file now waits for an explicit Install tap (bug 1).
+    expect(find.text('Install'), findsOneWidget);
   });
   testWidgets('installer failure is not reported as success', (tester) async {
     await tester.pumpWidget(
       app(
         () async => [AppFlavor.driver],
-        install: (_) async => (null, 'checksum_mismatch'),
+        download: (_, _) async =>
+            const OtaDownloadResult(error: 'checksum_mismatch'),
       ),
     );
     await tester.pumpAndSettle();

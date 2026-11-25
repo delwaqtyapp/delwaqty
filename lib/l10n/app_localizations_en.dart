@@ -8259,6 +8259,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'The verified download is ready. Follow the installation prompt.';
 
   @override
+  String get appInvitationInstall => 'Install';
+
+  @override
+  String get appInvitationOpen => 'Open';
+
+  @override
+  String get appInvitationUpdate => 'Update';
+
+  @override
+  String get appInvitationUpToDate => 'Installed and up to date';
+
+  @override
   String get appInvitationDownloadFailed =>
       'Download could not start. Check your connection and installation permission, then retry.';
 

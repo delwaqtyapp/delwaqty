@@ -8187,6 +8187,18 @@ class AppLocalizationsAr extends AppLocalizations {
       'التحميل الموثّق جاهز. اتبع رسالة التثبيت.';
 
   @override
+  String get appInvitationInstall => 'تثبيت';
+
+  @override
+  String get appInvitationOpen => 'فتح';
+
+  @override
+  String get appInvitationUpdate => 'تحديث';
+
+  @override
+  String get appInvitationUpToDate => 'مثبّت ومحدّث';
+
+  @override
   String get appInvitationDownloadFailed =>
       'تعذّر بدء التحميل. راجع اتصالك وإذن تثبيت التطبيقات ثم حاول مرة أخرى.';
 

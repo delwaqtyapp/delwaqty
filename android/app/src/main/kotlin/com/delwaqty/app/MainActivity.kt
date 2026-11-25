@@ -62,6 +62,37 @@ class MainActivity : FlutterFragmentActivity() {
             .setMethodCallHandler { call, result ->
                 if (call.method == "canRequestPackageInstalls") {
                     result.success(packageManager.canRequestPackageInstalls())
+                } else if (call.method == "getInstalledVersionCode") {
+                    val pkg = call.argument<String>("packageName")
+                    if (pkg == null) {
+                        result.error("bad_args", "packageName required", null); return@setMethodCallHandler
+                    }
+                    try {
+                        val info = packageManager.getPackageInfo(pkg, 0)
+                        val code = if (android.os.Build.VERSION.SDK_INT >= 28) {
+                            info.longVersionCode
+                        } else {
+                            @Suppress("DEPRECATION") info.versionCode.toLong()
+                        }
+                        result.success(code)
+                    } catch (e: android.content.pm.PackageManager.NameNotFoundException) {
+                        result.success(null)
+                    } catch (e: Exception) {
+                        result.error("query_failed", e.message, null)
+                    }
+                } else if (call.method == "launchApp") {
+                    val pkg = call.argument<String>("packageName")
+                    if (pkg == null) {
+                        result.error("bad_args", "packageName required", null); return@setMethodCallHandler
+                    }
+                    val intent = packageManager.getLaunchIntentForPackage(pkg)
+                    if (intent == null) {
+                        result.success(false)
+                    } else {
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        startActivity(intent)
+                        result.success(true)
+                    }
                 } else if (call.method == "installApk") {
                     val path = call.argument<String>("path")
                     if (path == null) {

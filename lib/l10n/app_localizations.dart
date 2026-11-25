@@ -15638,6 +15638,30 @@ abstract class AppLocalizations {
   /// **'The verified download is ready. Follow the installation prompt.'**
   String get appInvitationInstallReady;
 
+  /// No description provided for @appInvitationInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Install'**
+  String get appInvitationInstall;
+
+  /// No description provided for @appInvitationOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get appInvitationOpen;
+
+  /// No description provided for @appInvitationUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get appInvitationUpdate;
+
+  /// No description provided for @appInvitationUpToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed and up to date'**
+  String get appInvitationUpToDate;
+
   /// No description provided for @appInvitationDownloadFailed.
   ///
   /// In en, this message translates to:

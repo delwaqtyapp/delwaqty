@@ -284,6 +284,44 @@ Future<bool> canRequestPackageInstalls() async {
   }
 }
 
+/// Package name of each flavor's installed app, mirroring the
+/// applicationId values in android/app/build.gradle.kts.
+String packageNameForFlavor(AppFlavor flavor) => switch (flavor) {
+  AppFlavor.customer => 'com.delwaqty.app',
+  AppFlavor.admin => 'com.delwaqty.admin',
+  AppFlavor.driver => 'com.delwaqty.driver',
+  AppFlavor.provider => 'com.delwaqty.provider',
+};
+
+/// Installed versionCode of [packageName], or null when the package is not
+/// installed or the platform cannot answer.
+Future<int?> installedVersionCode(String packageName) async {
+  if (!Platform.isAndroid) return null;
+  try {
+    final code = await _otaMethodChannel.invokeMethod<int>(
+      'getInstalledVersionCode',
+      {'packageName': packageName},
+    );
+    return code;
+  } catch (_) {
+    return null;
+  }
+}
+
+/// Launches an installed app by [packageName]. Returns false when the
+/// package has no launcher entry or the platform refuses.
+Future<bool> launchInstalledApp(String packageName) async {
+  if (!Platform.isAndroid) return false;
+  try {
+    final launched = await _otaMethodChannel.invokeMethod<bool>('launchApp', {
+      'packageName': packageName,
+    });
+    return launched ?? false;
+  } catch (_) {
+    return false;
+  }
+}
+
 /// Asks the native side to launch Android's package installer for an
 /// already-downloaded [file]. Returns null on success or the native error
 /// code. `needs_install_permission` means the system settings page for

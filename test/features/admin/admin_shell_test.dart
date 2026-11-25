@@ -78,6 +78,31 @@ void main() {
     },
   );
 
+  testWidgets('320px / 1.6x text scale: bottom nav tiles do not overflow', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    final trapped = <FlutterErrorDetails>[];
+    final prevHandler = FlutterError.onError;
+    FlutterError.onError = (details) => trapped.add(details);
+
+    await tester.pumpWidget(await harness());
+    await tester.pumpAndSettle();
+    FlutterError.onError = prevHandler;
+
+    for (final details in trapped) {
+      debugPrint('=====DETAILS=====\n$details');
+    }
+    expect(trapped, isEmpty);
+    expect(find.byType(AdminShell), findsOneWidget);
+    expect(find.byIcon(Icons.people_rounded), findsWidgets);
+  });
+
   testWidgets('wide layout renders the premium sidebar with groups', (
     tester,
   ) async {

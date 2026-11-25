@@ -534,11 +534,13 @@ class _AdminBottomNavBar extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: List.generate(items.length, (i) {
-                  return _BottomNavTile(
-                    entry: items[i],
-                    isActive: currentIndex == i,
-                    onTap: () => onTap(i),
-                    isDark: isDark,
+                  return Expanded(
+                    child: _BottomNavTile(
+                      entry: items[i],
+                      isActive: currentIndex == i,
+                      onTap: () => onTap(i),
+                      isDark: isDark,
+                    ),
                   );
                 }),
               ),
@@ -574,70 +576,87 @@ class _BottomNavTile extends StatelessWidget {
         child: GestureDetector(
           onTap: onTap,
           behavior: HitTestBehavior.opaque,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 240),
-            curve: Curves.easeOutCubic,
-            width: isActive ? 92 : 60,
-            padding: const EdgeInsets.symmetric(vertical: 5),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              gradient: isActive
-                  ? const LinearGradient(
-                      begin: AlignmentDirectional.topStart,
-                      end: AlignmentDirectional.bottomEnd,
-                      colors: [AppColors.brandPurple, AppColors.brandViolet],
-                    )
-                  : null,
-              boxShadow: isActive
-                  ? [
-                      BoxShadow(
-                        color: AppColors.brandPurple.withValues(alpha: 0.35),
-                        blurRadius: 14,
-                        spreadRadius: -2,
-                        offset: const Offset(0, 5),
-                      ),
-                    ]
-                  : null,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  entry.icon,
-                  size: 20,
-                  color: isActive
-                      ? Colors.white
-                      : isDark
-                      ? Colors.white.withValues(alpha: 0.55)
-                      : Theme.of(context).colorScheme.onSurface
-                            .withValues(alpha: 0.5),
-                ),
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 240),
-                  curve: Curves.easeOutCubic,
-                  alignment: AlignmentDirectional.centerStart,
-                  child: isActive
-                      ? Padding(
-                          padding: const EdgeInsetsDirectional.only(start: 7),
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 64),
-                            child: Text(
-                              entry.label,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Narrow phones and large text scales: drop the label before
+              // it can overflow; Semantics and Tooltip still carry it.
+              final showLabel = isActive && constraints.maxWidth >= 72;
+              final labelMax = (constraints.maxWidth - 20 - 7 - 16).clamp(
+                0.0,
+                64.0,
+              );
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 240),
+                curve: Curves.easeOutCubic,
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(18),
+                  gradient: isActive
+                      ? const LinearGradient(
+                          begin: AlignmentDirectional.topStart,
+                          end: AlignmentDirectional.bottomEnd,
+                          colors: [
+                            AppColors.brandPurple,
+                            AppColors.brandViolet,
+                          ],
                         )
-                      : const SizedBox.shrink(),
+                      : null,
+                  boxShadow: isActive
+                      ? [
+                          BoxShadow(
+                            color: AppColors.brandPurple.withValues(
+                              alpha: 0.35,
+                            ),
+                            blurRadius: 14,
+                            spreadRadius: -2,
+                            offset: const Offset(0, 5),
+                          ),
+                        ]
+                      : null,
                 ),
-              ],
-            ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      entry.icon,
+                      size: 20,
+                      color: isActive
+                          ? Colors.white
+                          : isDark
+                          ? Colors.white.withValues(alpha: 0.55)
+                          : Theme.of(context).colorScheme.onSurface
+                                .withValues(alpha: 0.5),
+                    ),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 240),
+                      curve: Curves.easeOutCubic,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: showLabel
+                          ? Padding(
+                              padding: const EdgeInsetsDirectional.only(
+                                start: 7,
+                              ),
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(maxWidth: labelMax),
+                                child: Text(
+                                  entry.label,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),

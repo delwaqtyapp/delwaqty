@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'package:delwaqty/core/config/app_mode_provider.dart';
 
@@ -170,10 +171,15 @@ Future<OtaCheckResult> checkForOtaUpdate(AppFlavor flavor) async {
 final Map<String, String> _verifiedArtifactHashes = {};
 
 class OtaDownloadResult {
-  const OtaDownloadResult({this.file, this.error});
+  const OtaDownloadResult({this.file, this.error, this.version});
 
   final File? file;
   final String? error;
+
+  /// versionCode of the channel config the file was actually downloaded and
+  /// verified against. Callers must use THIS (not a later manifest snapshot)
+  /// when deciding whether an install completed.
+  final int? version;
 
   bool get ok => file != null;
 }
@@ -265,7 +271,7 @@ Future<OtaDownloadResult> downloadLatestApk(
 
     onProgress?.call(1.0);
     _verifiedArtifactHashes[target.path] = expectedHash;
-    return OtaDownloadResult(file: target);
+    return OtaDownloadResult(file: target, version: channel.version);
   } catch (_) {
     return const OtaDownloadResult();
   }
@@ -281,6 +287,44 @@ Future<bool> canRequestPackageInstalls() async {
     return allowed ?? true;
   } catch (_) {
     return true;
+  }
+}
+
+/// Package name of each flavor's installed app, mirroring the
+/// applicationId values in android/app/build.gradle.kts.
+String packageNameForFlavor(AppFlavor flavor) => switch (flavor) {
+  AppFlavor.customer => 'com.delwaqty.app',
+  AppFlavor.admin => 'com.delwaqty.admin',
+  AppFlavor.driver => 'com.delwaqty.driver',
+  AppFlavor.provider => 'com.delwaqty.provider',
+};
+
+/// Installed versionCode of [packageName], or null when the package is not
+/// installed or the platform cannot answer.
+Future<int?> installedVersionCode(String packageName) async {
+  if (!Platform.isAndroid) return null;
+  try {
+    final code = await _otaMethodChannel.invokeMethod<int>(
+      'getInstalledVersionCode',
+      {'packageName': packageName},
+    );
+    return code;
+  } catch (_) {
+    return null;
+  }
+}
+
+/// Launches an installed app by [packageName]. Returns false when the
+/// package has no launcher entry or the platform refuses.
+Future<bool> launchInstalledApp(String packageName) async {
+  if (!Platform.isAndroid) return false;
+  try {
+    final launched = await _otaMethodChannel.invokeMethod<bool>('launchApp', {
+      'packageName': packageName,
+    });
+    return launched ?? false;
+  } catch (_) {
+    return false;
   }
 }
 
@@ -319,6 +363,71 @@ Future<(int?, String?)> downloadAndInstallLatest(
   if (error != null) return (null, error);
   return (file.lengthSync(), null);
 }
+
+const _kInstallHandoffPrefix = 'ota_install_handed_off_';
+
+/// How long the automatic offer stays quiet after the installer was opened
+/// without the running build changing. Matches the OTA fallback interval:
+/// long enough to stop a resume loop, short enough that a cancelled or
+/// failed install is offered again the same day.
+const kOtaInstallHandoffCooldown = Duration(hours: 8);
+
+/// Records that the system installer was opened for [version] of [flavor].
+Future<void> markOtaInstallHandedOff(AppFlavor flavor, int version) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString(
+    '$_kInstallHandoffPrefix${flavor.name}',
+    '$version:${DateTime.now().millisecondsSinceEpoch}',
+  );
+}
+
+/// The last handoff as (version, timestamp), or null. A legacy record in
+/// another type (an int from the first iteration) is dropped instead of
+/// throwing, and reads as no handoff - failing open toward offering.
+Future<(int, DateTime)?> otaInstallHandoff(AppFlavor flavor) async {
+  final prefs = await SharedPreferences.getInstance();
+  final raw = prefs.get('$_kInstallHandoffPrefix${flavor.name}');
+  if (raw == null) return null;
+  if (raw is! String) {
+    await prefs.remove('$_kInstallHandoffPrefix${flavor.name}');
+    return null;
+  }
+  final parts = raw.split(':');
+  if (parts.length != 2) return null;
+  final version = int.tryParse(parts[0]);
+  final millis = int.tryParse(parts[1]);
+  if (version == null || millis == null) return null;
+  return (version, DateTime.fromMillisecondsSinceEpoch(millis));
+}
+
+/// Clears the handoff record once the running build actually changed.
+Future<void> clearOtaInstallHandoff(AppFlavor flavor) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('$_kInstallHandoffPrefix${flavor.name}');
+}
+
+/// Whether the automatic (non-forced) offer is suppressed: the installer
+/// was already opened for [latest] within [cooldown], and the running build
+/// still has not changed, so re-offering on every resume would loop the
+/// same update. The offer returns once the cooldown expires (a cancelled or
+/// failed install gets another chance), a newer [latest] than the
+/// handed-off one always offers again, and the manual About-page check
+/// (force) never consults this gate.
+bool suppressAutoOtaOffer({
+  required int current,
+  required int latest,
+  required int? handedOffVersion,
+  required DateTime? handedOffAt,
+  required DateTime now,
+  Duration cooldown = kOtaInstallHandoffCooldown,
+}) =>
+    handedOffVersion != null &&
+    handedOffAt != null &&
+    handedOffVersion >= latest &&
+    current < latest &&
+    // Clock skew: a handoff timestamped in the future must not suppress.
+    now.difference(handedOffAt) >= Duration.zero &&
+    now.difference(handedOffAt) < cooldown;
 
 /// Streams [file] through SHA-256 and compares it with [expected].
 ///

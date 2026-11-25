@@ -51,7 +51,7 @@ class SupabaseAuthDataSource {
   }
 
   /// Signs in through the auth-login-identifier edge function: the
-  /// identifier (email, phone or username) and password go to the server,
+  /// identifier (phone or username) and password go to the server,
   /// which resolves the account and checks the password with GoTrue.
   /// Scope: no email is disclosed before authentication, and the edge
   /// response carries no standalone user object - only session tokens.

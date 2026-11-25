@@ -1,7 +1,7 @@
-# Rollout runbook: session-only login (440 + auth-login-identifier + app swap)
+# Rollout runbook: session-only login (440 + 441 + auth-login-identifier + app swap)
 
 Sequence for enabling server-side session-only login in production.
-Hard order (security reviewer): **apply 440 -> deploy the function ->
+Hard order (security reviewer): **apply 440 and 441 -> deploy the function ->
 smoke 200/401/429 -> only then ship a build that includes the app swap
 (#60).** Every prod step requires the owner's explicit order. This
 document is a checklist, NOT authorization: each write step names its
@@ -20,6 +20,10 @@ Parts:
   `auth_login_begin` / `auth_login_finish` / `auth_login_resolve_email`,
   all service-role only) + edge function `auth-login-identifier`.
 - PR 2 (#60): app sign-in routes through the function.
+- #64: migration 441 removes the legacy email bridge (owner decision
+  2026-11-25: no email as a login identifier - username/phone only).
+  Email-shaped input resolves to NULL and is answered exactly like an
+  unknown identifier; email stays for signup, reset and contact only.
 - PR 3 (later release): revoke anon/authenticated EXECUTE on
   `lookup_email_by_phone` / `lookup_email_by_username`. NOT before old
   builds are gone from the wild - old builds still depend on them, and
@@ -43,16 +47,16 @@ Parts:
   owner's order for that stack), then 438, then 439. 439 in particular
   is required before 440 and the app swap: the prod username index is
   still the old case-sensitive one, and the app now depends on the
-  439 semantics. After this chain + 440, expect the registry max to be
-  440 (recheck live). Each apply keeps its own preflight and the
-  owner's explicit order.
+  439 semantics. After this chain + 440 + 441, expect the registry
+  max to be 441 (recheck live). Each apply keeps its own preflight and
+  the owner's explicit order.
 - **Tell the security reviewer when the prod apply is planned** so they
   can run their post-check against the live database.
 
 ## 1. Staging
 
-1. Apply migration 440 to the STAGING database (explicit staging target;
-   record target redacted + migration SHA).
+1. Apply migration 440 and then 441 to the STAGING database
+   (explicit staging target; record target redacted + migration SHAs).
 2. Privilege audit on staging. Run all of it; an empty result is a
    FAILURE of the audit, not a green.
    a. The three functions must exist - exactly these three:
@@ -83,7 +87,8 @@ Parts:
       AND p.proname IN ('auth_login_begin', 'auth_login_finish', 'auth_login_resolve_email')
     ORDER BY 1;
    -- compare signatures (argument types), owner and md5 against the
-   -- values recorded when 440 was reviewed/applied on staging.
+   -- values recorded when 440+441 were reviewed/applied on staging
+   -- (441 changed the resolver body, so its md5 differs from 440's).
    -- Note: md5(prosrc) covers the function BODY only - the signature,
    -- owner, prosecdef, search_path and ACL checks above are what catch
    -- a same-body replacement with different properties, so keep them.
@@ -174,8 +179,9 @@ Parts:
    exact rollout-test keys used>)` - each key listed explicitly, with
    the OWNER'S ACTUAL APPROVAL for that specific cleanup obtained
    beforehand, not a blanket delete and not a standing permission):
-   - For EACH identifier class - phone, username, legacy real email -
-     do a REAL client login through the merged #60 app build (or the
+   - For EACH identifier class - phone and username (email is NOT a
+     login identifier since 441) - do a REAL client login through the
+     merged #60 app build (or the
      exact supabase-js calls it makes: `functions.invoke` +
      `auth.setSession`): expect 200, `auth.setSession` adopts the
      session, and the profile loads. This proves SDK session adoption
@@ -185,6 +191,10 @@ Parts:
      the same path).
    - Wrong password -> 401 `invalid_credentials`; unknown identifier ->
      byte-identical 401 `invalid_credentials`.
+   - Email-bridge check (441): a REAL account's email + its CORRECT
+     password must now FAIL with the same byte-identical 401
+     `invalid_credentials` as an unknown identifier. If it succeeds,
+     the rollout is a FAIL - the bridge is still open.
    - Slow-but-working GoTrue: with GoTrue artificially delayed UNDER
      the function's 5s timeout (isolated staging or a mock - NEVER
      impair a shared/prod GoTrue), a credential rejection stays 401 on
@@ -218,9 +228,9 @@ Parts:
 ## 2. Production (owner's explicit order for each step)
 
 1. Recheck the live migration registry and file hashes (see section 0),
-   then apply migration 440 to the PROD database (explicit prod target;
-   record target redacted + SHA). Re-run the full privilege audit from
-   step 1.2.
+   then apply migrations 440 and 441 to the PROD database (explicit
+   prod target; record target redacted + SHAs). Re-run the full
+   privilege audit from step 1.2.
 2. Deploy the function to prod:
    `supabase functions deploy auth-login-identifier --no-verify-jwt --project-ref bttnlkmwhorjamzemwda`.
 3. Repeat the smoke suite from step 1.4 against prod with fresh prod

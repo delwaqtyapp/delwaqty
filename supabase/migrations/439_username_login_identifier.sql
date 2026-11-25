@@ -9,7 +9,9 @@
 -- users_username_unique_idx is case-SENSITIVE: 'Ahmed' and 'ahmed' could
 -- coexist and the lookup would pick one arbitrarily.
 --
--- Rules (mirrored exactly by the app's client-side validation):
+-- Rules (the companion app PR aligns client-side validation to these
+-- exact rules; until it lands the server constraint is the only
+-- enforcement):
 --   username ~ '^[a-zA-Z0-9_]{3,30}$'  (ASCII slug)
 --   username !~ '^[0-9]+$'             (never phone-shaped: the client
 --     routes all-digit identifiers to the phone-number login path, so a

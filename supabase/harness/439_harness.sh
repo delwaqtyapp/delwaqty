@@ -60,13 +60,20 @@ cleanup() { for db in "${CREATED[@]:-}"; do [ -n "$db" ] && psql "$ADMIN_URL" -X
 trap cleanup EXIT
 
 newdb() {
-  local db
-  db="h439_$(od -An -N4 -tx1 /dev/urandom | tr -d ' \n')"
-  psql "$ADMIN_URL" -X -q -c "CREATE DATABASE \"$db\" TEMPLATE $TEMPLATE" >/dev/null \
-    || fail_case "could not create database $db from $TEMPLATE"
-  CREATED+=("$db")
-  printf '%s' "$db"
+  # Sets NEWDB in the PARENT shell (never call in a subshell: CREATED
+  # and the result must survive). Retries on a name collision.
+  local db i
+  for i in 1 2 3; do
+    db="h439_$(od -An -N4 -tx1 /dev/urandom | tr -d ' \n')"
+    if psql "$ADMIN_URL" -X -q -c "CREATE DATABASE \"$db\" TEMPLATE $TEMPLATE" >/dev/null 2>&1; then
+      CREATED+=("$db")
+      NEWDB="$db"
+      return 0
+    fi
+  done
+  return 1
 }
+
 
 BASE_URL="$(printf '%s' "$ADMIN_URL" | sed -E 's#/[^/]*$##')"
 
@@ -81,8 +88,17 @@ seed_user() { # db email username_sql account_status
     || fail_case "fixture insert failed ($2)"
 }
 
+# Cleanup proof mode: create one clone, then fail. The EXIT trap must
+# drop it; verified externally by counting h439_* databases afterwards.
+if [ "${H439_FORCE_FAIL_AFTER_CREATE:-}" = "yes" ]; then
+  newdb || fail_case "could not create database"
+  echo "forced failure with clone $NEWDB still open"
+  fail_case "forced failure for cleanup proof"
+fi
+
 echo "== case 1: clean apply keeps valid names, builds lower() index"
-DB1="$(newdb)"
+newdb || fail_case "could not create case-1 database"
+DB1="$NEWDB"
 seed_user "$DB1" 'legacy.one@example.invalid' "'LegacyUser'"
 seed_user "$DB1" 'phone_201000000099@delwaqty.app' "NULL"
 seed_user "$DB1" 'deleted-00000000-0000-4000-8000-000000000439@anonymized.invalid' "NULL"
@@ -95,7 +111,8 @@ psql_db "$DB1" -f "$SUITE" >/dev/null || fail_case "post-apply suite failed"
 echo "case 1 OK"
 
 echo "== case 2: invalid legacy name aborts with diagnostics"
-DB2="$(newdb)"
+newdb || fail_case "could not create case-2 database"
+DB2="$NEWDB"
 seed_user "$DB2" 'john.doe@example.invalid' "'john.doe'"
 OUT="$(psql_db "$DB2" -f "$MIG" 2>&1)" && fail_case "apply must abort on invalid legacy name"
 printf '%s' "$OUT" | grep -q "439 preflight failed: existing usernames violate the new rules: john.doe" \
@@ -105,7 +122,8 @@ IDX="$(psql_db "$DB2" -c "SELECT indexdef FROM pg_indexes WHERE indexname='users
 echo "case 2 OK"
 
 echo "== case 3: case-fold collision aborts"
-DB3="$(newdb)"
+newdb || fail_case "could not create case-3 database"
+DB3="$NEWDB"
 seed_user "$DB3" 'ahmed.one@example.invalid' "'Ahmed'"
 seed_user "$DB3" 'ahmed.two@example.invalid' "'ahmed'"
 OUT="$(psql_db "$DB3" -f "$MIG" 2>&1)" && fail_case "apply must abort on case-fold collision"
@@ -116,7 +134,8 @@ IDX="$(psql_db "$DB3" -c "SELECT indexdef FROM pg_indexes WHERE indexname='users
 echo "case 3 OK"
 
 echo "== case 4: all-digit phone-shaped legacy name aborts"
-DB4="$(newdb)"
+newdb || fail_case "could not create case-4 database"
+DB4="$NEWDB"
 seed_user "$DB4" 'digits@example.invalid' "'012345678'"
 OUT="$(psql_db "$DB4" -f "$MIG" 2>&1)" && fail_case "apply must abort on phone-shaped name"
 printf '%s' "$OUT" | grep -q "439 preflight failed: existing usernames violate the new rules: 012345678" \

@@ -361,12 +361,26 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     try {
       final authState = ref.read(authStateProvider);
       final user = authState.whenOrNull(authenticated: (u) => u);
-      final email = _emailController.text.trim();
+      // Store the LOGIN identifier, never the synthetic phone-auth
+      // email: email is not a login identifier (441). Registration is
+      // phone-based, so the identifier is the verified phone.
+      final identifier = biometricLoginIdentifier(
+        phone: normalizeEgyptPhone(_phoneController.text),
+      );
       final password = _passwordController.text;
-      if (user == null || email.isEmpty || password.isEmpty) return;
+      if (user == null ||
+          identifier == null ||
+          identifier.isEmpty ||
+          password.isEmpty) {
+        return;
+      }
       await ref
           .read(biometricAuthStoreProvider)
-          .saveCredentials(userId: user.id, email: email, password: password);
+          .saveCredentials(
+            userId: user.id,
+            identifier: identifier,
+            password: password,
+          );
     } catch (_) {}
   }
 

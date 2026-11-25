@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,6 +14,20 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 class _FakeAuthNotifier extends AuthStateNotifier {
   @override
   AuthState build() => const AuthState.unauthenticated();
+}
+
+class _RecordingAuthNotifier extends AuthStateNotifier {
+  String? lastEmail;
+  String? lastPassword;
+
+  @override
+  AuthState build() => const AuthState.unauthenticated();
+
+  @override
+  Future<void> signIn({required String email, required String password}) async {
+    lastEmail = email;
+    lastPassword = password;
+  }
 }
 
 class _ConfirmResendAuthNotifier extends AuthStateNotifier {
@@ -70,7 +85,7 @@ void main() {
   ) async {
     await store.saveCredentials(
       userId: 'user-1',
-      email: 'a@b.com',
+      identifier: '01001112233',
       password: 'secret',
     );
     await store.clearForUser('user-1');
@@ -124,4 +139,99 @@ void main() {
       );
     },
   );
+
+  testWidgets(
+    'biometric login replays the stored login identifier, never an email (441)',
+    (tester) async {
+      const channel = MethodChannel('plugins.flutter.io/local_auth');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            switch (call.method) {
+              case 'canCheckBiometrics':
+              case 'isDeviceSupported':
+                return true;
+              case 'getAvailableBiometrics':
+                return <String>['fingerprint'];
+              case 'authenticate':
+                return true;
+              default:
+                return null;
+            }
+          });
+      addTearDown(
+        () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null),
+      );
+
+      await store.saveCredentials(
+        userId: 'user-1',
+        identifier: '01001112233',
+        password: 'secret',
+      );
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          store: store,
+          prefsService: prefsService,
+          notifier: _RecordingAuthNotifier.new,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.fingerprint_rounded), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.fingerprint_rounded));
+      await tester.pumpAndSettle();
+
+      final notifier = ProviderScope.containerOf(
+        tester.element(find.byType(LoginPage)),
+      ).read(authStateProvider.notifier) as _RecordingAuthNotifier;
+      expect(notifier.lastEmail, '01001112233');
+      expect(notifier.lastPassword, 'secret');
+    },
+  );
+
+  testWidgets('biometric login ignores a legacy email-keyed credential (441)', (
+    tester,
+  ) async {
+    const channel = MethodChannel('plugins.flutter.io/local_auth');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          switch (call.method) {
+            case 'canCheckBiometrics':
+            case 'isDeviceSupported':
+              return true;
+            case 'getAvailableBiometrics':
+              return <String>['fingerprint'];
+            case 'authenticate':
+              return true;
+            default:
+              return null;
+          }
+        });
+    addTearDown(
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null),
+    );
+
+    const storage = FlutterSecureStorage();
+    await storage.write(
+      key: 'auth_biometric_user-1',
+      value: '{"email":"phone_201001112233@delwaqty.app","password":"secret","userId":"user-1"}',
+    );
+    await storage.write(key: 'auth_biometric_active_user', value: 'user-1');
+    await storage.write(key: 'auth_biometric_index', value: '["user-1"]');
+
+    await tester.pumpWidget(
+      _buildTestApp(
+        store: store,
+        prefsService: prefsService,
+        notifier: _RecordingAuthNotifier.new,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // The only stored credential is email-keyed: discarded on read,
+    // so no fingerprint sign-in is offered.
+    expect(find.byIcon(Icons.fingerprint_rounded), findsNothing);
+  });
 }

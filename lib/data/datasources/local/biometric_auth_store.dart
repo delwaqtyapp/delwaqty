@@ -6,13 +6,28 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class BiometricCredentials {
   const BiometricCredentials({
     required this.userId,
-    required this.email,
+    required this.identifier,
     required this.password,
   });
 
   final String userId;
-  final String email;
+
+  /// The LOGIN identifier (phone or username) replayed through the
+  /// auth-login-identifier function - never an email. Email is not a
+  /// login identifier (441); a stored email-shaped value is a legacy
+  /// credential and is discarded on read.
+  final String identifier;
   final String password;
+}
+
+/// The login identifier to store for biometric replay: the account's
+/// phone when present, otherwise its username. NEVER an email - email
+/// is not a login identifier (441). Returns null when the account has
+/// no usable identifier; biometric enroll must not proceed then.
+String? biometricLoginIdentifier({String? phone, String? username}) {
+  if (phone != null && phone.isNotEmpty) return phone;
+  if (username != null && username.isNotEmpty) return username;
+  return null;
 }
 
 final biometricAuthStoreProvider = Provider<BiometricAuthStore>((ref) {
@@ -30,11 +45,11 @@ class BiometricAuthStore {
 
   Future<void> saveCredentials({
     required String userId,
-    required String email,
+    required String identifier,
     required String password,
   }) async {
     final payload = jsonEncode({
-      'email': email,
+      'identifier': identifier,
       'password': password,
       'userId': userId,
     });
@@ -48,17 +63,29 @@ class BiometricAuthStore {
     if (raw == null) return null;
     try {
       final decoded = jsonDecode(raw) as Map<String, dynamic>;
-      final email = decoded['email'] as String?;
+      // Current key is 'identifier'; entries written before the rename
+      // carry the same value under the legacy 'email' key.
+      final identifier =
+          (decoded['identifier'] as String?) ?? (decoded['email'] as String?);
       final password = decoded['password'] as String?;
-      if (email == null ||
-          email.isEmpty ||
+      if (identifier == null ||
+          identifier.isEmpty ||
           password == null ||
           password.isEmpty) {
         return null;
       }
+      if (identifier.contains('@')) {
+        // Legacy credential stored when email was a login identifier
+        // (registration / settings enroll saved user.email). Email
+        // login is gone (441), so this entry can never sign in:
+        // discard it explicitly; the user re-enrolls with their
+        // phone/username on the next password login or in settings.
+        await clearForUser(userId);
+        return null;
+      }
       return BiometricCredentials(
         userId: userId,
-        email: email,
+        identifier: identifier,
         password: password,
       );
     } catch (_) {
@@ -66,11 +93,14 @@ class BiometricAuthStore {
     }
   }
 
-  Future<BiometricCredentials?> credentialsForEmail(String email) async {
+  Future<BiometricCredentials?> credentialsForIdentifier(
+    String identifier,
+  ) async {
     final userIds = await allUserIds();
     for (final uid in userIds) {
       final creds = await credentialsFor(uid);
-      if (creds != null && creds.email.toLowerCase() == email.toLowerCase()) {
+      if (creds != null &&
+          creds.identifier.toLowerCase() == identifier.toLowerCase()) {
         return creds;
       }
     }

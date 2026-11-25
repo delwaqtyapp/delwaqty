@@ -531,6 +531,21 @@ test('unknown identifier and wrong password are identical, padded, and email-fre
   assert.ok(wrongCalls.includes('auth_login_finish'));
 });
 
+test('email-shaped identifier is just an unknown identifier (441: email bridge removed)', async () => {
+  const credError = { message: 'invalid', status: 400 };
+  // SQL now resolves any '@' input to NULL; the edge must answer exactly
+  // like an unknown identifier: 401, identical body, dummy timing check.
+  const calls = [];
+  const handler = loadLoginHandler({ resolveEmail: null, signInError: credError, calls });
+  const response = await handler(loginRequest('someone@example.com'));
+  assert.equal(response.status, 401);
+  const text = await response.text();
+  assert.equal(JSON.parse(text).error, 'invalid_credentials');
+  assert.ok(!EMAIL_RE.test(text));
+  assert.ok(calls.some(c => c.startsWith('signIn:missing-')), `no dummy signIn: ${calls}`);
+  assert.ok(calls.includes('auth_login_finish'));
+});
+
 test('successful login returns session tokens only: no user object, no standalone email', async () => {
   const calls = [];
   const handler = loadLoginHandler({ resolveEmail: 'hidden@example.com', calls });

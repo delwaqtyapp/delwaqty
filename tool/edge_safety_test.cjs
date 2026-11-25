@@ -142,14 +142,26 @@ function loadWebhookHandler({
     return self;
   };
   const messagesChain = {
-    insert: (rows, _opts) => ({
-      select: async () => {
-        const row = Array.isArray(rows) ? rows[0] : rows;
-        if (claimed.has(row.message_id)) return { data: [], error: null };
-        claimed.add(row.message_id);
-        return { data: [row], error: null };
-      },
-    }),
+    // insert() accepts no conflict options in supabase-js: fail loudly so a
+    // call shaped like one can never hide behind the mock.
+    insert: (_rows, opts) => {
+      if (opts !== undefined) throw new Error('insert() takes no options; use upsert for ON CONFLICT');
+      throw new Error('unexpected plain insert into whatsapp_webhook_messages');
+    },
+    upsert: (rows, opts) => {
+      // deepEqual fails cross-realm; compare the two supported keys directly.
+      assert.equal(opts && opts.onConflict, 'message_id');
+      assert.equal(opts && opts.ignoreDuplicates, true);
+      assert.deepEqual(Object.keys(opts || {}).sort(), ['ignoreDuplicates', 'onConflict']);
+      return {
+        select: async () => {
+          const row = Array.isArray(rows) ? rows[0] : rows;
+          if (claimed.has(row.message_id)) return { data: [], error: null };
+          claimed.add(row.message_id);
+          return { data: [row], error: null };
+        },
+      };
+    },
   };
   const context = {
     Request, Response, URL, TextEncoder, crypto: webcrypto, console, AbortSignal,

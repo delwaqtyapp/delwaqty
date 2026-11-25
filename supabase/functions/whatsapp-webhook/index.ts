@@ -212,15 +212,19 @@ Deno.serve(async (req) => {
             // on unique(message_id) and sends nothing. The row the RPC
             // wrote for a successful verify conflicts the same way, so a
             // duplicate that lost the verify race can never nudge after a
-            // confirmation.
-            const { data: claim } = await supabase
+            // confirmation. upsert + ignoreDuplicates is INSERT ... ON
+            // CONFLICT DO NOTHING in supabase-js; an error fails safe (no
+            // reply).
+            const { data: claim, error: claimError } = await supabase
               .from("whatsapp_webhook_messages")
-              .insert(
+              .upsert(
                 { message_id: messageId, phone: from },
                 { onConflict: "message_id", ignoreDuplicates: true },
               )
               .select("message_id");
-            if (claim && claim.length > 0) {
+            if (claimError) {
+              console.error("whatsapp reply claim error", claimError.code ?? "unknown");
+            } else if (claim && claim.length > 0) {
               await sendWhatsAppText(toDigits, INVALID_CODE_BODY);
             }
           }

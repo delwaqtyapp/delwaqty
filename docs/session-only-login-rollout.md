@@ -29,9 +29,12 @@ Parts:
   accepts email - old builds and the admin web gate sign in that way
   until part 3 retires that path.
 - PR 3 (later release): revoke anon/authenticated EXECUTE on
-  `lookup_email_by_phone` / `lookup_email_by_username`. NOT before old
-  builds are gone from the wild - old builds still depend on them, and
-  after the revoke the old-build fallback no longer exists.
+  `lookup_email_by_phone` / `lookup_email_by_username`, AND move the
+  admin web gate off its direct email GoTrue sign-in onto the
+  auth-login-identifier function (owner decision 2026-11-25: it stays
+  on the direct path until then). NOT before old builds are gone from
+  the wild - old builds still depend on the direct path, and after the
+  revoke the old-build fallback no longer exists.
 
 ## 0. Preconditions
 

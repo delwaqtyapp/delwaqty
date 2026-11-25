@@ -8171,7 +8171,7 @@ abstract class AppLocalizations {
   /// No description provided for @usernameInvalid.
   ///
   /// In en, this message translates to:
-  /// **'Username must be 3-30 letters, digits or underscores, not only digits'**
+  /// **'Username must be 3-30 English letters, digits or underscores, not only digits'**
   String get usernameInvalid;
 
   /// No description provided for @usernameTaken.

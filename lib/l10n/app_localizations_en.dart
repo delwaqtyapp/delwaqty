@@ -4255,7 +4255,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get usernameInvalid =>
-      'Username must be 3-30 letters, digits or underscores, not only digits';
+      'Username must be 3-30 English letters, digits or underscores, not only digits';
 
   @override
   String get usernameTaken => 'This username is taken. Try another one.';

@@ -66,6 +66,26 @@ Parts:
    -- expect exactly 3 rows
    ```
 
+   Then pin each function by IDENTITY (regprocedure signature + owner +
+   security-definer flag) and by SOURCE HASH, comparing against the
+   reviewed migration file - a same-named replacement with a different
+   body must fail this check:
+
+   ```sql
+   SELECT p.oid::regprocedure AS signature,
+          r.rolname AS owner,
+          p.prosecdef,
+          md5(p.prosrc) AS body_md5
+     FROM pg_proc p
+     JOIN pg_namespace n ON n.oid = p.pronamespace
+     JOIN pg_roles r ON r.oid = p.proowner
+    WHERE n.nspname = 'public'
+      AND p.proname IN ('auth_login_begin', 'auth_login_finish', 'auth_login_resolve_email')
+    ORDER BY 1;
+   -- compare signatures (argument types), owner and md5 against the
+   -- values recorded when 440 was reviewed/applied on staging
+   ```
+
    b. Named roles via has_function_privilege (PUBLIC is NOT a role and
    must not be queried this way - it errors on PG17):
 
@@ -94,7 +114,9 @@ Parts:
    ```
 
    d. Client table rights - enumerate ALL privilege types for anon,
-   authenticated and PUBLIC on the table, not a sample:
+   authenticated and PUBLIC on the table, not a sample. The aclexplode
+   query shows DIRECT grants; also check EFFECTIVE rights via
+   has_table_privilege (role memberships could grant more):
 
    ```sql
    SELECT g.rolname AS grantee, a.privilege_type
@@ -106,6 +128,14 @@ Parts:
       AND (a.grantee = 0
            OR g.rolname IN ('anon', 'authenticated'));
    -- expect 0 rows
+
+   SELECT priv,
+          has_table_privilege('anon',          'public.auth_login_attempts', priv) AS anon,
+          has_table_privilege('authenticated', 'public.auth_login_attempts', priv) AS authent
+     FROM (VALUES ('SELECT'), ('INSERT'), ('UPDATE'), ('DELETE'),
+                  ('TRUNCATE'), ('REFERENCES'), ('TRIGGER')) AS v(priv);
+   -- every value false
+   ```
 
    SELECT c.relrowsecurity
      FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
@@ -138,9 +168,10 @@ Parts:
    Watch the shared per-IP budget (20 failures / 10 min): the full suite
    can exhaust one tester IP - use a fresh trusted egress IP per full
    run, or reset the DESIGNATED test ledger rows afterwards
-   (`DELETE FROM public.auth_login_attempts WHERE identifier_key LIKE 'uname:rollout-test-%'`
-   with the owner's authorized scope for that cleanup; never a blanket
-   delete):
+   (`DELETE FROM public.auth_login_attempts WHERE identifier_key IN (<the
+   exact rollout-test keys used>)` - each key listed explicitly, with
+   the OWNER'S ACTUAL APPROVAL for that specific cleanup obtained
+   beforehand, not a blanket delete and not a standing permission):
    - For EACH identifier class - phone, username, legacy real email -
      do a REAL client login through the merged #60 app build (or the
      exact supabase-js calls it makes: `functions.invoke` +

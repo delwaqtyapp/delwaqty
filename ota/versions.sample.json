@@ -23,6 +23,20 @@
       "versionName": "1.0.0",
       "apk": "delwaqty-provider-8.apk",
       "notes": "تحسينات وإصلاحات نسخة التطوير"
+    },
+    "cashier-net8": {
+      "version": 1,
+      "versionName": "1.0.0-b1",
+      "apk": "delwaqty-cashier-setup-net8-b1.exe",
+      "notes": "تحديث الكاشير",
+      "sha256": "<64 hex>"
+    },
+    "cashier-net48": {
+      "version": 1,
+      "versionName": "1.0.0-b1",
+      "apk": "delwaqty-cashier-setup-net48-b1.exe",
+      "notes": "تحديث الكاشير",
+      "sha256": "<64 hex>"
     }
   }
 }

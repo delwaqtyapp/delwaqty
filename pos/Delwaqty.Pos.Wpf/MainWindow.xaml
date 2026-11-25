@@ -189,6 +189,8 @@
                             Click="SyncNow_Click" Background="#1565C0" Foreground="White"/>
                     <TextBlock x:Name="SyncDetailText" TextWrapping="Wrap" Margin="0,8"/>
                     <TextBlock x:Name="DeviceText" Foreground="#777" TextWrapping="Wrap" Margin="0,8"/>
+                    <Button Content="التحقق من تحديث التطبيق ⬇" FontSize="15" Padding="14,8" HorizontalAlignment="Left"
+                            Margin="0,8,0,0" Click="CheckUpdate_Click" Background="#2E7D32" Foreground="White"/>
                     <Button Content="تسجيل الخروج من الجهاز" Padding="14,8" HorizontalAlignment="Left"
                             Click="SignOut_Click" Background="#B71C1C" Foreground="White"/>
                 </StackPanel>

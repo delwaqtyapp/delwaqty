@@ -13,6 +13,16 @@ namespace Delwaqty.Pos.Wpf
 
         public const string AppVersion = "1.0.0";
 
+        /// <summary>
+        /// Monotonic OTA build number, compared against this runtime's
+        /// cashier channel ("cashier-net8" or "cashier-net48") of the
+        /// release manifest (versions.json). Stamped by pos-windows.yml
+        /// from the workflow run number at build time; local/dev builds
+        /// keep 0 and are simply always "out of date" when a published
+        /// channel exists.
+        /// </summary>
+        public const int OtaBuildNumber = 0;
+
         public const string BuildFlavor = "Retail";
         public const string DefaultTitle = "دلوقتي - كاشير المحلات";
         public const string ExeName = "DelwaqtyShopPos";

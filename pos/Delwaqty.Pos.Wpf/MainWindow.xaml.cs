@@ -41,6 +41,7 @@ namespace Delwaqty.Pos.Wpf
         private readonly string _dataDir;   // the merchant+flavor scope dir (#116)
 
         private readonly HttpClientFactory _http = new HttpClientFactory();
+        private readonly Delwaqty.Pos.Core.Ota.OtaUpdateService _ota;
         private readonly SyncClient _sync;
         private readonly AuthClient _auth;
         private AuthSession _session;
@@ -70,6 +71,7 @@ namespace Delwaqty.Pos.Wpf
             _state = state;
 
             _sync = new SyncClient(PosConfig.SupabaseUrl, PosConfig.SupabaseAnonKey, _http.Client);
+            _ota = new Delwaqty.Pos.Core.Ota.OtaUpdateService(_http.Client);
             _auth = new AuthClient(PosConfig.SupabaseUrl, PosConfig.SupabaseAnonKey, _http.Client);
             _products = new RetailCatalogCache(Path.Combine(_dataDir, "products.db"));
             _localDb = new PosLocalDb(Path.Combine(_dataDir, "pos.db"));
@@ -105,6 +107,10 @@ namespace Delwaqty.Pos.Wpf
             Loaded += OnScreenshotTourLoaded;
 #else
             Loaded += async (s, e) => await SyncNow();
+            // Like the four Flutter apps: check the OTA channel once on
+            // launch and only interrupt when an update actually exists.
+            // Tour builds never talk to production (security review).
+            Loaded += async (s, e) => await OfferUpdateIfAvailable();
 #endif
             Closed += (s, e) => { _syncTimer?.Stop(); _clockTimer.Stop(); _localDb.Dispose(); };
             ApplyMode();
@@ -707,6 +713,26 @@ namespace Delwaqty.Pos.Wpf
                 planAr += days >= 0 ? " (" + days + " يوم)" : " (منتهي - فترة سماح)";
             }
             LicenseBadge.Text = planAr;
+        }
+
+                // ==================== OTA UPDATE ====================
+
+        private void CheckUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            new UpdateDialog(_ota) { Owner = this }.ShowDialog();
+        }
+
+        private async System.Threading.Tasks.Task OfferUpdateIfAvailable()
+        {
+            try
+            {
+                var result = await _ota.CheckForUpdateAsync(PosConfig.OtaBuildNumber);
+                if (result != null && result.NeedsUpdate)
+                {
+                    new UpdateDialog(_ota) { Owner = this }.ShowDialog();
+                }
+            }
+            catch { /* never break the launch path on an update check */ }
         }
 
         private async void SyncNow_Click(object sender, RoutedEventArgs e)

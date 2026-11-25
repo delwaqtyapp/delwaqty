@@ -169,13 +169,15 @@ cat > "$FIX_SQL" <<'SQL'
 insert into auth.users(id, email) values ('442ee000-0000-4000-8000-0000000000a1', 'zz442race.c@example.invalid');
 insert into auth.users(id, email) values ('442ee000-0000-4000-8000-0000000000a2', 'zz442race.m@example.invalid');
 insert into auth.users(id, email) values ('442ee000-0000-4000-8000-0000000000a3', 'zz442race.c2@example.invalid');
+insert into auth.users(id, email) values ('442ee000-0000-4000-8000-0000000000a4', 'zz442race.o@example.invalid');
 insert into public.users(id, email, role, user_type, verification_status, username, account_status)
 values ('442ee000-0000-4000-8000-0000000000a1', 'zz442race.c@example.invalid', 'customer', 'customer', 'approved', 'zz442racec', 'active'),
        ('442ee000-0000-4000-8000-0000000000a2', 'zz442race.m@example.invalid', 'customer', 'customer', 'approved', 'zz442racem', 'active'),
-       ('442ee000-0000-4000-8000-0000000000a3', 'zz442race.c2@example.invalid', 'customer', 'customer', 'approved', 'zz442racec2', 'active')
+       ('442ee000-0000-4000-8000-0000000000a3', 'zz442race.c2@example.invalid', 'customer', 'customer', 'approved', 'zz442racec2', 'active'),
+       ('442ee000-0000-4000-8000-0000000000a4', 'zz442race.o@example.invalid', 'customer', 'customer', 'approved', 'zz442raceo', 'active')
 on conflict (id) do nothing;
 insert into public.merchants(id, name, owner_user_id, type, status)
-values ('442ee000-0000-4000-8000-0000000000b1', 'zz442-race-shop', NULL, 'food', 'active');
+values ('442ee000-0000-4000-8000-0000000000b1', 'zz442-race-shop', '442ee000-0000-4000-8000-0000000000a4', 'food', 'active');
 insert into public.branches(id, merchant_id, name, is_primary)
 values ('442ee000-0000-4000-8000-0000000000c1', '442ee000-0000-4000-8000-0000000000b1', 'zz442-race-b1', true);
 insert into public.products(id, merchant_id, name, name_ar, price, stock_quantity)
@@ -287,5 +289,74 @@ fi
 VOIDED="$(psql "$DB_URL" -X -q -At -c "SELECT status FROM public.pos_sales WHERE id = '$SALE_F'")"
 [ "$VOIDED" = "voided" ] || fail_case "race F: sale not voided at end ($VOIDED)"
 echo "race F OK (void-vs-close serialized)"
+
+# Race G: OWNER legacy void vs close (#252): the owner path of legacy
+# pos_void_sale runs the SAME shared core, so it too serializes on the
+# sale owner's shift lock.
+psql "$DB_URL" -X -q -At -c "SET ROLE authenticated; SELECT set_config('request.jwt.claims', '$CLAIMS2', true); SELECT public.staff_shift_open(0, '442ee000-0000-4000-8000-00000000f050');" >/dev/null 2>&1 || true
+SALE_G_OUT="$(psql "$DB_URL" -X -q -At -c "SET ROLE authenticated; SELECT set_config('request.jwt.claims', '$CLAIMS2', true); SELECT public.staff_create_walk_in_sale('[{\"product_id\":\"442ee000-0000-4000-8000-0000000000d1\",\"qty\":1}]', '[{\"method\":\"cash\",\"amount\":25}]', '442ee000-0000-4000-8000-00000000f051');")"
+SALE_G="$(printf '%s' "$SALE_G_OUT" | sed -n 's/.*\"id\": \"\([0-9a-f-]*\)\".*/\1/p' | head -1)"
+[ -n "$SALE_G" ] || fail_case "race G setup sale failed: $SALE_G_OUT"
+CLAIMSO='{"sub":"442ee000-0000-4000-8000-0000000000a4"}'
+psql "$DB_URL" -X -q -At -c "SET ROLE authenticated; SELECT set_config('request.jwt.claims', '$CLAIMSO', true); SELECT public.pos_void_sale('$SALE_G', 'owner race void');" > /tmp/.442_raceG1.txt 2>&1 &
+psql "$DB_URL" -X -q -At -c "SET ROLE authenticated; SELECT set_config('request.jwt.claims', '$CLAIMS2', true); SELECT public.staff_shift_close(0);" > /tmp/.442_raceG2.txt 2>&1 &
+wait
+grep -q '"ok": true' /tmp/.442_raceG1.txt || fail_case "race G: owner legacy void failed: $(cat /tmp/.442_raceG1.txt)"
+if grep -q '"expected": 0' /tmp/.442_raceG2.txt; then
+  : # void won; close excluded the voided sale
+elif grep -q '"expected": 25' /tmp/.442_raceG2.txt; then
+  : # close won; void followed
+else
+  fail_case "race G: close failed: $(cat /tmp/.442_raceG2.txt)"
+fi
+VOIDED="$(psql "$DB_URL" -X -q -At -c "SELECT status FROM public.pos_sales WHERE id = '$SALE_G'")"
+[ "$VOIDED" = "voided" ] || fail_case "race G: sale not voided at end ($VOIDED)"
+echo "race G OK (owner-void-vs-close serialized)"
+
+# ==================== 442 -> 443 chain check (#257) ====================
+echo "== 442 -> 443 chain check"
+M443="$HERE/../migrations/443_whatsapp_otp_number_rebased.sql"
+psql "$DB_URL" -v ON_ERROR_STOP=1 -X -q -f "$M443" >/dev/null || fail_case "443 failed to apply on top of 442"
+GUARD_DEF="$(psql "$DB_URL" -X -q -At -c "SELECT pg_get_functiondef('public.guard_platform_settings_owner_fields()'::regprocedure)")"
+printf '%s' "$GUARD_DEF" | grep -q 'whatsapp_otp_number' || fail_case "chain: guard lost whatsapp_otp_number clause"
+printf '%s' "$GUARD_DEF" | grep -q 'feature_flags' || fail_case "chain: guard lost the 442 feature_flags clause"
+OTP_ACL="$(psql "$DB_URL" -X -q -At -c "SELECT coalesce(array_agg(g ORDER BY g), '{}'::text[])::text FROM (SELECT CASE WHEN a.grantee = 0 THEN 'PUBLIC' ELSE a.grantee::regrole::text END AS g FROM pg_proc p, aclexplode(p.proacl) a WHERE p.oid = 'public.request_whatsapp_otp(text,text)'::regprocedure AND a.privilege_type = 'EXECUTE') z")"
+[ "$OTP_ACL" = "{anon,authenticated,postgres,service_role}" ] || fail_case "chain: OTP EXECUTE ACL drifted: $OTP_ACL"
+OTP_DEF="$(psql "$DB_URL" -X -q -At -c "SELECT pg_get_functiondef('public.request_whatsapp_otp(text,text)'::regprocedure)")"
+printf '%s' "$OTP_DEF" | grep -q '_lookup_rate_allow' || fail_case "chain: OTP per-IP rate limit missing"
+OTP_RES="$(psql "$DB_URL" -X -q -At -c "SELECT public.request_whatsapp_otp('+201000000000') ->> 'code'")"
+[ "$OTP_RES" = "WHATSAPP_NOT_CONFIGURED" ] || fail_case "chain: unset OTP config did not fail closed: $OTP_RES"
+# Wrong pre-image: a SECOND 443 apply must abort on its preconditions and
+# leave the guard untouched.
+GUARD_MD5_BEFORE="$(psql "$DB_URL" -X -q -At -c "SELECT md5(pg_get_functiondef('public.guard_platform_settings_owner_fields()'::regprocedure))")"
+if psql "$DB_URL" -v ON_ERROR_STOP=1 -X -q -f "$M443" >/dev/null 2>/tmp/.442_443_reapply.err; then
+  fail_case "chain: 443 re-applied over itself without aborting"
+fi
+grep -qE '443 precondition failed|already exists; aborting' /tmp/.442_443_reapply.err || fail_case "chain: 443 re-apply failed for an unexpected reason: $(head -2 /tmp/.442_443_reapply.err)"
+GUARD_MD5_AFTER="$(psql "$DB_URL" -X -q -At -c "SELECT md5(pg_get_functiondef('public.guard_platform_settings_owner_fields()'::regprocedure))")"
+[ "$GUARD_MD5_BEFORE" = "$GUARD_MD5_AFTER" ] || fail_case "chain: aborted 443 re-apply mutated the guard"
+# Wrong pre-image, the precise case: 443 on a chain WITHOUT 442 (guard
+# still at the 393-era body) must abort on the pinned 442 pre-image.
+NEWDB2=""
+for i in 1 2 3; do
+  db="h443x_$(od -An -N4 -tx1 /dev/urandom | tr -d ' \n')"
+  if psql "$ADMIN_URL" -X -q -c "CREATE DATABASE \"$db\" TEMPLATE $TEMPLATE" >/dev/null 2>&1; then
+    CREATED+=("$db")
+    NEWDB2="$db"
+    break
+  fi
+done
+[ -n "$NEWDB2" ] || fail_case "could not create the second chain-check database"
+DB_URL2="$BASE_URL/$NEWDB2"
+psql "$DB_URL2" -v ON_ERROR_STOP=1 -X -q -f "$M439" >/dev/null || fail_case "439 apply failed on chain-check db"
+psql "$DB_URL2" -v ON_ERROR_STOP=1 -X -q -f "$M440" >/dev/null || fail_case "440 apply failed on chain-check db"
+psql "$DB_URL2" -v ON_ERROR_STOP=1 -X -q -f "$M441" >/dev/null || fail_case "441 apply failed on chain-check db"
+if psql "$DB_URL2" -v ON_ERROR_STOP=1 -X -q -f "$M443" >/dev/null 2>/tmp/.442_443_noprev.err; then
+  fail_case "chain: 443 applied WITHOUT 442 (wrong pre-image)"
+fi
+grep -q '443 precondition failed' /tmp/.442_443_noprev.err || fail_case "chain: 443-without-442 failed for an unexpected reason: $(head -2 /tmp/.442_443_noprev.err)"
+GUARD_MD5_X="$(psql "$DB_URL2" -X -q -At -c "SELECT md5(pg_get_functiondef('public.guard_platform_settings_owner_fields()'::regprocedure))")"
+[ "$GUARD_MD5_X" = "797da2f7a1fb8c6eaf14b33121345bb8" ] || fail_case "chain: aborted 443-without-442 mutated the 393-era guard"
+echo "442 -> 443 chain OK (both guards, OTP ACL/rate-limit/unset-config, wrong-preimage rollback)"
 
 echo "442 harness ALL OK"

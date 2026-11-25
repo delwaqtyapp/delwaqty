@@ -356,6 +356,94 @@ $v442$;
 -- identical behavior for owners/admins/legacy cashiers, but ANY staff
 -- identity for the sale's merchant is refused and pointed at the gated
 -- path.
+-- One shared void implementation (#252): BOTH gates (manager-gated
+-- staff_void_sale and the legacy owner/admin pos_void_sale) authorize in
+-- their own wrapper, then run THIS accounting path -- the sale row lock,
+-- the SALE OWNER's shift lock for staff-attributed sales, stock restore
+-- (moves for staff sales, stamped stock_applied for legacy), commission
+-- and deferred-charge reversal, and the void stamp.
+CREATE FUNCTION public._pos_void_core(p_sale_id uuid, p_reason text, p_actor uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE
+  v_sale public.pos_sales%ROWTYPE;
+  v_move record;
+  v_line jsonb;
+BEGIN
+  SELECT * INTO v_sale FROM public.pos_sales WHERE id = p_sale_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'sale not found';
+  END IF;
+  IF v_sale.voided_at IS NOT NULL OR v_sale.status = 'voided' THEN
+    RAISE EXCEPTION 'sale already voided';
+  END IF;
+  IF v_sale.staff_id IS NOT NULL THEN
+    PERFORM pg_advisory_xact_lock(hashtextextended(v_sale.staff_id::text, 442002));
+  END IF;
+  IF v_sale.staff_id IS NOT NULL THEN
+    -- Staff sale: the sale's OWN moves are authoritative (#251/S3).
+    -- Untracked lines decremented nothing and recorded no move, so
+    -- nothing is restored for them -- their stamped stock_applied is 0.
+    FOR v_move IN
+      SELECT m.product_id, -sum(m.qty) AS restore_qty
+        FROM public.pos_stock_moves m
+       WHERE m.sale_id = p_sale_id AND m.kind = 'sale' AND m.product_id IS NOT NULL
+       GROUP BY m.product_id
+    LOOP
+      UPDATE public.products
+         SET stock_quantity = stock_quantity + v_move.restore_qty, updated_at = now()
+       WHERE id = v_move.product_id AND stock_quantity IS NOT NULL;
+      INSERT INTO public.pos_stock_moves
+        (merchant_id, product_id, kind, qty, note, created_by, sale_id)
+      VALUES
+        (v_sale.merchant_id, v_move.product_id, 'void_restore',
+         v_move.restore_qty, 'void ' || p_sale_id, p_actor, p_sale_id);
+    END LOOP;
+  ELSE
+    -- Genuinely legacy sale (staff_id NULL, 365 semantics): restore the
+    -- line's stamped stock_applied (clamped) decrement, merchant-scoped,
+    -- tracked stock only.
+    FOR v_line IN SELECT * FROM jsonb_array_elements(v_sale.items) LOOP
+      UPDATE public.products
+         SET stock_quantity = stock_quantity + COALESCE((v_line->>'stock_applied')::numeric,
+                                                        (v_line->>'qty')::numeric)::int,
+             updated_at = now()
+       WHERE id = (v_line->>'product_id')::uuid
+         AND merchant_id = v_sale.merchant_id
+         AND stock_quantity IS NOT NULL;
+    END LOOP;
+  END IF;
+  -- Reverse the still-open platform commission posting, if any.
+  UPDATE public.platform_commissions
+     SET status = 'reversed'
+   WHERE reference_type = 'pos_sale'
+     AND reference_id = v_sale.id
+     AND status = 'computed';
+  -- Reverse deferred charges with explicit reversal rows (idempotent).
+  INSERT INTO public.pos_debt_ledger
+    (merchant_id, customer_id, sale_id, client_op_id, kind, amount, note, created_by)
+  SELECT d.merchant_id, d.customer_id, d.sale_id,
+         md5('void-reversal:' || d.id::text)::uuid,
+         'reversal', d.amount, 'عكس مديونية لإلغاء العملية', p_actor
+    FROM public.pos_debt_ledger d
+   WHERE d.sale_id = p_sale_id AND d.kind = 'charge'
+     AND NOT EXISTS (SELECT 1 FROM public.pos_debt_ledger r
+                      WHERE r.sale_id = d.sale_id AND r.kind = 'reversal')
+  ON CONFLICT (merchant_id, client_op_id) DO NOTHING;
+  UPDATE public.pos_sales
+     SET voided_at = now(), voided_by = p_actor,
+         void_reason = NULLIF(btrim(coalesce(p_reason, '')), ''),
+         status = 'voided', updated_at = now()
+   WHERE id = v_sale.id;
+  RETURN jsonb_build_object('id', p_sale_id, 'voided', true);
+END;
+$function$;
+
+REVOKE EXECUTE ON FUNCTION public._pos_void_core(uuid, text, uuid) FROM PUBLIC, anon, authenticated;
+
 DO $v442$
 BEGIN
   IF md5(pg_get_functiondef('public.pos_void_sale(uuid,text)'::regprocedure))
@@ -375,7 +463,7 @@ DECLARE
   v_uid uuid := auth.uid();
   v_sale public.pos_sales%ROWTYPE;
   v_merchant public.merchants%ROWTYPE;
-  v_line jsonb;
+  v_res jsonb;
 BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Not authenticated';
@@ -400,32 +488,10 @@ BEGIN
   IF v_sale.status = 'voided' THEN
     RETURN jsonb_build_object('ok', true, 'sale_id', v_sale.id, 'already_voided', true);
   END IF;
-
-  -- Restore stock for tracked items only (NULL stock = untracked). #37:
-  -- restore the line's stamped stock_applied (clamped) decrement when
-  -- present, never the raw qty, and scope the write to this merchant (#36).
-  FOR v_line IN SELECT * FROM jsonb_array_elements(v_sale.items) LOOP
-    UPDATE public.products
-       SET stock_quantity = stock_quantity + COALESCE((v_line->>'stock_applied')::numeric,
-                                                      (v_line->>'qty')::numeric)::int,
-           updated_at = now()
-     WHERE id = (v_line->>'product_id')::uuid
-       AND merchant_id = v_sale.merchant_id
-       AND stock_quantity IS NOT NULL;
-  END LOOP;
-
-  -- Reverse the still-open platform commission posting, if any.
-  UPDATE public.platform_commissions
-     SET status = 'reversed'
-   WHERE reference_type = 'pos_sale'
-     AND reference_id = v_sale.id
-     AND status = 'computed';
-
-  UPDATE public.pos_sales
-     SET status = 'voided', voided_at = now(), voided_by = v_uid,
-         void_reason = NULLIF(btrim(COALESCE(p_reason, '')), '')
-   WHERE id = v_sale.id;
-
+  -- One shared locking/accounting implementation (#252): owner/admin
+  -- voids of staff-attributed sales take the sale owner's shift lock
+  -- here too, so they cannot race that staff member's close.
+  v_res := public._pos_void_core(p_sale_id, p_reason, v_uid);
   RETURN jsonb_build_object('ok', true, 'sale_id', v_sale.id);
 END;
 $function$;
@@ -823,6 +889,7 @@ DECLARE
   v_shift uuid;
   v_normalized jsonb := '[]'::jsonb;
   v_stock_ops jsonb := '[]'::jsonb;
+  v_applied numeric := 0;
   v_op jsonb;
   v_existing public.pos_sales%ROWTYPE;
   v_request_hash text;
@@ -888,6 +955,7 @@ BEGIN
        FROM public.platform_settings WHERE id = 'default'), 50000);
 
   FOR v_item IN SELECT value FROM jsonb_array_elements(p_items) LOOP
+    v_applied := 0;
     IF v_item ? 'product_id' THEN
       -- S2/#255: a product_id key is a catalog line, ALWAYS. Malformed or
       -- unknown ids refuse; they never fall through to free-text pricing.
@@ -913,6 +981,7 @@ BEGIN
       -- Stock ops are collected and applied after the sale row exists so
       -- the moves can link back to it (S3); same transaction = atomic.
       IF v_product.stock_quantity IS NOT NULL THEN
+        v_applied := v_qty;
         v_stock_ops := v_stock_ops || jsonb_build_object(
           'product_id', v_product.id, 'qty', v_qty, 'label', v_label);
       END IF;
@@ -942,9 +1011,14 @@ BEGIN
       END IF;
     END IF;
     v_subtotal := v_subtotal + round(v_price * v_qty, 2);
+    -- Applied-stock metadata (#251): every staff-sale line records what
+    -- the sale ACTUALLY decremented -- the qty for tracked catalog lines,
+    -- an explicit 0 for untracked and custom lines -- so a later void
+    -- (either gate) never has to guess, and tracking that starts after
+    -- the sale cannot credit invented stock.
     v_normalized := v_normalized || jsonb_build_object(
       'product_id', v_item ->> 'product_id', 'label', v_label,
-      'qty', v_qty, 'unit_price', v_price);
+      'qty', v_qty, 'unit_price', v_price, 'stock_applied', v_applied);
   END LOOP;
 
   IF v_discount < 0 OR v_discount > v_subtotal * (CASE v_staff.role
@@ -1204,9 +1278,7 @@ AS $function$
 DECLARE
   v_staff public.merchant_staff%ROWTYPE;
   v_sale public.pos_sales%ROWTYPE;
-  v_move record;
-  v_line jsonb;
-  v_moves_found int := 0;
+  v_res jsonb;
 BEGIN
   v_staff := public._authorize_staff('cashier_mode_mobile', ARRAY['branch_manager']);
   IF p_reason IS NULL OR btrim(p_reason) = '' THEN
@@ -1219,69 +1291,11 @@ BEGIN
   IF NOT public.staff_can_branch(v_staff.merchant_id, v_sale.branch_id) THEN
     RAISE EXCEPTION 'sale belongs to another branch';
   END IF;
-  IF v_sale.voided_at IS NOT NULL THEN
-    RAISE EXCEPTION 'sale already voided';
-  END IF;
-  -- Serialize against the SALE OWNER's sale/close path (#252): a manager
-  -- voiding a cashier's sale must not race that cashier's shift close.
-  IF v_sale.staff_id IS NOT NULL THEN
-    PERFORM pg_advisory_xact_lock(hashtextextended(v_sale.staff_id::text, 442002));
-  END IF;
-  -- Restore stock from the sale's OWN moves (S3): exactly what was
-  -- applied, per product, only where stock is tracked.
-  FOR v_move IN
-    SELECT m.product_id, -sum(m.qty) AS restore_qty
-      FROM public.pos_stock_moves m
-     WHERE m.sale_id = p_sale_id AND m.kind = 'sale' AND m.product_id IS NOT NULL
-     GROUP BY m.product_id
-  LOOP
-    v_moves_found := v_moves_found + 1;
-    UPDATE public.products
-       SET stock_quantity = stock_quantity + v_move.restore_qty, updated_at = now()
-     WHERE id = v_move.product_id AND stock_quantity IS NOT NULL;
-    INSERT INTO public.pos_stock_moves
-      (merchant_id, product_id, kind, qty, note, created_by, sale_id)
-    VALUES
-      (v_staff.merchant_id, v_move.product_id, 'void_restore',
-       v_move.restore_qty, 'void ' || p_sale_id, auth.uid(), p_sale_id);
-  END LOOP;
-  -- Legacy/desktop interop (#251): sales created before the moves link
-  -- have no sale_id-keyed moves; restore from the lines' stamped
-  -- stock_applied (clamped, merchant-scoped, tracked stock only) exactly
-  -- like the legacy void path (365).
-  IF v_moves_found = 0 THEN
-    FOR v_line IN SELECT * FROM jsonb_array_elements(v_sale.items) LOOP
-      UPDATE public.products
-         SET stock_quantity = stock_quantity + COALESCE((v_line->>'stock_applied')::numeric,
-                                                        (v_line->>'qty')::numeric)::int,
-             updated_at = now()
-       WHERE id = (v_line->>'product_id')::uuid
-         AND merchant_id = v_sale.merchant_id
-         AND stock_quantity IS NOT NULL;
-    END LOOP;
-  END IF;
-  -- Reverse the still-open platform commission posting, if any (legacy
-  -- sales carry one; staff sales never do).
-  UPDATE public.platform_commissions
-     SET status = 'reversed'
-   WHERE reference_type = 'pos_sale'
-     AND reference_id = v_sale.id
-     AND status = 'computed';
-  -- Reverse deferred charges with explicit reversal rows (idempotent).
-  INSERT INTO public.pos_debt_ledger
-    (merchant_id, customer_id, sale_id, client_op_id, kind, amount, note, created_by)
-  SELECT d.merchant_id, d.customer_id, d.sale_id,
-         md5('void-reversal:' || d.id::text)::uuid,
-         'reversal', d.amount, 'عكس مديونية لإلغاء العملية', auth.uid()
-    FROM public.pos_debt_ledger d
-   WHERE d.sale_id = p_sale_id AND d.kind = 'charge'
-     AND NOT EXISTS (SELECT 1 FROM public.pos_debt_ledger r
-                      WHERE r.sale_id = d.sale_id AND r.kind = 'reversal')
-  ON CONFLICT (merchant_id, client_op_id) DO NOTHING;
-  UPDATE public.pos_sales
-     SET voided_at = now(), voided_by = auth.uid(), void_reason = p_reason,
-         status = 'voided', updated_at = now()
-   WHERE id = p_sale_id;
+  -- One shared locking/accounting implementation (#252): the core takes
+  -- the SALE OWNER's shift lock for staff-attributed sales, restores
+  -- from moves (staff sales) or the stamped stock_applied (legacy
+  -- sales), reverses commissions and deferred charges, stamps the void.
+  v_res := public._pos_void_core(p_sale_id, p_reason, auth.uid());
   INSERT INTO public.merchant_staff_events (staff_id, merchant_id, kind, detail, actor_id)
   VALUES (v_staff.id, v_staff.merchant_id, 'void_sale',
           jsonb_build_object('sale_id', p_sale_id, 'reason', p_reason,

@@ -36,6 +36,9 @@ jobs:
         run: |
           bash tool/pharmacy_purge_guard.sh --self-test
           bash tool/pharmacy_purge_guard.sh
+
+      - name: Superseded migrations guard
+        run: bash tool/superseded_migrations_guard.sh
   test:
     name: Test
     runs-on: ubuntu-latest

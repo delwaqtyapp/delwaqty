@@ -1039,7 +1039,7 @@ INSERT INTO public.platform_commissions
 SELECT (SELECT owner FROM zz442), 'pos_sale', s.id, 75, 0.1, 7.5, 67.5, 'EGP', 'computed'
   FROM public.pos_sales s
  WHERE s.merchant_id = (SELECT merchant FROM zz442) AND s.status = 'completed'
-   AND s.items::text LIKE '%stock_applied%';
+   AND s.staff_id IS NULL AND s.items::text LIKE '%stock_applied%';
 
 -- #258: ACTIVE staff cannot use the legacy void on their own sale.
 SET LOCAL ROLE authenticated;
@@ -1087,7 +1087,7 @@ DECLARE
 BEGIN
   SELECT id INTO v_sale FROM public.pos_sales
    WHERE merchant_id = (SELECT merchant FROM zz442) AND status = 'completed'
-     AND items::text LIKE '%stock_applied%';
+     AND staff_id IS NULL AND items::text LIKE '%stock_applied%';
   v_res := public.pos_void_sale(v_sale, 'owner legacy void');
   ASSERT (v_res ->> 'ok')::boolean, 'owner legacy void refused: ' || v_res::text;
 END $$;
@@ -1121,7 +1121,7 @@ DO $$
 BEGIN
   PERFORM public.staff_void_sale((SELECT id FROM public.pos_sales
      WHERE merchant_id = (SELECT merchant FROM zz442) AND status = 'completed'
-       AND items::text LIKE '%stock_applied%'), 'إلغاء قديم');
+       AND staff_id IS NULL AND items::text LIKE '%stock_applied%'), 'إلغاء قديم');
 END $$;
 RESET ROLE;
 DO $$
@@ -1206,6 +1206,78 @@ RESET ROLE;
 SELECT set_config('request.jwt.claims', '{}', true);
 UPDATE public.merchant_staff SET branch_id = (SELECT branch2 FROM zz442)
  WHERE user_id = (SELECT cashier_b2 FROM zz442);
+
+-- #251 transition: a STAFF sale of an untracked product credits NOTHING
+-- when tracking starts later (moves are authoritative for staff sales).
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT mgr FROM zz442))::text, true);
+DO $$
+DECLARE v_res jsonb;
+BEGIN
+  v_res := public.staff_create_walk_in_sale(
+    ('[{"product_id":"' || (SELECT untracked_product FROM zz442) || '","qty":2}]')::jsonb,
+    '[{"method":"instapay","amount":30}]', '442dd000-0000-4000-8000-0000000000d4', 0, NULL, (SELECT branch1 FROM zz442));
+  PERFORM set_config('app.zz442_untracked_sale', v_res ->> 'id', false);
+END $$;
+RESET ROLE;
+DO $$
+BEGIN
+  ASSERT (SELECT (items -> 0 ->> 'stock_applied')::numeric FROM public.pos_sales
+           WHERE id = current_setting('app.zz442_untracked_sale')::uuid) = 0,
+    'untracked line not stamped stock_applied = 0';
+END $$;
+UPDATE public.products SET stock_quantity = 10, updated_at = now()
+ WHERE id = (SELECT untracked_product FROM zz442);
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT mgr FROM zz442))::text, true);
+DO $$
+BEGIN
+  PERFORM public.staff_void_sale(current_setting('app.zz442_untracked_sale')::uuid, 'لا مخزون');
+END $$;
+RESET ROLE;
+DO $$
+BEGIN
+  ASSERT (SELECT stock_quantity FROM public.products WHERE id = (SELECT untracked_product FROM zz442)) = 10,
+    'void of an untracked staff line credited invented stock';
+END $$;
+
+-- #251/#252: owner legacy void of a NEW staff sale restores from moves
+-- through the shared core.
+UPDATE zz442 SET stock0 = (SELECT stock_quantity FROM public.products WHERE id = (SELECT product FROM zz442));
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT cashier_b2 FROM zz442))::text, true);
+DO $$
+DECLARE v_res jsonb;
+BEGIN
+  v_res := public.staff_create_walk_in_sale(
+    ('[{"product_id":"' || (SELECT product FROM zz442) || '","qty":1}]')::jsonb,
+    '[{"method":"instapay","amount":25}]', '442dd000-0000-4000-8000-0000000000d5');
+  PERFORM set_config('app.zz442_staff_sale', v_res ->> 'id', false);
+END $$;
+RESET ROLE;
+DO $$
+BEGIN
+  ASSERT (SELECT (items -> 0 ->> 'stock_applied')::numeric FROM public.pos_sales
+           WHERE id = current_setting('app.zz442_staff_sale')::uuid) = 1,
+    'tracked line not stamped stock_applied = qty';
+END $$;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz442))::text, true);
+DO $$
+DECLARE v_res jsonb;
+BEGIN
+  v_res := public.pos_void_sale(current_setting('app.zz442_staff_sale')::uuid, 'مالك يلغي');
+  ASSERT (v_res ->> 'ok')::boolean, 'owner legacy void of a staff sale refused';
+END $$;
+RESET ROLE;
+DO $$
+BEGIN
+  ASSERT (SELECT stock_quantity FROM public.products WHERE id = (SELECT product FROM zz442))
+       = (SELECT stock0 FROM zz442),
+    'owner legacy void of a staff sale did not restore from moves';
+  ASSERT (SELECT voided_by FROM public.pos_sales WHERE id = current_setting('app.zz442_staff_sale')::uuid)
+       = (SELECT owner FROM zz442), 'void not stamped with the owner';
+END $$;
 
 -- dine_in_tables read goes through the shared read helper (flags +
 -- barrier + branch): pwstaff (password-change pending) sees nothing,

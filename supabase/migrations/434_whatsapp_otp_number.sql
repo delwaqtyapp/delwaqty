@@ -1,3 +1,4 @@
+-- SUPERSEDED: do not apply. Replaced by 443_whatsapp_otp_number_rebased.sql (see SUPERSEDED.txt).
 -- 434: dedicated WhatsApp OTP destination number, decoupled from support_phone.
 --
 -- request_whatsapp_otp sent customers to platform_settings.support_phone -

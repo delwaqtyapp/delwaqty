@@ -463,7 +463,8 @@ BEGIN
     PERFORM public.staff_create_walk_in_sale('[{"custom":true,"label":"x","price":1,"qty":1}]', '[{"method":"cash","amount":1}]', gen_random_uuid());
     RAISE EXCEPTION 'zz442 sentinel: cashier custom line at food shop allowed';
   EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz442 sentinel:%' THEN RAISE; END IF;
-    ASSERT SQLERRM LIKE '%branch manager or a service-type shop%', 'wrong error: ' || SQLERRM; END;
+    -- 445 changed the text (service-type carve-out removed); still refused.
+    ASSERT SQLERRM LIKE '%need a branch manager%', 'wrong error: ' || SQLERRM; END;
   -- Hostile jsonb: non-numeric qty/amount refused, never a cast crash.
   BEGIN
     PERFORM public.staff_create_walk_in_sale('[{"custom":true,"label":"x","price":1,"qty":"abc"}]', '[{"method":"cash","amount":1}]', gen_random_uuid());

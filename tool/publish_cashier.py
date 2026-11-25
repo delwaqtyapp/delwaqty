@@ -116,9 +116,13 @@ def merge(manifest, build, assets):
 
 def check_provenance(directory, build):
     """The artifacts must come from THIS run's build job, which exported
-    the resolved build commit as a job output and wrote this file into the
-    artifact. Anything else is the wrong payload.
+    the resolved build commit as a job output (BUILD_SHA) and wrote this
+    file into the artifact. Both must agree; anything else is the wrong
+    payload.
     """
+    build_sha = os.environ.get('BUILD_SHA', '')
+    if not SHA_RE.fullmatch(build_sha):
+        raise SystemExit('BUILD_SHA (the build job\'s resolved commit) is missing')
     try:
         prov = json.loads((Path(directory) / 'build-provenance.json').read_text())
     except (OSError, json.JSONDecodeError) as exc:
@@ -128,6 +132,8 @@ def check_provenance(directory, build):
             or not isinstance(prov.get('sha'), str)
             or not SHA_RE.fullmatch(prov['sha'])):
         raise SystemExit('Build provenance does not match this run and build')
+    if prov['sha'] != build_sha:
+        raise SystemExit('Provenance commit does not match the build job output')
     return prov['sha']
 
 

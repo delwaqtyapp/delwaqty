@@ -296,6 +296,38 @@ namespace Delwaqty.Pos.Core.Tests
             Assert.Null(check.Error);
             Assert.False(check.NeedsUpdate);
         }
+
+        [Fact]
+        public void Handoff_allows_exactly_one_begin()
+        {
+            var handoff = new OtaInstallHandoff();
+            Assert.True(handoff.TryBegin());       // first click starts the handoff
+            Assert.False(handoff.TryBegin());      // double-click is ignored
+            handoff.End();                         // failure path frees the next attempt
+            Assert.True(handoff.TryBegin());
+        }
+
+        [Fact]
+        public void Handoff_closed_window_never_launches()
+        {
+            var handoff = new OtaInstallHandoff();
+            Assert.True(handoff.TryBegin());
+            Assert.True(handoff.StillLaunchable);
+            handoff.Close();                       // window closed mid-verify
+            Assert.False(handoff.StillLaunchable); // Process.Start must not happen
+            handoff.End();
+            Assert.False(handoff.TryBegin());      // a closed dialog never hands off again
+            Assert.True(handoff.IsClosed);
+        }
+
+        [Fact]
+        public void Handoff_close_before_begin_blocks_everything()
+        {
+            var handoff = new OtaInstallHandoff();
+            handoff.Close();
+            Assert.False(handoff.TryBegin());
+            Assert.False(handoff.StillLaunchable);
+        }
     }
 
     /// <summary>Stub handler that can serve raw bytes (installer payloads).</summary>

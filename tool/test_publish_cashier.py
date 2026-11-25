@@ -89,20 +89,27 @@ class CashierPublisherSafetyTest(unittest.TestCase):
 
     def test_provenance_binds_artifacts_to_the_run(self):
         import tempfile
+        env = {'GITHUB_RUN_ID': '1', 'BUILD_SHA': 'a' * 40}
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / 'build-provenance.json'
             path.write_text(json.dumps(
                 {'run_id': '1', 'run_number': 12, 'sha': 'a' * 40}))
-            with patch.dict(cashier.os.environ, {'GITHUB_RUN_ID': '1'}):
+            with patch.dict(cashier.os.environ, env):
                 self.assertEqual(cashier.check_provenance(temp, 12), 'a' * 40)
-                with self.assertRaises(SystemExit):  # wrong run
+                with self.assertRaises(SystemExit):  # wrong build number
                     cashier.check_provenance(temp, 13)
-            with patch.dict(cashier.os.environ, {'GITHUB_RUN_ID': '2'}):
+            with patch.dict(cashier.os.environ, {**env, 'GITHUB_RUN_ID': '2'}):
                 with self.assertRaises(SystemExit):  # wrong run id
+                    cashier.check_provenance(temp, 12)
+            with patch.dict(cashier.os.environ, {'GITHUB_RUN_ID': '1', 'BUILD_SHA': 'b' * 40}):
+                with self.assertRaises(SystemExit):  # provenance != build job output
+                    cashier.check_provenance(temp, 12)
+            with patch.dict(cashier.os.environ, {'GITHUB_RUN_ID': '1'}):
+                with self.assertRaises(SystemExit):  # missing BUILD_SHA fails closed
                     cashier.check_provenance(temp, 12)
             path.write_text(json.dumps(
                 {'run_id': '1', 'run_number': 12, 'sha': 'notasha'}))
-            with patch.dict(cashier.os.environ, {'GITHUB_RUN_ID': '1'}):
+            with patch.dict(cashier.os.environ, env):
                 with self.assertRaises(SystemExit):  # unbound commit
                     cashier.check_provenance(temp, 12)
             path.unlink()

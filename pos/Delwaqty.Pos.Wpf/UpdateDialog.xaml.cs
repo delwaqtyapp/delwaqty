@@ -26,6 +26,7 @@ namespace Delwaqty.Pos.Wpf
         private OtaCheckResult _offered;
         private OtaVerifiedInstaller _installer;
         private bool _primaryCloses;
+        private readonly OtaInstallHandoff _handoff = new OtaInstallHandoff();
 
         public UpdateDialog(OtaUpdateService ota)
         {
@@ -35,6 +36,7 @@ namespace Delwaqty.Pos.Wpf
             Closed += (s, e) =>
             {
                 _closing.Cancel();
+                _handoff.Close();
                 ReleaseInstaller();
             };
         }
@@ -127,6 +129,12 @@ namespace Delwaqty.Pos.Wpf
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "DelwaqtyPos", "updates");
             var result = await _ota.DownloadLatestAsync(_offered, dir, progress, _closing.Token);
+            if (_handoff.IsClosed)
+            {
+                // The window closed while downloading: dispose the pin, keep nothing.
+                if (result.Installer != null) result.Installer.Dispose();
+                return;
+            }
             DownloadProgress.Visibility = Visibility.Collapsed;
             ProgressText.Visibility = Visibility.Collapsed;
 
@@ -161,23 +169,49 @@ namespace Delwaqty.Pos.Wpf
 
         private async Task InstallAsync()
         {
+            var installer = _installer;
+            if (installer == null || !_handoff.TryBegin())
+            {
+                // Double-click or a window already closing: exactly one handoff ever runs.
+                return;
+            }
+            PrimaryButton.IsEnabled = false;
             // Re-verify through the held pin handle right before launch:
             // bytes rewritten under the path must never be executed. Off the
             // UI thread - a full installer hash takes a moment.
-            var verified = await Task.Run(() => _installer.Reverify());
+            bool verified;
+            try
+            {
+                verified = await Task.Run(() => installer.Reverify());
+            }
+            catch
+            {
+                verified = false; // worker failure (incl. disposal on close) refuses the launch
+            }
             if (!verified)
             {
+                _handoff.End();
+                if (!_handoff.IsClosed)
+                {
+                    ReleaseInstaller();
+                    SetState("فشل التحقق من سلامة التحديث",
+                        "تغيّر ملف التحديث بعد تنزيله، لذلك أُلغي التثبيت حمايةً للجهاز.",
+                        "إغلاق", true, primaryCloses: true);
+                }
+                return;
+            }
+            if (!_handoff.StillLaunchable)
+            {
+                // The window closed during the verify: no launch, no leaked pin.
                 ReleaseInstaller();
-                SetState("فشل التحقق من سلامة التحديث",
-                    "تغيّر ملف التحديث بعد تنزيله، لذلك أُلغي التثبيت حمايةً للجهاز.",
-                    "إغلاق", true, primaryCloses: true);
+                _handoff.End();
                 return;
             }
             try
             {
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = _installer.File,
+                    FileName = installer.File,
                     Arguments = "/VERYSILENT /NORESTART",
                     UseShellExecute = true,
                     Verb = "runas", // the installer needs admin (PrivilegesRequired=admin)
@@ -185,6 +219,7 @@ namespace Delwaqty.Pos.Wpf
             }
             catch
             {
+                _handoff.End();
                 ReleaseInstaller();
                 SetState("تعذر بدء التثبيت", "لم يبدأ المثبّت — ربما رُفض إذن المسؤول.", "إغلاق", true,
                     primaryCloses: true);
@@ -193,6 +228,7 @@ namespace Delwaqty.Pos.Wpf
             // Handoff done: the installer process was created; release the
             // pin handle, then exit so the installer can replace the app.
             ReleaseInstaller();
+            _handoff.End();
             Application.Current.Shutdown();
         }
 

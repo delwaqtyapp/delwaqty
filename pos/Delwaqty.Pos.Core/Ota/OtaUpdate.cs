@@ -125,6 +125,50 @@ namespace Delwaqty.Pos.Core.Ota
         }
     }
 
+    /// <summary>
+    /// Guards the install handoff against UI races: a double-click must not
+    /// start two handoffs, and a window closed mid-handoff must never reach
+    /// Process.Start. The dialog owns the pin handle's lifetime; this object
+    /// only tracks the state transitions.
+    /// </summary>
+    public sealed class OtaInstallHandoff
+    {
+        private readonly object _gate = new object();
+        private bool _closed;
+        private bool _inProgress;
+
+        public bool IsClosed { get { lock (_gate) { return _closed; } } }
+
+        /// <summary>Starts the handoff exactly once; false on a double-click or after close.</summary>
+        public bool TryBegin()
+        {
+            lock (_gate)
+            {
+                if (_closed || _inProgress) return false;
+                _inProgress = true;
+                return true;
+            }
+        }
+
+        /// <summary>The window was closed: no launch may happen after this.</summary>
+        public void Close()
+        {
+            lock (_gate) { _closed = true; }
+        }
+
+        /// <summary>After the verify worker finishes: true only while the window is still open.</summary>
+        public bool StillLaunchable
+        {
+            get { lock (_gate) { return _inProgress && !_closed; } }
+        }
+
+        /// <summary>Ends the handoff (success, failure, or close-during-handoff).</summary>
+        public void End()
+        {
+            lock (_gate) { _inProgress = false; }
+        }
+    }
+
     /// <summary>Parses versions.json; throws on structurally invalid JSON.</summary>
     public static class OtaManifestParser
     {

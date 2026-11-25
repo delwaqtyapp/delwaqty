@@ -59,7 +59,9 @@ jobs:
 
       - name: Resolve the build commit
         id: resolve
-        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        shell: pwsh
+        run: |
+          "sha=$(git rev-parse HEAD)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
       - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with:
@@ -283,7 +285,7 @@ jobs:
           $expect | ForEach-Object { "built: $_" }
           # Bind the payload to this run and commit for the publish job's
           # provenance check.
-          @{ run_id = "${{ github.run_id }}"; run_number = ${{ github.run_number }}; sha = "${{ steps.resolve.outputs.build_sha }}" } |
+          @{ run_id = "${{ github.run_id }}"; run_number = ${{ github.run_number }}; sha = "${{ steps.resolve.outputs.sha }}" } |
             ConvertTo-Json | Out-File -Encoding utf8 build-provenance.json
 
       - name: Hand off the zip and installers as workflow artifacts

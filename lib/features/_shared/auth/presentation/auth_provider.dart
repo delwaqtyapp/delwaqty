@@ -131,8 +131,9 @@ class AuthStateNotifier extends Notifier<AuthState> {
 
   /// Signs in with an email, phone number, OR a username through the
   /// auth-login-identifier edge function: the identifier and password go
-  /// to the server, which resolves the account and returns only session
-  /// tokens - the auth email never reaches the client.
+  /// to the server, which resolves the account. No email is disclosed
+  /// before authentication; the adopted SDK session then holds the
+  /// normal authenticated session data.
   Future<void> signIn({required String email, required String password}) async {
     _isSignInInProgress = true;
     state = const AuthState.loading();

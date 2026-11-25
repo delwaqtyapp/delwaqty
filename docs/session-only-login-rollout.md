@@ -5,8 +5,9 @@ Hard order (security reviewer): **apply 440 -> deploy the function ->
 smoke 200/401/429 -> only then ship a build that includes the app swap
 (#60).** Every prod step requires the owner's explicit order. This
 document is a checklist, NOT authorization: each write step names its
-exact target, and the operator records target + SHA + output in the
-release log before and after every write.
+exact target, and the operator records the target (project ref, host,
+database - REDACTED, never a full DSN and never any password), the SHA
+and the output in the release log before and after every write.
 
 Project refs (always explicit, never defaulted):
 
@@ -30,52 +31,94 @@ Parts:
   Record the exact master SHA being rolled out.
 - No build 13 and no release from master until the owner says so.
 - Every command below carries an explicit `--project-ref`; migration
-  applies use an explicit, checked DB target (direct connection string
-  or pooler session DSN for THAT project, echoed and confirmed before
-  running). Record target, SHA and result for each write.
-- **Pending migration chain on prod:** the prod registry max is 435;
-  436-439 are unapplied. They must land BEFORE 440 and the app swap:
+  applies use an explicit, checked DB target. Record the target
+  REDACTED (project ref + host + database name only - never a full DSN,
+  never credentials) plus SHA and result for each write.
+- **Pending migration chain on prod (context as of writing - the
+  operator MUST recheck the live migration registry and the migration
+  file hashes immediately before applying; the max/count claims here
+  are context, not authority):** prod registry max was 435 with
+  436-439 unapplied. They must land BEFORE 440 and the app swap:
   437 then 436 (the ask-anything pair - 437 with or before 436, on the
   owner's order for that stack), then 438, then 439. 439 in particular
   is required before 440 and the app swap: the prod username index is
   still the old case-sensitive one, and the app now depends on the
-  439 semantics. After this chain + 440, the prod registry shows 440
-  as its max. Each apply keeps its own preflight and the owner's
-  explicit order.
+  439 semantics. After this chain + 440, expect the registry max to be
+  440 (recheck live). Each apply keeps its own preflight and the
+  owner's explicit order.
 - **Tell the security reviewer when the prod apply is planned** so they
   can run their post-check against the live database.
 
 ## 1. Staging
 
 1. Apply migration 440 to the STAGING database (explicit staging target;
-   record target + migration SHA).
-2. Privilege audit on staging - each of the 3 new functions x each of
-   anon / authenticated / PUBLIC must be false, the table must have no
-   client rights, and RLS must be on with no policies:
+   record target redacted + migration SHA).
+2. Privilege audit on staging. Run all of it; an empty result is a
+   FAILURE of the audit, not a green.
+   a. The three functions must exist - exactly these three:
+
+   ```sql
+   SELECT p.proname::text
+     FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname IN ('auth_login_begin', 'auth_login_finish', 'auth_login_resolve_email')
+    ORDER BY 1;
+   -- expect exactly 3 rows
+   ```
+
+   b. Named roles via has_function_privilege (PUBLIC is NOT a role and
+   must not be queried this way - it errors on PG17):
 
    ```sql
    SELECT p.proname,
-          has_function_privilege('anon',          p.oid, 'EXECUTE') AS anon,
-          has_function_privilege('authenticated', p.oid, 'EXECUTE') AS authenticated,
-          has_function_privilege('PUBLIC',        p.oid, 'EXECUTE') AS public
+          has_function_privilege('anon',          p.oid, 'EXECUTE') AS anon,   -- f
+          has_function_privilege('authenticated', p.oid, 'EXECUTE') AS authent, -- f
+          has_function_privilege('service_role',  p.oid, 'EXECUTE') AS service -- t (helpers must work)
      FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
     WHERE n.nspname = 'public'
       AND p.proname IN ('auth_login_begin', 'auth_login_finish', 'auth_login_resolve_email');
-   -- every value false
-
-   SELECT has_table_privilege('anon',          'public.auth_login_attempts', 'SELECT') AS anon_sel,
-          has_table_privilege('authenticated', 'public.auth_login_attempts', 'SELECT') AS auth_sel,
-          has_table_privilege('anon',          'public.auth_login_attempts', 'INSERT') AS anon_ins;
-   -- all false
-
-   SELECT relrowsecurity FROM pg_class WHERE relname = 'auth_login_attempts'; -- t
-   SELECT count(*) FROM pg_policies WHERE tablename = 'auth_login_attempts';  -- 0
    ```
 
-   As corroboration only (not a substitute for the explicit checks
+   c. PUBLIC (the implicit everyone-group, grantee oid 0) via
+   aclexplode over the EFFECTIVE acl (default included):
+
+   ```sql
+   SELECT p.proname, a.privilege_type
+     FROM pg_proc p
+     JOIN pg_namespace n ON n.oid = p.pronamespace,
+     LATERAL aclexplode(coalesce(p.proacl, acldefault('f', p.proowner))) a
+    WHERE n.nspname = 'public'
+      AND p.proname IN ('auth_login_begin', 'auth_login_finish', 'auth_login_resolve_email')
+      AND a.grantee = 0 AND a.privilege_type = 'EXECUTE';
+   -- expect 0 rows
+   ```
+
+   d. Client table rights - enumerate ALL privilege types for anon,
+   authenticated and PUBLIC on the table, not a sample:
+
+   ```sql
+   SELECT g.rolname AS grantee, a.privilege_type
+     FROM pg_class c
+     JOIN pg_namespace n ON n.oid = c.relnamespace,
+     LATERAL aclexplode(coalesce(c.relacl, acldefault('r', c.relowner))) a
+     LEFT JOIN pg_roles g ON g.oid = a.grantee
+    WHERE n.nspname = 'public' AND c.relname = 'auth_login_attempts'
+      AND (a.grantee = 0
+           OR g.rolname IN ('anon', 'authenticated'));
+   -- expect 0 rows
+
+   SELECT c.relrowsecurity
+     FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public' AND c.relname = 'auth_login_attempts'; -- t
+
+   SELECT count(*) FROM pg_policies
+    WHERE schemaname = 'public' AND tablename = 'auth_login_attempts'; -- 0
+   ```
+
+   e. As corroboration only (not a substitute for the explicit checks
    above): the baseline-wide counts of security-definer functions
    executable by anon / PUBLIC must be unchanged by 440 - anon = 11,
-   PUBLIC = 4. NOTE: these counts must come from pg_proc ACLs, NOT
+   PUBLIC = 4. These counts MUST come from pg_proc ACLs, NOT
    information_schema.routine_privileges (which expands role
    memberships and reports inflated numbers - 801/4162 on prod):
 
@@ -91,7 +134,13 @@ Parts:
    (`--no-verify-jwt`: a caller at login time has no session JWT.)
    Record the deployed function version.
 4. Smoke on staging, with FRESH fixtures per run (new test accounts and
-   fresh identifier buckets, so earlier attempts never pollute counts):
+   fresh identifier buckets, so earlier attempts never pollute counts).
+   Watch the shared per-IP budget (20 failures / 10 min): the full suite
+   can exhaust one tester IP - use a fresh trusted egress IP per full
+   run, or reset the DESIGNATED test ledger rows afterwards
+   (`DELETE FROM public.auth_login_attempts WHERE identifier_key LIKE 'uname:rollout-test-%'`
+   with the owner's authorized scope for that cleanup; never a blanket
+   delete):
    - For EACH identifier class - phone, username, legacy real email -
      do a REAL client login through the merged #60 app build (or the
      exact supabase-js calls it makes: `functions.invoke` +
@@ -103,35 +152,48 @@ Parts:
      the same path).
    - Wrong password -> 401 `invalid_credentials`; unknown identifier ->
      byte-identical 401 `invalid_credentials`.
-   - Parity under stress: repeat wrong-password once with GoTrue
-     artificially slow/unavailable where the environment allows -
-     unknown and known identifiers must both degrade to the SAME
-     controlled response (503 `temporarily_unavailable`), never a 401.
+   - Slow-but-working GoTrue: with GoTrue artificially delayed UNDER
+     the function's 5s timeout (isolated staging or a mock - NEVER
+     impair a shared/prod GoTrue), a credential rejection stays 401 on
+     BOTH the known- and unknown-identifier branches. Only a true
+     timeout/unavailable produces 503, also identical on both branches.
    - Lockout: 5 rapid wrong-password attempts on a FRESH bucket -> the
      6th returns 429 `too_many_attempts`. Use a fresh bucket each time
      this is re-run; the bucket clears after 10 minutes.
 5. **Last-XFF gate (security):** first learn the tester's true egress IP
-   independently (e.g. `curl ifconfig.me`). Then send requests whose
-   `x-forwarded-for` values are ALL bogus and NONE equals that real IP:
-   (a) header omitted entirely, (b) a single forged entry,
-   (c) multiple forged entries. Read the stored row in
-   `auth_login_attempts` after each:
-   - If the platform edge appends the true client IP, the stored value
-     is the REAL IP (or 'unknown' when the platform strips it) - a
-     user-supplied bogus value must NEVER be stored.
-   - If any user-supplied bogus value is stored, the gate FAILS: stop
-     the rollout, lockout bucketing is spoofable, design needs review.
+   independently (e.g. `curl ifconfig.me`). Then exercise:
+   (a) a PLAIN request with no XFF manipulation - the stored row must
+       show the tester's REAL IP; two different testers (or two
+       networks) must produce DIFFERENT stored values;
+   (b) header omitted entirely;
+   (c) a single forged entry;
+   (d) multiple forged entries - in (b)-(d) ALL supplied values are
+       bogus and NONE equals the real IP.
+   Read the stored row in `auth_login_attempts` after each:
+   - PASS: plain requests store the real, per-tester-distinct client
+     IP, and no user-supplied bogus value is ever stored.
+   - FAIL (rollout blocked): any user-supplied bogus value is stored
+     (lockout is spoofable), OR the stored value is 'unknown' or a
+     shared infrastructure address for plain requests (the function
+     cannot tell clients apart - the per-IP budget becomes a global
+     bucket: one attacker's 20 failures lock out EVERYONE). Unblock
+     only via a trusted non-spoofable client-IP design, or the owner's
+     explicit acceptance of the global-bucket behavior.
    Record stored values in the release log. This gate is repeated in
    prod (step 2.4).
 
 ## 2. Production (owner's explicit order for each step)
 
-1. Apply migration 440 to the PROD database (explicit prod target;
-   record target + SHA). Re-run the full privilege audit from step 1.2.
+1. Recheck the live migration registry and file hashes (see section 0),
+   then apply migration 440 to the PROD database (explicit prod target;
+   record target redacted + SHA). Re-run the full privilege audit from
+   step 1.2.
 2. Deploy the function to prod:
    `supabase functions deploy auth-login-identifier --no-verify-jwt --project-ref bttnlkmwhorjamzemwda`.
 3. Repeat the smoke suite from step 1.4 against prod with fresh prod
-   test fixtures.
+   test fixtures. Do NOT inject any GoTrue outage or delay against prod
+   - outage parity is proven on staging/mocks only; on prod verify only
+   that the healthy-path responses match.
 4. Repeat the last-XFF gate from step 1.5 against prod. A fail stops the
    rollout before any app ships.
 5. Exercise the REAL WhatsApp password-reset flow end to end on a test

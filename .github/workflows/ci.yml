@@ -57,6 +57,8 @@ jobs:
           node-version: '22'
       - name: Auth edge safety tests
         run: node --test tool/edge_safety_test.cjs
+      - name: Staff admin edge execution tests
+        run: node --test tool/edge_staff_admin_test.cjs
       - name: Publisher safety tests
         run: python3 -m unittest discover -s tool -p test_publish_development.py
       - name: Run tests with coverage

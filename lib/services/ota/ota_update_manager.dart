@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'package:delwaqty/core/config/app_mode_provider.dart';
 
@@ -357,6 +358,37 @@ Future<(int?, String?)> downloadAndInstallLatest(
   if (error != null) return (null, error);
   return (file.lengthSync(), null);
 }
+
+const _kInstallHandoffPrefix = 'ota_install_handed_off_';
+
+/// Records that the system installer was opened for [version] of [flavor].
+Future<void> markOtaInstallHandedOff(AppFlavor flavor, int version) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setInt('$_kInstallHandoffPrefix${flavor.name}', version);
+}
+
+/// The version whose install was last handed off to the system installer.
+Future<int?> otaInstallHandedOffVersion(AppFlavor flavor) async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getInt('$_kInstallHandoffPrefix${flavor.name}');
+}
+
+/// Clears the handoff record once the running build actually changed.
+Future<void> clearOtaInstallHandoff(AppFlavor flavor) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('$_kInstallHandoffPrefix${flavor.name}');
+}
+
+/// Whether the automatic (non-forced) offer is suppressed: the installer
+/// was already opened for [latest] and the running build still has not
+/// changed, so re-offering on every resume would loop the same update.
+/// A newer [latest] than the handed-off one always offers again, and the
+/// manual About-page check (force) never consults this gate.
+bool suppressAutoOtaOffer({
+  required int current,
+  required int latest,
+  required int? handedOff,
+}) => handedOff != null && handedOff >= latest && current < latest;
 
 /// Streams [file] through SHA-256 and compares it with [expected].
 ///

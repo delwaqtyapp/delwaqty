@@ -27,14 +27,43 @@ class AppInvitationsPage extends ConsumerStatefulWidget {
   ConsumerState<AppInvitationsPage> createState() => _AppInvitationsPageState();
 }
 
-class _AppInvitationsPageState extends ConsumerState<AppInvitationsPage> {
+class _AppInvitationsPageState extends ConsumerState<AppInvitationsPage>
+    with WidgetsBindingObserver {
   AppFlavor? _downloading;
   double _progress = 0;
   File? _readyFile;
   AppFlavor? _readyFlavor;
+
+  /// Manifest version of the APK currently waiting for install. The ready
+  /// state clears only once the installed versionCode reaches THIS version.
+  int? _readyVersion;
   OtaManifest? _manifest;
   final Map<AppFlavor, int?> _installed = {};
   bool _statusesRequested = false;
+  bool _statusesLoaded = false;
+  List<AppFlavor> _channels = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Returning from the system installer (or from anywhere else) re-reads
+    // the installed versions, so a completed install settles the card on
+    // Open instead of offering the same APK again.
+    if (state == AppLifecycleState.resumed && _channels.isNotEmpty) {
+      _loadStatuses(_channels);
+    }
+  }
 
   /// Loads the release manifest and each invited app's installed version, so
   /// a card can offer Download, Update or Open instead of re-offering the
@@ -58,6 +87,19 @@ class _AppInvitationsPageState extends ConsumerState<AppInvitationsPage> {
       _installed
         ..clear()
         ..addAll(installed);
+      _statusesLoaded = true;
+      // A completed install clears the ready APK once it reaches the
+      // downloaded version; a partial install keeps the Install button.
+      final readyFlavor = _readyFlavor;
+      final readyVersion = _readyVersion;
+      if (readyFlavor != null && readyVersion != null) {
+        final code = installed[readyFlavor];
+        if (code != null && code >= readyVersion) {
+          _readyFlavor = null;
+          _readyFile = null;
+          _readyVersion = null;
+        }
+      }
     });
   }
 
@@ -68,6 +110,7 @@ class _AppInvitationsPageState extends ConsumerState<AppInvitationsPage> {
       _progress = 0;
       _readyFlavor = null;
       _readyFile = null;
+      _readyVersion = null;
     });
     try {
       // Recheck current authority, never rely on a cached notification or card.
@@ -95,6 +138,7 @@ class _AppInvitationsPageState extends ConsumerState<AppInvitationsPage> {
       setState(() {
         _readyFile = file;
         _readyFlavor = flavor;
+        _readyVersion = _manifest?.forFlavor(flavor)?.version;
       });
     } catch (_) {
       if (mounted) {
@@ -110,6 +154,29 @@ class _AppInvitationsPageState extends ConsumerState<AppInvitationsPage> {
   Future<void> _install(AppFlavor flavor) async {
     final file = _readyFile;
     if (file == null) return;
+    // Recheck current authority: the invitation may have been revoked while
+    // the APK was downloading.
+    try {
+      final channels = await ref.refresh(appInvitationsProvider.future);
+      if (!mounted) return;
+      if (!channels.contains(flavor)) {
+        setState(() {
+          _readyFlavor = null;
+          _readyFile = null;
+          _readyVersion = null;
+        });
+        context.showAppSnackBar(
+          AppLocalizations.of(context).appInvitationUnavailable,
+        );
+        return;
+      }
+    } catch (_) {
+      if (!mounted) return;
+      context.showAppSnackBar(
+        AppLocalizations.of(context).appInvitationDownloadFailed,
+      );
+      return;
+    }
     final error = await installDownloadedApk(file);
     if (!mounted) return;
     if (error != null) {
@@ -121,21 +188,8 @@ class _AppInvitationsPageState extends ConsumerState<AppInvitationsPage> {
     context.showAppSnackBar(
       AppLocalizations.of(context).appInvitationInstallReady,
     );
-    // The install intent returns before the system finishes installing, so
-    // refresh the card status when the user comes back to this page.
-    Future.delayed(const Duration(seconds: 2), () async {
-      if (!mounted) return;
-      final code = await installedVersionCode(packageNameForFlavor(flavor));
-      if (!mounted || code == null) return;
-      setState(() {
-        _installed[flavor] = code;
-        final latest = _manifest?.forFlavor(flavor)?.version;
-        if (latest != null && code >= latest && _readyFlavor == flavor) {
-          _readyFlavor = null;
-          _readyFile = null;
-        }
-      });
-    });
+    // The install intent returns before the system finishes installing; the
+    // resume observer settles the card when the user comes back.
   }
 
   @override
@@ -195,6 +249,7 @@ class _AppInvitationsPageState extends ConsumerState<AppInvitationsPage> {
                 ),
               ],
               data: (channels) {
+                _channels = channels;
                 if (!_statusesRequested && channels.isNotEmpty) {
                   _statusesRequested = true;
                   // Load manifest + installed versions after the frame; the
@@ -278,6 +333,20 @@ class _AppInvitationsPageState extends ConsumerState<AppInvitationsPage> {
     final labelStyle = context.textTheme.labelLarge?.copyWith(
       color: context.colorScheme.onPrimary,
     );
+    // Statuses (manifest + installed versions) are still loading: show an
+    // indeterminate state instead of defaulting to Download.
+    if (!_statusesLoaded) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        child: Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      );
+    }
     if (_downloading == flavor) {
       final percent = (_progress * 100).clamp(0, 100).round();
       return Column(

@@ -113,6 +113,27 @@ void main() {
     // The verified file now waits for an explicit Install tap (bug 1).
     expect(find.text('Install'), findsOneWidget);
   });
+  testWidgets('revocation between download and install blocks install', (
+    tester,
+  ) async {
+    var checks = 0;
+    await tester.pumpWidget(
+      app(
+        // Initial load and the download-time recheck see the invitation;
+        // the install-time recheck finds it revoked.
+        () async => ++checks <= 2 ? [AppFlavor.driver] : [],
+        download: (_, _) async => OtaDownloadResult(file: File('x.apk')),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Download the app'));
+    await tester.pumpAndSettle();
+    expect(find.text('Install'), findsOneWidget);
+    await tester.tap(find.text('Install'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('no longer active'), findsOneWidget);
+    expect(find.text('Install'), findsNothing);
+  });
   testWidgets('installer failure is not reported as success', (tester) async {
     await tester.pumpWidget(
       app(

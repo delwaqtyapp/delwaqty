@@ -23,6 +23,15 @@
     <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
     <uses-permission android:name="android.permission.USE_FINGERPRINT"/>
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+    <!-- Android 11+ package visibility: the invitations screen reads the
+         installed versionCode of the sibling Delwaqty apps. Narrow queries
+         only, never QUERY_ALL_PACKAGES. -->
+    <queries>
+        <package android:name="com.delwaqty.app"/>
+        <package android:name="com.delwaqty.admin"/>
+        <package android:name="com.delwaqty.driver"/>
+        <package android:name="com.delwaqty.provider"/>
+    </queries>
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"

@@ -24,7 +24,24 @@ Future<bool> showOtaUpdateIfAvailable({
 }) async {
   if (_openUpdateFlavors.contains(flavor)) return false;
   final result = await checkForOtaUpdate(flavor);
-  if (!result.needsUpdate && !force) return false;
+  if (!result.needsUpdate) {
+    // The running build caught up: any earlier install handoff is done.
+    await clearOtaInstallHandoff(flavor);
+    if (!force) return false;
+  } else if (!force) {
+    // The installer was already opened for this exact version and the
+    // running build still has not changed: do not re-offer on every
+    // resume (the update loop). The About-page manual check (force)
+    // still shows the dialog.
+    final handedOff = await otaInstallHandedOffVersion(flavor);
+    if (suppressAutoOtaOffer(
+      current: result.current,
+      latest: result.latest,
+      handedOff: handedOff,
+    )) {
+      return false;
+    }
+  }
 
   final navigatorState = _navigatorFor(flavor);
   final navCtx = navigatorState?.context;
@@ -344,6 +361,13 @@ class _OtaUpdateDialogState extends State<OtaUpdateDialog>
       _file = null;
       await _startUpdate();
       return;
+    }
+    if (error == null) {
+      // The installer was opened for this version; remember it so the
+      // automatic check does not re-offer the same update on every resume
+      // while the install is still pending.
+      await markOtaInstallHandedOff(widget.flavor, widget.result.latest);
+      if (!mounted) return;
     }
     setState(() {
       if (error == null) {

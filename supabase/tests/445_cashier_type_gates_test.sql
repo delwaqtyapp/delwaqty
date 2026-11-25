@@ -183,6 +183,59 @@ BEGIN
 END $$;
 RESET ROLE;
 -- per-shift value cap: 100 already sold, cap 150, another 100 pushes past
+-- #267 batch: a single request must not outrun the caps. Persisted on
+-- this shift: 1 custom line of 100. Count cap 3: lines 1-2 pass
+-- (1+1, 2+1 <= 3), line 3 is refused (3+1 > 3). Pre-fix every line saw
+-- only the persisted 1 and the whole batch passed.
+SELECT set_config('request.jwt.claims', '{}', true);
+update public.platform_settings
+   set feature_flags = feature_flags || '{"cashier_custom_per_shift_count":3,"cashier_custom_per_shift_value":100000}'::jsonb
+ where id = 'default';
+SET LOCAL ROLE authenticated;
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT cashier FROM zz445))::text, true);
+  BEGIN PERFORM public.staff_create_walk_in_sale(
+    '[{"custom":true,"label":"b1","price":10,"qty":1},{"custom":true,"label":"b2","price":10,"qty":1},{"custom":true,"label":"b3","price":10,"qty":1}]'::jsonb,
+    '[{"method":"cash","amount":30}]'::jsonb, gen_random_uuid());
+    RAISE EXCEPTION 'zz445 sentinel: batch outran the count cap';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz445 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'custom lines: shift count cap reached', 'wrong error: ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+DO $$
+BEGIN
+  ASSERT (SELECT count(*) FROM public.pos_sales s
+           WHERE s.merchant_id = (SELECT merchant FROM zz445)
+             AND s.items::text LIKE '%b1%') = 0,
+    'refused batch leaked a sale row';
+END $$;
+-- #267 batch value: cap 150 with 100 persisted; two lines of 40 in ONE
+-- request: 100+40 <= 150 then 140+40 > 150. Pre-fix both lines saw 100.
+SELECT set_config('request.jwt.claims', '{}', true);
+update public.platform_settings
+   set feature_flags = feature_flags || '{"cashier_custom_per_shift_count":50,"cashier_custom_per_shift_value":150}'::jsonb
+ where id = 'default';
+SET LOCAL ROLE authenticated;
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT cashier FROM zz445))::text, true);
+  BEGIN PERFORM public.staff_create_walk_in_sale(
+    '[{"custom":true,"label":"v1","price":40,"qty":1},{"custom":true,"label":"v2","price":40,"qty":1}]'::jsonb,
+    '[{"method":"cash","amount":80}]'::jsonb, gen_random_uuid());
+    RAISE EXCEPTION 'zz445 sentinel: batch outran the value cap';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz445 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'custom lines: shift value cap reached', 'wrong error: ' || SQLERRM; END;
+END $$;
+RESET ROLE;
+DO $$
+BEGIN
+  ASSERT (SELECT count(*) FROM public.pos_sales s
+           WHERE s.merchant_id = (SELECT merchant FROM zz445)
+             AND s.items::text LIKE '%v1%') = 0,
+    'refused value batch leaked a sale row';
+END $$;
+
 SELECT set_config('request.jwt.claims', '{}', true);
 update public.platform_settings
    set feature_flags = feature_flags || '{"cashier_custom_per_shift_count":50,"cashier_custom_per_shift_value":150}'::jsonb
@@ -260,6 +313,26 @@ BEGIN
     'void after type flip did not restore stock';
 END $$;
 update public.merchants set type = 'restaurant' where id = (select merchant from zz445);
+
+-- ============ 7) #267: shiftless custom refused, shiftless catalog ok ==
+-- the cashier's shift is CLOSED here (section 6 closed it). A custom line
+-- needs an open shift for ANY payment method; a catalog noncash sale
+-- without a shift stays allowed.
+SET LOCAL ROLE authenticated;
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT cashier FROM zz445))::text, true);
+  BEGIN PERFORM public.staff_create_walk_in_sale(
+    '[{"custom":true,"label":"x","price":10,"qty":1}]'::jsonb,
+    '[{"method":"instapay","amount":10}]'::jsonb, gen_random_uuid());
+    RAISE EXCEPTION 'zz445 sentinel: shiftless noncash custom allowed';
+  EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'zz445 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'open a shift before custom lines', 'wrong error: ' || SQLERRM; END;
+  PERFORM public.staff_create_walk_in_sale(
+    format('[{"product_id":"%s","qty":1}]', (SELECT product FROM zz445))::jsonb,
+    '[{"method":"instapay","amount":25}]'::jsonb, gen_random_uuid());
+END $$;
+RESET ROLE;
 
 SELECT '445 suite OK' AS marker;
 ROLLBACK;

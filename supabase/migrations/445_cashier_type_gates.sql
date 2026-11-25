@@ -20,6 +20,69 @@
 --    and row validation (security condition 5).
 -- Presets/modifiers (condition 6) land in 446 on this same PR.
 
+BEGIN;
+
+-- ─── 0. preconditions (A0): 442 tables + 444 objects + pre-image pins ───
+-- This migration REPLACES three live 442 functions and 444's
+-- is_cashier_type. On a DB where 442/444 never applied, CREATE OR REPLACE
+-- would create SECURITY DEFINER functions carrying default PUBLIC EXECUTE
+-- (anon-callable), and on a drifted DB it would silently overwrite an
+-- unknown body. Refuse both before touching anything (442/443 pattern;
+-- body md5s computed from the deterministic 439..444 chain build).
+DO $a0$
+BEGIN
+  IF to_regclass('public.merchant_staff') IS NULL
+     OR to_regclass('public.merchant_staff_events') IS NULL
+     OR to_regclass('public.pos_shifts') IS NULL
+     OR to_regclass('public.pos_sales') IS NULL
+     OR to_regclass('public.pos_sale_payments') IS NULL
+     OR to_regclass('public.pos_debt_ledger') IS NULL
+     OR to_regclass('public.pos_customers') IS NULL
+     OR to_regclass('public.pos_stock_moves') IS NULL
+     OR to_regclass('public.branches') IS NULL
+     OR to_regclass('public.platform_settings') IS NULL THEN
+    RAISE EXCEPTION '445 precondition failed: 442 POS/staff tables missing';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_attribute
+                  WHERE attrelid = 'public.pos_stock_moves'::regclass
+                    AND attname = 'sale_id' AND NOT attisdropped) THEN
+    RAISE EXCEPTION '445 precondition failed: pos_stock_moves.sale_id missing (442-era)';
+  END IF;
+  IF to_regprocedure('public.staff_shift_open(numeric,uuid)') IS NULL
+     OR to_regprocedure('public.staff_create_walk_in_sale(jsonb,jsonb,uuid,numeric,uuid,uuid,text)') IS NULL
+     OR to_regprocedure('public.staff_shift_close(numeric)') IS NULL
+     OR to_regprocedure('public.is_cashier_type(text)') IS NULL
+     OR to_regprocedure('public.staff_admin_set_active(uuid,boolean)') IS NULL
+     OR to_regprocedure('public._authorize_staff(text,text[])') IS NULL
+     OR to_regprocedure('public.feature_enabled(text)') IS NULL
+     OR to_regprocedure('public._num_or_null(text)') IS NULL THEN
+    RAISE EXCEPTION '445 precondition failed: 442/444 helper objects missing';
+  END IF;
+  IF md5(pg_get_functiondef('public.staff_shift_open(numeric, uuid)'::regprocedure))
+       <> 'bcd1f64882e077d5bb5ea6cc82df9988'
+     OR md5(pg_get_functiondef('public.staff_create_walk_in_sale(jsonb, jsonb, uuid, numeric, uuid, uuid, text)'::regprocedure))
+       <> '768aaa5526180770a48ba1954f85d17b'
+     OR md5(pg_get_functiondef('public.staff_shift_close(numeric)'::regprocedure))
+       <> '02a7fc503301ec3bc329cea0660662a1'
+     OR md5(pg_get_functiondef('public.is_cashier_type(text)'::regprocedure))
+       <> '315ce3bad146ce58b3dd78743ac3bbd5' THEN
+    RAISE EXCEPTION '445 precondition failed: a replaced function drifted from its 442/444 pre-image';
+  END IF;
+  -- CHECK replacement pre-image (reviewer guard gap): refuse a drifted
+  -- type list before the DROP. Two real pre-images: the 435-purged
+  -- 43-value list (staging/prod) and the older pre-435 list that still
+  -- carries 'pharmacy'. Both converge on the same 445 post-image.
+  IF (SELECT pg_get_constraintdef(oid) FROM pg_constraint
+       WHERE conname = 'merchants_type_check'
+         AND conrelid = 'public.merchants'::regclass) NOT IN (
+    'CHECK ((type = ANY (ARRAY[''food''::text, ''restaurant''::text, ''grocery''::text, ''supermarket''::text, ''electronics''::text, ''fashion''::text, ''flowers''::text, ''bakery''::text, ''general''::text, ''fruits''::text, ''meat''::text, ''seafood''::text, ''sweets''::text, ''clothing''::text, ''shoes''::text, ''mobile''::text, ''furniture''::text, ''home''::text, ''cafe''::text, ''petShop''::text, ''fitness''::text, ''gas''::text, ''carwash''::text, ''perfumes''::text, ''spices''::text, ''dairy''::text, ''accessories''::text, ''butcher''::text, ''vegetables''::text, ''service''::text, ''home_services''::text, ''plumbing''::text, ''electrical''::text, ''cleaning''::text, ''handyman''::text, ''carpentry''::text, ''ac_maintenance''::text, ''painting''::text, ''pest_control''::text, ''appliance_repair''::text, ''doctor''::text, ''clinic''::text, ''other''::text])))',
+    'CHECK ((type = ANY (ARRAY[''food''::text, ''restaurant''::text, ''grocery''::text, ''supermarket''::text, ''pharmacy''::text, ''electronics''::text, ''fashion''::text, ''flowers''::text, ''bakery''::text, ''general''::text, ''fruits''::text, ''meat''::text, ''seafood''::text, ''sweets''::text, ''clothing''::text, ''shoes''::text, ''mobile''::text, ''furniture''::text, ''home''::text, ''cafe''::text, ''petShop''::text, ''fitness''::text, ''gas''::text, ''carwash''::text, ''perfumes''::text, ''spices''::text, ''dairy''::text, ''accessories''::text, ''butcher''::text, ''vegetables''::text, ''service''::text, ''home_services''::text, ''plumbing''::text, ''electrical''::text, ''cleaning''::text, ''handyman''::text, ''carpentry''::text, ''ac_maintenance''::text, ''painting''::text, ''pest_control''::text, ''appliance_repair''::text, ''doctor''::text, ''clinic''::text, ''other''::text])))'
+  ) THEN
+    RAISE EXCEPTION '445 precondition failed: merchants_type_check drifted from both known pre-images';
+  END IF;
+END
+$a0$;
+
 -- ─── 1. merchants_type_check gains juice_shop (condition 5) ───────────
 -- 435's definition (43 values, pharmacy purged) + 'juice_shop'. Existing
 -- rows are validated against the new list before it is installed.
@@ -233,7 +296,6 @@ DECLARE
   v_charge_id bigint;
   v_custom_count int := 0;
   v_custom_value numeric := 0;
-  v_shift_caps uuid;
   CASHIER_DISCOUNT_CAP constant numeric := 0.10;
   MANAGER_DISCOUNT_CAP constant numeric := 0.50;
 BEGIN
@@ -296,6 +358,28 @@ BEGIN
     RAISE EXCEPTION 'items required';
   END IF;
 
+  -- Shift + serialization (#267): the shared per-staff advisory lock
+  -- (#252/S7) and the open-shift derivation run BEFORE line validation,
+  -- so the per-shift custom caps below read settled state: concurrent
+  -- requests queue here instead of both passing stale totals, and the
+  -- caps add this request's own accepted custom lines to the persisted
+  -- ones (read once here, accumulated in the loop).
+  PERFORM pg_advisory_xact_lock(hashtextextended(v_staff.id::text, 442002));
+  SELECT s.id INTO v_shift FROM public.pos_shifts s
+   WHERE s.merchant_id = v_staff.merchant_id
+     AND s.opened_by_staff = v_staff.id AND s.closed_at IS NULL
+   ORDER BY s.opened_at DESC LIMIT 1;
+  IF v_staff.role <> 'branch_manager' THEN
+    SELECT count(*), coalesce(sum(round(
+             coalesce(public._num_or_null(li.value ->> 'unit_price'), 0)
+             * coalesce(public._num_or_null(li.value ->> 'qty'), 0), 2)), 0)
+      INTO v_custom_count, v_custom_value
+      FROM public.pos_sales s3,
+           LATERAL jsonb_array_elements(s3.items) AS li(value)
+     WHERE s3.shift_id = v_shift AND s3.status = 'completed'
+       AND coalesce((li.value ->> 'custom')::boolean, false) IS TRUE;
+  END IF;
+
   v_custom_cap := coalesce(
     (SELECT public._num_or_null(feature_flags ->> 'custom_line_cap')
        FROM public.platform_settings WHERE id = 'default'), 50000);
@@ -349,29 +433,15 @@ BEGIN
         IF coalesce((v_merchant.staff_settings ->> 'cashier_custom_lines')::boolean, false) IS NOT TRUE THEN
           RAISE EXCEPTION 'custom lines need a branch manager';
         END IF;
+        -- #267: a cashier's custom lines ride an open shift for ANY
+        -- payment method; a shiftless custom sale reads NULL history and
+        -- bypasses every cap AND the shift-close report.
+        IF v_shift IS NULL THEN
+          RAISE EXCEPTION 'open a shift before custom lines';
+        END IF;
         v_custom_cap := coalesce(
           (SELECT public._num_or_null(feature_flags ->> 'cashier_custom_line_cap')
              FROM public.platform_settings WHERE id = 'default'), 5000);
-        -- Per-shift caps count the cashier's OWN open shift (none yet:
-        -- zero). The shift row is re-derived later under the advisory
-        -- lock; caps are a fraud brake, not a serialization point.
-        SELECT s2.id INTO v_shift_caps FROM public.pos_shifts s2
-         WHERE s2.merchant_id = v_staff.merchant_id
-           AND s2.opened_by_staff = v_staff.id AND s2.closed_at IS NULL
-         ORDER BY s2.opened_at DESC LIMIT 1;
-        SELECT count(*), coalesce(sum(round(
-                 coalesce(public._num_or_null(li.value ->> 'unit_price'), 0)
-                 * coalesce(public._num_or_null(li.value ->> 'qty'), 0), 2)), 0)
-          INTO v_custom_count, v_custom_value
-          FROM public.pos_sales s3,
-               LATERAL jsonb_array_elements(s3.items) AS li(value)
-         WHERE s3.shift_id = v_shift_caps AND s3.status = 'completed'
-           AND coalesce((li.value ->> 'custom')::boolean, false) IS TRUE;
-        IF v_custom_count >= coalesce(
-             (SELECT public._num_or_null(feature_flags ->> 'cashier_custom_per_shift_count')
-                FROM public.platform_settings WHERE id = 'default'), 10) THEN
-          RAISE EXCEPTION 'custom lines: shift count cap reached';
-        END IF;
       END IF;
       v_label := nullif(btrim(coalesce(v_item ->> 'label', '')), '');
       IF v_label IS NULL THEN
@@ -388,11 +458,21 @@ BEGIN
       IF v_price * v_qty > v_custom_cap THEN
         RAISE EXCEPTION 'custom line exceeds the % cap', v_custom_cap;
       END IF;
-      IF v_staff.role <> 'branch_manager'
-         AND v_custom_value + round(v_price * v_qty, 2) > coalesce(
+      IF v_staff.role <> 'branch_manager' THEN
+        -- #267: persisted + THIS request's already-accepted custom lines,
+        -- both under the staff lock above; a batch cannot outrun the caps.
+        IF v_custom_count + 1 > coalesce(
+             (SELECT public._num_or_null(feature_flags ->> 'cashier_custom_per_shift_count')
+                FROM public.platform_settings WHERE id = 'default'), 10) THEN
+          RAISE EXCEPTION 'custom lines: shift count cap reached';
+        END IF;
+        IF v_custom_value + round(v_price * v_qty, 2) > coalesce(
              (SELECT public._num_or_null(feature_flags ->> 'cashier_custom_per_shift_value')
                 FROM public.platform_settings WHERE id = 'default'), 20000) THEN
-        RAISE EXCEPTION 'custom lines: shift value cap reached';
+          RAISE EXCEPTION 'custom lines: shift value cap reached';
+        END IF;
+        v_custom_count := v_custom_count + 1;
+        v_custom_value := v_custom_value + round(v_price * v_qty, 2);
       END IF;
     END IF;
     v_subtotal := v_subtotal + round(v_price * v_qty, 2);
@@ -447,13 +527,8 @@ BEGIN
     RAISE EXCEPTION 'customer does not belong to this shop';
   END IF;
 
-  -- Shift (#252/S7): one shared advisory lock serializes open/sale/close
-  -- per staff member; cash sales REQUIRE an open shift.
-  PERFORM pg_advisory_xact_lock(hashtextextended(v_staff.id::text, 442002));
-  SELECT s.id INTO v_shift FROM public.pos_shifts s
-   WHERE s.merchant_id = v_staff.merchant_id
-     AND s.opened_by_staff = v_staff.id AND s.closed_at IS NULL
-   ORDER BY s.opened_at DESC LIMIT 1;
+  -- Shift (#252/S7): derived under the shared per-staff advisory lock
+  -- BEFORE the item loop (#267); cash sales REQUIRE an open shift.
   IF 'cash' = ANY(v_methods) AND v_shift IS NULL THEN
     RAISE EXCEPTION 'open a shift before taking cash';
   END IF;
@@ -610,3 +685,19 @@ BEGIN
                             'custom_lines', v_custom);
 END;
 $function$;
+
+-- ─── 6. grants: explicit after every replacement (security BLOCKING 2) ──
+-- CREATE OR REPLACE keeps existing grants, but on a 442-less DB it would
+-- CREATE with default PUBLIC EXECUTE; pin the intended ACL either way.
+REVOKE EXECUTE ON FUNCTION public.staff_shift_open(numeric, uuid) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.staff_create_walk_in_sale(jsonb, jsonb, uuid, numeric, uuid, uuid, text) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.staff_shift_close(numeric) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.is_cashier_type(text) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.is_simple_service_type(text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.staff_shift_open(numeric, uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.staff_create_walk_in_sale(jsonb, jsonb, uuid, numeric, uuid, uuid, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.staff_shift_close(numeric) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_cashier_type(text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_simple_service_type(text) TO authenticated;
+
+COMMIT;

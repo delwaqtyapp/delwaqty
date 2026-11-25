@@ -109,7 +109,7 @@ echo "446 OK"
 NEW_CHK="$(psql "$URL" -X -q -A -t -c "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname='merchants_type_check' AND conrelid='public.merchants'::regclass")"
 [ "$NEW_CHK" = "$CHK445" ] || fail_case "446 changed merchants_type_check"
 NEW_KIND="$(psql "$URL" -X -q -A -t -c "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname='merchant_staff_events_kind_check' AND conrelid='public.merchant_staff_events'::regclass")"
-[ "$NEW_KIND" = "CHECK ((kind = ANY (ARRAY['created'::text, 'role_changed'::text, 'branch_changed'::text, 'disabled'::text, 'enabled'::text, 'password_reset'::text, 'walk_in_sale'::text, 'void_sale'::text, 'debt_payment'::text, 'shift_opened'::text, 'shift_closed'::text, 'order_status'::text, 'refused'::text, 'password_changed'::text, 'preset_applied'::text, 'preset_removed'::text])))" ] \
+[ "$NEW_KIND" = "CHECK ((kind = ANY (ARRAY['created'::text, 'role_changed'::text, 'branch_changed'::text, 'disabled'::text, 'enabled'::text, 'password_reset'::text, 'walk_in_sale'::text, 'void_sale'::text, 'debt_payment'::text, 'shift_opened'::text, 'shift_closed'::text, 'order_status'::text, 'refused'::text, 'password_changed'::text, 'preset_applied'::text, 'preset_removed'::text, 'staff_settings_changed'::text])))" ] \
   || fail_case "merchant_staff_events_kind_check post-image wrong: $NEW_KIND"
 echo "CHECK pins OK (type unchanged; kind +preset kinds)"
 
@@ -161,11 +161,12 @@ expected_added = sorted([
     ("public", "_resolve_owned_merchant", "p_merchant_id uuid"),
     ("public", "merchant_apply_preset", "p_preset text, p_merchant_id uuid"),
     ("public", "merchant_remove_preset", "p_preset text, p_merchant_id uuid"),
+    ("public", "_audit_staff_settings_change", ""),
 ])
 if changed != expected_changed or gone or added != expected_added:
     print("CHANGED:", changed, "GONE:", gone, "ADDED:", added)
     sys.exit(1)
-print("function-body pin OK (1 replaced pinned, 3 added)")
+print("function-body pin OK (1 replaced pinned, 4 added)")
 PY
 
 echo "== 442 suite (regression)"

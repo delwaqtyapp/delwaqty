@@ -187,4 +187,52 @@ OUT="$(psql "$URL" -X -q -v ON_ERROR_STOP=1 -f "$SUITE445" 2>&1)" || { printf '%
 printf '%s\n' "$OUT" | grep -q '445 suite OK' || fail_case "445 suite marker missing"
 echo "445 suite OK"
 
+echo "== race K: concurrent custom-line sales vs per-shift value cap (#267)"
+RK_OWNER="77700001-0000-4000-8000-000000000001"
+RK_CASHIER="77700002-0000-4000-8000-000000000002"
+RK_MERCHANT="77700003-0000-4000-8000-000000000003"
+RK_BRANCH="77700004-0000-4000-8000-000000000004"
+psql "$URL" -X -q > /dev/null 2>&1 <<SQL
+INSERT INTO auth.users(id, email) VALUES
+  ('$RK_OWNER', 'zz445race.owner@example.invalid'),
+  ('$RK_CASHIER', 'zz445race.cashier@example.invalid');
+INSERT INTO public.users(id, email, role, user_type, verification_status, username, account_status) VALUES
+  ('$RK_OWNER', 'zz445race.owner@example.invalid', 'customer', 'customer', 'approved', 'zz445raceown', 'active'),
+  ('$RK_CASHIER', 'zz445race.cashier@example.invalid', 'customer', 'customer', 'approved', 'zz445racecash', 'active');
+INSERT INTO public.merchants(id, name, owner_user_id, type, status, staff_settings) VALUES
+  ('$RK_MERCHANT', 'zz445-race-shop', '$RK_OWNER', 'restaurant', 'active', '{"cashier_custom_lines":true}');
+INSERT INTO public.branches(id, merchant_id, name, is_primary) VALUES
+  ('$RK_BRANCH', '$RK_MERCHANT', 'zz445-race-b1', true);
+INSERT INTO public.merchant_staff(merchant_id, user_id, username, full_name, role, branch_id, is_active, must_change_password) VALUES
+  ('$RK_MERCHANT', '$RK_CASHIER', 'zz445racecashier', 'Racer', 'cashier', '$RK_BRANCH', true, false);
+UPDATE public.platform_settings
+   SET feature_flags = feature_flags || '{"cashier_mode_mobile":true,"staff_accounts":true,"cashier_custom_per_shift_value":150,"cashier_custom_per_shift_count":50}'::jsonb
+ WHERE id = 'default';
+SQL
+psql "$URL" -X -q > /dev/null 2>&1 <<SQL
+BEGIN;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', '{"sub": "$RK_CASHIER"}', true);
+SELECT public.staff_shift_open(0, gen_random_uuid());
+COMMIT;
+SQL
+for i in 1 2; do
+  ( psql "$URL" -X -q > "/tmp/zz445_raceK_$i.out" 2>&1 <<SQL
+BEGIN;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', '{"sub": "$RK_CASHIER"}', true);
+SELECT public.staff_create_walk_in_sale(
+  '[{"custom":true,"label":"raceK","price":100,"qty":1}]'::jsonb,
+  '[{"method":"cash","amount":100}]'::jsonb, gen_random_uuid());
+COMMIT;
+SQL
+  ) &
+done
+wait
+WON=$(psql "$URL" -X -q -A -t -c "SELECT count(*) FROM public.pos_sales WHERE merchant_id = '$RK_MERCHANT'")
+[ "$WON" = "1" ] || fail_case "race K: expected exactly one custom sale to land, got $WON"
+( grep -q 'custom lines: shift value cap reached' /tmp/zz445_raceK_1.out || grep -q 'custom lines: shift value cap reached' /tmp/zz445_raceK_2.out ) \
+  || fail_case "race K: the losing request was not value-cap refused"
+echo "race K OK (two concurrent 100-lines vs cap 150: exactly one landed, loser refused)"
+
 echo "445 harness ALL OK"

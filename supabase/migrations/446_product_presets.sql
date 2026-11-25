@@ -11,6 +11,53 @@
 --  * REVOKE-first on the new tables; an audit row on every apply/remove;
 --  * negative tests in supabase/tests/446_product_presets_test.sql.
 
+BEGIN;
+
+-- ─── 0. preconditions (A0): 442 tables + 444/445 objects + pre-image pin
+-- 446 REPLACES 445's staff_create_walk_in_sale. On a DB where 442..445
+-- never applied, CREATE OR REPLACE would create a SECURITY DEFINER
+-- function with default PUBLIC EXECUTE (anon-callable), and on a drifted
+-- DB it would silently overwrite an unknown body. Refuse both before
+-- touching anything (442/443 pattern). The body md5 is computed from the
+-- deterministic 439..445 chain build of THIS PR's 445 file.
+DO $a0$
+BEGIN
+  IF to_regclass('public.merchant_staff') IS NULL
+     OR to_regclass('public.merchant_staff_events') IS NULL
+     OR to_regclass('public.pos_shifts') IS NULL
+     OR to_regclass('public.pos_sales') IS NULL
+     OR to_regclass('public.pos_stock_moves') IS NULL
+     OR to_regclass('public.products') IS NULL
+     OR to_regclass('public.product_modifier_groups') IS NULL
+     OR to_regclass('public.product_modifier_options') IS NULL
+     OR to_regclass('public.platform_settings') IS NULL THEN
+    RAISE EXCEPTION '446 precondition failed: 442/baseline tables missing';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_attribute
+                  WHERE attrelid = 'public.pos_stock_moves'::regclass
+                    AND attname = 'sale_id' AND NOT attisdropped) THEN
+    RAISE EXCEPTION '446 precondition failed: pos_stock_moves.sale_id missing (442-era)';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_attribute
+                  WHERE attrelid = 'public.merchants'::regclass
+                    AND attname = 'staff_settings' AND NOT attisdropped) THEN
+    RAISE EXCEPTION '446 precondition failed: merchants.staff_settings missing (445-era)';
+  END IF;
+  IF to_regprocedure('public.staff_create_walk_in_sale(jsonb,jsonb,uuid,numeric,uuid,uuid,text)') IS NULL
+     OR to_regprocedure('public.is_cashier_type(text)') IS NULL
+     OR to_regprocedure('public.is_simple_service_type(text)') IS NULL
+     OR to_regprocedure('public._assert_staff_settings_shape()') IS NULL
+     OR to_regprocedure('public.feature_enabled(text)') IS NULL
+     OR to_regprocedure('public._num_or_null(text)') IS NULL THEN
+    RAISE EXCEPTION '446 precondition failed: 442/444/445 helper objects missing';
+  END IF;
+  IF md5(pg_get_functiondef('public.staff_create_walk_in_sale(jsonb, jsonb, uuid, numeric, uuid, uuid, text)'::regprocedure))
+       <> '58e40815268508135f436b750876fab3' THEN
+    RAISE EXCEPTION '446 precondition failed: staff_create_walk_in_sale drifted from the 445 pre-image';
+  END IF;
+END
+$a0$;
+
 -- ─── 1. audit kinds (precondition pin, then drop+add) ─────────────────
 DO $g$
 DECLARE
@@ -28,7 +75,7 @@ ALTER TABLE public.merchant_staff_events ADD CONSTRAINT merchant_staff_events_ki
     'disabled'::text, 'enabled'::text, 'password_reset'::text, 'walk_in_sale'::text,
     'void_sale'::text, 'debt_payment'::text, 'shift_opened'::text, 'shift_closed'::text,
     'order_status'::text, 'refused'::text, 'password_changed'::text,
-    'preset_applied'::text, 'preset_removed'::text])));
+    'preset_applied'::text, 'preset_removed'::text, 'staff_settings_changed'::text])));
 
 -- ─── 2. preset markers on the EXISTING modifier system ───────────────
 -- The baseline already has product_modifier_groups (is_required,
@@ -110,6 +157,13 @@ DECLARE
   v_inserted int := 0;
   v_existing int := 0;
 BEGIN
+  -- Flag-gated (security NB-5): platform kill switch, default off. Note
+  -- _resolve_owned_merchant also passes for IN-SCOPE ADMINS
+  -- (is_merchant_owner semantics), so "owner-only" here is
+  -- owner-or-scoped-admin -- accepted: the admin app is the control room.
+  IF NOT public.feature_enabled('merchant_presets') THEN
+    RAISE EXCEPTION 'presets are not enabled';
+  END IF;
   v_m := public._resolve_owned_merchant(p_merchant_id);
   IF p_preset IS DISTINCT FROM 'cafe' THEN
     RAISE EXCEPTION 'unknown preset';
@@ -191,8 +245,13 @@ $function$;
 REVOKE ALL ON FUNCTION public.merchant_apply_preset(text, uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.merchant_apply_preset(text, uuid) TO authenticated;
 
--- Removal deletes ONLY preset_source rows (condition 6); the owner's own
--- products and groups are never touched. Groups/modifiers cascade.
+-- Removal touches ONLY preset_source rows (condition 6 + review decision):
+-- FK-referenced products (order_items / reviews / pos_stock_moves /
+-- pos_price_history) are SOFT-removed (is_available=false, markers
+-- cleared) instead of failing the DELETE; products the owner customized
+-- (own groups/options added under a preset product) are DETACHED (kept,
+-- markers cleared, still on sale); everything else is hard-deleted.
+-- Owner-created rows are never touched. Counts come back per outcome.
 CREATE FUNCTION public.merchant_remove_preset(p_preset text, p_merchant_id uuid DEFAULT NULL)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -201,27 +260,99 @@ CREATE FUNCTION public.merchant_remove_preset(p_preset text, p_merchant_id uuid 
 AS $function$
 DECLARE
   v_m public.merchants%ROWTYPE;
-  v_n int;
+  v_pid uuid;
+  v_deleted int := 0;
+  v_soft int := 0;
+  v_detached int := 0;
+  v_has_children boolean;
+  v_referenced boolean;
 BEGIN
+  IF NOT public.feature_enabled('merchant_presets') THEN
+    RAISE EXCEPTION 'presets are not enabled';
+  END IF;
   v_m := public._resolve_owned_merchant(p_merchant_id);
   IF p_preset IS DISTINCT FROM 'cafe' THEN
     RAISE EXCEPTION 'unknown preset';
   END IF;
-  WITH del AS (
-    DELETE FROM public.products
-     WHERE merchant_id = v_m.id AND preset_source = p_preset
-    RETURNING id
-  )
-  SELECT count(*) INTO v_n FROM del;
+  -- 1) preset marker options go (only preset_source rows)
+  DELETE FROM public.product_modifier_options o
+   WHERE o.preset_source = p_preset
+     AND o.group_id IN (SELECT g.id FROM public.product_modifier_groups g
+                         JOIN public.products pr ON pr.id = g.product_id
+                        WHERE pr.merchant_id = v_m.id AND pr.preset_source = p_preset);
+  -- 2) preset groups with NO owner-added options left are deleted; a
+  -- preset group the owner extended keeps the owner's options and is
+  -- detached (markers cleared) instead.
+  DELETE FROM public.product_modifier_groups g
+   WHERE g.preset_source = p_preset
+     AND g.product_id IN (SELECT pr.id FROM public.products pr
+                           WHERE pr.merchant_id = v_m.id AND pr.preset_source = p_preset)
+     AND NOT EXISTS (SELECT 1 FROM public.product_modifier_options o
+                      WHERE o.group_id = g.id);
+  UPDATE public.product_modifier_groups g
+     SET preset_source = NULL, preset_key = NULL
+   WHERE g.preset_source = p_preset
+     AND g.product_id IN (SELECT pr.id FROM public.products pr
+                           WHERE pr.merchant_id = v_m.id AND pr.preset_source = p_preset);
+  -- 3) products: owner-customized -> detach; FK-referenced -> soft-remove;
+  -- otherwise hard delete.
+  FOR v_pid IN SELECT pr.id FROM public.products pr
+                WHERE pr.merchant_id = v_m.id AND pr.preset_source = p_preset LOOP
+    v_has_children := EXISTS (SELECT 1 FROM public.product_modifier_groups g
+                               WHERE g.product_id = v_pid);
+    v_referenced := EXISTS (SELECT 1 FROM public.order_items oi WHERE oi.product_id = v_pid)
+                 OR EXISTS (SELECT 1 FROM public.reviews r WHERE r.product_id = v_pid)
+                 OR EXISTS (SELECT 1 FROM public.pos_stock_moves sm WHERE sm.product_id = v_pid)
+                 OR EXISTS (SELECT 1 FROM public.pos_price_history ph WHERE ph.product_id = v_pid);
+    IF v_has_children THEN
+      UPDATE public.products SET preset_source = NULL, preset_key = NULL WHERE id = v_pid;
+      v_detached := v_detached + 1;
+    ELSIF v_referenced THEN
+      UPDATE public.products SET preset_source = NULL, preset_key = NULL,
+                                 is_available = false
+       WHERE id = v_pid;
+      v_soft := v_soft + 1;
+    ELSE
+      DELETE FROM public.products WHERE id = v_pid;
+      v_deleted := v_deleted + 1;
+    END IF;
+  END LOOP;
   INSERT INTO public.merchant_staff_events (staff_id, merchant_id, kind, detail, actor_id)
   VALUES (NULL, v_m.id, 'preset_removed',
-          jsonb_build_object('preset', p_preset, 'products_removed', v_n),
+          jsonb_build_object('preset', p_preset, 'deleted', v_deleted,
+                             'soft_removed', v_soft, 'detached', v_detached),
           auth.uid());
-  RETURN jsonb_build_object('ok', true, 'preset', p_preset, 'products_removed', v_n);
+  RETURN jsonb_build_object('ok', true, 'preset', p_preset, 'deleted', v_deleted,
+                            'soft_removed', v_soft, 'detached', v_detached);
 END;
 $function$;
 REVOKE ALL ON FUNCTION public.merchant_remove_preset(text, uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.merchant_remove_preset(text, uuid) TO authenticated;
+
+-- NB-6: every staff_settings flip (e.g. cashier_custom_lines) is audited,
+-- whichever path wrote it -- the owner merchants policy, a future RPC, or
+-- a console write as postgres (actor_id NULL).
+CREATE FUNCTION public._audit_staff_settings_change()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+BEGIN
+  IF NEW.staff_settings IS DISTINCT FROM OLD.staff_settings THEN
+    INSERT INTO public.merchant_staff_events (staff_id, merchant_id, kind, detail, actor_id)
+    VALUES (NULL, NEW.id, 'staff_settings_changed',
+            jsonb_build_object('old', OLD.staff_settings, 'new', NEW.staff_settings),
+            auth.uid());
+  END IF;
+  RETURN NEW;
+END;
+$function$;
+REVOKE ALL ON FUNCTION public._audit_staff_settings_change() FROM PUBLIC, anon, authenticated;
+DROP TRIGGER IF EXISTS merchants_staff_settings_audit ON public.merchants;
+CREATE TRIGGER merchants_staff_settings_audit
+  AFTER UPDATE OF staff_settings ON public.merchants
+  FOR EACH ROW EXECUTE FUNCTION public._audit_staff_settings_change();
 
 
 -- ─── 4. sale path: modifiers priced server-side (condition 6) ──────
@@ -267,7 +398,6 @@ DECLARE
   v_charge_id bigint;
   v_custom_count int := 0;
   v_custom_value numeric := 0;
-  v_shift_caps uuid;
   v_mods jsonb;
   v_mod_total numeric;
   v_mod jsonb;
@@ -336,6 +466,28 @@ BEGIN
     RAISE EXCEPTION 'items required';
   END IF;
 
+  -- Shift + serialization (#267): the shared per-staff advisory lock
+  -- (#252/S7) and the open-shift derivation run BEFORE line validation,
+  -- so the per-shift custom caps below read settled state: concurrent
+  -- requests queue here instead of both passing stale totals, and the
+  -- caps add this request's own accepted custom lines to the persisted
+  -- ones (read once here, accumulated in the loop).
+  PERFORM pg_advisory_xact_lock(hashtextextended(v_staff.id::text, 442002));
+  SELECT s.id INTO v_shift FROM public.pos_shifts s
+   WHERE s.merchant_id = v_staff.merchant_id
+     AND s.opened_by_staff = v_staff.id AND s.closed_at IS NULL
+   ORDER BY s.opened_at DESC LIMIT 1;
+  IF v_staff.role <> 'branch_manager' THEN
+    SELECT count(*), coalesce(sum(round(
+             coalesce(public._num_or_null(li.value ->> 'unit_price'), 0)
+             * coalesce(public._num_or_null(li.value ->> 'qty'), 0), 2)), 0)
+      INTO v_custom_count, v_custom_value
+      FROM public.pos_sales s3,
+           LATERAL jsonb_array_elements(s3.items) AS li(value)
+     WHERE s3.shift_id = v_shift AND s3.status = 'completed'
+       AND coalesce((li.value ->> 'custom')::boolean, false) IS TRUE;
+  END IF;
+
   v_custom_cap := coalesce(
     (SELECT public._num_or_null(feature_flags ->> 'custom_line_cap')
        FROM public.platform_settings WHERE id = 'default'), 50000);
@@ -385,8 +537,10 @@ BEGIN
           IF NOT FOUND THEN
             RAISE EXCEPTION 'unknown modifier for this product';
           END IF;
+          -- #268: compare the CANONICAL stored uuid text; raw input text
+          -- would let a case variant of the same option pass twice.
           IF EXISTS (SELECT 1 FROM jsonb_array_elements(v_mods) e
-                      WHERE e.value ->> 'id' = (v_mod #>> '{}')) THEN
+                      WHERE e.value ->> 'id' = v_mrow.id::text) THEN
             RAISE EXCEPTION 'duplicate modifier';
           END IF;
           v_mods := v_mods || jsonb_build_object(
@@ -400,13 +554,21 @@ BEGIN
                     WHERE g3.product_id = v_product.id LOOP
         SELECT count(*) INTO v_gcount FROM jsonb_array_elements(v_mods) e
          WHERE (e.value ->> 'group_id')::uuid = v_grp.id;
+        -- #269: max_selections NULL or 0 = UNLIMITED, matching the shared
+        -- pricing helper (migration 234) the customer order path uses;
+        -- only a positive max caps the pick count.
         IF (v_grp.is_required AND v_gcount < 1)
-           OR v_gcount > coalesce(v_grp.max_selections, 1) THEN
+           OR (coalesce(v_grp.max_selections, 0) > 0
+               AND v_gcount > v_grp.max_selections) THEN
           RAISE EXCEPTION 'modifier group % selection count refused', v_grp.name;
         END IF;
       END LOOP;
       -- Server-side price: the client never names a price for catalog items.
       v_price := v_product.price + v_mod_total;
+      -- NB-3: negative adjustments must never zero out a line.
+      IF v_price <= 0 THEN
+        RAISE EXCEPTION 'line price must stay positive';
+      END IF;
       v_label := coalesce(v_product.name_ar, v_product.name);
       -- Stock ops are collected and applied after the sale row exists so
       -- the moves can link back to it (S3); same transaction = atomic.
@@ -433,29 +595,15 @@ BEGIN
         IF coalesce((v_merchant.staff_settings ->> 'cashier_custom_lines')::boolean, false) IS NOT TRUE THEN
           RAISE EXCEPTION 'custom lines need a branch manager';
         END IF;
+        -- #267: a cashier's custom lines ride an open shift for ANY
+        -- payment method; a shiftless custom sale reads NULL history and
+        -- bypasses every cap AND the shift-close report.
+        IF v_shift IS NULL THEN
+          RAISE EXCEPTION 'open a shift before custom lines';
+        END IF;
         v_custom_cap := coalesce(
           (SELECT public._num_or_null(feature_flags ->> 'cashier_custom_line_cap')
              FROM public.platform_settings WHERE id = 'default'), 5000);
-        -- Per-shift caps count the cashier's OWN open shift (none yet:
-        -- zero). The shift row is re-derived later under the advisory
-        -- lock; caps are a fraud brake, not a serialization point.
-        SELECT s2.id INTO v_shift_caps FROM public.pos_shifts s2
-         WHERE s2.merchant_id = v_staff.merchant_id
-           AND s2.opened_by_staff = v_staff.id AND s2.closed_at IS NULL
-         ORDER BY s2.opened_at DESC LIMIT 1;
-        SELECT count(*), coalesce(sum(round(
-                 coalesce(public._num_or_null(li.value ->> 'unit_price'), 0)
-                 * coalesce(public._num_or_null(li.value ->> 'qty'), 0), 2)), 0)
-          INTO v_custom_count, v_custom_value
-          FROM public.pos_sales s3,
-               LATERAL jsonb_array_elements(s3.items) AS li(value)
-         WHERE s3.shift_id = v_shift_caps AND s3.status = 'completed'
-           AND coalesce((li.value ->> 'custom')::boolean, false) IS TRUE;
-        IF v_custom_count >= coalesce(
-             (SELECT public._num_or_null(feature_flags ->> 'cashier_custom_per_shift_count')
-                FROM public.platform_settings WHERE id = 'default'), 10) THEN
-          RAISE EXCEPTION 'custom lines: shift count cap reached';
-        END IF;
       END IF;
       v_label := nullif(btrim(coalesce(v_item ->> 'label', '')), '');
       IF v_label IS NULL THEN
@@ -472,11 +620,21 @@ BEGIN
       IF v_price * v_qty > v_custom_cap THEN
         RAISE EXCEPTION 'custom line exceeds the % cap', v_custom_cap;
       END IF;
-      IF v_staff.role <> 'branch_manager'
-         AND v_custom_value + round(v_price * v_qty, 2) > coalesce(
+      IF v_staff.role <> 'branch_manager' THEN
+        -- #267: persisted + THIS request's already-accepted custom lines,
+        -- both under the staff lock above; a batch cannot outrun the caps.
+        IF v_custom_count + 1 > coalesce(
+             (SELECT public._num_or_null(feature_flags ->> 'cashier_custom_per_shift_count')
+                FROM public.platform_settings WHERE id = 'default'), 10) THEN
+          RAISE EXCEPTION 'custom lines: shift count cap reached';
+        END IF;
+        IF v_custom_value + round(v_price * v_qty, 2) > coalesce(
              (SELECT public._num_or_null(feature_flags ->> 'cashier_custom_per_shift_value')
                 FROM public.platform_settings WHERE id = 'default'), 20000) THEN
-        RAISE EXCEPTION 'custom lines: shift value cap reached';
+          RAISE EXCEPTION 'custom lines: shift value cap reached';
+        END IF;
+        v_custom_count := v_custom_count + 1;
+        v_custom_value := v_custom_value + round(v_price * v_qty, 2);
       END IF;
     END IF;
     v_subtotal := v_subtotal + round(v_price * v_qty, 2);
@@ -532,13 +690,8 @@ BEGIN
     RAISE EXCEPTION 'customer does not belong to this shop';
   END IF;
 
-  -- Shift (#252/S7): one shared advisory lock serializes open/sale/close
-  -- per staff member; cash sales REQUIRE an open shift.
-  PERFORM pg_advisory_xact_lock(hashtextextended(v_staff.id::text, 442002));
-  SELECT s.id INTO v_shift FROM public.pos_shifts s
-   WHERE s.merchant_id = v_staff.merchant_id
-     AND s.opened_by_staff = v_staff.id AND s.closed_at IS NULL
-   ORDER BY s.opened_at DESC LIMIT 1;
+  -- Shift (#252/S7): derived under the shared per-staff advisory lock
+  -- BEFORE the item loop (#267); cash sales REQUIRE an open shift.
   IF 'cash' = ANY(v_methods) AND v_shift IS NULL THEN
     RAISE EXCEPTION 'open a shift before taking cash';
   END IF;
@@ -617,3 +770,9 @@ EXCEPTION WHEN unique_violation THEN
   RAISE EXCEPTION 'idempotency key reused with a different request';
 END;
 $function$;
+
+-- ─── 5. grants: explicit after the replacement (security BLOCKING 2) ───
+REVOKE EXECUTE ON FUNCTION public.staff_create_walk_in_sale(jsonb, jsonb, uuid, numeric, uuid, uuid, text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.staff_create_walk_in_sale(jsonb, jsonb, uuid, numeric, uuid, uuid, text) TO authenticated;
+
+COMMIT;

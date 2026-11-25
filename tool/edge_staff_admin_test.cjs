@@ -1,7 +1,8 @@
 // Edge execution tests for supabase/functions/merchant-staff-admin/index.ts
-// (#265): mocked-GoTrue failure injection. The handler is loaded in a vm with
-// stubbed createClient; every GoTrue admin call and every RPC is recorded so
-// tests can assert call ORDER and the ABSENCE of effects after a refusal.
+// (#265, round 3): mocked-GoTrue failure injection. The handler is loaded in
+// a vm with stubbed createClient; every GoTrue admin call and every RPC is
+// recorded so tests can assert call ORDER and the ABSENCE of effects after
+// a refusal.
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -17,6 +18,8 @@ const MERCHANT_ID = '00000000-0000-4000-8000-0000000000dd';
 const PROVISION_ID = '00000000-0000-4000-8000-0000000000ee';
 const AUTH_USER_ID = '00000000-0000-4000-8000-0000000000ff';
 const STAFF = { id: STAFF_ID, user_id: STAFF_USER_ID, merchant_id: MERCHANT_ID };
+
+const j = (v) => JSON.parse(JSON.stringify(v));
 
 function loadHandler(fail = {}) {
   let handler;
@@ -69,36 +72,47 @@ function loadHandler(fail = {}) {
             case '_lookup_rate_allow':
               return fail.rateLimited ? { data: false } : { data: true };
             case 'staff_admin_provision_begin':
-              return fail.begin ? err()
-                : { data: { provision_id: PROVISION_ID, login_username: 'zzracer__0a1b2c' }, error: null };
+              // the DB refuses a branchless cashier; the mock mirrors it
+              if (fail.begin
+                  || (args.p_role === 'cashier' && !args.p_branch_id)
+                  || (args.p_role === 'kitchen' && !args.p_branch_id)) return err();
+              return { data: { provision_id: PROVISION_ID, login_username: 'zzracer__0a1b2c' }, error: null };
             case 'staff_admin_provision_complete':
               return fail.complete ? err() : { data: STAFF_ID, error: null };
             case 'staff_admin_provision_abort':
+              return fail.abort ? err() : { data: null, error: null };
             case 'staff_admin_audit_refusal':
               return { data: null, error: null };
             case 'staff_admin_set_active':
               return fail.setActive ? err() : { data: null, error: null };
             case 'staff_admin_record_password_reset':
               return fail.recordReset ? err() : { data: null, error: null };
+            case 'staff_admin_sync_complete':
+              return fail.sync ? err() : { data: null, error: null };
+            case 'staff_admin_mark_password_rotated':
+              return fail.mark ? err() : { data: null, error: null };
             case 'revoke_user_sessions':
               return fail.revoke ? err() : { data: null, error: null };
             default:
               throw new Error(`unexpected rpc ${name}`);
           }
         },
-        from: (table) => {
-          assert.equal(table, 'merchant_staff');
-          return {
-            select: () => ({
-              eq: () => ({
-                maybeSingle: async () => ({
-                  data: fail.staffMissing ? null : STAFF,
-                  error: null,
-                }),
-              }),
+        from: (table) => ({
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => {
+                if (table === 'merchant_staff') {
+                  return { data: fail.staffMissing ? null : STAFF, error: null };
+                }
+                if (table === 'merchants') {
+                  return { data: fail.merchantMissing ? null : { id: MERCHANT_ID }, error: null };
+                }
+                throw new Error(`unexpected table ${table}`);
+              },
+              order: async () => ({ data: [], error: null }),
             }),
-          };
-        },
+          }),
+        }),
       };
     },
   };
@@ -118,8 +132,10 @@ const names = (calls) => calls.map(([n]) => n);
 const gotrueNames = (calls) => names(calls).filter((n) => n.startsWith('gotrue:'));
 const CREATE_BODY = {
   action: 'create_staff', merchant_id: MERCHANT_ID, username: 'zzracer',
-  full_name: 'Racer', role: 'cashier', branch_id: null, phone: null,
+  full_name: 'Racer', role: 'cashier', branch_id: '00000000-0000-4000-8000-000000000011',
+  phone: null,
 };
+const RATE = ['admin:_lookup_rate_allow', 'admin:_lookup_rate_allow'];
 
 test('refused begin performs ZERO GoTrue effects and is audited (#259)', async () => {
   const { handler, calls } = loadHandler({ begin: true });
@@ -128,10 +144,19 @@ test('refused begin performs ZERO GoTrue effects and is audited (#259)', async (
   assert.deepEqual(await res.json(), { error: 'request_refused' });
   assert.deepEqual(gotrueNames(calls), []);
   assert.deepEqual(names(calls), [
-    'admin:_lookup_rate_allow', 'admin:_lookup_rate_allow',
-    'staff_admin_provision_begin', 'staff_admin_audit_refusal',
+    ...RATE, 'staff_admin_provision_begin', 'staff_admin_audit_refusal',
   ]);
   assert.equal(calls[3][1].p_reason, 'create_staff');
+});
+
+test('branchless cashier is refused at the DB boundary, zero GoTrue (#265)', async () => {
+  const { handler, calls } = loadHandler();
+  const res = await handler(post({ ...CREATE_BODY, branch_id: null }));
+  assert.equal(res.status, 403);
+  assert.deepEqual(gotrueNames(calls), []);
+  assert.deepEqual(names(calls), [
+    ...RATE, 'staff_admin_provision_begin', 'staff_admin_audit_refusal',
+  ]);
 });
 
 test('invalid role is refused before any executor or GoTrue call', async () => {
@@ -139,9 +164,7 @@ test('invalid role is refused before any executor or GoTrue call', async () => {
   const res = await handler(post({ ...CREATE_BODY, role: 'owner' }));
   assert.equal(res.status, 403);
   assert.deepEqual(gotrueNames(calls), []);
-  assert.deepEqual(names(calls), [
-    'admin:_lookup_rate_allow', 'admin:_lookup_rate_allow', 'staff_admin_audit_refusal',
-  ]);
+  assert.deepEqual(names(calls), [...RATE, 'staff_admin_audit_refusal']);
   assert.equal(calls[2][1].p_reason, 'invalid_role');
 });
 
@@ -151,8 +174,7 @@ test('createUser failure aborts the provision and returns 502', async () => {
   assert.equal(res.status, 502);
   assert.ok(!('password' in (await res.json())));
   assert.deepEqual(names(calls), [
-    'admin:_lookup_rate_allow', 'admin:_lookup_rate_allow',
-    'staff_admin_provision_begin', 'gotrue:createUser',
+    ...RATE, 'staff_admin_provision_begin', 'gotrue:createUser',
     'staff_admin_provision_abort', 'staff_admin_audit_refusal',
   ]);
   assert.equal(calls[4][1].p_reason, 'gotrue_failure');
@@ -163,7 +185,7 @@ test('createUser carries the provision binding in app_metadata (S3)', async () =
   const { handler, calls } = loadHandler();
   const res = await handler(post(CREATE_BODY));
   assert.equal(res.status, 200);
-  const args = JSON.parse(JSON.stringify(calls.find(([n]) => n === 'gotrue:createUser')[1]));
+  const args = j(calls.find(([n]) => n === 'gotrue:createUser')[1]);
   assert.deepEqual(args.app_metadata, { staff_provisioning: PROVISION_ID });
   assert.deepEqual(args.user_metadata, { full_name: 'Racer' });
   assert.ok(!('user_type' in args.user_metadata));
@@ -171,6 +193,21 @@ test('createUser carries the provision binding in app_metadata (S3)', async () =
   const body = await res.json();
   assert.equal(body.login_username, 'zzracer__0a1b2c');
   assert.equal(res.headers.get('cache-control'), 'no-store');
+  // the digest proof is marked AFTER the verified creation (#266)
+  assert.deepEqual(names(calls), [
+    ...RATE, 'staff_admin_provision_begin', 'gotrue:createUser',
+    'staff_admin_provision_complete', 'staff_admin_mark_password_rotated',
+  ]);
+  assert.equal(j(calls[5][1]).p_staff_id, STAFF_ID);
+});
+
+test('a mark failure after creation is logged but does not fail creation', async () => {
+  const { handler, calls } = loadHandler({ mark: true });
+  const res = await handler(post(CREATE_BODY));
+  assert.equal(res.status, 200);
+  const audit = calls.filter(([n]) => n === 'staff_admin_audit_refusal');
+  assert.equal(audit.length, 1);
+  assert.equal(audit[0][1].p_reason, 'provision');
 });
 
 test('complete failure deletes the auth user, aborts, refuses generically', async () => {
@@ -179,52 +216,78 @@ test('complete failure deletes the auth user, aborts, refuses generically', asyn
   assert.equal(res.status, 403);
   assert.deepEqual(await res.json(), { error: 'request_refused' });
   assert.deepEqual(names(calls), [
-    'admin:_lookup_rate_allow', 'admin:_lookup_rate_allow',
-    'staff_admin_provision_begin', 'gotrue:createUser',
+    ...RATE, 'staff_admin_provision_begin', 'gotrue:createUser',
     'staff_admin_provision_complete', 'gotrue:deleteUser',
     'staff_admin_provision_abort', 'staff_admin_audit_refusal',
   ]);
   assert.equal(calls[6][1].p_reason, 'create_staff');
 });
 
-test('a failed deleteUser is retried once, then flagged as an orphan (#262)', async () => {
+test('a failed deleteUser is retried once, then flagged with the orphan UID (#262)', async () => {
   const { handler, calls } = loadHandler({ complete: true, deleteFails: 2 });
   const res = await handler(post(CREATE_BODY));
   assert.equal(res.status, 403);
   assert.equal(gotrueNames(calls).filter((n) => n === 'gotrue:deleteUser').length, 2);
   const abort = calls.find(([n]) => n === 'staff_admin_provision_abort');
-  assert.equal(abort[1].p_reason, 'orphan_after_delete_failure');
+  assert.equal(abort[1].p_reason, `orphan_after_delete_failure:${AUTH_USER_ID}`);
 });
 
-test('set_active(disable): executor FIRST, then ban, then revoke (S2 order)', async () => {
+test('a failing abort call is itself audited, never silently dropped (#262)', async () => {
+  const { handler, calls } = loadHandler({ complete: true, abort: true });
+  const res = await handler(post(CREATE_BODY));
+  assert.equal(res.status, 403);
+  const audits = calls.filter(([n]) => n === 'staff_admin_audit_refusal').map(([, a]) => a.p_reason);
+  assert.deepEqual(audits, ['provision', 'create_staff']);
+});
+
+test('set_active(disable): executor FIRST, ban, revoke, sync reported (S2/#261)', async () => {
   const { handler, calls } = loadHandler();
   const res = await handler(post({ action: 'set_active', staff_id: STAFF_ID, active: false }));
   assert.equal(res.status, 200);
   assert.deepEqual(await res.json(), { ok: true });
   assert.deepEqual(names(calls), [
-    'admin:_lookup_rate_allow', 'admin:_lookup_rate_allow',
-    'staff_admin_set_active', 'gotrue:updateUserById', 'admin:revoke_user_sessions',
+    ...RATE, 'staff_admin_set_active', 'gotrue:updateUserById',
+    'admin:revoke_user_sessions', 'staff_admin_sync_complete',
   ]);
-  assert.deepEqual(JSON.parse(JSON.stringify(calls[3][1])), { ban_duration: '876000h' });
+  assert.deepEqual(j(calls[3][1]), { ban_duration: '876000h' });
+  assert.deepEqual(j(calls[5][1]), { p_staff_id: STAFF_ID, p_op: 'disable', p_ok: true });
 });
 
-test('set_active ban failure surfaces 502 and never reports ok (S6)', async () => {
+test('disable with ban failure: sync reported FALSE, 502, no revoke (S6/#262)', async () => {
   const { handler, calls } = loadHandler({ ban: true });
   const res = await handler(post({ action: 'set_active', staff_id: STAFF_ID, active: false }));
   assert.equal(res.status, 502);
   assert.ok(!('ok' in (await res.json())));
   assert.ok(!names(calls).includes('admin:revoke_user_sessions'));
+  assert.deepEqual(j(calls.find(([n]) => n === 'staff_admin_sync_complete')[1]),
+    { p_staff_id: STAFF_ID, p_op: 'disable', p_ok: false });
 });
 
-test('set_active(enable): executor first, revoke and unban checked', async () => {
+test('set_active(enable): executor first, revoke + unban, verified completion (#261)', async () => {
   const { handler, calls } = loadHandler();
   const res = await handler(post({ action: 'set_active', staff_id: STAFF_ID, active: true }));
   assert.equal(res.status, 200);
   assert.deepEqual(names(calls), [
-    'admin:_lookup_rate_allow', 'admin:_lookup_rate_allow',
-    'staff_admin_set_active', 'admin:revoke_user_sessions', 'gotrue:updateUserById',
+    ...RATE, 'staff_admin_set_active', 'admin:revoke_user_sessions',
+    'gotrue:updateUserById', 'staff_admin_sync_complete',
   ]);
-  assert.deepEqual(JSON.parse(JSON.stringify(calls[4][1])), { ban_duration: 'none' });
+  assert.deepEqual(j(calls[4][1]), { ban_duration: 'none' });
+  assert.deepEqual(j(calls[5][1]), { p_staff_id: STAFF_ID, p_op: 'enable', p_ok: true });
+});
+
+test('enable with revoke failure: sync reported FALSE and 502 (#262)', async () => {
+  const { handler, calls } = loadHandler({ revoke: true });
+  const res = await handler(post({ action: 'set_active', staff_id: STAFF_ID, active: true }));
+  assert.equal(res.status, 502);
+  assert.ok(!names(calls).includes('gotrue:updateUserById'));
+  assert.deepEqual(j(calls.find(([n]) => n === 'staff_admin_sync_complete')[1]),
+    { p_staff_id: STAFF_ID, p_op: 'enable', p_ok: false });
+});
+
+test('a sync_complete failure after GoTrue success surfaces 502', async () => {
+  const { handler } = loadHandler({ sync: true });
+  const res = await handler(post({ action: 'set_active', staff_id: STAFF_ID, active: true }));
+  assert.equal(res.status, 502);
 });
 
 test('reset_password: executor refusal means ZERO GoTrue rotation (S2)', async () => {
@@ -233,27 +296,30 @@ test('reset_password: executor refusal means ZERO GoTrue rotation (S2)', async (
   assert.equal(res.status, 403);
   assert.deepEqual(gotrueNames(calls), []);
   assert.deepEqual(names(calls), [
-    'admin:_lookup_rate_allow', 'admin:_lookup_rate_allow',
-    'staff_admin_record_password_reset', 'staff_admin_audit_refusal',
+    ...RATE, 'staff_admin_record_password_reset', 'staff_admin_audit_refusal',
   ]);
 });
 
-test('reset_password rotation failure is a 502 and NEVER returns a password (S2)', async () => {
+test('reset_password rotation failure: 502, NO password, sync reported FALSE (S2/#262)', async () => {
   const { handler, calls } = loadHandler({ rotate: true });
   const res = await handler(post({ action: 'reset_password', staff_id: STAFF_ID }));
   assert.equal(res.status, 502);
   assert.ok(!('password' in (await res.json())));
   assert.ok(!names(calls).includes('admin:revoke_user_sessions'));
+  assert.deepEqual(j(calls.find(([n]) => n === 'staff_admin_sync_complete')[1]),
+    { p_staff_id: STAFF_ID, p_op: 'reset', p_ok: false });
 });
 
-test('reset_password revoke failure is a 502 and NEVER returns a password', async () => {
+test('reset_password revoke failure: 502, NO password, sync reported FALSE', async () => {
   const { handler, calls } = loadHandler({ revoke: true });
   const res = await handler(post({ action: 'reset_password', staff_id: STAFF_ID }));
   assert.equal(res.status, 502);
   assert.ok(!('password' in (await res.json())));
+  assert.deepEqual(j(calls.find(([n]) => n === 'staff_admin_sync_complete')[1]),
+    { p_staff_id: STAFF_ID, p_op: 'reset', p_ok: false });
 });
 
-test('reset_password success returns the password exactly once, no-store', async () => {
+test('reset_password success: rotate, revoke, mark digest, close sync, no-store', async () => {
   const { handler, calls } = loadHandler();
   const res = await handler(post({ action: 'reset_password', staff_id: STAFF_ID }));
   assert.equal(res.status, 200);
@@ -261,15 +327,32 @@ test('reset_password success returns the password exactly once, no-store', async
   const body = await res.json();
   assert.equal(typeof body.password, 'string');
   assert.deepEqual(names(calls), [
-    'admin:_lookup_rate_allow', 'admin:_lookup_rate_allow',
-    'staff_admin_record_password_reset', 'gotrue:updateUserById',
-    'admin:revoke_user_sessions',
+    ...RATE, 'staff_admin_record_password_reset', 'gotrue:updateUserById',
+    'admin:revoke_user_sessions', 'staff_admin_mark_password_rotated',
+    'staff_admin_sync_complete',
   ]);
+  assert.deepEqual(j(calls[6][1]), { p_staff_id: STAFF_ID, p_op: 'reset', p_ok: true });
 });
 
-test('rate limiting happens before any executor or GoTrue work', async () => {
+test('list_staff on an invisible merchant is a logged refusal, not an empty list (#263)', async () => {
+  const { handler, calls } = loadHandler({ merchantMissing: true });
+  const res = await handler(post({ action: 'list_staff', merchant_id: MERCHANT_ID }));
+  assert.equal(res.status, 403);
+  assert.deepEqual(names(calls), [...RATE, 'staff_admin_audit_refusal']);
+  assert.equal(calls[2][1].p_reason, 'list_staff');
+});
+
+test('a rate-limited call is audited when the merchant is known (#263)', async () => {
   const { handler, calls } = loadHandler({ rateLimited: true });
   const res = await handler(post(CREATE_BODY));
   assert.equal(res.status, 429);
-  assert.deepEqual(names(calls), ['admin:_lookup_rate_allow', 'admin:_lookup_rate_allow']);
+  assert.deepEqual(names(calls), [...RATE, 'staff_admin_audit_refusal']);
+  assert.equal(calls[2][1].p_reason, 'rate_limited');
+});
+
+test('an unknown action with a merchant id is audited (#263)', async () => {
+  const { handler, calls } = loadHandler();
+  const res = await handler(post({ action: 'drop_table', merchant_id: MERCHANT_ID }));
+  assert.equal(res.status, 400);
+  assert.deepEqual(names(calls), [...RATE, 'staff_admin_audit_refusal']);
 });

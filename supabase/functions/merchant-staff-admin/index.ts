@@ -1,7 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.39.0";
 
 // merchant-staff-admin: owner-only staff account management (design v3 PR-A,
-// round 2: provisioning protocol).
+// round 3: provisioning protocol + sync completion + password proof).
 //
 // Security model:
 //   - JWT verification is ON for this function (default; see config.toml).
@@ -18,12 +18,20 @@ import { createClient } from "npm:@supabase/supabase-js@2.39.0";
 //     GoTrue call (a refused attempt performs ZERO GoTrue effects). The
 //     GoTrue user is created carrying app_metadata.staff_provisioning,
 //     which only the service key can set, and staff_admin_provision_complete
-//     consumes the row atomically only for that exact auth user. Any
-//     failure after begin is followed by staff_admin_provision_abort so
-//     the row can never be replayed.
-//   - Ordering: DB executor FIRST, GoTrue second (set_active and
-//     reset_password). A GoTrue failure is a surfaced 502, never a false
-//     ok, and never returns a password.
+//     consumes the row atomically only for that exact auth user, after
+//     re-validating CURRENT ownership/type/branch. Any failure after begin
+//     is followed by staff_admin_provision_abort (its own errors are
+//     logged, never silently dropped).
+//   - Sync protocol (#261/#262): set_active and reset_password arm a
+//     pending sync op on the staff row; enable NEVER activates from the
+//     direct RPC. The edge performs the GoTrue effects and reports the
+//     outcome via staff_admin_sync_complete; only a verified completion
+//     activates an enable. A GoTrue failure marks the op 'failed' - the
+//     actionable blocked state the owner retries from.
+//   - Password proof (#266): after every verified rotation (creation or
+//     reset) the edge calls staff_admin_mark_password_rotated, which stores
+//     a digest of auth.users.encrypted_password; staff_password_changed
+//     clears the barrier only when the live digest differs.
 //   - One-time passwords are generated with crypto.getRandomValues,
 //     returned ONCE with Cache-Control: no-store, never logged and never
 //     written to audit rows.
@@ -84,14 +92,8 @@ Deno.serve(async (req) => {
   if (authError || !authData?.user?.id) return json({ error: "unauthorized" }, 401);
   const callerId = authData.user.id;
 
-  // Rate limit BEFORE any work: 30/hr per owner, 60/hr per IP.
-  const ip = callerIp(req);
-  const [{ data: ownerOk }, { data: ipOk }] = await Promise.all([
-    admin.rpc("_lookup_rate_allow", { p_k: `staff_admin:owner:${callerId}`, p_max: 30 }),
-    admin.rpc("_lookup_rate_allow", { p_k: `staff_admin:ip:${ip}`, p_max: 60 }),
-  ]);
-  if (ownerOk !== true || ipOk !== true) return json({ error: "rate_limited" }, 429);
-
+  // Parse the body BEFORE rate limiting so a 429 can still be audited
+  // against its merchant (#263). Unparseable bodies carry no merchant.
   let body: Record<string, unknown>;
   try {
     body = await req.json();
@@ -99,6 +101,7 @@ Deno.serve(async (req) => {
     return json({ error: "invalid_body" }, 400);
   }
   const action = typeof body.action === "string" ? body.action : "";
+  const bodyMerchant = typeof body.merchant_id === "string" ? body.merchant_id : null;
 
   // Refusals are always logged through the bounded audit RPC (S1/#263);
   // failures of the logging call itself never change the response.
@@ -109,6 +112,17 @@ Deno.serve(async (req) => {
       p_reason: reason,
     }).then(() => {}, () => {});
   };
+
+  // Rate limit BEFORE any work: 30/hr per owner, 60/hr per IP.
+  const ip = callerIp(req);
+  const [{ data: ownerOk }, { data: ipOk }] = await Promise.all([
+    admin.rpc("_lookup_rate_allow", { p_k: `staff_admin:owner:${callerId}`, p_max: 30 }),
+    admin.rpc("_lookup_rate_allow", { p_k: `staff_admin:ip:${ip}`, p_max: 60 }),
+  ]);
+  if (ownerOk !== true || ipOk !== true) {
+    await logRefusal(bodyMerchant, "rate_limited");
+    return json({ error: "rate_limited" }, 429);
+  }
 
   if (action === "create_staff") {
     const merchantId = String(body.merchant_id ?? "");
@@ -142,6 +156,14 @@ Deno.serve(async (req) => {
       await logRefusal(merchantId, "create_staff");
       return json(REFUSED, 403);
     }
+    const abortProvision = async (reason: string) => {
+      const { error: abortErr } = await caller.rpc("staff_admin_provision_abort", {
+        p_provision_id: prov.provision_id,
+        p_reason: reason,
+      });
+      // Abort errors are never silently dropped (#262).
+      if (abortErr) await logRefusal(merchantId, "provision");
+    };
 
     // Fresh staff-only auth user, bound to this exact provision through
     // app_metadata (service-key only, S3). NO phone anywhere: staff phones
@@ -157,10 +179,7 @@ Deno.serve(async (req) => {
       user_metadata: { full_name: fullName },
     });
     if (createErr || !created?.user?.id) {
-      await caller.rpc("staff_admin_provision_abort", {
-        p_provision_id: prov.provision_id,
-        p_reason: "gotrue_failure",
-      }).then(() => {}, () => {});
+      await abortProvision("gotrue_failure");
       await logRefusal(merchantId, "gotrue_failure");
       return json({ error: "provision_failed" }, 502);
     }
@@ -172,16 +191,26 @@ Deno.serve(async (req) => {
     );
     if (completeErr || !staffId) {
       // Roll back the orphaned auth user (one retry); a delete failure
-      // leaves a flagged orphan and is logged as its own reason (#262).
+      // leaves a flagged orphan whose UID is recorded in the abort reason
+      // and the refusal trail (#262).
       let delErr = (await admin.auth.admin.deleteUser(authUserId)).error;
       if (delErr) delErr = (await admin.auth.admin.deleteUser(authUserId)).error;
-      await caller.rpc("staff_admin_provision_abort", {
-        p_provision_id: prov.provision_id,
-        p_reason: delErr ? "orphan_after_delete_failure" : "create_staff",
-      }).then(() => {}, () => {});
+      await abortProvision(
+        delErr ? `orphan_after_delete_failure:${authUserId}` : "create_staff",
+      );
       await logRefusal(merchantId, "create_staff");
       return json(REFUSED, 403);
     }
+
+    // Password proof baseline (#266): store the digest of the one-time
+    // password the edge just set. A failure here fails CLOSED (no baseline,
+    // no clear) and self-heals on the next reset, so it is logged but does
+    // not fail the creation.
+    const { error: markErr } = await caller.rpc("staff_admin_mark_password_rotated", {
+      p_staff_id: staffId,
+    });
+    if (markErr) await logRefusal(merchantId, "provision");
+
     // The one-time password is shown exactly once. No-store, never logged.
     return json(
       {
@@ -205,11 +234,11 @@ Deno.serve(async (req) => {
       .eq("id", staffId)
       .maybeSingle();
     if (!staff) {
-      await logRefusal(body.merchant_id, "set_active");
+      await logRefusal(bodyMerchant, "set_active");
       return json(REFUSED, 403);
     }
-    // Executor FIRST (S2): the DB state change is authorized and committed
-    // under the caller before any GoTrue effect.
+    // Executor FIRST (S2): arms the pending sync op under the caller.
+    // Enable is fail closed: the row stays inactive until sync_complete.
     const { error: execErr } = await caller.rpc("staff_admin_set_active", {
       p_staff_id: staffId,
       p_active: active,
@@ -218,27 +247,45 @@ Deno.serve(async (req) => {
       await logRefusal(staff.merchant_id, "set_active");
       return json(REFUSED, 403);
     }
-    // GoTrue session hygiene with CHECKED errors (S6): a failure surfaces
-    // as 502, never a false ok.
+    // GoTrue effects with CHECKED errors (S6); the outcome is ALWAYS
+    // reported back so the op never dangles (#261/#262).
+    const reportSync = async (ok: boolean) => {
+      const { error: syncErr } = await caller.rpc("staff_admin_sync_complete", {
+        p_staff_id: staffId,
+        p_op: active ? "enable" : "disable",
+        p_ok: ok,
+      });
+      return !syncErr;
+    };
+    let goErr: unknown = null;
     if (active) {
       const { error: revErr } = await admin.rpc("revoke_user_sessions", {
         p_user_id: staff.user_id,
       });
-      if (revErr) return json({ error: "provision_failed" }, 502);
-      const { error: banErr } = await admin.auth.admin.updateUserById(staff.user_id, {
-        ban_duration: "none",
-      });
-      if (banErr) return json({ error: "provision_failed" }, 502);
+      if (!revErr) {
+        const { error: banErr } = await admin.auth.admin.updateUserById(staff.user_id, {
+          ban_duration: "none",
+        });
+        goErr = banErr;
+      } else {
+        goErr = revErr;
+      }
     } else {
       const { error: banErr } = await admin.auth.admin.updateUserById(staff.user_id, {
         ban_duration: "876000h",
       });
-      if (banErr) return json({ error: "provision_failed" }, 502);
-      const { error: revErr } = await admin.rpc("revoke_user_sessions", {
-        p_user_id: staff.user_id,
-      });
-      if (revErr) return json({ error: "provision_failed" }, 502);
+      if (!banErr) {
+        const { error: revErr } = await admin.rpc("revoke_user_sessions", {
+          p_user_id: staff.user_id,
+        });
+        goErr = revErr;
+      } else {
+        goErr = banErr;
+      }
     }
+    const syncOk = await reportSync(!goErr);
+    if (goErr) return json({ error: "provision_failed" }, 502);
+    if (!syncOk) return json({ error: "provision_failed" }, 502);
     return json({ ok: true });
   }
 
@@ -250,7 +297,7 @@ Deno.serve(async (req) => {
       .eq("id", staffId)
       .maybeSingle();
     if (!staff) {
-      await logRefusal(body.merchant_id, "reset_password");
+      await logRefusal(bodyMerchant, "reset_password");
       return json(REFUSED, 403);
     }
     // Executor FIRST (S2): ownership and state are verified and recorded
@@ -262,12 +309,20 @@ Deno.serve(async (req) => {
       await logRefusal(staff.merchant_id, "reset_password");
       return json(REFUSED, 403);
     }
+    const reportReset = async (ok: boolean) => {
+      await caller.rpc("staff_admin_sync_complete", {
+        p_staff_id: staffId,
+        p_op: "reset",
+        p_ok: ok,
+      }).then(() => {}, () => {});
+    };
     const password = randomPassword();
     const { error: upErr } = await admin.auth.admin.updateUserById(staff.user_id, {
       password,
     });
     if (upErr) {
       // Rotation failure = refusal: no password is ever returned (S2).
+      await reportReset(false);
       await logRefusal(staff.merchant_id, "reset_password");
       return json({ error: "provision_failed" }, 502);
     }
@@ -275,7 +330,19 @@ Deno.serve(async (req) => {
     const { error: revErr } = await admin.rpc("revoke_user_sessions", {
       p_user_id: staff.user_id,
     });
-    if (revErr) return json({ error: "provision_failed" }, 502);
+    if (revErr) {
+      // The password rotated but is withheld; the op is marked failed so
+      // the owner sees the blocked state and retries (#262).
+      await reportReset(false);
+      await logRefusal(staff.merchant_id, "reset_password");
+      return json({ error: "provision_failed" }, 502);
+    }
+    // Verified rotation: store the digest proof (#266) and close the op.
+    const { error: markErr } = await caller.rpc("staff_admin_mark_password_rotated", {
+      p_staff_id: staffId,
+    });
+    if (markErr) await logRefusal(staff.merchant_id, "reset_password");
+    await reportReset(true);
     return json({ password, must_change_password: true }, 200, {
       "Cache-Control": "no-store",
     });
@@ -283,6 +350,17 @@ Deno.serve(async (req) => {
 
   if (action === "list_staff") {
     const merchantId = String(body.merchant_id ?? "");
+    // Authorization is explicit (S1/#263): an invisible merchant is a
+    // logged refusal, never a silent empty list.
+    const { data: merchant } = await caller
+      .from("merchants")
+      .select("id")
+      .eq("id", merchantId)
+      .maybeSingle();
+    if (!merchant) {
+      await logRefusal(merchantId, "list_staff");
+      return json(REFUSED, 403);
+    }
     const { data, error } = await caller
       .from("merchant_staff")
       .select("id, username, full_name, role, branch_id, is_active, must_change_password, created_at")
@@ -295,5 +373,6 @@ Deno.serve(async (req) => {
     return json({ staff: data ?? [] });
   }
 
+  await logRefusal(bodyMerchant, "provision");
   return json({ error: "unknown_action" }, 400);
 });

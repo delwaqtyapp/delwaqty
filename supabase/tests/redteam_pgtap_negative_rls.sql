@@ -188,5 +188,8 @@ select is(
   'FORBIDDEN_OWNER_ONLY',
   'approve_topup_request rejects non-owner');
 
-select * from finish();
+-- finish(true) raises on any failure or plan mismatch: without it a
+-- "not ok" line still lets psql exit 0 and the CI gate would be hollow
+-- (#287).
+select * from finish(true);
 rollback;

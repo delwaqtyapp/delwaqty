@@ -16,7 +16,7 @@
 
 begin;
 
-select plan(34);
+select plan(35);
 
 select tests.create_supabase_user('gate_customer', 'gate-customer@example.invalid');
 
@@ -188,6 +188,17 @@ select throws_like(
   $$ select * from public.merchant_staff limit 1 $$,
   '%permission denied%',
   'customer: merchant_staff direct SELECT denied');
+-- the 444 column-grant set drifts only through review: exactly these 15
+-- columns are client-readable, never the whole table
+select is(
+  (select string_agg(a.attname, ',' order by a.attname)
+     from pg_attribute a
+    where a.attrelid = 'public.merchant_staff'::regclass and a.attacl is not null
+      and exists (select 1 from aclexplode(a.attacl) x
+                   where x.grantee = 'authenticated'::regrole
+                     and x.privilege_type = 'SELECT')),
+  'branch_id,created_at,created_by,disabled_at,disabled_by,full_name,id,is_active,merchant_id,must_change_password,phone,role,updated_at,user_id,username',
+  'merchant_staff: authenticated column SELECT stays exactly the 444 set');
 
 select tests.clear_authentication();
 set request.jwt.claims to '{"role":"anon"}';
@@ -203,5 +214,8 @@ select throws_like(
   '%permission denied%',
   'anon: get_my_products_count(uuid) EXECUTE denied');
 
-select * from finish();
+-- finish(true) raises on any failure or plan mismatch: without it a
+-- "not ok" line still lets psql exit 0 and the CI gate would be hollow
+-- (#287).
+select * from finish(true);
 rollback;

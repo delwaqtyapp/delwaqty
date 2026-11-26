@@ -56,7 +56,7 @@ for S in 454_cashier_short_license_keys_test 419_cashier_license_gate_test 420_c
 done
 echo "== RED: broken 454 (throttle disabled) must make the suite fail"
 RURL="$(mk r)"; stub_uid "$RURL"; seed_legacy "$RURL"
-sed 's/IF public._cashier_key_throttled(v_uid) THEN/IF false THEN/' "$MIG" > /tmp/zz454_broken.sql
+sed 's/IF public._cashier_key_throttled(v_uid) THEN/IF false THEN/g' "$MIG" > /tmp/zz454_broken.sql
 cmp -s "$MIG" /tmp/zz454_broken.sql && fail_case "red edit did not change the migration"
 psql "$RURL" -X -q -v ON_ERROR_STOP=1 -f /tmp/zz454_broken.sql >/dev/null || fail_case "broken 454 apply failed"
 if psql "$RURL" -X -q -v ON_ERROR_STOP=1 -f "$T/454_cashier_short_license_keys_test.sql" >/tmp/zz454_red.out 2>&1; then
@@ -65,4 +65,23 @@ fi
 grep -q "454 F2" /tmp/zz454_red.out || fail_case "red run failed for the wrong reason"
 rm -f /tmp/zz454_broken.sql /tmp/zz454_red.out
 echo "red run failed as required (454 F2)"
+echo "== RED 2 (#297): throttle-first regression must fail the throttled-owner case"
+R2="$(mk q)"; stub_uid "$R2"; seed_legacy "$R2"
+python3 - "$MIG" > /tmp/zz454_broken2.sql <<'PY'
+import sys
+s=open(sys.argv[1]).read()
+k="  v_norm := public._cashier_normalize_key(p_license_key);\n  SELECT * INTO v_l"
+assert k in s
+s=s.replace(k,"  IF public._cashier_key_throttled(v_uid) THEN RETURN jsonb_build_object('ok', false, 'reason', 'TOO_MANY_ATTEMPTS'); END IF;\n"+k,1)
+sys.stdout.write(s)
+PY
+psql "$R2" -X -q -v ON_ERROR_STOP=1 -f /tmp/zz454_broken2.sql >/dev/null 2>&1 || fail_case "broken2 apply failed"
+if psql "$R2" -X -q -v ON_ERROR_STOP=1 -f "$T/454_cashier_short_license_keys_test.sql" >/tmp/zz454_red2.out 2>&1; then fail_case "suite passed against throttle-first"; fi
+grep -q "454 F4" /tmp/zz454_red2.out || fail_case "red2 failed for the wrong reason"
+rm -f /tmp/zz454_broken2.sql /tmp/zz454_red2.out
+echo "red run 2 failed as required (454 F4)"
+echo "== IDEMPOTENT: apply 454 a second time to the green DB"
+psql "$URL" -X -q -v ON_ERROR_STOP=1 -f "$MIG" >/dev/null || fail_case "454 is not re-runnable"
+OUT="$(psql "$URL" -X -q -v ON_ERROR_STOP=1 -f "$T/454_cashier_short_license_keys_test.sql" 2>&1)" || { printf '%s\n' "$OUT" | tail -5; fail_case "454 suite failed after re-apply"; }
+echo "re-apply OK, suite OK"
 echo "454 HARNESS PASS"

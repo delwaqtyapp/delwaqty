@@ -68,7 +68,9 @@ namespace Delwaqty.Pos.Core.Licensing
     ///
     /// Network failure is transient: the sealed state is kept and the guard's
     /// clock/grace cutoff applies. An authoritative NEGATIVE answer
-    /// (SUSPENDED, EXPIRED, UNKNOWN_KEY, BOUND_TO_OTHER_DEVICE, ...) is not:
+    /// (SUSPENDED, EXPIRED, UNKNOWN_KEY, BOUND_TO_OTHER_DEVICE, ...) is not.
+    /// TOO_MANY_ATTEMPTS (the 454 lookup throttle) is transient like a network
+    /// failure: state unchanged. Everything above is not transient:
     /// the state is marked revoked/suspended/expired, resealed, and the app
     /// locks (review #119 follow-up).
     /// </summary>
@@ -122,8 +124,17 @@ namespace Delwaqty.Pos.Core.Licensing
             var parsed = ActivationService.ParseDeviceLink(linkJson, state.LicenseKey, state.DeviceId);
             if (!parsed.Ok)
             {
-                // Authoritative denial from the server — fail closed.
                 result.Reason = parsed.Reason;
+                if (string.Equals(parsed.Reason, "TOO_MANY_ATTEMPTS", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Server-side throttle on failed key lookups (migration 454).
+                    // It says nothing about THIS license: keep the sealed state
+                    // untouched (not revoked, ValidatedAtUtc not moved) and let
+                    // the clock/grace cutoff keep applying. Retry next interval.
+                    result.Mode = LicenseGuard.Evaluate(state, nowUtc);
+                    return result;
+                }
+                // Authoritative denial from the server — fail closed.
                 if (string.Equals(parsed.Reason, "SUSPENDED", StringComparison.OrdinalIgnoreCase))
                     state.Status = "suspended";
                 else if (string.Equals(parsed.Reason, "EXPIRED", StringComparison.OrdinalIgnoreCase))

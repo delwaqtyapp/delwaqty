@@ -193,6 +193,35 @@ namespace Delwaqty.Pos.Core.Tests
         }
 
         [Fact]
+        public void Too_Many_Attempts_Is_Transient_State_Unchanged()
+        {
+            // #297: the server throttle must never revoke a running shop.
+            var stub = new StubHandler();
+            var svc = NewActivatedService(stub);
+            var state = svc.Restore();
+            var validated = DateTimeOffset.UtcNow.AddDays(-2);
+            state.ValidatedAtUtc = validated;
+            var statusBefore = state.Status;
+            var modeBefore = LicenseGuard.Evaluate(state, DateTimeOffset.UtcNow);
+
+            stub.Ok("{\"ok\":false,\"reason\":\"TOO_MANY_ATTEMPTS\"}");
+            var refresher = new LicenseRefresher(svc,
+                new SyncClient("https://x.supabase.co", "anon", new HttpClient(stub)));
+            var res = refresher.RefreshAsync(state, DateTimeOffset.UtcNow).Result;
+
+            Assert.True(res.Contacted);
+            Assert.False(res.Changed);
+            Assert.Equal("TOO_MANY_ATTEMPTS", res.Reason);
+            Assert.Equal(statusBefore, state.Status);
+            Assert.Equal(validated, state.ValidatedAtUtc);
+            Assert.Equal(modeBefore, res.Mode);
+            Assert.NotEqual(PosMode.Locked, res.Mode);
+            var restored = new ActivationService(_dir, "Retail").Restore();
+            Assert.Equal(statusBefore, restored.Status);
+            Assert.Equal(modeBefore, LicenseGuard.Evaluate(restored, DateTimeOffset.UtcNow));
+        }
+
+        [Fact]
         public void Offline_Keeps_Current_State_And_Grace_Still_Applies()
         {
             var stub = new StubHandler();

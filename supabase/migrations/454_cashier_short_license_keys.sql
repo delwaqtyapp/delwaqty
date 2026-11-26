@@ -10,7 +10,14 @@
 --
 -- Also adds a small failed-attempt throttle: 10 failed key lookups per user
 -- per hour (unknown key, or a key that belongs to another merchant), so the
--- 10^12 code space cannot be walked by a signed-in user.
+-- 10^12 code space cannot be walked by a signed-in user. The throttle only
+-- ever applies to the failure branches: the key is looked up first, and a key
+-- the caller owns validates normally even while throttled (a running shop must
+-- never be locked out by typos on another PC; old clients are covered too).
+--
+-- Rollout: b15/b19 cashier builds reject 12 digit keys in their local
+-- pre-check, so apply this migration only after a newer cashier is published.
+-- The migration is re-runnable.
 
 -- 1. column + backfill ------------------------------------------------------
 ALTER TABLE public.cashier_licenses ADD COLUMN IF NOT EXISTS short_code text;
@@ -30,10 +37,21 @@ BEGIN
 END
 $bf$;
 
-ALTER TABLE public.cashier_licenses
-  ALTER COLUMN short_code SET NOT NULL,
-  ADD CONSTRAINT cashier_licenses_short_code_format CHECK (short_code ~ '^[0-9]{12}$'),
-  ADD CONSTRAINT cashier_licenses_short_code_key UNIQUE (short_code);
+ALTER TABLE public.cashier_licenses ALTER COLUMN short_code SET NOT NULL;
+DO $c$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'cashier_licenses_short_code_format'
+                 AND conrelid = 'public.cashier_licenses'::regclass) THEN
+    ALTER TABLE public.cashier_licenses
+      ADD CONSTRAINT cashier_licenses_short_code_format CHECK (short_code ~ '^[0-9]{12}$');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'cashier_licenses_short_code_key'
+                 AND conrelid = 'public.cashier_licenses'::regclass) THEN
+    ALTER TABLE public.cashier_licenses
+      ADD CONSTRAINT cashier_licenses_short_code_key UNIQUE (short_code);
+  END IF;
+END
+$c$;
 
 -- Any other insert path (admin tooling, tests, future code) that omits the
 -- short code gets one generated, so NOT NULL never breaks an existing writer.
@@ -58,6 +76,7 @@ BEGIN
 END;
 $function$;
 REVOKE ALL ON FUNCTION public._cashier_license_fill_short_code() FROM public, anon, authenticated;
+DROP TRIGGER IF EXISTS cashier_licenses_fill_short_code ON public.cashier_licenses;
 CREATE TRIGGER cashier_licenses_fill_short_code
   BEFORE INSERT ON public.cashier_licenses
   FOR EACH ROW EXECUTE FUNCTION public._cashier_license_fill_short_code();
@@ -208,18 +227,24 @@ DECLARE
   v_l record;
 BEGIN
   IF v_uid IS NULL THEN RAISE EXCEPTION 'Not authenticated'; END IF;
-  IF public._cashier_key_throttled(v_uid) THEN
-    RETURN jsonb_build_object('ok', false, 'reason', 'TOO_MANY_ATTEMPTS');
-  END IF;
   v_norm := public._cashier_normalize_key(p_license_key);
   SELECT * INTO v_l FROM public.cashier_licenses
    WHERE short_code = v_norm OR license_key = v_norm
    ORDER BY (short_code = v_norm) DESC LIMIT 1 FOR UPDATE;
+  -- Throttle applies ONLY to the failure branches. Already throttled: answer
+  -- TOO_MANY_ATTEMPTS and record nothing new. Otherwise record and answer the
+  -- usual reason. A key the caller owns never reaches this code.
   IF NOT FOUND THEN
+    IF public._cashier_key_throttled(v_uid) THEN
+      RETURN jsonb_build_object('ok', false, 'reason', 'TOO_MANY_ATTEMPTS');
+    END IF;
     PERFORM public._cashier_key_fail(v_uid);
     RETURN jsonb_build_object('ok', false, 'reason', 'UNKNOWN_KEY');
   END IF;
   IF NOT public.is_merchant_owner(v_l.merchant_id) THEN
+    IF public._cashier_key_throttled(v_uid) THEN
+      RETURN jsonb_build_object('ok', false, 'reason', 'TOO_MANY_ATTEMPTS');
+    END IF;
     PERFORM public._cashier_key_fail(v_uid);
     RETURN jsonb_build_object('ok', false, 'reason', 'NOT_AUTHORIZED');
   END IF;

@@ -7,7 +7,7 @@ DECLARE
   v_r jsonb; v_err text; v_key text; v_code text; v_i int;
   v_legacy text := 'DLWQ1.' || repeat('A', 60) || '.' || repeat('b', 64);
   v_legacy_code text := '999900001111';
-  v_lid uuid;
+  v_lid uuid; v_n int;
 BEGIN
   INSERT INTO auth.users(id,email) VALUES (u,u::text||'@x.i'),(other,other::text||'@x.i'),(prober,prober::text||'@x.i');
   INSERT INTO public.users(id,email,role) VALUES (u,u::text||'@x.i','merchant'),(other,other::text||'@x.i','merchant'),(prober,prober::text||'@x.i','customer')
@@ -78,13 +78,32 @@ BEGIN
     v_r := public.cashier_license_validate('00000000' || lpad(v_i::text, 4, '0'), 'dev-p');
     ASSERT v_r->>'reason' = 'UNKNOWN_KEY', '454 F1: attempt ' || v_i || ' ' || v_r::text;
   END LOOP;
+  PERFORM set_config('role','none',true);
+  SELECT count(*) INTO v_n FROM public._cashier_key_failures WHERE user_id = prober;
+  PERFORM set_config('role','authenticated',true);
   v_r := public.cashier_license_validate('000000000099', 'dev-p');
   ASSERT v_r->>'reason' = 'TOO_MANY_ATTEMPTS', '454 F2: not throttled: ' || v_r::text;
+  -- someone else's real key while throttled: refused, nothing new recorded
   v_r := public.cashier_license_validate(v_key, 'dev-p');
-  ASSERT v_r->>'reason' = 'TOO_MANY_ATTEMPTS', '454 F3: correct key not refused while throttled: ' || v_r::text;
+  ASSERT v_r->>'reason' = 'TOO_MANY_ATTEMPTS', '454 F3: other key not refused while throttled: ' || v_r::text;
+  PERFORM set_config('role','none',true);
+  ASSERT (SELECT count(*) FROM public._cashier_key_failures WHERE user_id = prober) = v_n,
+    '454 F3b: throttled attempts keep adding rows';
+  PERFORM set_config('role','authenticated',true);
+  -- #297: a THROTTLED OWNER still validates and device-links the own bound key
   PERFORM set_config('request.jwt.claims', json_build_object('sub', u)::text, true);
+  PERFORM set_config('role','none',true);
+  INSERT INTO public._cashier_key_failures(user_id) SELECT u FROM generate_series(1, 25);
+  PERFORM set_config('role','authenticated',true);
   v_r := public.cashier_license_validate(v_key, 'dev-1');
-  ASSERT (v_r->>'ok')::boolean, '454 F4: throttle leaked to another user: ' || v_r::text;
+  ASSERT (v_r->>'ok')::boolean, '454 F4: throttled owner locked out: ' || v_r::text;
+  v_r := public.cashier_device_link(v_key, 'dev-1');
+  ASSERT (v_r->>'ok')::boolean AND v_r->'merchant'->>'name' = '454 shop', '454 F4b: throttled owner device_link: ' || v_r::text;
+  v_r := public.cashier_license_validate(v_legacy, 'dev-L');
+  ASSERT (v_r->>'ok')::boolean, '454 F4c: throttled owner legacy key: ' || v_r::text;
+  -- but the same throttled owner still cannot guess
+  v_r := public.cashier_license_validate('000000000098', 'dev-1');
+  ASSERT v_r->>'reason' = 'TOO_MANY_ATTEMPTS', '454 F4d: throttled owner can guess: ' || v_r::text;
   -- failures older than an hour stop counting
   PERFORM set_config('role','none',true);
   UPDATE public._cashier_key_failures SET at = now() - interval '2 hours' WHERE user_id = prober;

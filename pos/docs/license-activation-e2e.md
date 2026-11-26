@@ -106,8 +106,11 @@ older build:
 
 New licenses get a random 12 digit key shown as `1234-5678-9012`. The server
 looks it up (activation stays online); the client only normalizes what was
-typed (digits in any script, spaces and dashes ignored). Old `DLWQ1.` keys keep
+typed (ASCII, Arabic-Indic and Persian digits; spaces and dashes ignored). Old `DLWQ1.` keys keep
 working and every old license also received a short code. After 10 failed key
-lookups in an hour a user gets `TOO_MANY_ATTEMPTS` for the rest of the hour.
+lookups (unknown key or another merchant's key) in an hour a user gets
+`TOO_MANY_ATTEMPTS` on further failed lookups. A key the user owns always
+works, so a running shop is never locked out by someone's typos; the app also
+treats `TOO_MANY_ATTEMPTS` as transient (state unchanged).
 Short keys need a cashier build with `LicenseKey.TryNormalize` (b20 or later);
 older builds reject them in the pre-check.

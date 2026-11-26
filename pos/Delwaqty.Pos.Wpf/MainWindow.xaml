@@ -15,6 +15,8 @@
                 <TextBlock x:Name="TitleText" Text="دلوقتي كاشير" Foreground="White" FontSize="22" FontWeight="Bold"/>
                 <TextBlock x:Name="StoreText" Foreground="#BBDEFB" VerticalAlignment="Center" Margin="16,0,0,0"/>
                 <TextBlock x:Name="LicenseBadge" Foreground="#FFE082" FontWeight="Bold" VerticalAlignment="Center" Margin="16,0,0,0"/>
+                <Button x:Name="ReloginButton" Content="تسجيل الدخول من جديد" Visibility="Collapsed" Click="Relogin_Click"
+                        Padding="10,2" Margin="12,0,0,0" VerticalAlignment="Center" DockPanel.Dock="Left"/>
                 <TextBlock x:Name="SyncBadge" Text="غير متصل" Foreground="#FFAB91" VerticalAlignment="Center" DockPanel.Dock="Left"/>
             </DockPanel>
         </Border>

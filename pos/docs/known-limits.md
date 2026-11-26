@@ -16,3 +16,16 @@ Honest list, so nobody finds them in front of a customer.
   warns on start.
 - Windows runtime behavior has not yet been proven on a real PC. Run
   `windows-proof-checklist.md` once with test data before any real shop day.
+- Every 60 s the app pulls the full product and customer list (no
+  incremental pull yet). Fine for a test merchant; heavy for a large catalog.
+- A product deleted or hidden on the platform stays sellable on the PC until
+  the local cache is cleared, and the shown stock can jump back for up to a
+  minute after offline sales (the pull overwrites it with the server value).
+- Numbers sent as text by the server are parsed with the PC's culture; the
+  server sends JSON numbers, so this is expected to be harmless, not tested on
+  an Arabic-locale Windows PC.
+- Rejected sync ops are shown in the status area (first 3) and written to
+  `sync-failures.log` in the data folder; there is no screen to fix or discard
+  one yet.
+- If the saved sign-in is lost, a "تسجيل الدخول من جديد" button appears. It
+  renews the session only; it does not change the license or the merchant.

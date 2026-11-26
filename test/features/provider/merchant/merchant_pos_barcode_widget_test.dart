@@ -11,14 +11,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../helpers/golden_harness.dart';
+
 void main() {
   setUpAll(() async {
-    final font = FontLoader('Cairo')
-      ..addFont(rootBundle.load('assets/fonts/Cairo-400.ttf'));
-    await font.load();
-    final icons = FontLoader('MaterialIcons')
-      ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
-    await icons.load();
+    await loadGoldenFonts(cairoWeights: [400], materialIcons: true);
   });
 
   const permissionChannel = MethodChannel(

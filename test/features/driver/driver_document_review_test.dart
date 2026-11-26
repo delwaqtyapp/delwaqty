@@ -6,14 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../helpers/golden_harness.dart';
+
 void main() {
   setUpAll(() async {
-    final font = FontLoader('Cairo')
-      ..addFont(rootBundle.load('assets/fonts/Cairo-400.ttf'));
-    await font.load();
-    final icons = FontLoader('MaterialIcons')
-      ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
-    await icons.load();
+    await loadGoldenFonts(cairoWeights: [400], materialIcons: true);
   });
 
   final docs = [

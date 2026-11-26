@@ -11,6 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../helpers/golden_harness.dart';
+
 class _FakeSanctionsRepository implements SanctionsRepository {
   final List<({int days, String? reason})> cancelCalls = [];
   Completer<int>? gate;
@@ -63,13 +65,7 @@ class _FakeSanctionsRepository implements SanctionsRepository {
 
 void main() {
   setUpAll(() async {
-    final font = FontLoader('Cairo')
-      ..addFont(rootBundle.load('assets/fonts/Cairo-400.ttf'))
-      ..addFont(rootBundle.load('assets/fonts/Cairo-600.ttf'));
-    await font.load();
-    final icons = FontLoader('MaterialIcons')
-      ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
-    await icons.load();
+    await loadGoldenFonts(cairoWeights: [400, 600], materialIcons: true);
   });
 
   Future<({WidgetTester tester, _FakeSanctionsRepository repo})> pumpPage(

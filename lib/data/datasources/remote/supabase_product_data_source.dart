@@ -19,7 +19,28 @@ class SupabaseProductDataSource {
   final SupabaseClient _client;
   final AppLogger _logger;
 
-  static const String _tableName = 'products';
+  static const String _tableName = 'products_public';
+
+  // 449 app switch: reads hit the public view (450 revokes base-table
+  // SELECT); only these columns exist there.
+  static const List<String> _publicColumns = [
+    'id',
+    'merchant_id',
+    'category',
+    'name',
+    'name_ar',
+    'description',
+    'description_ar',
+    'price',
+    'compare_at_price',
+    'image_url',
+    'is_available',
+    'is_featured',
+    'sort_order',
+    'tags',
+    'created_at',
+    'updated_at',
+  ];
 
   Product _fromRow(Map<String, dynamic> row) {
     return Product(
@@ -51,7 +72,7 @@ class SupabaseProductDataSource {
     try {
       var query = _client
           .from(_tableName)
-          .select()
+          .select(_publicColumns.join(', '))
           .eq('merchant_id', merchantId);
 
       if (categoryId != null) {
@@ -78,7 +99,7 @@ class SupabaseProductDataSource {
     try {
       final data = await _client
           .from(_tableName)
-          .select()
+          .select(_publicColumns.join(', '))
           .eq('id', id)
           .maybeSingle();
       if (data == null) return null;
@@ -93,7 +114,7 @@ class SupabaseProductDataSource {
     try {
       final data = await _client
           .from(_tableName)
-          .select()
+          .select(_publicColumns.join(', '))
           .eq('merchant_id', merchantId)
           .eq('is_available', true)
           .order('created_at', ascending: false)
@@ -114,7 +135,7 @@ class SupabaseProductDataSource {
     try {
       var q = _client
           .from(_tableName)
-          .select()
+          .select(_publicColumns.join(', '))
           .or('name.ilike.%$query%,description.ilike.%$query%');
 
       if (merchantId != null) {

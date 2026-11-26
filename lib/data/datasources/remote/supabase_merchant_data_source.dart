@@ -21,7 +21,33 @@ class SupabaseMerchantDataSource {
   final SupabaseClient _client;
   final AppLogger _logger;
 
-  static const String _tableName = 'merchants';
+  static const String _tableName = 'merchants_public';
+
+  // 449 app switch: reads hit the public view (450 revokes base-table
+  // SELECT); only these columns exist there.
+  static const List<String> _publicColumns = [
+    'id',
+    'name',
+    'type',
+    'status',
+    'description',
+    'logo_url',
+    'cover_url',
+    'phone',
+    'address',
+    'latitude',
+    'longitude',
+    'rating',
+    'total_reviews',
+    'total_orders',
+    'delivery_fee',
+    'min_order',
+    'delivery_time_min',
+    'is_featured',
+    'is_open',
+    'created_at',
+    'updated_at',
+  ];
 
   Map<String, dynamic> _rowToMap(dynamic row) => row as Map<String, dynamic>;
 
@@ -40,7 +66,7 @@ class SupabaseMerchantDataSource {
       // customer discovery surface; legacy rows of retired types stay hidden.
       var query = _client
           .from(_tableName)
-          .select()
+          .select(_publicColumns.join(', '))
           .eq('status', 'active')
           .neq('type', 'pharmacy');
 
@@ -71,7 +97,7 @@ class SupabaseMerchantDataSource {
     try {
       final data = await _client
           .from(_tableName)
-          .select()
+          .select(_publicColumns.join(', '))
           .eq('id', id)
           .neq('type', 'pharmacy')
           .maybeSingle();
@@ -89,7 +115,7 @@ class SupabaseMerchantDataSource {
     try {
       final data = await _client
           .from(_tableName)
-          .select()
+          .select(_publicColumns.join(', '))
           .eq('status', 'active')
           .eq('is_featured', true)
           .neq('type', 'pharmacy')
@@ -109,7 +135,7 @@ class SupabaseMerchantDataSource {
     try {
       final data = await _client
           .from(_tableName)
-          .select()
+          .select(_publicColumns.join(', '))
           .or('name.ilike.%$query%,description.ilike.%$query%')
           .neq('type', 'pharmacy')
           .order('rating', ascending: false)
@@ -128,7 +154,7 @@ class SupabaseMerchantDataSource {
     try {
       final data = await _client
           .from(_tableName)
-          .select()
+          .select(_publicColumns.join(', '))
           .eq('type', type.name)
           .neq('type', 'pharmacy')
           .order('rating', ascending: false);

@@ -75,17 +75,19 @@ final merchantStockProvider =
           .from('product_inventory')
           .select(
             'product_id, stock_quantity, reserved_quantity, low_stock_threshold, '
-            'is_in_stock, products(name, price, is_available, image_url)',
+            'is_in_stock',
           )
           .eq('merchant_id', merchantId)
           .order('stock_quantity', ascending: true);
 
       if ((res as List).isEmpty) {
-        final productsRes = await client
-            .from('products')
-            .select('id, name, price, is_available, image_url, stock_quantity')
-            .eq('merchant_id', merchantId);
-        final productsList = productsRes as List;
+        // 449 app switch: seed from the owner's own catalog through the
+        // definer RPC (base-table SELECT is 450 territory; same PostgREST
+        // max_rows page cap as the old base-table read).
+        final productsList = await client.rpc(
+          'get_my_products',
+          params: {'p_merchant_id': merchantId},
+        ) as List;
         if (productsList.isNotEmpty) {
           final initialRows = productsList.map((raw) {
             final p = raw as Map<String, dynamic>;
@@ -108,7 +110,7 @@ final merchantStockProvider =
                 .from('product_inventory')
                 .select(
                   'product_id, stock_quantity, reserved_quantity, low_stock_threshold, '
-                  'is_in_stock, products(name, price, is_available, image_url)',
+                  'is_in_stock',
                 )
                 .eq('merchant_id', merchantId)
                 .order('stock_quantity', ascending: true);
@@ -133,10 +135,35 @@ final merchantStockProvider =
         }
       }
 
+      // 449/451 app switch: join the inventory page against the owner's
+      // own product rows fetched BY ID through the definer RPC, so the join
+      // never assumes one RPC page holds the whole catalog.
+      final inventoryIds = <String>[
+        for (final row in res as List)
+          (row as Map<String, dynamic>)['product_id'] as String,
+      ];
+      final productsById = <String, Map<String, dynamic>>{};
+      // Chunked at the RPC's 1000-id cap.
+      for (var i = 0; i < inventoryIds.length; i += 1000) {
+        final end = i + 1000 > inventoryIds.length
+            ? inventoryIds.length
+            : i + 1000;
+        final rows = await client.rpc(
+          'get_my_products_by_ids',
+          params: {
+            'p_merchant_id': merchantId,
+            'p_product_ids': inventoryIds.sublist(i, end),
+          },
+        ) as List;
+        for (final raw in rows) {
+          final m = Map<String, dynamic>.from(raw as Map);
+          productsById[m['id'] as String] = m;
+        }
+      }
+
       return (res as List).map((row) {
         final map = row as Map<String, dynamic>;
-        final product = map['products'];
-        final p = product is Map ? product : const <String, dynamic>{};
+        final p = productsById[map['product_id']] ?? const <String, dynamic>{};
         final stock = (map['stock_quantity'] as num?)?.toInt() ?? 0;
         return MerchantStockItem(
           productId: map['product_id'] as String,

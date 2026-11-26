@@ -719,7 +719,8 @@ final _merchantFeeProvider = FutureProvider.family<double, String>((
 ) async {
   if (merchantId.isEmpty) return 0;
   final row = await Supabase.instance.client
-      .from('merchants')
+      // 449 app switch: public view (450 revokes base-table SELECT).
+      .from('merchants_public')
       .select('delivery_fee')
       .eq('id', merchantId)
       .maybeSingle();

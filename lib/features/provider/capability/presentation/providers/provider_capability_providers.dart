@@ -126,34 +126,33 @@ final providerRawCategoryProvider = FutureProvider<String>((ref) async {
 
   String? merchantId;
   try {
+    // Kept for its side effect too: provisions a pending owner's merchant.
     final resolved = await client.rpc('resolve_my_merchant');
     if (resolved is String && resolved.isNotEmpty) {
       merchantId = resolved;
     }
   } catch (_) {}
 
-  final merchant = merchantId != null
-      ? await client
-            .from('merchants')
-            .select('type')
-            .eq('id', merchantId)
-            .maybeSingle()
-      : await client
-            .from('merchants')
-            .select('type')
-            .or('id.eq.$uid,owner_user_id.eq.$uid')
-            .maybeSingle();
+  // 449/451 app switch: the owner reads their own merchant row through the
+  // definer RPC (base-table SELECT is 450 territory). The resolved id pins
+  // the ACTIVE store for multi-business owners (451 overload); without it,
+  // the zero-arg RPC covers the legacy id = uid shape and the first-created
+  // fallback.
+  final res = merchantId != null
+      ? await client.rpc(
+          'get_my_merchant_profile',
+          params: {'p_merchant_id': merchantId},
+        )
+      : await client.rpc('get_my_merchant_profile');
+  final merchant = res == null ? null : Map<String, dynamic>.from(res as Map);
   if (merchant != null && merchant['type'] is String) {
     return merchant['type'] as String;
   }
 
-  final sp = await client
-      .from('service_providers')
-      .select('category_type')
-      .eq('user_id', uid)
-      .order('created_at')
-      .limit(1)
-      .maybeSingle();
+  // 448: own provider profile through the definer RPC (service_providers
+  // base-table SELECT is 450 territory; same first-created row).
+  final spRow = await client.rpc('get_my_provider_profile');
+  final sp = spRow == null ? null : Map<String, dynamic>.from(spRow as Map);
   if (sp != null && sp['category_type'] is String) {
     return sp['category_type'] as String;
   }

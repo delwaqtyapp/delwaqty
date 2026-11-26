@@ -11,7 +11,7 @@ class AdminOverviewDataSource {
     try {
       final results = await Future.wait([
         _count('users'),
-        _count('merchants'),
+        _merchantCount(),
         _count('orders'),
         _count('drivers'),
         _count('service_bookings'),
@@ -31,5 +31,25 @@ class AdminOverviewDataSource {
   Future<int> _count(String table) async {
     final response = await _supabase.from(table).select().count();
     return response.count;
+  }
+
+  Future<int> _merchantCount() async {
+    // 449 app switch: base-table SELECT on merchants is 450 territory.
+    // admin_dashboard_metrics is ANALYTICS_VIEW-gated and returns ZEROS
+    // without it (372), so admins lacking the permission fall back to the
+    // scope-aware listing count: the number is always real, never a
+    // silent 0.
+    final allowed = await _supabase.rpc(
+      'admin_has_permission',
+      params: {'p_permission': 'ANALYTICS_VIEW'},
+    );
+    if (allowed == true) {
+      final metrics = await _supabase.rpc('admin_dashboard_metrics') as Map;
+      return (metrics['totalMerchants'] as num?)?.toInt() ?? 0;
+    }
+    // Exact, scope-gated count (451): a listing rows.length would cap at
+    // PostgREST max_rows=1000.
+    final count = await _supabase.rpc('admin_get_merchants_count');
+    return count as int;
   }
 }

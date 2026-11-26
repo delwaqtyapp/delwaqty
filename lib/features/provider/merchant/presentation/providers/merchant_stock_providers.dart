@@ -142,20 +142,24 @@ final merchantStockProvider =
         for (final row in res as List)
           (row as Map<String, dynamic>)['product_id'] as String,
       ];
-      final productsList = inventoryIds.isEmpty
-          ? const <dynamic>[]
-          : await client.rpc(
-              'get_my_products_by_ids',
-              params: {
-                'p_merchant_id': merchantId,
-                'p_product_ids': inventoryIds,
-              },
-            ) as List;
-      final productsById = <String, Map<String, dynamic>>{
-        for (final raw in productsList)
-          (raw as Map<String, dynamic>)['id'] as String:
-              Map<String, dynamic>.from(raw),
-      };
+      final productsById = <String, Map<String, dynamic>>{};
+      // Chunked at the RPC's 1000-id cap.
+      for (var i = 0; i < inventoryIds.length; i += 1000) {
+        final end = i + 1000 > inventoryIds.length
+            ? inventoryIds.length
+            : i + 1000;
+        final rows = await client.rpc(
+          'get_my_products_by_ids',
+          params: {
+            'p_merchant_id': merchantId,
+            'p_product_ids': inventoryIds.sublist(i, end),
+          },
+        ) as List;
+        for (final raw in rows) {
+          final m = Map<String, dynamic>.from(raw as Map);
+          productsById[m['id'] as String] = m;
+        }
+      }
 
       return (res as List).map((row) {
         final map = row as Map<String, dynamic>;

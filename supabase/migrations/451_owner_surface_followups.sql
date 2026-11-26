@@ -14,9 +14,14 @@
 --   3. get_my_products_by_ids(p_merchant_id uuid, p_product_ids uuid[]):
 --      bounded fetch for client-side joins (stock inventory page), so
 --      the join never assumes one RPC page holds the whole catalog.
+--   4. admin_get_merchants_count(): exact, scope-gated merchant count
+--      (#281) for the admin overview fallback when the caller lacks
+--      ANALYTICS_VIEW (admin_dashboard_metrics returns zeros there);
+--      a listing rows.length is capped by PostgREST max_rows.
 --
--- All three keep the 449 gates verbatim: owner-or-active-staff for
--- products, own-row-only for the merchant profile, authenticated-only
+-- All four keep the 449 gates verbatim: owner-or-active-staff for
+-- products, own-row-only for the merchant profile, country/region-admin
+-- scope mirroring admin_list_merchants for the count, authenticated-only
 -- EXECUTE, PUBLIC/anon revoked.
 --
 -- A0 PRECONDITIONS (prod-verified 2026-11-26 via Management API,
@@ -124,10 +129,36 @@ $function$;
 REVOKE ALL ON FUNCTION public.get_my_products_by_ids(uuid, uuid[]) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.get_my_products_by_ids(uuid, uuid[]) TO authenticated;
 
+-- ─── 4. exact, scope-gated merchant count (#281) ──────────────────────
+CREATE FUNCTION public.admin_get_merchants_count()
+RETURNS bigint
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path TO 'public', 'pg_temp'
+AS $function$
+BEGIN
+  -- Gate and scope mirror admin_list_merchants (371) exactly; unlike the
+  -- listing (which silently returns no rows), a count has no empty-set
+  -- signal, so a non-admin gets an explicit error instead of a silent 0.
+  IF auth.uid() IS NULL
+     OR NOT (public._is_country_admin_uid(auth.uid())
+             OR public._is_active_admin_uid(auth.uid())) THEN
+    RAISE EXCEPTION 'not authorized';
+  END IF;
+  RETURN (SELECT count(*) FROM public.merchants m
+          WHERE public._is_country_admin_uid(auth.uid())
+             OR public.is_admin_for_region(
+                  public._ops_scope_region(public._merchant_region_id(m.id))));
+END;
+$function$;
+REVOKE ALL ON FUNCTION public.admin_get_merchants_count() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.admin_get_merchants_count() TO authenticated;
+
 -- ─── postconditions ────────────────────────────────────────────────────
 DO $$
 BEGIN
-  -- the three new/extended surfaces exist with the expected signatures
+  -- the four new/extended surfaces exist with the expected signatures
   ASSERT (SELECT count(*) FROM pg_proc p
           JOIN pg_namespace n ON n.oid = p.pronamespace
           WHERE n.nspname = 'public' AND p.proname = 'get_my_merchant_profile')
@@ -136,8 +167,24 @@ BEGIN
     '451: get_my_products_count missing';
   ASSERT to_regprocedure('public.get_my_products_by_ids(uuid,uuid[])') IS NOT NULL,
     '451: get_my_products_by_ids missing';
-  -- no PUBLIC EXECUTE on any of them (PUBLIC grantee = oid 0; a NULL
-  -- proacl means the default PUBLIC grant, which must not survive)
+  ASSERT to_regprocedure('public.admin_get_merchants_count()') IS NOT NULL,
+    '451: admin_get_merchants_count missing';
+
+  -- effective EXECUTE: authenticated has it, anon and PUBLIC do not, on
+  -- every 451 signature (has_function_privilege resolves role-level ACLs
+  -- including the PUBLIC default, so this is the effective check)
+  ASSERT NOT EXISTS (
+    SELECT 1 FROM (VALUES
+      ('public.get_my_merchant_profile(uuid)'),
+      ('public.get_my_products_count(uuid)'),
+      ('public.get_my_products_by_ids(uuid,uuid[])'),
+      ('public.admin_get_merchants_count()')) AS s(sig)
+    WHERE NOT has_function_privilege('authenticated', s.sig::regprocedure, 'EXECUTE')
+       OR has_function_privilege('anon', s.sig::regprocedure, 'EXECUTE')),
+    '451: EXECUTE wrong for anon/authenticated on a new function';
+
+  -- no PUBLIC EXECUTE (PUBLIC grantee = oid 0; a NULL proacl means the
+  -- default PUBLIC grant, which must not survive)
   ASSERT NOT EXISTS (
     SELECT 1 FROM pg_proc p
     JOIN pg_namespace n ON n.oid = p.pronamespace
@@ -146,9 +193,25 @@ BEGIN
     WHERE n.nspname = 'public'
       AND p.proname IN ('get_my_merchant_profile',
                         'get_my_products_count',
-                        'get_my_products_by_ids')
+                        'get_my_products_by_ids',
+                        'admin_get_merchants_count')
       AND x.grantee = 0),
     '451: PUBLIC EXECUTE leaked onto an owner-surface function';
+
+  -- every get_my_merchant_profile overload (449 zero-arg + 451 uuid) and
+  -- every new function is SECURITY DEFINER with the fixed search_path
+  ASSERT NOT EXISTS (
+    SELECT 1 FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname IN ('get_my_merchant_profile',
+                        'get_my_products_count',
+                        'get_my_products_by_ids',
+                        'admin_get_merchants_count')
+      AND (NOT p.prosecdef
+           OR p.proconfig IS NULL
+           OR NOT (p.proconfig @> array['search_path=public, pg_temp']))),
+    '451: a function is not SECURITY DEFINER or lacks the fixed search_path';
 END $$;
 
 COMMIT;

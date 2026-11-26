@@ -47,10 +47,9 @@ class AdminOverviewDataSource {
       final metrics = await _supabase.rpc('admin_dashboard_metrics') as Map;
       return (metrics['totalMerchants'] as num?)?.toInt() ?? 0;
     }
-    final rows = await _supabase.rpc(
-      'admin_list_merchants',
-      params: {'p_search': null, 'p_status': null},
-    );
-    return (rows as List).length;
+    // Exact, scope-gated count (451): a listing rows.length would cap at
+    // PostgREST max_rows=1000.
+    final count = await _supabase.rpc('admin_get_merchants_count');
+    return count as int;
   }
 }

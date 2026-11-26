@@ -268,17 +268,9 @@ class AdminRepository implements admin.AdminRepository {
       // table selects (base-table SELECT is 450 territory). Merchants the
       // caller may not see come back as the 'Unknown' fallback, same as the
       // old per-row catch.
-      final contactRows = topEntries.isEmpty
-          ? const <dynamic>[]
-          : await _supabase.rpc(
-              'admin_get_merchant_contacts',
-              params: {'p_merchant_ids': topEntries.map((e) => e.key).toList()},
-            ) as List;
-      final contactsById = <String, Map<String, dynamic>>{
-        for (final raw in contactRows)
-          (raw as Map<String, dynamic>)['id'] as String:
-              Map<String, dynamic>.from(raw),
-      };
+      final contactsById = await _merchantContactsById(
+        topEntries.map((e) => e.key).toSet(),
+      );
 
       final topMerchants = <Map<String, dynamic>>[];
       for (final entry in topEntries) {
@@ -500,6 +492,27 @@ class AdminRepository implements admin.AdminRepository {
     }
   }
 
+  /// Contact rows for a set of merchant ids through the admin-gated,
+  /// region-scoped 449 RPC, chunked at its 100-id cap.
+  Future<Map<String, Map<String, dynamic>>> _merchantContactsById(
+    Set<String> ids,
+  ) async {
+    final byId = <String, Map<String, dynamic>>{};
+    final list = ids.toList();
+    for (var i = 0; i < list.length; i += 100) {
+      final end = i + 100 > list.length ? list.length : i + 100;
+      final rows = await _supabase.rpc(
+        'admin_get_merchant_contacts',
+        params: {'p_merchant_ids': list.sublist(i, end)},
+      ) as List;
+      for (final raw in rows) {
+        final m = Map<String, dynamic>.from(raw as Map);
+        byId[m['id'] as String] = m;
+      }
+    }
+    return byId;
+  }
+
   @override
   Future<void> deleteUser(String userId) async {
     try {
@@ -716,17 +729,7 @@ class AdminRepository implements admin.AdminRepository {
         for (final r in rows)
           if (r['merchant_id'] != null) r['merchant_id'] as String,
       };
-      final contacts = merchantIds.isEmpty
-          ? const <dynamic>[]
-          : await _supabase.rpc(
-              'admin_get_merchant_contacts',
-              params: {'p_merchant_ids': merchantIds.toList()},
-            ) as List;
-      final contactsById = <String, Map<String, dynamic>>{
-        for (final raw in contacts)
-          (raw as Map<String, dynamic>)['id'] as String:
-              Map<String, dynamic>.from(raw),
-      };
+      final contactsById = await _merchantContactsById(merchantIds);
 
       return [
         for (final r in rows)

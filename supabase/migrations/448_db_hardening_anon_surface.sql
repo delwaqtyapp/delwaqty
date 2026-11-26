@@ -807,15 +807,25 @@ SELECT sp.id, sp.name, sp.category_type, sp.description,
   ) eff
  WHERE sp.is_available = true
     OR sp.user_id = auth.uid();  -- owner keeps seeing their own row when unavailable
+-- default privileges hand REFERENCES/TRIGGER to authenticated on a new
+-- view; the 397-era view carried SELECT only.
+REVOKE ALL ON public.service_providers_with_effective_pricing FROM anon, authenticated;
 GRANT SELECT ON public.service_providers_with_effective_pricing TO anon;
 GRANT SELECT ON public.service_providers_with_effective_pricing TO authenticated;
 
--- 4b. Base table: anon loses SELECT entirely (guests read the view);
--- authenticated keeps only the columns the installed provider app
--- selects/filters/orders by (category_type, user_id, created_at).
+-- 4b. Base table: anon loses SELECT entirely (guests read the view).
+-- The authenticated trim is DEFERRED TO 449 (security review, blocking):
+-- RLS policies on other tables run subqueries on service_providers as the
+-- caller and would break for every signed-in user —
+-- service_bookings_select_provider / _update_provider (sp.id, sp.user_id),
+-- "Admins can manage bookings" (sp.latitude/longitude via
+-- _admin_write_scope), "provider docs owner rw" on provider_documents
+-- (sp.id), plus the invoker trigger campaigns_guard_status_change. 449
+-- re-points those onto SECURITY DEFINER helpers before the column revoke
+-- (and then drops user_id from the grant). Until then a signed-in user
+-- can still read base rows of available providers (user_id + exact
+-- coords): accepted MEDIUM-LOW, same deferral class as merchants.
 REVOKE SELECT ON public.service_providers FROM anon;
-REVOKE SELECT ON public.service_providers FROM authenticated;
-GRANT SELECT (category_type, user_id, created_at) ON public.service_providers TO authenticated;
 
 -- 4c. Owner self-read (exact coords included) for the provider app to
 -- adopt in 449; fail-closed when the caller owns no provider row.

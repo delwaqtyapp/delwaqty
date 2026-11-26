@@ -139,6 +139,15 @@ OUT="$(psql "$URL" -X -q -v ON_ERROR_STOP=1 -f "$SUITE447" 2>&1)" \
 printf '%s\n' "$OUT" | grep -q "447 suite OK" || { printf '%s\n' "$OUT"; fail_case "447 suite marker missing"; }
 echo "447 suite OK"
 
+echo "== view owner + grants"
+OWN="$(psql "$URL" -X -q -A -t -c "SELECT r.rolname FROM pg_class c JOIN pg_roles r ON r.oid=c.relowner WHERE c.oid='public.service_providers_with_effective_pricing'::regclass")"
+[ "$OWN" = "postgres" ] || fail_case "view owner is $OWN, expected postgres"
+VG_BAD="$(psql "$URL" -X -q -A -t -c "SELECT grantee || ':' || privilege_type FROM information_schema.role_table_grants WHERE table_schema='public' AND table_name='service_providers_with_effective_pricing' AND (grantee NOT IN ('anon','authenticated','postgres','service_role') OR (grantee IN ('anon','authenticated') AND privilege_type <> 'SELECT'))")"
+[ -z "$VG_BAD" ] || fail_case "view grants wrong: $VG_BAD"
+VG_OK="$(psql "$URL" -X -q -A -t -c "SELECT count(*) FROM information_schema.role_table_grants WHERE table_schema='public' AND table_name='service_providers_with_effective_pricing' AND grantee IN ('anon','authenticated') AND privilege_type='SELECT'")"
+[ "$VG_OK" = "2" ] || fail_case "view missing anon/authenticated SELECT"
+echo "view owner postgres, anon+authenticated SELECT only"
+
 echo "== 448 suite"
 OUT="$(psql "$URL" -X -q -v ON_ERROR_STOP=1 -f "$SUITE448" 2>&1)" \
   || { printf '%s\n' "$OUT"; fail_case "448 suite failed"; }

@@ -307,28 +307,28 @@ RESET ROLE;
 UPDATE public.service_providers SET is_available = true
  WHERE id = (SELECT provider FROM zz448);
 
--- ─── 8. authenticated trims on service_providers ──────────────────────────
+-- ─── 8. authenticated keeps base-table access in 448 (trim is 449) ───────
+-- RLS policies on service_bookings / provider_documents subquery
+-- service_providers as the caller (sp.id, sp.user_id, sp.latitude,
+-- sp.longitude); revoking columns from authenticated would break every
+-- signed-in user. 449 re-points those policies onto definer helpers first.
 SET LOCAL ROLE authenticated;
 DO $$
 DECLARE
   v_n int;
 BEGIN
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT provider_user FROM zz448))::text, true);
-  -- provider app capability check keeps working (category_type + user_id
-  -- filter + created_at ordering are exactly the granted columns)
+  -- provider app capability check keeps working
   SELECT count(*) INTO v_n FROM (
     SELECT category_type FROM public.service_providers
      WHERE user_id = (SELECT provider_user FROM zz448)
      ORDER BY created_at LIMIT 1) s;
   ASSERT v_n = 1, 'provider capability read broke';
-  -- ...but lat/lng left the signed-in surface
-  BEGIN
-    PERFORM latitude FROM public.service_providers LIMIT 1;
-    RAISE EXCEPTION 'zz448 sentinel: authenticated read provider latitude';
-  EXCEPTION WHEN insufficient_privilege THEN NULL;
-            WHEN raise_exception THEN
-    IF SQLERRM LIKE 'zz448 sentinel:%' THEN RAISE; END IF;
-  END;
+  -- policy-subquery dependents keep working as the caller: provider's own
+  -- bookings read touches service_bookings policies
+  SELECT count(*) INTO v_n FROM public.service_bookings
+   WHERE provider_id = (SELECT provider FROM zz448);
+  -- (count itself is not the point; the query not erroring is)
 END $$;
 RESET ROLE;
 

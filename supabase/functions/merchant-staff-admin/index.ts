@@ -93,7 +93,11 @@ Deno.serve(async (req) => {
   // GoTrue/infra client: auth admin API + rate-limit/session RPCs only.
   const admin = createClient(supabaseUrl, serviceKey);
 
-  const { data: authData, error: authError } = await caller.auth.getUser();
+  // supabase-js auth.getUser() ignores the global Authorization header
+  // (auth-js 2.62.x): pass the caller JWT explicitly or every real session
+  // reads as "session missing" (prod lab finding, 2026-11-26).
+  const callerToken = authHeader.replace(/^Bearer\s+/i, "");
+  const { data: authData, error: authError } = await caller.auth.getUser(callerToken);
   if (authError || !authData?.user?.id) return json({ error: "unauthorized" }, 401);
   const callerId = authData.user.id;
 

@@ -37,24 +37,6 @@ class AdminService {
     }
   }
 
-  Future<AdminUser?> createUser(AdminUser user) async {
-    try {
-      return await _repository.createUser(user);
-    } catch (e) {
-      debugPrint('AdminService.createUser error: $e');
-      return null;
-    }
-  }
-
-  Future<AdminUser?> updateUser(AdminUser user) async {
-    try {
-      return await _repository.updateUser(user);
-    } catch (e) {
-      debugPrint('AdminService.updateUser error: $e');
-      return null;
-    }
-  }
-
   Future<bool> get isOwner async {
     final uid = Supabase.instance.client.auth.currentUser?.id;
     if (uid == null) return false;

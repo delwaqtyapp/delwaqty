@@ -39,43 +39,4 @@ class SupabaseRestaurantSettingsDataSource {
         .maybeSingle();
     return data != null ? _fromRow(data) : null;
   }
-
-  Future<RestaurantSettings> updateSettings(RestaurantSettings settings) async {
-    final existing = await getSettings(settings.merchantId);
-    if (existing == null) {
-      final data = await _client
-          .from('restaurant_settings')
-          .insert({
-            'merchant_id': settings.merchantId,
-            'accepts_reservations': settings.acceptsReservations,
-            'has_dine_in': settings.hasDineIn,
-            'has_takeaway': settings.hasTakeaway,
-            'has_delivery': settings.hasDelivery,
-            'average_prep_time': settings.averagePrepTime,
-            'max_orders_per_hour': settings.maxOrdersPerHour,
-            'auto_accept_orders': settings.autoAcceptOrders,
-            'printer_enabled': settings.printerEnabled,
-          })
-          .select()
-          .single();
-      return _fromRow(data);
-    }
-    final data = await _client
-        .from('restaurant_settings')
-        .update({
-          'accepts_reservations': settings.acceptsReservations,
-          'has_dine_in': settings.hasDineIn,
-          'has_takeaway': settings.hasTakeaway,
-          'has_delivery': settings.hasDelivery,
-          'average_prep_time': settings.averagePrepTime,
-          'max_orders_per_hour': settings.maxOrdersPerHour,
-          'auto_accept_orders': settings.autoAcceptOrders,
-          'printer_enabled': settings.printerEnabled,
-          'updated_at': DateTime.now().toIso8601String(),
-        })
-        .eq('merchant_id', settings.merchantId)
-        .select()
-        .single();
-    return _fromRow(data);
-  }
 }

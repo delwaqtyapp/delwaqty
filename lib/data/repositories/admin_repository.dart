@@ -436,62 +436,6 @@ class AdminRepository implements admin.AdminRepository {
     }
   }
 
-  @override
-  Future<AdminUser> createUser(AdminUser user) async {
-    try {
-      final response = await _supabase
-          .from('admin_users')
-          .insert({
-            'full_name': user.name,
-            'email': user.email,
-            'role': user.role.toDb(),
-            'status': user.status.name,
-          })
-          .select()
-          .single();
-
-      return AdminUser(
-        id: response['id'] as String,
-        name: response['name'] as String,
-        email: response['email'] as String,
-        role: user.role,
-        status: user.status,
-        createdAt: DateTime.parse(response['created_at'] as String),
-      );
-    } catch (e) {
-      throw AdminException('Failed to create user: $e');
-    }
-  }
-
-  @override
-  Future<AdminUser> updateUser(AdminUser user) async {
-    try {
-      final response = await _supabase
-          .from('admin_users')
-          .update({
-            'full_name': user.name,
-            'email': user.email,
-            'role': user.role.toDb(),
-            'status': user.status.name,
-          })
-          .eq('id', user.id)
-          .select()
-          .single();
-
-      return AdminUser(
-        id: response['id'] as String,
-        name: response['name'] as String,
-        email: response['email'] as String,
-        role: user.role,
-        status: user.status,
-        lastLogin: user.lastLogin,
-        createdAt: DateTime.parse(response['created_at'] as String),
-      );
-    } catch (e) {
-      throw AdminException('Failed to update user: $e');
-    }
-  }
-
   /// Contact rows for a set of merchant ids through the admin-gated,
   /// region-scoped 449 RPC, chunked at its 100-id cap.
   Future<Map<String, Map<String, dynamic>>> _merchantContactsById(

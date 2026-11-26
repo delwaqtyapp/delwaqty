@@ -130,6 +130,15 @@ function loadHandler(fail = {}) {
               order: async () => ({ data: [], error: null }),
             }),
           }),
+          delete: () => ({
+            eq: async (col, val) => {
+              calls.push([`${isAdmin ? 'admin' : 'caller'}:delete:${table}`, { [col]: val }]);
+              if (table === 'users' && fail.userRowDelete) {
+                return { error: { message: 'test failure' } };
+              }
+              return { error: null };
+            },
+          }),
         }),
       };
     },
@@ -219,17 +228,38 @@ test('createUser carries the provision binding in app_metadata (S3)', async () =
   ]);
 });
 
-test('complete failure deletes the auth user, aborts, refuses generically', async () => {
+test('complete failure deletes BOTH the mirrored users row and the auth user (Finding 3), aborts, refuses generically', async () => {
   const { handler, calls } = loadHandler({ complete: true });
   const res = await handler(post(CREATE_BODY));
   assert.equal(res.status, 403);
   assert.deepEqual(await res.json(), { error: 'request_refused' });
   assert.deepEqual(names(calls), [
     ...RATE, 'staff_admin_provision_begin', 'gotrue:createUser',
-    'staff_admin_provision_complete', 'gotrue:deleteUser',
+    'staff_admin_provision_complete', 'admin:delete:users', 'gotrue:deleteUser',
     'staff_admin_provision_abort', 'staff_admin_audit_refusal',
   ]);
-  assert.equal(calls[6][1].p_reason, 'create_staff');
+  // the mirrored-row delete targets exactly the orphaned auth user id
+  assert.deepEqual(calls[5][1], { id: AUTH_USER_ID });
+  assert.equal(calls[7][1].p_reason, 'create_staff');
+});
+
+test('a failed public.users delete leaves the auth rollback intact and is flagged (Finding 3)', async () => {
+  const { handler, calls } = loadHandler({ complete: true, userRowDelete: true });
+  const res = await handler(post(CREATE_BODY));
+  assert.equal(res.status, 403);
+  // the GoTrue delete still runs (once, success) after the row delete fails
+  assert.deepEqual(gotrueNames(calls), ['gotrue:createUser', 'gotrue:deleteUser']);
+  const abort = calls.find(([n]) => n === 'staff_admin_provision_abort');
+  assert.equal(abort[1].p_reason, `orphan_after_delete_failure:users_row:${AUTH_USER_ID}`);
+});
+
+test('both deletes failing flag both orphan halves with the UID', async () => {
+  const { handler, calls } = loadHandler({ complete: true, userRowDelete: true, deleteFails: 2 });
+  const res = await handler(post(CREATE_BODY));
+  assert.equal(res.status, 403);
+  assert.equal(gotrueNames(calls).filter((n) => n === 'gotrue:deleteUser').length, 2);
+  const abort = calls.find(([n]) => n === 'staff_admin_provision_abort');
+  assert.equal(abort[1].p_reason, `orphan_after_delete_failure:users_row+auth:${AUTH_USER_ID}`);
 });
 
 test('a failed deleteUser is retried once, then flagged with the orphan UID (#262)', async () => {
@@ -238,7 +268,7 @@ test('a failed deleteUser is retried once, then flagged with the orphan UID (#26
   assert.equal(res.status, 403);
   assert.equal(gotrueNames(calls).filter((n) => n === 'gotrue:deleteUser').length, 2);
   const abort = calls.find(([n]) => n === 'staff_admin_provision_abort');
-  assert.equal(abort[1].p_reason, `orphan_after_delete_failure:${AUTH_USER_ID}`);
+  assert.equal(abort[1].p_reason, `orphan_after_delete_failure:auth:${AUTH_USER_ID}`);
 });
 
 test('a failing abort call is itself audited, never silently dropped (#262)', async () => {

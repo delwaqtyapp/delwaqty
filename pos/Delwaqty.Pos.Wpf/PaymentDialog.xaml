@@ -1,0 +1,53 @@
+<Window x:Class="Delwaqty.Pos.Wpf.PaymentDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="الدفع" Height="600" Width="520" FlowDirection="RightToLeft"
+        WindowStartupLocation="CenterOwner" FontSize="16">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel>
+            <TextBlock Text="الإجمالي:" FontSize="22" FontWeight="Bold"/>
+            <TextBlock x:Name="TotalText" FontSize="22" FontWeight="Bold" Foreground="#1565C0" Margin="8,0"/>
+        </DockPanel>
+
+        <UniformGrid Grid.Row="1" Columns="3" Margin="0,10">
+            <Button Content="نقدي 💵" Margin="4" Padding="10" FontSize="17" Click="AddCash" Background="#00695C" Foreground="White"/>
+            <Button Content="انستاباي" Margin="4" Padding="10" FontSize="17" Click="AddInstaPay" Background="#4527A0" Foreground="White"/>
+            <Button Content="فودافون كاش" Margin="4" Padding="10" FontSize="17" Click="AddVodafone" Background="#B71C1C" Foreground="White"/>
+            <Button Content="بطاقة 💳" Margin="4" Padding="10" FontSize="17" Click="AddCard" Background="#37474F" Foreground="White"/>
+            <Button Content="آجل 📒" Margin="4" Padding="10" FontSize="17" Click="AddDeferred" Background="#E65100" Foreground="White"/>
+        </UniformGrid>
+
+        <StackPanel Grid.Row="2">
+            <TextBlock Text="الدفعات:" FontWeight="Bold"/>
+            <ListBox x:Name="PaymentsList" Height="150" Margin="0,6">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" FontSize="16"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <Button Content="حذف الدفعة المحددة" Click="RemovePayment" Padding="8,4" HorizontalAlignment="Left"/>
+        </StackPanel>
+
+        <DockPanel Grid.Row="3" Margin="0,8">
+            <TextBlock Text="المدفوع:" FontSize="18"/>
+            <TextBlock x:Name="PaidText" FontSize="18" FontWeight="Bold" Margin="8,0"/>
+            <TextBlock Text="المتبقي:" FontSize="18" Margin="16,0,0,0"/>
+            <TextBlock x:Name="RemainText" FontSize="18" FontWeight="Bold" Foreground="#E65100" Margin="8,0"/>
+        </DockPanel>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Left">
+            <Button Content="إلغاء" Padding="20,10" Margin="8,0,0,0" Click="Cancel_Click"/>
+            <Button x:Name="ConfirmButton" Content="إتمام البيع ✅" Padding="20,10" FontSize="18"
+                    Background="#2E7D32" Foreground="White" Click="Confirm_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

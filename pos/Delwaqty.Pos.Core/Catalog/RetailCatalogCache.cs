@@ -8,7 +8,7 @@ namespace Delwaqty.Pos.Core.Catalog
 {
     /// <summary>
     /// Local mirror of a retail merchant's products table for offline lookup.
-    /// Same scoring as the drug CatalogCache: exact barcode 1.0, prefix 1.0,
+    /// Scoring: exact barcode 1.0, prefix 1.0,
     /// word-boundary 0.9, substring 0.6, trigram word-similarity fallback for
     /// spelling variants.
     /// </summary>
@@ -18,8 +18,13 @@ namespace Delwaqty.Pos.Core.Catalog
 
         public RetailCatalogCache(string path)
         {
-            var cs = new SqliteConnectionStringBuilder { DataSource = path }.ToString();
+            var cs = new SqliteConnectionStringBuilder { DataSource = path, Pooling = false }.ToString();
+            // Pooling disabled: a pooled handle keeps the .db file locked after
+            // Dispose on Windows, breaking migrations (File.Move), teardown and any
+            // second opener. Stores here are long-lived, so pooling buys nothing.
             _db = new SqliteConnection(cs);
+            try
+            {
             _db.Open();
             using (var cmd = _db.CreateCommand())
             {
@@ -29,6 +34,14 @@ namespace Delwaqty.Pos.Core.Catalog
                     " stock REAL, barcode TEXT, search_norm TEXT, updated_at TEXT);" +
                     "CREATE INDEX IF NOT EXISTS products_norm ON products(search_norm);";
                 cmd.ExecuteNonQuery();
+            }
+            }
+            catch
+            {
+                // Corrupt/unreadable db: release the handle so the file is
+                // not left locked on Windows.
+                _db.Dispose();
+                throw;
             }
         }
 
@@ -105,7 +118,7 @@ namespace Delwaqty.Pos.Core.Catalog
                         {
                             var p = Read(r);
                             if (seen.Contains(p.Id ?? "") || p.SearchNorm == null) continue;
-                            var sim = CatalogCache.WordSimilarity(norm, p.SearchNorm);
+                            var sim = TextSimilarity.WordSimilarity(norm, p.SearchNorm);
                             if (sim >= 0.4) hits.Add(new Hit { Product = p, Score = sim });
                         }
                     }

@@ -67,7 +67,7 @@ namespace Delwaqty.Pos.Core.Tests
                     Assert.Equal(0, store.PendingCount());
                 }
             }
-            finally { File.Delete(path); }
+            finally { Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); File.Delete(path); }
         }
     }
 }

@@ -52,7 +52,7 @@ jobs:
         run: flutter pub get
       - name: Generate code
         run: dart run build_runner build --delete-conflicting-outputs
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
       - name: Auth edge safety tests

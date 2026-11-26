@@ -6,9 +6,13 @@ import { createClient } from "npm:@supabase/supabase-js@2.39.0";
 // Security model:
 //   - JWT verification is ON for this function (default; see config.toml).
 //   - The service-role key is used ONLY for GoTrue admin calls
-//     (createUser / updateUserById / deleteUser) and for the dedicated
+//     (createUser / updateUserById / deleteUser), for the dedicated
 //     infrastructure RPCs _lookup_rate_allow and revoke_user_sessions
-//     (388 precedent). It NEVER writes business tables: merchant_staff,
+//     (388 precedent), and for ONE bounded compensating action: when a
+//     create_staff attempt fails after the GoTrue user exists, the
+//     rollback deletes THAT user id's row from public.users (the row
+//     the signup trigger just created) so no orphan is left behind
+//     (Finding 3). It never writes anything else: merchant_staff,
 //     users and merchant_staff_events writes all go through the
 //     staff_admin_* executor RPCs under the CALLER's JWT, which re-check
 //     ownership and eligibility server-side and audit every action,
@@ -215,13 +219,26 @@ Deno.serve(async (req) => {
       { p_provision_id: prov.provision_id, p_auth_user_id: authUserId },
     );
     if (completeErr || !staffId) {
-      // Roll back the orphaned auth user (one retry); a delete failure
-      // leaves a flagged orphan whose UID is recorded in the abort reason
-      // and the refusal trail (#262).
+      // Roll back BOTH halves of the orphaned signup (Finding 3): the
+      // public.users row the signup trigger created AND the GoTrue user
+      // (one retry). Deleting only the GoTrue user leaves the mirrored
+      // public.users row behind. A delete failure leaves a flagged
+      // orphan whose UID is recorded in the abort reason and the refusal
+      // trail (#262); both deletes are always attempted.
+      const { error: rowDelErr } = await admin
+        .from("users")
+        .delete()
+        .eq("id", authUserId);
       let delErr = (await admin.auth.admin.deleteUser(authUserId)).error;
       if (delErr) delErr = (await admin.auth.admin.deleteUser(authUserId)).error;
+      const orphans = [
+        rowDelErr ? "users_row" : null,
+        delErr ? "auth" : null,
+      ].filter((part) => part !== null);
       await abortProvision(
-        delErr ? `orphan_after_delete_failure:${authUserId}` : "create_staff",
+        orphans.length
+          ? `orphan_after_delete_failure:${orphans.join("+")}:${authUserId}`
+          : "create_staff",
       );
       await logRefusal(merchantId, "create_staff");
       return json(REFUSED, 403);

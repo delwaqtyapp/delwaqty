@@ -27,18 +27,25 @@
 --      evidence-based keep-list. Guest mode browses only; the cart is
 --      local; OTP/signup writes go through edge functions (service role).
 --      Before/after grant sweeps are in the test file.
---   3. products: REVOKE ALL from anon. No customer/guest code path reads
---      products (customer catalog reads product_inventory); readers are the
---      merchant app (own rows) and admin, both authenticated. The
---      authenticated column trim ships in 449 with the app change (the two
---      wildcard readers are installed builds) — same reasoning as merchants.
+--   3. products: NOTHING changes in 448 beyond the section-2 DML sweep.
+--      The guest merchant detail page wildcard-selects the products TABLE
+--      (via a _tableName indirection in SupabaseProductDataSource), so the
+--      anon SELECT revoke waits for 449's products_public view/RPC + app
+--      change (LOW). The authenticated column trim is 449 too (installed
+--      merchant/admin builds wildcard-select).
 --   4. service_providers: recreate the customer view
 --      service_providers_with_effective_pricing as a definer view with a
---      fixed column list (NO user_id, latitude, longitude) and the
---      is_available = true filter baked in; revoke base-table SELECT from
---      anon; authenticated keeps column grants on exactly what the
---      installed provider app selects/filters (category_type, user_id,
---      created_at). Owner self-read of lat/lng gets a definer RPC
+--      fixed column list (no user_id; coords rounded to ~1km so the
+--      installed distance sort keeps working) and the is_available = true
+--      filter baked in, plus an owner branch (sp.user_id = auth.uid()) so
+--      the provider app keeps seeing its own unavailable row; revoke
+--      base-table SELECT from anon. The authenticated column trim is
+--      DEFERRED TO 449: RLS policies on service_bookings and
+--      provider_documents subquery service_providers as the caller (sp.id,
+--      sp.user_id, sp.latitude/longitude), so a revoke would break every
+--      signed-in user; 449 re-points those policies + the
+--      campaigns_guard_status_change trigger onto definer helpers first.
+--      Owner self-read of exact lat/lng via new definer RPC
 --      get_my_provider_profile() for the provider app to adopt in 449.
 --   5. merchants email/owner_user_id/phone/lat-lng: unchanged in 448 —
 --      installed guest + customer builds wildcard-select merchants, so any
@@ -773,8 +780,17 @@ EXCEPTION WHEN OTHERS THEN
   RAISE NOTICE '448: default-privileges revoke for supabase_admin not permitted: %', sqlerrm;
 END $$;
 
--- ─── 3. products: anon loses everything ──────────────────────────────────
-REVOKE ALL ON public.products FROM anon;
+-- ─── 3. products: SELECT revoke DEFERRED TO 449 ──────────────────────────
+-- UI review (Finding 1): the GUEST merchant detail page reads products via
+-- SupabaseProductDataSource.getProducts, a wildcard select on the TABLE
+-- (lib/data/datasources/remote/supabase_product_data_source.dart:22,53 —
+-- the _tableName indirection is why a from('products') grep misses it) and
+-- rethrows on error. An anon SELECT revoke breaks guest storefronts in
+-- installed builds, and a view cannot help until builds switch. 449 ships
+-- a products_public view/RPC + the app change, then revokes (LOW).
+-- The section-2 sweep already removed anon's INSERT/UPDATE/DELETE/
+-- TRUNCATE/TRIGGER on products; only SELECT remains, as today.
+-- (no statements in this section)
 
 -- ─── 4. service_providers: definer customer view + anon base revoke ──────
 -- 4a. Customer-facing view: definer, fixed columns, rounded coords.

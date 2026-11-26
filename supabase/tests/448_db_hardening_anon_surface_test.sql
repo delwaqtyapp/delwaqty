@@ -49,9 +49,17 @@ insert into public.products(id, merchant_id, name, name_ar, price, stock_quantit
   ((select product1 from zz448), (select shop from zz448), 'zz448-item', 'صنف', 100, NULL);
 insert into public.merchant_staff(merchant_id, user_id, username, full_name, role, branch_id, is_active, must_change_password) values
   ((select shop from zz448), (select cashier from zz448), 'zz448cashier', 'Cashier', 'cashier', (select branch1 from zz448), true, false);
+-- schema convention: service_providers.id IS the provider's users.id
+-- (provider_documents FKs users.id while its policy matches sp.id)
+update zz448 set provider = provider_user;
 insert into public.service_providers(id, user_id, name, category_type, is_available, latitude, longitude) values
   ((select provider from zz448), (select provider_user from zz448), 'zz448-plumber', 'plumbing',
    true, 30.0444196, 31.2357116);
+insert into public.service_bookings(id, user_id, provider_id, provider_name, category_type, scheduled_date, scheduled_time, status) values
+  (gen_random_uuid(), (select customer from zz448), (select provider from zz448), 'zz448-plumber', 'plumbing',
+   current_date + 1, '10:00', 'pending');
+insert into public.provider_documents(id, provider_id, doc_type) values
+  (gen_random_uuid(), (select provider from zz448), 'license');
 
 UPDATE public.platform_settings
    SET feature_flags = '{"cashier_mode_mobile":true,"staff_accounts":true}'::jsonb
@@ -252,13 +260,11 @@ BEGIN
             WHEN raise_exception THEN
     IF SQLERRM LIKE 'zz448 sentinel:%' THEN RAISE; END IF;
   END;
-  BEGIN
-    PERFORM count(*) FROM public.products;
-    RAISE EXCEPTION 'zz448 sentinel: anon read products';
-  EXCEPTION WHEN insufficient_privilege THEN NULL;
-            WHEN raise_exception THEN
-    IF SQLERRM LIKE 'zz448 sentinel:%' THEN RAISE; END IF;
-  END;
+  -- guest storefront: anon SELECT * on products KEEPS WORKING in 448
+  -- (installed merchant_detail_page reads the table; revoke is 449)
+  SELECT p.* INTO v_row FROM public.products p
+   WHERE merchant_id = (SELECT shop FROM zz448) LIMIT 1;
+  ASSERT v_row.id IS NOT NULL, 'anon products wildcard read broke (guest storefront)';
   -- anon writes are refused (RLS-free proof: privilege error, not 0 rows)
   BEGIN
     INSERT INTO public.merchants(id, name, type, status)
@@ -329,6 +335,50 @@ BEGIN
   SELECT count(*) INTO v_n FROM public.service_bookings
    WHERE provider_id = (SELECT provider FROM zz448);
   -- (count itself is not the point; the query not erroring is)
+END $$;
+RESET ROLE;
+
+-- ─── 8b. policy-subquery UPDATE paths as the caller ───────────────────────
+-- service_bookings_update_provider subqueries service_providers (sp.id,
+-- sp.user_id); "provider docs owner rw" subqueries sp.id. No-op updates
+-- (set a column to itself) still evaluate those policies per row.
+SET LOCAL ROLE authenticated;
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT provider_user FROM zz448))::text, true);
+  -- direct booking writes are refused by design
+  -- (service_bookings_guard_client_writes: fields are managed by
+  -- update_service_booking_status). Reaching that guard PROVES the
+  -- provider UPDATE policy's service_providers subquery evaluated and
+  -- admitted the row; a privilege failure would error differently.
+  BEGIN
+    UPDATE public.service_bookings SET notes = notes
+     WHERE provider_id = (SELECT provider FROM zz448);
+    RAISE EXCEPTION 'zz448 sentinel: direct booking update allowed';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM LIKE 'zz448 sentinel:%' THEN RAISE; END IF;
+    ASSERT SQLERRM = 'booking fields are managed by update_service_booking_status',
+      'wrong error (policy subquery broken?): ' || SQLERRM;
+  END;
+  -- provider_documents allows direct owner writes: no-op update lands
+  UPDATE public.provider_documents SET doc_type = doc_type
+   WHERE provider_id = (SELECT provider FROM zz448);
+  ASSERT FOUND, 'provider no-op update on own document errored or matched nothing';
+
+  -- the booking's customer: read works; direct update hits the same guard
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT customer FROM zz448))::text, true);
+  PERFORM count(*) FROM public.service_bookings
+   WHERE provider_id = (SELECT provider FROM zz448);
+  BEGIN
+    UPDATE public.service_bookings SET notes = notes
+     WHERE provider_id = (SELECT provider FROM zz448) AND user_id = (SELECT customer FROM zz448);
+    -- 0 rows is fine for the customer (their policies may admit none);
+    -- what must not happen is a privilege error
+  EXCEPTION WHEN insufficient_privilege THEN
+    RAISE EXCEPTION 'customer booking update hit a privilege error (policy subquery broken)';
+              WHEN raise_exception THEN
+    IF SQLERRM = 'booking fields are managed by update_service_booking_status' THEN NULL; ELSE RAISE; END IF;
+  END;
 END $$;
 RESET ROLE;
 

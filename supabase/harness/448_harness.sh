@@ -133,6 +133,11 @@ psql "$URL" -X -q -A -t -c "SET ROLE anon; SET LOCAL request.jwt.claims='{}'; SE
   || fail_case "anon wildcard SELECT m.* on merchants broke in 448"
 echo "anon merchants wildcard read (SELECT m.*) OK"
 
+echo "== guest merchant detail path (anon SELECT * on products)"
+psql "$URL" -X -q -A -t -c "SET ROLE anon; SET LOCAL request.jwt.claims='{}'; SELECT p.* FROM public.products p LIMIT 1" >/dev/null \
+  || fail_case "anon wildcard SELECT on products broke in 448 (guest merchant detail)"
+echo "guest merchant detail path OK"
+
 echo "== 447 suite (regression)"
 OUT="$(psql "$URL" -X -q -v ON_ERROR_STOP=1 -f "$SUITE447" 2>&1)" \
   || { printf '%s\n' "$OUT"; fail_case "447 regression suite failed"; }

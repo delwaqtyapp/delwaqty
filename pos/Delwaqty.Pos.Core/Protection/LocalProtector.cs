@@ -157,13 +157,14 @@ namespace Delwaqty.Pos.Core.Protection
     /// inheritance and grant exactly SYSTEM + Administrators (full) and the
     /// CURRENT Windows user (full) — the supported model is one dedicated
     /// Windows account per shop PC, so other local users get nothing.
-    /// Best-effort: failure never blocks startup. No-op off Windows.
+    /// Never blocks startup, but a failure is RETURNED (null = hardened or not
+    /// Windows) so the caller can tell the user instead of failing silently.
     /// </summary>
     public static class DataDirSecurity
     {
-        public static void Harden(string dir)
+        public static string Harden(string dir)
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return null;
             try
             {
                 var info = new DirectoryInfo(dir);
@@ -190,8 +191,9 @@ namespace Delwaqty.Pos.Core.Protection
                     System.Security.AccessControl.PropagationFlags.None,
                     System.Security.AccessControl.AccessControlType.Allow));
                 info.SetAccessControl(sec);
+                return null;
             }
-            catch { /* hardening is best-effort; never block the cashier from opening */ }
+            catch (Exception ex) { return ex.GetType().Name + ": " + ex.Message; }
         }
     }
 }

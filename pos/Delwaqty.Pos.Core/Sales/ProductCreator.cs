@@ -50,7 +50,7 @@ namespace Delwaqty.Pos.Core.Sales
                 ["barcode"] = CanonicalBarcode(barcode),
                 ["is_available"] = true,
             });
-            var json = await _client.RestWriteAsync("POST", "products", body, "return=representation")
+            var json = await _client.RestWriteAsync("POST", "products?select=id", body, "return=representation")
                 .ConfigureAwait(false);
             string id = null;
             using (var doc = JsonDocument.Parse(json))

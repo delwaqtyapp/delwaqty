@@ -46,7 +46,17 @@ namespace Delwaqty.Pos.Wpf
             var amount = InputDialog.AskAmount(this, ReceiptBuilder.MethodLabel(method),
                 "المبلغ (" + ReceiptBuilder.MethodLabel(method) + "):", remainder.ToString("0.##"));
             if (!amount.HasValue || amount.Value <= 0) return;
-            try { _sale.AddPayment(method, amount.Value); }
+            var tendered = amount.Value;
+            if (method == "cash" && tendered > remainder)
+            {
+                // Cash handed over exceeds what is due: record only the amount due
+                // (the server rejects overpayment) and tell the cashier the change.
+                var change = Math.Round(tendered - remainder, 2, MidpointRounding.AwayFromZero);
+                MessageBox.Show(this, "الباقي للعميل: " + change.ToString("0.##"), "الدفع",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                tendered = remainder;
+            }
+            try { _sale.AddPayment(method, tendered); }
             catch (ArgumentException ex)
             {
                 MessageBox.Show(this, ex.Message, "الدفع", MessageBoxButton.OK, MessageBoxImage.Warning);

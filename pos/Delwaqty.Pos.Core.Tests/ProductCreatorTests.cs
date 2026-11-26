@@ -30,6 +30,8 @@ namespace Delwaqty.Pos.Core.Tests
                 {
                     var id = await creator.CreateAsync(cache, "Rice 5kg", "ارز ٥ كيلو", 185m, 20, " 6221 ");
                     Assert.Equal("p-9", id);
+                    // 452 leaves clients SELECT(id) only: never RETURN *
+                    Assert.Contains("products?select=id", stub.Requests[0].Url);
                     Assert.Contains("\"merchant_id\":\"m-1\"", stub.Requests[0].Body);
                     Assert.Contains("\"barcode\":\"6221\"", stub.Requests[0].Body);
                     var cached = cache.ById("p-9");

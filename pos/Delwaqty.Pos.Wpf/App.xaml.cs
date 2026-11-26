@@ -55,7 +55,13 @@ namespace Delwaqty.Pos.Wpf
             }
 #endif
             var rootDir = AppPaths.DataDir();
-            DataDirSecurity.Harden(rootDir); // #114: tighten the shared dir ACL (Windows)
+            // #114: tighten the data dir ACL (Windows). A failure must not be silent:
+            // the data stays usable but the user is told the folder is not locked down.
+            var aclError = DataDirSecurity.Harden(rootDir);
+            if (aclError != null)
+                MessageBox.Show(
+                    "تعذر تأمين مجلد بيانات الكاشير. البيانات تعمل لكن المجلد غير محمي بالكامل. " +
+                    "اتصل بالدعم.\n" + aclError, "Delwaqty POS", MessageBoxButton.OK, MessageBoxImage.Warning);
             var activation = new ActivationService(rootDir, PosConfig.BuildFlavor);
             var state = activation.Restore();
 

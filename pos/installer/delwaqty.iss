@@ -1,4 +1,4 @@
-; Delwaqty POS installer - see pos/docs/installer-and-autoupdate.md
+; Delwaqty POS installer (manual reinstall; in-app auto-update is not in this release)
 ; Single shop build (DelwaqtyShopPos). Two payloads, same script:
 ;   net8.0-windows self-contained (Windows 10+)
 ;   net48 + .NET Framework 4.8 web bootstrapper (Windows 7 SP1 fallback)
@@ -40,9 +40,8 @@ PrivilegesRequired=admin
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
-; Auto-update path launches the downloaded setup with /VERYSILENT /NORESTART.
 ; Signing: unsigned builds trigger SmartScreen - see the launch-blocker note
-; in pos/docs/installer-and-autoupdate.md.
+; in pos/docs/installer-and-autoupdate.md (design notes; OTA is not shipped).
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -52,10 +51,10 @@ Name: "arabic"; MessagesFile: "compiler:Languages\Arabic.isl"
 Name: "desktopicon"; Description: "Desktop shortcut"; GroupDescription: "Shortcuts:"
 
 [Dirs]
-; Shared per-machine data dir (survives updates, writable by every user).
-; The app creates it too; pre-creating with open permissions avoids
-; first-run ACL surprises when a second Windows user runs the app.
-Name: "{commonappdata}\DelwaqtyPos"; Permissions: everyone-modify
+; The data dir C:\ProgramData\DelwaqtyPos is deliberately NOT pre-created here.
+; The app creates it as the running Windows user and then locks it down to
+; SYSTEM + Administrators + that user (DataDirSecurity.Harden). Pre-creating it
+; with everyone-modify would give every local user read/write on shop data.
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion

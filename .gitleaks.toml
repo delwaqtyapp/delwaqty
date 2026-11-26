@@ -1,0 +1,10 @@
+# Extend the default gitleaks rules; allowlist ONLY the publishable Supabase
+# anon key (role "anon", public by design, already shipped in
+# lib/config/app_config.dart and the Flutter apps). Any other secret, or any
+# other JWT, still fails the scan.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Supabase publishable anon key (not a secret)"
+regexes = ['''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0dG5sa213aG9yamFtemVtd2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxODc4MzgsImV4cCI6MjA5OTc2MzgzOH0.IsksTaJz-k9Gbc-6f7Is6HxWd0wOZRhSGpYI00gYkH4''']

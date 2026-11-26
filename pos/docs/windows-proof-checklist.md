@@ -8,13 +8,13 @@ real Windows 10/11 machine (or VM) with the shop build.
 Setup for all items: install/run the app once as Windows user A
 ("SHOPPC\Cashi­er"), activate with a test key, make at least one offline
 sale (airplane mode) so the outbox holds a pending op. Data dir:
-`C:\ProgramData\Delwaqty\Pos` (confirm via AppPaths).
+`C:\ProgramData\DelwaqtyPos` (confirm via AppPaths).
 
 ## 1. Cross-user protection
 
 1. Create a second standard Windows user B (Settings → Accounts → Other
    users), sign in as B.
-2. Try to open `C:\ProgramData\Delwaqty\Pos` in Explorer.
+2. Try to open `C:\ProgramData\DelwaqtyPos` in Explorer.
    Expected: access denied (ACL grants only user A + SYSTEM + Admins).
 3. As B, run `certutil -dump` on nothing — instead: copy the data dir to
    B's Desktop with an admin elevate, then run the app as B.
@@ -42,7 +42,7 @@ sale (airplane mode) so the outbox holds a pending op. Data dir:
 ## 3. Uninstall / reinstall recovery
 
 1. With a pending offline op queued, uninstall the app (do NOT delete
-   `C:\ProgramData\Delwaqty\Pos`).
+   `C:\ProgramData\DelwaqtyPos`).
 2. Reinstall the same build, start as the SAME Windows user.
    Expected: normal startup with no activation prompt (DPAPI blobs still
    unprotect for the same user on the same machine); the pending op is
@@ -75,7 +75,7 @@ sale (airplane mode) so the outbox holds a pending op. Data dir:
 - No plaintext secret ever appears in the data dir: `device.key` starts
   with `DP1:`, `session.cred` with `DP2:`, `license.seal` is JSON with a
   `Seal` over the whole `StateJson`.
-- `icacls C:\ProgramData\Delwaqty\Pos` shows exactly: SYSTEM (F),
+- `icacls C:\ProgramData\DelwaqtyPos` shows exactly: SYSTEM (F),
   BUILTIN\Administrators (F), SHOPPC\<shop account> (F) — no Users,
   no Everyone.
 - After ANY forced reactivation: queued ops upload exactly once (server

@@ -115,7 +115,7 @@ namespace Delwaqty.Pos.Core.Auth
     /// <summary>
     /// Persists the refresh token next to the other app data (review #114).
     ///
-    /// v2 (current): DPAPI LocalMachine via ILocalProtector — the blob only
+    /// v2 (current): DPAPI CurrentUser via ILocalProtector — the blob only
     /// unprotects on this PC; a copied data dir is useless elsewhere.
     /// File format: "DP2:" + base64(protect(utf8 payload)).
     /// Payload: refreshToken + "\n" + email.

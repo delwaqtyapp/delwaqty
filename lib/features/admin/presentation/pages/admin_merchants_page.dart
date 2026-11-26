@@ -6,6 +6,7 @@ import 'package:delwaqty/services/admin/admin_providers.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/pages/cashier_license_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 
@@ -162,6 +163,14 @@ class _AdminMerchantsPageState extends ConsumerState<AdminMerchantsPage> {
                         },
                         onManageProducts: () =>
                             _showManageProductsSheet(context, ref, merchant),
+                        onCashierLicense: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => CashierLicensePage(
+                              merchantId: merchant['id'] as String,
+                              adminMode: true,
+                            ),
+                          ),
+                        ),
                         onDeleteMerchant: () =>
                             _confirmDeleteMerchant(context, ref, merchant),
                       ),
@@ -430,6 +439,7 @@ class _MerchantTile extends StatelessWidget {
     required this.l10n,
     required this.onStatusChanged,
     required this.onManageProducts,
+    required this.onCashierLicense,
     required this.onDeleteMerchant,
   });
 
@@ -437,6 +447,7 @@ class _MerchantTile extends StatelessWidget {
   final AppLocalizations l10n;
   final Function(String) onStatusChanged;
   final VoidCallback onManageProducts;
+  final VoidCallback onCashierLicense;
   final VoidCallback onDeleteMerchant;
 
   @override
@@ -505,6 +516,8 @@ class _MerchantTile extends StatelessWidget {
                     onSelected: (value) {
                       if (value == '__products') {
                         onManageProducts();
+                      } else if (value == '__cashier') {
+                        onCashierLicense();
                       } else if (value == '__delete') {
                         onDeleteMerchant();
                       } else {
@@ -531,6 +544,10 @@ class _MerchantTile extends StatelessWidget {
                       PopupMenuItem(
                         value: '__products',
                         child: Text(l10n.manageProducts),
+                      ),
+                      PopupMenuItem(
+                        value: '__cashier',
+                        child: Text(l10n.cashierLicenseTitle),
                       ),
                       PopupMenuItem(
                         value: '__delete',

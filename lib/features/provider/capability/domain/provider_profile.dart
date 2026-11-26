@@ -64,6 +64,7 @@ const Map<String, ProviderCapability> kRouteCapability = {
   '/merchant-dashboard/inventory': ProviderCapability.inventory,
   '/provider-cashier': ProviderCapability.cashier,
   '/merchant-dashboard/pos': ProviderCapability.cashier,
+  '/merchant-dashboard/cashier-license': ProviderCapability.cashier,
   '/merchant-dashboard/storefront': ProviderCapability.storefront,
   '/merchant-dashboard/banners': ProviderCapability.banners,
   '/merchant-dashboard/offers': ProviderCapability.offers,

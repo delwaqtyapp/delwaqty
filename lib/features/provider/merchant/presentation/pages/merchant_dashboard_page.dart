@@ -583,6 +583,13 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
           color: AppColors.brandCyan,
           onTap: () => context.push('/merchant-dashboard/pos'),
         ),
+      if (caps.contains(ProviderCapability.cashier))
+        _QuickActionItem(
+          title: l10n.cashierLicenseOpen,
+          icon: Icons.key_rounded,
+          color: AppColors.brandViolet,
+          onTap: () => context.push('/merchant-dashboard/cashier-license'),
+        ),
       if (caps.contains(ProviderCapability.inventory))
         _QuickActionItem(
           title: l10n.inventory,

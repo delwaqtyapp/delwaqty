@@ -1,5 +1,6 @@
 -- 450 suite: run by harness/450_harness.sh on the disposable
--- 439..451+450 DB AFTER tests/449_seed.sql. Personas from zz449.
+-- 439..451+450 DB AFTER tests/449_seed.sql + tests/450_seed.sql.
+-- Personas from zz449 + zz450.
 -- Positive + NEGATIVE coverage of the 450 revoke posture: the keep-list
 -- columns stay readable, every other direct base-table read is denied,
 -- and the definer surfaces are unaffected. Runs in one transaction,
@@ -118,6 +119,31 @@ DO $$
 BEGIN
   ASSERT (SELECT count(*) FROM public.products_public) > 0,
     'customer lost products_public';
+END $$;
+-- the rebuilt deliveries view: the customer's own delivery ride comes
+-- back with merchant labels resolved through the definer subview
+DO $$
+BEGIN
+  ASSERT (SELECT merchant_name FROM public.deliveries
+           WHERE id = (select ride_customer from zz450)) = 'zz449-cafe',
+    'customer lost the deliveries merchant label';
+  ASSERT (SELECT merchant_address FROM public.deliveries
+           WHERE id = (select ride_customer from zz450)) = 'zz450-cafe-address',
+    'customer lost the deliveries merchant address';
+END $$;
+RESET ROLE;
+
+-- ─── driver (customer2): the driver app's deliveries read ────────────
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (select customer2 from zz449))::text, true) \g /dev/null
+DO $$
+BEGIN
+  ASSERT (SELECT merchant_name FROM public.deliveries
+           WHERE id = (select ride_driver from zz450)) = 'zz449-cafe',
+    'driver lost the deliveries merchant label';
+  ASSERT (SELECT status FROM public.deliveries
+           WHERE id = (select ride_driver from zz450)) = 'accepted',
+    'driver lost the deliveries status mapping';
 END $$;
 RESET ROLE;
 

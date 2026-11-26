@@ -8,7 +8,12 @@
 #
 #   450 suite: tests/450_public_table_select_revokes_test.sql (keep-list
 #   positives; negative anon/authenticated coverage of every revoked
-#   table and column class; owner/admin write paths).
+#   table and column class; owner/admin write paths; deliveries labels).
+#
+#   negative apply: a seeded PUBLIC SELECT and an inherited-role SELECT
+#   must each abort the apply untouched. Rollback atomicity: a missing
+#   snapshot and an unrestorable snapshot row must each abort the
+#   rollback WITHOUT any mutation.
 #
 #   451 suite (regression) runs on the post-450 DB; it was made
 #   posture-independent (superuser-captured ids) for exactly this.
@@ -125,8 +130,12 @@ echo "450 OK"
 echo "== seed + equal-behavior proof (450 battery identical pre vs post)"
 psql "$URLPRE"  -X -q -v ON_ERROR_STOP=1 -f "$TESTS/449_seed.sql" >/dev/null \
   || fail_case "seed failed on pre DB"
+psql "$URLPRE"  -X -q -v ON_ERROR_STOP=1 -f "$TESTS/450_seed.sql" >/dev/null \
+  || fail_case "450 seed failed on pre DB"
 psql "$URLPOST" -X -q -v ON_ERROR_STOP=1 -f "$TESTS/449_seed.sql" >/dev/null \
   || fail_case "seed failed on post DB"
+psql "$URLPOST" -X -q -v ON_ERROR_STOP=1 -f "$TESTS/450_seed.sql" >/dev/null \
+  || fail_case "450 seed failed on post DB"
 psql "$URLPRE"  -X -q -v ON_ERROR_STOP=1 -f "$TESTS/450_battery.sql" >/tmp/zz450_bat_pre.out 2>/tmp/zz450_bat_pre.err \
   || { cat /tmp/zz450_bat_pre.err;  fail_case "450 battery failed on pre DB"; }
 psql "$URLPOST" -X -q -v ON_ERROR_STOP=1 -f "$TESTS/450_battery.sql" >/tmp/zz450_bat_post.out 2>/tmp/zz450_bat_post.err \
@@ -147,6 +156,84 @@ OUT="$(psql "$URLPOST" -X -q -v ON_ERROR_STOP=1 -f "$TESTS/451_owner_surface_fol
   || { printf '%s\n' "$OUT"; fail_case "451 suite failed after 450"; }
 echo "451 regression OK"
 
+echo "== negative apply: seeded PUBLIC SELECT must abort 450 (A0)"
+DBPUB="zz450pub_$(date +%s)_$RANDOM"
+psql "$ADMIN_URL" -X -q -c "CREATE DATABASE \"$DBPUB\" TEMPLATE \"$TEMPLATE\"" \
+  || fail_case "could not clone $TEMPLATE"
+CREATED+=("$DBPUB")
+URLPUB="$(printf '%s' "$ADMIN_URL" | sed -E "s#/[a-zA-Z0-9_\"'-]+\$#/$DBPUB#")"
+apply_chain_451 "$URLPUB"
+psql "$URLPUB" -X -q -v ON_ERROR_STOP=1 -c "GRANT SELECT ON public.merchants TO PUBLIC" \
+  || fail_case "could not seed PUBLIC SELECT"
+if psql "$URLPUB" -X -q -v ON_ERROR_STOP=1 -f "$MIG/450_public_table_select_revokes.sql" >/dev/null 2>&1; then
+  fail_case "450 applied despite a seeded PUBLIC SELECT"
+fi
+# the abort must leave the posture untouched (single transaction)
+[ "$(psql "$URLPUB" -X -q -A -t -c "SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace CROSS JOIN LATERAL aclexplode(c.relacl) x WHERE n.nspname='public' AND c.relname='merchants' AND x.grantee=0 AND x.privilege_type='SELECT'")" = "1" ] \
+  || fail_case "PUBLIC-SELECT abort mutated the posture (PUBLIC grant gone)"
+[ "$(psql "$URLPUB" -X -q -A -t -c "SELECT count(*) FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace CROSS JOIN LATERAL aclexplode(a.attacl) x WHERE n.nspname='public' AND c.relname IN ('merchants','products') AND x.privilege_type='SELECT'")" = "0" ] \
+  || fail_case "PUBLIC-SELECT abort mutated the posture (keep-list leaked)"
+[ "$(psql "$URLPUB" -X -q -A -t -c "SELECT md5(pg_get_viewdef('public.deliveries'::regclass))")" = "228af4e1fa465baf165751e3f84fb7a3" ] \
+  || fail_case "PUBLIC-SELECT abort mutated the deliveries view"
+echo "PUBLIC-SELECT refusal OK"
+
+echo "== negative apply: inherited SELECT via a parent role must abort 450 (A0)"
+DBROLE="zz450role_$(date +%s)_$RANDOM"
+psql "$ADMIN_URL" -X -q -c "CREATE DATABASE \"$DBROLE\" TEMPLATE \"$TEMPLATE\"" \
+  || fail_case "could not clone $TEMPLATE"
+CREATED+=("$DBROLE")
+URLROLE="$(printf '%s' "$ADMIN_URL" | sed -E "s#/[a-zA-Z0-9_\"'-]+\$#/$DBROLE#")"
+apply_chain_451 "$URLROLE"
+psql "$URLROLE" -X -q -v ON_ERROR_STOP=1 \
+  -c "CREATE ROLE zz450_parent NOLOGIN" \
+  -c "GRANT zz450_parent TO authenticated" \
+  -c "GRANT SELECT ON public.products TO zz450_parent" \
+  || fail_case "could not seed inherited SELECT"
+if psql "$URLROLE" -X -q -v ON_ERROR_STOP=1 -f "$MIG/450_public_table_select_revokes.sql" >/dev/null 2>&1; then
+  fail_case "450 applied despite an inherited SELECT grant"
+fi
+[ "$(psql "$URLROLE" -X -q -A -t -c "SELECT md5(pg_get_viewdef('public.deliveries'::regclass))")" = "228af4e1fa465baf165751e3f84fb7a3" ] \
+  || fail_case "inherited-SELECT abort mutated the deliveries view"
+echo "inherited-SELECT refusal OK"
+
+echo "== rollback atomicity: missing snapshot aborts WITHOUT mutating"
+DBMISS="zz450miss_$(date +%s)_$RANDOM"
+psql "$ADMIN_URL" -X -q -c "CREATE DATABASE \"$DBMISS\" TEMPLATE \"$TEMPLATE\"" \
+  || fail_case "could not clone $TEMPLATE"
+CREATED+=("$DBMISS")
+URLMISS="$(printf '%s' "$ADMIN_URL" | sed -E "s#/[a-zA-Z0-9_\"'-]+\$#/$DBMISS#")"
+apply_chain_451 "$URLMISS"
+psql "$URLMISS" -X -q -v ON_ERROR_STOP=1 -f "$MIG/450_public_table_select_revokes.sql" >/dev/null \
+  || fail_case "450 apply failed on the atomicity DB"
+psql "$URLMISS" -X -q -v ON_ERROR_STOP=1 -c "DROP TABLE public._450_revoked_grants" \
+  || fail_case "could not drop the snapshot for the atomicity case"
+if psql "$URLMISS" -X -q -v ON_ERROR_STOP=1 -f "$RB/450_public_table_select_revokes_rollback.sql" >/dev/null 2>&1; then
+  fail_case "rollback ran without a snapshot"
+fi
+# nothing may have mutated: keep-lists still present, no table-level
+# SELECT restored, rebuilt deliveries view still in place
+[ "$(psql "$URLMISS" -X -q -A -t -c "SELECT count(*) FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace CROSS JOIN LATERAL aclexplode(a.attacl) x WHERE n.nspname='public' AND c.relname IN ('merchants','products') AND a.attname='id' AND x.grantee='authenticated'::regrole AND x.privilege_type='SELECT'")" = "2" ] \
+  || fail_case "missing-snapshot rollback mutated the keep-lists"
+[ "$(psql "$URLMISS" -X -q -A -t -c "SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace CROSS JOIN LATERAL aclexplode(c.relacl) x JOIN pg_roles g ON g.oid=x.grantee WHERE n.nspname='public' AND c.relname IN ('merchants','products','service_providers') AND g.rolname IN ('anon','authenticated') AND x.privilege_type='SELECT'")" = "0" ] \
+  || fail_case "missing-snapshot rollback restored table-level SELECT"
+[ "$(psql "$URLMISS" -X -q -A -t -c "SELECT count(*) FROM pg_depend d JOIN pg_rewrite rw ON rw.oid=d.objid JOIN pg_class v ON v.oid=rw.ev_class JOIN pg_namespace vn ON vn.oid=v.relnamespace WHERE vn.nspname='public' AND v.relname='deliveries' AND d.refclassid='pg_class'::regclass AND d.refobjid='public.merchants'::regclass")" = "0" ] \
+  || fail_case "missing-snapshot rollback touched the deliveries view"
+echo "missing-snapshot atomicity OK"
+
+echo "== rollback atomicity: unrestorable snapshot row aborts WITHOUT mutating"
+psql "$URLMISS" -X -q -v ON_ERROR_STOP=1 -c \
+  "CREATE TABLE public._450_revoked_grants(tbl text NOT NULL, grantee text NOT NULL, privilege text NOT NULL, grantor text NOT NULL, grantable boolean NOT NULL)" \
+  -c "INSERT INTO public._450_revoked_grants VALUES ('merchants','anon','SELECT','zz450_no_such_role',false),('merchants','authenticated','SELECT','zz450_no_such_role',false)" \
+  || fail_case "could not seed the unrestorable snapshot"
+if psql "$URLMISS" -X -q -v ON_ERROR_STOP=1 -f "$RB/450_public_table_select_revokes_rollback.sql" >/dev/null 2>&1; then
+  fail_case "rollback ran with an unrestorable snapshot row"
+fi
+[ "$(psql "$URLMISS" -X -q -A -t -c "SELECT count(*) FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace CROSS JOIN LATERAL aclexplode(a.attacl) x WHERE n.nspname='public' AND c.relname IN ('merchants','products') AND a.attname='id' AND x.grantee='authenticated'::regrole AND x.privilege_type='SELECT'")" = "2" ] \
+  || fail_case "restore-failure rollback mutated the keep-lists"
+[ "$(psql "$URLMISS" -X -q -A -t -c "SELECT count(*) FROM public._450_revoked_grants")" = "2" ] \
+  || fail_case "restore-failure rollback dropped the snapshot"
+echo "restore-failure atomicity OK"
+
 echo "== rollback 450"
 psql "$URLPOST" -X -q -v ON_ERROR_STOP=1 -f "$RB/450_public_table_select_revokes_rollback.sql" >/dev/null \
   || fail_case "450 rollback failed"
@@ -155,6 +242,10 @@ psql "$URLPOST" -X -q -v ON_ERROR_STOP=1 -f "$RB/450_public_table_select_revokes
 [ "$(psql "$URLPOST" -X -q -A -t -c "SELECT count(*) FROM public._450_revoked_grants" 2>/dev/null)" = "" ] \
   || fail_case "rollback left the _450_revoked_grants snapshot behind"
 echo "rollback pins OK"
+
+echo "== deliveries view restored to the exact pre-image after rollback"
+[ "$(psql "$URLPOST" -X -q -A -t -c "SELECT md5(pg_get_viewdef('public.deliveries'::regclass))")" = "228af4e1fa465baf165751e3f84fb7a3" ] \
+  || fail_case "rollback did not restore the deliveries pre-image"
 
 echo "== 450 battery still matches after the rollback"
 psql "$URLPOST" -X -q -v ON_ERROR_STOP=1 -f "$TESTS/450_battery.sql" >/tmp/zz450_bat_rb.out 2>/tmp/zz450_bat_rb.err \

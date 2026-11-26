@@ -30,6 +30,61 @@ namespace Delwaqty.Pos.Core.Tests
             Assert.Equal(2, info.ExpiresAt.Value.Offset.Hours);
         }
 
+        [Theory]
+        [InlineData("123456789012")]
+        [InlineData("1234-5678-9012")]
+        [InlineData("  1234 5678 9012  ")]
+        [InlineData("1234\u20105678\u20139012")]
+        [InlineData("\u0661\u0662\u0663\u0664-\u0665\u0666\u0667\u0668-\u0669\u0660\u0661\u0662")]
+        [InlineData("\u06F1\u06F2\u06F3\u06F4\u06F5\u06F6\u06F7\u06F8\u06F9\u06F0\u06F1\u06F2")]
+        public void Short_Key_Normalizes_To_Twelve_Ascii_Digits(string typed)
+        {
+            Assert.True(LicenseKey.TryNormalize(typed, out var canonical, out var err), err);
+            Assert.Equal("123456789012", canonical);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void Empty_Key_Is_Rejected(string typed)
+        {
+            Assert.False(LicenseKey.TryNormalize(typed, out var canonical, out var err));
+            Assert.Equal("EMPTY_KEY", err);
+            Assert.Null(canonical);
+        }
+
+        [Theory]
+        [InlineData("12345678901")]
+        [InlineData("1234567890123")]
+        [InlineData("1234-5678")]
+        public void Wrong_Length_Digits_Are_Rejected(string typed)
+        {
+            Assert.False(LicenseKey.TryNormalize(typed, out var canonical, out var err));
+            Assert.Equal("BAD_SHORT_KEY_LENGTH", err);
+        }
+
+        [Fact]
+        public void Legacy_Key_Still_Accepted_And_Left_Unchanged()
+        {
+            var payload = Guid.NewGuid() + "|" + Guid.NewGuid() + "|trial|2026-12-22 03:25:12.345678+02";
+            var key = MakeKey(payload, Sig64);
+            Assert.True(LicenseKey.TryNormalize("  " + key + " ", out var canonical, out var err), err);
+            Assert.Equal(key, canonical);
+        }
+
+        [Fact]
+        public void Garbage_With_Twelve_Digits_Inside_Is_Not_A_Short_Key()
+        {
+            Assert.False(LicenseKey.TryNormalize("abc123456789012xyz", out var canonical, out var err));
+            Assert.Equal("BAD_FORMAT", err);
+        }
+
+        [Fact]
+        public void FormatShort_Groups_By_Four()
+        {
+            Assert.Equal("1234-5678-9012", LicenseKey.FormatShort("123456789012"));
+        }
+
         [Fact]
         public void Parses_Lifetime_Key()
         {

@@ -12,7 +12,7 @@ Each item names the code path it exercises and the expected result.
 
 ## 1. First run / activation
 - [ ] App starts with no config: shows the activation screen, not a crash.
-- [ ] Enter a trial key (DLWQ1.…): `SyncClient.DeviceLink` → `cashier_device_link`.
+- [ ] Enter a trial key (12 digits, 1234-5678-9012; old DLWQ1.… keys still work): `SyncClient.DeviceLink` → `cashier_device_link`.
       Expected: store name/address/phone shown, plan = trial, expiry shown.
 - [ ] Wrong key: shows "مفتاح غير معروف" (UNKNOWN_KEY), no crash, retry allowed.
 - [ ] Key already bound to another PC: shows the BOUND_TO_OTHER_DEVICE message.

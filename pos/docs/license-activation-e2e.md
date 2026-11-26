@@ -101,3 +101,13 @@ older build:
   docs/windows-proof-checklist.md item 4 for the manual verification.
 - The supported model is one dedicated Windows account per shop PC; the
   data-dir ACL grants only that account + SYSTEM + Administrators.
+
+## Short keys (migration 454)
+
+New licenses get a random 12 digit key shown as `1234-5678-9012`. The server
+looks it up (activation stays online); the client only normalizes what was
+typed (digits in any script, spaces and dashes ignored). Old `DLWQ1.` keys keep
+working and every old license also received a short code. After 10 failed key
+lookups in an hour a user gets `TOO_MANY_ATTEMPTS` for the rest of the hour.
+Short keys need a cashier build with `LicenseKey.TryNormalize` (b20 or later);
+older builds reject them in the pre-check.

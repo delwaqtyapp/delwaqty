@@ -80,10 +80,25 @@ namespace Delwaqty.Pos.Core.Sync
                 ",\"p_closing_cash\":" + closingCash.ToString(System.Globalization.CultureInfo.InvariantCulture) + "}");
         }
 
-        public Task<string> CatalogSearchOnline(string query, int limit)
+        /// <summary>PostgREST insert/update. Returns the representation when prefer is return=representation.</summary>
+        public async Task<string> RestWriteAsync(string method, string pathAndQuery, string bodyJson, string prefer)
         {
-            return RpcAsync("drug_catalog_search",
-                "{\"p_query\":" + JsonString(query) + ",\"p_limit\":" + limit + "}");
+            using (var req = new HttpRequestMessage(new HttpMethod(method), _baseUrl + "/rest/v1/" + pathAndQuery))
+            {
+                req.Headers.Add("apikey", _anonKey);
+                if (AccessToken != null)
+                    req.Headers.Authorization =
+                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AccessToken);
+                if (prefer != null) req.Headers.Add("Prefer", prefer);
+                req.Content = new StringContent(bodyJson, Encoding.UTF8, "application/json");
+                using (var res = await _http.SendAsync(req).ConfigureAwait(false))
+                {
+                    var text = await res.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    if (!res.IsSuccessStatusCode)
+                        throw new InvalidOperationException(method + " " + pathAndQuery + " failed: " + (int)res.StatusCode + " " + text);
+                    return text;
+                }
+            }
         }
 
         private static string JsonString(string s)

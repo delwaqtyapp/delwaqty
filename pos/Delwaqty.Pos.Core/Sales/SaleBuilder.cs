@@ -6,8 +6,7 @@ namespace Delwaqty.Pos.Core.Sales
 {
     public sealed class SaleLine
     {
-        public string ProductId;       // null for catalog-only drugs not in the store's products
-        public string DrugCatalogId;
+        public string ProductId;       // null for quick lines not in the store's products
         public string Name;
         public decimal Qty;
         public decimal UnitPrice;
@@ -34,8 +33,13 @@ namespace Delwaqty.Pos.Core.Sales
     /// </summary>
     public sealed class SaleBuilder
     {
+        // Must mirror the pos_sale_payments CHECK constraint exactly
+        // (migration 340, widened by 347): anything else fails server-side.
+        public static readonly IReadOnlyCollection<string> AllowedMethods =
+            new List<string> { "cash", "instapay", "vodafone_cash", "card", "deferred" };
+
         private static readonly HashSet<string> Methods =
-            new HashSet<string>(new[] { "cash", "card", "wallet", "deferred" });
+            new HashSet<string>(AllowedMethods);
 
         private readonly List<SaleLine> _lines = new List<SaleLine>();
         private readonly List<Payment> _payments = new List<Payment>();
@@ -85,6 +89,12 @@ namespace Delwaqty.Pos.Core.Sales
             }
         }
 
+        public void RemoveLineAt(int index) { _lines.RemoveAt(index); }
+
+        public void RemovePaymentAt(int index) { _payments.RemoveAt(index); }
+
+        public void ClearPayments() { _payments.Clear(); }
+
         public decimal PaidAmount
         {
             get
@@ -97,6 +107,17 @@ namespace Delwaqty.Pos.Core.Sales
         public decimal DeferredAmount
         {
             get { return Math.Round(Total - PaidAmount, 2, MidpointRounding.AwayFromZero); }
+        }
+
+        /// <summary>Reset to an empty sale (new transaction without losing settings).</summary>
+        public void Reset()
+        {
+            _lines.Clear();
+            _payments.Clear();
+            DiscountAmount = 0;
+            CustomerId = null;
+            CustomerName = null;
+            Notes = null;
         }
 
         /// <summary>Validate and auto-balance: adds a cash payment for any uncovered remainder.</summary>

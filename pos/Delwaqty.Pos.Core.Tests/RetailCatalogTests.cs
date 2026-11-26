@@ -46,7 +46,7 @@ namespace Delwaqty.Pos.Core.Tests
                 Assert.Equal("p1", hits[0].Product.Id);
                 Assert.Equal(1.0, hits[0].Score);
             }
-            finally { cache.Dispose(); File.Delete(path); }
+            finally { cache.Dispose(); Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); File.Delete(path); }
         }
 
         [Fact]
@@ -60,7 +60,7 @@ namespace Delwaqty.Pos.Core.Tests
                 Assert.NotEmpty(hits);
                 Assert.Equal("p1", hits[0].Product.Id);
             }
-            finally { cache.Dispose(); File.Delete(path); }
+            finally { cache.Dispose(); Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); File.Delete(path); }
         }
 
         [Fact]
@@ -74,7 +74,7 @@ namespace Delwaqty.Pos.Core.Tests
                 Assert.NotEmpty(hits);
                 Assert.Equal("p4", hits[0].Product.Id);
             }
-            finally { cache.Dispose(); File.Delete(path); }
+            finally { cache.Dispose(); Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); File.Delete(path); }
         }
 
         [Fact]
@@ -105,7 +105,7 @@ namespace Delwaqty.Pos.Core.Tests
                 Assert.Equal(2, cache.Count());
                 Assert.Equal(45m, cache.ById("a").Price);
             }
-            finally { cache.Dispose(); File.Delete(path); }
+            finally { cache.Dispose(); Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); File.Delete(path); }
         }
 
         [Fact]
@@ -122,7 +122,7 @@ namespace Delwaqty.Pos.Core.Tests
                 Assert.Equal(0, s.Customers);
                 Assert.Null(s.OpenShiftId);
             }
-            finally { cache.Dispose(); File.Delete(path); }
+            finally { cache.Dispose(); Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); File.Delete(path); }
         }
     }
 }

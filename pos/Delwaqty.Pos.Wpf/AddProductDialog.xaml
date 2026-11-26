@@ -1,0 +1,24 @@
+<Window x:Class="Delwaqty.Pos.Wpf.AddProductDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="إضافة صنف" Height="480" Width="460" FlowDirection="RightToLeft"
+        WindowStartupLocation="CenterOwner" FontSize="16">
+    <StackPanel Margin="16">
+        <TextBlock Text="الاسم بالعربي:"/>
+        <TextBox x:Name="NameArBox" Padding="8" Margin="0,2,0,8"/>
+        <TextBlock Text="الاسم بالإنجليزي (اختياري):"/>
+        <TextBox x:Name="NameEnBox" Padding="8" Margin="0,2,0,8" FlowDirection="LeftToRight"/>
+        <TextBlock Text="السعر:"/>
+        <TextBox x:Name="PriceBox" Padding="8" Margin="0,2,0,8"/>
+        <TextBlock Text="الرصيد الافتتاحي (الكمية):"/>
+        <TextBox x:Name="StockBox" Padding="8" Margin="0,2,0,8" Text="0"/>
+        <TextBlock Text="الباركود (اختياري):"/>
+        <TextBox x:Name="BarcodeBox" Padding="8" Margin="0,2,0,8" FlowDirection="LeftToRight"/>
+        <TextBlock Text="إضافة صنف جديد تحتاج اتصالاً بالإنترنت. البيع السريع بدون تسجيل صنف متاح دائماً."
+                   Foreground="#777" TextWrapping="Wrap" Margin="0,4"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,12,0,0">
+            <Button Content="إلغاء" Padding="16,8" Margin="8,0,0,0" Click="Cancel_Click"/>
+            <Button Content="حفظ الصنف" Padding="16,8" Background="#2E7D32" Foreground="White" Click="Save_Click"/>
+        </StackPanel>
+    </StackPanel>
+</Window>

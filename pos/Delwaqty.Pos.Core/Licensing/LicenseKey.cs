@@ -111,7 +111,7 @@ namespace Delwaqty.Pos.Core.Licensing
         {
             if (string.IsNullOrEmpty(expectedSealHex)) return false;
             var actual = Seal(statePayload, deviceKey);
-            return string.Equals(actual, expectedSealHex.ToLowerInvariant(), StringComparison.Ordinal);
+            return FixedTimeEqualsHex(actual, expectedSealHex.ToLowerInvariant());
         }
 
         public static string StatePayload(LicenseInfo info, string deviceId, DateTimeOffset validatedAtUtc)
@@ -119,6 +119,42 @@ namespace Delwaqty.Pos.Core.Licensing
             var exp = info.ExpiresAt.HasValue ? info.ExpiresAt.Value.UtcDateTime.ToString("o") : "lifetime";
             return info.Id + "|" + info.MerchantId + "|" + info.Plan + "|" + exp + "|" +
                    deviceId + "|" + validatedAtUtc.UtcDateTime.ToString("o");
+        }
+
+        // ---- v2: the WHOLE serialized activation state is sealed (review
+        // #115). v1 covered only a subset of fields, so Pro/ExpiresAt/
+        // MerchantId in the stored StateJson were forgeable by anyone who
+        // could read the device key. v2 binds the exact stored JSON to the
+        // device identity; any byte changed invalidates the seal.
+        public const string SealV2Prefix = "DELWQ-SEAL-v2";
+
+        public static string SealState(string stateJson, string deviceId, byte[] deviceKey)
+        {
+            using (var h = new HMACSHA256(deviceKey))
+            {
+                var input = SealV2Prefix + "|" + (deviceId ?? "") + "|" + (stateJson ?? "");
+                return ToHex(h.ComputeHash(Encoding.UTF8.GetBytes(input)));
+            }
+        }
+
+        public static bool VerifyState(string stateJson, string deviceId, string expectedSealHex, byte[] deviceKey)
+        {
+            if (string.IsNullOrEmpty(expectedSealHex)) return false;
+            var actual = SealState(stateJson, deviceId, deviceKey);
+            return FixedTimeEqualsHex(actual, expectedSealHex.ToLowerInvariant());
+        }
+
+        /// <summary>
+        /// Constant-time hex comparison (security review LOW-2): no early
+        /// exit on the first differing character, so the compare does not
+        /// leak how much of a forged seal was right.
+        /// </summary>
+        private static bool FixedTimeEqualsHex(string a, string b)
+        {
+            if (a == null || b == null || a.Length != b.Length) return false;
+            var diff = 0;
+            for (var i = 0; i < a.Length; i++) diff |= a[i] ^ b[i];
+            return diff == 0;
         }
 
         private static string ToHex(byte[] bytes)

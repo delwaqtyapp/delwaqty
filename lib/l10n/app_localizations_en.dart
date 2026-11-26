@@ -8712,4 +8712,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cashierLicenseIssue => 'Issue';
+
+  @override
+  String get cashierLicenseStatusIssued => 'Issued, not activated';
+
+  @override
+  String get cashierLicenseStatusActive => 'Active';
+
+  @override
+  String get cashierLicenseStatusExpired => 'Expired';
+
+  @override
+  String get cashierLicenseStatusSuspended => 'Suspended';
 }

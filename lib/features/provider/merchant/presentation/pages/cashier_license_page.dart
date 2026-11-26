@@ -47,6 +47,10 @@ const cashierPaidPlans = <String>[
   'core_lifetime',
 ];
 
+/// A lifetime plan never expires, so a day count is meaningless for it and is
+/// never sent (the server would otherwise accept 1..400 and make it expire).
+bool planTakesDays(String plan) => plan != 'core_lifetime';
+
 final cashierLicensesProvider = FutureProvider.autoDispose
     .family<List<Map<String, dynamic>>, String>((ref, merchantId) async {
       final data = await Supabase.instance.client
@@ -125,6 +129,14 @@ class _CashierLicensePageState extends ConsumerState<CashierLicensePage> {
       CashierLicenseError.other => l10n.cashierLicenseIssueFailed,
     };
   }
+
+  String _statusLabel(AppLocalizations l10n, String status) => switch (status) {
+    'issued' => l10n.cashierLicenseStatusIssued,
+    'active' => l10n.cashierLicenseStatusActive,
+    'expired' => l10n.cashierLicenseStatusExpired,
+    'suspended' => l10n.cashierLicenseStatusSuspended,
+    _ => status,
+  };
 
   String _planLabel(AppLocalizations l10n, String plan) => switch (plan) {
     'trial' => l10n.cashierLicensePlanTrial,
@@ -217,15 +229,21 @@ class _CashierLicensePageState extends ConsumerState<CashierLicensePage> {
                 ],
                 onChanged: (v) => setLocal(() => plan = v ?? plan),
               ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: daysController,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: InputDecoration(
-                  labelText: l10n.cashierLicenseDaysOptional,
+              if (!planTakesDays(plan)) ...[
+                const SizedBox(height: 12),
+                Text(l10n.cashierLicenseNeverExpires),
+              ],
+              if (planTakesDays(plan)) ...[
+                const SizedBox(height: 12),
+                TextField(
+                  controller: daysController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: InputDecoration(
+                    labelText: l10n.cashierLicenseDaysOptional,
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
           actions: [
@@ -241,7 +259,9 @@ class _CashierLicensePageState extends ConsumerState<CashierLicensePage> {
         ),
       ),
     );
-    final days = int.tryParse(daysController.text.trim());
+    final days = planTakesDays(plan)
+        ? int.tryParse(daysController.text.trim())
+        : null;
     daysController.dispose();
     if (go == true && mounted) await _issue(plan, days: days);
   }
@@ -294,7 +314,7 @@ class _CashierLicensePageState extends ConsumerState<CashierLicensePage> {
                         ),
                         subtitle: Text(
                           '${_planLabel(l10n, r['plan'] as String? ?? '')}'
-                          ' - ${r['status']}'
+                          ' - ${_statusLabel(l10n, r['status'] as String? ?? '')}'
                           ' - ${_expiry(l10n, r['expires_at'] as String?)}',
                         ),
                         trailing: IconButton(

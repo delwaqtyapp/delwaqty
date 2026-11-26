@@ -3050,5 +3050,9 @@
   "cashierLicensePlanAnnual": "سنوي",
   "cashierLicensePlanLifetime": "مدى الحياة",
   "cashierLicenseOpen": "ترخيص الكاشير",
-  "cashierLicenseIssue": "إصدار"
+  "cashierLicenseIssue": "إصدار",
+  "cashierLicenseStatusIssued": "صادر، لم يتم تفعيله",
+  "cashierLicenseStatusActive": "نشط",
+  "cashierLicenseStatusExpired": "منتهي",
+  "cashierLicenseStatusSuspended": "موقوف"
 }

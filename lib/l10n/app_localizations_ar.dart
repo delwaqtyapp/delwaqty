@@ -8636,4 +8636,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cashierLicenseIssue => 'إصدار';
+
+  @override
+  String get cashierLicenseStatusIssued => 'صادر، لم يتم تفعيله';
+
+  @override
+  String get cashierLicenseStatusActive => 'نشط';
+
+  @override
+  String get cashierLicenseStatusExpired => 'منتهي';
+
+  @override
+  String get cashierLicenseStatusSuspended => 'موقوف';
 }

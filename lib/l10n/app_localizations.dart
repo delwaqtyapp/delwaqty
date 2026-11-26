@@ -16459,6 +16459,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Issue'**
   String get cashierLicenseIssue;
+
+  /// No description provided for @cashierLicenseStatusIssued.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued, not activated'**
+  String get cashierLicenseStatusIssued;
+
+  /// No description provided for @cashierLicenseStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get cashierLicenseStatusActive;
+
+  /// No description provided for @cashierLicenseStatusExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get cashierLicenseStatusExpired;
+
+  /// No description provided for @cashierLicenseStatusSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get cashierLicenseStatusSuspended;
 }
 
 class _AppLocalizationsDelegate

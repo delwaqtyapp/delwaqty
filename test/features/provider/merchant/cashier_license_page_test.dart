@@ -46,4 +46,10 @@ void main() {
       'core_lifetime',
     ]);
   });
+
+  test('lifetime takes no day count, other paid plans do', () {
+    expect(planTakesDays('core_lifetime'), isFalse);
+    expect(planTakesDays('core_monthly'), isTrue);
+    expect(planTakesDays('core_annual'), isTrue);
+  });
 }

@@ -3135,5 +3135,9 @@
   "cashierLicensePlanAnnual": "Annual",
   "cashierLicensePlanLifetime": "Lifetime",
   "cashierLicenseOpen": "Cashier license",
-  "cashierLicenseIssue": "Issue"
+  "cashierLicenseIssue": "Issue",
+  "cashierLicenseStatusIssued": "Issued, not activated",
+  "cashierLicenseStatusActive": "Active",
+  "cashierLicenseStatusExpired": "Expired",
+  "cashierLicenseStatusSuspended": "Suspended"
 }

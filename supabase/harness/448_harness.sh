@@ -129,9 +129,9 @@ LEFT="$(psql "$URL" -X -q -A -t -c \
 echo "anon sweep OK (0 write-class grants left; sweeps in /tmp/zz448_grants_{before,after}.txt)"
 
 echo "== anon wildcard merchants read still works (guest browse)"
-N="$(psql "$URL" -X -q -A -t -c "SET ROLE anon; SET LOCAL request.jwt.claims='{}'; SELECT count(*) FROM public.merchants")" \
-  || fail_case "anon wildcard SELECT on merchants broke in 448"
-echo "anon merchants wildcard read OK ($N rows visible through RLS)"
+psql "$URL" -X -q -A -t -c "SET ROLE anon; SET LOCAL request.jwt.claims='{}'; SELECT m.* FROM public.merchants m LIMIT 1" >/dev/null \
+  || fail_case "anon wildcard SELECT m.* on merchants broke in 448"
+echo "anon merchants wildcard read (SELECT m.*) OK"
 
 echo "== 447 suite (regression)"
 OUT="$(psql "$URL" -X -q -v ON_ERROR_STOP=1 -f "$SUITE447" 2>&1)" \

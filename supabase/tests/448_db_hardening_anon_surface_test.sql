@@ -103,28 +103,46 @@ END $$;
 -- ─── 3. owner write path through RLS + audit trigger ─────────────────────
 SET LOCAL ROLE authenticated;
 DO $$
+DECLARE
+  v_first timestamptz;
+  v_second timestamptz;
 BEGIN
   PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT owner FROM zz448))::text, true);
+  -- real first opt-in: INSERT with the gate ON, no prior row
   INSERT INTO public.merchant_staff_settings (merchant_id, settings)
-  VALUES ((SELECT shop FROM zz448), '{"cashier_custom_lines": false}'::jsonb);
+  VALUES ((SELECT shop FROM zz448), '{"cashier_custom_lines": true}'::jsonb);
+  SELECT updated_at INTO v_first FROM public.merchant_staff_settings
+   WHERE merchant_id = (SELECT shop FROM zz448);
+  PERFORM pg_sleep(0.05);
   UPDATE public.merchant_staff_settings
      SET settings = '{"cashier_custom_lines": true}'::jsonb
    WHERE merchant_id = (SELECT shop FROM zz448);
   ASSERT FOUND, 'owner update through RLS did not land';
+  SELECT updated_at INTO v_second FROM public.merchant_staff_settings
+   WHERE merchant_id = (SELECT shop FROM zz448);
+  ASSERT v_second > v_first, 'updated_at did not advance on update';
 END $$;
 RESET ROLE;
 
 DO $$
 DECLARE
-  v_payload jsonb;
+  v_insert_payload jsonb;
+  v_update_payload jsonb;
 BEGIN
-  SELECT detail INTO v_payload FROM public.merchant_staff_events
+  -- the FIRST INSERT ({} -> true) is audited with old NULL
+  SELECT detail INTO v_insert_payload FROM public.merchant_staff_events
    WHERE kind = 'staff_settings_changed'
      AND merchant_id = (SELECT shop FROM zz448)
-   ORDER BY created_at DESC LIMIT 1;
-  ASSERT v_payload IS NOT NULL, 'audit event missing for staff_settings change';
-  ASSERT v_payload -> 'new' ->> 'cashier_custom_lines' = 'true',
-    'audit payload wrong: ' || v_payload::text;
+     AND detail -> 'old' = 'null'::jsonb
+   ORDER BY created_at ASC LIMIT 1;
+  ASSERT v_insert_payload IS NOT NULL, 'first opt-in INSERT was not audited';
+  ASSERT v_insert_payload -> 'new' ->> 'cashier_custom_lines' = 'true',
+    'insert audit payload wrong: ' || v_insert_payload::text;
+  -- the later no-change UPDATE (true -> true) adds no event
+  ASSERT (SELECT count(*) FROM public.merchant_staff_events
+          WHERE kind = 'staff_settings_changed'
+            AND merchant_id = (SELECT shop FROM zz448)) = 1,
+    'no-change update should not be audited';
 END $$;
 
 -- ─── 4. customer (non-owner) cannot read or write it ─────────────────────
@@ -207,9 +225,10 @@ DECLARE
   v_row record;
 BEGIN
   PERFORM set_config('request.jwt.claims', '{}', true);
-  -- guest merchant browse (installed customer app wildcard-selects this)
-  SELECT count(*) INTO v_n FROM public.merchants WHERE status = 'active';
-  ASSERT v_n >= 1, 'anon merchant browse broke';
+  -- guest merchant browse: the installed customer app wildcard-selects,
+  -- so prove SELECT m.* itself works as anon (not just count(*))
+  SELECT m.* INTO v_row FROM public.merchants m WHERE status = 'active' LIMIT 1;
+  ASSERT v_row.id IS NOT NULL, 'anon merchant wildcard read broke';
   -- guest provider browse through the definer view
   SELECT count(*) INTO v_n FROM public.service_providers_with_effective_pricing;
   ASSERT v_n >= 1, 'anon provider view read broke';
@@ -251,6 +270,42 @@ BEGIN
   END;
 END $$;
 RESET ROLE;
+
+-- ─── 7b. owner sees own UNAVAILABLE row; nobody else does ───────────────
+UPDATE public.service_providers SET is_available = false
+ WHERE id = (SELECT provider FROM zz448);
+
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE
+  v_n int;
+BEGIN
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT provider_user FROM zz448))::text, true);
+  SELECT count(*) INTO v_n FROM public.service_providers_with_effective_pricing
+   WHERE id = (SELECT provider FROM zz448);
+  ASSERT v_n = 1, 'owner lost their unavailable provider row';
+
+  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', (SELECT customer FROM zz448))::text, true);
+  SELECT count(*) INTO v_n FROM public.service_providers_with_effective_pricing
+   WHERE id = (SELECT provider FROM zz448);
+  ASSERT v_n = 0, 'other user saw an unavailable provider';
+END $$;
+RESET ROLE;
+
+SET LOCAL ROLE anon;
+DO $$
+DECLARE
+  v_n int;
+BEGIN
+  PERFORM set_config('request.jwt.claims', '{}', true);
+  SELECT count(*) INTO v_n FROM public.service_providers_with_effective_pricing
+   WHERE id = (SELECT provider FROM zz448);
+  ASSERT v_n = 0, 'anon saw an unavailable provider';
+END $$;
+RESET ROLE;
+
+UPDATE public.service_providers SET is_available = true
+ WHERE id = (SELECT provider FROM zz448);
 
 -- ─── 8. authenticated trims on service_providers ──────────────────────────
 SET LOCAL ROLE authenticated;

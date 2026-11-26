@@ -156,6 +156,17 @@ SECURITY DEFINER
 SET search_path TO 'public', 'pg_temp'
 AS $function$
 BEGIN
+  -- INSERT: the first opt-in matters as much as a flip; old is NULL.
+  -- An INSERT of the default '{}' changes no setting and is not audited.
+  IF TG_OP = 'INSERT' THEN
+    IF NEW.settings IS DISTINCT FROM '{}'::jsonb THEN
+      INSERT INTO public.merchant_staff_events (staff_id, merchant_id, kind, detail, actor_id)
+      VALUES (NULL, NEW.merchant_id, 'staff_settings_changed',
+              jsonb_build_object('old', NULL, 'new', NEW.settings),
+              auth.uid());
+    END IF;
+    RETURN NEW;
+  END IF;
   IF NEW.settings IS DISTINCT FROM OLD.settings THEN
     INSERT INTO public.merchant_staff_events (staff_id, merchant_id, kind, detail, actor_id)
     VALUES (NULL, NEW.merchant_id, 'staff_settings_changed',
@@ -168,8 +179,27 @@ $function$;
 REVOKE ALL ON FUNCTION public._audit_staff_settings_change() FROM PUBLIC, anon, authenticated;
 
 CREATE TRIGGER merchant_staff_settings_audit
-  AFTER UPDATE OF settings ON public.merchant_staff_settings
+  AFTER INSERT OR UPDATE OF settings ON public.merchant_staff_settings
   FOR EACH ROW EXECUTE FUNCTION public._audit_staff_settings_change();
+
+-- updated_at advances on every update.
+CREATE FUNCTION public._merchant_staff_settings_touch()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path TO 'public', 'pg_temp'
+AS $function$
+BEGIN
+  -- clock_timestamp(), not now(): now() is transaction-start time, so a
+  -- same-transaction update would leave updated_at untouched.
+  NEW.updated_at := clock_timestamp();
+  RETURN NEW;
+END;
+$function$;
+REVOKE ALL ON FUNCTION public._merchant_staff_settings_touch() FROM PUBLIC, anon, authenticated;
+
+CREATE TRIGGER trg_merchant_staff_settings_touch
+  BEFORE UPDATE ON public.merchant_staff_settings
+  FOR EACH ROW EXECUTE FUNCTION public._merchant_staff_settings_touch();
 
 -- Old triggers and the column leave merchants.
 DROP TRIGGER IF EXISTS trg_merchants_staff_settings_shape ON public.merchants;
@@ -754,7 +784,8 @@ REVOKE ALL ON public.products FROM anon;
 -- the public surface (decision: main agent under the owner's delegation,
 -- 2026-11-26; exact server-side distance RPC is 449 scope). The
 -- is_available = true filter is baked in because a definer view bypasses
--- the base table's RLS.
+-- the base table's RLS; the owner branch (sp.user_id = auth.uid()) keeps
+-- the provider app's servicesFor() working on their own unavailable row.
 DROP VIEW public.service_providers_with_effective_pricing;
 CREATE VIEW public.service_providers_with_effective_pricing AS
 SELECT sp.id, sp.name, sp.category_type, sp.description,
@@ -774,7 +805,8 @@ SELECT sp.id, sp.name, sp.category_type, sp.description,
   CROSS JOIN LATERAL (
     SELECT public.service_provider_effective_pricing(sp.id) AS p
   ) eff
- WHERE sp.is_available = true;
+ WHERE sp.is_available = true
+    OR sp.user_id = auth.uid();  -- owner keeps seeing their own row when unavailable
 GRANT SELECT ON public.service_providers_with_effective_pricing TO anon;
 GRANT SELECT ON public.service_providers_with_effective_pricing TO authenticated;
 

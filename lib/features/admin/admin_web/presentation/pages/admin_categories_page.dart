@@ -12,7 +12,7 @@ import 'package:delwaqty/features/admin/presentation/widgets/admin_page_header.d
 import 'package:delwaqty/features/admin/presentation/widgets/admin_states.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:delwaqty/core/auth/platform_capabilities.dart' show isOwnerByRole;
+import 'package:delwaqty/core/auth/platform_capabilities.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 

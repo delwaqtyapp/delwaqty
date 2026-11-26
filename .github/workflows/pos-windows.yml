@@ -1,52 +1,243 @@
-name: POS Windows cashier (experimental)
-# Builds the WPF cashier (Delwaqty.Pos.Wpf, Pharmacy flavor) from the
-# work/pos-cashier branch WITHOUT committing to that branch, and attaches the
-# zipped build to the rolling 'development' release as
-# delwaqty-cashier-windows-EXPERIMENTAL.zip. Manual dispatch only: the branch
-# is pre-merge and its Windows runtime proof is still outstanding, so this is
-# an experimental artifact for a first real run on the owner's machine.
+name: POS Windows cashier (shops and restaurants)
+# Windows cashier (Delwaqty.Pos.Wpf, shop/restaurant build, no pharmacy).
+# Two entry points:
+#  - pull_request touching pos/**: Pos.Core unit tests plus a Windows build of
+#    the WPF app. Nothing is published.
+#  - workflow_dispatch on master: builds the cashier from master, runs the
+#    tests, the tour-marker scan and screenshots, compiles the installers.
+#    Publishing is OPT-IN (publish=true): only then are the zip and the two
+#    installers attached to the rolling 'development' release. Validation
+#    runs leave the release untouched.
+# Cashier assets are immutable, build-numbered files. This workflow never
+# touches versions.json (the Flutter update manifest) and the cashier has no
+# in-app update: a new build is installed by hand over the old one.
+# Not usable end to end until the Windows proof checklist
+# (pos/docs/windows-proof-checklist.md) has been run once by a person on a
+# real PC with TEST data.
 #
-# Security split (#148): the job that touches the selected ref's code has no
-# write token and no persisted git credentials; the job that holds
-# contents:write never checks out or executes source - it only moves a
-# fixed-name artifact to the release.
+# Security split: the job that builds code has no write token and no
+# persisted git credentials; the job that holds contents:write never builds
+# or executes built code. It runs the fail-closed publisher
+# (tool/publish_cashier.py) from the master commit that started this run
+# (github.sha, refs/heads/master only) and the artifacts are bound to the
+# build by build-provenance.json (run id + resolved build sha).
 on:
+  pull_request:
+    paths:
+      - 'pos/**'
+      - '.github/workflows/pos-windows.yml'
+      - 'tool/publish_cashier.py'
+      - 'tool/test_publish_cashier.py'
   workflow_dispatch:
     inputs:
-      ref:
-        description: 'Ref to build the cashier from'
-        required: true
-        default: 'work/pos-cashier'
-        type: string
+      publish:
+        description: 'Attach the cashier ZIP and installers to the rolling development release. Default false: build + screenshot validation only, the release is not touched.'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
 
+# Cashier publishes and Flutter publishes share one serialization lock so
+# they never interleave on the development release. Queue, never cancel.
+# PR runs use their own group and never wait for a publisher.
+concurrency:
+  group: ${{ github.event_name == 'workflow_dispatch' && 'delwaqty-development-publisher' || format('pos-pr-{0}', github.ref) }}
+  cancel-in-progress: false
+
 jobs:
-  build-cashier:
+  pr-check:
+    if: ${{ github.event_name == 'pull_request' }}
     runs-on: windows-latest
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          ref: ${{ inputs.ref }}
+          persist-credentials: false
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Unit tests (Pos.Core)
+        run: dotnet test pos/Delwaqty.Pos.Core.Tests/Delwaqty.Pos.Core.Tests.csproj -c Release --nologo
+      - name: Build the WPF cashier (net8.0-windows)
+        run: dotnet build pos/Delwaqty.Pos.Wpf/Delwaqty.Pos.Wpf.csproj -c Release -f net8.0-windows --nologo
+      - name: Build the WPF cashier (net48)
+        run: dotnet build pos/Delwaqty.Pos.Wpf/Delwaqty.Pos.Wpf.csproj -c Release -f net48 --nologo
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Cashier publisher regression tests
+        run: python3 -m unittest discover -s tool -p "test_publish_cashier.py"
+
+  build-cashier:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    outputs:
+      build_sha: ${{ steps.resolve.outputs.sha }}
+    steps:
+      - id: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
           persist-credentials: false
 
-      - uses: actions/setup-dotnet@v4
+      - name: Resolve the build commit
+        id: resolve
+        shell: pwsh
+        run: |
+          "sha=$(git rev-parse HEAD)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with:
           dotnet-version: '8.0.x'
 
       - name: Unit tests (Pos.Core)
         run: dotnet test pos/Delwaqty.Pos.Core.Tests/Delwaqty.Pos.Core.Tests.csproj -c Release --nologo
 
-      - name: Publish Pharmacy cashier (net8.0-windows, win-x64)
+      - name: Publish shop cashier (net8.0-windows, win-x64, self-contained)
         run: >-
           dotnet publish pos/Delwaqty.Pos.Wpf/Delwaqty.Pos.Wpf.csproj
           -c Release -f net8.0-windows -r win-x64 --self-contained true
-          -p:PosFlavor=Pharmacy -o publish/pharmacy --nologo
+          -o publish/shop-net8 --nologo
 
-      - name: Add first-run README and zip
+      - name: Publish shop cashier (net48, Win7 SP1 fallback)
+        run: >-
+          dotnet publish pos/Delwaqty.Pos.Wpf/Delwaqty.Pos.Wpf.csproj
+          -c Release -f net48
+          -o publish/shop-net48 --nologo
+
+      - name: Checkout the same commit again for the tour build
+        # First real run (45381504825) proved -p:BaseIntermediateOutputPath
+        # cannot separate intermediates: MSBuild applies it to the Core project
+        # reference too, so the shipped build's stale obj/*.cs got globbed into
+        # the tour compile (CS0518/CS0234). A pristine second checkout gives
+        # the tour build its own untouched obj/bin tree instead.
+        # #204: pinned to the exact commit the first checkout resolved (never
+        # the movable trigger ref), and it must not persist the job token into
+        # a tree that runs source code.
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: tour-src
+          ref: ${{ steps.checkout.outputs.commit }}
+          persist-credentials: false
+
+      - name: Assert both checkouts resolved the same commit
+        shell: pwsh
+        run: |
+          $a = (git rev-parse HEAD)
+          $b = (git -C tour-src rev-parse HEAD)
+          if ($a -ne $b) { throw "checkout mismatch: $a vs $b" }
+          "both trees at $a"
+
+      - name: Publish screenshot-tour build (CI instrumentation, never shipped)
+        # Compiles the SAME commit with SCREENSHOT_TOUR defined from the
+        # pristine second checkout, so not a single intermediate is shared
+        # with the shipped publish. Only the tour output dir runs on the
+        # runner; the fail-closed scan below proves the shipped binaries
+        # carry no tour marker.
+        run: >-
+          dotnet publish tour-src/pos/Delwaqty.Pos.Wpf/Delwaqty.Pos.Wpf.csproj
+          -c Release -f net8.0-windows -r win-x64 --self-contained true
+          -p:DefineConstants="SCREENSHOT_TOUR%3BTRACE%3BRELEASE"
+          -o publish/tour-net8 --nologo
+
+      - name: Prove the shipped builds contain no tour code (#202/#203 fail-closed)
+        shell: pwsh
+        run: |
+          $utf16 = [System.Text.Encoding]::Unicode
+          $ascii = [System.Text.Encoding]::ASCII
+          function Test-Markers([string]$path, [string[]]$markers) {
+            $bytes = [System.IO.File]::ReadAllBytes((Join-Path $PWD $path))
+            # .NET #US literals are UTF-16 and can sit at ODD byte offsets, so
+            # scan from offsets 0 and 1; metadata member names are ASCII.
+            $views = @(
+              $utf16.GetString($bytes, 0, $bytes.Length),
+              $utf16.GetString($bytes, 1, $bytes.Length - 1),
+              $ascii.GetString($bytes)
+            )
+            foreach ($m in $markers) { foreach ($v in $views) { if ($v.Contains($m)) { return $true } } }
+            return $false
+          }
+          $markers = @("DELWAQTY_SCREENSHOT_TOUR", "SCREENSHOT-TOUR", "UseSyntheticScopeForTour")
+          $shipped = @(
+            "publish\shop-net8\DelwaqtyShopPos.dll",
+            "publish\shop-net8\Delwaqty.Pos.Core.dll",
+            "publish\shop-net48\DelwaqtyShopPos.exe",
+            "publish\shop-net48\Delwaqty.Pos.Core.dll"
+          )
+          foreach ($dll in $shipped) {
+            if (Test-Markers $dll $markers) { throw "tour marker found in shipped binary: $dll" }
+          }
+          # Positive control: the same scan MUST find the markers in the tour
+          # build, or the scan is blind and the clean result proves nothing.
+          if (-not (Test-Markers "publish\tour-net8\DelwaqtyShopPos.dll" @("DELWAQTY_SCREENSHOT_TOUR", "SCREENSHOT-TOUR"))) {
+            throw "scan blind: tour WPF payload has no tour marker"
+          }
+          if (-not (Test-Markers "publish\tour-net8\Delwaqty.Pos.Core.dll" @("UseSyntheticScopeForTour"))) {
+            throw "scan blind: tour Core assembly has no test-only init path"
+          }
+          "shipped binaries clean of tour markers; positive control passed"
+
+      - name: Capture the activation window (normal build, first run)
+        shell: pwsh
+        run: |
+          try { Set-DisplayResolution -Width 1920 -Height 1080 -Force } catch { "display resolution unchanged: $($_.Exception.Message)" }
+          New-Item -ItemType Directory -Force screenshots | Out-Null
+          Add-Type -AssemblyName System.Windows.Forms
+          Add-Type -AssemblyName System.Drawing
+          $proc = Start-Process (Join-Path $PWD "publish\shop-net8\DelwaqtyShopPos.exe") -PassThru
+          $deadline = (Get-Date).AddSeconds(60)
+          while ($proc.MainWindowHandle -eq 0 -and (Get-Date) -lt $deadline) { Start-Sleep -Milliseconds 500; $proc.Refresh() }
+          if ($proc.HasExited -or $proc.MainWindowHandle -eq 0) { throw "activation window never appeared" }
+          Start-Sleep -Seconds 3
+          $bounds = [System.Windows.Forms.SystemInformation]::VirtualScreen
+          $bmp = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height
+          $g = [System.Drawing.Graphics]::FromImage($bmp)
+          $g.CopyFromScreen($bounds.Left, $bounds.Top, 0, 0, $bmp.Size)
+          $bmp.Save((Join-Path $PWD "screenshots\window-activation.png"), [System.Drawing.Imaging.ImageFormat]::Png)
+          $g.Dispose(); $bmp.Dispose()
+          $proc.Kill()
+
+      - name: Capture every tab and dialog (tour build, marker-synchronized)
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.Windows.Forms
+          Add-Type -AssemblyName System.Drawing
+          $env:DELWAQTY_SCREENSHOT_TOUR = "1"
+          # Unique per-run marker dir so a retry can never mistake stale
+          # ready/ack files from a previous attempt for this run's state.
+          $env:DELWAQTY_TOUR_DIR = Join-Path $PWD ("tour-markers-" + $env:GITHUB_RUN_ID + "-" + $env:GITHUB_RUN_ATTEMPT)
+          New-Item -ItemType Directory -Force $env:DELWAQTY_TOUR_DIR | Out-Null
+          $proc = Start-Process (Join-Path $PWD "publish\tour-net8\DelwaqtyShopPos.exe") -PassThru
+          $bounds = [System.Windows.Forms.SystemInformation]::VirtualScreen
+          $slugs = @("tab-sales","tab-inventory","tab-customers","tab-shifts","tab-settings","dialog-payment","dialog-addproduct","dialog-receipt")
+          foreach ($slug in $slugs) {
+            $ready = Join-Path $env:DELWAQTY_TOUR_DIR "ready-$slug"
+            $deadline = (Get-Date).AddSeconds(60)
+            while (-not (Test-Path $ready) -and (Get-Date) -lt $deadline) {
+              if ($proc.HasExited) { throw "tour app exited before $slug" }
+              Start-Sleep -Milliseconds 500
+            }
+            if (-not (Test-Path $ready)) { throw "timeout waiting for ready-$slug" }
+            $proc.Refresh()
+            if ($proc.HasExited -or $proc.MainWindowHandle -eq 0 -or [string]::IsNullOrEmpty($proc.MainWindowTitle)) { throw "tour window not alive at $slug" }
+            Start-Sleep -Milliseconds 700
+            $bmp = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height
+            $g = [System.Drawing.Graphics]::FromImage($bmp)
+            $g.CopyFromScreen($bounds.Left, $bounds.Top, 0, 0, $bmp.Size)
+            $bmp.Save((Join-Path $PWD "screenshots\$slug.png"), [System.Drawing.Imaging.ImageFormat]::Png)
+            $g.Dispose(); $bmp.Dispose()
+            "captured: $slug.png <- $(Get-Content $ready -Raw)"
+            New-Item -ItemType File -Force (Join-Path $env:DELWAQTY_TOUR_DIR "ack-$slug") | Out-Null
+          }
+          $proc.Kill()
+          $count = (Get-ChildItem screenshots\*.png).Count
+          if ($count -lt 9) { throw "expected at least 9 screenshots, got $count" }
+
+      - name: Add first-run README and zip the net8 build
         shell: pwsh
         run: |
           $sha = (git rev-parse HEAD)
@@ -54,7 +245,7 @@ jobs:
           Delwaqty Cashier (Windows) - EXPERIMENTAL FIRST-RUN BUILD
           ==========================================================
           Built from commit: $sha
-          This is the first Windows build of the Delwaqty pharmacy cashier.
+          This is the first Windows build of the Delwaqty shop cashier.
           It compiles and passes its unit tests, but it has NOT yet completed
           the manual Windows proof checklist.
 
@@ -64,33 +255,109 @@ jobs:
             in the repo (cross-user protection, copy-to-another-PC,
             uninstall/reinstall recovery) and report anything unexpected.
 
-          Start: DelwaqtyPharmacyPos.exe
-          Data dir: C:\ProgramData\Delwaqty\Pos
-          "@ | Out-File -Encoding utf8 publish/pharmacy/README-FIRST-RUN.txt
-          Compress-Archive -Path publish/pharmacy/* -DestinationPath delwaqty-cashier-windows-EXPERIMENTAL.zip
+          Start: DelwaqtyShopPos.exe
+          Data dir: C:\ProgramData\DelwaqtyPos
+          "@ | Out-File -Encoding utf8 publish/shop-net8/README-FIRST-RUN.txt
+          Compress-Archive -Path publish/shop-net8/* -DestinationPath delwaqty-cashier-windows-b${{ github.run_number }}.zip
 
-      - name: Hand off the zip as a workflow artifact
-        uses: actions/upload-artifact@v4
+      - name: Download the .NET Framework 4.8 web bootstrapper
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force artifacts | Out-Null
+          Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/?linkid=2088631" -OutFile artifacts/ndp48-web.exe
+          # The bootstrapper ships inside the net48 installer: it must be a
+          # validly Microsoft-signed binary, not whatever the CDN handed us.
+          $sig = Get-AuthenticodeSignature artifacts/ndp48-web.exe
+          if ($sig.Status -ne 'Valid') { throw "ndp48-web.exe signature invalid: $($sig.Status)" }
+          if ($sig.SignerCertificate.Subject -notmatch 'Microsoft') { throw "ndp48-web.exe unexpected signer: $($sig.SignerCertificate.Subject)" }
+          "bootstrapper signed by: $($sig.SignerCertificate.Subject)"
+
+      - name: Install Inno Setup 6
+        run: choco install innosetup --version=6.7.1 --no-progress -y
+
+      - name: Compile installers
+        shell: pwsh
+        run: |
+          # #195: the .iss resolves every path macro relative to its own
+          # directory, so pass ABSOLUTE paths for payload, bootstrapper and
+          # output, then assert the exact files the upload step expects.
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\iscc.exe"
+          $out = "$PWD\installer-output"
+          & $iscc "/DSourceDir=$PWD\publish\shop-net8" "/DOutputDir=$out" "/DOutputBase=delwaqty-cashier-setup-net8-b${{ github.run_number }}" pos\installer\delwaqty.iss
+          if ($LASTEXITCODE -ne 0) { throw "iscc net8 failed: $LASTEXITCODE" }
+          & $iscc "/DSourceDir=$PWD\publish\shop-net48" "/DNet48Bootstrapper=$PWD\artifacts\ndp48-web.exe" "/DOutputDir=$out" "/DOutputBase=delwaqty-cashier-setup-net48-b${{ github.run_number }}" pos\installer\delwaqty.iss
+          if ($LASTEXITCODE -ne 0) { throw "iscc net48 failed: $LASTEXITCODE" }
+          $expect = @(
+            "$out\delwaqty-cashier-setup-net8-b${{ github.run_number }}.exe",
+            "$out\delwaqty-cashier-setup-net48-b${{ github.run_number }}.exe"
+          )
+          foreach ($f in $expect) {
+            if (-not (Test-Path $f)) { throw "expected installer missing: $f" }
+          }
+          $expect | ForEach-Object { "built: $_" }
+          # Bind the payload to this run and commit for the publish job's
+          # provenance check.
+          @{ run_id = "${{ github.run_id }}"; run_number = ${{ github.run_number }}; sha = "${{ steps.resolve.outputs.sha }}" } |
+            ConvertTo-Json | Out-File -Encoding utf8 build-provenance.json
+
+      - name: Hand off the zip and installers as workflow artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: delwaqty-cashier-windows-EXPERIMENTAL
-          path: delwaqty-cashier-windows-EXPERIMENTAL.zip
+          name: delwaqty-cashier-windows-b${{ github.run_number }}
+          path: |
+            delwaqty-cashier-windows-b${{ github.run_number }}.zip
+            installer-output/delwaqty-cashier-setup-net8-b${{ github.run_number }}.exe
+            installer-output/delwaqty-cashier-setup-net48-b${{ github.run_number }}.exe
+            build-provenance.json
+            screenshots/*.png
           if-no-files-found: error
           retention-days: 7
 
   publish-cashier:
+    # Opt-in only: validation/screenshot dispatches (publish unset or false)
+    # must never touch the public release. Serialized against the Flutter
+    # publisher by the shared workflow concurrency group above.
+    if: ${{ github.event.inputs.publish == 'true' }}
     needs: build-cashier
     runs-on: ubuntu-latest
     permissions:
-      contents: write # gh release upload only; no source checkout here
+      contents: write # gh release upload only
     steps:
-      - name: Download the fixed-name artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: delwaqty-cashier-windows-EXPERIMENTAL
+      - name: Refuse to publish from anywhere but master
+        run: |
+          if [ "${{ github.ref }}" != "refs/heads/master" ]; then
+            echo "The cashier publisher only runs from the default branch."
+            exit 1
+          fi
 
-      - name: Attach to the development release
+      # The publisher code is the master commit that started this run.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Publisher regression tests
+        run: python3 -m unittest discover -s tool -p "test_publish_*.py"
+
+      - name: Download the versioned build artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: delwaqty-cashier-windows-b${{ github.run_number }}
+
+      - name: Publish the zip and installers (fail-closed)
+        # tool/publish_cashier.py: validates build provenance (this run id +
+        # the build job commit), uploads the immutable build-numbered zip and
+        # installers (never clobbering), and hash-proves each upload. It does
+        # not read or write versions.json.
         env:
           GH_TOKEN: ${{ github.token }}
+          BUILD_SHA: ${{ needs.build-cashier.outputs.build_sha }}
         run: >-
-          gh release upload development delwaqty-cashier-windows-EXPERIMENTAL.zip
-          --clobber -R delwaqtyapp/delwaqty
+          python3 tool/publish_cashier.py ${{ github.run_number }}
+          delwaqty-cashier-windows-b${{ github.run_number }}.zip
+          installer-output/delwaqty-cashier-setup-net8-b${{ github.run_number }}.exe
+          installer-output/delwaqty-cashier-setup-net48-b${{ github.run_number }}.exe

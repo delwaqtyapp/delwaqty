@@ -5,8 +5,8 @@
 ; CI builds both; the download site picks by Windows version.
 ;
 ; Build (Inno Setup 6):
-;   iscc /DSourceDir=publish\shop-net8 /DOutputBase=delwaqty-cashier-setup-net8-EXPERIMENTAL pos\installer\delwaqty.iss
-;   iscc /DSourceDir=publish\shop-net48 /DNet48Bootstrapper=artifacts\ndp48-web.exe /DOutputBase=delwaqty-cashier-setup-net48-EXPERIMENTAL pos\installer\delwaqty.iss
+;   iscc /DSourceDir=publish\shop-net8 /DOutputBase=delwaqty-cashier-setup-net8-b1 pos\installer\delwaqty.iss
+;   iscc /DSourceDir=publish\shop-net48 /DNet48Bootstrapper=artifacts\ndp48-web.exe /DOutputBase=delwaqty-cashier-setup-net48-b1 pos\installer\delwaqty.iss
 
 ; Path macros (SourceDir, Net48Bootstrapper, OutputDir) are resolved
 ; RELATIVE TO THIS SCRIPT'S DIRECTORY when passed relative - callers must
@@ -71,7 +71,7 @@ Name: "{commondesktop}\Delwaqty POS"; Filename: "{app}\DelwaqtyShopPos.exe"; Tas
 ; Install .NET Framework 4.8 only when the machine lacks it (Release >= 528040).
 Filename: "{tmp}\ndp48-web.exe"; Parameters: "/q /norestart"; Check: Not Net48Installed; StatusMsg: "Installing .NET Framework 4.8..."
 #endif
-Filename: "{app}\DelwaqtyShopPos.exe"; Description: "Run Delwaqty POS"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\DelwaqtyShopPos.exe"; Description: "Run Delwaqty POS"; Flags: nowait postinstall skipifsilent runasoriginaluser
 
 [Code]
 function Net48Installed: Boolean;

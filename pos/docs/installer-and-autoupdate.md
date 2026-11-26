@@ -1,5 +1,10 @@
 # Installer and auto-update path — Delwaqty POS
 
+> STATUS: design notes only. The in-app auto-update (OTA) is NOT part of the
+> current cashier release. A new build is installed by hand over the old one
+> (same installer, the data folder is kept). Release assets are build-numbered
+> files on the development release; the cashier never touches versions.json.
+
 Constraints from the market: weak shop PCs, some still on Windows 7, metered
 connections, no IT staff. The install and update path must be one file, one
 click, and resumable.

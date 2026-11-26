@@ -263,33 +263,37 @@ class AdminRepository implements admin.AdminRepository {
       final sortedMerchants = merchantRevenue.entries.toList()
         ..sort((a, b) => b.value.compareTo(a.value));
 
-      final topMerchants = <Map<String, dynamic>>[];
-      for (final entry in sortedMerchants.take(limit)) {
-        try {
-          final merchantData = await _supabase
-              .from('merchants')
-              .select('id, name, email, phone')
-              .eq('id', entry.key)
-              .maybeSingle();
+      final topEntries = sortedMerchants.take(limit).toList();
+      // 449 app switch: one admin-gated definer RPC replaces the per-row
+      // table selects (base-table SELECT is 450 territory). Merchants the
+      // caller may not see come back as the 'Unknown' fallback, same as the
+      // old per-row catch.
+      final contactRows = topEntries.isEmpty
+          ? const <dynamic>[]
+          : await _supabase.rpc(
+              'admin_get_merchant_contacts',
+              params: {
+                'p_merchant_ids': topEntries.map((e) => e.key).toList(),
+              },
+            ) as List;
+      final contactsById = <String, Map<String, dynamic>>{
+        for (final raw in contactRows)
+          (raw as Map<String, dynamic>)['id'] as String:
+              Map<String, dynamic>.from(raw),
+      };
 
-          topMerchants.add({
-            'merchant_id': entry.key,
-            'name': merchantData?['name'] ?? 'Unknown',
-            'email': merchantData?['email'],
-            'phone': merchantData?['phone'],
-            'total_revenue': entry.value,
-            'total_deliveries': merchantTrips[entry.key] ?? 0,
-            'currency': 'ج.م',
-          });
-        } catch (_) {
-          topMerchants.add({
-            'merchant_id': entry.key,
-            'name': 'Unknown',
-            'total_revenue': entry.value,
-            'total_deliveries': merchantTrips[entry.key] ?? 0,
-            'currency': 'ج.م',
-          });
-        }
+      final topMerchants = <Map<String, dynamic>>[];
+      for (final entry in topEntries) {
+        final merchantData = contactsById[entry.key];
+        topMerchants.add({
+          'merchant_id': entry.key,
+          'name': merchantData?['name'] ?? 'Unknown',
+          'email': merchantData?['email'],
+          'phone': merchantData?['phone'],
+          'total_revenue': entry.value,
+          'total_deliveries': merchantTrips[entry.key] ?? 0,
+          'currency': 'ج.م',
+        });
       }
 
       return topMerchants;
@@ -556,11 +560,12 @@ class AdminRepository implements admin.AdminRepository {
     String merchantId,
   ) async {
     try {
-      final response = await _supabase
-          .from('products')
-          .select()
-          .eq('merchant_id', merchantId)
-          .order('created_at', ascending: false);
+      // 449 app switch: admin reads the catalog through the definer RPC
+      // (base-table SELECT is 450 territory; same shape and ordering).
+      final response = await _supabase.rpc(
+        'admin_get_merchant_products',
+        params: {'p_merchant_id': merchantId},
+      );
       return List<Map<String, dynamic>>.from(response as List);
     } catch (e) {
       throw AdminException('Failed to fetch merchant products: $e');

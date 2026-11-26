@@ -75,17 +75,25 @@ final merchantStockProvider =
           .from('product_inventory')
           .select(
             'product_id, stock_quantity, reserved_quantity, low_stock_threshold, '
-            'is_in_stock, products(name, price, is_available, image_url)',
+            'is_in_stock',
           )
           .eq('merchant_id', merchantId)
           .order('stock_quantity', ascending: true);
 
+      // 449 app switch: the owner reads their own full product rows through
+      // the definer RPC (base-table SELECT is 450 territory); the inventory
+      // rows join client-side by product_id instead of a PostgREST embed.
+      final productsList = await client.rpc(
+        'get_my_products',
+        params: {'p_merchant_id': merchantId},
+      ) as List;
+      final productsById = <String, Map<String, dynamic>>{
+        for (final raw in productsList)
+          (raw as Map<String, dynamic>)['id'] as String:
+              Map<String, dynamic>.from(raw),
+      };
+
       if ((res as List).isEmpty) {
-        final productsRes = await client
-            .from('products')
-            .select('id, name, price, is_available, image_url, stock_quantity')
-            .eq('merchant_id', merchantId);
-        final productsList = productsRes as List;
         if (productsList.isNotEmpty) {
           final initialRows = productsList.map((raw) {
             final p = raw as Map<String, dynamic>;
@@ -108,7 +116,7 @@ final merchantStockProvider =
                 .from('product_inventory')
                 .select(
                   'product_id, stock_quantity, reserved_quantity, low_stock_threshold, '
-                  'is_in_stock, products(name, price, is_available, image_url)',
+                  'is_in_stock',
                 )
                 .eq('merchant_id', merchantId)
                 .order('stock_quantity', ascending: true);
@@ -135,8 +143,7 @@ final merchantStockProvider =
 
       return (res as List).map((row) {
         final map = row as Map<String, dynamic>;
-        final product = map['products'];
-        final p = product is Map ? product : const <String, dynamic>{};
+        final p = productsById[map['product_id']] ?? const <String, dynamic>{};
         final stock = (map['stock_quantity'] as num?)?.toInt() ?? 0;
         return MerchantStockItem(
           productId: map['product_id'] as String,

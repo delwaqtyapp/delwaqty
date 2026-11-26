@@ -124,25 +124,18 @@ final providerRawCategoryProvider = FutureProvider<String>((ref) async {
 
   if (await isOwnerByRole(client, uid)) return 'owner';
 
-  String? merchantId;
   try {
-    final resolved = await client.rpc('resolve_my_merchant');
-    if (resolved is String && resolved.isNotEmpty) {
-      merchantId = resolved;
-    }
+    // Kept for its side effect: provisions a pending owner's merchant row.
+    await client.rpc('resolve_my_merchant');
   } catch (_) {}
 
-  final merchant = merchantId != null
-      ? await client
-            .from('merchants')
-            .select('type')
-            .eq('id', merchantId)
-            .maybeSingle()
-      : await client
-            .from('merchants')
-            .select('type')
-            .or('id.eq.$uid,owner_user_id.eq.$uid')
-            .maybeSingle();
+  // 449 app switch: the owner reads their own merchant row through the
+  // definer RPC (base-table SELECT is 450 territory). The RPC covers both
+  // shapes above: the resolved merchant and the legacy id = uid row. For a
+  // multi-merchant owner whose active category points past the first-created
+  // merchant, the RPC returns the first-created row (449 design).
+  final res = await client.rpc('get_my_merchant_profile');
+  final merchant = res == null ? null : Map<String, dynamic>.from(res as Map);
   if (merchant != null && merchant['type'] is String) {
     return merchant['type'] as String;
   }

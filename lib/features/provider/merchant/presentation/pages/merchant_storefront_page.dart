@@ -97,18 +97,11 @@ class WorkingHoursDay {
 
 final storefrontProvider = FutureProvider<StorefrontData>((ref) async {
   final client = ref.watch(supabaseClientProvider);
-  final merchantId = await ref.watch(providerMerchantIdProvider.future);
-  if (merchantId.isEmpty) return const StorefrontData();
-  final row = await client
-      .from('merchants')
-      .select(
-        'id, name, type, description, logo_url, cover_url, phone, address, '
-        'latitude, longitude, delivery_fee, min_order, delivery_time_min',
-      )
-      .eq('id', merchantId)
-      .maybeSingle();
+  // 449 app switch: the owner reads their own full row through the definer
+  // RPC (base-table SELECT is 450 territory).
+  final row = await client.rpc('get_my_merchant_profile');
   if (row == null) return const StorefrontData();
-  return StorefrontData.fromRow(row);
+  return StorefrontData.fromRow(Map<String, dynamic>.from(row as Map));
 });
 
 final workingHoursProvider = FutureProvider<List<WorkingHoursDay>>((ref) async {

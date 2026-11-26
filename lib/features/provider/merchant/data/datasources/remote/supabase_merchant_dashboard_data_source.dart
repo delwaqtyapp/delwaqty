@@ -100,10 +100,13 @@ class SupabaseMerchantDashboardDataSource {
         (sum, o) => sum + ((o['total_amount'] as num?)?.toDouble() ?? 0),
       );
 
-      final totalProducts = await _client
-          .from('products')
-          .count()
-          .eq('merchant_id', merchantId);
+      // 449 app switch: count comes from the definer RPC rows (base-table
+      // SELECT is 450 territory).
+      final productRows = await _client.rpc(
+        'get_my_products',
+        params: {'p_merchant_id': merchantId},
+      ) as List;
+      final totalProducts = productRows.length;
 
       final totalReviews = await _client
           .from('reviews')
@@ -249,11 +252,13 @@ class SupabaseMerchantDashboardDataSource {
       return const [];
     }
     try {
-      final data = await _client
-          .from('products')
-          .select()
-          .eq('merchant_id', merchantId)
-          .order('created_at', ascending: false);
+      // 449 app switch: the owner reads their own full rows through the
+      // definer RPC (base-table SELECT is 450 territory; same shape and
+      // created_at-desc ordering).
+      final data = await _client.rpc(
+        'get_my_products',
+        params: {'p_merchant_id': merchantId},
+      );
       return (data as List<dynamic>)
           .map((r) => Map<String, dynamic>.from(r as Map))
           .toList();

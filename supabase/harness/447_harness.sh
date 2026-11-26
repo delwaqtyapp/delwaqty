@@ -26,7 +26,7 @@ SUITE447="$HERE/../tests/447_pos_sanity_caps_test.sql"
 TEMPLATE="h435_template"
 WALKIN_SIG="public.staff_create_walk_in_sale(jsonb, jsonb, uuid, numeric, uuid, uuid, text)"
 PRE_MD5="0a9dbbdf895874107de9a754f7d4d3c2"
-POST_MD5="10033f4d3c26b3ce646fd3d4ef34347a"
+POST_MD5="c081f5c008cc826e5454b54949a10751"
 
 ADMIN_URL="${1:?usage: 447_harness.sh <admin-db-url>}"
 

@@ -4,9 +4,14 @@
 --   catalog_line_qty_cap (default 10000) and the whole sale total <= the
 --   flag-readable sale_total_cap (default 1000000). Both live in
 --   platform_settings.feature_flags, so the owner can tune them without a
---   migration; the defaults only stop absurd values.
+--   migration; the defaults only stop absurd values. Valid cap range is
+--   POSITIVE numbers only: a zero, negative or non-numeric flag value is
+--   treated as unset and the default applies (a 0 cap would refuse every
+--   sale).
 -- LOW2: the custom-line label had no length limit (5000 chars accepted).
 --   Now refused above 120 characters.
+-- Plus (security non-blocking, same head): p_items line count is capped
+-- at 200, so a single request cannot carry an unbounded work list.
 -- Scope: staff_create_walk_in_sale only. Open question for reviewers,
 --   flagged in the PR body: the customer order path (migration 234 pricing
 --   helper) has its own validation and is NOT changed here.
@@ -151,6 +156,10 @@ BEGIN
   IF p_items IS NULL OR jsonb_typeof(p_items) <> 'array' OR jsonb_array_length(p_items) = 0 THEN
     RAISE EXCEPTION 'items required';
   END IF;
+  -- 447 (security batch 2, non-blocking): bound the request size itself.
+  IF jsonb_array_length(p_items) > 200 THEN
+    RAISE EXCEPTION 'too many lines (max 200)';
+  END IF;
 
   -- Shift + serialization (#267): the shared per-staff advisory lock
   -- (#252/S7) and the open-shift derivation run BEFORE line validation,
@@ -181,11 +190,14 @@ BEGIN
   -- 447: flag-readable sanity caps, read once per sale (security LOW batch
   -- 2): catalog line qty and the sale total. Defaults only stop absurd
   -- values; the owner can tune them via feature_flags without a migration.
+  -- Positive-only flags: 0/negative/garbage falls back to the default.
   v_catalog_qty_cap := coalesce(
-    (SELECT public._num_or_null(feature_flags ->> 'catalog_line_qty_cap')
+    (SELECT CASE WHEN public._num_or_null(feature_flags ->> 'catalog_line_qty_cap') > 0
+                 THEN public._num_or_null(feature_flags ->> 'catalog_line_qty_cap') END
        FROM public.platform_settings WHERE id = 'default'), 10000);
   v_sale_total_cap := coalesce(
-    (SELECT public._num_or_null(feature_flags ->> 'sale_total_cap')
+    (SELECT CASE WHEN public._num_or_null(feature_flags ->> 'sale_total_cap') > 0
+                 THEN public._num_or_null(feature_flags ->> 'sale_total_cap') END
        FROM public.platform_settings WHERE id = 'default'), 1000000);
 
   FOR v_item IN SELECT value FROM jsonb_array_elements(p_items) LOOP

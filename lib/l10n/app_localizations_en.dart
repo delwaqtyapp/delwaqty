@@ -8634,4 +8634,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get merchantGuideOpenTooltip => 'How to add products';
+
+  @override
+  String get cashierLicenseTitle => 'Cashier license';
+
+  @override
+  String get cashierLicenseStartTrial => 'Start 30-day free trial';
+
+  @override
+  String get cashierLicenseIssuePaid => 'Issue a paid license';
+
+  @override
+  String get cashierLicenseYourKey => 'License key';
+
+  @override
+  String get cashierLicenseKeyHint =>
+      'Enter this code in the Delwaqty Cashier app. Keep it private.';
+
+  @override
+  String get cashierLicenseCopy => 'Copy code';
+
+  @override
+  String get cashierLicenseCopied => 'Code copied';
+
+  @override
+  String get cashierLicenseNone => 'No license yet';
+
+  @override
+  String get cashierLicenseDaysOptional => 'Days (optional)';
+
+  @override
+  String get cashierLicenseTrialUsed =>
+      'The free trial was already used for this shop.';
+
+  @override
+  String get cashierLicenseAdminOnly => 'Paid licenses are issued by an admin.';
+
+  @override
+  String get cashierLicenseNotAllowed =>
+      'You are not allowed to issue a license for this shop.';
+
+  @override
+  String get cashierLicenseIssueFailed =>
+      'Could not issue the license. Try again.';
+
+  @override
+  String get cashierLicenseInvalidDays => 'Days must be between 1 and 400.';
+
+  @override
+  String get cashierLicenseNeverExpires => 'Never expires';
+
+  @override
+  String cashierLicenseExpiresOn(String date) {
+    return 'Expires $date';
+  }
+
+  @override
+  String get cashierLicensePlanTrial => 'Free trial';
+
+  @override
+  String get cashierLicensePlanMonthly => 'Monthly';
+
+  @override
+  String get cashierLicensePlanQuarterly => 'Quarterly';
+
+  @override
+  String get cashierLicensePlanSemiannual => 'Six months';
+
+  @override
+  String get cashierLicensePlanAnnual => 'Annual';
+
+  @override
+  String get cashierLicensePlanLifetime => 'Lifetime';
+
+  @override
+  String get cashierLicenseOpen => 'Cashier license';
+
+  @override
+  String get cashierLicenseIssue => 'Issue';
+
+  @override
+  String get cashierLicenseStatusIssued => 'Issued, not activated';
+
+  @override
+  String get cashierLicenseStatusActive => 'Active';
+
+  @override
+  String get cashierLicenseStatusExpired => 'Expired';
+
+  @override
+  String get cashierLicenseStatusSuspended => 'Suspended';
 }

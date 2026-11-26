@@ -8559,4 +8559,93 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get merchantGuideOpenTooltip => 'إزاي تضيف منتج';
+
+  @override
+  String get cashierLicenseTitle => 'ترخيص الكاشير';
+
+  @override
+  String get cashierLicenseStartTrial => 'ابدأ تجربة مجانية لمدة 30 يوماً';
+
+  @override
+  String get cashierLicenseIssuePaid => 'إصدار ترخيص مدفوع';
+
+  @override
+  String get cashierLicenseYourKey => 'مفتاح الترخيص';
+
+  @override
+  String get cashierLicenseKeyHint =>
+      'أدخل هذا الرمز في تطبيق دلوقتي كاشير. حافظ على سريته.';
+
+  @override
+  String get cashierLicenseCopy => 'نسخ الرمز';
+
+  @override
+  String get cashierLicenseCopied => 'تم نسخ الرمز';
+
+  @override
+  String get cashierLicenseNone => 'لا يوجد ترخيص بعد';
+
+  @override
+  String get cashierLicenseDaysOptional => 'عدد الأيام (اختياري)';
+
+  @override
+  String get cashierLicenseTrialUsed =>
+      'تم استخدام التجربة المجانية لهذا المتجر من قبل.';
+
+  @override
+  String get cashierLicenseAdminOnly => 'التراخيص المدفوعة يصدرها المشرف.';
+
+  @override
+  String get cashierLicenseNotAllowed =>
+      'غير مسموح لك بإصدار ترخيص لهذا المتجر.';
+
+  @override
+  String get cashierLicenseIssueFailed => 'تعذر إصدار الترخيص. حاول مرة أخرى.';
+
+  @override
+  String get cashierLicenseInvalidDays => 'يجب أن يكون عدد الأيام بين 1 و400.';
+
+  @override
+  String get cashierLicenseNeverExpires => 'لا ينتهي';
+
+  @override
+  String cashierLicenseExpiresOn(String date) {
+    return 'ينتهي في $date';
+  }
+
+  @override
+  String get cashierLicensePlanTrial => 'تجربة مجانية';
+
+  @override
+  String get cashierLicensePlanMonthly => 'شهري';
+
+  @override
+  String get cashierLicensePlanQuarterly => 'ربع سنوي';
+
+  @override
+  String get cashierLicensePlanSemiannual => 'ستة أشهر';
+
+  @override
+  String get cashierLicensePlanAnnual => 'سنوي';
+
+  @override
+  String get cashierLicensePlanLifetime => 'مدى الحياة';
+
+  @override
+  String get cashierLicenseOpen => 'ترخيص الكاشير';
+
+  @override
+  String get cashierLicenseIssue => 'إصدار';
+
+  @override
+  String get cashierLicenseStatusIssued => 'صادر، لم يتم تفعيله';
+
+  @override
+  String get cashierLicenseStatusActive => 'نشط';
+
+  @override
+  String get cashierLicenseStatusExpired => 'منتهي';
+
+  @override
+  String get cashierLicenseStatusSuspended => 'موقوف';
 }

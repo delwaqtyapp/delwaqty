@@ -16315,6 +16315,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'How to add products'**
   String get merchantGuideOpenTooltip;
+
+  /// No description provided for @cashierLicenseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashier license'**
+  String get cashierLicenseTitle;
+
+  /// No description provided for @cashierLicenseStartTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Start 30-day free trial'**
+  String get cashierLicenseStartTrial;
+
+  /// No description provided for @cashierLicenseIssuePaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue a paid license'**
+  String get cashierLicenseIssuePaid;
+
+  /// No description provided for @cashierLicenseYourKey.
+  ///
+  /// In en, this message translates to:
+  /// **'License key'**
+  String get cashierLicenseYourKey;
+
+  /// No description provided for @cashierLicenseKeyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter this code in the Delwaqty Cashier app. Keep it private.'**
+  String get cashierLicenseKeyHint;
+
+  /// No description provided for @cashierLicenseCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy code'**
+  String get cashierLicenseCopy;
+
+  /// No description provided for @cashierLicenseCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Code copied'**
+  String get cashierLicenseCopied;
+
+  /// No description provided for @cashierLicenseNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No license yet'**
+  String get cashierLicenseNone;
+
+  /// No description provided for @cashierLicenseDaysOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Days (optional)'**
+  String get cashierLicenseDaysOptional;
+
+  /// No description provided for @cashierLicenseTrialUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'The free trial was already used for this shop.'**
+  String get cashierLicenseTrialUsed;
+
+  /// No description provided for @cashierLicenseAdminOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid licenses are issued by an admin.'**
+  String get cashierLicenseAdminOnly;
+
+  /// No description provided for @cashierLicenseNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not allowed to issue a license for this shop.'**
+  String get cashierLicenseNotAllowed;
+
+  /// No description provided for @cashierLicenseIssueFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not issue the license. Try again.'**
+  String get cashierLicenseIssueFailed;
+
+  /// No description provided for @cashierLicenseInvalidDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Days must be between 1 and 400.'**
+  String get cashierLicenseInvalidDays;
+
+  /// No description provided for @cashierLicenseNeverExpires.
+  ///
+  /// In en, this message translates to:
+  /// **'Never expires'**
+  String get cashierLicenseNeverExpires;
+
+  /// No description provided for @cashierLicenseExpiresOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires {date}'**
+  String cashierLicenseExpiresOn(String date);
+
+  /// No description provided for @cashierLicensePlanTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Free trial'**
+  String get cashierLicensePlanTrial;
+
+  /// No description provided for @cashierLicensePlanMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get cashierLicensePlanMonthly;
+
+  /// No description provided for @cashierLicensePlanQuarterly.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarterly'**
+  String get cashierLicensePlanQuarterly;
+
+  /// No description provided for @cashierLicensePlanSemiannual.
+  ///
+  /// In en, this message translates to:
+  /// **'Six months'**
+  String get cashierLicensePlanSemiannual;
+
+  /// No description provided for @cashierLicensePlanAnnual.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual'**
+  String get cashierLicensePlanAnnual;
+
+  /// No description provided for @cashierLicensePlanLifetime.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifetime'**
+  String get cashierLicensePlanLifetime;
+
+  /// No description provided for @cashierLicenseOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashier license'**
+  String get cashierLicenseOpen;
+
+  /// No description provided for @cashierLicenseIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue'**
+  String get cashierLicenseIssue;
+
+  /// No description provided for @cashierLicenseStatusIssued.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued, not activated'**
+  String get cashierLicenseStatusIssued;
+
+  /// No description provided for @cashierLicenseStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get cashierLicenseStatusActive;
+
+  /// No description provided for @cashierLicenseStatusExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get cashierLicenseStatusExpired;
+
+  /// No description provided for @cashierLicenseStatusSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get cashierLicenseStatusSuspended;
 }
 
 class _AppLocalizationsDelegate

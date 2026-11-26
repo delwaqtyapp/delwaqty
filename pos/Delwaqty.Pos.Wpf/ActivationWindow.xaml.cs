@@ -41,7 +41,8 @@ namespace Delwaqty.Pos.Wpf
             ActivateButton.Content = "جاري التفعيل...";
             try
             {
-                var http = new System.Net.Http.HttpClient();
+                // 20 s, not the 100 s default: a bad network must not freeze the button.
+                var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(20) };
                 var auth = new AuthClient(PosConfig.SupabaseUrl, PosConfig.SupabaseAnonKey, http);
                 var sync = new SyncClient(PosConfig.SupabaseUrl, PosConfig.SupabaseAnonKey, http);
                 var result = await _activation.ActivateAsync(auth, sync, email, password, key,
@@ -82,7 +83,9 @@ namespace Delwaqty.Pos.Wpf
                 case "LEGACY_DATA_NEEDS_REPAIR":
                     return "توجد بيانات قديمة غير متزامنة لا يمكن التحقق من التاجر المالك لها. تواصل مع الدعم لترحيلها قبل التفعيل — بياناتك محفوظة ولم يُمسّ أي ملف.";
                 case "NETWORK": return "تعذر الاتصال بالخادم. تأكد من الإنترنت وحاول مرة أخرى.";
-                default: return "تعذر التفعيل (" + reason + ")" + (detail != null ? ": " + detail : "");
+                default:
+                    System.Diagnostics.Debug.WriteLine("activation: " + reason + " " + detail);
+                    return "تعذر التفعيل. حاول مرة أخرى، وإن تكرر تواصل مع الدعم (" + (reason ?? "?") + ").";
             }
         }
     }

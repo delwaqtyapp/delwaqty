@@ -15,6 +15,10 @@ namespace Delwaqty.Pos.Wpf
     {
         protected override void OnStartup(StartupEventArgs e)
         {
+#if NET48
+            // Windows 7 / old .NET Framework: HTTPS to Supabase needs TLS 1.2 enabled explicitly.
+            System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls12;
+#endif
             base.OnStartup(e);
 #if SCREENSHOT_TOUR
             // CI screenshot instrumentation - compiled ONLY into the dedicated
@@ -113,7 +117,7 @@ namespace Delwaqty.Pos.Wpf
             {
                 string refresh, email;
                 if (!activation.TryLoadRefreshToken(out refresh, out email)) return;
-                var http = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
+                var http = new HttpClient { Timeout = TimeSpan.FromSeconds(4) }; // runs before any window: keep an offline start short
                 var auth = new AuthClient(PosConfig.SupabaseUrl, PosConfig.SupabaseAnonKey, http);
                 var sync = new SyncClient(PosConfig.SupabaseUrl, PosConfig.SupabaseAnonKey, http);
                 var session = auth.Refresh(refresh).GetAwaiter().GetResult();

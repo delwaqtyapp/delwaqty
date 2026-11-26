@@ -38,6 +38,7 @@ namespace Delwaqty.Pos.Wpf
 
         private readonly ActivationService _activation;
         private readonly ActivationState _state;
+        private readonly HashSet<string> _loggedFailures = new HashSet<string>();
         private readonly string _dataDir;   // the merchant+flavor scope dir (#116)
 
         private readonly HttpClientFactory _http = new HttpClientFactory();
@@ -614,6 +615,7 @@ namespace Delwaqty.Pos.Wpf
                 }
 
                 var flush = await _engine.FlushAsync();
+                SyncFailureReport.Append(_dataDir, flush.Failures, DateTimeOffset.UtcNow, _loggedFailures);
                 if (flush.RepricedLines > 0 || flush.ClientPricedLines > 0)
                     StatusText.Text = "السيرفر حدّث " + flush.RepricedLines + " سعراً؛ " +
                         flush.ClientPricedLines + " صنفاً بسعرك (قيد المراجعة)";
@@ -646,7 +648,8 @@ namespace Delwaqty.Pos.Wpf
                 }
                 SyncDetailText.Text = "آخر مزامنة: " + DateTime.Now.ToString("HH:mm:ss") +
                     " — أصناف: " + summary.Products + "، عملاء: " + summary.Customers +
-                    (flush.Failures.Count > 0 ? "\nعمليات فشلت: " + flush.Failures.Count : "") +
+                    (flush.Failures.Count > 0 ? "\nعمليات فشلت: " + flush.Failures.Count + "\n" +
+                        SyncFailureReport.Summarize(flush.Failures, 3) : "") +
                     (flush.Blocked > 0 ? "\nعمليات تنتظر اكتمال المزامنة: " + flush.Blocked : "");
             }
             catch (Exception)
@@ -665,6 +668,7 @@ namespace Delwaqty.Pos.Wpf
             if (_session != null && !_session.IsExpired(DateTimeOffset.UtcNow))
             {
                 _sync.AccessToken = _session.AccessToken;
+                ReloginButton.Visibility = Visibility.Collapsed;
                 return true;
             }
             string refresh, email;
@@ -674,11 +678,13 @@ namespace Delwaqty.Pos.Wpf
                 _session = await _auth.Refresh(refresh);
                 _activation.SaveRefreshToken(_session.RefreshToken, _session.Email ?? email);
                 _sync.AccessToken = _session.AccessToken;
+                ReloginButton.Visibility = Visibility.Collapsed;
                 return true;
             }
             catch
             {
                 _session = null;
+                ReloginButton.Visibility = Visibility.Visible;
                 StatusText.Text = "انتهت الجلسة — البيع يستمر، والرفع ينتظر تسجيل الدخول مرة أخرى";
                 return false;
             }
@@ -707,6 +713,21 @@ namespace Delwaqty.Pos.Wpf
                 planAr += days >= 0 ? " (" + days + " يوم)" : " (منتهي - فترة سماح)";
             }
             LicenseBadge.Text = planAr;
+        }
+
+        private async void Relogin_Click(object sender, RoutedEventArgs e)
+        {
+            string refresh, email;
+            _activation.TryLoadRefreshToken(out refresh, out email);
+            var dlg = new SignInAgainDialog(_auth, email) { Owner = this };
+            if (dlg.ShowDialog() == true && dlg.Session != null)
+            {
+                _session = dlg.Session;
+                _activation.SaveRefreshToken(_session.RefreshToken, _session.Email ?? email);
+                _sync.AccessToken = _session.AccessToken;
+                ReloginButton.Visibility = Visibility.Collapsed;
+                await SyncNow();
+            }
         }
 
         private async void SyncNow_Click(object sender, RoutedEventArgs e)

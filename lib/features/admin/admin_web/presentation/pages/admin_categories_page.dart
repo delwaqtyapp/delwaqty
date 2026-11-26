@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -10,10 +11,30 @@ import 'package:delwaqty/features/customer/home/domain/repositories/platform_cat
 import 'package:delwaqty/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:delwaqty/features/admin/presentation/widgets/admin_states.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
-import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
-import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/core/auth/platform_capabilities.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
+
+/// Owner flag for the web admin. The web entrypoint never starts the auth
+/// notifier, so this reads users.role for the current session, the same source
+/// AdminWebGate uses. Override in tests.
+final adminWebIsOwnerProvider = FutureProvider.autoDispose<bool>((ref) {
+  final client = Supabase.instance.client;
+  return resolveAdminWebOwner(
+    client.auth.currentSession?.user.id,
+    (uid) => isOwnerByRole(client, uid),
+  );
+});
+
+@visibleForTesting
+Future<bool> resolveAdminWebOwner(
+  String? userId,
+  Future<bool> Function(String userId) isOwner,
+) async {
+  if (userId == null) return false;
+  return isOwner(userId);
+}
 
 final _allCategoriesProvider =
     FutureProvider.autoDispose<List<PlatformCategory>>((ref) async {
@@ -190,9 +211,7 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
         sortOrder: result.sortOrder,
       );
 
-      final authState = ref.read(authStateProvider);
-      final isOwner =
-          authState is AuthAuthenticated && authState.user.role == 'owner';
+      final isOwner = await ref.read(adminWebIsOwnerProvider.future);
       if (isOwner && result.imageBytes != null) {
         await _repo.uploadCategoryImage(
           categoryId: cat.id,
@@ -259,9 +278,7 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final categoriesAsync = ref.watch(_allCategoriesProvider);
-    final authState = ref.watch(authStateProvider);
-    final isOwner =
-        authState is AuthAuthenticated && authState.user.role == 'owner';
+    final isOwner = ref.watch(adminWebIsOwnerProvider).asData?.value ?? false;
 
     final padding = MediaQuery.sizeOf(context).width < 600 ? 16.0 : 32.0;
     return Padding(

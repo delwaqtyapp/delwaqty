@@ -107,4 +107,30 @@ void main() {
       expect(params['p_type'], 'reminder');
     });
   });
+
+  group('sendBroadcast', () {
+    test('calls the RPC exactly once and returns the device count', () async {
+      var calls = 0;
+      final n = await sendBroadcast((fn, {params}) async {
+        calls++;
+        expect(fn, 'admin_broadcast_notification');
+        expect(params!.containsKey('p_data'), isFalse);
+        return 7;
+      }, {'p_title': 't'});
+      expect(calls, 1);
+      expect(n, 7);
+    });
+
+    test('propagates the first error without a second call', () async {
+      var calls = 0;
+      await expectLater(
+        sendBroadcast((fn, {params}) async {
+          calls++;
+          throw StateError('Not authorized');
+        }, {'p_title': 't'}),
+        throwsA(isA<StateError>()),
+      );
+      expect(calls, 1);
+    });
+  });
 }

@@ -277,7 +277,7 @@ jobs:
 
           التشغيل: DelwaqtyShopPos.exe
           مجلد البيانات: C:\ProgramData\DelwaqtyPos
-"@ | Out-File -Encoding utf8 publish/shop-net8/README-FIRST-RUN.txt
+          "@ | Out-File -Encoding utf8 publish/shop-net8/README-FIRST-RUN.txt
           Compress-Archive -Path publish/shop-net8/* -DestinationPath delwaqty-cashier-windows-b${{ github.run_number }}.zip
 
       - name: Download the .NET Framework 4.8 web bootstrapper

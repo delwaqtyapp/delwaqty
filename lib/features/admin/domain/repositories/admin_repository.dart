@@ -22,8 +22,6 @@ abstract class AdminRepository {
   Future<List<Map<String, dynamic>>> getDriverPerformance({int limit = 10});
   Future<List<AdminActivityLog>> getRecentActivity({int limit = 20});
   Future<List<AdminUser>> getUsers({String? search});
-  Future<AdminUser> createUser(AdminUser user);
-  Future<AdminUser> updateUser(AdminUser user);
   Future<void> deleteUser(String userId);
   Future<List<Map<String, dynamic>>> getMerchants({
     String? search,

@@ -9,7 +9,4 @@ abstract interface class ModifierRepository {
   /// All modifier groups with selection rules (required, max selections)
   /// and option membership, for picker enforcement.
   Future<List<ModifierGroupInfo>> getModifierGroups(String productId);
-  Future<ProductModifier> createModifier(ProductModifier modifier);
-  Future<ProductModifier> updateModifier(ProductModifier modifier);
-  Future<void> deleteModifier(String id);
 }

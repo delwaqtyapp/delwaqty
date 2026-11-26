@@ -121,40 +121,4 @@ class SupabaseModifierDataSource {
         ),
     ];
   }
-
-  Future<ProductModifier> createModifier(ProductModifier modifier) async {
-    final data = await _client
-        .from('product_modifiers')
-        .insert({
-          'product_id': modifier.productId,
-          'name': modifier.name,
-          'description': modifier.description,
-          'price_adjustment': modifier.priceAdjustment,
-          'is_available': modifier.isAvailable,
-          'sort_order': modifier.sortOrder,
-        })
-        .select()
-        .single();
-    return _fromRow(data);
-  }
-
-  Future<ProductModifier> updateModifier(ProductModifier modifier) async {
-    final data = await _client
-        .from('product_modifiers')
-        .update({
-          'name': modifier.name,
-          'description': modifier.description,
-          'price_adjustment': modifier.priceAdjustment,
-          'is_available': modifier.isAvailable,
-          'sort_order': modifier.sortOrder,
-        })
-        .eq('id', modifier.id)
-        .select()
-        .single();
-    return _fromRow(data);
-  }
-
-  Future<void> deleteModifier(String id) async {
-    await _client.from('product_modifiers').delete().eq('id', id);
-  }
 }

@@ -18,22 +18,4 @@ class WorkingHoursRepositoryImpl implements WorkingHoursRepository {
       throw ServerException(message: e.toString());
     }
   }
-
-  @override
-  Future<void> setHours(List<WorkingHours> hours) async {
-    try {
-      await _dataSource.setHours(hours);
-    } catch (e) {
-      throw ServerException(message: e.toString());
-    }
-  }
-
-  @override
-  Future<void> deleteHours(String merchantId, {String? branchId}) async {
-    try {
-      await _dataSource.deleteHours(merchantId, branchId: branchId);
-    } catch (e) {
-      throw ServerException(message: e.toString());
-    }
-  }
 }

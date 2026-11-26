@@ -130,17 +130,10 @@ class CampaignAdminService {
   }
 
   Future<void> deleteBanner(String campaignId, {String? imagePath}) async {
-    try {
-      await _client.rpc(
-        'admin_delete_banner',
-        params: {'p_campaign_id': campaignId},
-      );
-    } on PostgrestException catch (e) {
-      if (e.code != 'PGRST202' && !e.message.contains('admin_delete_banner')) {
-        rethrow;
-      }
-      await _client.from('campaigns').delete().eq('id', campaignId);
-    }
+    await _client.rpc(
+      'admin_delete_banner',
+      params: {'p_campaign_id': campaignId},
+    );
 
     if (imagePath != null && imagePath.trim().isNotEmpty) {
       try {

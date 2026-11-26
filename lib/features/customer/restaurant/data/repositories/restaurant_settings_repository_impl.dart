@@ -15,13 +15,4 @@ class RestaurantSettingsRepositoryImpl implements RestaurantSettingsRepository {
       throw ServerException(message: e.toString());
     }
   }
-
-  @override
-  Future<RestaurantSettings> updateSettings(RestaurantSettings settings) async {
-    try {
-      return await _dataSource.updateSettings(settings);
-    } catch (e) {
-      throw ServerException(message: e.toString());
-    }
-  }
 }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Delwaqty.Pos.Core.Licensing
 {
-    /// <summary>Parsed DLWQ1 license key issued by cashier_license_issue (migration 340).</summary>
+    /// <summary>Parsed legacy DLWQ1 license key (migration 340). New keys (454) are 12 digit codes, see LicenseKey.TryNormalize.</summary>
     public sealed class LicenseInfo
     {
         public string Id;
@@ -62,6 +62,51 @@ namespace Delwaqty.Pos.Core.Licensing
                 RawPayload = payload,
             };
             return true;
+        }
+
+        /// <summary>
+        /// Accepts what a person types or pastes and returns the form the
+        /// server looks up. Short key: 12 digits in any of ASCII, Arabic-Indic
+        /// or Persian digits, with spaces or dashes anywhere (1234-5678-9012);
+        /// returned as 12 plain ASCII digits. Legacy DLWQ1 token: validated
+        /// with TryParse and returned trimmed, unchanged. The server repeats
+        /// this normalization (migration 454), this only gives a fast, local
+        /// "typo" answer and a clean value to store.
+        /// </summary>
+        public static bool TryNormalize(string raw, out string canonical, out string error)
+        {
+            canonical = null; error = null;
+            if (string.IsNullOrWhiteSpace(raw)) { error = "EMPTY_KEY"; return false; }
+            var t = raw.Trim();
+            var digits = new StringBuilder();
+            var onlyShortChars = true;
+            foreach (var ch in t)
+            {
+                if (ch >= '0' && ch <= '9') digits.Append(ch);
+                else if (ch >= '\u0660' && ch <= '\u0669') digits.Append((char)('0' + (ch - '\u0660')));
+                else if (ch >= '\u06F0' && ch <= '\u06F9') digits.Append((char)('0' + (ch - '\u06F0')));
+                else if (char.IsWhiteSpace(ch) || ch == '-' || ch == '\u00A0'
+                         || (ch >= '\u2010' && ch <= '\u2015') || ch == '\u2212'
+                         || ch == '\u200E' || ch == '\u200F') { }
+                else onlyShortChars = false;
+            }
+            if (onlyShortChars)
+            {
+                if (digits.Length != 12) { error = "BAD_SHORT_KEY_LENGTH"; return false; }
+                canonical = digits.ToString();
+                return true;
+            }
+            LicenseInfo info;
+            if (!TryParse(t, out info, out error)) return false;
+            canonical = t;
+            return true;
+        }
+
+        /// <summary>1234-5678-9012 display form of a 12 digit key.</summary>
+        public static string FormatShort(string twelveDigits)
+        {
+            if (twelveDigits == null || twelveDigits.Length != 12) return twelveDigits;
+            return twelveDigits.Substring(0, 4) + "-" + twelveDigits.Substring(4, 4) + "-" + twelveDigits.Substring(8, 4);
         }
 
         public static byte[] Base64UrlDecode(string s)

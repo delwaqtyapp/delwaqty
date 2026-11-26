@@ -102,6 +102,7 @@ jobs:
           -f supabase/tests/redteam_pgtap_negative_rls.sql
           -f supabase/tests/redteam_pgtap_hardening_gate.sql
           -f supabase/tests/430_rides_insert_guard_test.sql
+          -f supabase/tests/454_cashier_short_license_keys_test.sql
   build:
     name: Build APK (${{ matrix.flavor }})
     # No `needs`: builds run in parallel with analyze/test so wall time is

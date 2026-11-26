@@ -29,11 +29,12 @@ namespace Delwaqty.Pos.Wpf
                 ErrorText.Text = "اكتب البريد وكلمة المرور لحساب التاجر";
                 return;
             }
-            LicenseInfo info;
             string keyError;
-            if (!LicenseKey.TryParse(key, out info, out keyError))
+            if (!LicenseKey.TryNormalize(key, out key, out keyError))
             {
-                ErrorText.Text = "مفتاح غير صحيح: " + keyError;
+                ErrorText.Text = keyError == "BAD_SHORT_KEY_LENGTH"
+                    ? "المفتاح يجب أن يكون 12 رقماً (مثال: 1234-5678-9012)."
+                    : "مفتاح غير صحيح. تأكد من كتابته كاملاً.";
                 return;
             }
 
@@ -74,6 +75,7 @@ namespace Delwaqty.Pos.Wpf
             {
                 case "AUTH_FAILED": return "بيانات الدخول غير صحيحة. تأكد من البريد وكلمة المرور.";
                 case "UNKNOWN_KEY": return "مفتاح غير معروف. تأكد من نسخه كاملاً.";
+                case "TOO_MANY_ATTEMPTS": return "محاولات كثيرة خاطئة. انتظر ساعة ثم حاول مرة أخرى، أو تواصل مع الدعم.";
                 case "NOT_AUTHORIZED": return "هذا المفتاح لا يخص حسابك. تواصل مع الدعم.";
                 case "SUSPENDED": return "الترخيص موقوف من المنصة. تواصل مع الدعم.";
                 case "BOUND_TO_OTHER_DEVICE": return "المفتاح مفعّل على جهاز آخر. تواصل مع الدعم لنقله.";

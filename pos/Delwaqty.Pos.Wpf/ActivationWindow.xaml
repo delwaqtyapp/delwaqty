@@ -29,7 +29,7 @@
         <TextBlock Grid.Row="3" Text="كلمة المرور:" Margin="0,4"/>
         <PasswordBox Grid.Row="4" x:Name="PasswordBox" Padding="8" Margin="0,0,0,8"/>
 
-        <TextBlock Grid.Row="5" Text="مفتاح الترخيص (DLWQ1....):" Margin="0,4"/>
+        <TextBlock Grid.Row="5" Text="مفتاح الترخيص (12 رقماً، مثال 1234-5678-9012):" Margin="0,4"/>
         <TextBox Grid.Row="6" x:Name="KeyBox" Padding="8" FlowDirection="LeftToRight" Margin="0,0,0,12"/>
 
         <StackPanel Grid.Row="7">

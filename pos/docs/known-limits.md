@@ -29,3 +29,9 @@ Honest list, so nobody finds them in front of a customer.
   one yet.
 - If the saved sign-in is lost, a "تسجيل الدخول من جديد" button appears. It
   renews the session only; it does not change the license or the merchant.
+- Short license keys (454): the failed-lookup throttle is per signed-in user
+  (10 per hour) and signups are open, so it slows guessing but is not a hard
+  cap. A wrong key and a key that belongs to another merchant return different
+  answers (UNKNOWN_KEY vs NOT_AUTHORIZED), which tells a signed-in user that a
+  code exists. Accepted for the trial period; the code is useless without the
+  merchant's own login.

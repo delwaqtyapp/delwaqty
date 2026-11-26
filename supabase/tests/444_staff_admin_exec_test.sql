@@ -56,6 +56,17 @@ DECLARE
   v_vals text[];
   v_val text;
 BEGIN
+  -- 445 flips food to cashier-eligible (owner decision) and its CHECK
+  -- drops pharmacy/has juice_shop; under the 445 chain (detected via
+  -- is_simple_service_type) the expected partition follows 445.
+  IF EXISTS (SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+             WHERE n.nspname = 'public' AND p.proname = 'is_simple_service_type') THEN
+    v_cashier := v_cashier || ARRAY['food'];
+    v_simple := ARRAY[
+      'service','home_services','plumbing','electrical','cleaning','handyman',
+      'carpentry','ac_maintenance','painting','pest_control','appliance_repair',
+      'doctor','clinic','fitness','carwash','gas','other'];
+  END IF;
   ASSERT (SELECT NOT p.prosecdef AND p.provolatile = 'i'
             FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
            WHERE n.nspname = 'public' AND p.proname = 'is_cashier_type'),

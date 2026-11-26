@@ -44,19 +44,43 @@ namespace Delwaqty.Pos.Core.Tests
         }
 
         [Fact]
-        public void Append_Writes_One_Line_Per_Failure_And_Never_Throws()
+        public void Append_Writes_Once_Per_Op_And_Reason_And_Never_Throws()
         {
             var dir = Path.Combine(Path.GetTempPath(), "sfr-" + Guid.NewGuid());
             Directory.CreateDirectory(dir);
             try
             {
-                SyncFailureReport.Append(dir, Make(2), DateTimeOffset.UtcNow);
-                SyncFailureReport.Append(dir, Make(1), DateTimeOffset.UtcNow);
+                var seen = new HashSet<string>();
+                SyncFailureReport.Append(dir, Make(2), DateTimeOffset.UtcNow, seen);
+                SyncFailureReport.Append(dir, Make(2), DateTimeOffset.UtcNow, seen); // same ops again: no new lines
+                var changed = Make(1); changed[0].Reason = "OTHER";
+                SyncFailureReport.Append(dir, changed, DateTimeOffset.UtcNow, seen); // same op, new reason: logged
                 var lines = File.ReadAllLines(Path.Combine(dir, SyncFailureReport.LogFileName));
                 Assert.Equal(3, lines.Length);
                 Assert.Contains("op-1 sale R1", lines[1]);
-                // Bad directory: must not throw.
-                SyncFailureReport.Append(Path.Combine(dir, "no", "such", "dir"), Make(1), DateTimeOffset.UtcNow);
+                SyncFailureReport.Append(Path.Combine(dir, "no", "such", "dir"), Make(1), DateTimeOffset.UtcNow, new HashSet<string>());
+            }
+            finally { Directory.Delete(dir, true); }
+        }
+
+        [Fact]
+        public void Append_Cuts_An_Oversized_Log_To_Its_Newest_Half_Not_Deleted()
+        {
+            var dir = Path.Combine(Path.GetTempPath(), "sfr-" + Guid.NewGuid());
+            Directory.CreateDirectory(dir);
+            try
+            {
+                var path = Path.Combine(dir, SyncFailureReport.LogFileName);
+                var big = new System.Text.StringBuilder();
+                var n = 0;
+                while (big.Length <= SyncFailureReport.MaxBytes) big.Append("line-" + (n++) + " " + new string('x', 90) + "\n");
+                File.WriteAllText(path, big.ToString());
+                SyncFailureReport.Append(dir, Make(1), DateTimeOffset.UtcNow, new HashSet<string>());
+                var lines = File.ReadAllLines(path);
+                Assert.True(lines.Length > 10 && lines.Length < n);
+                Assert.Contains("line-" + (n - 1) + " ", lines[lines.Length - 2]); // newest old line kept
+                Assert.Contains("op-0 sale R0", lines[lines.Length - 1]);
+                Assert.DoesNotContain("line-0 ", string.Join("\n", lines));
             }
             finally { Directory.Delete(dir, true); }
         }

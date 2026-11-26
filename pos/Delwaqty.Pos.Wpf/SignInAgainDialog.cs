@@ -18,6 +18,7 @@ namespace Delwaqty.Pos.Wpf
         private readonly TextBlock _error = new TextBlock { Foreground = System.Windows.Media.Brushes.Firebrick, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 8, 0, 0) };
         private readonly Button _go = new Button { Content = "تسجيل الدخول", Padding = new Thickness(16, 8, 16, 8), Margin = new Thickness(0, 12, 0, 0) };
         private readonly AuthClient _auth;
+        private readonly string _knownEmail;
 
         public AuthSession Session { get; private set; }
 
@@ -30,6 +31,9 @@ namespace Delwaqty.Pos.Wpf
             WindowStartupLocation = WindowStartupLocation.CenterOwner;
             ResizeMode = ResizeMode.NoResize; FontSize = 16;
             _email.Text = knownEmail ?? "";
+            _knownEmail = string.IsNullOrWhiteSpace(knownEmail) ? null : knownEmail.Trim();
+            // The saved account is fixed: this dialog only renews ITS session.
+            _email.IsReadOnly = _knownEmail != null;
             var panel = new StackPanel { Margin = new Thickness(24) };
             panel.Children.Add(new TextBlock { Text = "انتهت الجلسة. سجّل الدخول لرفع المبيعات المعلقة. البيع يستمر بدون اتصال.", TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 12) });
             panel.Children.Add(new TextBlock { Text = "حساب التاجر (البريد):" });
@@ -54,7 +58,14 @@ namespace Delwaqty.Pos.Wpf
             _go.IsEnabled = false;
             try
             {
-                Session = await _auth.SignInPassword(email, _password.Password);
+                var session = await _auth.SignInPassword(_knownEmail ?? email, _password.Password);
+                if (_knownEmail != null && session.Email != null &&
+                    !string.Equals(session.Email, _knownEmail, StringComparison.OrdinalIgnoreCase))
+                {
+                    _error.Text = "هذا الحساب مختلف عن حساب التاجر المفعّل على الجهاز.";
+                    return;
+                }
+                Session = session;
                 DialogResult = true;
                 Close();
             }

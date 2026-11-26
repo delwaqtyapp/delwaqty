@@ -13,6 +13,7 @@ namespace Delwaqty.Pos.Core.Sync
     public static class SyncFailureReport
     {
         public const string LogFileName = "sync-failures.log";
+        public const int MaxBytes = 256 * 1024;
 
         /// <summary>One line per failure (at most max), then "+N" when more exist.</summary>
         public static string Summarize(IList<SyncEngine.OpFailure> failures, int max)
@@ -32,21 +33,39 @@ namespace Delwaqty.Pos.Core.Sync
             return sb.ToString();
         }
 
-        public static void Append(string dir, IList<SyncEngine.OpFailure> failures, DateTimeOffset nowUtc)
+        /// <summary>
+        /// Appends each (op id, reason) pair only the first time it is seen in
+        /// this session (seen is owned by the caller), so a rejected op that is
+        /// retried every minute does not flood the log. When the file passes
+        /// MaxBytes it is cut to its newest half, never deleted.
+        /// </summary>
+        public static void Append(string dir, IList<SyncEngine.OpFailure> failures, DateTimeOffset nowUtc,
+            ISet<string> seen)
         {
             if (failures == null || failures.Count == 0 || string.IsNullOrEmpty(dir)) return;
             try
             {
                 var sb = new StringBuilder();
                 foreach (var f in failures)
+                {
+                    var reason = Trim(f.Reason ?? "UNKNOWN", 200).Replace('\n', ' ').Replace('\r', ' ');
+                    var key = (f.OpId ?? "-") + "|" + reason;
+                    if (seen != null && !seen.Add(key)) continue;
                     sb.Append(nowUtc.ToString("o")).Append(' ')
                       .Append(f.OpId ?? "-").Append(' ')
                       .Append(f.Type ?? "-").Append(' ')
-                      .Append(Trim(f.Reason ?? "UNKNOWN", 200).Replace('\n', ' ').Replace('\r', ' '))
+                      .Append(reason)
                       .Append('\n');
+                }
+                if (sb.Length == 0) return;
                 var path = Path.Combine(dir, LogFileName);
-                // Keep the file bounded: past 256 KB start over.
-                if (File.Exists(path) && new FileInfo(path).Length > 256 * 1024) File.Delete(path);
+                if (File.Exists(path) && new FileInfo(path).Length > MaxBytes)
+                {
+                    var lines = File.ReadAllLines(path, Encoding.UTF8);
+                    var keep = new string[lines.Length / 2];
+                    Array.Copy(lines, lines.Length - keep.Length, keep, 0, keep.Length);
+                    File.WriteAllText(path, string.Join("\n", keep) + (keep.Length > 0 ? "\n" : ""), new UTF8Encoding(false));
+                }
                 File.AppendAllText(path, sb.ToString(), new UTF8Encoding(false));
             }
             catch { /* diagnostics only */ }

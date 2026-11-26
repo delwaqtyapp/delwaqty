@@ -38,6 +38,7 @@ namespace Delwaqty.Pos.Wpf
 
         private readonly ActivationService _activation;
         private readonly ActivationState _state;
+        private readonly HashSet<string> _loggedFailures = new HashSet<string>();
         private readonly string _dataDir;   // the merchant+flavor scope dir (#116)
 
         private readonly HttpClientFactory _http = new HttpClientFactory();
@@ -614,7 +615,7 @@ namespace Delwaqty.Pos.Wpf
                 }
 
                 var flush = await _engine.FlushAsync();
-                SyncFailureReport.Append(AppPaths.DataDir(), flush.Failures, DateTimeOffset.UtcNow);
+                SyncFailureReport.Append(_dataDir, flush.Failures, DateTimeOffset.UtcNow, _loggedFailures);
                 if (flush.RepricedLines > 0 || flush.ClientPricedLines > 0)
                     StatusText.Text = "السيرفر حدّث " + flush.RepricedLines + " سعراً؛ " +
                         flush.ClientPricedLines + " صنفاً بسعرك (قيد المراجعة)";

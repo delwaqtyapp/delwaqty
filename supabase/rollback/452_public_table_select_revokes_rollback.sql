@@ -1,10 +1,10 @@
--- Rollback for 450_public_table_select_revokes.sql (phase 2b, breaking).
--- Restores the pre-450 posture:
---   * restores the deliveries view to its pre-450 definition (md5
+-- Rollback for 452_public_table_select_revokes.sql (phase 2b, breaking).
+-- Restores the pre-452 posture:
+--   * restores the deliveries view to its pre-452 definition (md5
 --     228af4e1fa465baf165751e3f84fb7a3, verified after restore) and
 --     drops _delivery_merchant_labels;
---   * replays ONLY the SELECT grants 450 snapshotted before revoking
---     (_450_revoked_grants; exact inverse incl. grantor/grant-option);
+--   * replays ONLY the SELECT grants 452 snapshotted before revoking
+--     (_452_revoked_grants; exact inverse incl. grantor/grant-option);
 --   * removes the keep-list column grants (merchants.id, products.id
 --     for authenticated);
 --   * drops the snapshot table.
@@ -22,32 +22,54 @@
 BEGIN;
 
 -- A0 FIRST, before any mutation: this rollback only runs on the exact
--- 450 post-state with an intact snapshot
+-- 452 post-state with an intact snapshot
 DO $$
 DECLARE
   v_bad int;
 BEGIN
-  IF to_regclass('public._450_revoked_grants') IS NULL THEN
-    RAISE EXCEPTION '450 rollback A0: snapshot table _450_revoked_grants absent - refusing to run (would be a destructive partial rollback)';
+  IF to_regclass('public._452_revoked_grants') IS NULL THEN
+    RAISE EXCEPTION '452 rollback A0: snapshot table _452_revoked_grants absent - refusing to run (would be a destructive partial rollback)';
   END IF;
-  IF (SELECT count(*) FROM public._450_revoked_grants) = 0 THEN
-    RAISE EXCEPTION '450 rollback A0: snapshot table is empty - refusing to run';
+  IF (SELECT count(*) FROM public._452_revoked_grants) = 0 THEN
+    RAISE EXCEPTION '452 rollback A0: snapshot table is empty - refusing to run';
   END IF;
   SELECT count(*) INTO v_bad
-    FROM public._450_revoked_grants
+    FROM public._452_revoked_grants
    WHERE privilege <> 'SELECT'
       OR tbl NOT IN ('merchants','products','service_providers')
       OR grantee NOT IN ('anon','authenticated');
   IF v_bad > 0 THEN
-    RAISE EXCEPTION '450 rollback A0: % snapshot rows outside the expected shape - refusing to run', v_bad;
+    RAISE EXCEPTION '452 rollback A0: % snapshot rows outside the expected shape - refusing to run', v_bad;
   END IF;
-  IF EXISTS (SELECT 1 FROM public._450_revoked_grants
+  IF EXISTS (SELECT 1 FROM public._452_revoked_grants
              WHERE tbl = 'merchants' AND grantee = 'anon')
-     AND NOT EXISTS (SELECT 1 FROM public._450_revoked_grants
+     AND NOT EXISTS (SELECT 1 FROM public._452_revoked_grants
                      WHERE tbl = 'merchants' AND grantee = 'authenticated') THEN
-    RAISE EXCEPTION '450 rollback A0: snapshot has anon but not authenticated merchants SELECT - implausible shape, refusing';
+    RAISE EXCEPTION '452 rollback A0: snapshot has anon but not authenticated merchants SELECT - implausible shape, refusing';
   END IF;
-  -- the 450 post-state: keep-lists present, no table-level SELECT, the
+  -- #284: the deliveries view ACL pre-image snapshot must be intact too
+  IF to_regclass('public._452_view_snapshot') IS NULL THEN
+    RAISE EXCEPTION '452 rollback A0: snapshot table _452_view_snapshot absent - refusing to run (would be a destructive partial rollback)';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM public._452_view_snapshot WHERE view_name = 'deliveries') THEN
+    RAISE EXCEPTION '452 rollback A0: _452_view_snapshot has no deliveries rows - refusing to run';
+  END IF;
+  SELECT count(*) INTO v_bad
+    FROM public._452_view_snapshot
+   WHERE view_name <> 'deliveries'
+      -- MAINTAIN included: PG17 grants it (prod deliveries pre-image
+      -- carries it for postgres/service_role)
+      OR privilege NOT IN ('SELECT','INSERT','UPDATE','DELETE','TRUNCATE','REFERENCES','TRIGGER','MAINTAIN');
+  IF v_bad > 0 THEN
+    RAISE EXCEPTION '452 rollback A0: % view snapshot rows outside the expected shape - refusing to run', v_bad;
+  END IF;
+  -- #286: the 452 post-state carries no column grants on deliveries
+  IF EXISTS (SELECT 1 FROM pg_attribute a
+              WHERE a.attrelid = 'public.deliveries'::regclass
+                AND a.attacl IS NOT NULL) THEN
+    RAISE EXCEPTION '452 rollback A0: unexpected column grants on deliveries (not the 452 post-state?)';
+  END IF;
+  -- the 452 post-state: keep-lists present, no table-level SELECT, the
   -- rebuilt deliveries view + labels subview in place
   ASSERT (SELECT count(*) FROM pg_attribute a
            JOIN pg_class c ON c.oid = a.attrelid
@@ -58,7 +80,7 @@ BEGIN
             AND a.attname = 'id'
             AND x.grantee = 'authenticated'::regrole
             AND x.privilege_type = 'SELECT') = 2,
-    '450 rollback A0: keep-list grants not present (not the 450 post-state?)';
+    '452 rollback A0: keep-list grants not present (not the 452 post-state?)';
   ASSERT NOT EXISTS (
     SELECT 1 FROM pg_class c
       JOIN pg_namespace n ON n.oid = c.relnamespace
@@ -68,12 +90,12 @@ BEGIN
        AND c.relname IN ('merchants','products','service_providers')
        AND g.rolname IN ('anon','authenticated')
        AND x.privilege_type = 'SELECT'),
-    '450 rollback A0: table-level SELECT already present (not the 450 post-state?)';
+    '452 rollback A0: table-level SELECT already present (not the 452 post-state?)';
   ASSERT to_regclass('public._delivery_merchant_labels') IS NOT NULL,
-    '450 rollback A0: _delivery_merchant_labels missing (not the 450 post-state?)';
+    '452 rollback A0: _delivery_merchant_labels missing (not the 452 post-state?)';
 END $$;
 
--- 1. deliveries view back to its exact pre-450 definition (216),
+-- 1. deliveries view back to its exact pre-452 definition (216),
 --    joining the merchants base table as the caller again
 DROP VIEW public.deliveries;
 CREATE VIEW public.deliveries
@@ -109,27 +131,90 @@ WITH (security_invoker = true) AS
   WHERE (r.ride_type = 'delivery'::text) OR (r.order_id IS NOT NULL);
 
 REVOKE ALL ON public.deliveries FROM PUBLIC, anon, authenticated;
-GRANT SELECT ON public.deliveries TO authenticated;
-GRANT UPDATE ON public.deliveries TO authenticated;
 
 CREATE TRIGGER deliveries_view_update INSTEAD OF UPDATE ON public.deliveries
   FOR EACH ROW EXECUTE FUNCTION deliveries_view_update();
 
 DROP VIEW public._delivery_merchant_labels;
 
+-- #284: restore the deliveries view's EXACT ACL pre-image from the snapshot
+-- (grantee/privilege/grantor/grant-option), never a hardcoded grant list.
+DO $$
+DECLARE
+  r record;
+  v_me text := current_user;
+  v_missing int;
+BEGIN
+  FOR r IN SELECT * FROM public._452_view_snapshot WHERE view_name = 'deliveries' LOOP
+    IF EXISTS (SELECT 1 FROM pg_class c
+                CROSS JOIN LATERAL aclexplode(c.relacl) x
+                WHERE c.oid = 'public.deliveries'::regclass
+                  AND COALESCE(NULLIF(x.grantee, 0)::regrole::text, 'PUBLIC') = r.grantee
+                  AND x.privilege_type = r.privilege
+                  AND x.grantor::regrole::text = r.grantor
+                  AND x.is_grantable = r.grantable) THEN
+      CONTINUE;
+    END IF;
+    BEGIN
+      IF r.grantor <> v_me THEN
+        EXECUTE format('SET ROLE %I', r.grantor);
+      END IF;
+      IF r.grantable THEN
+        EXECUTE format('GRANT %s ON public.deliveries TO %s WITH GRANT OPTION',
+                       r.privilege, CASE WHEN r.grantee = 'PUBLIC' THEN 'PUBLIC' ELSE quote_ident(r.grantee) END);
+      ELSE
+        EXECUTE format('GRANT %s ON public.deliveries TO %s',
+                       r.privilege, CASE WHEN r.grantee = 'PUBLIC' THEN 'PUBLIC' ELSE quote_ident(r.grantee) END);
+      END IF;
+      IF r.grantor <> v_me THEN
+        RESET ROLE;
+      END IF;
+    EXCEPTION WHEN OTHERS THEN
+      RESET ROLE;
+      RAISE EXCEPTION '452 rollback: failed to restore % on public.deliveries to % (grantor %): % / % - transaction aborted, snapshot kept',
+        r.privilege, r.grantee, r.grantor, SQLSTATE, SQLERRM;
+    END;
+  END LOOP;
+  -- every snapshot row must now exist exactly, with nothing extra
+  SELECT count(*) INTO v_missing
+    FROM public._452_view_snapshot s
+   WHERE s.view_name = 'deliveries'
+     AND NOT EXISTS (SELECT 1 FROM pg_class c
+                      CROSS JOIN LATERAL aclexplode(c.relacl) x
+                      WHERE c.oid = 'public.deliveries'::regclass
+                        AND COALESCE(NULLIF(x.grantee, 0)::regrole::text, 'PUBLIC') = s.grantee
+                        AND x.privilege_type = s.privilege
+                        AND x.grantor::regrole::text = s.grantor
+                        AND x.is_grantable = s.grantable);
+  IF v_missing > 0 THEN
+    RAISE EXCEPTION '452 rollback: % deliveries view snapshot rows not restored exactly - transaction aborted, snapshot kept', v_missing;
+  END IF;
+  IF (SELECT count(*) FROM pg_class c
+       CROSS JOIN LATERAL aclexplode(c.relacl) x
+       WHERE c.oid = 'public.deliveries'::regclass)
+     <> (SELECT count(*) FROM public._452_view_snapshot WHERE view_name = 'deliveries') THEN
+    RAISE EXCEPTION '452 rollback: deliveries view ACL has entries beyond the snapshot pre-image - transaction aborted, snapshot kept';
+  END IF;
+END $$;
+
 DO $$
 BEGIN
   ASSERT md5(pg_get_viewdef('public.deliveries'::regclass))
          = '228af4e1fa465baf165751e3f84fb7a3',
-    '450 rollback: deliveries view did not restore to the exact pre-image';
+    '452 rollback: deliveries view did not restore to the exact pre-image';
+  -- #284: the view owner must match the snapshotted pre-image owner
+  ASSERT (SELECT pg_get_userbyid(relowner) FROM pg_class
+           WHERE oid = 'public.deliveries'::regclass)
+         = (SELECT owner FROM public._452_view_snapshot WHERE view_name = 'deliveries' LIMIT 1),
+    '452 rollback: deliveries view owner does not match the pre-image';
 END $$;
 
--- 2. remove the keep-lists (the replay below restores the exact pre-450
+-- 2. remove the keep-lists (the replay below restores the exact pre-452
 --    table-level grants)
 REVOKE SELECT (id) ON public.merchants FROM authenticated;
 REVOKE SELECT (id) ON public.products FROM authenticated;
 
--- 3. exact restore: replay ONLY the rows 450 snapshotted before
+-- 3. exact restore: replay ONLY the rows 452 snapshotted before
 --    revoking (table/grantee/privilege/grantor/grantable).
 DO $$
 DECLARE
@@ -137,7 +222,7 @@ DECLARE
   v_me text := current_user;
   v_missing int;
 BEGIN
-  FOR r IN SELECT * FROM public._450_revoked_grants LOOP
+  FOR r IN SELECT * FROM public._452_revoked_grants LOOP
     -- already exactly present (never actually revoked, or restored
     -- earlier): grantor AND grant-option must both match
     -- pg_class.relacl + aclexplode, NOT information_schema (which hides
@@ -169,14 +254,14 @@ BEGIN
       END IF;
     EXCEPTION WHEN OTHERS THEN
       RESET ROLE;
-      RAISE EXCEPTION '450 rollback: failed to restore % on public.% to % (grantor %): % / % - transaction aborted, snapshot kept',
+      RAISE EXCEPTION '452 rollback: failed to restore % on public.% to % (grantor %): % / % - transaction aborted, snapshot kept',
         r.privilege, r.tbl, r.grantee, r.grantor, SQLSTATE, SQLERRM;
     END;
   END LOOP;
   -- full exact postcondition: every snapshot row must now exist with
   -- its original grantor and grant-option
   SELECT count(*) INTO v_missing
-    FROM public._450_revoked_grants g
+    FROM public._452_revoked_grants g
    WHERE NOT EXISTS (SELECT 1 FROM pg_class c
                       JOIN pg_namespace n ON n.oid = c.relnamespace
                       CROSS JOIN LATERAL aclexplode(c.relacl) x
@@ -187,7 +272,7 @@ BEGIN
                         AND go.rolname=g.grantor
                         AND x.is_grantable = g.grantable);
   IF v_missing > 0 THEN
-    RAISE EXCEPTION '450 rollback: % snapshot rows not restored exactly - transaction aborted, snapshot kept', v_missing;
+    RAISE EXCEPTION '452 rollback: % snapshot rows not restored exactly - transaction aborted, snapshot kept', v_missing;
   END IF;
   -- keep-lists must be gone
   IF EXISTS (SELECT 1 FROM pg_attribute a
@@ -196,10 +281,11 @@ BEGIN
               CROSS JOIN LATERAL aclexplode(a.attacl) x
              WHERE n.nspname='public'
                AND c.relname IN ('merchants','products','service_providers')) THEN
-    RAISE EXCEPTION '450 rollback: a column grant survived - transaction aborted, snapshot kept';
+    RAISE EXCEPTION '452 rollback: a column grant survived - transaction aborted, snapshot kept';
   END IF;
 END $$;
 -- reached only when the postconditions passed
-DROP TABLE IF EXISTS public._450_revoked_grants;
+DROP TABLE IF EXISTS public._452_revoked_grants;
+DROP TABLE IF EXISTS public._452_view_snapshot;
 
 COMMIT;

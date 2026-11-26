@@ -1,5 +1,8 @@
--- 450: DB hardening phase 2b — public table SELECT revokes, BREAKING
--- half of the staged 448/449/450 plan.
+-- 452: DB hardening phase 2b — public table SELECT revokes, BREAKING
+-- half of the staged 448/449 plan. (This stage was planned as "450" in
+-- the 448/449/450 staged plan and reviewers still call it "450";
+-- numbered 452 because 451 landed first - chain runners apply files
+-- in order and this file's A0 pins the 451 functions.)
 --
 --   448 (applied): staff_settings move, anon DML sweep, provider view.
 --   449 (applied): public views + owner/staff/admin RPCs + definer
@@ -8,7 +11,7 @@
 --   451 (applied): owner-surface follow-ups for the #80 app switch
 --     (profile overload, exact counts, bounded by-ids fetch, scoped
 --     admin merchant count).
---   450 (THIS FILE):
+--   452 (THIS FILE):
 --     1. Rebuilds the security_invoker `deliveries` view so its merchant
 --        name/address come from a postgres-owned security_barrier
 --        subview restricted to the caller's visible delivery rows
@@ -71,8 +74,8 @@
 --   * no PUBLIC (grantee 0) SELECT on the three tables, and no SELECT
 --     granted to any role anon/authenticated inherit from.
 --
--- Rollback: rollback/450_public_table_select_revokes_rollback.sql
--- restores the deliveries pre-image, replays the _450_revoked_grants
+-- Rollback: rollback/452_public_table_select_revokes_rollback.sql
+-- restores the deliveries pre-image, replays the _452_revoked_grants
 -- snapshot exactly (grantor + grant-option) and removes the keep-lists.
 
 BEGIN;
@@ -92,6 +95,19 @@ BEGIN
          = '82547e1b21fe1212f9af36d03a7a630a', 'A0: 451 admin count drifted';
   ASSERT md5(pg_get_viewdef('public.deliveries'::regclass))
          = '228af4e1fa465baf165751e3f84fb7a3', 'A0: deliveries view pre-image drifted';
+  -- #286: the rollback restores to the snapshotted owner; pin it before
+  -- any mutation so a surprise owner aborts the apply, not the rollback
+  ASSERT (SELECT pg_get_userbyid(relowner) FROM pg_class
+           WHERE oid = 'public.deliveries'::regclass) = 'postgres',
+    'A0: deliveries view owner is not postgres';
+  -- #286: DROP VIEW also destroys explicit column grants (pg_attribute
+  -- .attacl), which the relacl snapshot cannot capture; refuse to run
+  -- when any exist instead of silently losing them
+  ASSERT NOT EXISTS (
+    SELECT 1 FROM pg_attribute a
+     WHERE a.attrelid = 'public.deliveries'::regclass
+       AND a.attacl IS NOT NULL),
+    'A0: explicit column grants on deliveries - refusing (snapshot/replay of column ACLs not implemented)';
   ASSERT to_regclass('public._delivery_merchant_labels') IS NULL,
     'A0: _delivery_merchant_labels already exists';
   ASSERT NOT EXISTS (
@@ -113,7 +129,7 @@ BEGIN
      WHERE n.nspname = 'public'
        AND c.relname IN ('merchants','products','service_providers')
        AND x.grantee IN (0, 'anon'::regrole, 'authenticated'::regrole)),
-    'A0: unexpected pre-existing column grant on a 450 table';
+    'A0: unexpected pre-existing column grant on a 452 table';
   -- no PUBLIC SELECT on the three tables
   ASSERT NOT EXISTS (
     SELECT 1 FROM pg_class c
@@ -122,7 +138,7 @@ BEGIN
      WHERE n.nspname = 'public'
        AND c.relname IN ('merchants','products','service_providers')
        AND x.grantee = 0 AND x.privilege_type = 'SELECT'),
-    'A0: PUBLIC holds SELECT on a 450 table';
+    'A0: PUBLIC holds SELECT on a 452 table';
   -- no SELECT via any role anon/authenticated inherit from (recursive)
   ASSERT NOT EXISTS (
     WITH RECURSIVE ancestors AS (
@@ -139,13 +155,13 @@ BEGIN
        AND c.relname IN ('merchants','products','service_providers')
        AND x.privilege_type = 'SELECT'
        AND x.grantee IN (SELECT roleid FROM ancestors)),
-    'A0: an ancestor role of anon/authenticated holds SELECT on a 450 table';
+    'A0: an ancestor role of anon/authenticated holds SELECT on a 452 table';
 END $$;
 
 -- ─── 1. deliveries view: merchant label off the caller path ──────────
 -- Caller-row-restricted, postgres-owned, security_barrier. The IN
 -- predicate MIRRORS the rides SELECT policies (rider, assigned driver,
--- requested driver, country admin) - keep it in sync with them; the 450
+-- requested driver, country admin) - keep it in sync with them; the 452
 -- battery pins identical per-persona deliveries output pre/post.
 -- Owners and regional admins hold no rides read policy, so they see no
 -- deliveries rows at all, exactly as before.
@@ -165,14 +181,47 @@ WHERE m.id IN (
                        WHERE rr.driver_id IN (SELECT d2.id FROM public.drivers d2
                                                WHERE d2.user_id = auth.uid()))
           OR public._is_country_admin_uid(auth.uid()))
-);
+)
+  -- #285: mirror the caller-side merchants read policy ("Merchants readable by
+  -- signed-in users": status='active' OR is_merchant_owner(id)) so a suspended/
+  -- pending merchant's label still comes back BLANK for a ride party, exactly
+  -- as the old caller-side LEFT JOIN returned under merchants RLS.
+  AND (m.status = 'active'::text OR public.is_merchant_owner(m.id));
 COMMENT ON VIEW public._delivery_merchant_labels IS
-  '450: merchant name/address for the deliveries view, restricted to '
+  '452: merchant name/address for the deliveries view, restricted to '
   'merchants of delivery rides the CALLER may see (mirrors the rides '
-  'SELECT policies). Runs as the owner so the deliveries view needs no '
-  'merchants column grant.';
+  'SELECT policies) and to merchants the caller may read (mirrors the '
+  'merchants SELECT policy: active or own). Runs as the owner so the '
+  'deliveries view needs no merchants column grant.';
 REVOKE ALL ON public._delivery_merchant_labels FROM PUBLIC, anon, authenticated;
 GRANT SELECT ON public._delivery_merchant_labels TO authenticated;
+
+-- #284: snapshot the deliveries view's exact ACL pre-image (grantee,
+-- privilege, grantor, grant-option) and owner so the rollback can restore
+-- it exactly instead of re-granting from a hardcoded list.
+CREATE TABLE public._452_view_snapshot(
+  view_name text NOT NULL,
+  owner text NOT NULL,
+  grantee text NOT NULL,
+  privilege text NOT NULL,
+  grantor text NOT NULL,
+  grantable boolean NOT NULL
+);
+REVOKE ALL ON public._452_view_snapshot FROM PUBLIC, anon, authenticated, service_role;
+ALTER TABLE public._452_view_snapshot ENABLE ROW LEVEL SECURITY;
+COMMENT ON TABLE public._452_view_snapshot IS
+  '452: pre-apply capture of the deliveries view ACL + owner. Read only by '
+  'the 452 rollback (replays these rows, then drops the table).';
+INSERT INTO public._452_view_snapshot (view_name, owner, grantee, privilege, grantor, grantable)
+SELECT 'deliveries',
+       pg_get_userbyid(c.relowner),
+       COALESCE(NULLIF(a.grantee, 0)::regrole::text, 'PUBLIC'),
+       a.privilege_type,
+       a.grantor::regrole::text,
+       a.is_grantable
+FROM pg_class c
+CROSS JOIN LATERAL aclexplode(COALESCE(c.relacl, acldefault('r', c.relowner))) a
+WHERE c.oid = 'public.deliveries'::regclass;
 
 DROP VIEW public.deliveries;
 CREATE VIEW public.deliveries
@@ -218,21 +267,21 @@ CREATE TRIGGER deliveries_view_update INSTEAD OF UPDATE ON public.deliveries
 
 -- ─── 2. grant snapshot (exact rollback source) ───────────────────────
 -- Same contract as 449: capture first, replay only these rows.
-CREATE TABLE public._450_revoked_grants(
+CREATE TABLE public._452_revoked_grants(
   tbl text NOT NULL,
   grantee text NOT NULL,
   privilege text NOT NULL,
   grantor text NOT NULL,
   grantable boolean NOT NULL
 );
-REVOKE ALL ON public._450_revoked_grants FROM PUBLIC, anon, authenticated, service_role;
-ALTER TABLE public._450_revoked_grants ENABLE ROW LEVEL SECURITY;
-COMMENT ON TABLE public._450_revoked_grants IS
-  '450: pre-apply capture of every SELECT grant this migration revokes. '
-  'Read only by the 450 rollback (replays these rows, then drops the table).';
+REVOKE ALL ON public._452_revoked_grants FROM PUBLIC, anon, authenticated, service_role;
+ALTER TABLE public._452_revoked_grants ENABLE ROW LEVEL SECURITY;
+COMMENT ON TABLE public._452_revoked_grants IS
+  '452: pre-apply capture of every SELECT grant this migration revokes. '
+  'Read only by the 452 rollback (replays these rows, then drops the table).';
 -- pg_class.relacl + aclexplode, NOT information_schema (which hides rows
 -- from a non-superuser applier)
-INSERT INTO public._450_revoked_grants
+INSERT INTO public._452_revoked_grants
 SELECT c.relname, g.rolname, x.privilege_type, go.rolname, x.is_grantable
   FROM pg_class c
   JOIN pg_namespace n ON n.oid = c.relnamespace
@@ -267,7 +316,7 @@ BEGIN
        AND c.relname IN ('merchants','products','service_providers')
        AND g.rolname IN ('anon','authenticated')
        AND x.privilege_type = 'SELECT'),
-    '450: table-level SELECT left';
+    '452: table-level SELECT left';
   -- EFFECTIVE access, PUBLIC and inherited roles included: every
   -- non-keep column is unreadable by anon and by authenticated
   ASSERT NOT EXISTS (
@@ -281,7 +330,7 @@ BEGIN
             OR (has_column_privilege('authenticated', c.oid, a.attnum, 'SELECT')
                 AND NOT (c.relname IN ('merchants','products')
                          AND a.attname = 'id')))),
-    '450: a non-keep column is still readable (direct, PUBLIC or inherited)';
+    '452: a non-keep column is still readable (direct, PUBLIC or inherited)';
   -- exact keep access: merchants.id + products.id for authenticated only
   ASSERT (SELECT count(*) FROM pg_attribute a
            JOIN pg_class c ON c.oid = a.attrelid
@@ -292,10 +341,10 @@ BEGIN
             AND a.attname = 'id'
             AND x.grantee = 'authenticated'::regrole
             AND x.privilege_type = 'SELECT') = 2,
-    '450: a keep-list grant is missing';
+    '452: a keep-list grant is missing';
   ASSERT NOT has_column_privilege('anon', 'public.merchants', 'id', 'SELECT')
          AND NOT has_column_privilege('anon', 'public.products', 'id', 'SELECT'),
-    '450: anon holds a keep-list column';
+    '452: anon holds a keep-list column';
   -- the deliveries view no longer references the merchants base table
   ASSERT NOT EXISTS (
     SELECT 1 FROM pg_depend d
@@ -305,7 +354,7 @@ BEGIN
      WHERE vn.nspname = 'public' AND v.relname = 'deliveries'
        AND d.refclassid = 'pg_class'::regclass
        AND d.refobjid = 'public.merchants'::regclass),
-    '450: deliveries still reads the merchants base table';
+    '452: deliveries still reads the merchants base table';
   -- the deliveries view kept its exact grant posture (no residue)
   ASSERT NOT EXISTS (
     SELECT 1 FROM pg_class c
@@ -315,17 +364,21 @@ BEGIN
      WHERE n.nspname = 'public' AND c.relname = 'deliveries'
        AND g.rolname IN ('anon','authenticated')
        AND x.privilege_type NOT IN ('SELECT','UPDATE')),
-    '450: deliveries view grant residue';
+    '452: deliveries view grant residue';
   ASSERT NOT EXISTS (
     SELECT 1 FROM pg_class c
       JOIN pg_namespace n ON n.oid = c.relnamespace
       CROSS JOIN LATERAL aclexplode(c.relacl) x
      WHERE n.nspname = 'public' AND c.relname = 'deliveries'
        AND x.grantee = 0),
-    '450: deliveries view PUBLIC grant';
+    '452: deliveries view PUBLIC grant';
   -- the snapshot captured this apply's revokes
-  ASSERT (SELECT count(*) FROM public._450_revoked_grants) >= 1,
-    '450: grant snapshot is empty';
+  ASSERT (SELECT count(*) FROM public._452_revoked_grants) >= 1,
+    '452: grant snapshot is empty';
+  -- #284: the deliveries view ACL pre-image snapshot exists and is nonempty
+  ASSERT (SELECT count(*) FROM public._452_view_snapshot
+           WHERE view_name = 'deliveries') >= 1,
+    '452: deliveries view ACL pre-image snapshot is empty';
 END $$;
 
 COMMIT;

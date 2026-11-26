@@ -1,7 +1,7 @@
--- 450 equal-behavior battery: run by harness/450_harness.sh on BOTH the
--- pre DB (439..451) and the post DB (439..451+450) AFTER
--- tests/449_seed.sql + tests/450_seed.sql. The two outputs are diffed;
--- they must be IDENTICAL (450 must not change any read or write path
+-- 452 equal-behavior battery: run by harness/452_harness.sh on BOTH the
+-- pre DB (439..451) and the post DB (439..451+452) AFTER
+-- tests/449_seed.sql + tests/452_seed.sql. The two outputs are diffed;
+-- they must be IDENTICAL (452 must not change any read or write path
 -- the shipped build uses).
 --
 -- Two layers of proof per probe:
@@ -12,9 +12,9 @@
 --     failures) instead of only printing, so a both-sides-broken path
 --     fails the battery loudly instead of passing the diff.
 --
--- This is the 449 battery re-expressed over the post-450 surfaces: the
+-- This is the 449 battery re-expressed over the post-452 surfaces: the
 -- four direct base-table SELECT probes of 449 (anon/customer/cashier
--- products, which 450 intentionally revokes) are swapped for the view /
+-- products, which 452 intentionally revokes) are swapped for the view /
 -- RPC reads the app switched to in #80. owner.merchant_vischeck and
 -- owner.edge_vischeck stay DIRECT id-only reads on purpose: they are
 -- the keep-list probes (the merchant-staff-admin edge function's exact
@@ -24,9 +24,9 @@
 -- NOT simulatable here (documented, verified by enumeration instead):
 -- real PostgREST HTTP (no PostgREST in this lab) and the POS client
 -- (reads only via SECURITY DEFINER cashier_* / drug_catalog_search
--- RPCs, which 450 does not touch).
+-- RPCs, which 452 does not touch).
 --
--- Personas from zz449 + zz450: owner / cashier / customer / customer2
+-- Personas from zz449 + zz452: owner / cashier / customer / customer2
 -- (driver user) / provider_user / admin_user (country admin) /
 -- regional_admin. Runs in one transaction, rolled back at the end.
 
@@ -58,7 +58,7 @@ SELECT 'customer.tracking|'  || count(*) FROM public.order_tracking;
 -- the deliveries view (customer sees own delivery ride, with labels)
 SELECT 'customer.deliveries|' || count(*) FROM public.deliveries;
 SELECT 'customer.delivery_label|' || merchant_name || '|' || merchant_address || '|' || status
-  FROM public.deliveries WHERE id = (select ride_customer from zz450);
+  FROM public.deliveries WHERE id = (select ride_customer from zz452);
 
 -- ─── owner ────────────────────────────────────────────────────────────
 SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (select owner from zz449))::text, true) \g /dev/null
@@ -177,9 +177,9 @@ DO $$
 BEGIN
   UPDATE public.service_bookings SET status = 'accepted'
    WHERE id = (select booking1 from zz449);
-  RAISE EXCEPTION 'provider.booking_update unexpectedly SUCCEEDED' USING ERRCODE = 'ZZ450';
+  RAISE EXCEPTION 'provider.booking_update unexpectedly SUCCEEDED' USING ERRCODE = 'ZZ452';
 EXCEPTION WHEN OTHERS THEN
-  IF SQLSTATE = 'ZZ450' THEN RAISE; END IF;
+  IF SQLSTATE = 'ZZ452' THEN RAISE; END IF;
   ASSERT SQLSTATE = 'P0001',
     'provider.booking_update failed with unexpected SQLSTATE ' || SQLSTATE;
   RAISE NOTICE 'provider.booking_update|%', SQLSTATE;
@@ -194,7 +194,16 @@ SELECT 'driver.obligations|' || count(*) FROM public.driver_obligations;
 -- resolved through the definer labels subview)
 SELECT 'driver.deliveries|'  || count(*) FROM public.deliveries;
 SELECT 'driver.delivery_label|' || merchant_name || '|' || merchant_address || '|' || status
-  FROM public.deliveries WHERE id = (select ride_driver from zz450);
+  FROM public.deliveries WHERE id = (select ride_driver from zz452);
+-- #285: the suspended cafe's delivery row is visible to the assigned
+-- driver, but its label must stay BLANK (mirrors the old caller-side
+-- merchants RLS on the join)
+SELECT 'driver.delivery_suspended_label|' || merchant_name || '|' || merchant_address
+  FROM public.deliveries WHERE id = (select ride_suspended from zz452);
+-- #285: requested-driver positive - a searching ride requested to this
+-- driver is visible with its (active) merchant label
+SELECT 'driver.delivery_requested_label|' || merchant_name || '|' || merchant_address
+  FROM public.deliveries WHERE id = (select ride_requested from zz452);
 
 -- ─── admin_user (country admin): the app's admin write path ──────────
 -- (updateMerchantStatus filters .eq('id', ...), covered by the
@@ -203,7 +212,7 @@ SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (select admin_
 SELECT 'admin.merchant_count|' || admin_get_merchants_count();
 SELECT 'admin.deliveries|'     || count(*) FROM public.deliveries;
 SELECT 'admin.delivery_label|' || merchant_name || '|' || merchant_address
-  FROM public.deliveries WHERE id = (select ride_driver from zz450);
+  FROM public.deliveries WHERE id = (select ride_driver from zz452);
 DO $$
 DECLARE n int;
 BEGIN
@@ -215,10 +224,17 @@ BEGIN
 END $$;
 
 -- ─── regional_admin: region-scoped definer reads; no rides policy ────
-SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (select regional_admin from zz450))::text, true) \g /dev/null
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (select regional_admin from zz452))::text, true) \g /dev/null
 SELECT 'regional_admin.merchant_count|' || admin_get_merchants_count();
 SELECT 'regional_admin.list_merchants|' || count(*) FROM admin_list_merchants();
 SELECT 'regional_admin.deliveries|'     || count(*) FROM public.deliveries;
+
+-- ─── driver2: an UNREQUESTED second driver sees no deliveries ────────
+-- (#285 requested-driver negative)
+SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (select driver2_user from zz452))::text, true) \g /dev/null
+SELECT 'driver2.deliveries|'           || count(*) FROM public.deliveries;
+SELECT 'driver2.delivery_requested|'   || count(*) FROM public.deliveries
+  WHERE id = (select ride_requested from zz452);
 
 RESET ROLE;
 ROLLBACK;

@@ -25,6 +25,7 @@ const j = (v) => JSON.parse(JSON.stringify(v));
 function loadHandler(fail = {}) {
   let handler;
   const calls = []; // [name, args] — GoTrue names prefixed 'gotrue:'
+  const getUserTokens = []; // every token passed to caller.auth.getUser(token)'
   const source = fs.readFileSync(FILE, 'utf8').replace(
     /^import \{ createClient \} from .*;\r?\n/m, '',
   );
@@ -43,7 +44,13 @@ function loadHandler(fail = {}) {
       const isAdmin = key === 'test-service-key';
       return {
         auth: {
-          getUser: async () => ({ data: { user: { id: CALLER_ID } }, error: null }),
+          getUser: async (token) => {
+            getUserTokens.push(token);
+            if (!token) {
+              return { data: { user: null }, error: { message: 'session missing' } };
+            }
+            return { data: { user: { id: CALLER_ID } }, error: null };
+          },
           admin: {
             createUser: async (args) => {
               calls.push(['gotrue:createUser', args]);
@@ -129,7 +136,7 @@ function loadHandler(fail = {}) {
   };
   vm.runInNewContext(stripTypeScriptTypes(source), context, { filename: FILE });
   assert.equal(typeof handler, 'function');
-  return { handler, calls };
+  return { handler, calls, getUserTokens };
 }
 
 function post(body) {
@@ -417,4 +424,24 @@ test('an unknown action with a merchant id is audited (#263)', async () => {
   const res = await handler(post({ action: 'drop_table', merchant_id: MERCHANT_ID }));
   assert.equal(res.status, 400);
   assert.deepEqual(names(calls), [...RATE, 'staff_admin_audit_refusal']);
+});
+
+test('the caller JWT is passed to auth.getUser (regression: real sessions 401)', async () => {
+  const { handler, getUserTokens } = loadHandler();
+  const res = await handler(post({ action: 'list_staff', merchant_id: MERCHANT_ID }));
+  assert.ok(getUserTokens.length >= 1, 'getUser was called');
+  assert.equal(getUserTokens[0], 'test', 'the Bearer token from Authorization was passed explicitly');
+  assert.notEqual(res.status, 401);
+});
+
+test('a request without a Bearer token is 401 with zero effects', async () => {
+  const { handler, calls, getUserTokens } = loadHandler();
+  const res = await handler(new Request('https://example.invalid', {
+    method: 'POST',
+    headers: { 'x-forwarded-for': '1.2.3.4' },
+    body: JSON.stringify(CREATE_BODY),
+  }));
+  assert.equal(res.status, 401);
+  assert.deepEqual(getUserTokens, [''], 'getUser saw the empty token');
+  assert.deepEqual(calls, [], 'no RPC or GoTrue admin effects');
 });

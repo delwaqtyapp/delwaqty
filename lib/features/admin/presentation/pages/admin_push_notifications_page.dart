@@ -51,6 +51,18 @@ Map<String, dynamic> buildBroadcastParams({
   };
 }
 
+/// One call, no fallback. The function signature is fixed on the server, so a
+/// failure is a real failure (not authorized, network) and must reach the
+/// operator unchanged instead of being masked by a second, different error.
+@visibleForTesting
+Future<int> sendBroadcast(
+  Future<dynamic> Function(String fn, {Map<String, dynamic>? params}) rpc,
+  Map<String, dynamic> params,
+) async {
+  final result = await rpc('admin_broadcast_notification', params: params);
+  return result is num ? result.toInt() : 0;
+}
+
 final adminNotificationTokensProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
       final client = Supabase.instance.client;
@@ -114,26 +126,8 @@ class _AdminPushNotificationsPageState
         deepLink: _deepLinkController.text,
         audience: _audience,
       );
-      dynamic result;
-      try {
-        result = await client.rpc(
-          'admin_broadcast_notification',
-          params: baseParams,
-        );
-      } catch (_) {
-        result = await client.rpc(
-          'admin_broadcast_notification',
-          params: {
-            'p_title': baseParams['p_title'],
-            'p_body': baseParams['p_body'],
-            'p_target_role': baseParams['p_target_role'],
-            'p_type': baseParams['p_type'],
-            'p_deep_link': baseParams['p_deep_link'],
-            'p_data': {'target_app': _audience, 'audience': _audience},
-          },
-        );
-      }
-      final sent = result is num ? result.toInt() : 0;
+      final result = await sendBroadcast(client.rpc, baseParams);
+      final sent = result;
       setState(() => _lastSentDeviceCount = sent);
       if (mounted) {
         context.showAppSnackBar(l10n.sentToDevices(sent));
@@ -141,7 +135,10 @@ class _AdminPushNotificationsPageState
       ref.invalidate(adminNotificationTokensProvider);
     } catch (e) {
       if (mounted) {
-        context.showAppSnackBar(l10n.sendFailed, isError: true);
+        context.showAppSnackBar(
+          '${l10n.sendFailed}: ${appErrorText(context, e)}',
+          isError: true,
+        );
       }
     } finally {
       if (mounted) setState(() => _sending = false);

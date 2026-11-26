@@ -106,8 +106,10 @@ older build:
 
 New licenses get a random 12 digit key shown as `1234-5678-9012`. The server
 looks it up (activation stays online); the client only normalizes what was
-typed (ASCII, Arabic-Indic and Persian digits; spaces and dashes ignored). Old `DLWQ1.` keys keep
-working and every old license also received a short code. After 10 failed key
+typed (ASCII, Arabic-Indic and Persian digits; spaces and dashes ignored). Old `DLWQ1.` keys were retired by
+migration 455: every license's key is now its 12 digit code, and a long token
+answers `UNKNOWN_KEY` (the app still accepts the old format in its local
+pre-check, the server rejects it). After 10 failed key
 lookups (unknown key or another merchant's key) in an hour a user gets
 `TOO_MANY_ATTEMPTS` on further failed lookups. A key the user owns always
 works, so a running shop is never locked out by someone's typos; the app also

@@ -26,10 +26,7 @@ class SupabaseMerchantDashboardDataSource {
       final modifierNames = modifiersData is List
           ? modifiersData.map((e) => e.toString()).toList()
           : <String>[];
-      final product = data['products'];
-      final productName = (product is Map && product['name'] != null)
-          ? product['name'] as String
-          : (data['product_name'] as String? ?? '');
+      final productName = data['product_name'] as String? ?? '';
       return MerchantOrderItem(
         productId: data['product_id'] as String? ?? '',
         productName: productName,
@@ -100,13 +97,13 @@ class SupabaseMerchantDashboardDataSource {
         (sum, o) => sum + ((o['total_amount'] as num?)?.toDouble() ?? 0),
       );
 
-      // 449 app switch: count comes from the definer RPC rows (base-table
-      // SELECT is 450 territory).
-      final productRows = await _client.rpc(
-        'get_my_products',
+      // 449/451 app switch: exact count through the definer RPC
+      // (base-table SELECT is 450 territory; a rows.length client count is
+      // capped by PostgREST max_rows and downloads private rows).
+      final totalProducts = await _client.rpc(
+        'get_my_products_count',
         params: {'p_merchant_id': merchantId},
-      ) as List;
-      final totalProducts = productRows.length;
+      ) as int;
 
       final totalReviews = await _client
           .from('reviews')
@@ -152,9 +149,13 @@ class SupabaseMerchantDashboardDataSource {
     try {
       var query = _client
           .from('orders')
+          // 449/451 app switch: no products() embed (products base-table
+          // SELECT is 450 territory); item names come from the denormalized
+          // order_items.product_name snapshot, which is the correct source
+          // for order history anyway.
           .select(
             'id, user_id, driver_id, status, dispatch_status, total_amount, created_at, delivery_address, notes, '
-            'order_items(product_id, product_name, quantity, unit_price, modifiers, products(name))',
+            'order_items(product_id, product_name, quantity, unit_price, modifiers)',
           )
           .eq('merchant_id', merchantId);
 

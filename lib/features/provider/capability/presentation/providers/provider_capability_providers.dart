@@ -124,29 +124,35 @@ final providerRawCategoryProvider = FutureProvider<String>((ref) async {
 
   if (await isOwnerByRole(client, uid)) return 'owner';
 
+  String? merchantId;
   try {
-    // Kept for its side effect: provisions a pending owner's merchant row.
-    await client.rpc('resolve_my_merchant');
+    // Kept for its side effect too: provisions a pending owner's merchant.
+    final resolved = await client.rpc('resolve_my_merchant');
+    if (resolved is String && resolved.isNotEmpty) {
+      merchantId = resolved;
+    }
   } catch (_) {}
 
-  // 449 app switch: the owner reads their own merchant row through the
-  // definer RPC (base-table SELECT is 450 territory). The RPC covers both
-  // shapes above: the resolved merchant and the legacy id = uid row. For a
-  // multi-merchant owner whose active category points past the first-created
-  // merchant, the RPC returns the first-created row (449 design).
-  final res = await client.rpc('get_my_merchant_profile');
+  // 449/451 app switch: the owner reads their own merchant row through the
+  // definer RPC (base-table SELECT is 450 territory). The resolved id pins
+  // the ACTIVE store for multi-business owners (451 overload); without it,
+  // the zero-arg RPC covers the legacy id = uid shape and the first-created
+  // fallback.
+  final res = merchantId != null
+      ? await client.rpc(
+          'get_my_merchant_profile',
+          params: {'p_merchant_id': merchantId},
+        )
+      : await client.rpc('get_my_merchant_profile');
   final merchant = res == null ? null : Map<String, dynamic>.from(res as Map);
   if (merchant != null && merchant['type'] is String) {
     return merchant['type'] as String;
   }
 
-  final sp = await client
-      .from('service_providers')
-      .select('category_type')
-      .eq('user_id', uid)
-      .order('created_at')
-      .limit(1)
-      .maybeSingle();
+  // 448: own provider profile through the definer RPC (service_providers
+  // base-table SELECT is 450 territory; same first-created row).
+  final spRow = await client.rpc('get_my_provider_profile');
+  final sp = spRow == null ? null : Map<String, dynamic>.from(spRow as Map);
   if (sp != null && sp['category_type'] is String) {
     return sp['category_type'] as String;
   }

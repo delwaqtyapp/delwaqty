@@ -34,10 +34,23 @@ class AdminOverviewDataSource {
   }
 
   Future<int> _merchantCount() async {
-    // 449 app switch: base-table SELECT on merchants is 450 territory; the
-    // definer dashboard RPC is scope-aware (372), which also fixes the old
-    // bare count leaking the countrywide total to scoped admins.
-    final metrics = await _supabase.rpc('admin_dashboard_metrics') as Map;
-    return (metrics['totalMerchants'] as num?)?.toInt() ?? 0;
+    // 449 app switch: base-table SELECT on merchants is 450 territory.
+    // admin_dashboard_metrics is ANALYTICS_VIEW-gated and returns ZEROS
+    // without it (372), so admins lacking the permission fall back to the
+    // scope-aware listing count: the number is always real, never a
+    // silent 0.
+    final allowed = await _supabase.rpc(
+      'admin_has_permission',
+      params: {'p_permission': 'ANALYTICS_VIEW'},
+    );
+    if (allowed == true) {
+      final metrics = await _supabase.rpc('admin_dashboard_metrics') as Map;
+      return (metrics['totalMerchants'] as num?)?.toInt() ?? 0;
+    }
+    final rows = await _supabase.rpc(
+      'admin_list_merchants',
+      params: {'p_search': null, 'p_status': null},
+    );
+    return (rows as List).length;
   }
 }

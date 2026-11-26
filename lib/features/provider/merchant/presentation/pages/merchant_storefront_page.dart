@@ -97,9 +97,15 @@ class WorkingHoursDay {
 
 final storefrontProvider = FutureProvider<StorefrontData>((ref) async {
   final client = ref.watch(supabaseClientProvider);
-  // 449 app switch: the owner reads their own full row through the definer
-  // RPC (base-table SELECT is 450 territory).
-  final row = await client.rpc('get_my_merchant_profile');
+  final merchantId = await ref.watch(providerMerchantIdProvider.future);
+  if (merchantId.isEmpty) return const StorefrontData();
+  // 449/451 app switch: the owner reads their own full row through the
+  // definer RPC (base-table SELECT is 450 territory); the resolved id pins
+  // the ACTIVE store for multi-business owners (451 overload).
+  final row = await client.rpc(
+    'get_my_merchant_profile',
+    params: {'p_merchant_id': merchantId},
+  );
   if (row == null) return const StorefrontData();
   return StorefrontData.fromRow(Map<String, dynamic>.from(row as Map));
 });

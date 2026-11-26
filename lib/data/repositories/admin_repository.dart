@@ -272,9 +272,7 @@ class AdminRepository implements admin.AdminRepository {
           ? const <dynamic>[]
           : await _supabase.rpc(
               'admin_get_merchant_contacts',
-              params: {
-                'p_merchant_ids': topEntries.map((e) => e.key).toList(),
-              },
+              params: {'p_merchant_ids': topEntries.map((e) => e.key).toList()},
             ) as List;
       final contactsById = <String, Map<String, dynamic>>{
         for (final raw in contactRows)
@@ -691,9 +689,8 @@ class AdminRepository implements admin.AdminRepository {
   }) async {
     try {
       var query = _supabase.from('orders').select('''
-        id, total_amount, status, created_at,
-        users!inner(id, full_name, email),
-        merchants!inner(id, name)
+        id, merchant_id, total_amount, status, created_at,
+        users!inner(id, full_name, email)
       ''');
 
       if (search != null && search.isNotEmpty) {
@@ -708,7 +705,40 @@ class AdminRepository implements admin.AdminRepository {
           .order('created_at', ascending: false)
           .range(offset, offset + limit - 1);
 
-      return List<Map<String, dynamic>>.from(response as List);
+      // 449/451 app switch: merchant names resolve through the admin-gated,
+      // region-scoped contacts RPC (merchants base-table SELECT is 450
+      // territory; the RPC has no status filter, so suspended/inactive
+      // merchant order history is preserved). Orders whose merchant the
+      // caller may not see drop out, mirroring the old inner join under
+      // merchant RLS.
+      final rows = List<Map<String, dynamic>>.from(response as List);
+      final merchantIds = <String>{
+        for (final r in rows)
+          if (r['merchant_id'] != null) r['merchant_id'] as String,
+      };
+      final contacts = merchantIds.isEmpty
+          ? const <dynamic>[]
+          : await _supabase.rpc(
+              'admin_get_merchant_contacts',
+              params: {'p_merchant_ids': merchantIds.toList()},
+            ) as List;
+      final contactsById = <String, Map<String, dynamic>>{
+        for (final raw in contacts)
+          (raw as Map<String, dynamic>)['id'] as String:
+              Map<String, dynamic>.from(raw),
+      };
+
+      return [
+        for (final r in rows)
+          if (contactsById.containsKey(r['merchant_id']))
+            {
+              ...r,
+              'merchants': {
+                'id': r['merchant_id'],
+                'name': contactsById[r['merchant_id']]!['name'],
+              },
+            },
+      ];
     } catch (e) {
       throw AdminException('Failed to fetch orders: $e');
     }

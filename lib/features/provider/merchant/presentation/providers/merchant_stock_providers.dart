@@ -80,20 +80,14 @@ final merchantStockProvider =
           .eq('merchant_id', merchantId)
           .order('stock_quantity', ascending: true);
 
-      // 449 app switch: the owner reads their own full product rows through
-      // the definer RPC (base-table SELECT is 450 territory); the inventory
-      // rows join client-side by product_id instead of a PostgREST embed.
-      final productsList = await client.rpc(
-        'get_my_products',
-        params: {'p_merchant_id': merchantId},
-      ) as List;
-      final productsById = <String, Map<String, dynamic>>{
-        for (final raw in productsList)
-          (raw as Map<String, dynamic>)['id'] as String:
-              Map<String, dynamic>.from(raw),
-      };
-
       if ((res as List).isEmpty) {
+        // 449 app switch: seed from the owner's own catalog through the
+        // definer RPC (base-table SELECT is 450 territory; same PostgREST
+        // max_rows page cap as the old base-table read).
+        final productsList = await client.rpc(
+          'get_my_products',
+          params: {'p_merchant_id': merchantId},
+        ) as List;
         if (productsList.isNotEmpty) {
           final initialRows = productsList.map((raw) {
             final p = raw as Map<String, dynamic>;
@@ -140,6 +134,28 @@ final merchantStockProvider =
           }
         }
       }
+
+      // 449/451 app switch: join the inventory page against the owner's
+      // own product rows fetched BY ID through the definer RPC, so the join
+      // never assumes one RPC page holds the whole catalog.
+      final inventoryIds = <String>[
+        for (final row in res as List)
+          (row as Map<String, dynamic>)['product_id'] as String,
+      ];
+      final productsList = inventoryIds.isEmpty
+          ? const <dynamic>[]
+          : await client.rpc(
+              'get_my_products_by_ids',
+              params: {
+                'p_merchant_id': merchantId,
+                'p_product_ids': inventoryIds,
+              },
+            ) as List;
+      final productsById = <String, Map<String, dynamic>>{
+        for (final raw in productsList)
+          (raw as Map<String, dynamic>)['id'] as String:
+              Map<String, dynamic>.from(raw),
+      };
 
       return (res as List).map((row) {
         final map = row as Map<String, dynamic>;

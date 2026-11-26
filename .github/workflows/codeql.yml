@@ -6,6 +6,7 @@ on:
     branches: [master]
   schedule:
     - cron: '27 3 * * 1'
+  workflow_dispatch:
 permissions:
   actions: read
   contents: read
@@ -18,12 +19,17 @@ jobs:
     name: Analyze (javascript-typescript)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # actions/checkout v4 (11d5960a326750d5838078e36cf38b85af677262)
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       # CodeQL has no Dart extractor; this covers the TypeScript edge
       # functions under supabase/functions. Flutter app code is covered by
-      # `flutter analyze` in ci.yml.
-      - uses: github/codeql-action/init@v3
+      # flutter analyze in ci.yml.
+      # github/codeql-action v4.39.5 (v4 tag -> commit 915412ff23e8)
+      - uses: github/codeql-action/init@915412ff23e8b7659517e607487dbeae018f2934
         with:
           languages: javascript-typescript
-          paths: ['supabase/functions']
-      - uses: github/codeql-action/analyze@v3
+          config: |
+            paths:
+              - supabase/functions
+      # github/codeql-action v4.39.5 (v4 tag -> commit 915412ff23e8)
+      - uses: github/codeql-action/analyze@915412ff23e8b7659517e607487dbeae018f2934

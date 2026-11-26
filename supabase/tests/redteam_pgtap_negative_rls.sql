@@ -9,7 +9,7 @@
 
 begin;
 
-select plan(30);
+select plan(29);
 
 -- ------------------------------------------------------------------
 -- 0. Fixtures: two customers
@@ -24,12 +24,14 @@ select tests.create_supabase_user('rls_customer_b', 'rls-b@example.invalid');
 --    _cashier_keys (internal, no grants to anon/authenticated).
 -- ------------------------------------------------------------------
 select is(
-  (select count(*)::int from pg_class c
-    join pg_namespace n on n.oid = c.relnamespace
-   where n.nspname = 'public' and c.relkind = 'r'
-     and not c.relrowsecurity
-     and c.relname not in ('spatial_ref_sys', '_cashier_keys')),
-  0,
+  coalesce(
+    (select string_agg(c.relname, ', ' order by c.relname) from pg_class c
+      join pg_namespace n on n.oid = c.relnamespace
+     where n.nspname = 'public' and c.relkind = 'r'
+       and not c.relrowsecurity
+       and c.relname not in ('spatial_ref_sys', '_cashier_keys')),
+    ''),
+  '',
   'RLS enabled on every public table (excluding spatial_ref_sys, _cashier_keys)'
 );
 
@@ -188,5 +190,8 @@ select is(
   'FORBIDDEN_OWNER_ONLY',
   'approve_topup_request rejects non-owner');
 
-select * from finish();
+-- finish(true) raises on any failure or plan mismatch: without it a
+-- "not ok" line still lets psql exit 0 and the CI gate would be hollow
+-- (#287).
+select * from finish(true);
 rollback;

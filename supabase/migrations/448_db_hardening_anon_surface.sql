@@ -122,7 +122,7 @@ CREATE POLICY merchant_staff_settings_owner ON public.merchant_staff_settings
 CREATE OR REPLACE FUNCTION public._assert_staff_settings_shape()
 RETURNS trigger
 LANGUAGE plpgsql
-SET search_path TO 'public'
+SET search_path TO 'public', 'pg_temp'
 AS $function$
 DECLARE
   v_key text;
@@ -152,13 +152,15 @@ CREATE TRIGGER trg_merchant_staff_settings_shape
 CREATE OR REPLACE FUNCTION public._audit_staff_settings_change()
 RETURNS trigger
 LANGUAGE plpgsql
-SET search_path TO 'public'
+SECURITY DEFINER
+SET search_path TO 'public', 'pg_temp'
 AS $function$
 BEGIN
   IF NEW.settings IS DISTINCT FROM OLD.settings THEN
-    INSERT INTO public.audit_log (actor, entity_id, kind, payload)
+    INSERT INTO public.merchant_staff_events (staff_id, merchant_id, kind, detail, actor_id)
     VALUES (NULL, NEW.merchant_id, 'staff_settings_changed',
-            jsonb_build_object('old', OLD.settings, 'new', NEW.settings));
+            jsonb_build_object('old', OLD.settings, 'new', NEW.settings),
+            auth.uid());
   END IF;
   RETURN NEW;
 END;
@@ -642,96 +644,101 @@ ALTER TABLE public.merchants DROP COLUMN staff_settings;
 -- verify_whatsapp_otp, whatsapp_otp_status, decide_user_verification — all
 -- prosecdef=true on prod), which table revokes do not affect. No app code
 -- path writes any public table while signed out (grepped lib/, pos/).
-REVOKE INSERT, UPDATE, DELETE ON public."activity_logs" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."admin_receiving_wallets" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."admin_roles" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."admin_users" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."audit_log" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."branches" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."catalog_categories" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."categories" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."chat_messages" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."chat_rooms" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."chat_typing" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."coupon_redemptions" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."coupons" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."delivery_pricing" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."delivery_zones" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."dispatch_config" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."driver_delay_events" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."driver_documents" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."driver_earnings" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."driver_locations" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."drivers" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."drug_catalog" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."favorite_drivers" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."favorites" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."financial_permissions" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."financial_receiving_accounts" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."geography_columns" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."geometry_columns" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."grace_accounts" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."grace_audit_log" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."identifier_lookup_attempts" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."live_share_sessions" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."location_updates" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."merchant_profiles" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."merchants" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."notification_destinations" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."notifications" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."offers" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."order_dispatch" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."order_edit_events" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."order_items" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."order_tracking" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."orders" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."payment_transactions" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."platform_receiving_accounts" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."platform_settings" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."platform_settlements" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."pos_sales" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."product_inventory" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."product_modifier_groups" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."product_modifier_options" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."product_modifiers" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."products" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."promo_codes" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."promo_redemptions" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."provider_business_profiles" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."provider_documents" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."regional_collections" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."reservations" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."restaurant_settings" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."reviews" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."ride_ratings" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."ride_requests" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."sanctions" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."saved_places" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."service_audio_logs" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."service_bookings" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."service_categories" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."service_providers" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."service_reviews" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."spatial_ref_sys" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."topup_requests" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."trip_events" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."trusted_contacts" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."user_addresses" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."users" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."vehicles" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."verification_attempts" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."wallet_funding_requests" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."wallets" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."whatsapp_otp_verifications" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."withdrawal_requests" FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public."working_hours" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."activity_logs" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."admin_receiving_wallets" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."admin_roles" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."admin_users" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."audit_log" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."branches" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."catalog_categories" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."categories" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."chat_messages" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."chat_rooms" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."chat_typing" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."coupon_redemptions" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."coupons" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."delivery_pricing" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."delivery_zones" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."dispatch_config" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."driver_delay_events" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."driver_documents" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."driver_earnings" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."driver_locations" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."driver_obligations" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."drivers" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."drug_catalog" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."favorite_drivers" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."favorites" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."financial_permissions" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."financial_receiving_accounts" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."geography_columns" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."geometry_columns" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."grace_accounts" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."grace_audit_log" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."identifier_lookup_attempts" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."live_share_sessions" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."location_updates" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."merchant_ledger" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."merchant_payout_requests" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."merchant_profiles" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."merchants" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."notification_destinations" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."notifications" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."offers" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."order_dispatch" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."order_edit_events" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."order_items" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."order_tracking" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."orders" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."payment_transactions" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."platform_receiving_accounts" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."platform_settings" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."platform_settlements" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."pos_sales" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."product_inventory" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."product_modifier_groups" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."product_modifier_options" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."product_modifiers" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."products" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."promo_codes" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."promo_redemptions" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."provider_business_profiles" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."provider_documents" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."regional_collections" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."reservations" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."restaurant_settings" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."reviews" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."ride_ratings" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."ride_requests" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."sanctions" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."saved_places" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."service_audio_logs" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."service_bookings" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."service_categories" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."service_providers" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."service_reviews" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."sos_alerts" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."spatial_ref_sys" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."topup_requests" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."trip_events" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."trusted_contacts" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."user_addresses" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."users" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."vehicles" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."verification_attempts" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."wallet_funding_requests" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."wallet_transactions" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."wallets" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."whatsapp_otp_verifications" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."withdrawal_requests" FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public."working_hours" FROM anon;
 
 -- Stop the next baseline-style table from re-inheriting anon grants where
 -- the platform allows it; failure is non-fatal (notice only).
 DO $$
 BEGIN
   ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public
-    REVOKE INSERT, UPDATE, DELETE ON TABLES FROM anon;
+    REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON TABLES FROM anon;
 EXCEPTION WHEN OTHERS THEN
   RAISE NOTICE '448: default-privileges revoke for supabase_admin not permitted: %', sqlerrm;
 END $$;

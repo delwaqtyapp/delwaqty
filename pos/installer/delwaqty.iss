@@ -16,7 +16,7 @@
   #define SourceDir "publish\shop-net8"
 #endif
 #ifndef OutputBase
-  #define OutputBase "delwaqty-cashier-setup-EXPERIMENTAL"
+  #define OutputBase "delwaqty-cashier-setup-local"
 #endif
 #ifndef OutputDir
   #define OutputDir "installer-output"

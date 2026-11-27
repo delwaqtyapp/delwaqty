@@ -6,6 +6,9 @@
 --   admin_review_refund()    approve (credits the wallet once) or reject (note required);
 --                            needs financial permission 'review_refund' (owner always has it)
 --   admin_list_refund_requests()
+-- Scope note (#322): the refund RPCs are platform-global, not region-scoped.
+-- review_refund is granted only to the owner or global finance staff; regional
+-- scoping becomes a later item if regional finance admins are added.
 -- order_id is ON DELETE RESTRICT so financial history is never silently deleted.
 -- All writes go through the DEFINER RPCs; both actions write audit_log.
 -- Re-runnable.

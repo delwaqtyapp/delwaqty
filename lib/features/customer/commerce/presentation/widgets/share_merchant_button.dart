@@ -36,11 +36,13 @@ class ShareMerchantButton extends StatelessWidget {
           if (merchant.city != null && merchant.city!.isNotEmpty)
             merchant.city!,
         ].join(', ');
-        Share.share(
-          composeMerchantShareText(
-            merchantName: merchant.name,
-            appName: l10n.appName,
-            address: address.isEmpty ? null : address,
+        SharePlus.instance.share(
+          ShareParams(
+            text: composeMerchantShareText(
+              merchantName: merchant.name,
+              appName: l10n.appName,
+              address: address.isEmpty ? null : address,
+            ),
           ),
         );
       },

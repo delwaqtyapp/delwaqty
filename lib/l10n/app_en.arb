@@ -3139,5 +3139,12 @@
   "cashierLicenseStatusIssued": "Issued, not activated",
   "cashierLicenseStatusActive": "Active",
   "cashierLicenseStatusExpired": "Expired",
-  "cashierLicenseStatusSuspended": "Suspended"
+  "cashierLicenseStatusSuspended": "Suspended",
+  "cancelOrderConfirmBody": "Cancel this order? If you already paid, the amount is refunded.",
+  "cancelOrderLimitNote": "You can cancel 2 orders per month. A third cancellation in the same month suspends your account.",
+  "cancelOrderKeep": "Keep order",
+  "cancelOrderDone": "Order cancelled",
+  "cancelOrderOutForDelivery": "The order is already out for delivery and cannot be cancelled here.",
+  "cancelOrderNotAllowed": "This order can no longer be cancelled.",
+  "cancelOrderFailed": "Could not cancel the order. Try again."
 }

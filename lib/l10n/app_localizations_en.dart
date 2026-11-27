@@ -8724,4 +8724,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cashierLicenseStatusSuspended => 'Suspended';
+
+  @override
+  String get cancelOrderConfirmBody =>
+      'Cancel this order? If you already paid, the amount is refunded.';
+
+  @override
+  String get cancelOrderLimitNote =>
+      'You can cancel 2 orders per month. A third cancellation in the same month suspends your account.';
+
+  @override
+  String get cancelOrderKeep => 'Keep order';
+
+  @override
+  String get cancelOrderDone => 'Order cancelled';
+
+  @override
+  String get cancelOrderOutForDelivery =>
+      'The order is already out for delivery and cannot be cancelled here.';
+
+  @override
+  String get cancelOrderNotAllowed => 'This order can no longer be cancelled.';
+
+  @override
+  String get cancelOrderFailed => 'Could not cancel the order. Try again.';
 }

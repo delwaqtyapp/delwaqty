@@ -48,6 +48,7 @@ import 'package:delwaqty/features/admin/financial/presentation/pages/admin_settl
 import 'package:delwaqty/features/admin/financial/presentation/pages/admin_grace_management_page.dart';
 import 'package:delwaqty/features/admin/financial/presentation/pages/admin_receiving_wallets_page.dart';
 import 'package:delwaqty/features/admin/financial/presentation/pages/admin_owner_dashboard_page.dart';
+import 'package:delwaqty/features/admin/financial/presentation/pages/admin_payout_requests_page.dart';
 import 'package:delwaqty/features/admin/financial/presentation/pages/admin_refund_requests_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_categories_management_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_campaigns_page.dart';
@@ -351,6 +352,11 @@ class AdminModule extends FeatureModule {
           path: 'hierarchy',
           pageBuilder: (context, state) =>
               _adminPage(const AdminHierarchyPage()),
+        ),
+        GoRoute(
+          path: 'payout-requests',
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminPayoutRequestsPage()),
         ),
         GoRoute(
           path: 'refund-requests',

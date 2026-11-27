@@ -8824,4 +8824,63 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminRefundRejected => 'Refund request rejected';
+
+  @override
+  String get merchantPayouts => 'Payouts and ledger';
+
+  @override
+  String get payoutRequest => 'Request payout';
+
+  @override
+  String get payoutRequested => 'Payout request sent';
+
+  @override
+  String get payoutRequestsTitle => 'Payout requests';
+
+  @override
+  String get payoutLedgerTitle => 'Ledger';
+
+  @override
+  String get payoutLedgerEmpty => 'No ledger entries yet';
+
+  @override
+  String get payoutStatusApproved => 'Approved';
+
+  @override
+  String get payoutErrorBalance =>
+      'The amount is more than your available balance.';
+
+  @override
+  String get payoutErrorPending => 'You already have a pending payout request.';
+
+  @override
+  String get payoutErrorAmount => 'Enter a valid amount (up to 2 decimals).';
+
+  @override
+  String get payoutErrorGeneric =>
+      'Could not complete the payout action. Try again.';
+
+  @override
+  String get adminPayoutRequests => 'Payout requests';
+
+  @override
+  String get adminPayoutNone => 'No pending payout requests';
+
+  @override
+  String get adminPayoutApproveBody =>
+      'Approve and debit the merchant ledger by:';
+
+  @override
+  String get adminPayoutApproved => 'Payout approved';
+
+  @override
+  String get adminPayoutRejected => 'Payout rejected';
+
+  @override
+  String get payoutErrorMerchantUnsupported =>
+      'Payouts are not supported yet for accounts with more than one shop, or without a shop.';
+
+  @override
+  String get adminPayoutManualNote =>
+      'Approving only records the debit in the merchant ledger. The actual transfer (InstaPay, Vodafone Cash or cash) is done manually by staff.';
 }

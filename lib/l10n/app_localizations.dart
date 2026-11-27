@@ -16669,6 +16669,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Refund request rejected'**
   String get adminRefundRejected;
+
+  /// No description provided for @merchantPayouts.
+  ///
+  /// In en, this message translates to:
+  /// **'Payouts and ledger'**
+  String get merchantPayouts;
+
+  /// No description provided for @payoutRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Request payout'**
+  String get payoutRequest;
+
+  /// No description provided for @payoutRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Payout request sent'**
+  String get payoutRequested;
+
+  /// No description provided for @payoutRequestsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payout requests'**
+  String get payoutRequestsTitle;
+
+  /// No description provided for @payoutLedgerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger'**
+  String get payoutLedgerTitle;
+
+  /// No description provided for @payoutLedgerEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No ledger entries yet'**
+  String get payoutLedgerEmpty;
+
+  /// No description provided for @payoutStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get payoutStatusApproved;
+
+  /// No description provided for @payoutErrorBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'The amount is more than your available balance.'**
+  String get payoutErrorBalance;
+
+  /// No description provided for @payoutErrorPending.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have a pending payout request.'**
+  String get payoutErrorPending;
+
+  /// No description provided for @payoutErrorAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid amount (up to 2 decimals).'**
+  String get payoutErrorAmount;
+
+  /// No description provided for @payoutErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not complete the payout action. Try again.'**
+  String get payoutErrorGeneric;
+
+  /// No description provided for @adminPayoutRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Payout requests'**
+  String get adminPayoutRequests;
+
+  /// No description provided for @adminPayoutNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending payout requests'**
+  String get adminPayoutNone;
+
+  /// No description provided for @adminPayoutApproveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve and debit the merchant ledger by:'**
+  String get adminPayoutApproveBody;
+
+  /// No description provided for @adminPayoutApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Payout approved'**
+  String get adminPayoutApproved;
+
+  /// No description provided for @adminPayoutRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Payout rejected'**
+  String get adminPayoutRejected;
+
+  /// No description provided for @payoutErrorMerchantUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Payouts are not supported yet for accounts with more than one shop, or without a shop.'**
+  String get payoutErrorMerchantUnsupported;
+
+  /// No description provided for @adminPayoutManualNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Approving only records the debit in the merchant ledger. The actual transfer (InstaPay, Vodafone Cash or cash) is done manually by staff.'**
+  String get adminPayoutManualNote;
 }
 
 class _AppLocalizationsDelegate

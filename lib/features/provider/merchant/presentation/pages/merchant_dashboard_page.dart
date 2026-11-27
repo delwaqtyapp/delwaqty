@@ -590,6 +590,13 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
           color: AppColors.brandViolet,
           onTap: () => context.push('/merchant-dashboard/cashier-license'),
         ),
+      if (caps.contains(ProviderCapability.financial))
+        _QuickActionItem(
+          title: l10n.merchantPayouts,
+          icon: Icons.payments_rounded,
+          color: AppColors.successLight,
+          onTap: () => context.push('/merchant-dashboard/payouts'),
+        ),
       if (caps.contains(ProviderCapability.inventory))
         _QuickActionItem(
           title: l10n.inventory,

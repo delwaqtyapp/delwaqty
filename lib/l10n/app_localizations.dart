@@ -16765,6 +16765,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Payout rejected'**
   String get adminPayoutRejected;
+
+  /// No description provided for @payoutErrorMerchantUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Payouts are not supported yet for accounts with more than one shop, or without a shop.'**
+  String get payoutErrorMerchantUnsupported;
+
+  /// No description provided for @adminPayoutManualNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Approving only records the debit in the merchant ledger. The actual transfer (InstaPay, Vodafone Cash or cash) is done manually by staff.'**
+  String get adminPayoutManualNote;
 }
 
 class _AppLocalizationsDelegate

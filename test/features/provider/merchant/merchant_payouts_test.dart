@@ -57,4 +57,12 @@ void main() {
     expect(l.entries.last.isCredit, isTrue);
     expect(l.entries.last.description, isNull);
   });
+
+  test('payoutErrorKey exposes the server code', () {
+    expect(
+      payoutErrorKey(PayoutException('AMBIGUOUS_MERCHANT')),
+      'AMBIGUOUS_MERCHANT',
+    );
+    expect(payoutErrorKey(Exception('x')), '');
+  });
 }

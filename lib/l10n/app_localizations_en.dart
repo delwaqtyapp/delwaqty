@@ -8875,4 +8875,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminPayoutRejected => 'Payout rejected';
+
+  @override
+  String get payoutErrorMerchantUnsupported =>
+      'Payouts are not supported yet for accounts with more than one shop, or without a shop.';
+
+  @override
+  String get adminPayoutManualNote =>
+      'Approving only records the debit in the merchant ledger. The actual transfer (InstaPay, Vodafone Cash or cash) is done manually by staff.';
 }

@@ -3101,5 +3101,7 @@
   "adminPayoutNone": "لا توجد طلبات سحب معلقة",
   "adminPayoutApproveBody": "الموافقة وخصم هذا المبلغ من رصيد التاجر:",
   "adminPayoutApproved": "تمت الموافقة على السحب",
-  "adminPayoutRejected": "تم رفض طلب السحب"
+  "adminPayoutRejected": "تم رفض طلب السحب",
+  "payoutErrorMerchantUnsupported": "السحب غير مدعوم بعد للحسابات التي لديها أكثر من متجر أو بدون متجر.",
+  "adminPayoutManualNote": "الموافقة تسجّل الخصم في حساب التاجر فقط. التحويل الفعلي (إنستاباي أو فودافون كاش أو نقداً) يتم يدوياً بواسطة الفريق."
 }

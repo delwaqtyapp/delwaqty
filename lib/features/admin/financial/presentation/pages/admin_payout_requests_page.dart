@@ -165,9 +165,18 @@ class _AdminPayoutRequestsPageState extends State<AdminPayoutRequestsPage> {
             )
           : ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: _rows.length,
+              itemCount: _rows.length + 1,
               itemBuilder: (context, i) {
-                final r = _rows[i];
+                if (i == 0) {
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: ListTile(
+                      leading: const Icon(Icons.info_outline_rounded),
+                      title: Text(l10n.adminPayoutManualNote),
+                    ),
+                  );
+                }
+                final r = _rows[i - 1];
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
                   child: Padding(

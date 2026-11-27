@@ -9,6 +9,8 @@ String payoutErrorText(AppLocalizations l10n, Object e) =>
     switch (payoutErrorKey(e)) {
       'INSUFFICIENT_BALANCE' => l10n.payoutErrorBalance,
       'PENDING_EXISTS' => l10n.payoutErrorPending,
+      'AMBIGUOUS_MERCHANT' ||
+      'NO_MERCHANT' => l10n.payoutErrorMerchantUnsupported,
       'INVALID_AMOUNT' => l10n.payoutErrorAmount,
       _ => l10n.payoutErrorGeneric,
     };
@@ -78,6 +80,9 @@ class _MerchantPayoutsPageState extends State<MerchantPayoutsPage> {
   Future<void> _request() async {
     final l10n = AppLocalizations.of(context);
     final controller = TextEditingController();
+    // One key per dialog: a retry of the same submit replays instead of
+    // creating a second request.
+    final key = 'app-${DateTime.now().microsecondsSinceEpoch}';
     final amount = await showDialog<num>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -110,11 +115,7 @@ class _MerchantPayoutsPageState extends State<MerchantPayoutsPage> {
     if (amount == null || !mounted) return;
     setState(() => _busy = true);
     try {
-      await _api.requestPayout(
-        amount,
-        idempotencyKey:
-            'app-${DateTime.now().microsecondsSinceEpoch}-${amount.toString()}',
-      );
+      await _api.requestPayout(amount, idempotencyKey: key);
       if (mounted) context.showAppSnackBar(l10n.payoutRequested);
       await _load();
     } catch (e) {

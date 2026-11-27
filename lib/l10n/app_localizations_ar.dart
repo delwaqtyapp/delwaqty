@@ -8793,4 +8793,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get adminPayoutRejected => 'تم رفض طلب السحب';
+
+  @override
+  String get payoutErrorMerchantUnsupported =>
+      'السحب غير مدعوم بعد للحسابات التي لديها أكثر من متجر أو بدون متجر.';
+
+  @override
+  String get adminPayoutManualNote =>
+      'الموافقة تسجّل الخصم في حساب التاجر فقط. التحويل الفعلي (إنستاباي أو فودافون كاش أو نقداً) يتم يدوياً بواسطة الفريق.';
 }

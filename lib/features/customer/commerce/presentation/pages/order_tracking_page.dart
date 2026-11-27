@@ -6,6 +6,7 @@ import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/order.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/cancel_order_button.dart';
+import 'package:delwaqty/features/customer/commerce/presentation/widgets/refund_request_section.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
@@ -74,6 +75,7 @@ class _OrderTrackingPageState extends ConsumerState<OrderTrackingPage>
                 _TimelineSection(order: order, pulseAnimation: _pulseAnimation),
                 const SizedBox(height: 24),
                 _OrderDetailsCard(order: order),
+                RefundRequestSection(order: order),
                 CancelOrderButton(
                   order: order,
                   onCancelled: () =>

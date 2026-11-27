@@ -8672,4 +8672,76 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cancelOrderFailed => 'تعذر إلغاء الطلب. حاول مرة أخرى.';
+
+  @override
+  String get refundRequestTitle => 'طلب استرداد';
+
+  @override
+  String get refundReasonMissingItem => 'صنف ناقص';
+
+  @override
+  String get refundReasonWrongItem => 'صنف خاطئ';
+
+  @override
+  String get refundReasonQuality => 'مشكلة في الجودة';
+
+  @override
+  String get refundReasonLate => 'وصل متأخراً';
+
+  @override
+  String get refundReasonDamaged => 'تالف';
+
+  @override
+  String get refundReasonOther => 'سبب آخر';
+
+  @override
+  String get refundDetailsHint => 'اشرح ما حدث (اختياري)';
+
+  @override
+  String get refundSubmit => 'إرسال الطلب';
+
+  @override
+  String get refundRequestSent => 'تم إرسال طلب الاسترداد';
+
+  @override
+  String get refundStatusPending => 'طلب الاسترداد قيد المراجعة';
+
+  @override
+  String get refundStatusApproved => 'تمت إضافة المبلغ إلى محفظتك:';
+
+  @override
+  String get refundStatusRejected => 'تم رفض طلب الاسترداد';
+
+  @override
+  String get refundErrorAlready => 'يوجد طلب استرداد لهذا الطلب بالفعل.';
+
+  @override
+  String get refundErrorWindow => 'انتهت مهلة الاسترداد (14 يوماً).';
+
+  @override
+  String get refundErrorNotEligible => 'هذا الطلب غير مؤهل للاسترداد.';
+
+  @override
+  String get refundErrorGeneric => 'تعذر إرسال طلب الاسترداد. حاول مرة أخرى.';
+
+  @override
+  String get adminRefundRequests => 'طلبات الاسترداد';
+
+  @override
+  String get adminRefundNone => 'لا توجد طلبات استرداد معلقة';
+
+  @override
+  String get adminRefundApproveBody => 'إضافة هذا المبلغ إلى محفظة العميل:';
+
+  @override
+  String get adminRefundRejectHint => 'السبب الذي سيراه العميل';
+
+  @override
+  String get adminRefundNoteRequired => 'السبب مطلوب للرفض';
+
+  @override
+  String get adminRefundApproved => 'تم قبول الاسترداد وإضافة المبلغ';
+
+  @override
+  String get adminRefundRejected => 'تم رفض طلب الاسترداد';
 }

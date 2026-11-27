@@ -530,10 +530,17 @@ class _ProductDetailBottomSheetState
   }
 
   Widget _buildAddToCartButton(AppLocalizations l10n) {
+    final merchantOpen =
+        ref
+            .watch(merchantOpenStatusProvider(widget.merchantId))
+            .asData
+            ?.value ??
+        true;
+    final canOrder = widget.product.isAvailable && merchantOpen;
     return SizedBox(
       width: double.infinity,
       child: FilledButton.icon(
-        onPressed: widget.product.isAvailable
+        onPressed: canOrder
             ? () async {
                 final messenger = ScaffoldMessenger.of(context);
                 final router = GoRouter.of(context);
@@ -589,7 +596,9 @@ class _ProductDetailBottomSheetState
             : null,
         icon: const Icon(Icons.shopping_cart_outlined, size: 20),
         label: Text(
-          '${l10n.addToCart} - ${_totalPrice.toStringAsFixed(0)} ${l10n.currencySymbol}',
+          merchantOpen
+              ? '${l10n.addToCart} - ${_totalPrice.toStringAsFixed(0)} ${l10n.currencySymbol}'
+              : l10n.closed,
         ),
         style: FilledButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 14),

@@ -8,6 +8,7 @@ import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart'
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/price_tag.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/cart_badge.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/cart_conflict_guard.dart';
+import 'package:delwaqty/features/customer/commerce/presentation/providers/cart_providers.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/entities/product_modifier.dart';
 import 'package:delwaqty/features/customer/restaurant/restaurant_module.dart'
     as restaurant;
@@ -192,6 +193,13 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
         }
 
         if (!_modifiersLoaded) _loadModifiers();
+
+        final merchantOpen =
+            ref
+                .watch(merchantOpenStatusProvider(widget.merchantId))
+                .asData
+                ?.value ??
+            true;
 
         final selectedVariant = _selectedVariantId != null
             ? product.variants
@@ -492,7 +500,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: FilledButton.icon(
-                onPressed: product.isAvailable
+                onPressed: product.isAvailable && merchantOpen
                     ? () async {
                         if (_missingRequiredModifier) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -571,7 +579,9 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                     : null,
                 icon: const Icon(Icons.add_shopping_cart),
                 label: Text(
-                  '${l10n.addToCart} - ${totalPrice.toStringAsFixed(0)} ${l10n.currencySymbol}',
+                  merchantOpen
+                      ? '${l10n.addToCart} - ${totalPrice.toStringAsFixed(0)} ${l10n.currencySymbol}'
+                      : l10n.closed,
                 ),
               ),
             ),

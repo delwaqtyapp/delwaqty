@@ -64,6 +64,26 @@ final cartProvider = AsyncNotifierProvider<CartNotifier, Cart?>(
   CartNotifier.new,
 );
 
+/// Whether a merchant currently accepts orders (`merchants.is_open`).
+///
+/// Powers the closed-merchant guard on the add-to-cart surfaces: the server
+/// already rejects orders from closed merchants (create_order), this keeps
+/// customers from filling a cart they cannot check out. A failed or missing
+/// lookup resolves to `true` so a transient error never blocks ordering.
+final merchantOpenStatusProvider = FutureProvider.family<bool, String>((
+  ref,
+  merchantId,
+) async {
+  try {
+    final merchant = await ref
+        .watch(merchantRepositoryProvider)
+        .getMerchantById(merchantId);
+    return merchant?.isOpenNow ?? true;
+  } catch (_) {
+    return true;
+  }
+});
+
 /// Convenience view: just the cart, ignoring loading/error states.
 final currentCartProvider = Provider<Cart?>(
   (ref) => ref.watch(cartProvider).asData?.value,

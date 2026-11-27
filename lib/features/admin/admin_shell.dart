@@ -442,11 +442,13 @@ class _AdminCanvas extends StatelessWidget {
           Expanded(
             child: Builder(
               builder: (context) {
-                // Narrow phones showed a 24px empty strip on both sides;
-                // keep the desktop gutter only where there is room for it.
-                final horizontal = MediaQuery.sizeOf(context).width < 600
-                    ? 12.0
-                    : 24.0;
+                // Admin pages already pad themselves (12 to 16 px). Stacking a
+                // shell gutter on top left two empty bars on a phone, so
+                // phones get no extra gutter; wider screens keep a small one.
+                final width = MediaQuery.sizeOf(context).width;
+                final horizontal = width < 600
+                    ? 0.0
+                    : (width < 900 ? 8.0 : 24.0);
                 return ResponsiveContent(
                   maxWidth: 1240,
                   padding: EdgeInsets.symmetric(horizontal: horizontal),

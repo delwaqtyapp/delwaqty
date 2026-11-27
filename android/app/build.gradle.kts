@@ -45,7 +45,8 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         ndk {
-            abiFilters += listOf("arm64-v8a")
+            // Universal APK: 64-bit plus 32-bit ARM (older 32-bit-only phones).
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
         }
         val mapsApiKey = System.getenv("MAPS_API_KEY")
             ?: project.findProperty("MAPS_API_KEY") as? String

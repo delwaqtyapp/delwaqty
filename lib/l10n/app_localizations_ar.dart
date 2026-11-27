@@ -2871,6 +2871,36 @@ class AppLocalizationsAr extends AppLocalizations {
   String get saveNumber => 'حفظ الرقم';
 
   @override
+  String get directDeliveryErrAddress => 'أدخل عنوان التوصيل أو اخترْه';
+
+  @override
+  String get directDeliveryErrPhone => 'أدخل رقم هاتفك';
+
+  @override
+  String get directDeliveryErrPhoneInvalid =>
+      'أدخل رقم موبايل مصري صحيح (01 ثم 9 أرقام)';
+
+  @override
+  String get directDeliveryErrNothing =>
+      'أضف منتجاً واحداً على الأقل أو اكتب وصف طلبك';
+
+  @override
+  String get directDeliveryErrQuantity => 'الكمية يجب أن تكون 1 أو أكثر';
+
+  @override
+  String get directDeliveryPickAddress => 'أي عنوان تقصد؟';
+
+  @override
+  String get directDeliverySavedAddresses => 'العناوين المحفوظة';
+
+  @override
+  String get directDeliveryEstimateNote =>
+      'تقدير حسب المسافة. قد يختلف السعر النهائي.';
+
+  @override
+  String get directDeliveryEstimateLabel => 'تكلفة التوصيل التقديرية';
+
+  @override
   String get numberSaved => 'تم حفظ الرقم';
 
   @override

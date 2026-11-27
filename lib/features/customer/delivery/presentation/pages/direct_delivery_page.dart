@@ -12,14 +12,34 @@ import 'package:delwaqty/features/customer/location/presentation/providers/locat
 import 'package:delwaqty/features/customer/location/presentation/widgets/smart_map_picker_sheet.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
 import 'package:delwaqty/features/customer/search/domain/entities/geo_point.dart';
+import 'package:delwaqty/features/customer/search/domain/entities/place_suggestion.dart';
 import 'package:delwaqty/features/customer/search/domain/entities/search_session.dart';
 import 'package:delwaqty/features/customer/search/presentation/providers/search_providers.dart';
 
 import 'dart:async';
 
+import 'package:geolocator/geolocator.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/features/customer/delivery/domain/direct_delivery_validation.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
+
+/// Saved delivery addresses (user_addresses) for the quick-pick chips.
+final _directSavedAddressesProvider =
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+      final client = Supabase.instance.client;
+      final uid = client.auth.currentUser?.id;
+      if (uid == null) return const <Map<String, dynamic>>[];
+      final rows = await client
+          .from('user_addresses')
+          .select('id,label,address,latitude,longitude,is_default')
+          .eq('user_id', uid)
+          .order('is_default', ascending: false)
+          .order('created_at');
+      return (rows as List<dynamic>).cast<Map<String, dynamic>>();
+    });
 
 class DirectDeliveryPage extends ConsumerStatefulWidget {
   const DirectDeliveryPage({super.key});
@@ -41,6 +61,9 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
   bool _saveNumber = true;
   bool _loadingLocation = false;
   bool _submitting = false;
+  double? _estimateFee;
+  String _estimateCurrency = 'EGP';
+  int _estimateSeq = 0;
   double? _pickedDropoffLat;
   double? _pickedDropoffLng;
 
@@ -94,8 +117,15 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
 
   void _addItem() {
     final name = _itemNameController.text.trim();
-    final qty = int.tryParse(_itemQtyController.text.trim()) ?? 1;
+    final qty = parseItemQuantity(_itemQtyController.text);
     if (name.isEmpty) return;
+    if (qty == null) {
+      context.showAppSnackBar(
+        AppLocalizations.of(context).directDeliveryErrQuantity,
+        isError: true,
+      );
+      return;
+    }
 
     String? subUnit;
     if (_selectedUnit == 'kg') {
@@ -125,6 +155,94 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     setState(() => _items.removeAt(index));
   }
 
+  void _clearPin() {
+    _pickedDropoffLat = null;
+    _pickedDropoffLng = null;
+    if (_estimateFee != null) setState(() => _estimateFee = null);
+  }
+
+  /// Fee estimate for the chosen pin, from the server pricing table. Distance
+  /// is straight-line, so the UI labels it an estimate.
+  Future<void> _updateEstimate() async {
+    final lat = _pickedDropoffLat;
+    final lng = _pickedDropoffLng;
+    final from = ref.read(userLocationProvider).value;
+    if (lat == null || lng == null || from == null) return;
+    final seq = ++_estimateSeq;
+    try {
+      final km =
+          Geolocator.distanceBetween(from.latitude, from.longitude, lat, lng) /
+          1000;
+      final res = await ref
+          .read(deliveryRepositoryProvider)
+          .estimateDeliveryFee('courier', km);
+      if (!mounted || seq != _estimateSeq) return;
+      final fee = (res['fee'] as num?)?.toDouble();
+      if (res['success'] == true && fee != null) {
+        setState(() {
+          _estimateFee = fee;
+          _estimateCurrency = res['currency'] as String? ?? 'EGP';
+        });
+      }
+    } catch (e, st) {
+      // The estimate is informational; never block the request on it.
+      ref.read(loggerProvider).e('Fee estimate failed', e, st);
+    }
+  }
+
+  void _setPin(String address, double lat, double lng) {
+    setState(() {
+      _dropoffController.text = address;
+      _pickedDropoffLat = lat;
+      _pickedDropoffLng = lng;
+      _estimateFee = null;
+    });
+    unawaited(_updateEstimate());
+  }
+
+  /// Lets the user choose among the geocoder's matches instead of silently
+  /// taking the first one. Returns the chosen suggestion or null.
+  Future<PlaceSuggestion?> _chooseSuggestion(
+    List<PlaceSuggestion> suggestions,
+    AppLocalizations l10n,
+  ) {
+    return showModalBottomSheet<PlaceSuggestion>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Text(
+                l10n.directDeliveryPickAddress,
+                style: AppTextStyles.titleMedium,
+              ),
+            ),
+            for (final s in suggestions.take(5))
+              ListTile(
+                leading: const Icon(Icons.location_on_outlined),
+                title: Text(s.primaryText),
+                subtitle: s.secondaryText.isEmpty
+                    ? null
+                    : Text(s.secondaryText),
+                onTap: () => Navigator.of(ctx).pop(s),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _errorText(DirectDeliveryError e, AppLocalizations l10n) =>
+      switch (e) {
+        DirectDeliveryError.noDropoff => l10n.directDeliveryErrAddress,
+        DirectDeliveryError.noPhone => l10n.directDeliveryErrPhone,
+        DirectDeliveryError.badPhone => l10n.directDeliveryErrPhoneInvalid,
+        DirectDeliveryError.nothingToDeliver => l10n.directDeliveryErrNothing,
+      };
+
   Future<void> _useCurrentLocation() async {
     final l10n = AppLocalizations.of(context);
     setState(() => _loadingLocation = true);
@@ -135,11 +253,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
         final address = value.detailedAddress.isNotEmpty
             ? value.detailedAddress
             : '${value.latitude}, ${value.longitude}';
-        setState(() {
-          _dropoffController.text = address;
-          _pickedDropoffLat = value.latitude;
-          _pickedDropoffLng = value.longitude;
-        });
+        _setPin(address, value.latitude, value.longitude);
         final accuracy = value.accuracyMeters;
         if (accuracy != null && accuracy > precisionTargetMeters) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -169,11 +283,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
       initialLng: _pickedDropoffLng,
     );
     if (picked != null && mounted) {
-      setState(() {
-        _dropoffController.text = picked.detailedAddress;
-        _pickedDropoffLat = picked.latitude;
-        _pickedDropoffLng = picked.longitude;
-      });
+      _setPin(picked.detailedAddress, picked.latitude, picked.longitude);
     }
   }
 
@@ -181,12 +291,14 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     final l10n = AppLocalizations.of(context);
     final dropoffText = _dropoffController.text.trim();
     final phone = _phoneController.text.trim();
-    if (dropoffText.isEmpty) {
-      context.showAppSnackBar(l10n.deliverTo, isError: true);
-      return;
-    }
-    if (phone.isEmpty) {
-      context.showAppSnackBar(l10n.customerPhone, isError: true);
+    final problem = validateDirectDelivery(
+      dropoffText: dropoffText,
+      phone: phone,
+      itemCount: _items.length,
+      description: _descriptionController.text,
+    );
+    if (problem != null) {
+      context.showAppSnackBar(_errorText(problem, l10n), isError: true);
       return;
     }
     final authState = ref.read(authStateProvider);
@@ -228,8 +340,11 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
           }
           return;
         }
+        if (!mounted) return;
+        final chosen = await _chooseSuggestion(suggestions, l10n);
+        if (chosen == null || !mounted) return;
         final details = await places.details(
-          placeId: suggestions.first.placeId,
+          placeId: chosen.placeId,
           languageCode: languageCode,
           session: session,
         );
@@ -346,6 +461,8 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                   const SizedBox(height: 16),
 
                   _buildDeliverToField(context, l10n, cs),
+                  _buildSavedAddresses(l10n),
+                  _buildEstimate(l10n, cs),
                   const SizedBox(height: 16),
 
                   _buildField(
@@ -393,6 +510,62 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     );
   }
 
+  Widget _buildSavedAddresses(AppLocalizations l10n) {
+    final saved = ref.watch(_directSavedAddressesProvider).value;
+    if (saved == null || saved.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 4,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          Text(
+            l10n.directDeliverySavedAddresses,
+            style: AppTextStyles.bodySmall,
+          ),
+          for (final a in saved)
+            if (a['latitude'] != null && a['longitude'] != null)
+              ActionChip(
+                avatar: const Icon(Icons.bookmark_outline_rounded, size: 16),
+                label: Text(
+                  (a['label'] as String?)?.trim().isNotEmpty == true
+                      ? a['label'] as String
+                      : (a['address'] as String? ?? ''),
+                ),
+                onPressed: () => _setPin(
+                  a['address'] as String? ?? '',
+                  (a['latitude'] as num).toDouble(),
+                  (a['longitude'] as num).toDouble(),
+                ),
+              ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEstimate(AppLocalizations l10n, ColorScheme cs) {
+    final fee = _estimateFee;
+    if (fee == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        children: [
+          Icon(Icons.payments_outlined, size: 18, color: cs.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              '${l10n.directDeliveryEstimateLabel}: '
+              '${fee.toStringAsFixed(2)} $_estimateCurrency\n'
+              '${l10n.directDeliveryEstimateNote}',
+              style: AppTextStyles.bodySmall,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildDeliverToField(
     BuildContext context,
     AppLocalizations l10n,
@@ -406,10 +579,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
       ),
       child: TextField(
         controller: _dropoffController,
-        onChanged: (_) {
-          _pickedDropoffLat = null;
-          _pickedDropoffLng = null;
-        },
+        onChanged: (_) => _clearPin(),
         decoration: InputDecoration(
           prefixIcon: Icon(Icons.location_on_outlined, color: cs.error),
           labelText: l10n.deliverTo,

@@ -95,6 +95,10 @@ android {
             val storePass = keystoreProperties.getProperty("storePassword")
                 ?: System.getenv("KEYSTORE_PASSWORD").orEmpty()
             val hasReleaseKey = keystoreFile.exists() && storePass.isNotEmpty()
+            if (System.getenv("PLAY_BUILD") == "true" && !hasReleaseKey) {
+                throw GradleException(
+                    "PLAY_BUILD=true requires the release keystore; refusing to sign with the debug key")
+            }
             signingConfig = if (hasReleaseKey) {
                 signingConfigs.getByName("release")
             } else {

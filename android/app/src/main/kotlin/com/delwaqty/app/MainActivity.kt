@@ -98,6 +98,19 @@ class MainActivity : FlutterFragmentActivity() {
                     if (path == null) {
                         result.error("bad_args", "path required", null); return@setMethodCallHandler
                     }
+                    // Defense in depth: the Play build removes
+                    // REQUEST_INSTALL_PACKAGES from the manifest, so refuse to
+                    // install anything when it is not declared.
+                    val declaresInstall = try {
+                        val info = packageManager.getPackageInfo(
+                            packageName, android.content.pm.PackageManager.GET_PERMISSIONS)
+                        info.requestedPermissions?.contains(
+                            android.Manifest.permission.REQUEST_INSTALL_PACKAGES) == true
+                    } catch (e: Exception) { false }
+                    if (!declaresInstall) {
+                        result.error("disabled_in_play_build", "install not available", null)
+                        return@setMethodCallHandler
+                    }
                     try {
                         val apkFile = java.io.File(path)
                         if (!apkFile.exists()) {

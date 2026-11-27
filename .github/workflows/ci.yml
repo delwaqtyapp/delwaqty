@@ -171,6 +171,28 @@ jobs:
           done
           echo "Release build failed after 3 attempts"
           exit 1
+      - name: Build and verify Play-flavored release APK (customer)
+        if: matrix.flavor == 'customer' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+        env:
+          PLAY_BUILD: 'true'
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
+        run: |
+          flutter build apk --release --flavor customer -t lib/customer/main.dart --dart-define=PLAY_BUILD=true
+          python3 - build/app/outputs/flutter-apk/app-customer-release.apk <<'PYEOF'
+          import sys, zipfile
+          man = zipfile.ZipFile(sys.argv[1]).read('AndroidManifest.xml')
+          needle = 'REQUEST_INSTALL_PACKAGES'
+          if needle.encode() in man or needle.encode('utf-16-le') in man:
+              print('Play APK manifest still declares REQUEST_INSTALL_PACKAGES')
+              sys.exit(1)
+          print('Play APK manifest has no REQUEST_INSTALL_PACKAGES')
+          PYEOF
+          # Rebuild the normal release so later steps see the standard APK.
+          rm -f build/app/outputs/flutter-apk/app-customer-release.apk
+          flutter build apk --release --flavor customer -t lib/customer/main.dart
       - name: Verify release config in APK
         if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
         run: |

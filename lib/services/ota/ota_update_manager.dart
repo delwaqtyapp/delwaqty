@@ -343,6 +343,7 @@ Future<bool> launchInstalledApp(String packageName) async {
 /// "install unknown apps" was opened; wait for the user to come back and call
 /// this again, the file is kept.
 Future<String?> installDownloadedApk(File file) async {
+  if (kPlayBuild) return 'disabled_in_play_build';
   try {
     final expected = _verifiedArtifactHashes[file.path];
     if (!await file.exists()) return 'artifact_missing';
@@ -365,6 +366,7 @@ Future<(int?, String?)> downloadAndInstallLatest(
   AppFlavor flavor, {
   void Function(double fraction)? onProgress,
 }) async {
+  if (kPlayBuild) return (null, 'disabled_in_play_build');
   final download = await downloadLatestApk(flavor, onProgress: onProgress);
   final file = download.file;
   if (file == null) return (null, download.error);

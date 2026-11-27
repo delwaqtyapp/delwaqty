@@ -2828,6 +2828,12 @@ abstract class AppLocalizations {
   /// **'Submit Review'**
   String get submitReview;
 
+  /// No description provided for @reviewAlreadySubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'You already reviewed this order.'**
+  String get reviewAlreadySubmitted;
+
   /// No description provided for @reviewSubmitted.
   ///
   /// In en, this message translates to:

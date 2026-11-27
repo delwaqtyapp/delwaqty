@@ -1437,6 +1437,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get submitReview => 'إرسال التقييم';
 
   @override
+  String get reviewAlreadySubmitted => 'لقد قيّمت هذا الطلب من قبل.';
+
+  @override
   String get reviewSubmitted => 'تم إرسال التقييم! شكراً لك.';
 
   @override

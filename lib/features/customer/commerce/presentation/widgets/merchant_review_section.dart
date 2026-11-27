@@ -1,17 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 
 /// A review can be submitted once a star rating (1-5) is chosen and no
 /// submission is in flight.
 bool canSubmitReview({required int rating, required bool submitting}) =>
     !submitting && rating >= 1 && rating <= 5;
+
+/// True when [e] is the database refusing a second review for the same order
+/// (unique violation, SQLSTATE 23505).
+bool isDuplicateReviewError(Object e) =>
+    e is PostgrestException && e.code == '23505';
+
+/// Whether this order already has a review, so the card stays hidden on every
+/// later visit. A failed lookup counts as "no review": the server still
+/// refuses a duplicate.
+final orderReviewedProvider = FutureProvider.autoDispose.family<bool, String>((
+  ref,
+  orderId,
+) async {
+  try {
+    final rows = await ref
+        .watch(supabaseClientProvider)
+        .from('reviews')
+        .select('id')
+        .eq('order_id', orderId)
+        .limit(1);
+    return rows.isNotEmpty;
+  } catch (_) {
+    return false;
+  }
+});
 
 /// Post-delivery merchant review card on the order tracking page: stars plus
 /// an optional written comment, submitted against the order's merchant.
@@ -66,7 +93,16 @@ class _MerchantReviewSectionState extends ConsumerState<MerchantReviewSection> {
       if (mounted) setState(() => _submitted = true);
       messenger.showSnackBar(SnackBar(content: Text(l10n.reviewSubmitted)));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
+      if (isDuplicateReviewError(e)) {
+        if (mounted) setState(() => _submitted = true);
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.reviewAlreadySubmitted)),
+        );
+      } else {
+        messenger.showSnackBar(
+          SnackBar(content: Text(appErrorText(context, e))),
+        );
+      }
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -77,7 +113,15 @@ class _MerchantReviewSectionState extends ConsumerState<MerchantReviewSection> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
-    if (_submitted) {
+    final alreadyReviewed = ref
+        .watch(orderReviewedProvider(widget.orderId))
+        .maybeWhen(data: (v) => v, orElse: () => false);
+    final stillLoading = ref
+        .watch(orderReviewedProvider(widget.orderId))
+        .isLoading;
+    if (stillLoading && !_submitted) return const SizedBox.shrink();
+
+    if (_submitted || alreadyReviewed) {
       return AnimatedFadeIn(
         child: Card(
           child: Padding(
@@ -89,7 +133,13 @@ class _MerchantReviewSectionState extends ConsumerState<MerchantReviewSection> {
                   color: theme.colorScheme.primary,
                 ),
                 const SizedBox(width: 12),
-                Expanded(child: Text(l10n.reviewSubmitted)),
+                Expanded(
+                  child: Text(
+                    alreadyReviewed
+                        ? l10n.reviewAlreadySubmitted
+                        : l10n.reviewSubmitted,
+                  ),
+                ),
               ],
             ),
           ),

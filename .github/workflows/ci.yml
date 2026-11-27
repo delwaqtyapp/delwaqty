@@ -109,7 +109,7 @@ jobs:
   pgtap-rls:
     name: pgTAP RLS negative tests
     needs: changes
-    if: needs.changes.outputs.db == 'true'
+    if: ${{ always() && needs.changes.outputs.db != 'false' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -135,7 +135,7 @@ jobs:
   build:
     name: Build APK (${{ matrix.flavor }})
     needs: changes
-    if: needs.changes.outputs.android == 'true'
+    if: ${{ always() && needs.changes.outputs.android != 'false' }}
     # Only `changes` is needed: builds run in parallel with analyze/test so wall time is
     # max(test, build) instead of test + build. Every job is still a required
     # check, and the publisher requires ALL jobs of the run green.

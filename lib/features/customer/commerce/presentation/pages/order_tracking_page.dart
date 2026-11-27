@@ -6,6 +6,7 @@ import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/order.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/cancel_order_button.dart';
+import 'package:delwaqty/features/customer/commerce/presentation/widgets/merchant_review_section.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/refund_request_section.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -90,6 +91,11 @@ class _OrderTrackingPageState extends ConsumerState<OrderTrackingPage>
                 if (order.status == OrderStatus.delivered) ...[
                   const SizedBox(height: 24),
                   DriverRatingSection(orderId: order.id),
+                  const SizedBox(height: 12),
+                  MerchantReviewSection(
+                    orderId: order.id,
+                    merchantId: order.merchantId,
+                  ),
                 ],
                 if (const {
                   OrderStatus.confirmed,

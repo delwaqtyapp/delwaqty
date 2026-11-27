@@ -3,9 +3,6 @@ DO $$
 BEGIN
   IF to_regclass('storage.objects') IS NULL THEN RETURN; END IF;
   UPDATE storage.buckets SET file_size_limit = NULL, allowed_mime_types = NULL WHERE id = 'provider-documents';
-  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='storage' AND policyname='Users update own identity documents') THEN
-    ALTER POLICY "Users update own identity documents" ON storage.objects RENAME TO "Users delete own identity documents";
-  END IF;
   DROP POLICY IF EXISTS "audio logs upload" ON storage.objects;
   CREATE POLICY "audio logs upload" ON storage.objects FOR INSERT TO public
     WITH CHECK (bucket_id = 'service-audio-logs' AND auth.role() = 'authenticated' AND (split_part(name,'/',1))::uuid = auth.uid());

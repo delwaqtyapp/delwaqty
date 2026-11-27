@@ -5,8 +5,9 @@
 --    Storage API delete (direct deletes on storage tables are blocked by Supabase).
 --    delete-user keeps listing the bucket, which is harmless for an empty bucket.
 -- 2. provider-documents: add a 10 MB limit and image/pdf mime types (the app uploads image/jpeg).
--- 3. identity-documents: the policy named "Users delete own identity documents" is really an
---    UPDATE policy. Rename it to say so; behavior unchanged (no DELETE right is added).
+-- Not done: the identity-documents policy named "Users delete own identity documents" is really an
+-- UPDATE policy (naming only). ALTER POLICY RENAME on storage.objects needs ownership that postgres
+-- lacks (42501), so it is left as is.
 -- Re-runnable.
 DO $$
 BEGIN
@@ -20,9 +21,4 @@ BEGIN
      SET file_size_limit = 10485760,
          allowed_mime_types = ARRAY['image/jpeg','image/png','image/webp','application/pdf']
    WHERE id = 'provider-documents';
-  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='storage' AND tablename='objects'
-             AND policyname = 'Users delete own identity documents') THEN
-    ALTER POLICY "Users delete own identity documents" ON storage.objects
-      RENAME TO "Users update own identity documents";
-  END IF;
 END $$;

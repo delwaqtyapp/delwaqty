@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
+import 'package:delwaqty/features/provider/merchant/domain/cashier_pricing.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 /// Why `cashier_license_issue` refused. The server owns every rule (trial once
@@ -148,6 +149,15 @@ class _CashierLicensePageState extends ConsumerState<CashierLicensePage> {
     _ => plan,
   };
 
+  /// Plan name with its price from [cashierPlanPricesEgp], when it has one.
+  String _planWithPrice(AppLocalizations l10n, String plan) {
+    final price = cashierPlanPriceEgp(plan);
+    final label = _planLabel(l10n, plan);
+    return price == null
+        ? label
+        : l10n.cashierLicensePlanWithPrice(label, price);
+  }
+
   Future<void> _issue(String plan, {int? days}) async {
     final l10n = AppLocalizations.of(context);
     setState(() => _busy = true);
@@ -224,7 +234,7 @@ class _CashierLicensePageState extends ConsumerState<CashierLicensePage> {
                   for (final p in cashierPaidPlans)
                     DropdownMenuItem(
                       value: p,
-                      child: Text(_planLabel(l10n, p)),
+                      child: Text(_planWithPrice(l10n, p)),
                     ),
                 ],
                 onChanged: (v) => setLocal(() => plan = v ?? plan),
@@ -291,6 +301,27 @@ class _CashierLicensePageState extends ConsumerState<CashierLicensePage> {
               icon: const Icon(Icons.key_rounded),
               label: Text(l10n.cashierLicenseIssuePaid),
             ),
+          const SizedBox(height: 16),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.cashierLicensePrices,
+                    style: theme.textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  for (final p in cashierPaidPlans)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Text(_planWithPrice(l10n, p)),
+                    ),
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 16),
           licenses.when(
             loading: () => const Center(child: CircularProgressIndicator()),

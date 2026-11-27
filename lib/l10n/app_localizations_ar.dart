@@ -8623,6 +8623,14 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get cashierLicensePrices => 'أسعار ترخيص الكاشير';
+
+  @override
+  String cashierLicensePlanWithPrice(String plan, int price) {
+    return '$plan: $price جنيه';
+  }
+
+  @override
   String get cashierLicensePlanTrial => 'تجربة مجانية';
 
   @override

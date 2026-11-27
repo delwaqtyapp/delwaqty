@@ -16525,6 +16525,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not cancel the order. Try again.'**
   String get cancelOrderFailed;
+
+  /// No description provided for @refundRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request a refund'**
+  String get refundRequestTitle;
+
+  /// No description provided for @refundReasonMissingItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Item missing'**
+  String get refundReasonMissingItem;
+
+  /// No description provided for @refundReasonWrongItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong item'**
+  String get refundReasonWrongItem;
+
+  /// No description provided for @refundReasonQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality problem'**
+  String get refundReasonQuality;
+
+  /// No description provided for @refundReasonLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived too late'**
+  String get refundReasonLate;
+
+  /// No description provided for @refundReasonDamaged.
+  ///
+  /// In en, this message translates to:
+  /// **'Damaged'**
+  String get refundReasonDamaged;
+
+  /// No description provided for @refundReasonOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get refundReasonOther;
+
+  /// No description provided for @refundDetailsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what happened (optional)'**
+  String get refundDetailsHint;
+
+  /// No description provided for @refundSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Send request'**
+  String get refundSubmit;
+
+  /// No description provided for @refundRequestSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund request sent'**
+  String get refundRequestSent;
+
+  /// No description provided for @refundStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund request under review'**
+  String get refundStatusPending;
+
+  /// No description provided for @refundStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund added to your wallet:'**
+  String get refundStatusApproved;
+
+  /// No description provided for @refundStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund request rejected'**
+  String get refundStatusRejected;
+
+  /// No description provided for @refundErrorAlready.
+  ///
+  /// In en, this message translates to:
+  /// **'A refund request already exists for this order.'**
+  String get refundErrorAlready;
+
+  /// No description provided for @refundErrorWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'The 14-day refund window has passed.'**
+  String get refundErrorWindow;
+
+  /// No description provided for @refundErrorNotEligible.
+  ///
+  /// In en, this message translates to:
+  /// **'This order is not eligible for a refund.'**
+  String get refundErrorNotEligible;
+
+  /// No description provided for @refundErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not send the refund request. Try again.'**
+  String get refundErrorGeneric;
+
+  /// No description provided for @adminRefundRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund requests'**
+  String get adminRefundRequests;
+
+  /// No description provided for @adminRefundNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending refund requests'**
+  String get adminRefundNone;
+
+  /// No description provided for @adminRefundApproveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit this amount to the customer\'s wallet:'**
+  String get adminRefundApproveBody;
+
+  /// No description provided for @adminRefundRejectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason shown to the customer'**
+  String get adminRefundRejectHint;
+
+  /// No description provided for @adminRefundNoteRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'A reason is required to reject'**
+  String get adminRefundNoteRequired;
+
+  /// No description provided for @adminRefundApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund approved and credited'**
+  String get adminRefundApproved;
+
+  /// No description provided for @adminRefundRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund request rejected'**
+  String get adminRefundRejected;
 }
 
 class _AppLocalizationsDelegate

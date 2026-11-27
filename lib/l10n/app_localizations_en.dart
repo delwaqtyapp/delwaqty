@@ -8748,4 +8748,80 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancelOrderFailed => 'Could not cancel the order. Try again.';
+
+  @override
+  String get refundRequestTitle => 'Request a refund';
+
+  @override
+  String get refundReasonMissingItem => 'Item missing';
+
+  @override
+  String get refundReasonWrongItem => 'Wrong item';
+
+  @override
+  String get refundReasonQuality => 'Quality problem';
+
+  @override
+  String get refundReasonLate => 'Arrived too late';
+
+  @override
+  String get refundReasonDamaged => 'Damaged';
+
+  @override
+  String get refundReasonOther => 'Other';
+
+  @override
+  String get refundDetailsHint => 'Tell us what happened (optional)';
+
+  @override
+  String get refundSubmit => 'Send request';
+
+  @override
+  String get refundRequestSent => 'Refund request sent';
+
+  @override
+  String get refundStatusPending => 'Refund request under review';
+
+  @override
+  String get refundStatusApproved => 'Refund added to your wallet:';
+
+  @override
+  String get refundStatusRejected => 'Refund request rejected';
+
+  @override
+  String get refundErrorAlready =>
+      'A refund request already exists for this order.';
+
+  @override
+  String get refundErrorWindow => 'The 14-day refund window has passed.';
+
+  @override
+  String get refundErrorNotEligible =>
+      'This order is not eligible for a refund.';
+
+  @override
+  String get refundErrorGeneric =>
+      'Could not send the refund request. Try again.';
+
+  @override
+  String get adminRefundRequests => 'Refund requests';
+
+  @override
+  String get adminRefundNone => 'No pending refund requests';
+
+  @override
+  String get adminRefundApproveBody =>
+      'Credit this amount to the customer\'s wallet:';
+
+  @override
+  String get adminRefundRejectHint => 'Reason shown to the customer';
+
+  @override
+  String get adminRefundNoteRequired => 'A reason is required to reject';
+
+  @override
+  String get adminRefundApproved => 'Refund approved and credited';
+
+  @override
+  String get adminRefundRejected => 'Refund request rejected';
 }

@@ -2173,12 +2173,14 @@ class _DiscoveryTabsState extends ConsumerState<_DiscoveryTabs> {
     DiscoveryMode.nearby,
     DiscoveryMode.recommended,
     DiscoveryMode.popular,
+    DiscoveryMode.favorites,
   ];
 
   List<String> get _labels => [
     widget.l10n.closest,
     widget.l10n.topRated,
     widget.l10n.mostRequested,
+    widget.l10n.favorites,
   ];
 
   @override

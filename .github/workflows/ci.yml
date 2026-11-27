@@ -11,6 +11,33 @@ env:
   FLUTTER_VERSION: '3.50.1'
   JAVA_VERSION: '17'
 jobs:
+  # Cheap PRs: APK builds and pgTAP are expensive (~45 of ~55 min per head).
+  # On a PR they run only when the diff can affect them (android/, pubspec,
+  # build config for APKs; supabase/ for pgTAP). Push to master and tags
+  # always run everything. A skipped job counts as passing for the merge gate.
+  changes:
+    name: Detect changed areas
+    runs-on: ubuntu-latest
+    outputs:
+      android: ${{ steps.d.outputs.android }}
+      db: ${{ steps.d.outputs.db }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: d
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ "$EVENT" != "pull_request" ]; then
+            echo "android=true" >> "$GITHUB_OUTPUT"; echo "db=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          files=$(git diff --name-only "origin/$BASE_REF...HEAD")
+          echo "$files"
+          if echo "$files" | grep -qE '^(android/|build\.yaml$|l10n\.yaml$|analysis_options\.yaml$|pubspec\.(yaml|lock)$|\.github/workflows/|assets/|tool/)'; then a=true; else a=false; fi
+          if echo "$files" | grep -qE '^(supabase/|\.github/workflows/)'; then d=true; else d=false; fi
+          echo "android=$a" >> "$GITHUB_OUTPUT"; echo "db=$d" >> "$GITHUB_OUTPUT"
   analyze:
     name: Analyze & Format
     runs-on: ubuntu-latest
@@ -81,6 +108,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   pgtap-rls:
     name: pgTAP RLS negative tests
+    needs: changes
+    if: ${{ always() && needs.changes.outputs.db != 'false' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -105,7 +134,9 @@ jobs:
           -f supabase/tests/455_cashier_short_keys_only_test.sql
   build:
     name: Build APK (${{ matrix.flavor }})
-    # No `needs`: builds run in parallel with analyze/test so wall time is
+    needs: changes
+    if: ${{ always() && needs.changes.outputs.android != 'false' }}
+    # Only `changes` is needed: builds run in parallel with analyze/test so wall time is
     # max(test, build) instead of test + build. Every job is still a required
     # check, and the publisher requires ALL jobs of the run green.
     strategy:

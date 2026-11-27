@@ -768,6 +768,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         if (!isProvider && !isDriver)
           _SectionTile(
+            icon: Icons.favorite_border_rounded,
+            color: primary,
+            title: l10n.favorites,
+            onTap: () => context.push('/market/favorites'),
+          ),
+        if (!isProvider && !isDriver)
+          _SectionTile(
             icon: Icons.event_note_outlined,
             color: primary,
             title: l10n.myBookings,

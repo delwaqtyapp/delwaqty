@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/favorite.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/features/customer/home/domain/entities/platform_category.dart';
@@ -20,7 +21,7 @@ final activeCategoriesProvider = FutureProvider<List<PlatformCategory>>((
   return repo.getActiveCategories();
 });
 
-enum DiscoveryMode { nearby, recommended, popular }
+enum DiscoveryMode { nearby, recommended, popular, favorites }
 
 final discoveryModeProvider = StateProvider<DiscoveryMode>(
   (_) => DiscoveryMode.nearby,
@@ -68,12 +69,41 @@ int _bookingRank(ServiceCategoryType type) {
   return i == -1 ? _bookingPriority.length : i;
 }
 
+/// The customer's favorite shops, newest favorite first. A favorite whose
+/// merchant can no longer be loaded (deleted or hidden) is skipped.
+Future<List<DiscoveryEntry>> favoriteMerchantEntries({
+  required List<Favorite> favorites,
+  required Future<Merchant?> Function(String id) loadMerchant,
+}) async {
+  final ids = <String>{
+    for (final f in favorites)
+      if (f.type == FavoriteType.merchant) f.targetId,
+  };
+  final merchants = await Future.wait([
+    for (final id in ids)
+      loadMerchant(id).then<Merchant?>((m) => m, onError: (_) => null),
+  ]);
+  return [
+    for (final m in merchants)
+      if (m != null) MerchantDiscoveryEntry(m),
+  ];
+}
+
 final discoveryEntriesProvider = FutureProvider<List<DiscoveryEntry>>((
   ref,
 ) async {
   final mode = ref.watch(discoveryModeProvider);
   final repo = ref.watch(merchantRepositoryProvider);
   final serviceRepo = ref.watch(cachedServiceBookingRepositoryProvider);
+
+  if (mode == DiscoveryMode.favorites) {
+    return favoriteMerchantEntries(
+      favorites: await ref
+          .watch(favoriteRepositoryProvider)
+          .getFavorites(type: FavoriteType.merchant),
+      loadMerchant: repo.getMerchantById,
+    );
+  }
 
   final merchantsFuture = repo.getMerchants(limit: 50);
   final providersFuture = serviceRepo.getProviders();
@@ -91,6 +121,8 @@ final discoveryEntriesProvider = FutureProvider<List<DiscoveryEntry>>((
   entries.addAll([for (final p in sortedProviders) ProviderDiscoveryEntry(p)]);
 
   switch (mode) {
+    case DiscoveryMode.favorites:
+      return const <DiscoveryEntry>[]; // handled above
     case DiscoveryMode.nearby:
       return entries;
     case DiscoveryMode.recommended:

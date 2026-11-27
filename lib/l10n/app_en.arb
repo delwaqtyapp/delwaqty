@@ -307,6 +307,17 @@
   "priceRange": "Price Range",
   "freeDelivery": "Free Delivery",
   "minOrder": "Min",
+  "addMoreToReachMinOrder": "Add {amount} {currency} more to reach the minimum order",
+  "@addMoreToReachMinOrder": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
   "highestRated": "Highest Rated",
   "discount": "Discount",
   "enterCouponCode": "Enter coupon code",

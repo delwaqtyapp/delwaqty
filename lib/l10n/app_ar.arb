@@ -303,6 +303,17 @@
   "priceRange": "نطاق السعر",
   "freeDelivery": "توصيل مجاني",
   "minOrder": "الحد الأدنى",
+  "addMoreToReachMinOrder": "أضف {amount} {currency} إضافية للوصول إلى الحد الأدنى للطلب",
+  "@addMoreToReachMinOrder": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
   "highestRated": "الأعلى تقييماً",
   "discount": "الخصم",
   "enterCouponCode": "أدخل كود الخصم",

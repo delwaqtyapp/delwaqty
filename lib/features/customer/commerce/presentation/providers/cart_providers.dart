@@ -68,3 +68,24 @@ final cartProvider = AsyncNotifierProvider<CartNotifier, Cart?>(
 final currentCartProvider = Provider<Cart?>(
   (ref) => ref.watch(cartProvider).asData?.value,
 );
+
+/// The current cart merchant's minimum order (EGP), when the merchant sets
+/// one. Powers the "add X more to reach the minimum" indicator in the cart;
+/// the server still enforces the floor at order placement
+/// (create_order -> BELOW_MIN_ORDER), this only surfaces it earlier.
+final cartMerchantMinOrderProvider = FutureProvider<double?>((ref) async {
+  final cart = ref.watch(currentCartProvider);
+  if (cart == null) return null;
+  final merchant = await ref
+      .watch(merchantRepositoryProvider)
+      .getMerchantById(cart.merchantId);
+  return merchant?.minimumOrder;
+});
+
+/// Amount still missing to reach [minimumOrder], or `null` when there is no
+/// minimum or the subtotal already covers it. Zero counts as "no minimum".
+double? minOrderShortfall(double subtotal, double? minimumOrder) {
+  if (minimumOrder == null || minimumOrder <= 0) return null;
+  final remaining = minimumOrder - subtotal;
+  return remaining > 0 ? remaining : null;
+}

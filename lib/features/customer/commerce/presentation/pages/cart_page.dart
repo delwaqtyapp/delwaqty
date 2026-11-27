@@ -89,6 +89,12 @@ class CartPage extends ConsumerWidget {
             );
           }
 
+          final minOrderAsync = ref.watch(cartMerchantMinOrderProvider);
+          final shortfall = minOrderShortfall(
+            cart.subtotal,
+            minOrderAsync.asData?.value,
+          );
+
           return Column(
             children: [
               // Loose + shrinkWrap: with few items the totals sit right under
@@ -253,11 +259,50 @@ class CartPage extends ConsumerWidget {
                         value: '${cart.total.toStringAsFixed(0)} ${l10n.egp}',
                         isBold: true,
                       ),
+                      if (shortfall != null) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.errorContainer.withValues(
+                              alpha: 0.35,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                size: 18,
+                                color: colorScheme.error,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  l10n.addMoreToReachMinOrder(
+                                    shortfall.toStringAsFixed(0),
+                                    l10n.egp,
+                                  ),
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurface,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 12),
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton(
-                          onPressed: () => context.push('/market/checkout'),
+                          onPressed: shortfall != null
+                              ? null
+                              : () => context.push('/market/checkout'),
                           child: Text(l10n.proceedToCheckout),
                         ),
                       ),

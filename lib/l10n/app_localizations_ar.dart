@@ -895,6 +895,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get minOrder => 'الحد الأدنى';
 
   @override
+  String addMoreToReachMinOrder(Object amount, Object currency) {
+    return 'أضف $amount $currency إضافية للوصول إلى الحد الأدنى للطلب';
+  }
+
+  @override
   String get highestRated => 'الأعلى تقييماً';
 
   @override

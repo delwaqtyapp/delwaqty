@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/product.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
+import 'package:delwaqty/features/customer/commerce/presentation/widgets/cart_conflict_guard.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
@@ -548,6 +549,12 @@ class _ProductDetailBottomSheetState
                       ? null
                       : _instructionsController.text,
                 );
+                final proceed = await confirmCartMerchantSwitch(
+                  context: context,
+                  ref: ref,
+                  merchantId: widget.merchantId,
+                );
+                if (!proceed || !mounted) return;
                 try {
                   await ref
                       .read(cartProvider.notifier)

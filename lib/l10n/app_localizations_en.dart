@@ -8563,6 +8563,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminManagement => 'Admin management';
 
   @override
+  String get cartConflictTitle => 'Start a new cart?';
+
+  @override
+  String cartConflictMessage(Object merchantName) {
+    return 'Your cart already has items from $merchantName. Adding this item will clear them.';
+  }
+
+  @override
+  String get cartConflictStartNew => 'Start new cart';
+
+  @override
   String get customerTourStep1Title => 'Explore everything around you';
 
   @override

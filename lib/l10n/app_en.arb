@@ -3188,5 +3188,15 @@
   "adminPayoutApproved": "Payout approved",
   "adminPayoutRejected": "Payout rejected",
   "payoutErrorMerchantUnsupported": "Payouts are not supported yet for accounts with more than one shop, or without a shop.",
-  "adminPayoutManualNote": "Approving only records the debit in the merchant ledger. The actual transfer (InstaPay, Vodafone Cash or cash) is done manually by staff."
+  "adminPayoutManualNote": "Approving only records the debit in the merchant ledger. The actual transfer (InstaPay, Vodafone Cash or cash) is done manually by staff.",
+  "cartConflictTitle": "Start a new cart?",
+  "cartConflictMessage": "Your cart already has items from {merchantName}. Adding this item will clear them.",
+  "cartConflictStartNew": "Start new cart",
+  "@cartConflictMessage": {
+    "placeholders": {
+      "merchantName": {
+        "type": "String"
+      }
+    }
+  }
 }

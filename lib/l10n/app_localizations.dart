@@ -16190,6 +16190,15 @@ abstract class AppLocalizations {
   /// **'Admin management'**
   String get adminManagement;
 
+  /// No description provided for @cartConflictTitle.
+  String get cartConflictTitle;
+
+  /// No description provided for @cartConflictMessage.
+  String cartConflictMessage(Object merchantName);
+
+  /// No description provided for @cartConflictStartNew.
+  String get cartConflictStartNew;
+
   /// No description provided for @customerTourStep1Title.
   ///
   /// In en, this message translates to:

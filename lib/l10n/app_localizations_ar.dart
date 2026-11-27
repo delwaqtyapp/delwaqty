@@ -8488,6 +8488,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminManagement => 'إدارة المشرفين';
 
   @override
+  String get cartConflictTitle => 'عربة جديدة؟';
+
+  @override
+  String cartConflictMessage(Object merchantName) {
+    return 'عربتك فيها منتجات من $merchantName. إضافة المنتج ده هتمسحهم.';
+  }
+
+  @override
+  String get cartConflictStartNew => 'ابدأ عربة جديدة';
+
+  @override
   String get customerTourStep1Title => 'استكشف كل حاجة حواليك';
 
   @override

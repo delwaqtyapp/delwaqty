@@ -16493,7 +16493,7 @@ abstract class AppLocalizations {
   /// No description provided for @cancelOrderLimitNote.
   ///
   /// In en, this message translates to:
-  /// **'You can cancel 2 orders per month. A third cancellation in the same month suspends your account.'**
+  /// **'You can cancel 2 orders per month. A third cancellation in the same month suspends your account for 5 days. If that happens, contact support in the app to explain the repeated cancellations.'**
   String get cancelOrderLimitNote;
 
   /// No description provided for @cancelOrderKeep.

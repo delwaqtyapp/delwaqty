@@ -8731,7 +8731,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancelOrderLimitNote =>
-      'You can cancel 2 orders per month. A third cancellation in the same month suspends your account.';
+      'You can cancel 2 orders per month. A third cancellation in the same month suspends your account for 5 days. If that happens, contact support in the app to explain the repeated cancellations.';
 
   @override
   String get cancelOrderKeep => 'Keep order';

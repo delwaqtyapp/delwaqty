@@ -3056,7 +3056,7 @@
   "cashierLicenseStatusExpired": "منتهي",
   "cashierLicenseStatusSuspended": "موقوف",
   "cancelOrderConfirmBody": "إلغاء هذا الطلب؟ إذا كنت قد دفعت، يُرد المبلغ إليك.",
-  "cancelOrderLimitNote": "يمكنك إلغاء طلبين في الشهر. الإلغاء الثالث في نفس الشهر يوقف حسابك.",
+  "cancelOrderLimitNote": "يمكنك إلغاء طلبين في الشهر. الإلغاء الثالث في نفس الشهر يوقف حسابك 5 أيام. إذا حدث ذلك، تواصل مع الدعم من التطبيق لتوضيح سبب تكرار الإلغاء.",
   "cancelOrderKeep": "إبقاء الطلب",
   "cancelOrderDone": "تم إلغاء الطلب",
   "cancelOrderOutForDelivery": "الطلب في الطريق إليك بالفعل ولا يمكن إلغاؤه من هنا.",

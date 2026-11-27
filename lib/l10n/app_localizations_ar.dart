@@ -8655,7 +8655,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cancelOrderLimitNote =>
-      'يمكنك إلغاء طلبين في الشهر. الإلغاء الثالث في نفس الشهر يوقف حسابك.';
+      'يمكنك إلغاء طلبين في الشهر. الإلغاء الثالث في نفس الشهر يوقف حسابك 5 أيام. إذا حدث ذلك، تواصل مع الدعم من التطبيق لتوضيح سبب تكرار الإلغاء.';
 
   @override
   String get cancelOrderKeep => 'إبقاء الطلب';

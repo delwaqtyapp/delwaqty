@@ -37,4 +37,8 @@ void main() {
       expect(cancelOrderErrorOf(Exception('boom')), CancelOrderError.other);
     });
   });
+
+  test('cancel reason codes are stable and unknown text passes through', () {
+    expect(cancelReasonCodes, ['changed_mind', 'wrong_address', 'other']);
+  });
 }

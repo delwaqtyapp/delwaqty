@@ -189,7 +189,16 @@ class _TimelineSection extends StatelessWidget {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          l10n.orderCancelled,
+                          [
+                                l10n.orderCancelled,
+                                localizedCancelReason(
+                                  l10n,
+                                  order.cancellationReason,
+                                ),
+                              ]
+                              .whereType<String>()
+                              .where((e) => e.isNotEmpty)
+                              .join(' - '),
                           style: textTheme.titleSmall?.copyWith(
                             color: colorScheme.onErrorContainer,
                             fontWeight: FontWeight.w600,

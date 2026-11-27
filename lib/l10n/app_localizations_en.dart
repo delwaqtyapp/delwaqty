@@ -8690,6 +8690,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get cashierLicensePrices => 'Cashier license prices';
+
+  @override
+  String cashierLicensePlanWithPrice(String plan, int price) {
+    return '$plan: $price EGP';
+  }
+
+  @override
   String get cashierLicensePlanTrial => 'Free trial';
 
   @override

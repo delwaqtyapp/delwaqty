@@ -16412,6 +16412,18 @@ abstract class AppLocalizations {
   /// **'Expires {date}'**
   String cashierLicenseExpiresOn(String date);
 
+  /// No description provided for @cashierLicensePrices.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashier license prices'**
+  String get cashierLicensePrices;
+
+  /// No description provided for @cashierLicensePlanWithPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'{plan}: {price} EGP'**
+  String cashierLicensePlanWithPrice(String plan, int price);
+
   /// No description provided for @cashierLicensePlanTrial.
   ///
   /// In en, this message translates to:

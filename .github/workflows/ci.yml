@@ -217,7 +217,7 @@ jobs:
               if need not in names:
                   problems.append('missing ' + need)
           if any(n.startswith('lib/x86') for n in names):
-              problems.append('x86 libs must not ship in the release APK')
+              problems.append('x86 libs must not ship in the release APK: ' + ', '.join(n for n in names if n.startswith('lib/x86')))
           if not u16(man, 'com.google.android.geo.API_KEY'):
               problems.append('geo.API_KEY meta-data missing from AndroidManifest')
           if not u16(man, 'AIza'):

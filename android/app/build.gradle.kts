@@ -59,7 +59,12 @@ android {
             // Vulkan validation layer is a DEBUG-ONLY diagnostic shipped by the
             // Flutter/NDK toolchain. It is never needed at runtime; excluding it
             // removes ~15 MB from every debug APK.
-            excludes += setOf("**/libVkLayer_khronos_validation.so")
+            excludes += setOf(
+                "**/libVkLayer_khronos_validation.so",
+                // No x86 / x86_64 phones are supported: arm64-v8a + armeabi-v7a only.
+                "/lib/x86/**",
+                "/lib/x86_64/**",
+            )
             // Store native libs compressed (extract-at-install) instead of
             // uncompressed/mmap path. Removes ~24MB and allows a tight repack.
             useLegacyPackaging = true

@@ -8818,4 +8818,15 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get adminPayoutManualNote =>
       'الموافقة تسجّل الخصم في حساب التاجر فقط. التحويل الفعلي (إنستاباي أو فودافون كاش أو نقداً) يتم يدوياً بواسطة الفريق.';
+
+  @override
+  String get cartConflictTitle => 'عربة جديدة؟';
+
+  @override
+  String cartConflictMessage(String merchantName) {
+    return 'عربتك فيها منتجات من $merchantName. إضافة المنتج ده هتمسحهم.';
+  }
+
+  @override
+  String get cartConflictStartNew => 'ابدأ عربة جديدة';
 }

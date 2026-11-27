@@ -7,6 +7,7 @@ import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart'
     as commerce;
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/price_tag.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/cart_badge.dart';
+import 'package:delwaqty/features/customer/commerce/presentation/widgets/cart_conflict_guard.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/entities/product_modifier.dart';
 import 'package:delwaqty/features/customer/restaurant/restaurant_module.dart'
     as restaurant;
@@ -514,6 +515,13 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                         final specialInstructions = instructionsParts.isEmpty
                             ? null
                             : instructionsParts.join(' | ');
+                        if (!context.mounted) return;
+                        final proceed = await confirmCartMerchantSwitch(
+                          context: context,
+                          ref: ref,
+                          merchantId: widget.merchantId,
+                        );
+                        if (!proceed || !context.mounted) return;
                         final cartNotifier = ref.read(cartProvider.notifier);
                         try {
                           await cartNotifier.addToCart(

@@ -16807,6 +16807,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Approving only records the debit in the merchant ledger. The actual transfer (InstaPay, Vodafone Cash or cash) is done manually by staff.'**
   String get adminPayoutManualNote;
+
+  /// No description provided for @cartConflictTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a new cart?'**
+  String get cartConflictTitle;
+
+  /// No description provided for @cartConflictMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cart already has items from {merchantName}. Adding this item will clear them.'**
+  String cartConflictMessage(String merchantName);
+
+  /// No description provided for @cartConflictStartNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Start new cart'**
+  String get cartConflictStartNew;
 }
 
 class _AppLocalizationsDelegate

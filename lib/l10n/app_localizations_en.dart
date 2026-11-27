@@ -8900,4 +8900,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get adminPayoutManualNote =>
       'Approving only records the debit in the merchant ledger. The actual transfer (InstaPay, Vodafone Cash or cash) is done manually by staff.';
+
+  @override
+  String get cartConflictTitle => 'Start a new cart?';
+
+  @override
+  String cartConflictMessage(String merchantName) {
+    return 'Your cart already has items from $merchantName. Adding this item will clear them.';
+  }
+
+  @override
+  String get cartConflictStartNew => 'Start new cart';
 }

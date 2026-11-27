@@ -3109,5 +3109,15 @@
   "adminPayoutApproved": "تمت الموافقة على السحب",
   "adminPayoutRejected": "تم رفض طلب السحب",
   "payoutErrorMerchantUnsupported": "السحب غير مدعوم بعد للحسابات التي لديها أكثر من متجر أو بدون متجر.",
-  "adminPayoutManualNote": "الموافقة تسجّل الخصم في حساب التاجر فقط. التحويل الفعلي (إنستاباي أو فودافون كاش أو نقداً) يتم يدوياً بواسطة الفريق."
+  "adminPayoutManualNote": "الموافقة تسجّل الخصم في حساب التاجر فقط. التحويل الفعلي (إنستاباي أو فودافون كاش أو نقداً) يتم يدوياً بواسطة الفريق.",
+  "cartConflictTitle": "عربة جديدة؟",
+  "cartConflictMessage": "عربتك فيها منتجات من {merchantName}. إضافة المنتج ده هتمسحهم.",
+  "cartConflictStartNew": "ابدأ عربة جديدة",
+  "@cartConflictMessage": {
+    "placeholders": {
+      "merchantName": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -35,6 +35,7 @@ import 'package:delwaqty/features/customer/restaurant/presentation/pages/restaur
 import 'package:delwaqty/features/customer/restaurant/presentation/pages/restaurant_menu_page.dart';
 import 'package:delwaqty/features/customer/restaurant/presentation/pages/restaurant_offers_page.dart';
 import 'package:delwaqty/features/customer/restaurant/presentation/pages/restaurant_reviews_page.dart';
+import 'package:delwaqty/features/customer/restaurant/presentation/pages/my_reservations_page.dart';
 import 'package:delwaqty/features/customer/restaurant/presentation/pages/restaurant_reservation_page.dart';
 import 'package:delwaqty/features/customer/restaurant/presentation/pages/restaurant_gallery_page.dart';
 
@@ -117,6 +118,10 @@ class RestaurantModule extends FeatureModule {
 
   @override
   List<RouteBase> get standaloneRoutes => [
+    GoRoute(
+      path: '/my-reservations',
+      builder: (context, state) => const MyReservationsPage(),
+    ),
     GoRoute(
       path: '/restaurant/:merchantId',
       builder: (context, state) =>

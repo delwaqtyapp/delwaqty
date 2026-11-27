@@ -3124,6 +3124,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get completed => 'مكتمل';
 
   @override
+  String get seated => 'تم الجلوس';
+
+  @override
   String get assigned => 'معين';
 
   @override

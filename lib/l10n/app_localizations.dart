@@ -6086,6 +6086,12 @@ abstract class AppLocalizations {
   /// **'Completed'**
   String get completed;
 
+  /// No description provided for @seated.
+  ///
+  /// In en, this message translates to:
+  /// **'Seated'**
+  String get seated;
+
   /// No description provided for @assigned.
   ///
   /// In en, this message translates to:

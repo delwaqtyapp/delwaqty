@@ -513,6 +513,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               accent: AppColors.brandViolet,
               onTap: () => context.push('/market/orders'),
             ),
+            _BentoActionItem(
+              icon: Icons.event_seat_rounded,
+              label: l10n.myReservations,
+              accent: AppColors.brandPurple,
+              onTap: () => context.push('/my-reservations'),
+            ),
           ];
 
     // AdaptiveTileWrap: column count adapts to width AND text scale, and a

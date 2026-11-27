@@ -1820,6 +1820,12 @@ abstract class AppLocalizations {
   /// **'Min'**
   String get minOrder;
 
+  /// No description provided for @addMoreToReachMinOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {amount} {currency} more to reach the minimum order'**
+  String addMoreToReachMinOrder(String amount, String currency);
+
   /// No description provided for @highestRated.
   ///
   /// In en, this message translates to:

@@ -1,4 +1,5 @@
 import 'package:delwaqty/features/customer/commerce/presentation/providers/cart_providers.dart';
+import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -88,6 +89,12 @@ class CartPage extends ConsumerWidget {
               onAction: () => context.push('/market'),
             );
           }
+
+          final minOrderAsync = ref.watch(cartMerchantMinOrderProvider);
+          final shortfall = minOrderShortfall(
+            cart.subtotal,
+            minOrderAsync.asData?.value,
+          );
 
           return Column(
             children: [
@@ -253,11 +260,52 @@ class CartPage extends ConsumerWidget {
                         value: '${cart.total.toStringAsFixed(0)} ${l10n.egp}',
                         isBold: true,
                       ),
+                      if (shortfall != null) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.errorContainer.withValues(
+                              alpha: 0.35,
+                            ),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusLg,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                size: 18,
+                                color: colorScheme.error,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  l10n.addMoreToReachMinOrder(
+                                    shortfall.toStringAsFixed(0),
+                                    l10n.egp,
+                                  ),
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurface,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 12),
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton(
-                          onPressed: () => context.push('/market/checkout'),
+                          onPressed: shortfall != null
+                              ? null
+                              : () => context.push('/market/checkout'),
                           child: Text(l10n.proceedToCheckout),
                         ),
                       ),

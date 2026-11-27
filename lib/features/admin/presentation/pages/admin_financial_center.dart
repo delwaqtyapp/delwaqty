@@ -88,6 +88,12 @@ class AdminFinancialCenter extends ConsumerWidget {
                       onTap: () => context.push('/admin/topup-requests'),
                     ),
                     _FinanceQuickAction(
+                      icon: Icons.payments_rounded,
+                      label: l10n.adminPayoutRequests,
+                      color: const Color(0xFF34C759),
+                      onTap: () => context.push('/admin/payout-requests'),
+                    ),
+                    _FinanceQuickAction(
                       icon: Icons.currency_exchange_rounded,
                       label: l10n.adminRefundRequests,
                       color: const Color(0xFFFF9500),

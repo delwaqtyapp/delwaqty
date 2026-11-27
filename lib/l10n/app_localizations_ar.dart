@@ -8744,4 +8744,53 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get adminRefundRejected => 'تم رفض طلب الاسترداد';
+
+  @override
+  String get merchantPayouts => 'المدفوعات وكشف الحساب';
+
+  @override
+  String get payoutRequest => 'طلب سحب أرباح';
+
+  @override
+  String get payoutRequested => 'تم إرسال طلب السحب';
+
+  @override
+  String get payoutRequestsTitle => 'طلبات السحب';
+
+  @override
+  String get payoutLedgerTitle => 'كشف الحساب';
+
+  @override
+  String get payoutLedgerEmpty => 'لا توجد حركات بعد';
+
+  @override
+  String get payoutStatusApproved => 'تمت الموافقة';
+
+  @override
+  String get payoutErrorBalance => 'المبلغ أكبر من رصيدك المتاح.';
+
+  @override
+  String get payoutErrorPending => 'لديك طلب سحب قيد المراجعة بالفعل.';
+
+  @override
+  String get payoutErrorAmount => 'أدخل مبلغاً صحيحاً (حتى خانتين عشريتين).';
+
+  @override
+  String get payoutErrorGeneric => 'تعذر إتمام العملية. حاول مرة أخرى.';
+
+  @override
+  String get adminPayoutRequests => 'طلبات السحب';
+
+  @override
+  String get adminPayoutNone => 'لا توجد طلبات سحب معلقة';
+
+  @override
+  String get adminPayoutApproveBody =>
+      'الموافقة وخصم هذا المبلغ من رصيد التاجر:';
+
+  @override
+  String get adminPayoutApproved => 'تمت الموافقة على السحب';
+
+  @override
+  String get adminPayoutRejected => 'تم رفض طلب السحب';
 }

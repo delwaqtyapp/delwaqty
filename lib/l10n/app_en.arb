@@ -3170,5 +3170,21 @@
   "adminRefundRejectHint": "Reason shown to the customer",
   "adminRefundNoteRequired": "A reason is required to reject",
   "adminRefundApproved": "Refund approved and credited",
-  "adminRefundRejected": "Refund request rejected"
+  "adminRefundRejected": "Refund request rejected",
+  "merchantPayouts": "Payouts and ledger",
+  "payoutRequest": "Request payout",
+  "payoutRequested": "Payout request sent",
+  "payoutRequestsTitle": "Payout requests",
+  "payoutLedgerTitle": "Ledger",
+  "payoutLedgerEmpty": "No ledger entries yet",
+  "payoutStatusApproved": "Approved",
+  "payoutErrorBalance": "The amount is more than your available balance.",
+  "payoutErrorPending": "You already have a pending payout request.",
+  "payoutErrorAmount": "Enter a valid amount (up to 2 decimals).",
+  "payoutErrorGeneric": "Could not complete the payout action. Try again.",
+  "adminPayoutRequests": "Payout requests",
+  "adminPayoutNone": "No pending payout requests",
+  "adminPayoutApproveBody": "Approve and debit the merchant ledger by:",
+  "adminPayoutApproved": "Payout approved",
+  "adminPayoutRejected": "Payout rejected"
 }

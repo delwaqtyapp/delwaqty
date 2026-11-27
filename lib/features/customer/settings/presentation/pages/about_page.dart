@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/config/build_channel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -175,34 +176,36 @@ class _AboutPageState extends ConsumerState<AboutPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 18),
-                FilledButton.icon(
-                  onPressed: _checking ? null : _checkForUpdate,
-                  icon: _checking
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.brandPurpleDeep,
-                          ),
-                        )
-                      : const Icon(Icons.system_update_alt_rounded),
-                  label: Text(
-                    _checking ? l10n.checkingForUpdate : l10n.checkForUpdate,
-                  ),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: AppColors.brandPurpleDeep,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
+                if (!kPlayBuild) ...[
+                  const SizedBox(height: 18),
+                  FilledButton.icon(
+                    onPressed: _checking ? null : _checkForUpdate,
+                    icon: _checking
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.brandPurpleDeep,
+                            ),
+                          )
+                        : const Icon(Icons.system_update_alt_rounded),
+                    label: Text(
+                      _checking ? l10n.checkingForUpdate : l10n.checkForUpdate,
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppColors.brandPurpleDeep,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
           ),

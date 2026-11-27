@@ -12,6 +12,7 @@ import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
 import 'package:delwaqty/services/ota/ota_update_dialog.dart';
+import 'package:delwaqty/core/config/build_channel.dart';
 import 'package:delwaqty/services/ota/ota_update_manager.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/appearance_segmented.dart';
@@ -564,21 +565,23 @@ class _AdminSettingsMenuPageState extends ConsumerState<AdminSettingsMenuPage> {
           style: Theme.of(context).textTheme.bodySmall
               ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
-        const SizedBox(height: 12),
-        FilledButton.icon(
-          onPressed: () async {
-            Navigator.of(context).pop();
-            await showUpdateAvailableAndDownload(
-              context: context,
-              flavor: flavor,
-              result: checkResult!,
-            );
-          },
-          icon: const Icon(Icons.system_update_alt_rounded),
-          label: Text(
-            needsUpdate ? l10n.updateAvailableNow : l10n.checkForUpdate,
+        if (!kPlayBuild) ...[
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await showUpdateAvailableAndDownload(
+                context: context,
+                flavor: flavor,
+                result: checkResult!,
+              );
+            },
+            icon: const Icon(Icons.system_update_alt_rounded),
+            label: Text(
+              needsUpdate ? l10n.updateAvailableNow : l10n.checkForUpdate,
+            ),
           ),
-        ),
+        ],
       ],
     );
   }

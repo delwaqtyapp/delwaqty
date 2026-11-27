@@ -9,6 +9,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'package:delwaqty/core/config/app_mode_provider.dart';
+import 'package:delwaqty/core/config/build_channel.dart';
 
 import 'dart:async';
 
@@ -122,6 +123,7 @@ Future<String?> _fetchLatestTag() async {
 /// Fetches the OTA manifest for the LATEST release. Returns null when
 /// unreachable or invalid.
 Future<OtaManifest?> fetchOtaManifest() async {
+  if (kPlayBuild) return null; // no self-update in the Play build
   final tag = await _fetchLatestTag();
   if (tag == null) return null;
   return fetchOtaManifestForTag(tag);
@@ -145,6 +147,13 @@ Future<OtaManifest?> fetchOtaManifestForTag(String tag) async {
 Future<OtaCheckResult> checkForOtaUpdate(AppFlavor flavor) async {
   final packageInfo = await PackageInfo.fromPlatform();
   final current = int.tryParse(packageInfo.buildNumber) ?? 0;
+  if (kPlayBuild) {
+    return OtaCheckResult(
+      current: current,
+      latest: current,
+      needsUpdate: false,
+    );
+  }
   final tag = await _fetchLatestTag();
   final manifest = tag == null ? null : await fetchOtaManifestForTag(tag);
   if (manifest == null) {

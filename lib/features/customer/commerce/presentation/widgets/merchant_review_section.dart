@@ -142,10 +142,8 @@ class _MerchantReviewSectionState extends ConsumerState<MerchantReviewSection> {
               ),
               const SizedBox(height: 8),
               FilledButton(
-                onPressed: canSubmitReview(
-                      rating: _rating,
-                      submitting: _submitting,
-                    )
+                onPressed:
+                    canSubmitReview(rating: _rating, submitting: _submitting)
                     ? _submit
                     : null,
                 child: _submitting

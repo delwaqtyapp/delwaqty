@@ -27,7 +27,6 @@ Future<bool> confirmCartMerchantSwitch({
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (dialogContext) => AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: Text(l10n.cartConflictTitle),
       content: Text(l10n.cartConflictMessage(cart.merchantName)),
       actions: [

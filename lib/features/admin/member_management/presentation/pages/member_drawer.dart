@@ -1516,9 +1516,6 @@ class _SupportSection extends ConsumerWidget {
               final activeCount = rooms
                   .where((r) => r['status'] == 'active')
                   .length;
-              final emergencyCount = rooms
-                  .where((r) => r['is_emergency'] == true)
-                  .length;
               final escalatedCount = rooms
                   .where((r) => r['escalation_status'] != null)
                   .length;
@@ -1542,12 +1539,6 @@ class _SupportSection extends ConsumerWidget {
                         color: Colors.green,
                       ),
                       StatCard(
-                        title: l10n.emergencyStat,
-                        value: emergencyCount.toString(),
-                        icon: Icons.emergency_rounded,
-                        color: Colors.red,
-                      ),
-                      StatCard(
                         title: l10n.escalated,
                         value: escalatedCount.toString(),
                         icon: Icons.trending_up_rounded,
@@ -1560,18 +1551,15 @@ class _SupportSection extends ConsumerWidget {
                     final roomTitle =
                         r['title'] as String? ?? l10n.supportSection;
                     final priority = r['priority'] as String? ?? 'normal';
-                    final isEmergency = r['is_emergency'] as bool? ?? false;
                     final assignedAdmin = r['assigned_admin_name'] as String?;
                     final createdAt = r['created_at'] as String? ?? '';
                     return ListTile(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      leading: Icon(
-                        isEmergency
-                            ? Icons.emergency_rounded
-                            : Icons.chat_bubble_outline,
+                      leading: const Icon(
+                        Icons.chat_bubble_outline,
                         size: 16,
-                        color: isEmergency ? Colors.red : Colors.blue,
+                        color: Colors.blue,
                       ),
                       title: Text(
                         roomTitle,

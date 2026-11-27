@@ -2092,17 +2092,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get driverEnRoute => 'Driver is en route';
 
   @override
-  String get emergencyAlert => 'Emergency Alert';
-
-  @override
-  String get emergencyConfirmation =>
-      'Are you sure you want to call emergency services?';
-
-  @override
-  String get emergencyServicesNotified =>
-      'Emergency services have been notified.';
-
-  @override
   String get cancelReasonWrongAddress => 'Wrong address entered';
 
   @override
@@ -4853,27 +4842,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminProviderIntelligence => 'Provider Intelligence';
 
   @override
-  String get adminEmergency => 'Emergency';
-
-  @override
-  String get emergencyActive => 'Active';
-
-  @override
-  String get emergencyResolved => 'Resolved';
-
-  @override
-  String get emergencyEscalated => 'Escalated';
-
-  @override
-  String get emergencyFalseAlarm => 'False alarm';
-
-  @override
-  String get emergencyAll => 'All';
-
-  @override
-  String get emergencyOnlyActive => 'Active only';
-
-  @override
   String get adminSettingsPage => 'Settings';
 
   @override
@@ -6836,12 +6804,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get markResolved => 'Resolve';
-
-  @override
-  String get noEmergencies => 'No emergency alerts';
-
-  @override
-  String get noEmergenciesDescription => 'No SOS alerts have been raised.';
 
   @override
   String get dismiss => 'Dismiss';

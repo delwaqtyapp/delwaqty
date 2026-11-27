@@ -3144,6 +3144,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get completed => 'Completed';
 
   @override
+  String get seated => 'Seated';
+
+  @override
   String get assigned => 'Assigned';
 
   @override

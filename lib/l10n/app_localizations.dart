@@ -4064,12 +4064,6 @@ abstract class AppLocalizations {
   /// **'Driver is en route'**
   String get driverEnRoute;
 
-  /// No description provided for @sos.
-  ///
-  /// In en, this message translates to:
-  /// **'SOS'**
-  String get sos;
-
   /// No description provided for @emergencyAlert.
   ///
   /// In en, this message translates to:
@@ -4081,12 +4075,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to call emergency services?'**
   String get emergencyConfirmation;
-
-  /// No description provided for @confirmSOS.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm SOS'**
-  String get confirmSOS;
 
   /// No description provided for @emergencyServicesNotified.
   ///
@@ -9344,90 +9332,6 @@ abstract class AppLocalizations {
   /// **'Active only'**
   String get emergencyOnlyActive;
 
-  /// No description provided for @sosUser.
-  ///
-  /// In en, this message translates to:
-  /// **'Member'**
-  String get sosUser;
-
-  /// No description provided for @sosDriver.
-  ///
-  /// In en, this message translates to:
-  /// **'Driver'**
-  String get sosDriver;
-
-  /// No description provided for @sosAlertTypeManual.
-  ///
-  /// In en, this message translates to:
-  /// **'Manual'**
-  String get sosAlertTypeManual;
-
-  /// No description provided for @sosAlertType.
-  ///
-  /// In en, this message translates to:
-  /// **'Alert type'**
-  String get sosAlertType;
-
-  /// No description provided for @sosAlertTypeAutomatic.
-  ///
-  /// In en, this message translates to:
-  /// **'Automatic'**
-  String get sosAlertTypeAutomatic;
-
-  /// No description provided for @sosAlertTypeTimer.
-  ///
-  /// In en, this message translates to:
-  /// **'Timer'**
-  String get sosAlertTypeTimer;
-
-  /// No description provided for @resolveSosAlert.
-  ///
-  /// In en, this message translates to:
-  /// **'Close alert'**
-  String get resolveSosAlert;
-
-  /// No description provided for @markSosFalseAlarm.
-  ///
-  /// In en, this message translates to:
-  /// **'Mark false alarm'**
-  String get markSosFalseAlarm;
-
-  /// No description provided for @sosResolved.
-  ///
-  /// In en, this message translates to:
-  /// **'Alert closed'**
-  String get sosResolved;
-
-  /// No description provided for @sosActionFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Action failed, try again'**
-  String get sosActionFailed;
-
-  /// No description provided for @sosNoteHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Note (optional)'**
-  String get sosNoteHint;
-
-  /// No description provided for @sosNoAlerts.
-  ///
-  /// In en, this message translates to:
-  /// **'No alerts right now'**
-  String get sosNoAlerts;
-
-  /// No description provided for @sosNoAlertsHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Customer emergency alerts will appear here.'**
-  String get sosNoAlertsHint;
-
-  /// No description provided for @confirmSosFalseAlarm.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm marking this alert as a false alarm?'**
-  String get confirmSosFalseAlarm;
-
   /// No description provided for @adminSettingsPage.
   ///
   /// In en, this message translates to:
@@ -10100,12 +10004,6 @@ abstract class AppLocalizations {
   /// **'Payment failures'**
   String get kpiPaymentFailures;
 
-  /// No description provided for @kpiSosActive.
-  ///
-  /// In en, this message translates to:
-  /// **'Active SOS calls'**
-  String get kpiSosActive;
-
   /// No description provided for @kpiPendingWithdrawals.
   ///
   /// In en, this message translates to:
@@ -10730,18 +10628,6 @@ abstract class AppLocalizations {
   /// **'Member email: {email}'**
   String memberEmailLabel(Object email);
 
-  /// No description provided for @activeSosCalls.
-  ///
-  /// In en, this message translates to:
-  /// **'Active SOS Calls'**
-  String get activeSosCalls;
-
-  /// No description provided for @noActiveSosCalls.
-  ///
-  /// In en, this message translates to:
-  /// **'No active SOS calls'**
-  String get noActiveSosCalls;
-
   /// No description provided for @allUsersSafe.
   ///
   /// In en, this message translates to:
@@ -10759,18 +10645,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No critical issues require intervention'**
   String get noCriticalIssues;
-
-  /// No description provided for @sosUserLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'User: {id}'**
-  String sosUserLabel(Object id);
-
-  /// No description provided for @sosRideInfo.
-  ///
-  /// In en, this message translates to:
-  /// **'Delivery: {rideId} • {time}'**
-  String sosRideInfo(Object rideId, Object time);
 
   /// No description provided for @timeNow.
   ///
@@ -14635,30 +14509,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your complaint status has been updated'**
   String get notifComplaintUpdateBody;
-
-  /// No description provided for @notifSosAlertTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'SOS Emergency Alert'**
-  String get notifSosAlertTitle;
-
-  /// No description provided for @notifSosAlertBody.
-  ///
-  /// In en, this message translates to:
-  /// **'A user triggered an SOS alert'**
-  String get notifSosAlertBody;
-
-  /// No description provided for @notifSosResolvedTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'SOS Emergency Resolved'**
-  String get notifSosResolvedTitle;
-
-  /// No description provided for @notifSosResolvedBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Your SOS emergency alert has been resolved.'**
-  String get notifSosResolvedBody;
 
   /// No description provided for @notifVerificationApprovedTitle.
   ///

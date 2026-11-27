@@ -46,7 +46,6 @@ abstract class PlatformKpiSummary with _$PlatformKpiSummary {
     @Default(0) int openComplaints,
     @Default(0) int escalatedComplaints,
     @Default(0) int activeSanctions,
-    @Default(0) int sosActive,
     @Default(0) int pendingWithdrawals,
     @Default(0) int paymentFailures,
     DateTime? dateFrom,
@@ -103,7 +102,6 @@ abstract class PlatformKpiSummary with _$PlatformKpiSummary {
         openComplaints: json['open_complaints'] as int? ?? 0,
         escalatedComplaints: json['escalated_complaints'] as int? ?? 0,
         activeSanctions: json['active_sanctions'] as int? ?? 0,
-        sosActive: json['sos_active'] as int? ?? 0,
         pendingWithdrawals: json['pending_withdrawals'] as int? ?? 0,
         paymentFailures: json['payment_failures'] as int? ?? 0,
         dateFrom: json['date_from'] != null

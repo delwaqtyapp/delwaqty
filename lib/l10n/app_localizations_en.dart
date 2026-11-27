@@ -2092,17 +2092,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get driverEnRoute => 'Driver is en route';
 
   @override
-  String get sos => 'SOS';
-
-  @override
   String get emergencyAlert => 'Emergency Alert';
 
   @override
   String get emergencyConfirmation =>
       'Are you sure you want to call emergency services?';
-
-  @override
-  String get confirmSOS => 'Confirm SOS';
 
   @override
   String get emergencyServicesNotified =>
@@ -4880,49 +4874,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emergencyOnlyActive => 'Active only';
 
   @override
-  String get sosUser => 'Member';
-
-  @override
-  String get sosDriver => 'Driver';
-
-  @override
-  String get sosAlertTypeManual => 'Manual';
-
-  @override
-  String get sosAlertType => 'Alert type';
-
-  @override
-  String get sosAlertTypeAutomatic => 'Automatic';
-
-  @override
-  String get sosAlertTypeTimer => 'Timer';
-
-  @override
-  String get resolveSosAlert => 'Close alert';
-
-  @override
-  String get markSosFalseAlarm => 'Mark false alarm';
-
-  @override
-  String get sosResolved => 'Alert closed';
-
-  @override
-  String get sosActionFailed => 'Action failed, try again';
-
-  @override
-  String get sosNoteHint => 'Note (optional)';
-
-  @override
-  String get sosNoAlerts => 'No alerts right now';
-
-  @override
-  String get sosNoAlertsHint => 'Customer emergency alerts will appear here.';
-
-  @override
-  String get confirmSosFalseAlarm =>
-      'Confirm marking this alert as a false alarm?';
-
-  @override
   String get adminSettingsPage => 'Settings';
 
   @override
@@ -5263,9 +5214,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get kpiPaymentFailures => 'Payment failures';
 
   @override
-  String get kpiSosActive => 'Active SOS calls';
-
-  @override
   String get kpiPendingWithdrawals => 'Pending withdrawals';
 
   @override
@@ -5598,12 +5546,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get activeSosCalls => 'Active SOS Calls';
-
-  @override
-  String get noActiveSosCalls => 'No active SOS calls';
-
-  @override
   String get allUsersSafe => 'All platform users are safe';
 
   @override
@@ -5611,16 +5553,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noCriticalIssues => 'No critical issues require intervention';
-
-  @override
-  String sosUserLabel(Object id) {
-    return 'User: $id';
-  }
-
-  @override
-  String sosRideInfo(Object rideId, Object time) {
-    return 'Delivery: $rideId • $time';
-  }
 
   @override
   String get timeNow => 'Now';
@@ -7686,19 +7618,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get notifComplaintUpdateBody =>
       'Your complaint status has been updated';
-
-  @override
-  String get notifSosAlertTitle => 'SOS Emergency Alert';
-
-  @override
-  String get notifSosAlertBody => 'A user triggered an SOS alert';
-
-  @override
-  String get notifSosResolvedTitle => 'SOS Emergency Resolved';
-
-  @override
-  String get notifSosResolvedBody =>
-      'Your SOS emergency alert has been resolved.';
 
   @override
   String get notifVerificationApprovedTitle => 'Account Verified';

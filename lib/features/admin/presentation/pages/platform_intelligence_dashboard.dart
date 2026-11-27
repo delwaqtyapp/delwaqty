@@ -1342,10 +1342,7 @@ class _AlertCard extends StatelessWidget {
   String _targetRoute() {
     final cat = alert.category.toLowerCase();
     final title = alert.title.toLowerCase();
-    if (cat.contains('sos') ||
-        cat.contains('emerg') ||
-        title.contains('sos') ||
-        title.contains('emerg')) {
+    if (cat.contains('emerg') || title.contains('emerg')) {
       return '/admin/support-chat';
     }
     if (cat.contains('complaint') ||

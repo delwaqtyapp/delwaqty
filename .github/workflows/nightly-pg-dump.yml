@@ -1,9 +1,16 @@
-name: Nightly prod schema dump
+name: Nightly prod dump (encrypted)
 
-# Nightly logical backup of the prod database (schema + data) as a private
-# workflow artifact. Needs the repo secret SUPABASE_DB_URL (a read-capable
-# connection string, pooler/session mode). Without the secret the job
-# fails loudly instead of silently skipping.
+# Nightly logical backup of the prod database. THIS REPOSITORY IS PUBLIC, and
+# workflow artifacts of a public repo are downloadable by any signed-in GitHub
+# user, so the dump is NEVER uploaded in plaintext: it is encrypted with `age`
+# to a public recipient key, the plaintext is deleted, and only the .age file
+# is uploaded (7-day retention). The private key stays offline with the owner.
+#
+# Disabled until the owner sets, in repo settings:
+#   variable BACKUP_ENABLED = true
+#   secret   SUPABASE_DB_URL   (connection string, pooler/session mode)
+#   secret   AGE_RECIPIENT     (the age public key, starts with "age1")
+# Restore: age -d -i key.txt prod_*.dump.age > prod.dump; pg_restore ...
 on:
   schedule:
     - cron: '17 1 * * *'
@@ -14,34 +21,50 @@ permissions:
 
 jobs:
   dump:
-    name: pg_dump prod
+    name: pg_dump prod (encrypted)
+    if: vars.BACKUP_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - name: Require secret
+      - name: Require secrets
         env:
           DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          AGE_RECIPIENT: ${{ secrets.AGE_RECIPIENT }}
         run: |
           if [ -z "$DB_URL" ]; then echo "SUPABASE_DB_URL secret is not set" >&2; exit 1; fi
-      - name: Install postgresql-client 17
+          case "$AGE_RECIPIENT" in
+            age1*) ;;
+            *) echo "AGE_RECIPIENT secret missing or not an age public key; refusing to dump without encryption" >&2; exit 1 ;;
+          esac
+      - name: Install postgresql-client 17 and age
         run: |
           sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
           wget -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /etc/apt/trusted.gpg.d/pgdg.asc >/dev/null
           sudo apt-get update -qq
-          sudo apt-get install -y -qq postgresql-client-17
-      - name: Dump
+          sudo apt-get install -y -qq postgresql-client-17 age
+      - name: Dump and encrypt
         env:
           DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          AGE_RECIPIENT: ${{ secrets.AGE_RECIPIENT }}
         run: |
           set -euo pipefail
+          umask 077
           STAMP=$(date -u +%Y%m%dT%H%M%SZ)
+          PLAIN="${RUNNER_TEMP}/prod_${STAMP}.dump"
           /usr/lib/postgresql/17/bin/pg_dump "$DB_URL" --format=custom --no-owner --no-privileges \
-            --schema=public --schema=supabase_migrations --schema=auth --file="prod_${STAMP}.dump"
-          /usr/lib/postgresql/17/bin/pg_restore --list "prod_${STAMP}.dump" | wc -l
-          sha256sum "prod_${STAMP}.dump" | tee "prod_${STAMP}.dump.sha256"
+            --schema=public --schema=supabase_migrations --schema=auth --file="$PLAIN"
+          /usr/lib/postgresql/17/bin/pg_restore --list "$PLAIN" | wc -l
+          age -r "$AGE_RECIPIENT" -o "prod_${STAMP}.dump.age" "$PLAIN"
+          shred -u "$PLAIN" || rm -f "$PLAIN"
+          sha256sum "prod_${STAMP}.dump.age" | tee "prod_${STAMP}.dump.age.sha256"
+          # Hard stop: only ciphertext may sit in the upload directory.
+          test "$(ls prod_*.dump 2>/dev/null | wc -l)" = 0
+          head -c 22 "prod_${STAMP}.dump.age" | grep -q 'age-encryption.org'
       - uses: actions/upload-artifact@v4
         with:
-          name: prod-dump
-          path: prod_*.dump*
-          retention-days: 14
+          name: prod-dump-encrypted
+          path: |
+            prod_*.dump.age
+            prod_*.dump.age.sha256
+          retention-days: 7
           if-no-files-found: error

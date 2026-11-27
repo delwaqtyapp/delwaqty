@@ -33,6 +33,20 @@ final userLocationProvider =
 
 const double precisionTargetMeters = 1.0;
 
+/// Completes with [fallback] when [future] has not finished within [limit]
+/// (or throws). Used so a platform call that never answers cannot leave a
+/// caller (and its spinner) waiting forever.
+Future<T> withDeadline<T>(Future<T> future, Duration limit, T fallback) =>
+    future
+        .timeout(limit, onTimeout: () => fallback)
+        .catchError((_) => fallback);
+
+/// Upper bound for one "use my location" request: GNSS attempts plus
+/// geocoding. After this the caller gets whatever was found, or null.
+const locationRequestCap = Duration(seconds: 30);
+const _geocodeCap = Duration(seconds: 10);
+const _nativeGeocodeCap = Duration(seconds: 6);
+
 class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
   @override
   Future<UserLocation?> build() async {
@@ -49,10 +63,18 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
   }
 
   Future<UserLocation?> refreshDeepLocked() async {
+    final clock = Stopwatch()..start();
     UserLocation? best;
     for (var attempt = 0; attempt < 3; attempt++) {
-      final value = await _determinePosition(deepPrecision: true);
-      if (value == null) return null;
+      final remaining = locationRequestCap - clock.elapsed;
+      // A later attempt needs room to finish; otherwise keep what we have.
+      if (attempt > 0 && remaining < const Duration(seconds: 10)) break;
+      final value = await withDeadline<UserLocation?>(
+        _determinePosition(deepPrecision: true),
+        remaining,
+        null,
+      );
+      if (value == null) return best;
       final accuracy = value.accuracyMeters;
       if (best == null ||
           (accuracy != null &&
@@ -97,10 +119,10 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
         return null;
       }
 
-      final detailedAddress = await _reverseGeocode(
-        position.latitude,
-        position.longitude,
-        _appLanguage(),
+      final detailedAddress = await withDeadline<String>(
+        _reverseGeocode(position.latitude, position.longitude, _appLanguage()),
+        _geocodeCap,
+        '',
       );
 
       return UserLocation(
@@ -398,10 +420,14 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
     String language,
   ) async {
     try {
-      final result = await _nativeGeocoder.invokeMethod<Map<Object?, Object?>>(
-        'reverseGeocode',
-        {'lat': lat, 'lng': lng, 'language': language, 'maxResults': 1},
-      );
+      final result = await _nativeGeocoder
+          .invokeMethod<Map<Object?, Object?>>('reverseGeocode', {
+            'lat': lat,
+            'lng': lng,
+            'language': language,
+            'maxResults': 1,
+          })
+          .timeout(_nativeGeocodeCap);
       final addressLine = result?['addressLine'] as String?;
       if (addressLine == null || addressLine.isEmpty) return null;
       final cleaned = _cleanAddress(addressLine, language);

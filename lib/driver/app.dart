@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/config/build_channel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -77,7 +78,7 @@ class _DriverAppState extends ConsumerState<DriverApp>
   }
 
   Future<void> _checkOtaUpdate() async {
-    if (!mounted) return;
+    if (kPlayBuild || !mounted) return;
     await Future<void>.delayed(const Duration(seconds: 4));
     if (!mounted) return;
     try {

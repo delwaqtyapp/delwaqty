@@ -64,6 +64,12 @@ android {
             useLegacyPackaging = true
         }
     }
+    // Google Play build: PLAY_BUILD=true (env) adds a manifest overlay to the
+    // release variants that removes REQUEST_INSTALL_PACKAGES. The Dart side is
+    // switched off with --dart-define=PLAY_BUILD=true (lib/core/config/build_channel.dart).
+    if (System.getenv("PLAY_BUILD") == "true") {
+        sourceSets.getByName("release").manifest.srcFile("src/play/AndroidManifest.xml")
+    }
     flavorDimensions += "app"
     productFlavors {
         create("customer") {
@@ -94,8 +100,8 @@ android {
             } else {
                 signingConfigs.getByName("debug")
             }
-            isMinifyEnabled = false
-            isShrinkResources = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

@@ -1,3 +1,5 @@
+import 'package:delwaqty/core/config/build_channel.dart';
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -23,6 +25,7 @@ Future<bool> showOtaUpdateIfAvailable({
   bool force = false,
   Future<OtaCheckResult> Function(AppFlavor flavor)? check,
 }) async {
+  if (kPlayBuild) return false;
   if (_openUpdateFlavors.contains(flavor)) return false;
   final result = await (check ?? checkForOtaUpdate)(flavor);
   // Clear the handoff only when the RUNNING build positively reached the

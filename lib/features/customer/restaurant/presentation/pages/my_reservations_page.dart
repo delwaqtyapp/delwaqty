@@ -21,14 +21,15 @@ final myReservationsProvider = FutureProvider<List<Reservation>>((ref) async {
   return ref.watch(reservationRepositoryProvider).getUserReservations(userId);
 });
 
-final reservationMerchantNameProvider = FutureProvider.family<String?, String>(
-  (ref, merchantId) async {
-    final merchant = await ref
-        .watch(merchantRepositoryProvider)
-        .getMerchantById(merchantId);
-    return merchant?.name;
-  },
-);
+final reservationMerchantNameProvider = FutureProvider.family<String?, String>((
+  ref,
+  merchantId,
+) async {
+  final merchant = await ref
+      .watch(merchantRepositoryProvider)
+      .getMerchantById(merchantId);
+  return merchant?.name;
+});
 
 /// A reservation can be cancelled by the customer until the restaurant
 /// seats the party.
@@ -72,15 +73,13 @@ class MyReservationsPage extends ConsumerWidget {
           .cancelReservation(reservation.id);
       ref.invalidate(myReservationsProvider);
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.reservationCancelled)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.reservationCancelled)));
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     }
   }

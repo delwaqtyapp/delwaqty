@@ -271,7 +271,9 @@ class CartPage extends ConsumerWidget {
                             color: colorScheme.errorContainer.withValues(
                               alpha: 0.35,
                             ),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusLg,
+                            ),
                           ),
                           child: Row(
                             children: [

@@ -8648,4 +8648,28 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cashierLicenseStatusSuspended => 'موقوف';
+
+  @override
+  String get cancelOrderConfirmBody =>
+      'إلغاء هذا الطلب؟ إذا كنت قد دفعت، يُرد المبلغ إليك.';
+
+  @override
+  String get cancelOrderLimitNote =>
+      'يمكنك إلغاء طلبين في الشهر. الإلغاء الثالث في نفس الشهر يوقف حسابك.';
+
+  @override
+  String get cancelOrderKeep => 'إبقاء الطلب';
+
+  @override
+  String get cancelOrderDone => 'تم إلغاء الطلب';
+
+  @override
+  String get cancelOrderOutForDelivery =>
+      'الطلب في الطريق إليك بالفعل ولا يمكن إلغاؤه من هنا.';
+
+  @override
+  String get cancelOrderNotAllowed => 'لم يعد بالإمكان إلغاء هذا الطلب.';
+
+  @override
+  String get cancelOrderFailed => 'تعذر إلغاء الطلب. حاول مرة أخرى.';
 }

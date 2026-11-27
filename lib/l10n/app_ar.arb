@@ -3054,5 +3054,12 @@
   "cashierLicenseStatusIssued": "صادر، لم يتم تفعيله",
   "cashierLicenseStatusActive": "نشط",
   "cashierLicenseStatusExpired": "منتهي",
-  "cashierLicenseStatusSuspended": "موقوف"
+  "cashierLicenseStatusSuspended": "موقوف",
+  "cancelOrderConfirmBody": "إلغاء هذا الطلب؟ إذا كنت قد دفعت، يُرد المبلغ إليك.",
+  "cancelOrderLimitNote": "يمكنك إلغاء طلبين في الشهر. الإلغاء الثالث في نفس الشهر يوقف حسابك.",
+  "cancelOrderKeep": "إبقاء الطلب",
+  "cancelOrderDone": "تم إلغاء الطلب",
+  "cancelOrderOutForDelivery": "الطلب في الطريق إليك بالفعل ولا يمكن إلغاؤه من هنا.",
+  "cancelOrderNotAllowed": "لم يعد بالإمكان إلغاء هذا الطلب.",
+  "cancelOrderFailed": "تعذر إلغاء الطلب. حاول مرة أخرى."
 }

@@ -16483,6 +16483,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Suspended'**
   String get cashierLicenseStatusSuspended;
+
+  /// No description provided for @cancelOrderConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this order? If you already paid, the amount is refunded.'**
+  String get cancelOrderConfirmBody;
+
+  /// No description provided for @cancelOrderLimitNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You can cancel 2 orders per month. A third cancellation in the same month suspends your account.'**
+  String get cancelOrderLimitNote;
+
+  /// No description provided for @cancelOrderKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep order'**
+  String get cancelOrderKeep;
+
+  /// No description provided for @cancelOrderDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Order cancelled'**
+  String get cancelOrderDone;
+
+  /// No description provided for @cancelOrderOutForDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'The order is already out for delivery and cannot be cancelled here.'**
+  String get cancelOrderOutForDelivery;
+
+  /// No description provided for @cancelOrderNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'This order can no longer be cancelled.'**
+  String get cancelOrderNotAllowed;
+
+  /// No description provided for @cancelOrderFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not cancel the order. Try again.'**
+  String get cancelOrderFailed;
 }
 
 class _AppLocalizationsDelegate

@@ -15,7 +15,10 @@ INSERT INTO public.merchants(id, owner_user_id, name, type, status)
 VALUES (gen_random_uuid(), (select customer from zz449), 'zz451-other',
         'restaurant', 'active');
 CREATE TEMP TABLE zz451_expected AS
-SELECT (SELECT count(*) FROM public.merchants m
+SELECT (SELECT count(*) FROM public.products
+         WHERE merchant_id = (SELECT shop FROM zz449)) AS shop_products_count,
+       (SELECT id FROM public.merchants WHERE name = 'zz451-other') AS other_id,
+       (SELECT count(*) FROM public.merchants m
         WHERE public._is_country_admin_uid((select admin_user from zz449))
            OR public.is_admin_for_region(
                 public._ops_scope_region(
@@ -31,14 +34,13 @@ BEGIN
   ASSERT (SELECT get_my_merchant_profile((SELECT shop FROM zz449))->>'id')
          = (SELECT shop::text FROM zz449), 'owner param profile mismatch';
   ASSERT (SELECT get_my_products_count((SELECT shop FROM zz449)))
-         = (SELECT count(*) FROM public.products
-            WHERE merchant_id = (SELECT shop FROM zz449)), 'owner count wrong';
+         = (SELECT shop_products_count FROM zz451_expected), 'owner count wrong';
   ASSERT (SELECT count(*) FROM get_my_products_by_ids(
            (SELECT shop FROM zz449), array[(SELECT product1 FROM zz449)]))
          = 1, 'owner by_ids wrong';
   -- owner negative: a stranger-owned merchant id returns NULL, never the row
   ASSERT (SELECT get_my_merchant_profile(
-           (SELECT id FROM public.merchants WHERE name = 'zz451-other')))
+           (SELECT other_id FROM zz451_expected)))
          IS NULL, 'param profile leaked a stranger merchant';
 END $$;
 
@@ -47,8 +49,7 @@ SELECT set_config('request.jwt.claims', jsonb_build_object('sub', (select cashie
 DO $$
 BEGIN
   ASSERT (SELECT get_my_products_count((SELECT shop FROM zz449)))
-         = (SELECT count(*) FROM public.products
-            WHERE merchant_id = (SELECT shop FROM zz449)), 'staff count wrong';
+         = (SELECT shop_products_count FROM zz451_expected), 'staff count wrong';
   ASSERT (SELECT count(*) FROM get_my_products_by_ids(
            (SELECT shop FROM zz449), array[(SELECT product1 FROM zz449)]))
          = 1, 'staff by_ids wrong';
@@ -78,7 +79,7 @@ BEGIN
   -- their own store DOES resolve (customer owns zz451-other): ownership
   -- is by row, not by persona label
   ASSERT (SELECT get_my_merchant_profile(
-           (SELECT id FROM public.merchants WHERE name = 'zz451-other'))->>'name')
+           (SELECT other_id FROM zz451_expected))->>'name')
          = 'zz451-other', 'owner of a store cannot read it back';
 END $$;
 DO $$

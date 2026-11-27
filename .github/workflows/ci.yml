@@ -26,13 +26,16 @@ jobs:
         with:
           fetch-depth: 0
       - id: d
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          if [ "${{ github.event_name }}" != "pull_request" ]; then
+          if [ "$EVENT" != "pull_request" ]; then
             echo "android=true" >> "$GITHUB_OUTPUT"; echo "db=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          files=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          files=$(git diff --name-only "origin/$BASE_REF...HEAD")
           echo "$files"
-          if echo "$files" | grep -qE '^(android/|pubspec\.(yaml|lock)$|\.github/workflows/|assets/|tool/)'; then a=true; else a=false; fi
+          if echo "$files" | grep -qE '^(android/|build\.yaml$|l10n\.yaml$|analysis_options\.yaml$|pubspec\.(yaml|lock)$|\.github/workflows/|assets/|tool/)'; then a=true; else a=false; fi
           if echo "$files" | grep -qE '^(supabase/|\.github/workflows/)'; then d=true; else d=false; fi
           echo "android=$a" >> "$GITHUB_OUTPUT"; echo "db=$d" >> "$GITHUB_OUTPUT"
   analyze:

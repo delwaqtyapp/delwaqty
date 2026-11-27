@@ -22,10 +22,6 @@ class NotificationLocalizer {
       return l10n.notifEmergencySupportTitle;
     if (lower == 'new complaint') return l10n.notifNewComplaintTitle;
     if (lower == 'complaint update') return l10n.notifComplaintUpdateTitle;
-    if (lower == 'sos emergency alert') return l10n.notifSosAlertTitle;
-    if (lower.contains('sos') && lower.contains('resolved')) {
-      return l10n.notifSosResolvedTitle;
-    }
     if (lower.contains('verification') && lower.contains('approved')) {
       return l10n.notifVerificationApprovedTitle;
     }
@@ -72,12 +68,6 @@ class NotificationLocalizer {
     }
     if (lower.startsWith('your complaint status changed to')) {
       return l10n.notifComplaintUpdateBody;
-    }
-    if (lower == 'a user triggered an sos alert') {
-      return l10n.notifSosAlertBody;
-    }
-    if (lower.contains('sos') && lower.contains('resolved')) {
-      return l10n.notifSosResolvedBody;
     }
     if (lower.contains('verification') && lower.contains('approved')) {
       return l10n.notifVerificationApprovedBody;

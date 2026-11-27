@@ -2081,17 +2081,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get driverEnRoute => 'السائق في طريقه إليك';
 
   @override
-  String get sos => 'طوارئ SOS';
-
-  @override
   String get emergencyAlert => 'تنبيه طوارئ';
 
   @override
   String get emergencyConfirmation =>
       'هل أنت متأكد من رغبتك في الاتصال بخدمات الطوارئ؟';
-
-  @override
-  String get confirmSOS => 'تأكيد الطوارئ';
 
   @override
   String get emergencyServicesNotified => 'تم إخطار خدمات الطوارئ.';
@@ -4842,49 +4836,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get emergencyOnlyActive => 'النشطة فقط';
 
   @override
-  String get sosUser => 'المستعمل';
-
-  @override
-  String get sosDriver => 'السائق';
-
-  @override
-  String get sosAlertTypeManual => 'يدوي';
-
-  @override
-  String get sosAlertType => 'نوع الإنذار';
-
-  @override
-  String get sosAlertTypeAutomatic => 'تلقائي';
-
-  @override
-  String get sosAlertTypeTimer => 'مؤقّت';
-
-  @override
-  String get resolveSosAlert => 'إغلاق الإنذار';
-
-  @override
-  String get markSosFalseAlarm => 'إنذار خاطئ';
-
-  @override
-  String get sosResolved => 'تم إغلاق الإنذار';
-
-  @override
-  String get sosActionFailed => 'فشل تنفيذ الإجراء، حاول مرة أخرى';
-
-  @override
-  String get sosNoteHint => 'ملاحظة (اختياري)';
-
-  @override
-  String get sosNoAlerts => 'لا توجد إنذارات حالية';
-
-  @override
-  String get sosNoAlertsHint => 'ستظهر هنا إنذارات الطوارئ الخاصة بالعملاء.';
-
-  @override
-  String get confirmSosFalseAlarm =>
-      'تأكيد تعليم هذا الإنذار على أنه إنذار خاطئ؟';
-
-  @override
   String get adminSettingsPage => 'الإعدادات';
 
   @override
@@ -5224,9 +5175,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get kpiPaymentFailures => 'فشل المدفوعات';
 
   @override
-  String get kpiSosActive => 'نداءات SOS النشطة';
-
-  @override
   String get kpiPendingWithdrawals => 'عمليات السحب المعلقة';
 
   @override
@@ -5558,12 +5506,6 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get activeSosCalls => 'نداءات الاستغاثة النشطة';
-
-  @override
-  String get noActiveSosCalls => 'لا توجد نداءات استغاثة نشطة';
-
-  @override
   String get allUsersSafe => 'جميع مستخدمي المنصة في أمان';
 
   @override
@@ -5571,16 +5513,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noCriticalIssues => 'لا توجد مشاكل حرجة تستدعي التدخل';
-
-  @override
-  String sosUserLabel(Object id) {
-    return 'المستخدم: $id';
-  }
-
-  @override
-  String sosRideInfo(Object rideId, Object time) {
-    return 'توصيلة: $rideId • $time';
-  }
 
   @override
   String get timeNow => 'الآن';
@@ -7624,19 +7556,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get notifComplaintUpdateBody => 'تم تحديث حالة الشكوى الخاصة بك';
-
-  @override
-  String get notifSosAlertTitle => 'تنبيه طوارئ SOS';
-
-  @override
-  String get notifSosAlertBody => 'أطلق أحد المستخدمين تنبيه طوارئ';
-
-  @override
-  String get notifSosResolvedTitle => 'تم حل بلاغ الطوارئ';
-
-  @override
-  String get notifSosResolvedBody =>
-      'تمت معالجة وإغلاق تنبيه الطوارئ الخاص بك.';
 
   @override
   String get notifVerificationApprovedTitle => 'تم توثيق الحساب';

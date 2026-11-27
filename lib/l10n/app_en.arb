@@ -3141,7 +3141,7 @@
   "cashierLicenseStatusExpired": "Expired",
   "cashierLicenseStatusSuspended": "Suspended",
   "cancelOrderConfirmBody": "Cancel this order? If you already paid, the amount is refunded.",
-  "cancelOrderLimitNote": "You can cancel 2 orders per month. A third cancellation in the same month suspends your account.",
+  "cancelOrderLimitNote": "You can cancel 2 orders per month. A third cancellation in the same month suspends your account for 5 days. If that happens, contact support in the app to explain the repeated cancellations.",
   "cancelOrderKeep": "Keep order",
   "cancelOrderDone": "Order cancelled",
   "cancelOrderOutForDelivery": "The order is already out for delivery and cannot be cancelled here.",

@@ -11,6 +11,17 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 bool canCustomerCancel(OrderStatus status) =>
     status == OrderStatus.pending || status == OrderStatus.confirmed;
 
+/// Stable codes stored in orders.cancelled_reason; shown localized on read.
+const cancelReasonCodes = ['changed_mind', 'wrong_address', 'other'];
+
+String? localizedCancelReason(AppLocalizations l10n, String? code) =>
+    switch (code) {
+      'changed_mind' => l10n.cancelReasonChangedMind,
+      'wrong_address' => l10n.cancelReasonWrongAddress,
+      'other' => l10n.cancelReasonOther,
+      _ => code,
+    };
+
 enum CancelOrderError { outForDelivery, notCancellable, forbidden, other }
 
 /// `cancel_order` answers `{ok:false, code}`; the data source rethrows it as
@@ -43,11 +54,7 @@ class _CancelOrderButtonState extends ConsumerState<CancelOrderButton> {
   bool _busy = false;
 
   Future<String?> _askReason(AppLocalizations l10n) {
-    final reasons = <String>[
-      l10n.cancelReasonChangedMind,
-      l10n.cancelReasonWrongAddress,
-      l10n.cancelReasonOther,
-    ];
+    const reasons = cancelReasonCodes;
     var selected = reasons.first;
     return showDialog<String>(
       context: context,
@@ -69,7 +76,7 @@ class _CancelOrderButtonState extends ConsumerState<CancelOrderButton> {
                       for (final r in reasons)
                         RadioListTile<String>(
                           value: r,
-                          title: Text(r),
+                          title: Text(localizedCancelReason(l10n, r) ?? r),
                           contentPadding: EdgeInsets.zero,
                         ),
                     ],

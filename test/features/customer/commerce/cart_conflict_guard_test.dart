@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:delwaqty/data/repositories/local_cart_repository.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart';
-import 'package:delwaqty/features/customer/commerce/presentation/providers/cart_providers.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/cart_conflict_guard.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 

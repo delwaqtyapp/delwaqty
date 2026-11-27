@@ -32,6 +32,7 @@ mk() { local n="zz457${1}_$(date +%s)_$RANDOM"
 OWN=00000000-0000-0000-0000-000000457a01   # platform owner (reviewer)
 CUS=00000000-0000-0000-0000-000000457a02   # customer
 OTH=00000000-0000-0000-0000-000000457a03   # another customer
+REV=00000000-0000-0000-0000-000000457a04   # non-owner staff reviewer
 O_OK=00000000-0000-0000-0000-0000004570a1  # delivered+paid, 100
 O_PEND=00000000-0000-0000-0000-0000004570a2 # pending
 O_UNPAID=00000000-0000-0000-0000-0000004570a3 # delivered, unpaid
@@ -41,8 +42,8 @@ O_OWN=00000000-0000-0000-0000-0000004570a6 # the owner's own order (self review)
 O_REJ=00000000-0000-0000-0000-0000004570a7 # reject then re-request
 prep() { psql "$1" -X -q -v ON_ERROR_STOP=1 -c "
   CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS \$f\$ SELECT coalesce(nullif(current_setting('request.jwt.claim.sub', true), ''), nullif(current_setting('request.jwt.claims', true)::jsonb ->> 'sub', ''))::uuid \$f\$;
-  INSERT INTO auth.users(id,email) VALUES ('$OWN','o457@x.i'),('$CUS','c457@x.i'),('$OTH','t457@x.i');
-  INSERT INTO public.users(id,email,role) VALUES ('$OWN','o457@x.i','owner'),('$CUS','c457@x.i','customer'),('$OTH','t457@x.i','customer') ON CONFLICT(id) DO UPDATE SET role=EXCLUDED.role;
+  INSERT INTO auth.users(id,email) VALUES ('$OWN','o457@x.i'),('$CUS','c457@x.i'),('$OTH','t457@x.i'),('$REV','r457@x.i');
+  INSERT INTO public.users(id,email,role) VALUES ('$OWN','o457@x.i','owner'),('$CUS','c457@x.i','customer'),('$OTH','t457@x.i','customer'),('$REV','r457@x.i','admin') ON CONFLICT(id) DO UPDATE SET role=EXCLUDED.role;
   INSERT INTO public.orders(id,user_id,status,payment_status,subtotal,total_amount,created_at,merchant_name) VALUES
    ('$O_OK','$CUS','delivered','paid',100,100,now(),'m'),
    ('$O_PEND','$CUS','pending','paid',100,100,now(),'m'),
@@ -84,6 +85,13 @@ check() { local U="$1" bad=0 r n rid
   r=$(code "$U" $CUS "public.admin_list_refund_requests()"); want "customer list" "$r" FORBIDDEN
   r=$(code "$U" $OWN "public.admin_list_refund_requests()"); want "owner list" "$r" OK
   n=$(as "$U" $OWN "select jsonb_array_length((public.admin_list_refund_requests())->'requests')"); want "list content" "$n" 1
+  # --- non-owner staff: no permission -> forbidden; granted -> allowed; revoked -> forbidden
+  r=$(code "$U" $REV "public.admin_list_refund_requests()"); want "staff without permission" "$r" FORBIDDEN
+  psql "$U" -X -q -c "insert into public.financial_permissions(user_id,permission,granted_by) values ('$REV','review_refund','$OWN')" 2>/tmp/h457.err || { echo "review_refund not grantable (CHECK)"; bad=1; }
+  r=$(code "$U" $REV "public.admin_list_refund_requests()"); want "staff with permission" "$r" OK
+  psql "$U" -X -q -c "update public.financial_permissions set revoked_at=now() where user_id='$REV'" 2>/dev/null
+  r=$(code "$U" $REV "public.admin_list_refund_requests()"); want "staff revoked" "$r" FORBIDDEN
+  n=$(val "$U" "select confdeltype from pg_constraint where conrelid='public.refund_requests'::regclass and contype='f' and confrelid='public.orders'::regclass"); want "order FK is RESTRICT" "$n" r
   # --- reject path then re-request
   r=$(code "$U" $CUS "public.request_refund('$O_REJ','quality')"); want "req for reject" "$r" OK
   local rj; rj=$(val "$U" "select id from public.refund_requests where order_id='$O_REJ'")

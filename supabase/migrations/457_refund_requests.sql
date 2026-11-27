@@ -6,12 +6,19 @@
 --   admin_review_refund()    approve (credits the wallet once) or reject (note required);
 --                            needs financial permission 'review_refund' (owner always has it)
 --   admin_list_refund_requests()
+-- order_id is ON DELETE RESTRICT so financial history is never silently deleted.
 -- All writes go through the DEFINER RPCs; both actions write audit_log.
 -- Re-runnable.
 
+-- Allow granting the new permission to non-owner staff.
+ALTER TABLE public.financial_permissions DROP CONSTRAINT IF EXISTS financial_permissions_permission_check;
+ALTER TABLE public.financial_permissions ADD CONSTRAINT financial_permissions_permission_check
+  CHECK (permission = ANY (ARRAY['approve_wallet_funding','reject_wallet_funding','view_funding_requests',
+    'manage_receiving_accounts','view_financial_transactions','adjust_wallet_balance','review_refund']));
+
 CREATE TABLE IF NOT EXISTS public.refund_requests (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id uuid NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
+  order_id uuid NOT NULL REFERENCES public.orders(id) ON DELETE RESTRICT,
   user_id uuid NOT NULL,
   amount numeric(12,2) NOT NULL CHECK (amount > 0),
   reason_code text NOT NULL CHECK (reason_code IN

@@ -763,6 +763,30 @@ class AppLocalizationsAr extends AppLocalizations {
   String get savedAddresses => 'العناوين المحفوظة';
 
   @override
+  String get myAddresses => 'عناويني';
+
+  @override
+  String get addAddress => 'إضافة عنوان';
+
+  @override
+  String get addressLabelHint => 'الاسم (المنزل، العمل...)';
+
+  @override
+  String get setAsDefaultAddress => 'تعيين كافتراضي';
+
+  @override
+  String get defaultAddressBadge => 'افتراضي';
+
+  @override
+  String get deleteAddressConfirm => 'حذف هذا العنوان المحفوظ؟';
+
+  @override
+  String get addressDeleted => 'تم حذف العنوان';
+
+  @override
+  String get addressUpdated => 'تم تحديث العنوان';
+
+  @override
   String get noSavedAddresses => 'لا توجد عناوين محفوظة بعد';
 
   @override

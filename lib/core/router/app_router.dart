@@ -58,6 +58,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         '/market/favorites',
         '/orders',
         '/my-reservations',
+        '/profile/addresses',
       ];
       final isRestricted = restrictedRoutes.any(
         (r) => state.matchedLocation.startsWith(r),

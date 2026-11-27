@@ -1449,6 +1449,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get submitReview => 'Submit Review';
 
   @override
+  String get reviewAlreadySubmitted => 'You already reviewed this order.';
+
+  @override
   String get reviewSubmitted => 'Review submitted! Thank you.';
 
   @override

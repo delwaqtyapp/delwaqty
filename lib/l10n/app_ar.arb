@@ -473,6 +473,7 @@
   "yourRating": "تقييمك",
   "yourReview": "تعليقك",
   "submitReview": "إرسال التقييم",
+  "reviewAlreadySubmitted": "لقد قيّمت هذا الطلب من قبل.",
   "reviewSubmitted": "تم إرسال التقييم! شكراً لك.",
   "selectBranchFirst": "يرجى اختيار الفرع أولاً",
   "today": "اليوم",

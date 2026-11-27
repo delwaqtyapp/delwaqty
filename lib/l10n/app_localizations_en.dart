@@ -904,7 +904,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get minOrder => 'Min';
 
   @override
-  String addMoreToReachMinOrder(Object amount, Object currency) {
+  String addMoreToReachMinOrder(String amount, String currency) {
     return 'Add $amount $currency more to reach the minimum order';
   }
 

@@ -5588,6 +5588,60 @@ abstract class AppLocalizations {
   /// **'Save number'**
   String get saveNumber;
 
+  /// No description provided for @directDeliveryErrAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter or pick the delivery address'**
+  String get directDeliveryErrAddress;
+
+  /// No description provided for @directDeliveryErrPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your phone number'**
+  String get directDeliveryErrPhone;
+
+  /// No description provided for @directDeliveryErrPhoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid Egyptian mobile number (01 followed by 9 digits)'**
+  String get directDeliveryErrPhoneInvalid;
+
+  /// No description provided for @directDeliveryErrNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one item or describe your order'**
+  String get directDeliveryErrNothing;
+
+  /// No description provided for @directDeliveryErrQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity must be 1 or more'**
+  String get directDeliveryErrQuantity;
+
+  /// No description provided for @directDeliveryPickAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Which address do you mean?'**
+  String get directDeliveryPickAddress;
+
+  /// No description provided for @directDeliverySavedAddresses.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved addresses'**
+  String get directDeliverySavedAddresses;
+
+  /// No description provided for @directDeliveryEstimateNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate based on distance. The final fee may differ.'**
+  String get directDeliveryEstimateNote;
+
+  /// No description provided for @directDeliveryEstimateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated delivery fee'**
+  String get directDeliveryEstimateLabel;
+
   /// No description provided for @numberSaved.
   ///
   /// In en, this message translates to:

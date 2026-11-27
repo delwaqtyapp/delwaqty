@@ -2889,6 +2889,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveNumber => 'Save number';
 
   @override
+  String get directDeliveryErrAddress => 'Enter or pick the delivery address';
+
+  @override
+  String get directDeliveryErrPhone => 'Enter your phone number';
+
+  @override
+  String get directDeliveryErrPhoneInvalid =>
+      'Enter a valid Egyptian mobile number (01 followed by 9 digits)';
+
+  @override
+  String get directDeliveryErrNothing =>
+      'Add at least one item or describe your order';
+
+  @override
+  String get directDeliveryErrQuantity => 'Quantity must be 1 or more';
+
+  @override
+  String get directDeliveryPickAddress => 'Which address do you mean?';
+
+  @override
+  String get directDeliverySavedAddresses => 'Saved addresses';
+
+  @override
+  String get directDeliveryEstimateNote =>
+      'Estimate based on distance. The final fee may differ.';
+
+  @override
+  String get directDeliveryEstimateLabel => 'Estimated delivery fee';
+
+  @override
   String get numberSaved => 'Phone number saved';
 
   @override

@@ -2081,16 +2081,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get driverEnRoute => 'السائق في طريقه إليك';
 
   @override
-  String get emergencyAlert => 'تنبيه طوارئ';
-
-  @override
-  String get emergencyConfirmation =>
-      'هل أنت متأكد من رغبتك في الاتصال بخدمات الطوارئ؟';
-
-  @override
-  String get emergencyServicesNotified => 'تم إخطار خدمات الطوارئ.';
-
-  @override
   String get cancelReasonWrongAddress => 'تم إدخال عنوان خاطئ';
 
   @override
@@ -4815,27 +4805,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminProviderIntelligence => 'ذكاء مقدمي الخدمة';
 
   @override
-  String get adminEmergency => 'الطوارئ';
-
-  @override
-  String get emergencyActive => 'نشطة';
-
-  @override
-  String get emergencyResolved => 'مُعالجة';
-
-  @override
-  String get emergencyEscalated => 'مُصعّدة';
-
-  @override
-  String get emergencyFalseAlarm => 'إنذار خاطئ';
-
-  @override
-  String get emergencyAll => 'الكل';
-
-  @override
-  String get emergencyOnlyActive => 'النشطة فقط';
-
-  @override
   String get adminSettingsPage => 'الإعدادات';
 
   @override
@@ -6789,12 +6758,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get markResolved => 'تم الحل';
-
-  @override
-  String get noEmergencies => 'لا توجد تنبيهات طوارئ';
-
-  @override
-  String get noEmergenciesDescription => 'لم يتم رفع أي تنبيه استغاثة.';
 
   @override
   String get dismiss => 'تجاهل';

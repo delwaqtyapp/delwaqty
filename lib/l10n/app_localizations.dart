@@ -4064,24 +4064,6 @@ abstract class AppLocalizations {
   /// **'Driver is en route'**
   String get driverEnRoute;
 
-  /// No description provided for @emergencyAlert.
-  ///
-  /// In en, this message translates to:
-  /// **'Emergency Alert'**
-  String get emergencyAlert;
-
-  /// No description provided for @emergencyConfirmation.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to call emergency services?'**
-  String get emergencyConfirmation;
-
-  /// No description provided for @emergencyServicesNotified.
-  ///
-  /// In en, this message translates to:
-  /// **'Emergency services have been notified.'**
-  String get emergencyServicesNotified;
-
   /// No description provided for @cancelReasonWrongAddress.
   ///
   /// In en, this message translates to:
@@ -9290,48 +9272,6 @@ abstract class AppLocalizations {
   /// **'Provider Intelligence'**
   String get adminProviderIntelligence;
 
-  /// No description provided for @adminEmergency.
-  ///
-  /// In en, this message translates to:
-  /// **'Emergency'**
-  String get adminEmergency;
-
-  /// No description provided for @emergencyActive.
-  ///
-  /// In en, this message translates to:
-  /// **'Active'**
-  String get emergencyActive;
-
-  /// No description provided for @emergencyResolved.
-  ///
-  /// In en, this message translates to:
-  /// **'Resolved'**
-  String get emergencyResolved;
-
-  /// No description provided for @emergencyEscalated.
-  ///
-  /// In en, this message translates to:
-  /// **'Escalated'**
-  String get emergencyEscalated;
-
-  /// No description provided for @emergencyFalseAlarm.
-  ///
-  /// In en, this message translates to:
-  /// **'False alarm'**
-  String get emergencyFalseAlarm;
-
-  /// No description provided for @emergencyAll.
-  ///
-  /// In en, this message translates to:
-  /// **'All'**
-  String get emergencyAll;
-
-  /// No description provided for @emergencyOnlyActive.
-  ///
-  /// In en, this message translates to:
-  /// **'Active only'**
-  String get emergencyOnlyActive;
-
   /// No description provided for @adminSettingsPage.
   ///
   /// In en, this message translates to:
@@ -13087,18 +13027,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resolve'**
   String get markResolved;
-
-  /// No description provided for @noEmergencies.
-  ///
-  /// In en, this message translates to:
-  /// **'No emergency alerts'**
-  String get noEmergencies;
-
-  /// No description provided for @noEmergenciesDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'No SOS alerts have been raised.'**
-  String get noEmergenciesDescription;
 
   /// No description provided for @dismiss.
   ///

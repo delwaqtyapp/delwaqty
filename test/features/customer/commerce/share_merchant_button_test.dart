@@ -5,7 +5,10 @@ void main() {
   group('composeMerchantShareText', () {
     test('name and app only when there is no address', () {
       expect(
-        composeMerchantShareText(merchantName: 'Koshary Ali', appName: 'Delwaqty'),
+        composeMerchantShareText(
+          merchantName: 'Koshary Ali',
+          appName: 'Delwaqty',
+        ),
         'Koshary Ali - Delwaqty',
       );
     });

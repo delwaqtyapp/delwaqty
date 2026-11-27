@@ -1568,6 +1568,54 @@ abstract class AppLocalizations {
   /// **'Saved Addresses'**
   String get savedAddresses;
 
+  /// No description provided for @myAddresses.
+  ///
+  /// In en, this message translates to:
+  /// **'My Addresses'**
+  String get myAddresses;
+
+  /// No description provided for @addAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Add address'**
+  String get addAddress;
+
+  /// No description provided for @addressLabelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (Home, Work...)'**
+  String get addressLabelHint;
+
+  /// No description provided for @setAsDefaultAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as default'**
+  String get setAsDefaultAddress;
+
+  /// No description provided for @defaultAddressBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get defaultAddressBadge;
+
+  /// No description provided for @deleteAddressConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this saved address?'**
+  String get deleteAddressConfirm;
+
+  /// No description provided for @addressDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Address deleted'**
+  String get addressDeleted;
+
+  /// No description provided for @addressUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Address updated'**
+  String get addressUpdated;
+
   /// No description provided for @noSavedAddresses.
   ///
   /// In en, this message translates to:

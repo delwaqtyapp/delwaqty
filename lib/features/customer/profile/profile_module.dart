@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/features/customer/profile/presentation/pages/app_invitations_page.dart';
+import 'package:delwaqty/features/customer/profile/presentation/pages/my_addresses_page.dart';
 import 'package:delwaqty/features/customer/profile/presentation/pages/profile_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
@@ -30,6 +31,10 @@ class ProfileModule extends FeatureModule {
           name: 'profile',
           builder: (context, state) => const ProfilePage(),
           routes: [
+            GoRoute(
+              path: 'addresses',
+              builder: (context, state) => const MyAddressesPage(),
+            ),
             GoRoute(
               path: 'app-invitations',
               builder: (context, state) => const AppInvitationsPage(),

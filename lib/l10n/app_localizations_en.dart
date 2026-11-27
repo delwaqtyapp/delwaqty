@@ -769,6 +769,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get savedAddresses => 'Saved Addresses';
 
   @override
+  String get myAddresses => 'My Addresses';
+
+  @override
+  String get addAddress => 'Add address';
+
+  @override
+  String get addressLabelHint => 'Name (Home, Work...)';
+
+  @override
+  String get setAsDefaultAddress => 'Set as default';
+
+  @override
+  String get defaultAddressBadge => 'Default';
+
+  @override
+  String get deleteAddressConfirm => 'Delete this saved address?';
+
+  @override
+  String get addressDeleted => 'Address deleted';
+
+  @override
+  String get addressUpdated => 'Address updated';
+
+  @override
   String get noSavedAddresses => 'No saved addresses yet';
 
   @override

@@ -6,6 +6,7 @@ import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dar
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/rating_stars.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/delivery_info.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/cart_badge.dart';
+import 'package:delwaqty/features/customer/commerce/presentation/widgets/share_merchant_button.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/features/customer/restaurant/restaurant_module.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/entities/branch.dart';
@@ -312,6 +313,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
           onPressed: () =>
               context.push('/restaurant/${widget.merchantId}/reviews'),
         ),
+        ShareMerchantButton(merchant: merchant),
         CartBadge(onTap: () => context.push('/market/cart')),
       ],
       flexibleSpace: FlexibleSpaceBar(

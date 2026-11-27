@@ -187,6 +187,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appName => 'Delwaqty';
 
   @override
+  String get share => 'Share';
+
+  @override
   String get appNameAr => 'دلوقتي';
 
   @override

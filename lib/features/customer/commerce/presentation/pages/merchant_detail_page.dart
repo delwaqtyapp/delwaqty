@@ -15,6 +15,7 @@ import 'package:delwaqty/features/customer/commerce/presentation/widgets/deliver
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/cart_badge.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/favorite_button.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/product_detail_bottom_sheet.dart';
+import 'package:delwaqty/features/customer/commerce/presentation/widgets/share_merchant_button.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
@@ -201,6 +202,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
           ),
           onPressed: () => context.push('/restaurant/${merchant.id}/reviews'),
         ),
+        ShareMerchantButton(merchant: merchant),
         CartBadge(onTap: () => context.push('/market/cart')),
         const SizedBox(width: 4),
       ],

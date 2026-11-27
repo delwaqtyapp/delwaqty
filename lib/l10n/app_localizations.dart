@@ -446,6 +446,12 @@ abstract class AppLocalizations {
   /// **'Delwaqty'**
   String get appName;
 
+  /// No description provided for @share.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get share;
+
   /// No description provided for @appNameAr.
   ///
   /// In en, this message translates to:

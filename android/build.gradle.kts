@@ -24,7 +24,7 @@ subprojects {
         extensions.configure<com.android.build.gradle.LibraryExtension>("android") {
             defaultConfig {
                 ndk {
-                    abiFilters += listOf("arm64-v8a")
+                    abiFilters += listOf("arm64-v8a", "armeabi-v7a")
                 }
             }
         }

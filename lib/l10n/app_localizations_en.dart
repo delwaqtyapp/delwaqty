@@ -8859,4 +8859,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cartConflictStartNew => 'Start new cart';
+
+  @override
+  String get adminDeliveryPricing => 'Delivery pricing';
+
+  @override
+  String get adminDeliveryPricingNote =>
+      'Changes apply to new delivery requests only. Rides already requested keep their price.';
+
+  @override
+  String get adminPricingBaseFee => 'Base fee';
+
+  @override
+  String get adminPricingPerKm => 'Per km';
+
+  @override
+  String get adminPricingPerKg => 'Per kg';
+
+  @override
+  String get adminPricingMinFee => 'Minimum fee';
+
+  @override
+  String get adminPricingPriorityX => 'Priority multiplier';
+
+  @override
+  String get adminPricingExpressX => 'Express multiplier';
+
+  @override
+  String get adminPricingActive => 'Active';
+
+  @override
+  String get adminPricingSaved => 'Pricing saved';
+
+  @override
+  String get adminPricingInvalid =>
+      'Enter valid numbers. Fees cannot be negative and multipliers must be between 1 and 5.';
 }

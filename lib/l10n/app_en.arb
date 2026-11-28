@@ -3197,5 +3197,16 @@
         "type": "String"
       }
     }
-  }
+  },
+  "adminDeliveryPricing": "Delivery pricing",
+  "adminDeliveryPricingNote": "Changes apply to new delivery requests only. Rides already requested keep their price.",
+  "adminPricingBaseFee": "Base fee",
+  "adminPricingPerKm": "Per km",
+  "adminPricingPerKg": "Per kg",
+  "adminPricingMinFee": "Minimum fee",
+  "adminPricingPriorityX": "Priority multiplier",
+  "adminPricingExpressX": "Express multiplier",
+  "adminPricingActive": "Active",
+  "adminPricingSaved": "Pricing saved",
+  "adminPricingInvalid": "Enter valid numbers. Fees cannot be negative and multipliers must be between 1 and 5."
 }

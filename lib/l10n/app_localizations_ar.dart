@@ -8778,4 +8778,39 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cartConflictStartNew => 'ابدأ عربة جديدة';
+
+  @override
+  String get adminDeliveryPricing => 'تسعير التوصيل';
+
+  @override
+  String get adminDeliveryPricingNote =>
+      'التغييرات تسري على طلبات التوصيل الجديدة فقط. الطلبات الحالية تحتفظ بسعرها.';
+
+  @override
+  String get adminPricingBaseFee => 'رسوم البداية';
+
+  @override
+  String get adminPricingPerKm => 'سعر الكيلومتر';
+
+  @override
+  String get adminPricingPerKg => 'سعر الكيلوجرام';
+
+  @override
+  String get adminPricingMinFee => 'الحد الأدنى للأجرة';
+
+  @override
+  String get adminPricingPriorityX => 'معامل الأولوية';
+
+  @override
+  String get adminPricingExpressX => 'معامل السريع';
+
+  @override
+  String get adminPricingActive => 'مفعّل';
+
+  @override
+  String get adminPricingSaved => 'تم حفظ التسعير';
+
+  @override
+  String get adminPricingInvalid =>
+      'أدخل أرقامًا صحيحة. لا يمكن أن تكون الرسوم سالبة ويجب أن تكون المعاملات بين 1 و5.';
 }

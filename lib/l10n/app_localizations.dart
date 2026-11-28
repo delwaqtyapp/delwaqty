@@ -16723,6 +16723,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start new cart'**
   String get cartConflictStartNew;
+
+  /// No description provided for @adminDeliveryPricing.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery pricing'**
+  String get adminDeliveryPricing;
+
+  /// No description provided for @adminDeliveryPricingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes apply to new delivery requests only. Rides already requested keep their price.'**
+  String get adminDeliveryPricingNote;
+
+  /// No description provided for @adminPricingBaseFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Base fee'**
+  String get adminPricingBaseFee;
+
+  /// No description provided for @adminPricingPerKm.
+  ///
+  /// In en, this message translates to:
+  /// **'Per km'**
+  String get adminPricingPerKm;
+
+  /// No description provided for @adminPricingPerKg.
+  ///
+  /// In en, this message translates to:
+  /// **'Per kg'**
+  String get adminPricingPerKg;
+
+  /// No description provided for @adminPricingMinFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum fee'**
+  String get adminPricingMinFee;
+
+  /// No description provided for @adminPricingPriorityX.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority multiplier'**
+  String get adminPricingPriorityX;
+
+  /// No description provided for @adminPricingExpressX.
+  ///
+  /// In en, this message translates to:
+  /// **'Express multiplier'**
+  String get adminPricingExpressX;
+
+  /// No description provided for @adminPricingActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get adminPricingActive;
+
+  /// No description provided for @adminPricingSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing saved'**
+  String get adminPricingSaved;
+
+  /// No description provided for @adminPricingInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter valid numbers. Fees cannot be negative and multipliers must be between 1 and 5.'**
+  String get adminPricingInvalid;
 }
 
 class _AppLocalizationsDelegate

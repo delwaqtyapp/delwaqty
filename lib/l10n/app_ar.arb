@@ -3112,5 +3112,16 @@
         "type": "String"
       }
     }
-  }
+  },
+  "adminDeliveryPricing": "تسعير التوصيل",
+  "adminDeliveryPricingNote": "التغييرات تسري على طلبات التوصيل الجديدة فقط. الطلبات الحالية تحتفظ بسعرها.",
+  "adminPricingBaseFee": "رسوم البداية",
+  "adminPricingPerKm": "سعر الكيلومتر",
+  "adminPricingPerKg": "سعر الكيلوجرام",
+  "adminPricingMinFee": "الحد الأدنى للأجرة",
+  "adminPricingPriorityX": "معامل الأولوية",
+  "adminPricingExpressX": "معامل السريع",
+  "adminPricingActive": "مفعّل",
+  "adminPricingSaved": "تم حفظ التسعير",
+  "adminPricingInvalid": "أدخل أرقامًا صحيحة. لا يمكن أن تكون الرسوم سالبة ويجب أن تكون المعاملات بين 1 و5."
 }

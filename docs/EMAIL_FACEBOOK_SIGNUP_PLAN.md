@@ -9,10 +9,12 @@ Status: DRAFT. Not merged, not applied to prod, not published. Needs the owner's
 - Google login unchanged.
 - Safety kept: mailbox proven before access, no auto-link by email match, 467 hook guard (format check, hourly breaker, no @delwaqty.app).
 - Login by real email resolves in `auth_login_resolve_email`. The 8 old synthetic phone accounts still log in by phone.
-- Edit Profile > Login and security: show the password saved on this device, and set or change the login password. Both need fingerprint or phone screen lock first. The saved password exists only if the user turned on fingerprint login.
+- Edit Profile > Login and security: show the password saved on this device (no copy button), set or change the login password, and change email. Each needs fingerprint or phone screen lock first (client-side only). The saved password exists only if the user turned on fingerprint login.
+- Change email (shipped): GoTrue mails a confirmation link; the email changes only after it is opened. Migration 468 then copies the new email to `public.users`. Secure email change also asks the OLD address, which does not exist for the 8 @delwaqty.app phone accounts, so email change does not work for them (open item).
+- Hotfix 469 (PR #140) closes signup-as-owner/admin and must be applied first.
 
 ## Not built yet (phase 2)
-- Change email, phone, username from Edit Profile with server re-check of the password and verification of the new email or phone.
+- Change phone from Edit Profile (stays read-only: needs WhatsApp verification, which is blocked). Username is already editable.
 - Login by username or by the phone saved in the profile (needs a resolver extension and the phone-change rules).
 - Provider and driver document uploads need a session, which does not exist before activation.
 
@@ -37,3 +39,9 @@ Then set `auth_methods.facebook` true.
 - GoTrue may auto-link an OAuth identity to an unconfirmed email account. Must not.
 - Whether an email change applies without confirmation under autoconfirm.
 - Email send limit (30/hour now, Gmail SMTP) is enough for launch volume.
+
+## Runbook gates (not enforced in SQL; GoTrue settings are not readable from a migration)
+- Migration 468 must NOT be applied until `mailer_autoconfirm` is off AND a throwaway-mailbox check shows an email change waits for the new-mailbox link.
+- Email flag stays off until: autoconfirm off, activation template and sender work, `io.delwaqty://login-callback/activated` is in `uri_allow_list`, password re-authentication is on.
+- Facebook flag stays off until the Meta app is Live and a check shows GoTrue does not auto-link to an unconfirmed email account.
+- Order: 469 (#140), then 467 + 468, then Auth config, then throwaway test, then the email flag, then build 17.

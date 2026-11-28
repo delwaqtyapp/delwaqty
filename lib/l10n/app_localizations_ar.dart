@@ -8885,9 +8885,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loginPasswordSaved => 'تم حفظ كلمة المرور. يمكنك الدخول بها الآن.';
 
   @override
-  String get copyAction => 'نسخ';
-
-  @override
   String get changeEmail => 'تغيير البريد الإلكتروني';
 
   @override

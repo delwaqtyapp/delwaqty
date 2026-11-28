@@ -16910,12 +16910,6 @@ abstract class AppLocalizations {
   /// **'Password saved. You can sign in with it now.'**
   String get loginPasswordSaved;
 
-  /// No description provided for @copyAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy'**
-  String get copyAction;
-
   /// No description provided for @changeEmail.
   ///
   /// In en, this message translates to:

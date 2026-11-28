@@ -3229,7 +3229,6 @@
   "setLoginPassword": "Set or change login password",
   "setLoginPasswordHint": "Use this password with your email or username to sign in.",
   "loginPasswordSaved": "Password saved. You can sign in with it now.",
-  "copyAction": "Copy",
   "changeEmail": "Change email",
   "changeEmailHint": "We send a confirmation link to the new address. Your email only changes after you open it.",
   "newEmailLabel": "New email",

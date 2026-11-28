@@ -8970,9 +8970,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Password saved. You can sign in with it now.';
 
   @override
-  String get copyAction => 'Copy';
-
-  @override
   String get changeEmail => 'Change email';
 
   @override

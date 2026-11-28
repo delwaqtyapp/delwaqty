@@ -1,4 +1,6 @@
 {
+  "noSavedAddressesMessage": "Save your home, work or any place to order faster next time.",
+  "accuracyApproximate": "Your location is approximate. Adjust the pin on the map if needed.",
   "@@locale": "en",
   "appTitle": "Delwaqty",
   "home": "Home",
@@ -961,7 +963,7 @@
   "directDeliveryErrQuantity": "Quantity must be 1 or more",
   "directDeliveryPickAddress": "Which address do you mean?",
   "directDeliverySavedAddresses": "Saved addresses",
-  "directDeliveryEstimateNote": "Estimate based on distance. The final fee may differ.",
+  "directDeliveryEstimateNote": "Estimate from the distance between your location and the drop-off point. The final fee may differ.",
   "directDeliveryEstimateLabel": "Estimated delivery fee",
   "numberSaved": "Phone number saved",
   "shoppingList": "Shopping List",

@@ -36,7 +36,10 @@ void main() {
     );
   });
 
-  test('the whole request is capped at 30 seconds', () {
-    expect(locationRequestCap, const Duration(seconds: 30));
+  test('the whole request is capped at 20 seconds', () {
+    expect(locationRequestCap, const Duration(seconds: 20));
+    // A GPS target tighter than a few metres is not reachable on phones.
+    expect(precisionTargetMeters, inInclusiveRange(10.0, 30.0));
+    expect(approximateLocationMeters, greaterThan(precisionTargetMeters));
   });
 }

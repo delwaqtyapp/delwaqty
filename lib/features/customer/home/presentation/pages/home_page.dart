@@ -2323,11 +2323,17 @@ class _DiscoveryContent extends ConsumerWidget {
             return Padding(
               key: const ValueKey('empty'),
               padding: const EdgeInsets.all(20),
-              child: PremiumEmptyState(
-                icon: Icons.store_outlined,
-                title: AppLocalizations.of(context).noResults,
-                message: AppLocalizations.of(context).nearbyEmptyHint,
-              ),
+              child: mode == DiscoveryMode.favorites
+                  ? PremiumEmptyState(
+                      icon: Icons.favorite_border_rounded,
+                      title: AppLocalizations.of(context).noFavorites,
+                      message: AppLocalizations.of(context).noFavoritesMessage,
+                    )
+                  : PremiumEmptyState(
+                      icon: Icons.store_outlined,
+                      title: AppLocalizations.of(context).noResults,
+                      message: AppLocalizations.of(context).nearbyEmptyHint,
+                    ),
             );
           }
           return Column(

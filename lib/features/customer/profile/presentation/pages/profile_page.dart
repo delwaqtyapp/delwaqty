@@ -11,6 +11,7 @@ import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/customer/profile/presentation/pages/edit_profile_page.dart';
 import 'package:delwaqty/features/customer/profile/presentation/widgets/avatar_picker.dart';
+import 'package:delwaqty/shared/widgets/cairo_hero_painter.dart';
 import 'package:delwaqty/features/customer/profile/presentation/widgets/profile_sections.dart';
 import 'package:delwaqty/gen/assets.gen.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -27,6 +28,10 @@ class ProfilePage extends ConsumerStatefulWidget {
   @override
   ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
+
+const _heroTextShadow = [
+  Shadow(color: Color(0x80000000), blurRadius: 6, offset: Offset(0, 1)),
+];
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
   bool _isUploadingAvatar = false;
@@ -127,207 +132,213 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ? user.phone!
         : (user.email.isNotEmpty ? user.email : null);
 
-    return ConstrainedBox(
-      constraints: BoxConstraints(minHeight: top + 332),
-      child: Stack(
-        children: [
-          PositionedDirectional(
-            start: 0,
-            end: 0,
-            bottom: 0,
-            height: 190,
-            child: CustomPaint(
-              painter: _SkylinePainter(
-                color: cs.primary,
-                dark: Theme.of(context).brightness == Brightness.dark,
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: top + 384),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: CustomPaint(
+                painter: CairoHeroPainter(
+                  dark: Theme.of(context).brightness == Brightness.dark,
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(14, top + 8, 14, 24),
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 44,
-                  child: Row(
-                    children: [
-                      const FloatingMenuCircleButton(size: 40),
-                      Expanded(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              Assets.egypt.delwaqtyLogoMark.path,
-                              width: 30,
-                              height: 30,
-                              errorBuilder: (_, _, _) =>
-                                  const SizedBox.shrink(),
-                            ),
-                            const SizedBox(width: 8),
-                            Flexible(
-                              child: Text(
-                                l10n.appName,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: context.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w800,
+            Padding(
+              padding: EdgeInsets.fromLTRB(14, top + 8, 14, 24),
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 44,
+                    child: Row(
+                      children: [
+                        const FloatingMenuCircleButton(size: 40),
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                Assets.egypt.delwaqtyLogoMark.path,
+                                width: 30,
+                                height: 30,
+                                errorBuilder: (_, _, _) =>
+                                    const SizedBox.shrink(),
+                              ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  l10n.appName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: context.textTheme.titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.white,
+                                        shadows: _heroTextShadow,
+                                      ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const FloatingNotificationCircleButton(size: 40),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: 240,
-                  height: 128,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    clipBehavior: Clip.none,
-                    children: [
-                      _AvatarRing(
-                        child: GestureDetector(
-                          onTap: () => _openEditProfile(context, user),
-                          child: CircleAvatar(
-                            radius: 54,
-                            backgroundColor: cs.primary,
-                            foregroundImage: user.avatarUrl?.isNotEmpty == true
-                                ? NetworkImage(user.avatarUrl!)
-                                : null,
-                            child: Text(
-                              initial,
-                              style: context.textTheme.headlineMedium?.copyWith(
-                                color: cs.onPrimary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            ],
                           ),
                         ),
-                      ),
-                      PositionedDirectional(
-                        bottom: 4,
-                        start: 44,
-                        child: _RoundBadge(
-                          icon: Icons.camera_alt_rounded,
-                          busy: _isUploadingAvatar,
-                          semantic: l10n.takePhoto,
-                          onTap: _isUploadingAvatar
-                              ? null
-                              : () => pickAndUploadAvatar(
-                                  context: context,
-                                  ref: ref,
-                                  userId: user.id,
-                                  l10n: l10n,
-                                  onBusy: (b) {
-                                    if (mounted) {
-                                      setState(() => _isUploadingAvatar = b);
-                                    }
-                                  },
-                                ),
-                        ),
-                      ),
-                      PositionedDirectional(
-                        end: 0,
-                        bottom: 22,
-                        child: _RoundBadge(
-                          icon: Icons.settings_rounded,
-                          semantic: l10n.settings,
-                          onTap: () => context.push('/settings'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                InkWell(
-                  borderRadius: BorderRadius.circular(8),
-                  onTap: () => _openEditProfile(context, user),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          user.fullName ?? user.username ?? l10n.user,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                      if (user.verificationStatus.isApproved) ...[
-                        const SizedBox(width: 6),
-                        const Icon(
-                          Icons.verified_rounded,
-                          size: 20,
-                          color: AppColors.brandViolet,
-                        ),
+                        const FloatingNotificationCircleButton(size: 40),
                       ],
-                    ],
-                  ),
-                ),
-                if (user.username?.isNotEmpty == true)
-                  Text(
-                    '@${user.username}',
-                    textDirection: TextDirection.ltr,
-                    style: context.textTheme.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
-                  alignment: WrapAlignment.center,
-                  children: [
-                    if (contact != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 7,
-                        ),
-                        decoration: BoxDecoration(
-                          color: cs.surfaceContainerLowest,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: cs.outlineVariant.withValues(alpha: 0.4),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              (user.phone?.isNotEmpty ?? false)
-                                  ? Icons.phone_rounded
-                                  : Icons.mail_outline_rounded,
-                              size: 16,
-                              color: cs.primary,
-                            ),
-                            const SizedBox(width: 6),
-                            Directionality(
-                              textDirection: TextDirection.ltr,
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: 240,
+                    height: 128,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      clipBehavior: Clip.none,
+                      children: [
+                        _AvatarRing(
+                          child: GestureDetector(
+                            onTap: () => _openEditProfile(context, user),
+                            child: CircleAvatar(
+                              radius: 54,
+                              backgroundColor: cs.primary,
+                              foregroundImage:
+                                  user.avatarUrl?.isNotEmpty == true
+                                  ? NetworkImage(user.avatarUrl!)
+                                  : null,
                               child: Text(
-                                contact,
-                                style: context.textTheme.labelLarge?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
+                                initial,
+                                style: context.textTheme.headlineMedium
+                                    ?.copyWith(
+                                      color: cs.onPrimary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
                             ),
-                          ],
+                          ),
                         ),
+                        PositionedDirectional(
+                          bottom: 4,
+                          start: 44,
+                          child: _RoundBadge(
+                            icon: Icons.camera_alt_rounded,
+                            busy: _isUploadingAvatar,
+                            semantic: l10n.takePhoto,
+                            onTap: _isUploadingAvatar
+                                ? null
+                                : () => pickAndUploadAvatar(
+                                    context: context,
+                                    ref: ref,
+                                    userId: user.id,
+                                    l10n: l10n,
+                                    onBusy: (b) {
+                                      if (mounted) {
+                                        setState(() => _isUploadingAvatar = b);
+                                      }
+                                    },
+                                  ),
+                          ),
+                        ),
+                        PositionedDirectional(
+                          end: 0,
+                          bottom: 22,
+                          child: _RoundBadge(
+                            icon: Icons.settings_rounded,
+                            semantic: l10n.settings,
+                            onTap: () => context.push('/settings'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () => _openEditProfile(context, user),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            user.fullName ?? user.username ?? l10n.user,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              shadows: _heroTextShadow,
+                            ),
+                          ),
+                        ),
+                        if (user.verificationStatus.isApproved) ...[
+                          const SizedBox(width: 6),
+                          const Icon(
+                            Icons.verified_rounded,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (user.username?.isNotEmpty == true)
+                    Text(
+                      '@${user.username}',
+                      textDirection: TextDirection.ltr,
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.92),
+                        fontWeight: FontWeight.w600,
+                        shadows: _heroTextShadow,
                       ),
-                    if (roleLabel != null) _RoleChip(label: roleLabel),
-                  ],
-                ),
-              ],
+                    ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      if (contact != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: cs.surfaceContainerLowest,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: cs.outlineVariant.withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                (user.phone?.isNotEmpty ?? false)
+                                    ? Icons.phone_rounded
+                                    : Icons.mail_outline_rounded,
+                                size: 16,
+                                color: cs.primary,
+                              ),
+                              const SizedBox(width: 6),
+                              Directionality(
+                                textDirection: TextDirection.ltr,
+                                child: Text(
+                                  contact,
+                                  style: context.textTheme.labelLarge?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      if (roleLabel != null) _RoleChip(label: roleLabel),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -811,95 +822,4 @@ class _GuestAvatar extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Light vector skyline (Cairo Tower, a dome and a minaret among blocks)
-/// painted behind the header: no image asset, no blur, cheap on weak phones.
-class _SkylinePainter extends CustomPainter {
-  const _SkylinePainter({required this.color, required this.dark});
-
-  final Color color;
-  final bool dark;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-    final far = Paint()..color = color.withValues(alpha: dark ? 0.16 : 0.10);
-    final near = Paint()..color = color.withValues(alpha: dark ? 0.24 : 0.16);
-
-    // soft hills
-    final hill = Path()
-      ..moveTo(0, h * 0.72)
-      ..quadraticBezierTo(w * 0.25, h * 0.55, w * 0.5, h * 0.7)
-      ..quadraticBezierTo(w * 0.78, h * 0.86, w, h * 0.66)
-      ..lineTo(w, h)
-      ..lineTo(0, h)
-      ..close();
-    canvas.drawPath(hill, far);
-
-    // blocks (far)
-    final blocks = <List<double>>[
-      [0.02, 0.05, 0.40],
-      [0.08, 0.06, 0.52],
-      [0.15, 0.05, 0.36],
-      [0.74, 0.06, 0.50],
-      [0.81, 0.05, 0.38],
-      [0.88, 0.07, 0.56],
-      [0.95, 0.05, 0.34],
-    ];
-    for (final b in blocks) {
-      final bh = h * b[2];
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromLTWH(w * b[0], h - bh, w * b[1], bh),
-          const Radius.circular(3),
-        ),
-        near,
-      );
-    }
-
-    // Cairo Tower (slim shaft + lotus top) on the end side
-    final tx = w * 0.84;
-    final shaftTop = h * 0.30;
-    canvas.drawRect(Rect.fromLTRB(tx - 4, shaftTop, tx + 4, h), far);
-    final lotus = Path()
-      ..moveTo(tx - 12, shaftTop)
-      ..quadraticBezierTo(tx - 16, shaftTop - 22, tx - 4, shaftTop - 30)
-      ..lineTo(tx + 4, shaftTop - 30)
-      ..quadraticBezierTo(tx + 16, shaftTop - 22, tx + 12, shaftTop)
-      ..close();
-    canvas.drawPath(lotus, far);
-    canvas.drawRect(
-      Rect.fromLTRB(tx - 1, shaftTop - 46, tx + 1, shaftTop - 30),
-      far,
-    );
-
-    // dome + minaret on the start side
-    final dx = w * 0.20;
-    canvas.drawRect(Rect.fromLTWH(dx - 28, h * 0.62, 56, h * 0.38), far);
-    canvas.drawArc(
-      Rect.fromCenter(center: Offset(dx, h * 0.62), width: 56, height: 44),
-      3.14159,
-      3.14159,
-      true,
-      far,
-    );
-    canvas.drawRect(Rect.fromLTWH(dx + 34, h * 0.40, 7, h * 0.60), far);
-    canvas.drawArc(
-      Rect.fromCenter(
-        center: Offset(dx + 37.5, h * 0.40),
-        width: 12,
-        height: 18,
-      ),
-      3.14159,
-      3.14159,
-      true,
-      far,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _SkylinePainter old) =>
-      old.color != color || old.dark != dark;
 }

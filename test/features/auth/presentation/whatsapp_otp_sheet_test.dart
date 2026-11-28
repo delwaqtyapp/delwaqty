@@ -252,11 +252,18 @@ void main() {
     await _openSheet(tester, client);
     expect(find.textContaining('1 2 3 4 5 6'), findsOneWidget);
     expect(find.textContaining('Code expires in'), findsOneWidget);
-    await tester.tap(find.byTooltip('Copy code'));
-    await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    // Answer the clipboard channel in the test zone so the copy future
+    // resolves on microtasks, not on a real-time wait.
+    final messenger = tester.binding.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      return null;
+    });
+    addTearDown(
+      () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
     );
+    await tester.tap(find.byTooltip('Copy code'));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
     expect(find.text('Code copied'), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
     client.dispose();

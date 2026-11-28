@@ -8872,4 +8872,68 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get contactUs => 'Contact us';
+
+  @override
+  String get adminDeliveryPricing => 'Delivery pricing';
+
+  @override
+  String get adminDeliveryPricingNote =>
+      'Changes apply to new delivery requests only. Rides already requested keep their price.';
+
+  @override
+  String get adminPricingBaseFee => 'Base fee';
+
+  @override
+  String get adminPricingPerKm => 'Per km';
+
+  @override
+  String get adminPricingPerKg => 'Per kg';
+
+  @override
+  String get adminPricingMinFee => 'Minimum fee';
+
+  @override
+  String get adminPricingPriorityX => 'Priority multiplier';
+
+  @override
+  String get adminPricingExpressX => 'Express multiplier';
+
+  @override
+  String get adminPricingActive => 'Active';
+
+  @override
+  String get adminPricingSaved => 'Pricing saved';
+
+  @override
+  String get adminPricingInvalid =>
+      'Enter valid numbers. Fees: base and minimum up to 500, per km and per kg up to 50. Multipliers between 1 and 3.';
+
+  @override
+  String get adminPricingReadOnly =>
+      'Only country-level admins and the owner can edit prices. You can view them here.';
+
+  @override
+  String get adminPricingNotSaved =>
+      'Not saved. You do not have permission to change delivery pricing.';
+
+  @override
+  String get adminPricingDisableWarning =>
+      'Turning this off blocks new requests of this service type until it is turned on again.';
+
+  @override
+  String adminPricingConfirmTitle(String service) {
+    return 'Save pricing for $service?';
+  }
+
+  @override
+  String adminPricingConfirmSample(String fare) {
+    return 'Sample fare for 5 km, 1 kg, standard: $fare';
+  }
+
+  @override
+  String get adminPricingConfirmOff =>
+      'This service will be turned off. New requests will be blocked.';
+
+  @override
+  String get adminPricingConfirmNewOnly => 'Applies to new requests only.';
 }

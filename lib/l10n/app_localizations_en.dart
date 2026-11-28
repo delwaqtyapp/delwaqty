@@ -8936,4 +8936,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminPricingConfirmNewOnly => 'Applies to new requests only.';
+
+  @override
+  String get loginSecurityTitle => 'Login and security';
+
+  @override
+  String get showSavedPassword => 'Show my saved password';
+
+  @override
+  String get savedPasswordTitle => 'Saved password';
+
+  @override
+  String get noSavedPassword =>
+      'No password is saved on this device. Turn on fingerprint login to save it here.';
+
+  @override
+  String get deviceLockReason =>
+      'Confirm it is you with your fingerprint or phone lock';
+
+  @override
+  String get deviceLockFailed =>
+      'Could not confirm your identity. Nothing was changed.';
+
+  @override
+  String get setLoginPassword => 'Set or change login password';
+
+  @override
+  String get setLoginPasswordHint =>
+      'Use this password with your email or username to sign in.';
+
+  @override
+  String get loginPasswordSaved =>
+      'Password saved. You can sign in with it now.';
+
+  @override
+  String get copyAction => 'Copy';
 }

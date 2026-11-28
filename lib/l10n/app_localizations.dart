@@ -16855,6 +16855,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Applies to new requests only.'**
   String get adminPricingConfirmNewOnly;
+
+  /// No description provided for @loginSecurityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Login and security'**
+  String get loginSecurityTitle;
+
+  /// No description provided for @showSavedPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show my saved password'**
+  String get showSavedPassword;
+
+  /// No description provided for @savedPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved password'**
+  String get savedPasswordTitle;
+
+  /// No description provided for @noSavedPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'No password is saved on this device. Turn on fingerprint login to save it here.'**
+  String get noSavedPassword;
+
+  /// No description provided for @deviceLockReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm it is you with your fingerprint or phone lock'**
+  String get deviceLockReason;
+
+  /// No description provided for @deviceLockFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not confirm your identity. Nothing was changed.'**
+  String get deviceLockFailed;
+
+  /// No description provided for @setLoginPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Set or change login password'**
+  String get setLoginPassword;
+
+  /// No description provided for @setLoginPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this password with your email or username to sign in.'**
+  String get setLoginPasswordHint;
+
+  /// No description provided for @loginPasswordSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Password saved. You can sign in with it now.'**
+  String get loginPasswordSaved;
+
+  /// No description provided for @copyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copyAction;
 }
 
 class _AppLocalizationsDelegate

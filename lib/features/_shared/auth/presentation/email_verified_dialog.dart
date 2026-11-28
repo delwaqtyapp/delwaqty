@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
@@ -38,6 +39,21 @@ Future<void> handleEmailConfirmedDeepLink(
   final state = ref.read(authStateProvider);
   final context = navigatorKey.currentContext;
   if (state is AuthAuthenticated && context != null && context.mounted) {
+    showEmailVerifiedDialog(context);
+  }
+}
+
+/// The activation email was tapped: the link signs a temporary session in.
+/// Drop it, go to the login page and tell the user the account is active.
+Future<void> handleEmailActivatedDeepLink(
+  WidgetRef ref, {
+  required GlobalKey<NavigatorState> navigatorKey,
+  required GoRouter router,
+}) async {
+  await ref.read(authStateProvider.notifier).signOut();
+  router.go('/login');
+  final context = navigatorKey.currentContext;
+  if (context != null && context.mounted) {
     showEmailVerifiedDialog(context);
   }
 }

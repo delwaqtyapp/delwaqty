@@ -39,5 +39,20 @@ void main() {
       expect(DeepLinkResolver.resolve('io.delwaqty://callback'), isNull);
       expect(DeepLinkResolver.resolve('io.delwaqty://login-callbackx'), isNull);
     });
+
+    test('activation email redirect is its own route; OAuth return is not', () {
+      expect(
+        DeepLinkResolver.resolve('io.delwaqty://login-callback/activated'),
+        DeepLinkRoute.emailActivated,
+      );
+      expect(
+        DeepLinkResolver.resolve('io.delwaqty://login-callback?code=abc'),
+        DeepLinkRoute.loginCallback,
+      );
+      expect(
+        DeepLinkResolver.resolve('io.delwaqty://login-callback/other'),
+        DeepLinkRoute.loginCallback,
+      );
+    });
   });
 }

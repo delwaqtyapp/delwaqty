@@ -14,11 +14,15 @@ class SocialAuthButtons extends StatelessWidget {
   const SocialAuthButtons({
     super.key,
     required this.onGoogle,
+    this.onFacebook,
     this.isLoading = false,
     this.dividerColor,
   });
 
   final VoidCallback onGoogle;
+
+  /// Shown only when the server turned Facebook on (auth_methods).
+  final VoidCallback? onFacebook;
 
   /// Disables the button while an auth flow is in progress.
   final bool isLoading;
@@ -63,6 +67,14 @@ class SocialAuthButtons extends StatelessWidget {
           logoAsset: 'assets/branding/google_logo.png',
           label: l10n.loginWithGoogle,
         ),
+        if (onFacebook != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          OutlinedButton.icon(
+            onPressed: isLoading ? null : onFacebook,
+            icon: const Icon(Icons.facebook_rounded),
+            label: Text(l10n.loginWithFacebook),
+          ),
+        ],
       ],
     );
   }

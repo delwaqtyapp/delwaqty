@@ -96,6 +96,8 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     service.routes.listen((route) {
       if (route == DeepLinkRoute.loginCallback) {
         _handleLoginCallback();
+      } else if (route == DeepLinkRoute.emailActivated) {
+        unawaited(_handleEmailActivated());
       }
     });
     // Cold start: the platform delivers the launching URI through the stream
@@ -104,8 +106,18 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
       final route = await service.initialRoute;
       if (route == DeepLinkRoute.loginCallback && mounted) {
         unawaited(_handleLoginCallback());
+      } else if (route == DeepLinkRoute.emailActivated && mounted) {
+        unawaited(_handleEmailActivated());
       }
     });
+  }
+
+  Future<void> _handleEmailActivated() async {
+    await handleEmailActivatedDeepLink(
+      ref,
+      navigatorKey: rootNavigatorKey,
+      router: ref.read(goRouterProvider),
+    );
   }
 
   Future<void> _handleLoginCallback() async {

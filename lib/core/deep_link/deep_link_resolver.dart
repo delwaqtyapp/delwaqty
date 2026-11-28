@@ -14,6 +14,11 @@ enum DeepLinkRoute {
   /// SDK completes the exchange; the app should then let the router's auth
   /// redirect land the user on the correct page (pending verification or home).
   loginCallback,
+
+  /// `io.delwaqty://login-callback/activated` is the redirect of the signup
+  /// activation email. The app signs the temporary session out and shows the
+  /// login page with an "account active" message.
+  emailActivated,
 }
 
 class DeepLinkResolver {
@@ -42,6 +47,8 @@ class DeepLinkResolver {
     }
     if (!uri.hasAuthority) return null;
     return switch (uri.host) {
+      _callbackHost when uri.path == '/activated' =>
+        DeepLinkRoute.emailActivated,
       _callbackHost => DeepLinkRoute.loginCallback,
       _ => null,
     };

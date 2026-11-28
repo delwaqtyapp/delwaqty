@@ -460,6 +460,17 @@ class _LoginPageState extends ConsumerState<LoginPage>
                                 onGoogle: () => ref
                                     .read(authStateProvider.notifier)
                                     .signInWithGoogle(),
+                                onFacebook:
+                                    ref
+                                            .watch(authMethodsProvider)
+                                            .asData
+                                            ?.value
+                                            .facebook ==
+                                        true
+                                    ? () => ref
+                                          .read(authStateProvider.notifier)
+                                          .signInWithFacebook()
+                                    : null,
                                 isLoading: isLoading,
                                 dividerColor: Colors.white54,
                               ),

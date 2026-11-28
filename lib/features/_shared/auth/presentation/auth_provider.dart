@@ -27,6 +27,34 @@ final requireProviderDocumentsProvider = FutureProvider<bool>((ref) async {
   }
 });
 
+/// Which signup/login buttons the server currently offers
+/// (platform_settings.feature_flags.auth_methods). Defaults to Google only,
+/// so any failure never shows a method that may be off.
+class AuthMethods {
+  const AuthMethods({
+    this.email = false,
+    this.facebook = false,
+    this.google = true,
+  });
+  final bool email;
+  final bool facebook;
+  final bool google;
+}
+
+final authMethodsProvider = FutureProvider<AuthMethods>((ref) async {
+  try {
+    final r = await Supabase.instance.client.rpc('auth_methods');
+    if (r is! Map) return const AuthMethods();
+    return AuthMethods(
+      email: r['email'] == true,
+      facebook: r['facebook'] == true,
+      google: r['google'] != false,
+    );
+  } catch (_) {
+    return const AuthMethods();
+  }
+});
+
 final authStateProvider = NotifierProvider<AuthStateNotifier, AuthState>(
   AuthStateNotifier.new,
 );

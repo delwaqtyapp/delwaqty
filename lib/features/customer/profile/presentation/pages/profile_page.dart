@@ -127,8 +127,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ? user.phone!
         : (user.email.isNotEmpty ? user.email : null);
 
-    return SizedBox(
-      height: top + 332,
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: top + 332),
       child: Stack(
         children: [
           PositionedDirectional(
@@ -144,7 +144,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.fromLTRB(14, top + 8, 14, 0),
+            padding: EdgeInsets.fromLTRB(14, top + 8, 14, 24),
             child: Column(
               children: [
                 SizedBox(
@@ -152,21 +152,31 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   child: Row(
                     children: [
                       const FloatingMenuCircleButton(size: 40),
-                      const Spacer(),
-                      Image.asset(
-                        Assets.egypt.delwaqtyLogoMark.path,
-                        width: 30,
-                        height: 30,
-                        errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        l10n.appName,
-                        style: context.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              Assets.egypt.delwaqtyLogoMark.path,
+                              width: 30,
+                              height: 30,
+                              errorBuilder: (_, _, _) =>
+                                  const SizedBox.shrink(),
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                l10n.appName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: context.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const Spacer(),
                       const FloatingNotificationCircleButton(size: 40),
                     ],
                   ),
@@ -263,6 +273,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 if (user.username?.isNotEmpty == true)
                   Text(
                     '@${user.username}',
+                    textDirection: TextDirection.ltr,
                     style: context.textTheme.bodySmall?.copyWith(
                       color: cs.onSurfaceVariant,
                       fontWeight: FontWeight.w600,
@@ -332,13 +343,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             _BentoActionItem(
               icon: Icons.account_balance_wallet_rounded,
               label: l10n.financialCenter,
-              accent: AppColors.brandPurple,
               onTap: () => context.push('/driver/financial-center'),
             ),
             _BentoActionItem(
               icon: Icons.two_wheeler_rounded,
               label: l10n.vehicleManagement,
-              accent: AppColors.brandViolet,
               onTap: () => context.push('/driver/vehicles'),
             ),
           ]
@@ -347,19 +356,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             _BentoActionItem(
               icon: Icons.account_balance_wallet_rounded,
               label: l10n.financialCenter,
-              accent: AppColors.brandPurple,
               onTap: () => context.push('/provider-financial-center'),
             ),
             _BentoActionItem(
               icon: Icons.receipt_long_rounded,
               label: l10n.viewOrders,
-              accent: AppColors.brandViolet,
               onTap: () => context.push('/merchant-dashboard/orders'),
             ),
             _BentoActionItem(
               icon: Icons.storefront_rounded,
               label: l10n.storefront,
-              accent: AppColors.brandGold,
               onTap: () => context.push('/merchant-dashboard/storefront'),
             ),
           ]
@@ -367,37 +373,31 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             _BentoActionItem(
               icon: Icons.account_balance_wallet_rounded,
               label: l10n.wallet,
-              accent: AppColors.brandPurple,
               onTap: () => context.push('/wallet'),
             ),
             _BentoActionItem(
               icon: Icons.stars_rounded,
               label: l10n.rewards,
-              accent: AppColors.brandGold,
               onTap: () => context.push('/rewards'),
             ),
             _BentoActionItem(
               icon: Icons.receipt_long_rounded,
               label: l10n.previousOrders,
-              accent: AppColors.brandViolet,
               onTap: () => context.push('/market/orders'),
             ),
             _BentoActionItem(
               icon: Icons.event_seat_rounded,
               label: l10n.myReservations,
-              accent: AppColors.brandPurple,
               onTap: () => context.push('/my-reservations'),
             ),
             _BentoActionItem(
               icon: Icons.location_on_rounded,
               label: l10n.myAddresses,
-              accent: AppColors.brandCyan,
               onTap: () => context.push('/profile/addresses'),
             ),
             _BentoActionItem(
               icon: Icons.support_agent_rounded,
               label: l10n.support,
-              accent: AppColors.brandViolet,
               onTap: () => context.push('/support'),
             ),
           ];
@@ -622,13 +622,11 @@ class _BentoActionItem {
   const _BentoActionItem({
     required this.icon,
     required this.label,
-    required this.accent,
     required this.onTap,
   });
 
   final IconData icon;
   final String label;
-  final Color accent;
   final VoidCallback onTap;
 }
 

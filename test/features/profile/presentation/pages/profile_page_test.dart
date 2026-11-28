@@ -289,4 +289,19 @@ void main() {
     expect(find.text('English'), findsOneWidget);
     expect(find.text('Apply'), findsOneWidget);
   });
+
+  testWidgets('header does not overflow at large text scale', (tester) async {
+    final oldHandler = FlutterError.onError;
+    FlutterError.onError = ignoreVisualAssertions(oldHandler);
+    addTearDown(() => FlutterError.onError = oldHandler);
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await tester.pumpWidget(_buildTestApp(mockRepo, prefs));
+    await tester.pump(const Duration(milliseconds: 800));
+    expect(find.text('Test Customer'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

@@ -11,7 +11,11 @@ import 'package:delwaqty/shared/widgets/cairo_hero_painter.dart';
 ///
 /// Use as the first child of the hero `Stack`.
 class HomeHeroBackdrop extends StatelessWidget {
-  const HomeHeroBackdrop({super.key});
+  const HomeHeroBackdrop({super.key, this.overhang = 0});
+
+  /// How far the image runs below the hero box (the content that follows
+  /// paints over this faded tail).
+  final double overhang;
 
   static const double _aspect = 1200 / 800;
 
@@ -25,7 +29,7 @@ class HomeHeroBackdrop extends StatelessWidget {
 
   /// Frosted fill for chips and the search bar over the hero.
   static Color glass(Brightness b) =>
-      b == Brightness.dark ? const Color(0x14FFFFFF) : const Color(0xB3FFFFFF);
+      b == Brightness.dark ? const Color(0x47000000) : const Color(0xB3FFFFFF);
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +40,11 @@ class HomeHeroBackdrop extends StatelessWidget {
         ? 'assets/egypt/home_hero_dusk.webp'
         : 'assets/egypt/home_hero_daylight.webp';
 
-    return Positioned.fill(
+    return Positioned(
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: -overhang,
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -46,9 +54,15 @@ class HomeHeroBackdrop extends StatelessWidget {
             child: LayoutBuilder(
               builder: (context, c) {
                 final h = c.maxWidth / _aspect;
-                Widget fallback() => SizedBox(
-                  height: h,
-                  child: CustomPaint(painter: CairoHeroPainter(dark: dark)),
+                // The painter is drawn for a 1200x500 panorama: keep that
+                // aspect (no stretching), bottom-aligned on the sky fill.
+                Widget fallback() => Align(
+                  alignment: Alignment.bottomCenter,
+                  child: SizedBox(
+                    height: c.maxWidth / (1200 / 500),
+                    width: c.maxWidth,
+                    child: CustomPaint(painter: CairoHeroPainter(dark: dark)),
+                  ),
                 );
                 return SizedBox(
                   height: h,

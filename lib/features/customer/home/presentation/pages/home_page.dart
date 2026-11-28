@@ -68,7 +68,7 @@ void _precacheImageUrls(BuildContext context, Iterable<String> urls) {
 List<_TileItem> get _allDefaultServiceItems =>
     serviceCategoryPriority.map((t) => _ServiceTile(t)).toList(growable: false);
 
-/// How far the direct-order button rides up over the faded hero edge.
+/// How far the hero image runs below the hero box, behind the order card.
 const double _heroOverlap = 26;
 
 class HomePage extends ConsumerWidget {
@@ -138,18 +138,15 @@ class HomePage extends ConsumerWidget {
                             locationAsync: locationAsync,
                             unreadCount: unreadCount,
                           ),
-                          // The button overlaps the faded lower hero.
-                          Transform.translate(
-                            offset: const Offset(0, -_heroOverlap),
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                              child: _DirectOrderButton(
-                                l10n: l10n,
-                                onTap: () => context.push('/direct-delivery'),
-                              ),
+                          // The hero image runs _heroOverlap below the hero
+                          // box, so the card sits on its faded tail.
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                            child: _DirectOrderButton(
+                              l10n: l10n,
+                              onTap: () => context.push('/direct-delivery'),
                             ),
                           ),
-                          const SizedBox(height: 0),
                         ],
                       ),
                     ),
@@ -291,29 +288,23 @@ class _EgyptHeroState extends State<_EgyptHero>
     final textScale = MediaQuery.textScalerOf(context)
         .scale(1.0)
         .clamp(1.0, 1.8);
-    final badgeReserve = 40.0 * textScale + 4.0 + _heroOverlap;
+    final badgeReserve = 40.0 * textScale + 4.0;
     final heroH = math.max(heroImageH, contentH + badgeReserve);
 
     final brightness = Theme.of(context).brightness;
-    final ink = HomeHeroBackdrop.ink(brightness);
-    final glass = HomeHeroBackdrop.glass(brightness);
     final overDark = brightness == Brightness.dark;
 
     return SizedBox(
       height: heroH,
       child: Stack(
+        clipBehavior: Clip.none,
         fit: StackFit.expand,
         children: [
-          const HomeHeroBackdrop(),
+          const HomeHeroBackdrop(overhang: _heroOverlap),
           Align(
             alignment: AlignmentDirectional.bottomStart,
             child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                horizontalPadding,
-                0,
-                12,
-                12 + _heroOverlap,
-              ),
+              padding: EdgeInsets.fromLTRB(horizontalPadding, 0, 12, 12),
               child: _buildLocationBadge(
                 context,
                 height: 28,
@@ -526,7 +517,10 @@ class _EgyptHeroState extends State<_EgyptHero>
               color: HomeHeroBackdrop.ink(Theme.of(context).brightness),
               letterSpacing: 0.5,
               shadows: Theme.of(context).brightness == Brightness.dark
-                  ? const [Shadow(color: Color(0x55000000), blurRadius: 3)]
+                  ? const [
+                      Shadow(color: Color(0xB3000000), blurRadius: 6),
+                      Shadow(color: Color(0x66000000), blurRadius: 12),
+                    ]
                   : const [Shadow(color: Color(0x99FFFFFF), blurRadius: 4)],
             ),
           ),

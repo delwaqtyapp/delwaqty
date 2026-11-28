@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/config/app_mode_provider.dart';
@@ -17,7 +20,6 @@ import 'package:delwaqty/gen/assets.gen.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/app_shell.dart';
-import 'package:delwaqty/shared/widgets/adaptive_tile_wrap.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/shared/widgets/floating_glass_buttons.dart';
 import 'package:delwaqty/shared/widgets/gradient_background.dart';
@@ -56,7 +58,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         : null;
     final user = profileAsync?.value ?? authUser;
 
-    return Scaffold(
+    final page = Scaffold(
       body: GradientBackground(
         child: CustomScrollView(
           physics: const ClampingScrollPhysics(
@@ -107,6 +109,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
       ),
     );
+    if (user == null) return page;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: page,
+    );
   }
 
   Future<void> _openEditProfile(BuildContext context, User user) async {
@@ -139,9 +150,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         child: Stack(
           children: [
             Positioned.fill(
-              child: CustomPaint(
-                painter: CairoHeroPainter(
-                  dark: Theme.of(context).brightness == Brightness.dark,
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  painter: CairoHeroPainter(
+                    dark: Theme.of(context).brightness == Brightness.dark,
+                  ),
                 ),
               ),
             ),
@@ -153,7 +166,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     height: 44,
                     child: Row(
                       children: [
-                        const FloatingMenuCircleButton(size: 40),
+                        const FloatingMenuCircleButton(
+                          size: 40,
+                          overDarkHero: true,
+                        ),
                         Expanded(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -182,7 +198,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             ],
                           ),
                         ),
-                        const FloatingNotificationCircleButton(size: 40),
+                        const FloatingNotificationCircleButton(
+                          size: 40,
+                          overDarkHero: true,
+                        ),
                       ],
                     ),
                   ),
@@ -415,9 +434,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     // AdaptiveTileWrap: column count adapts to width AND text scale, and a
     // short last row stretches to full width instead of dangling an orphan.
-    return AdaptiveTileWrap(
-      children: [for (final item in items) _BentoActionTile(item: item)],
-    );
+    return _QuickActionGrid(items: items);
   }
 
   Widget _buildAccountSection(
@@ -641,34 +658,104 @@ class _BentoActionItem {
   final VoidCallback onTap;
 }
 
+/// Uniform tile grid: every tile has the same width (equal columns, one gap
+/// on all sides) and the same height (icon + a reserved two-line label slot
+/// that scales with the text scale). A short last row keeps the same tile
+/// width and starts at the leading edge, so it is symmetric in LTR and RTL.
+class _QuickActionGrid extends StatelessWidget {
+  const _QuickActionGrid({required this.items});
+
+  final List<_BentoActionItem> items;
+
+  static const double _gap = 10;
+  static const double _padding = 14;
+  static const double _icon = 28;
+  static const double _iconGap = 8;
+  static const double _labelFont = 12;
+  static const double _labelHeight = 1.2;
+
+  @override
+  Widget build(BuildContext context) {
+    if (items.isEmpty) return const SizedBox.shrink();
+    final scaler = MediaQuery.textScalerOf(context);
+    final lineHeight = scaler.scale(_labelFont) * _labelHeight;
+    final tileHeight = _padding * 2 + 2 + _icon + _iconGap + lineHeight * 2;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final scale = scaler.scale(1).clamp(1.0, 1.6).toDouble();
+        var columns = items.length < 3 ? items.length : 3;
+        while (columns > 1 &&
+            (constraints.maxWidth - _gap * (columns - 1)) / columns <
+                100 * scale) {
+          columns--;
+        }
+        final rows = <Widget>[];
+        for (var i = 0; i < items.length; i += columns) {
+          final end = math.min(i + columns, items.length);
+          rows.add(
+            Row(
+              children: [
+                for (var c = 0; c < columns; c++) ...[
+                  if (c > 0) const SizedBox(width: _gap),
+                  Expanded(
+                    child: i + c < end
+                        ? SizedBox(
+                            height: tileHeight,
+                            child: _BentoActionTile(
+                              item: items[i + c],
+                              lineHeight: lineHeight,
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                ],
+              ],
+            ),
+          );
+          if (end < items.length) rows.add(const SizedBox(height: _gap));
+        }
+        return Column(children: rows);
+      },
+    );
+  }
+}
+
 class _BentoActionTile extends StatelessWidget {
-  const _BentoActionTile({required this.item});
+  const _BentoActionTile({required this.item, required this.lineHeight});
 
   final _BentoActionItem item;
+  final double lineHeight;
 
   @override
   Widget build(BuildContext context) {
     final cs = context.colorScheme;
-    // One neutral surface and one accent for every tile.
     return PremiumCard(
       onTap: item.onTap,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: _QuickActionGrid._padding,
+      ),
       radius: 20,
       color: cs.surfaceContainerLowest,
       borderColor: cs.outlineVariant.withValues(alpha: 0.28),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(item.icon, size: 28, color: cs.primary),
-          const SizedBox(height: 10),
-          Text(
-            item.label,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: context.textTheme.labelMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              height: 1.2,
+          Icon(item.icon, size: _QuickActionGrid._icon, color: cs.primary),
+          const SizedBox(height: _QuickActionGrid._iconGap),
+          SizedBox(
+            height: lineHeight * 2,
+            child: Center(
+              child: Text(
+                item.label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: context.textTheme.labelMedium?.copyWith(
+                  fontSize: _QuickActionGrid._labelFont,
+                  fontWeight: FontWeight.w700,
+                  height: _QuickActionGrid._labelHeight,
+                ),
+              ),
             ),
           ),
         ],

@@ -98,7 +98,7 @@ class CairoHeroPainter extends CustomPainter {
           end: Alignment.bottomCenter,
           colors: [
             Colors.black.withValues(alpha: 0),
-            Colors.black.withValues(alpha: dark ? 0.30 : 0.26),
+            Colors.black.withValues(alpha: dark ? 0.32 : 0.36),
           ],
         ).createShader(Rect.fromLTWH(0, h * 0.42, w, horizon - h * 0.42)),
     );

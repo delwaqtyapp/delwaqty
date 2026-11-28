@@ -77,12 +77,6 @@ class _LoginSecuritySectionState extends ConsumerState<LoginSecuritySection> {
                   textDirection: TextDirection.ltr,
                 ),
           actions: [
-            if (creds != null)
-              TextButton(
-                onPressed: () =>
-                    Clipboard.setData(ClipboardData(text: creds.password)),
-                child: Text(l10n.copyAction),
-              ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
               child: Text(l10n.ok),

@@ -9,6 +9,9 @@ BEGIN
   INSERT INTO public.platform_settings(id) VALUES ('default') ON CONFLICT (id) DO NOTHING;
   UPDATE public.platform_settings SET feature_flags = '{}'::jsonb WHERE id = 'default';
   ASSERT public.auth_methods() = '{"email":false,"facebook":false,"google":true}'::jsonb, '467 1a: defaults changed: ' || public.auth_methods()::text;
+  UPDATE public.platform_settings SET feature_flags = '{"auth_methods":{"email":"maybe","facebook":{"x":1},"google":"nope"}}'::jsonb WHERE id = 'default';
+  ASSERT public.auth_methods() = '{"email":false,"facebook":false,"google":true}'::jsonb, '467 1b: malformed flag not safe: ' || public.auth_methods()::text;
+  UPDATE public.platform_settings SET feature_flags = '{}'::jsonb WHERE id = 'default';
 
   ev := jsonb_build_object('user', jsonb_build_object('email', 'new.user@example.com', 'app_metadata', jsonb_build_object('provider', 'email')));
   r := public.before_user_created_phone_guard(ev);
@@ -38,11 +41,11 @@ BEGIN
 
   -- breaker
   UPDATE public.platform_settings SET feature_flags = '{"auth_methods":{"email":true},"email_signup_per_hour":1}'::jsonb WHERE id = 'default';
-  INSERT INTO auth.users(id, email, email_confirmed_at) VALUES (gen_random_uuid(), 'confirmed.467@example.com', now());
-  INSERT INTO auth.users(id, email, raw_app_meta_data) VALUES (gen_random_uuid(), 'g.467@example.com', '{"provider":"google"}'::jsonb);
+  INSERT INTO auth.users(id, email, email_confirmed_at, created_at) VALUES (gen_random_uuid(), 'confirmed.467@example.com', now(), now());
+  INSERT INTO auth.users(id, email, raw_app_meta_data, created_at) VALUES (gen_random_uuid(), 'g.467@example.com', '{"provider":"google"}'::jsonb, now());
   r := public.before_user_created_phone_guard(ev);
   ASSERT r = '{}'::jsonb, '467 4b: confirmed/google users used up the email budget: ' || r::text;
-  INSERT INTO auth.users(id, email) VALUES (u, 'a.b@example.com');
+  INSERT INTO auth.users(id, email, created_at) VALUES (u, 'a.b@example.com', now());
   r := public.before_user_created_phone_guard(ev);
   ASSERT r #>> '{error,message}' LIKE 'SIGNUP_BUSY%', '467 4a: breaker did not trip: ' || r::text;
 

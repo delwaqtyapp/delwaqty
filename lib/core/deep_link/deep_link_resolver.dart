@@ -47,10 +47,18 @@ class DeepLinkResolver {
     }
     if (!uri.hasAuthority) return null;
     return switch (uri.host) {
-      _callbackHost when uri.path == '/activated' =>
+      // Only a link that carries a fresh session (implicit fragment tokens or
+      // a PKCE code) counts as an activation; a bare /activated link from
+      // anywhere else must not sign the user out.
+      _callbackHost when uri.path == '/activated' && _carriesSession(uri) =>
         DeepLinkRoute.emailActivated,
       _callbackHost => DeepLinkRoute.loginCallback,
       _ => null,
     };
   }
+
+  static bool _carriesSession(Uri uri) =>
+      uri.fragment.contains('access_token=') ||
+      uri.queryParameters.containsKey('code') ||
+      uri.queryParameters.containsKey('token_hash');
 }

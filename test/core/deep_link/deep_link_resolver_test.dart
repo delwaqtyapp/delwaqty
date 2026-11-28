@@ -42,8 +42,21 @@ void main() {
 
     test('activation email redirect is its own route; OAuth return is not', () {
       expect(
-        DeepLinkResolver.resolve('io.delwaqty://login-callback/activated'),
+        DeepLinkResolver.resolve(
+          'io.delwaqty://login-callback/activated#access_token=a&refresh_token=b',
+        ),
         DeepLinkRoute.emailActivated,
+      );
+      expect(
+        DeepLinkResolver.resolve(
+          'io.delwaqty://login-callback/activated?code=abc',
+        ),
+        DeepLinkRoute.emailActivated,
+      );
+      // No session in the link: must not sign anyone out.
+      expect(
+        DeepLinkResolver.resolve('io.delwaqty://login-callback/activated'),
+        DeepLinkRoute.loginCallback,
       );
       expect(
         DeepLinkResolver.resolve('io.delwaqty://login-callback?code=abc'),

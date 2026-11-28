@@ -26,9 +26,9 @@ CREATE OR REPLACE FUNCTION public.auth_methods()
  SET search_path TO 'public', 'pg_temp'
 AS $$
   SELECT jsonb_build_object(
-    'email', COALESCE((feature_flags #>> '{auth_methods,email}')::boolean, false),
-    'facebook', COALESCE((feature_flags #>> '{auth_methods,facebook}')::boolean, false),
-    'google', COALESCE((feature_flags #>> '{auth_methods,google}')::boolean, true))
+    'email', COALESCE(CASE WHEN feature_flags #>> '{auth_methods,email}' IN ('true','false') THEN (feature_flags #>> '{auth_methods,email}')::boolean END, false),
+    'facebook', COALESCE(CASE WHEN feature_flags #>> '{auth_methods,facebook}' IN ('true','false') THEN (feature_flags #>> '{auth_methods,facebook}')::boolean END, false),
+    'google', COALESCE(CASE WHEN feature_flags #>> '{auth_methods,google}' IN ('true','false') THEN (feature_flags #>> '{auth_methods,google}')::boolean END, true))
     FROM public.platform_settings WHERE id = 'default'
   UNION ALL SELECT '{"email":false,"facebook":false,"google":true}'::jsonb
   LIMIT 1;

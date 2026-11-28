@@ -3198,6 +3198,10 @@
       }
     }
   },
+  "appSection": "App",
+  "chooseAppLanguage": "Choose the app language",
+  "languageChangeAnytime": "You can change the app language at any time.",
+  "contactUs": "Contact us",
   "adminDeliveryPricing": "Delivery pricing",
   "adminDeliveryPricingNote": "Changes apply to new delivery requests only. Rides already requested keep their price.",
   "adminPricingBaseFee": "Base fee",

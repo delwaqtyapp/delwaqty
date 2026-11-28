@@ -16724,6 +16724,30 @@ abstract class AppLocalizations {
   /// **'Start new cart'**
   String get cartConflictStartNew;
 
+  /// No description provided for @appSection.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get appSection;
+
+  /// No description provided for @chooseAppLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the app language'**
+  String get chooseAppLanguage;
+
+  /// No description provided for @languageChangeAnytime.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change the app language at any time.'**
+  String get languageChangeAnytime;
+
+  /// No description provided for @contactUs.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact us'**
+  String get contactUs;
+
   /// No description provided for @adminDeliveryPricing.
   ///
   /// In en, this message translates to:

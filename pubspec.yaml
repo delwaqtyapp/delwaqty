@@ -79,6 +79,7 @@ flutter:
     - assets/logo app/logo.webp
     - assets/branding/
     - assets/egypt/
+    - assets/profile/
     - assets/categories/
   fonts:
     - family: Cairo

@@ -3113,6 +3113,10 @@
       }
     }
   },
+  "appSection": "التطبيق",
+  "chooseAppLanguage": "اختر لغة التطبيق",
+  "languageChangeAnytime": "يمكنك تغيير لغة التطبيق في أي وقت.",
+  "contactUs": "تواصل معنا",
   "adminDeliveryPricing": "تسعير التوصيل",
   "adminDeliveryPricingNote": "التغييرات تسري على طلبات التوصيل الجديدة فقط. الطلبات الحالية تحتفظ بسعرها.",
   "adminPricingBaseFee": "رسوم البداية",

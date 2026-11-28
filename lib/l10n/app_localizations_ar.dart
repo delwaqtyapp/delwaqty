@@ -8780,6 +8780,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cartConflictStartNew => 'ابدأ عربة جديدة';
 
   @override
+  String get appSection => 'التطبيق';
+
+  @override
+  String get chooseAppLanguage => 'اختر لغة التطبيق';
+
+  @override
+  String get languageChangeAnytime => 'يمكنك تغيير لغة التطبيق في أي وقت.';
+
+  @override
+  String get contactUs => 'تواصل معنا';
+
+  @override
   String get adminDeliveryPricing => 'تسعير التوصيل';
 
   @override

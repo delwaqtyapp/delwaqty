@@ -49,8 +49,8 @@ Future<T> withDeadline<T>(Future<T> future, Duration limit, T fallback) =>
 /// Upper bound for one "use my location" request: GNSS attempts plus
 /// geocoding. After this the caller gets whatever was found, or null.
 const locationRequestCap = Duration(seconds: 20);
-const _geocodeCap = Duration(seconds: 10);
-const _nativeGeocodeCap = Duration(seconds: 6);
+const _geocodeCap = Duration(seconds: 6);
+const _nativeGeocodeCap = Duration(seconds: 5);
 
 class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
   @override

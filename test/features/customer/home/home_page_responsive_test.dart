@@ -179,21 +179,19 @@ void main() {
       // The hero background must fill the whole hero even when the overlay
       // content forces the hero taller than the image's natural-fit height;
       // fitWidth left a strip that clipped the location badge (bug 6).
-      final boxes = tester.widgetList<DecoratedBox>(find.byType(DecoratedBox));
-      final hero = boxes
+      final heroImages = tester
+          .widgetList<Image>(find.byType(Image))
           .where(
-            (b) =>
-                b.decoration is BoxDecoration &&
-                (b.decoration as BoxDecoration).image != null &&
-                ((b.decoration as BoxDecoration).image!.image is AssetImage) &&
-                (((b.decoration as BoxDecoration).image!.image as AssetImage)
+            (i) =>
+                i.image is ResizeImage &&
+                ((i.image as ResizeImage).imageProvider is AssetImage) &&
+                (((i.image as ResizeImage).imageProvider as AssetImage)
                     .assetName
-                    .contains('home_egypt_hero')),
+                    .contains('home_hero_')),
           )
           .toList();
-      expect(hero, hasLength(1));
-      final image = (hero.single.decoration as BoxDecoration).image!;
-      expect(image.fit, BoxFit.cover);
+      expect(heroImages, hasLength(1));
+      expect(heroImages.single.fit, BoxFit.fill);
 
       await tester.pump(const Duration(seconds: 1));
       await tester.pump(const Duration(seconds: 1));

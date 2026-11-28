@@ -132,6 +132,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     super.dispose();
   }
 
+  bool get _passwordMode =>
+      ref.read(signupPhoneModeProvider).asData?.value == 'password';
+
   Future<void> _openWhatsAppVerification() async {
     final phone = normalizeEgyptPhone(_phoneController.text);
     final phoneError = isEgyptMobilePhone(phone)
@@ -189,8 +192,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
     if (_currentStep == 1) {
       if (!_formKey.currentState!.validate()) return;
-      if (!_whatsappVerified ||
-          _verifiedPhone != normalizeEgyptPhone(_phoneController.text)) {
+      if (!_passwordMode &&
+          (!_whatsappVerified ||
+              _verifiedPhone != normalizeEgyptPhone(_phoneController.text))) {
         await _openWhatsAppVerification();
         return;
       }
@@ -283,6 +287,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final role = _selectedRole!;
     final phone = normalizeEgyptPhone(_phoneController.text);
     if (phone.isNotEmpty &&
+        !_passwordMode &&
         (!_whatsappVerified ||
             _verifiedPhone != phone ||
             _phoneVerificationChallenge == null)) {
@@ -843,10 +848,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   Widget _buildStepInfo(AppLocalizations l10n) {
+    final passwordMode =
+        ref.watch(signupPhoneModeProvider).asData?.value == 'password';
     final isPhoneVerified =
-        _whatsappVerified &&
-        _verifiedPhone.isNotEmpty &&
-        _verifiedPhone == normalizeEgyptPhone(_phoneController.text);
+        passwordMode ||
+        (_whatsappVerified &&
+            _verifiedPhone.isNotEmpty &&
+            _verifiedPhone == normalizeEgyptPhone(_phoneController.text));
     return Form(
       key: _formKey,
       child: Column(
@@ -894,7 +902,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             },
           ),
           const SizedBox(height: 10),
-          if (isPhoneVerified)
+          if (isPhoneVerified && !passwordMode)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
@@ -925,7 +933,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 ],
               ),
             )
-          else
+          else if (!passwordMode)
             Align(
               alignment: AlignmentDirectional.centerEnd,
               child: OutlinedButton.icon(

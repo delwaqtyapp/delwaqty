@@ -27,6 +27,18 @@ final requireProviderDocumentsProvider = FutureProvider<bool>((ref) async {
   }
 });
 
+/// 'password' = phone + password, no WhatsApp proof at signup (server flag
+/// feature_flags.signup_phone_mode). Anything else, or any failure, keeps the
+/// WhatsApp proof, so the safe path is the default.
+final signupPhoneModeProvider = FutureProvider<String>((ref) async {
+  try {
+    final r = await Supabase.instance.client.rpc('signup_phone_mode');
+    return r == 'password' ? 'password' : 'whatsapp';
+  } catch (_) {
+    return 'whatsapp';
+  }
+});
+
 final authStateProvider = NotifierProvider<AuthStateNotifier, AuthState>(
   AuthStateNotifier.new,
 );

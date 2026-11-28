@@ -5,6 +5,9 @@ import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/customer/location/presentation/widgets/smart_map_picker_sheet.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/shared/widgets/app_empty_state.dart';
+import 'package:delwaqty/shared/widgets/app_shell.dart'
+    show kFloatingNavClearance;
 
 /// The signed-in user's saved delivery addresses (user_addresses). Row-level
 /// security limits every read and write to the owner's own rows.
@@ -173,10 +176,14 @@ class MyAddressesPage extends ConsumerWidget {
     final async = ref.watch(myAddressesProvider);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.myAddresses)),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _add(context, ref),
-        icon: const Icon(Icons.add_location_alt_rounded),
-        label: Text(l10n.addAddress),
+      // Lift the button above the floating bottom navigation bar.
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(bottom: kFloatingNavClearance - 16),
+        child: FloatingActionButton.extended(
+          onPressed: () => _add(context, ref),
+          icon: const Icon(Icons.add_location_alt_rounded),
+          label: Text(l10n.addAddress),
+        ),
       ),
       body: SafeArea(
         child: async.when(
@@ -184,10 +191,19 @@ class MyAddressesPage extends ConsumerWidget {
           error: (e, _) => Center(child: Text(appErrorText(context, e))),
           data: (rows) {
             if (rows.isEmpty) {
-              return Center(child: Text(l10n.noSavedAddresses));
+              return AppEmptyState(
+                icon: Icons.location_on_outlined,
+                title: l10n.noSavedAddresses,
+                message: l10n.noSavedAddressesMessage,
+              );
             }
             return ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
+              padding: const EdgeInsets.fromLTRB(
+                16,
+                12,
+                16,
+                kFloatingNavClearance + 88,
+              ),
               itemCount: rows.length,
               separatorBuilder: (_, _) => const SizedBox(height: 8),
               itemBuilder: (ctx, i) {

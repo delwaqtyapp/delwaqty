@@ -98,6 +98,18 @@ abstract class AppLocalizations {
     Locale('en'),
   ];
 
+  /// No description provided for @noSavedAddressesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your home, work or any place to order faster next time.'**
+  String get noSavedAddressesMessage;
+
+  /// No description provided for @accuracyApproximate.
+  ///
+  /// In en, this message translates to:
+  /// **'Your location is approximate. Adjust the pin on the map if needed.'**
+  String get accuracyApproximate;
+
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
@@ -5681,7 +5693,7 @@ abstract class AppLocalizations {
   /// No description provided for @directDeliveryEstimateNote.
   ///
   /// In en, this message translates to:
-  /// **'Estimate based on distance. The final fee may differ.'**
+  /// **'Estimate from the distance between your location and the drop-off point. The final fee may differ.'**
   String get directDeliveryEstimateNote;
 
   /// No description provided for @directDeliveryEstimateLabel.

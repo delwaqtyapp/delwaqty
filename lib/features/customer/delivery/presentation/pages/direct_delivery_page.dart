@@ -255,13 +255,8 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
             : '${value.latitude}, ${value.longitude}';
         _setPin(address, value.latitude, value.longitude);
         final accuracy = value.accuracyMeters;
-        if (accuracy != null && accuracy > precisionTargetMeters) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.accuracyInsufficient),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
+        if (accuracy != null && accuracy > approximateLocationMeters) {
+          context.showAppSnackBar(l10n.accuracyApproximate);
         }
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

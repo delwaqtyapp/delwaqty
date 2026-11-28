@@ -10,6 +10,14 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get noSavedAddressesMessage =>
+      'احفظ بيتك أو شغلك أو أي مكان علشان تطلب أسرع المرة الجاية.';
+
+  @override
+  String get accuracyApproximate =>
+      'موقعك تقريبي. عدّل الدبوس على الخريطة لو احتجت.';
+
+  @override
   String get appTitle => 'دلوقتي';
 
   @override
@@ -2919,7 +2927,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get directDeliveryEstimateNote =>
-      'تقدير حسب المسافة. قد يختلف السعر النهائي.';
+      'تقدير حسب المسافة بين موقعك ونقطة التسليم. قد يختلف السعر النهائي.';
 
   @override
   String get directDeliveryEstimateLabel => 'تكلفة التوصيل التقديرية';

@@ -10,6 +10,14 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get noSavedAddressesMessage =>
+      'Save your home, work or any place to order faster next time.';
+
+  @override
+  String get accuracyApproximate =>
+      'Your location is approximate. Adjust the pin on the map if needed.';
+
+  @override
   String get appTitle => 'Delwaqty';
 
   @override
@@ -2937,7 +2945,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get directDeliveryEstimateNote =>
-      'Estimate based on distance. The final fee may differ.';
+      'Estimate from the distance between your location and the drop-off point. The final fee may differ.';
 
   @override
   String get directDeliveryEstimateLabel => 'Estimated delivery fee';

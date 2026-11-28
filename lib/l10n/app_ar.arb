@@ -1,4 +1,6 @@
 {
+  "noSavedAddressesMessage": "احفظ بيتك أو شغلك أو أي مكان علشان تطلب أسرع المرة الجاية.",
+  "accuracyApproximate": "موقعك تقريبي. عدّل الدبوس على الخريطة لو احتجت.",
   "@@locale": "ar",
   "appTitle": "دلوقتي",
   "home": "الرئيسية",
@@ -959,7 +961,7 @@
   "directDeliveryErrQuantity": "الكمية يجب أن تكون 1 أو أكثر",
   "directDeliveryPickAddress": "أي عنوان تقصد؟",
   "directDeliverySavedAddresses": "العناوين المحفوظة",
-  "directDeliveryEstimateNote": "تقدير حسب المسافة. قد يختلف السعر النهائي.",
+  "directDeliveryEstimateNote": "تقدير حسب المسافة بين موقعك ونقطة التسليم. قد يختلف السعر النهائي.",
   "directDeliveryEstimateLabel": "تكلفة التوصيل التقديرية",
   "numberSaved": "تم حفظ الرقم",
   "shoppingList": "قائمة التسوق",

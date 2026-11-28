@@ -31,7 +31,12 @@ final userLocationProvider =
       UserLocationNotifier.new,
     );
 
-const double precisionTargetMeters = 1.0;
+/// A GPS fix this tight is good enough to place a delivery pin. (A 1 m target
+/// is not reachable on phones and made the lookup spin for the full cap.)
+const double precisionTargetMeters = 20.0;
+
+/// Above this the fix is only approximate and the user is nudged to adjust the pin.
+const double approximateLocationMeters = 100.0;
 
 /// Completes with [fallback] when [future] has not finished within [limit]
 /// (or throws). Used so a platform call that never answers cannot leave a
@@ -43,9 +48,9 @@ Future<T> withDeadline<T>(Future<T> future, Duration limit, T fallback) =>
 
 /// Upper bound for one "use my location" request: GNSS attempts plus
 /// geocoding. After this the caller gets whatever was found, or null.
-const locationRequestCap = Duration(seconds: 30);
-const _geocodeCap = Duration(seconds: 10);
-const _nativeGeocodeCap = Duration(seconds: 6);
+const locationRequestCap = Duration(seconds: 20);
+const _geocodeCap = Duration(seconds: 6);
+const _nativeGeocodeCap = Duration(seconds: 5);
 
 class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
   @override

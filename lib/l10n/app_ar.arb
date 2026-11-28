@@ -3123,5 +3123,14 @@
   "adminPricingExpressX": "معامل السريع",
   "adminPricingActive": "مفعّل",
   "adminPricingSaved": "تم حفظ التسعير",
-  "adminPricingInvalid": "أدخل أرقامًا صحيحة. لا يمكن أن تكون الرسوم سالبة ويجب أن تكون المعاملات بين 1 و5."
+  "adminPricingInvalid": "أدخل أرقامًا صحيحة. رسوم البداية والحد الأدنى حتى 500، وسعر الكيلومتر والكيلوجرام حتى 50، والمعاملات بين 1 و3.",
+  "adminPricingReadOnly": "تعديل الأسعار متاح لمديري مستوى الدولة والمالك فقط. يمكنك عرضها هنا.",
+  "adminPricingNotSaved": "لم يتم الحفظ. ليس لديك صلاحية تعديل تسعير التوصيل.",
+  "adminPricingDisableWarning": "إيقاف هذا الخيار يمنع الطلبات الجديدة من هذا النوع حتى يتم تفعيله مرة أخرى.",
+  "adminPricingConfirmTitle": "حفظ تسعير {service}؟",
+  "adminPricingConfirmSample": "سعر تقريبي لـ 5 كم و1 كجم عادي: {fare}",
+  "adminPricingConfirmOff": "سيتم إيقاف هذه الخدمة وسيتم منع الطلبات الجديدة.",
+  "adminPricingConfirmNewOnly": "يسري على الطلبات الجديدة فقط.",
+  "@adminPricingConfirmTitle": {"placeholders": {"service": {"type": "String"}}},
+  "@adminPricingConfirmSample": {"placeholders": {"fare": {"type": "String"}}}
 }

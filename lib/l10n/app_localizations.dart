@@ -16787,8 +16787,50 @@ abstract class AppLocalizations {
   /// No description provided for @adminPricingInvalid.
   ///
   /// In en, this message translates to:
-  /// **'Enter valid numbers. Fees cannot be negative and multipliers must be between 1 and 5.'**
+  /// **'Enter valid numbers. Fees: base and minimum up to 500, per km and per kg up to 50. Multipliers between 1 and 3.'**
   String get adminPricingInvalid;
+
+  /// No description provided for @adminPricingReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Only country-level admins and the owner can edit prices. You can view them here.'**
+  String get adminPricingReadOnly;
+
+  /// No description provided for @adminPricingNotSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Not saved. You do not have permission to change delivery pricing.'**
+  String get adminPricingNotSaved;
+
+  /// No description provided for @adminPricingDisableWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Turning this off blocks new requests of this service type until it is turned on again.'**
+  String get adminPricingDisableWarning;
+
+  /// No description provided for @adminPricingConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save pricing for {service}?'**
+  String adminPricingConfirmTitle(String service);
+
+  /// No description provided for @adminPricingConfirmSample.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample fare for 5 km, 1 kg, standard: {fare}'**
+  String adminPricingConfirmSample(String fare);
+
+  /// No description provided for @adminPricingConfirmOff.
+  ///
+  /// In en, this message translates to:
+  /// **'This service will be turned off. New requests will be blocked.'**
+  String get adminPricingConfirmOff;
+
+  /// No description provided for @adminPricingConfirmNewOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to new requests only.'**
+  String get adminPricingConfirmNewOnly;
 }
 
 class _AppLocalizationsDelegate

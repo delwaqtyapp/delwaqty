@@ -8812,5 +8812,34 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get adminPricingInvalid =>
-      'أدخل أرقامًا صحيحة. لا يمكن أن تكون الرسوم سالبة ويجب أن تكون المعاملات بين 1 و5.';
+      'أدخل أرقامًا صحيحة. رسوم البداية والحد الأدنى حتى 500، وسعر الكيلومتر والكيلوجرام حتى 50، والمعاملات بين 1 و3.';
+
+  @override
+  String get adminPricingReadOnly =>
+      'تعديل الأسعار متاح لمديري مستوى الدولة والمالك فقط. يمكنك عرضها هنا.';
+
+  @override
+  String get adminPricingNotSaved =>
+      'لم يتم الحفظ. ليس لديك صلاحية تعديل تسعير التوصيل.';
+
+  @override
+  String get adminPricingDisableWarning =>
+      'إيقاف هذا الخيار يمنع الطلبات الجديدة من هذا النوع حتى يتم تفعيله مرة أخرى.';
+
+  @override
+  String adminPricingConfirmTitle(String service) {
+    return 'حفظ تسعير $service؟';
+  }
+
+  @override
+  String adminPricingConfirmSample(String fare) {
+    return 'سعر تقريبي لـ 5 كم و1 كجم عادي: $fare';
+  }
+
+  @override
+  String get adminPricingConfirmOff =>
+      'سيتم إيقاف هذه الخدمة وسيتم منع الطلبات الجديدة.';
+
+  @override
+  String get adminPricingConfirmNewOnly => 'يسري على الطلبات الجديدة فقط.';
 }

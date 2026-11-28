@@ -108,7 +108,15 @@ BEGIN
   END IF;
 
   -- (6) request_courier_delivery creates the ride with server-controlled
-  -- fields: caller cannot set fare, payment, order_id or merchant_id.
+  -- fields: caller cannot set fare, payment, order_id or merchant_id; the fare
+  -- is computed server-side (464).
+  -- 464: the RPC prices the ride from the courier pricing row.
+  PERFORM set_config('role', 'postgres', true);
+  DELETE FROM public.delivery_pricing WHERE service_type = 'courier';
+  INSERT INTO public.delivery_pricing(service_type, base_fee, per_km, per_kg,
+    minimum_fee, priority_multiplier, express_multiplier, currency, is_active)
+  VALUES ('courier', 15, 5, 2, 20, 1.2, 1.5, 'EGP', true);
+  PERFORM set_config('role', 'authenticated', true);
   PERFORM set_config('request.jwt.claim.sub', u::text, true);
   a := public.request_courier_delivery(
     30.0, 31.0, 'pickup',
@@ -128,7 +136,7 @@ BEGIN
     RAISE EXCEPTION 'rider_id is not the caller';
   END IF;
   IF v_ride.service_type IS DISTINCT FROM 'courier'
-     OR v_ride.fare IS NOT NULL
+     OR v_ride.fare IS NULL
      OR v_ride.order_id IS NOT NULL
      OR v_ride.merchant_id IS NOT NULL THEN
     RAISE EXCEPTION 'courier ride fields not server-controlled: %', v_ride;

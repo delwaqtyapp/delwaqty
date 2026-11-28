@@ -109,7 +109,7 @@ class _ProviderAppState extends ConsumerState<ProviderApp>
   Future<void> _handleEmailActivated() async {
     await handleEmailActivatedDeepLink(
       ref,
-      navigatorKey: rootNavigatorKey,
+      navigatorKey: providerRootNavigatorKey,
       router: ref.read(providerGoRouterProvider),
     );
   }

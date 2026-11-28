@@ -112,7 +112,7 @@ class _DriverAppState extends ConsumerState<DriverApp>
   Future<void> _handleEmailActivated() async {
     await handleEmailActivatedDeepLink(
       ref,
-      navigatorKey: rootNavigatorKey,
+      navigatorKey: driverRootNavigatorKey,
       router: ref.read(driverGoRouterProvider),
     );
   }

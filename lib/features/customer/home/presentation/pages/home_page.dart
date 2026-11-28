@@ -35,6 +35,7 @@ import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/core/theme/app_elevation.dart';
 import 'package:delwaqty/shared/widgets/floating_glass_buttons.dart';
+import 'package:delwaqty/shared/widgets/home_hero.dart';
 
 final _homeServiceCategoriesProvider = FutureProvider<List<ServiceCategory>>((
   ref,
@@ -67,6 +68,9 @@ void _precacheImageUrls(BuildContext context, Iterable<String> urls) {
 List<_TileItem> get _allDefaultServiceItems =>
     serviceCategoryPriority.map((t) => _ServiceTile(t)).toList(growable: false);
 
+/// How far the hero image runs below the hero box, behind the order card.
+const double _heroOverlap = 26;
+
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
@@ -79,10 +83,14 @@ class HomePage extends ConsumerWidget {
     final unreadCount = isGuest ? 0 : ref.watch(unreadCountProvider).value ?? 0;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
+      value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
+        statusBarIconBrightness: Theme.of(context).brightness == Brightness.dark
+            ? Brightness.light
+            : Brightness.dark,
+        statusBarBrightness: Theme.of(context).brightness == Brightness.dark
+            ? Brightness.dark
+            : Brightness.light,
         systemNavigationBarColor: Colors.transparent,
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
@@ -120,22 +128,26 @@ class HomePage extends ConsumerWidget {
                   ),
                   slivers: [
                     SliverToBoxAdapter(
-                      child: _EgyptHero(
-                        ref: ref,
-                        l10n: l10n,
-                        authState: authState,
-                        isGuest: isGuest,
-                        locationAsync: locationAsync,
-                        unreadCount: unreadCount,
-                      ),
-                    ),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                        child: _DirectOrderButton(
-                          l10n: l10n,
-                          onTap: () => context.push('/direct-delivery'),
-                        ),
+                      child: Column(
+                        children: [
+                          _EgyptHero(
+                            ref: ref,
+                            l10n: l10n,
+                            authState: authState,
+                            isGuest: isGuest,
+                            locationAsync: locationAsync,
+                            unreadCount: unreadCount,
+                          ),
+                          // The hero image runs _heroOverlap below the hero
+                          // box, so the card sits on its faded tail.
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                            child: _DirectOrderButton(
+                              l10n: l10n,
+                              onTap: () => context.push('/direct-delivery'),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     SliverToBoxAdapter(child: _CompactCategories(l10n: l10n)),
@@ -253,8 +265,8 @@ class _EgyptHeroState extends State<_EgyptHero>
 
     // The hero is exactly the image's natural-fit height: the direct-order
     // button lives right below the image bottom edge (its own sliver).
-    // Natural aspect of assets/egypt/home_egypt_hero.png (1821x864).
-    final heroImageH = screenWidth * (864 / 1821);
+    // Aspect of assets/egypt/home_hero_*.webp (1200x800).
+    final heroImageH = screenWidth * (800 / 1200);
 
     final horizontalPadding = (screenWidth * 0.055).clamp(16.0, 28.0);
     final topButtonSize = (screenWidth * 0.095).clamp(36.0, 44.0);
@@ -279,115 +291,87 @@ class _EgyptHeroState extends State<_EgyptHero>
     final badgeReserve = 40.0 * textScale + 4.0;
     final heroH = math.max(heroImageH, contentH + badgeReserve);
 
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
-      child: SizedBox(
-        height: heroH,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/egypt/home_egypt_hero.webp'),
-                  // Cover the full hero: when the overlay content (tall
-                  // status-bar inset or large text scale) forces the hero
-                  // taller than the image's natural-fit height, fitWidth
-                  // left an unpainted strip at the bottom and the location
-                  // badge sat half-clipped against the image edge.
-                  fit: BoxFit.cover,
-                  alignment: Alignment.topCenter,
-                ),
+    final brightness = Theme.of(context).brightness;
+    final overDark = brightness == Brightness.dark;
+
+    return SizedBox(
+      height: heroH,
+      child: Stack(
+        clipBehavior: Clip.none,
+        fit: StackFit.expand,
+        children: [
+          const HomeHeroBackdrop(overhang: _heroOverlap),
+          Align(
+            alignment: AlignmentDirectional.bottomStart,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(horizontalPadding, 0, 12, 12),
+              child: _buildLocationBadge(
+                context,
+                height: 28,
+                maxWidth: screenWidth * 0.72,
               ),
             ),
-            Positioned.fill(
-              child: IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        const Color(0xFF2E146F).withValues(alpha: 0.12),
-                        Colors.transparent,
-                      ],
-                    ),
+          ),
+          SafeArea(
+            bottom: false,
+            // Top-anchor when the content (not the image) sets the hero
+            // height, so the search bar stays clear of the location
+            // badge anchored at the hero's bottom edge.
+            child: Align(
+              alignment: heroH > heroImageH
+                  ? Alignment.topCenter
+                  : Alignment.center,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    2,
+                    horizontalPadding,
+                    0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: Row(
+                          children: [
+                            FloatingNotificationCircleButton(
+                              size: topButtonSize,
+                              iconSize: topIconSize,
+                              overDarkHero: overDark,
+                            ),
+                            const Spacer(),
+                            _buildMiniLockup(
+                              logoSize: logoSize,
+                              arabicSize: arabicSize,
+                            ),
+                            const Spacer(),
+                            FloatingMenuCircleButton(
+                              size: topButtonSize,
+                              iconSize: topIconSize,
+                              overDarkHero: overDark,
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: zoneGap),
+                      _PremiumTypewriterSearchBar(
+                        l10n: widget.l10n,
+                        onTap: (anchor) => _GlassSearchPopupController.open(
+                          context,
+                          widget.ref,
+                          anchor: anchor,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-            Align(
-              alignment: AlignmentDirectional.bottomStart,
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(horizontalPadding, 0, 12, 12),
-                child: _buildLocationBadge(
-                  context,
-                  height: 28,
-                  maxWidth: screenWidth * 0.72,
-                ),
-              ),
-            ),
-            SafeArea(
-              bottom: false,
-              // Top-anchor when the content (not the image) sets the hero
-              // height, so the search bar stays clear of the location
-              // badge anchored at the hero's bottom edge.
-              child: Align(
-                alignment: heroH > heroImageH
-                    ? Alignment.topCenter
-                    : Alignment.center,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 600),
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      horizontalPadding,
-                      2,
-                      horizontalPadding,
-                      0,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Directionality(
-                          textDirection: TextDirection.ltr,
-                          child: Row(
-                            children: [
-                              FloatingNotificationCircleButton(
-                                size: topButtonSize,
-                                iconSize: topIconSize,
-                                overDarkHero: true,
-                              ),
-                              const Spacer(),
-                              _buildMiniLockup(
-                                logoSize: logoSize,
-                                arabicSize: arabicSize,
-                              ),
-                              const Spacer(),
-                              FloatingMenuCircleButton(
-                                size: topButtonSize,
-                                iconSize: topIconSize,
-                                overDarkHero: true,
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: zoneGap),
-                        _PremiumTypewriterSearchBar(
-                          l10n: widget.l10n,
-                          onTap: (anchor) => _GlassSearchPopupController.open(
-                            context,
-                            widget.ref,
-                            anchor: anchor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -397,6 +381,9 @@ class _EgyptHeroState extends State<_EgyptHero>
     required double height,
     required double maxWidth,
   }) {
+    final brightness = Theme.of(context).brightness;
+    final ink = HomeHeroBackdrop.ink(brightness);
+    final glass = HomeHeroBackdrop.glass(brightness);
     final locationText = widget.locationAsync.when(
       skipLoadingOnRefresh: true,
       skipLoadingOnReload: true,
@@ -421,11 +408,9 @@ class _EgyptHeroState extends State<_EgyptHero>
                   height: height,
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.18),
+                    color: glass,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.3),
-                    ),
+                    border: Border.all(color: ink.withValues(alpha: 0.3)),
                     boxShadow: const [
                       BoxShadow(
                         color: Color(0x22000000),
@@ -436,17 +421,13 @@ class _EgyptHeroState extends State<_EgyptHero>
                   ),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.location_on_rounded,
-                        size: 15,
-                        color: Colors.white,
-                      ),
+                      Icon(Icons.location_on_rounded, size: 15, color: ink),
                       const SizedBox(width: 5),
                       Expanded(
                         child: _MarqueeLocationText(
                           text: locationText,
                           style: AppTextStyles.bodyMedium.copyWith(
-                            color: Colors.white,
+                            color: ink,
                             fontWeight: FontWeight.w600,
                             fontSize: 11,
                           ),
@@ -455,7 +436,7 @@ class _EgyptHeroState extends State<_EgyptHero>
                       Icon(
                         Icons.expand_more_rounded,
                         size: 14,
-                        color: Colors.white.withValues(alpha: 0.8),
+                        color: ink.withValues(alpha: 0.8),
                       ),
                     ],
                   ),
@@ -468,9 +449,9 @@ class _EgyptHeroState extends State<_EgyptHero>
             width: height,
             height: height,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.22),
+              color: glass,
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
+              border: Border.all(color: ink.withValues(alpha: 0.35)),
             ),
             child: IconButton(
               padding: EdgeInsets.zero,
@@ -479,11 +460,7 @@ class _EgyptHeroState extends State<_EgyptHero>
                 height: height,
               ),
               tooltip: widget.l10n.pickLocationOnMap,
-              icon: const Icon(
-                Icons.map_rounded,
-                size: 15,
-                color: Colors.white,
-              ),
+              icon: Icon(Icons.map_rounded, size: 15, color: ink),
               onPressed: () {
                 unawaited(SmartMapPickerSheet.show(context));
               },
@@ -537,9 +514,14 @@ class _EgyptHeroState extends State<_EgyptHero>
               fontFamily: 'Cairo',
               fontSize: arabicSize,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFFF7F7FA),
+              color: HomeHeroBackdrop.ink(Theme.of(context).brightness),
               letterSpacing: 0.5,
-              shadows: const [Shadow(color: Color(0x55000000), blurRadius: 3)],
+              shadows: Theme.of(context).brightness == Brightness.dark
+                  ? const [
+                      Shadow(color: Color(0xB3000000), blurRadius: 6),
+                      Shadow(color: Color(0x66000000), blurRadius: 12),
+                    ]
+                  : const [Shadow(color: Color(0x99FFFFFF), blurRadius: 4)],
             ),
           ),
         ),
@@ -825,6 +807,9 @@ class _PremiumTypewriterSearchBarState
   @override
   Widget build(BuildContext context) {
     final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final brightness = Theme.of(context).brightness;
+    final ink = HomeHeroBackdrop.ink(brightness);
+    final glass = HomeHeroBackdrop.glass(brightness);
     final hints = _hints;
     final fullText = hints[_phraseIndex % hints.length];
     final displayText = _animationsDisabled
@@ -855,20 +840,16 @@ class _PremiumTypewriterSearchBarState
               height: 48,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.08),
+                color: glass,
                 borderRadius: BorderRadius.circular(26),
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.38),
+                  color: ink.withValues(alpha: 0.38),
                   width: 1.1,
                 ),
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.search_rounded,
-                    color: Colors.white,
-                    size: 21,
-                  ),
+                  Icon(Icons.search_rounded, color: ink, size: 21),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Row(
@@ -877,12 +858,17 @@ class _PremiumTypewriterSearchBarState
                           child: Text(
                             displayText,
                             style: AppTextStyles.bodyMedium.copyWith(
-                              color: Colors.white.withValues(alpha: 0.96),
+                              color: ink.withValues(alpha: 0.96),
                               fontWeight: FontWeight.w500,
                               fontSize: 13.5,
-                              shadows: const [
-                                Shadow(color: Color(0x55000000), blurRadius: 4),
-                              ],
+                              shadows: brightness == Brightness.dark
+                                  ? const [
+                                      Shadow(
+                                        color: Color(0x55000000),
+                                        blurRadius: 4,
+                                      ),
+                                    ]
+                                  : null,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -907,18 +893,16 @@ class _PremiumTypewriterSearchBarState
                     height: 24,
                     width: 24,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.12),
+                      color: ink.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.32),
-                      ),
+                      border: Border.all(color: ink.withValues(alpha: 0.32)),
                     ),
                     child: Icon(
                       isRtl
                           ? Icons.arrow_back_rounded
                           : Icons.arrow_forward_rounded,
                       size: 13,
-                      color: Colors.white,
+                      color: ink,
                     ),
                   ),
                 ],

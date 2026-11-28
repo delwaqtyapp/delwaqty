@@ -3197,5 +3197,9 @@
         "type": "String"
       }
     }
-  }
+  },
+  "appSection": "App",
+  "chooseAppLanguage": "Choose the app language",
+  "languageChangeAnytime": "You can change the app language at any time.",
+  "contactUs": "Contact us"
 }

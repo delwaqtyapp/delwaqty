@@ -8859,4 +8859,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cartConflictStartNew => 'Start new cart';
+
+  @override
+  String get appSection => 'App';
+
+  @override
+  String get chooseAppLanguage => 'Choose the app language';
+
+  @override
+  String get languageChangeAnytime =>
+      'You can change the app language at any time.';
+
+  @override
+  String get contactUs => 'Contact us';
 }

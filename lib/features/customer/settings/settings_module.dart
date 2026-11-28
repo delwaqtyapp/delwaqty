@@ -4,7 +4,9 @@ import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/features/customer/settings/presentation/pages/about_page.dart';
 import 'package:delwaqty/features/customer/settings/presentation/pages/help_center_page.dart';
 import 'package:delwaqty/features/customer/settings/presentation/pages/privacy_policy_page.dart';
+import 'package:delwaqty/features/customer/settings/presentation/pages/language_page.dart';
 import 'package:delwaqty/features/customer/settings/presentation/pages/privacy_security_page.dart';
+import 'package:delwaqty/features/customer/settings/presentation/pages/settings_page.dart';
 import 'package:delwaqty/features/customer/settings/presentation/pages/terms_of_service_page.dart';
 import 'package:delwaqty/features/customer/settings/presentation/pages/privacy/change_password_page.dart';
 import 'package:delwaqty/features/customer/settings/presentation/pages/privacy/data_privacy_page.dart';
@@ -32,6 +34,16 @@ class SettingsModule extends FeatureModule {
 
   @override
   List<RouteBase> get standaloneRoutes => [
+    GoRoute(
+      path: '/settings',
+      name: 'settings',
+      builder: (context, state) => const SettingsPage(),
+    ),
+    GoRoute(
+      path: '/settings/language',
+      name: 'settings-language',
+      builder: (context, state) => const LanguagePage(),
+    ),
     GoRoute(
       path: '/settings/about',
       name: 'settings-about',

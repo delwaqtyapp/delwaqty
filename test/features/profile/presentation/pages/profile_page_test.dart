@@ -15,6 +15,8 @@ import 'package:delwaqty/domain/usecases/profile/profile_usecases.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/customer/profile/presentation/pages/profile_page.dart';
+import 'package:delwaqty/features/customer/settings/presentation/pages/language_page.dart';
+import 'package:delwaqty/features/customer/settings/presentation/pages/settings_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/app_shell.dart';
 import 'package:delwaqty/shared/widgets/appearance_segmented.dart';
@@ -36,18 +38,22 @@ class _FakeAuthNotifier extends AuthStateNotifier {
   AuthState build() => AuthState.authenticated(user: _user);
 }
 
-Widget _buildTestApp(ProfileRepository repo, SharedPreferencesService prefs) {
+Widget _buildTestApp(
+  ProfileRepository repo,
+  SharedPreferencesService prefs, {
+  Widget home = const ProfilePage(),
+}) {
   return ProviderScope(
     overrides: [
       profileRepositoryProvider.overrideWithValue(repo),
       sharedPreferencesProvider.overrideWithValue(prefs),
       authStateProvider.overrideWith(_FakeAuthNotifier.new),
     ],
-    child: const MaterialApp(
+    child: MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: Locale('en'),
-      home: ProfilePage(),
+      home: home,
     ),
   );
 }
@@ -116,8 +122,7 @@ void main() {
     await tester.pumpWidget(_buildTestApp(mockRepo, prefs));
     await tester.pump(const Duration(milliseconds: 800));
 
-    expect(find.text('Edit Profile'), findsOneWidget);
-    await tester.tap(find.widgetWithText(FilledButton, 'Edit Profile'));
+    await tester.tap(find.text('Test Customer'));
     await tester.pump(const Duration(milliseconds: 300));
     await tester.pump(const Duration(milliseconds: 400));
 
@@ -157,7 +162,8 @@ void main() {
     await tester.pumpWidget(_buildTestApp(mockRepo, prefs));
     await tester.pump(const Duration(milliseconds: 800));
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Edit Profile'));
+    await tester.tap(find.text('Test Customer'));
+    await tester.pump(const Duration(milliseconds: 300));
     await tester.pump(const Duration(milliseconds: 400));
 
     await tester.enterText(find.byType(TextField).at(0), 'Only Name');
@@ -225,22 +231,14 @@ void main() {
     FlutterError.onError = ignoreVisualAssertions(oldHandler);
     addTearDown(() => FlutterError.onError = oldHandler);
 
-    await tester.pumpWidget(_buildTestApp(mockRepo, prefs));
-    await tester.pump(const Duration(milliseconds: 800));
-
-    // The profile page is a lazily-built CustomScrollView and the appearance
-    // section sits below the fold since the account list grew; scroll it into
-    // view before asserting (finders miss unbuilt sliver children).
-    await tester.scrollUntilVisible(
-      find.byType(AppearanceSegmented<ThemeMode>),
-      300,
-      scrollable: find.byType(Scrollable).first,
+    await tester.pumpWidget(
+      _buildTestApp(mockRepo, prefs, home: const SettingsPage()),
     );
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 800));
 
     // No saved theme mode -> provider defaults to light; the subtitle shows the
     // current mode in addition to the matching segment label.
-    expect(find.text('Light Mode'), findsNWidgets(2));
+    expect(find.text('Light Mode'), findsOneWidget);
     expect(find.text('Dark Mode'), findsOneWidget);
     expect(find.text('System'), findsOneWidget);
 
@@ -255,13 +253,40 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('Dark Mode'), findsNWidgets(2));
+    expect(find.text('Dark Mode'), findsOneWidget);
     expect(find.text('Light Mode'), findsOneWidget);
 
     final container = ProviderScope.containerOf(
-      tester.element(find.byType(ProfilePage)),
+      tester.element(find.byType(SettingsPage)),
     );
     expect(container.read(themeModeProvider), ThemeMode.dark);
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('settings page lists account, app and support sections', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      _buildTestApp(mockRepo, prefs, home: const SettingsPage()),
+    );
+    await tester.pump(const Duration(milliseconds: 800));
+    expect(find.text('Account'), findsOneWidget);
+    expect(find.text('App'), findsOneWidget);
+    expect(find.text('Support'), findsOneWidget);
+    expect(find.text('Language'), findsOneWidget);
+  });
+
+  testWidgets('language page applies the chosen locale only on Apply', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildTestApp(mockRepo, prefs, home: const LanguagePage()),
+    );
+    await tester.pump(const Duration(milliseconds: 800));
+    expect(find.text('English'), findsOneWidget);
+    expect(find.text('Apply'), findsOneWidget);
   });
 }

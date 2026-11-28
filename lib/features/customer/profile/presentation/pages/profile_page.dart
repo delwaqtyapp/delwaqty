@@ -1,25 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:delwaqty/core/config/app_mode_provider.dart';
-import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
-import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
-import 'package:delwaqty/core/theme/theme_mode_provider.dart';
-import 'package:delwaqty/core/utils/validators.dart';
 import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/domain/usecases/profile/profile_usecases.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
-import 'package:delwaqty/features/customer/profile/presentation/app_invitations_provider.dart';
+import 'package:delwaqty/features/customer/profile/presentation/pages/edit_profile_page.dart';
+import 'package:delwaqty/features/customer/profile/presentation/widgets/avatar_picker.dart';
+import 'package:delwaqty/features/customer/profile/presentation/widgets/profile_sections.dart';
+import 'package:delwaqty/gen/assets.gen.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/app_shell.dart';
-import 'package:delwaqty/shared/widgets/appearance_segmented.dart';
 import 'package:delwaqty/shared/widgets/adaptive_tile_wrap.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/shared/widgets/floating_glass_buttons.dart';
@@ -34,28 +30,11 @@ class ProfilePage extends ConsumerStatefulWidget {
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
   bool _isUploadingAvatar = false;
-  String _appVersionLabel = '';
-
-  @override
-  void initState() {
-    super.initState();
-    PackageInfo.fromPlatform()
-        .then((info) {
-          if (mounted) {
-            setState(() => _appVersionLabel = info.version);
-          }
-        })
-        .catchError((_) {
-          // Keep the l10n fallback label when package info is unavailable.
-        });
-  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final authState = ref.watch(authStateProvider);
-    final themeMode = ref.watch(themeModeProvider);
-    final locale = ref.watch(localeProvider);
     final isGuest = authState is AuthGuest;
 
     if (isGuest) {
@@ -66,6 +45,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final isProvider = flavor == AppFlavor.provider;
     final isDriver = flavor == AppFlavor.driver;
 
+    final authUser = authState is AuthAuthenticated ? authState.user : null;
+    final profileAsync = authUser != null
+        ? ref.watch(watchProfileUseCaseProvider(authUser.id))
+        : null;
+    final user = profileAsync?.value ?? authUser;
+
     return Scaffold(
       body: GradientBackground(
         child: CustomScrollView(
@@ -73,18 +58,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             parent: AlwaysScrollableScrollPhysics(),
           ),
           slivers: [
-            _buildHeroSliverAppBar(context, authState, l10n),
+            SliverToBoxAdapter(
+              child: user == null
+                  ? SizedBox(height: MediaQuery.paddingOf(context).top + 64)
+                  : _buildHeader(context, user, l10n),
+            ),
             SliverPadding(
               padding: EdgeInsets.fromLTRB(
                 16,
-                16,
+                8,
                 16,
                 kFloatingNavClearance + MediaQuery.paddingOf(context).bottom,
               ),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   AnimatedFadeIn(
-                    child: _buildBentoQuickActions(
+                    child: _buildQuickActions(
                       context,
                       isProvider,
                       isDriver,
@@ -101,24 +90,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       l10n,
                     ),
                   ),
-                  const SizedBox(height: 18),
-                  AnimatedFadeIn(
-                    delay: const Duration(milliseconds: 120),
-                    child: _buildAppearanceSection(
-                      context,
-                      l10n,
-                      themeMode,
-                      locale,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  AnimatedFadeIn(
-                    delay: const Duration(milliseconds: 170),
-                    child: _buildSupportAndLegalSection(context, l10n),
-                  ),
                   const SizedBox(height: 22),
                   AnimatedFadeIn(
-                    delay: const Duration(milliseconds: 220),
+                    delay: const Duration(milliseconds: 120),
                     child: _buildLogoutButton(context, l10n),
                   ),
                 ]),
@@ -130,309 +104,224 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildHeroSliverAppBar(
-    BuildContext context,
-    AuthState authState,
-    AppLocalizations l10n,
-  ) {
-    final authUser = authState is AuthAuthenticated ? authState.user : null;
-    final userId = authUser?.id;
-    final profileAsync = userId != null
-        ? ref.watch(watchProfileUseCaseProvider(userId))
-        : null;
-    final user = profileAsync?.value ?? authUser;
-
-    final topPadding = MediaQuery.paddingOf(context).top;
-
-    return SliverAppBar(
-      pinned: true,
-      expandedHeight: 256,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      backgroundColor: Colors.transparent,
-      surfaceTintColor: Colors.transparent,
-      automaticallyImplyLeading: false,
-      leadingWidth: 64,
-      leading: const Padding(
-        padding: EdgeInsetsDirectional.only(start: 14),
-        child: Center(
-          child: FloatingMenuCircleButton(size: 40, overDarkHero: true),
-        ),
-      ),
-      actions: const [
-        Padding(
-          padding: EdgeInsetsDirectional.only(end: 14),
-          child: Center(
-            child: FloatingNotificationCircleButton(
-              size: 40,
-              overDarkHero: true,
-            ),
-          ),
-        ),
-      ],
-      flexibleSpace: FlexibleSpaceBar(
-        background: ClipRRect(
-          borderRadius: const BorderRadius.vertical(
-            bottom: Radius.circular(32),
-          ),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: AlignmentDirectional.topStart,
-                    end: AlignmentDirectional.bottomEnd,
-                    colors: [
-                      Color(0xFF170B3B),
-                      AppColors.brandPurpleDeep,
-                      AppColors.brandPurple,
-                    ],
-                  ),
-                ),
-              ),
-              CustomPaint(
-                painter: _HeroCirclesPainter(
-                  rtl: Directionality.of(context) == TextDirection.rtl,
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(16, topPadding + 54, 16, 26),
-                child: user == null
-                    ? const SizedBox.shrink()
-                    : Align(
-                        alignment: Alignment.bottomCenter,
-                        child: _buildGlassHeroCard(context, user, l10n),
-                      ),
-              ),
-            ],
-          ),
-        ),
-      ),
+  Future<void> _openEditProfile(BuildContext context, User user) async {
+    final l10n = AppLocalizations.of(context);
+    final saved = await Navigator.of(context, rootNavigator: true).push<bool>(
+      MaterialPageRoute(builder: (_) => EditProfilePage(user: user)),
     );
+    if (saved == true && context.mounted) {
+      context.showAppSnackBar(l10n.success);
+    }
   }
 
-  Widget _buildGlassHeroCard(
-    BuildContext context,
-    User user,
-    AppLocalizations l10n,
-  ) {
+  Widget _buildHeader(BuildContext context, User user, AppLocalizations l10n) {
+    final cs = context.colorScheme;
+    final top = MediaQuery.paddingOf(context).top;
     final initial = (user.fullName?.isNotEmpty ?? false)
         ? user.fullName![0].toUpperCase()
         : (user.username?.isNotEmpty ?? false)
         ? user.username![0].toUpperCase()
         : 'U';
     final roleLabel = _roleLabel(user.role, l10n);
-    final contactInfo = (user.phone?.isNotEmpty ?? false)
+    final contact = (user.phone?.isNotEmpty ?? false)
         ? user.phone!
         : (user.email.isNotEmpty ? user.email : null);
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: Material(
-        type: MaterialType.transparency,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.20)),
-          ),
-          child: Row(
-            children: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  _GradientAvatarRing(
-                    child: ClipOval(
-                      child: SizedBox(
-                        width: 74,
-                        height: 74,
-                        child: user.avatarUrl?.isNotEmpty == true
-                            ? Image.network(
-                                user.avatarUrl!,
-                                fit: BoxFit.cover,
-                                loadingBuilder:
-                                    (context, child, loadingProgress) {
-                                      if (loadingProgress == null) {
-                                        return child;
-                                      }
-                                      return Container(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.12,
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: const SizedBox(
-                                          width: 20,
-                                          height: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                errorBuilder: (_, _, _) =>
-                                    _buildAvatarFallback(context, initial),
-                              )
-                            : _buildAvatarFallback(context, initial),
-                      ),
-                    ),
-                  ),
-                  PositionedDirectional(
-                    bottom: -2,
-                    end: -2,
-                    child: GestureDetector(
-                      onTap: _isUploadingAvatar
-                          ? null
-                          : () => _onChangePhoto(context, user.id, l10n),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: const LinearGradient(
-                            begin: AlignmentDirectional.topStart,
-                            end: AlignmentDirectional.bottomEnd,
-                            colors: [
-                              AppColors.brandPurple,
-                              AppColors.brandViolet,
-                            ],
-                          ),
-                          border: Border.all(color: Colors.white, width: 1.8),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x45170B3B),
-                              blurRadius: 10,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: _isUploadingAvatar
-                            ? const SizedBox(
-                                width: 14,
-                                height: 14,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Icon(
-                                Icons.camera_alt_rounded,
-                                size: 14,
-                                color: Colors.white,
-                              ),
-                      ),
-                    ),
-                  ),
-                ],
+    return SizedBox(
+      height: top + 332,
+      child: Stack(
+        children: [
+          PositionedDirectional(
+            start: 0,
+            end: 0,
+            bottom: 0,
+            height: 190,
+            child: CustomPaint(
+              painter: _SkylinePainter(
+                color: cs.primary,
+                dark: Theme.of(context).brightness == Brightness.dark,
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            user.fullName ?? user.username ?? l10n.user,
-                            style: context.textTheme.titleMedium?.copyWith(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                              letterSpacing: -0.2,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (user.verificationStatus.isApproved) ...[
-                          const SizedBox(width: 6),
-                          const Icon(
-                            Icons.verified_rounded,
-                            size: 18,
-                            color: AppColors.brandGold,
-                          ),
-                        ],
-                      ],
-                    ),
-                    if (user.username?.isNotEmpty == true) ...[
-                      const SizedBox(height: 2),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(14, top + 8, 14, 0),
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 44,
+                  child: Row(
+                    children: [
+                      const FloatingMenuCircleButton(size: 40),
+                      const Spacer(),
+                      Image.asset(
+                        Assets.egypt.delwaqtyLogoMark.path,
+                        width: 30,
+                        height: 30,
+                        errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                      ),
+                      const SizedBox(width: 8),
                       Text(
-                        '@${user.username}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.84),
-                          fontWeight: FontWeight.w600,
+                        l10n.appName,
+                        style: context.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                    ] else if (contactInfo != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        contactInfo,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.82),
-                          fontWeight: FontWeight.w500,
+                      const Spacer(),
+                      const FloatingNotificationCircleButton(size: 40),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: 240,
+                  height: 128,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
+                    children: [
+                      _AvatarRing(
+                        child: GestureDetector(
+                          onTap: () => _openEditProfile(context, user),
+                          child: CircleAvatar(
+                            radius: 54,
+                            backgroundColor: cs.primary,
+                            foregroundImage: user.avatarUrl?.isNotEmpty == true
+                                ? NetworkImage(user.avatarUrl!)
+                                : null,
+                            child: Text(
+                              initial,
+                              style: context.textTheme.headlineMedium?.copyWith(
+                                color: cs.onPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      PositionedDirectional(
+                        bottom: 4,
+                        start: 44,
+                        child: _RoundBadge(
+                          icon: Icons.camera_alt_rounded,
+                          busy: _isUploadingAvatar,
+                          semantic: l10n.takePhoto,
+                          onTap: _isUploadingAvatar
+                              ? null
+                              : () => pickAndUploadAvatar(
+                                  context: context,
+                                  ref: ref,
+                                  userId: user.id,
+                                  l10n: l10n,
+                                  onBusy: (b) {
+                                    if (mounted) {
+                                      setState(() => _isUploadingAvatar = b);
+                                    }
+                                  },
+                                ),
+                        ),
+                      ),
+                      PositionedDirectional(
+                        end: 0,
+                        bottom: 22,
+                        child: _RoundBadge(
+                          icon: Icons.settings_rounded,
+                          semantic: l10n.settings,
+                          onTap: () => context.push('/settings'),
                         ),
                       ),
                     ],
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 6,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        if (roleLabel != null) _RoleChip(label: roleLabel),
-                        FilledButton.icon(
-                          onPressed: () =>
-                              _showEditProfileSheet(context, user, l10n),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: Colors.white.withValues(
-                              alpha: 0.18,
-                            ),
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            visualDensity: VisualDensity.compact,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: AppSpacing.borderRadiusFull,
-                              side: BorderSide(
-                                color: Colors.white.withValues(alpha: 0.32),
-                              ),
-                            ),
-                          ),
-                          icon: const Icon(Icons.edit_outlined, size: 14),
-                          label: Text(
-                            l10n.editProfile,
-                            style: context.textTheme.labelSmall?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () => _openEditProfile(context, user),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          user.fullName ?? user.username ?? l10n.user,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
+                      ),
+                      if (user.verificationStatus.isApproved) ...[
+                        const SizedBox(width: 6),
+                        const Icon(
+                          Icons.verified_rounded,
+                          size: 20,
+                          color: AppColors.brandViolet,
+                        ),
                       ],
+                    ],
+                  ),
+                ),
+                if (user.username?.isNotEmpty == true)
+                  Text(
+                    '@${user.username}',
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
                     ),
+                  ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    if (contact != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          color: cs.surfaceContainerLowest,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: cs.outlineVariant.withValues(alpha: 0.4),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              (user.phone?.isNotEmpty ?? false)
+                                  ? Icons.phone_rounded
+                                  : Icons.mail_outline_rounded,
+                              size: 16,
+                              color: cs.primary,
+                            ),
+                            const SizedBox(width: 6),
+                            Directionality(
+                              textDirection: TextDirection.ltr,
+                              child: Text(
+                                contact,
+                                style: context.textTheme.labelLarge?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (roleLabel != null) _RoleChip(label: roleLabel),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildBentoQuickActions(
+  Widget _buildQuickActions(
     BuildContext context,
     bool isProvider,
     bool isDriver,
@@ -505,14 +394,76 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               accent: AppColors.brandCyan,
               onTap: () => context.push('/profile/addresses'),
             ),
+            _BentoActionItem(
+              icon: Icons.support_agent_rounded,
+              label: l10n.support,
+              accent: AppColors.brandViolet,
+              onTap: () => context.push('/support'),
+            ),
           ];
 
     // AdaptiveTileWrap: column count adapts to width AND text scale, and a
-    // short last row stretches to full width instead of dangling an orphan
-    // tile (owner feedback at large system font sizes).
+    // short last row stretches to full width instead of dangling an orphan.
     return AdaptiveTileWrap(
       children: [for (final item in items) _BentoActionTile(item: item)],
     );
+  }
+
+  Widget _buildAccountSection(
+    BuildContext context,
+    bool isProvider,
+    bool isDriver,
+    AppLocalizations l10n,
+  ) {
+    final primary = context.colorScheme.primary;
+    return ProfileSectionCard(
+      children: [
+        ProfileSectionTile(
+          icon: Icons.lock_outline_rounded,
+          color: primary,
+          title: l10n.privacySecurity,
+          onTap: () => context.push('/settings/privacy-security'),
+        ),
+        if (!isProvider && !isDriver)
+          ProfileSectionTile(
+            icon: Icons.favorite_border_rounded,
+            color: primary,
+            title: l10n.favorites,
+            onTap: () => context.push('/market/favorites'),
+          ),
+        if (!isProvider && !isDriver)
+          ProfileSectionTile(
+            icon: Icons.event_note_outlined,
+            color: primary,
+            title: l10n.myBookings,
+            onTap: () => context.push('/home-services/my-bookings'),
+          ),
+        if (!isProvider && !isDriver)
+          ProfileSectionTile(
+            icon: Icons.notifications_outlined,
+            color: primary,
+            title: l10n.notifications,
+            onTap: () => context.push('/notifications'),
+          ),
+      ],
+    );
+  }
+
+  String? _roleLabel(String role, AppLocalizations l10n) {
+    switch (role) {
+      case 'admin':
+        return l10n.admin;
+      case 'driver':
+        return l10n.driver;
+      case 'merchant':
+        return l10n.merchant;
+      case 'provider':
+        return l10n.provider;
+      case 'owner':
+        return l10n.owner;
+      default:
+        return null;
+    }
   }
 
   Widget _buildGuestProfile(BuildContext context, AppLocalizations l10n) {
@@ -613,377 +564,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  String? _roleLabel(String role, AppLocalizations l10n) {
-    switch (role) {
-      case 'admin':
-        return l10n.admin;
-      case 'driver':
-        return l10n.driver;
-      case 'merchant':
-        return l10n.merchant;
-      case 'provider':
-        return l10n.provider;
-      case 'owner':
-        return l10n.owner;
-      default:
-        return null;
-    }
-  }
-
-  Widget _buildAvatarFallback(BuildContext context, String initial) {
-    return Container(
-      color: context.colorScheme.primary,
-      alignment: Alignment.center,
-      child: Text(
-        initial,
-        style: context.textTheme.headlineMedium?.copyWith(
-          color: context.colorScheme.onPrimary,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  Future<void> _onChangePhoto(
-    BuildContext context,
-    String userId,
-    AppLocalizations l10n,
-  ) async {
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      useRootNavigator: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppSpacing.radiusSheet),
-        ),
-      ),
-      builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 8),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: context.colorScheme.outlineVariant,
-                borderRadius: AppSpacing.borderRadiusFull,
-              ),
-            ),
-            const SizedBox(height: 8),
-            ListTile(
-              leading: const Icon(Icons.photo_library_outlined),
-              title: Text(l10n.chooseFromGallery),
-              onTap: () => Navigator.of(sheetContext).pop(ImageSource.gallery),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_camera_outlined),
-              title: Text(l10n.takePhoto),
-              onTap: () => Navigator.of(sheetContext).pop(ImageSource.camera),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
-    if (source == null || !mounted) return;
-
-    try {
-      final file = await ImagePicker().pickImage(
-        source: source,
-        imageQuality: 85,
-        maxWidth: 1024,
-      );
-      if (file == null || !context.mounted) return;
-
-      setState(() => _isUploadingAvatar = true);
-      final bytes = await file.readAsBytes();
-      final url = await ref
-          .read(uploadAvatarUseCaseProvider)
-          .call(
-            userId: userId,
-            bytes: bytes,
-            fileName: 'avatar_${DateTime.now().millisecondsSinceEpoch}.jpg',
-          );
-      if (!context.mounted) return;
-      await ref
-          .read(updateProfileUseCaseProvider)
-          .call(userId: userId, data: {'avatar_url': url});
-      if (context.mounted) {
-        context.showAppSnackBar(l10n.success);
-      }
-    } catch (e) {
-      if (context.mounted) {
-        context.showAppSnackBar(appErrorText(context, e));
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isUploadingAvatar = false);
-      }
-    }
-  }
-
-  Future<void> _showEditProfileSheet(
-    BuildContext context,
-    User user,
-    AppLocalizations l10n,
-  ) async {
-    final saved = await showModalBottomSheet<bool>(
-      context: context,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) => _EditProfileSheet(user: user, l10n: l10n),
-    );
-
-    if (saved == true && context.mounted) {
-      context.showAppSnackBar(l10n.success);
-    }
-  }
-
-  Widget _buildAccountSection(
-    BuildContext context,
-    bool isProvider,
-    bool isDriver,
-    AppLocalizations l10n,
-  ) {
-    final primary = context.colorScheme.primary;
-    return _SectionCard(
-      title: l10n.account,
-      children: [
-        _SectionTile(
-          icon: Icons.lock_outline_rounded,
-          color: primary,
-          title: l10n.privacySecurity,
-          onTap: () => context.push('/settings/privacy-security'),
-        ),
-        if (!isProvider && !isDriver)
-          _SectionTile(
-            icon: Icons.favorite_border_rounded,
-            color: primary,
-            title: l10n.favorites,
-            onTap: () => context.push('/market/favorites'),
-          ),
-        if (!isProvider && !isDriver)
-          _SectionTile(
-            icon: Icons.event_note_outlined,
-            color: primary,
-            title: l10n.myBookings,
-            onTap: () => context.push('/home-services/my-bookings'),
-          ),
-        if (!isProvider && !isDriver)
-          _SectionTile(
-            icon: Icons.notifications_outlined,
-            color: primary,
-            title: l10n.notifications,
-            onTap: () => context.push('/notifications'),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildAppearanceSection(
-    BuildContext context,
-    AppLocalizations l10n,
-    ThemeMode themeMode,
-    Locale locale,
-  ) {
-    final cs = context.colorScheme;
-    final themeLabel = switch (themeMode) {
-      ThemeMode.light => l10n.lightMode,
-      ThemeMode.dark => l10n.darkMode,
-      ThemeMode.system => l10n.systemMode,
-    };
-    final themeIcon = switch (themeMode) {
-      ThemeMode.light => Icons.light_mode_outlined,
-      ThemeMode.dark => Icons.dark_mode_outlined,
-      ThemeMode.system => Icons.brightness_auto_outlined,
-    };
-    return _SectionCard(
-      title: l10n.appearance,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  _IconTile(icon: themeIcon, color: cs.primary),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.theme,
-                          style: context.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          themeLabel,
-                          style: context.textTheme.bodySmall?.copyWith(
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              AppearanceSegmented<ThemeMode>(
-                options: [
-                  AppearanceSegmentOption(
-                    ThemeMode.light,
-                    Icons.light_mode_rounded,
-                    l10n.lightMode,
-                  ),
-                  AppearanceSegmentOption(
-                    ThemeMode.dark,
-                    Icons.dark_mode_rounded,
-                    l10n.darkMode,
-                  ),
-                  AppearanceSegmentOption(
-                    ThemeMode.system,
-                    Icons.brightness_auto_rounded,
-                    l10n.systemMode,
-                  ),
-                ],
-                selected: themeMode,
-                onChanged: ref.read(themeModeProvider.notifier).setThemeMode,
-              ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  _IconTile(icon: Icons.language_rounded, color: cs.primary),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.language,
-                          style: context.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          locale.languageCode == 'ar'
-                              ? l10n.arabicLanguageName
-                              : l10n.englishLanguageName,
-                          style: context.textTheme.bodySmall?.copyWith(
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              AppearanceSegmented<String>(
-                options: [
-                  AppearanceSegmentOption(
-                    'en',
-                    Icons.translate_rounded,
-                    l10n.englishLanguageName,
-                    glyph: 'Aa',
-                  ),
-                  AppearanceSegmentOption(
-                    'ar',
-                    Icons.language_rounded,
-                    l10n.arabicLanguageName,
-                    glyph: 'ع',
-                  ),
-                ],
-                selected: locale.languageCode,
-                onChanged: (code) =>
-                    ref.read(localeProvider.notifier).setLocale(Locale(code)),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSupportAndLegalSection(
-    BuildContext context,
-    AppLocalizations l10n,
-  ) {
-    final primary = context.colorScheme.primary;
-    final hasInvitations =
-        ref.watch(appFlavorProvider) == AppFlavor.customer &&
-        (ref.watch(appInvitationsProvider).value?.isNotEmpty ?? false);
-    return _SectionCard(
-      title: l10n.support,
-      children: [
-        if (hasInvitations)
-          _SectionTile(
-            icon: Icons.mark_email_read_outlined,
-            color: primary,
-            title: l10n.appInvitationsTitle,
-            subtitle: l10n.appInvitationApproved,
-            onTap: () => context.push('/profile/app-invitations'),
-          ),
-        // Suggestions entry in the profile screen (owner request
-        // 2026-11-23, all four apps; complaints lives in the side menu).
-        _SectionTile(
-          icon: Icons.lightbulb_outline_rounded,
-          color: primary,
-          title: l10n.suggestions,
-          subtitle: l10n.suggestionsProfileSubtitle,
-          onTap: () => context.push('/my-suggestions'),
-        ),
-        _SectionTile(
-          icon: Icons.help_outline_rounded,
-          color: primary,
-          title: l10n.helpCenter,
-          onTap: () => context.push('/settings/help-center'),
-        ),
-        _SectionTile(
-          icon: Icons.support_agent_rounded,
-          color: primary,
-          title: l10n.support,
-          onTap: () => context.push('/support'),
-        ),
-        _SectionTile(
-          icon: Icons.info_outline_rounded,
-          color: primary,
-          title: l10n.about,
-          subtitle: _appVersionLabel.isEmpty
-              ? l10n.version
-              : '${l10n.version.split(' ').first} $_appVersionLabel',
-          onTap: () => context.push('/settings/about'),
-        ),
-        _SectionTile(
-          icon: Icons.description_outlined,
-          color: primary,
-          title: l10n.termsOfService,
-          onTap: () => context.push('/settings/terms-of-service'),
-        ),
-        _SectionTile(
-          icon: Icons.privacy_tip_outlined,
-          color: primary,
-          title: l10n.privacyPolicy,
-          onTap: () => context.push('/settings/privacy-policy'),
-        ),
-      ],
-    );
-  }
-
   Widget _buildLogoutButton(BuildContext context, AppLocalizations l10n) {
     final errorColor = context.colorScheme.error;
     return SizedBox(
@@ -1060,8 +640,7 @@ class _BentoActionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = context.colorScheme;
-    // One neutral surface and one accent for every tile, matching the
-    // section cards below, so the screen reads as a single family.
+    // One neutral surface and one accent for every tile.
     return PremiumCard(
       onTap: item.onTap,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
@@ -1071,15 +650,7 @@ class _BentoActionTile extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: cs.primary.withValues(alpha: 0.10),
-            ),
-            child: Icon(item.icon, size: 22, color: cs.primary),
-          ),
+          Icon(item.icon, size: 28, color: cs.primary),
           const SizedBox(height: 10),
           Text(
             item.label,
@@ -1097,446 +668,75 @@ class _BentoActionTile extends StatelessWidget {
   }
 }
 
-class _EditProfileSheet extends ConsumerStatefulWidget {
-  const _EditProfileSheet({required this.user, required this.l10n});
+class _AvatarRing extends StatelessWidget {
+  const _AvatarRing({required this.child});
 
-  final User user;
-  final AppLocalizations l10n;
-
-  @override
-  ConsumerState<_EditProfileSheet> createState() => _EditProfileSheetState();
-}
-
-class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
-  late final TextEditingController _nameController;
-  late final TextEditingController _usernameController;
-  late final TextEditingController _phoneController;
-  DateTime? _selectedDate;
-  bool _saving = false;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _nameController = TextEditingController(text: widget.user.fullName ?? '');
-    _usernameController = TextEditingController(
-      text: widget.user.username ?? '',
-    );
-    _phoneController = TextEditingController(text: widget.user.phone ?? '');
-    _selectedDate = widget.user.dateOfBirth;
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _usernameController.dispose();
-    _phoneController.dispose();
-    super.dispose();
-  }
-
-  String _formatDate(DateTime date) {
-    final year = date.year;
-    final month = date.month.toString().padLeft(2, '0');
-    final day = date.day.toString().padLeft(2, '0');
-    return '$year-$month-$day';
-  }
-
-  Future<void> _save() async {
-    if (_saving) return;
-    setState(() {
-      _saving = true;
-      _errorMessage = null;
-    });
-
-    final name = _nameController.text.trim();
-    final username = _usernameController.text.trim();
-
-    if (username.isNotEmpty && !AppValidators.isValidUsername(username)) {
-      setState(() {
-        _saving = false;
-        _errorMessage = widget.l10n.usernameInvalid;
-      });
-      return;
-    }
-
-    final data = <String, dynamic>{};
-    if (name.isNotEmpty) {
-      data['full_name'] = name;
-    }
-    data['username'] = username.isEmpty ? null : username;
-
-    try {
-      if (data.isNotEmpty) {
-        await ref
-            .read(updateProfileUseCaseProvider)
-            .call(userId: widget.user.id, data: data);
-      }
-      final dobChanged = _selectedDate != widget.user.dateOfBirth;
-      if (dobChanged) {
-        await ref
-            .read(updateDateOfBirthUseCaseProvider)
-            .call(userId: widget.user.id, dateOfBirth: _selectedDate);
-      }
-      if (mounted) {
-        Navigator.of(context).pop(true);
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _saving = false;
-          _errorMessage = e.toString().contains('users_username_unique_idx')
-              ? widget.l10n.usernameTaken
-              : appErrorText(context, e);
-        });
-      }
-    }
-  }
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = widget.l10n;
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
-
     return Container(
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
+        shape: BoxShape.circle,
         color: context.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(AppSpacing.radiusSheet),
+        border: Border.all(
+          color: context.colorScheme.primary.withValues(alpha: 0.55),
+          width: 3,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: context.colorScheme.primary.withValues(alpha: 0.22),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
-      padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 42,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: context.colorScheme.outlineVariant,
-                  borderRadius: AppSpacing.borderRadiusFull,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.editProfile,
-                    style: context.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  tooltip: l10n.cancel,
-                  onPressed: _saving
-                      ? null
-                      : () => Navigator.of(context).pop(false),
-                  icon: const Icon(Icons.close_rounded),
-                ),
-              ],
-            ),
-            if (_errorMessage != null) ...[
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: context.colorScheme.errorContainer.withValues(
-                    alpha: 0.7,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  _errorMessage!,
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: context.colorScheme.onErrorContainer,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-            const SizedBox(height: 14),
-            TextField(
-              controller: _nameController,
-              enabled: !_saving,
-              decoration: InputDecoration(labelText: l10n.fullName),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _usernameController,
-              enabled: !_saving,
-              decoration: InputDecoration(
-                labelText: l10n.username,
-                prefixText: '@',
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _phoneController,
-              readOnly: true,
-              enabled: !_saving,
-              decoration: InputDecoration(
-                labelText: l10n.phone,
-                helperText: l10n.phoneChangeUnavailable,
-                helperMaxLines: 3,
-              ),
-              keyboardType: TextInputType.phone,
-            ),
-            const SizedBox(height: 12),
-            InkWell(
-              borderRadius: BorderRadius.circular(8),
-              onTap: _saving
-                  ? null
-                  : () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: _selectedDate ?? DateTime(2000),
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime.now(),
-                        helpText: l10n.dateOfBirth,
-                      );
-                      if (picked != null) {
-                        setState(() {
-                          _selectedDate = DateTime(
-                            picked.year,
-                            picked.month,
-                            picked.day,
-                          );
-                        });
-                      }
-                    },
-              child: InputDecorator(
-                decoration: InputDecoration(labelText: l10n.dateOfBirth),
-                child: Row(
-                  children: [
-                    const Icon(Icons.cake_outlined, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _selectedDate == null
-                            ? l10n.notSet
-                            : _formatDate(_selectedDate!),
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: Text(
-                l10n.dateOfBirthPrivacy,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: TextButton.icon(
-                onPressed: _saving
-                    ? null
-                    : () => setState(() => _selectedDate = null),
-                icon: const Icon(Icons.clear, size: 16),
-                label: Text(l10n.clear),
-              ),
-            ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _saving
-                        ? null
-                        : () => Navigator.of(context).pop(false),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusButton,
-                        ),
-                      ),
-                    ),
-                    child: Text(l10n.cancel),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: FilledButton(
-                    onPressed: _saving ? null : _save,
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusButton,
-                        ),
-                      ),
-                    ),
-                    child: _saving
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : Text(l10n.saveChanges),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+      child: child,
     );
   }
 }
 
-class _SectionCard extends StatelessWidget {
-  const _SectionCard({required this.title, required this.children});
-
-  final String title;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = context.colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsetsDirectional.only(start: 4, bottom: 10),
-          child: Row(
-            children: [
-              Container(
-                width: 4,
-                height: 16,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(4),
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [AppColors.brandPurple, AppColors.brandViolet],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                title,
-                style: context.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: cs.onSurface,
-                  letterSpacing: 0.15,
-                ),
-              ),
-            ],
-          ),
-        ),
-        PremiumCard(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          radius: 20,
-          color: cs.surfaceContainerLowest.withValues(alpha: 0.94),
-          borderColor: cs.outlineVariant.withValues(alpha: 0.22),
-          child: Material(
-            type: MaterialType.transparency,
-            child: Column(
-              children: List.generate(children.length, (index) {
-                final tile = children[index];
-                return Column(
-                  children: [
-                    if (index > 0)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14),
-                        child: Divider(
-                          height: 1,
-                          color: cs.outlineVariant.withValues(alpha: 0.25),
-                        ),
-                      ),
-                    tile,
-                  ],
-                );
-              }),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SectionTile extends StatelessWidget {
-  const _SectionTile({
+class _RoundBadge extends StatelessWidget {
+  const _RoundBadge({
     required this.icon,
-    required this.color,
-    required this.title,
-    this.subtitle,
-    this.onTap,
+    required this.semantic,
+    required this.onTap,
+    this.busy = false,
   });
 
   final IconData icon;
-  final Color color;
-  final String title;
-  final String? subtitle;
+  final String semantic;
   final VoidCallback? onTap;
+  final bool busy;
 
   @override
   Widget build(BuildContext context) {
     final cs = context.colorScheme;
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-      minVerticalPadding: 10,
-      leading: _IconTile(icon: icon, color: color),
-      title: Text(
-        title,
-        style: context.textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-          color: cs.onSurface,
+    return Semantics(
+      button: true,
+      label: semantic,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: cs.primary,
+            border: Border.all(color: cs.surface, width: 2.5),
+          ),
+          child: busy
+              ? Padding(
+                  padding: const EdgeInsets.all(9),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: cs.onPrimary,
+                  ),
+                )
+              : Icon(icon, size: 18, color: cs.onPrimary),
         ),
       ),
-      subtitle: subtitle == null
-          ? null
-          : Text(
-              subtitle!,
-              style: context.textTheme.bodySmall?.copyWith(
-                color: cs.onSurfaceVariant,
-              ),
-            ),
-      trailing: Icon(
-        Icons.chevron_right_rounded,
-        size: 20,
-        color: cs.onSurfaceVariant.withValues(alpha: 0.7),
-      ),
-      onTap: onTap,
-    );
-  }
-}
-
-class _IconTile extends StatelessWidget {
-  const _IconTile({required this.icon, required this.color});
-
-  final IconData icon;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 38,
-      height: 38,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.16)),
-      ),
-      child: Icon(icon, size: 20, color: color),
     );
   }
 }
@@ -1549,9 +749,9 @@ class _RoleChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.brandGold.withValues(alpha: 0.20),
+        color: AppColors.brandGold.withValues(alpha: 0.18),
         borderRadius: AppSpacing.borderRadiusFull,
         border: Border.all(color: AppColors.brandGold.withValues(alpha: 0.55)),
       ),
@@ -1560,52 +760,18 @@ class _RoleChip extends StatelessWidget {
         children: [
           const Icon(
             Icons.workspace_premium_rounded,
-            size: 13,
+            size: 14,
             color: AppColors.brandGold,
           ),
           const SizedBox(width: 4),
           Text(
             label,
             style: context.textTheme.labelSmall?.copyWith(
-              color: Colors.white,
               fontWeight: FontWeight.w700,
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _GradientAvatarRing extends StatelessWidget {
-  const _GradientAvatarRing({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(2.5),
-      decoration: const BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          begin: AlignmentDirectional.topStart,
-          end: AlignmentDirectional.bottomEnd,
-          colors: [
-            AppColors.brandGold,
-            AppColors.brandViolet,
-            AppColors.brandPurple,
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x42170B3B),
-            blurRadius: 16,
-            offset: Offset(0, 6),
-          ),
-        ],
-      ),
-      child: child,
     );
   }
 }
@@ -1649,22 +815,93 @@ class _GuestAvatar extends StatelessWidget {
   }
 }
 
-/// Two soft translucent circles behind the hero: cheap decoration (no blur,
-/// no image) that mirrors in RTL.
-class _HeroCirclesPainter extends CustomPainter {
-  const _HeroCirclesPainter({required this.rtl});
+/// Light vector skyline (Cairo Tower, a dome and a minaret among blocks)
+/// painted behind the header: no image asset, no blur, cheap on weak phones.
+class _SkylinePainter extends CustomPainter {
+  const _SkylinePainter({required this.color, required this.dark});
 
-  final bool rtl;
+  final Color color;
+  final bool dark;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.white.withValues(alpha: 0.06);
-    final x1 = rtl ? size.width * 0.1 : size.width * 0.9;
-    final x2 = rtl ? size.width * 0.95 : size.width * 0.05;
-    canvas.drawCircle(Offset(x1, size.height * 0.18), size.width * 0.34, paint);
-    canvas.drawCircle(Offset(x2, size.height * 0.95), size.width * 0.26, paint);
+    final w = size.width;
+    final h = size.height;
+    final far = Paint()..color = color.withValues(alpha: dark ? 0.16 : 0.10);
+    final near = Paint()..color = color.withValues(alpha: dark ? 0.24 : 0.16);
+
+    // soft hills
+    final hill = Path()
+      ..moveTo(0, h * 0.72)
+      ..quadraticBezierTo(w * 0.25, h * 0.55, w * 0.5, h * 0.7)
+      ..quadraticBezierTo(w * 0.78, h * 0.86, w, h * 0.66)
+      ..lineTo(w, h)
+      ..lineTo(0, h)
+      ..close();
+    canvas.drawPath(hill, far);
+
+    // blocks (far)
+    final blocks = <List<double>>[
+      [0.02, 0.05, 0.40],
+      [0.08, 0.06, 0.52],
+      [0.15, 0.05, 0.36],
+      [0.74, 0.06, 0.50],
+      [0.81, 0.05, 0.38],
+      [0.88, 0.07, 0.56],
+      [0.95, 0.05, 0.34],
+    ];
+    for (final b in blocks) {
+      final bh = h * b[2];
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(w * b[0], h - bh, w * b[1], bh),
+          const Radius.circular(3),
+        ),
+        near,
+      );
+    }
+
+    // Cairo Tower (slim shaft + lotus top) on the end side
+    final tx = w * 0.84;
+    final shaftTop = h * 0.30;
+    canvas.drawRect(Rect.fromLTRB(tx - 4, shaftTop, tx + 4, h), far);
+    final lotus = Path()
+      ..moveTo(tx - 12, shaftTop)
+      ..quadraticBezierTo(tx - 16, shaftTop - 22, tx - 4, shaftTop - 30)
+      ..lineTo(tx + 4, shaftTop - 30)
+      ..quadraticBezierTo(tx + 16, shaftTop - 22, tx + 12, shaftTop)
+      ..close();
+    canvas.drawPath(lotus, far);
+    canvas.drawRect(
+      Rect.fromLTRB(tx - 1, shaftTop - 46, tx + 1, shaftTop - 30),
+      far,
+    );
+
+    // dome + minaret on the start side
+    final dx = w * 0.20;
+    canvas.drawRect(Rect.fromLTWH(dx - 28, h * 0.62, 56, h * 0.38), far);
+    canvas.drawArc(
+      Rect.fromCenter(center: Offset(dx, h * 0.62), width: 56, height: 44),
+      3.14159,
+      3.14159,
+      true,
+      far,
+    );
+    canvas.drawRect(Rect.fromLTWH(dx + 34, h * 0.40, 7, h * 0.60), far);
+    canvas.drawArc(
+      Rect.fromCenter(
+        center: Offset(dx + 37.5, h * 0.40),
+        width: 12,
+        height: 18,
+      ),
+      3.14159,
+      3.14159,
+      true,
+      far,
+    );
   }
 
   @override
-  bool shouldRepaint(covariant _HeroCirclesPainter old) => old.rtl != rtl;
+  bool shouldRepaint(covariant _SkylinePainter old) =>
+      old.color != color || old.dark != dark;
 }

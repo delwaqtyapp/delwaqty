@@ -3112,5 +3112,9 @@
         "type": "String"
       }
     }
-  }
+  },
+  "appSection": "التطبيق",
+  "chooseAppLanguage": "اختر لغة التطبيق",
+  "languageChangeAnytime": "يمكنك تغيير لغة التطبيق في أي وقت.",
+  "contactUs": "تواصل معنا"
 }

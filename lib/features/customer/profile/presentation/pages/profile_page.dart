@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -173,8 +171,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
-        background: ClipPath(
-          clipper: const _ProfileHeroWaveClipper(),
+        background: ClipRRect(
+          borderRadius: const BorderRadius.vertical(
+            bottom: Radius.circular(32),
+          ),
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -187,26 +187,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       Color(0xFF170B3B),
                       AppColors.brandPurpleDeep,
                       AppColors.brandPurple,
-                      Color(0xFF4C1D95),
                     ],
                   ),
                 ),
               ),
-              Image.asset(
-                'assets/egypt/profile_hero_bg.webp',
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => const SizedBox.shrink(),
-              ),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withValues(alpha: 0.16),
-                      Colors.black.withValues(alpha: 0.36),
-                    ],
-                  ),
+              CustomPaint(
+                painter: _HeroCirclesPainter(
+                  rtl: Directionality.of(context) == TextDirection.rtl,
                 ),
               ),
               Padding(
@@ -241,22 +228,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         : (user.email.isNotEmpty ? user.email : null);
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(22),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+      borderRadius: BorderRadius.circular(24),
+      child: Material(
+        type: MaterialType.transparency,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: AlignmentDirectional.topStart,
-              end: AlignmentDirectional.bottomEnd,
-              colors: [
-                Colors.white.withValues(alpha: 0.16),
-                Colors.white.withValues(alpha: 0.08),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.24)),
+            color: Colors.white.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.20)),
           ),
           child: Row(
             children: [
@@ -919,11 +899,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     'en',
                     Icons.translate_rounded,
                     l10n.englishLanguageName,
+                    glyph: 'Aa',
                   ),
                   AppearanceSegmentOption(
                     'ar',
                     Icons.language_rounded,
                     l10n.arabicLanguageName,
+                    glyph: 'ع',
                   ),
                 ],
                 selected: locale.languageCode,
@@ -1077,38 +1059,26 @@ class _BentoActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.colorScheme;
+    // One neutral surface and one accent for every tile, matching the
+    // section cards below, so the screen reads as a single family.
     return PremiumCard(
       onTap: item.onTap,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
-      radius: 18,
-      gradient: LinearGradient(
-        begin: AlignmentDirectional.topStart,
-        end: AlignmentDirectional.bottomEnd,
-        colors: [
-          item.accent.withValues(alpha: 0.12),
-          context.colorScheme.surfaceContainerLowest,
-        ],
-      ),
-      borderColor: item.accent.withValues(alpha: 0.22),
+      radius: 20,
+      color: cs.surfaceContainerLowest,
+      borderColor: cs.outlineVariant.withValues(alpha: 0.28),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 42,
-            height: 42,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(13),
-              gradient: LinearGradient(
-                begin: AlignmentDirectional.topStart,
-                end: AlignmentDirectional.bottomEnd,
-                colors: [
-                  item.accent.withValues(alpha: 0.20),
-                  item.accent.withValues(alpha: 0.08),
-                ],
-              ),
-              border: Border.all(color: item.accent.withValues(alpha: 0.22)),
+              shape: BoxShape.circle,
+              color: cs.primary.withValues(alpha: 0.10),
             ),
-            child: Icon(item.icon, size: 21, color: item.accent),
+            child: Icon(item.icon, size: 22, color: cs.primary),
           ),
           const SizedBox(height: 10),
           Text(
@@ -1679,26 +1649,22 @@ class _GuestAvatar extends StatelessWidget {
   }
 }
 
-class _ProfileHeroWaveClipper extends CustomClipper<Path> {
-  const _ProfileHeroWaveClipper();
+/// Two soft translucent circles behind the hero: cheap decoration (no blur,
+/// no image) that mirrors in RTL.
+class _HeroCirclesPainter extends CustomPainter {
+  const _HeroCirclesPainter({required this.rtl});
+
+  final bool rtl;
 
   @override
-  Path getClip(Size size) {
-    final w = size.width;
-    final h = size.height;
-    final path = Path()..lineTo(0, h - 18);
-
-    path.quadraticBezierTo(w * 0.12, h, w * 0.28, h - 10);
-    path.quadraticBezierTo(w * 0.44, h - 22, w * 0.60, h - 8);
-    path.quadraticBezierTo(w * 0.76, h + 2, w * 0.90, h - 14);
-    path.quadraticBezierTo(w * 0.96, h - 21, w, h - 16);
-
-    path
-      ..lineTo(w, 0)
-      ..close();
-    return path;
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.white.withValues(alpha: 0.06);
+    final x1 = rtl ? size.width * 0.1 : size.width * 0.9;
+    final x2 = rtl ? size.width * 0.95 : size.width * 0.05;
+    canvas.drawCircle(Offset(x1, size.height * 0.18), size.width * 0.34, paint);
+    canvas.drawCircle(Offset(x2, size.height * 0.95), size.width * 0.26, paint);
   }
 
   @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+  bool shouldRepaint(covariant _HeroCirclesPainter old) => old.rtl != rtl;
 }

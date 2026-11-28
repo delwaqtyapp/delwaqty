@@ -1,3 +1,4 @@
+-- NOTE: this migration supersedes the header of 441 ("login identifiers are username or phone ONLY, email dropped"); a real email is a login identifier again (owner decision 2026-11-28). 441 itself is already applied and is not edited.
 -- 467 (DRAFT, DO NOT APPLY): signup by EMAIL or FACEBOOK, behind server flags.
 -- Owner decision 2026-11-28 18:07: phone-number signup is removed; email
 -- (activation link from our own sender) and Facebook (when the Meta app is
@@ -94,7 +95,13 @@ BEGIN
       RETURN jsonb_build_object('error', jsonb_build_object(
         'message', 'EMAIL_INVALID: enter a valid email address.', 'http_code', 400));
     END IF;
-    SELECT count(*) INTO v_recent FROM auth.users WHERE created_at > now() - interval '1 hour';
+    -- #375: count only still-unconfirmed email signups, so Google/Facebook/
+    -- phone users and confirmed members never use up the email budget.
+    -- (GoTrue's own per-IP sign-up rate limit covers a single noisy IP.)
+    SELECT count(*) INTO v_recent FROM auth.users
+     WHERE created_at > now() - interval '1 hour'
+       AND email_confirmed_at IS NULL
+       AND COALESCE(raw_app_meta_data ->> 'provider', 'email') = 'email';
     IF v_recent >= public._email_signup_hourly_cap() THEN
       RETURN jsonb_build_object('error', jsonb_build_object(
         'message', 'SIGNUP_BUSY: too many signups right now, try again later.', 'http_code', 429));

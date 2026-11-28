@@ -38,6 +38,10 @@ BEGIN
 
   -- breaker
   UPDATE public.platform_settings SET feature_flags = '{"auth_methods":{"email":true},"email_signup_per_hour":1}'::jsonb WHERE id = 'default';
+  INSERT INTO auth.users(id, email, email_confirmed_at) VALUES (gen_random_uuid(), 'confirmed.467@example.com', now());
+  INSERT INTO auth.users(id, email, raw_app_meta_data) VALUES (gen_random_uuid(), 'g.467@example.com', '{"provider":"google"}'::jsonb);
+  r := public.before_user_created_phone_guard(ev);
+  ASSERT r = '{}'::jsonb, '467 4b: confirmed/google users used up the email budget: ' || r::text;
   INSERT INTO auth.users(id, email) VALUES (u, 'a.b@example.com');
   r := public.before_user_created_phone_guard(ev);
   ASSERT r #>> '{error,message}' LIKE 'SIGNUP_BUSY%', '467 4a: breaker did not trip: ' || r::text;

@@ -1,20 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:delwaqty/shared/widgets/pressable_scale.dart';
 
 /// A single selectable entry inside an [AppearanceSegmented] control.
+///
+/// [glyph] (optional) is drawn instead of [icon], e.g. "ع" / "Aa" for the
+/// language switch.
 class AppearanceSegmentOption<T> {
-  const AppearanceSegmentOption(this.value, this.icon, this.label);
+  const AppearanceSegmentOption(
+    this.value,
+    this.icon,
+    this.label, {
+    this.glyph,
+  });
 
   final T value;
   final IconData icon;
   final String label;
+  final String? glyph;
 }
 
-/// A modern, animated segmented control for the settings' Appearance section.
+/// Animated sliding-thumb selector used for the theme and language switches
+/// (profile and admin settings), so both controls look and move the same.
 ///
-/// Renders the options inside a soft rounded track; the selected option becomes
-/// a filled elevated primary pill (icon + bold label) that animates in, giving
-/// a professional segmented look instead of the default Material [SegmentedButton].
+/// A single thumb glides under the selected option (RTL-aware through
+/// [AlignmentDirectional]); the label colour, icon scale and weight animate
+/// with it. Only implicit animations and plain boxes: cheap on low-end phones.
 class AppearanceSegmented<T> extends StatelessWidget {
   const AppearanceSegmented({
     super.key,
@@ -27,37 +36,80 @@ class AppearanceSegmented<T> extends StatelessWidget {
   final T selected;
   final ValueChanged<T> onChanged;
 
+  static const _duration = Duration(milliseconds: 320);
+  static const _curve = Curves.easeOutBack;
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final count = options.length;
+    final index = options.indexWhere((o) => o.value == selected);
+    final slot = index < 0 ? 0 : index;
+    final x = count <= 1 ? 0.0 : -1 + 2 * slot / (count - 1);
     return Container(
       height: 52,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.55),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.35),
-        ),
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.3)),
       ),
-      child: Row(
+      child: Stack(
         children: [
-          for (final option in options)
-            Expanded(
-              child: _SegmentPill<T>(
-                option: option,
-                isSelected: option.value == selected,
-                onTap: () => onChanged(option.value),
+          if (index >= 0)
+            AnimatedAlign(
+              duration: _duration,
+              curve: _curve,
+              alignment: AlignmentDirectional(x, 0),
+              child: FractionallySizedBox(
+                widthFactor: 1 / count,
+                heightFactor: 1,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: AlignmentDirectional.topStart,
+                      end: AlignmentDirectional.bottomEnd,
+                      colors: [
+                        scheme.primary,
+                        Color.lerp(
+                          scheme.primary,
+                          scheme.primaryContainer,
+                          0.2,
+                        )!,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(22),
+                    boxShadow: [
+                      BoxShadow(
+                        color: scheme.primary.withValues(alpha: 0.28),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
+          Row(
+            children: [
+              for (final option in options)
+                Expanded(
+                  child: _SegmentLabel<T>(
+                    option: option,
+                    isSelected: option.value == selected,
+                    onTap: () => onChanged(option.value),
+                  ),
+                ),
+            ],
+          ),
         ],
       ),
     );
   }
 }
 
-class _SegmentPill<T> extends StatelessWidget {
-  const _SegmentPill({
+class _SegmentLabel<T> extends StatelessWidget {
+  const _SegmentLabel({
     required this.option,
     required this.isSelected,
     required this.onTap,
@@ -71,64 +123,56 @@ class _SegmentPill<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final foreground = isSelected ? scheme.onPrimary : scheme.onSurfaceVariant;
-    return PressableScale(
-      scale: 0.94,
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 260),
-        curve: Curves.easeOutCubic,
-        alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          gradient: isSelected
-              ? LinearGradient(
-                  begin: AlignmentDirectional.topStart,
-                  end: AlignmentDirectional.bottomEnd,
-                  colors: [
-                    scheme.primary,
-                    Color.lerp(scheme.primary, scheme.primaryContainer, 0.18)!,
-                  ],
-                )
-              : null,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: scheme.primary.withValues(alpha: 0.28),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: Icon(
-                option.icon,
-                key: ValueKey(isSelected),
-                size: 20,
-                color: foreground,
-              ),
-            ),
-            const SizedBox(width: 6),
-            Flexible(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  option.label,
-                  maxLines: 1,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: foreground,
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: option.label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedScale(
+                  scale: isSelected ? 1.15 : 1,
+                  duration: AppearanceSegmented._duration,
+                  curve: AppearanceSegmented._curve,
+                  child: option.glyph != null
+                      ? Text(
+                          option.glyph!,
+                          style: Theme.of(context).textTheme.labelLarge!
+                              .copyWith(
+                                fontSize: 17,
+                                height: 1.1,
+                                fontWeight: FontWeight.w800,
+                                color: foreground,
+                              ),
+                        )
+                      : Icon(option.icon, size: 19, color: foreground),
+                ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: AnimatedDefaultTextStyle(
+                      duration: AppearanceSegmented._duration,
+                      style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                        fontSize: 13,
+                        fontWeight: isSelected
+                            ? FontWeight.w800
+                            : FontWeight.w600,
+                        color: foreground,
+                      ),
+                      child: Text(option.label, maxLines: 1),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -185,6 +185,17 @@ void main() {
       expect(await store.activeCredentials(), isNull);
     });
 
+    test('a real email identifier is a valid credential again (467)', () async {
+      const storage = FlutterSecureStorage();
+      await storage.write(
+        key: 'auth_biometric_user-1',
+        value: '{"identifier":"person@example.com","password":"secret","userId":"user-1"}',
+      );
+      final credentials = await store.credentialsFor('user-1');
+      expect(credentials, isNotNull);
+      expect(credentials!.identifier, 'person@example.com');
+    });
+
     test('legacy entry with a non-email identifier under the email key still reads', () async {
       const storage = FlutterSecureStorage();
       await storage.write(

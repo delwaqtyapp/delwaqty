@@ -53,10 +53,16 @@ final _catalog = [
   ),
 ];
 
-Widget _buildTestApp({List<ServiceCategory>? catalog, String locale = 'en'}) {
+Widget _buildTestApp({
+  List<ServiceCategory>? catalog,
+  String locale = 'en',
+  AuthMethods? methods,
+}) {
   return ProviderScope(
     overrides: [
       authStateProvider.overrideWith(_FakeAuthNotifier.new),
+      if (methods != null)
+        authMethodsProvider.overrideWith((ref) async => methods),
       registerPhoneVerifierProvider.overrideWithValue(
         (context, phone) async => '00000000-0000-4000-8000-000000000008',
       ),
@@ -284,5 +290,44 @@ void main() {
       find.widgetWithText(OutlinedButton, 'Verify via WhatsApp'),
       findsOneWidget,
     );
+  });
+
+  testWidgets(
+    'email mode: email field, no phone, no WhatsApp, no phone proof',
+    (tester) async {
+      tester.view.physicalSize = const Size(1280, 2800);
+      tester.view.devicePixelRatio = 2.975;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        _buildTestApp(methods: const AuthMethods(email: true)),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Customer'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const Key('registerStepNext')));
+      await tester.tap(find.byKey(const Key('registerStepNext')));
+      await tester.pumpAndSettle();
+      expect(find.text('Email'), findsWidgets);
+      expect(find.text('Phone number'), findsNothing);
+      expect(find.text('Verify via WhatsApp'), findsNothing);
+      expect(find.text('Password'), findsWidgets);
+    },
+  );
+
+  testWidgets('default (flags off): phone + WhatsApp path unchanged', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 2800);
+    tester.view.devicePixelRatio = 2.975;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(_buildTestApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Customer'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const Key('registerStepNext')));
+    await tester.tap(find.byKey(const Key('registerStepNext')));
+    await tester.pumpAndSettle();
+    expect(find.text('Phone number'), findsWidgets);
+    expect(find.text('Verify via WhatsApp'), findsOneWidget);
   });
 }

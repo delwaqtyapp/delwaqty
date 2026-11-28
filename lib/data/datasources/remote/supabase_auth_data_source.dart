@@ -120,6 +120,9 @@ class SupabaseAuthDataSource {
       final response = await _auth.signUp(
         email: email,
         password: password,
+        // The activation email returns here; the app then shows the login
+        // page with an "account active" message.
+        emailRedirectTo: '$_oauthRedirectTo/activated',
         data: {
           'full_name': fullName,
           'phone': phone,

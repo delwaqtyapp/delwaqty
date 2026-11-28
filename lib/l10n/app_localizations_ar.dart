@@ -8854,4 +8854,47 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get adminPricingConfirmNewOnly => 'يسري على الطلبات الجديدة فقط.';
+
+  @override
+  String get loginSecurityTitle => 'الدخول والأمان';
+
+  @override
+  String get showSavedPassword => 'إظهار كلمة المرور المحفوظة';
+
+  @override
+  String get savedPasswordTitle => 'كلمة المرور المحفوظة';
+
+  @override
+  String get noSavedPassword =>
+      'لا توجد كلمة مرور محفوظة على هذا الجهاز. فعّل الدخول بالبصمة لحفظها هنا.';
+
+  @override
+  String get deviceLockReason => 'أكّد أنك أنت ببصمتك أو بقفل الهاتف';
+
+  @override
+  String get deviceLockFailed => 'تعذر التأكد من هويتك. لم يتغير شيء.';
+
+  @override
+  String get setLoginPassword => 'تعيين أو تغيير كلمة مرور الدخول';
+
+  @override
+  String get setLoginPasswordHint =>
+      'استخدم هذه الكلمة مع بريدك أو اسم المستخدم لتسجيل الدخول.';
+
+  @override
+  String get loginPasswordSaved => 'تم حفظ كلمة المرور. يمكنك الدخول بها الآن.';
+
+  @override
+  String get changeEmail => 'تغيير البريد الإلكتروني';
+
+  @override
+  String get changeEmailHint =>
+      'هنبعت رابط تأكيد على العنوان الجديد. بريدك مش هيتغير غير بعد ما تفتح الرابط.';
+
+  @override
+  String get newEmailLabel => 'البريد الجديد';
+
+  @override
+  String get emailChangeSent =>
+      'افتح بريدك الجديد واضغط على الرابط لتأكيد التغيير.';
 }

@@ -126,6 +126,17 @@ class WelcomePage extends ConsumerWidget {
                         onGoogle: () => ref
                             .read(authStateProvider.notifier)
                             .signInWithGoogle(),
+                        onFacebook:
+                            ref
+                                    .watch(authMethodsProvider)
+                                    .asData
+                                    ?.value
+                                    .facebook ==
+                                true
+                            ? () => ref
+                                  .read(authStateProvider.notifier)
+                                  .signInWithFacebook()
+                            : null,
                         dividerColor: context.colorScheme.onPrimary.withValues(
                           alpha: 0.7,
                         ),

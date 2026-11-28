@@ -92,14 +92,26 @@ class _ProviderAppState extends ConsumerState<ProviderApp>
     service.routes.listen((route) {
       if (route == DeepLinkRoute.loginCallback) {
         _handleLoginCallback();
+      } else if (route == DeepLinkRoute.emailActivated) {
+        unawaited(_handleEmailActivated());
       }
     });
     Future<void>.delayed(const Duration(milliseconds: 800), () async {
       final route = await service.initialRoute;
       if (route == DeepLinkRoute.loginCallback && mounted) {
         unawaited(_handleLoginCallback());
+      } else if (route == DeepLinkRoute.emailActivated && mounted) {
+        unawaited(_handleEmailActivated());
       }
     });
+  }
+
+  Future<void> _handleEmailActivated() async {
+    await handleEmailActivatedDeepLink(
+      ref,
+      navigatorKey: providerRootNavigatorKey,
+      router: ref.read(providerGoRouterProvider),
+    );
   }
 
   Future<void> _handleLoginCallback() async {

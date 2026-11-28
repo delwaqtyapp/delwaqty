@@ -132,6 +132,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     super.dispose();
   }
 
+  /// Server flag auth_methods.email: signup by email + password, activated by
+  /// the link we email. No phone number and no WhatsApp step.
+  bool get _emailMode =>
+      ref.read(authMethodsProvider).asData?.value.email == true;
+
   Future<void> _openWhatsAppVerification() async {
     final phone = normalizeEgyptPhone(_phoneController.text);
     final phoneError = isEgyptMobilePhone(phone)
@@ -189,12 +194,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
     if (_currentStep == 1) {
       if (!_formKey.currentState!.validate()) return;
-      if (!_whatsappVerified ||
-          _verifiedPhone != normalizeEgyptPhone(_phoneController.text)) {
-        await _openWhatsAppVerification();
-        return;
+      if (!_emailMode) {
+        if (!_whatsappVerified ||
+            _verifiedPhone != normalizeEgyptPhone(_phoneController.text)) {
+          await _openWhatsAppVerification();
+          return;
+        }
+        _emailController.text = phoneAuthIdentifier(_phoneController.text);
       }
-      _emailController.text = phoneAuthIdentifier(_phoneController.text);
     }
     setState(() => _currentStep++);
   }
@@ -281,7 +288,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   Future<void> _onRegister() async {
     final role = _selectedRole!;
-    final phone = normalizeEgyptPhone(_phoneController.text);
+    final emailMode = _emailMode;
+    final phone = emailMode ? '' : normalizeEgyptPhone(_phoneController.text);
     if (phone.isNotEmpty &&
         (!_whatsappVerified ||
             _verifiedPhone != phone ||
@@ -291,7 +299,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         return;
     }
     // Technical auth identifier only. Email signup is not exposed to users.
-    final email = phoneAuthIdentifier(phone);
+    final email = emailMode
+        ? _emailController.text.trim().toLowerCase()
+        : phoneAuthIdentifier(phone);
     _emailController.text = email;
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -843,10 +853,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   Widget _buildStepInfo(AppLocalizations l10n) {
+    final emailMode =
+        ref.watch(authMethodsProvider).asData?.value.email == true;
     final isPhoneVerified =
-        _whatsappVerified &&
-        _verifiedPhone.isNotEmpty &&
-        _verifiedPhone == normalizeEgyptPhone(_phoneController.text);
+        emailMode ||
+        (_whatsappVerified &&
+            _verifiedPhone.isNotEmpty &&
+            _verifiedPhone == normalizeEgyptPhone(_phoneController.text));
     return Form(
       key: _formKey,
       child: Column(
@@ -868,15 +881,25 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 textInputAction: TextInputAction.next,
                 validator: (v) => AppValidators.required(v),
               );
-              final phoneField = _PremiumField(
-                controller: _phoneController,
-                hint: l10n.phoneNumber,
-                icon: Icons.phone_outlined,
-                keyboardType: TextInputType.phone,
-                textInputAction: TextInputAction.next,
-                validator: (value) =>
-                    isEgyptMobilePhone(value ?? '') ? null : l10n.phoneInvalid,
-              );
+              final phoneField = emailMode
+                  ? _PremiumField(
+                      controller: _emailController,
+                      hint: l10n.email,
+                      icon: Icons.mail_outline_rounded,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      validator: (value) => AppValidators.email(value),
+                    )
+                  : _PremiumField(
+                      controller: _phoneController,
+                      hint: l10n.phoneNumber,
+                      icon: Icons.phone_outlined,
+                      keyboardType: TextInputType.phone,
+                      textInputAction: TextInputAction.next,
+                      validator: (value) => isEgyptMobilePhone(value ?? '')
+                          ? null
+                          : l10n.phoneInvalid,
+                    );
               if (constraints.maxWidth >= 340) {
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -894,7 +917,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             },
           ),
           const SizedBox(height: 10),
-          if (isPhoneVerified)
+          if (emailMode)
+            const SizedBox.shrink()
+          else if (isPhoneVerified)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
@@ -994,6 +1019,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             SocialAuthButtons(
               onGoogle: () =>
                   ref.read(authStateProvider.notifier).signInWithGoogle(),
+              onFacebook:
+                  ref.watch(authMethodsProvider).asData?.value.facebook == true
+                  ? () => ref
+                        .read(authStateProvider.notifier)
+                        .signInWithFacebook()
+                  : null,
               dividerColor: Colors.white54,
             ),
           ],

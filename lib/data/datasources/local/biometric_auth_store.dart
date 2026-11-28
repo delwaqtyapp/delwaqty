@@ -74,7 +74,9 @@ class BiometricAuthStore {
           password.isEmpty) {
         return null;
       }
-      if (identifier.contains('@')) {
+      // Only the technical phone identifier is dead; a real email is a login
+      // identifier again (467, owner decision 2026-11-28).
+      if (identifier.toLowerCase().endsWith('@delwaqty.app')) {
         // Legacy credential stored when email was a login identifier
         // (registration / settings enroll saved user.email). Email
         // login is gone (441), so this entry can never sign in:

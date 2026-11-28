@@ -7,6 +7,7 @@ import 'package:delwaqty/core/utils/validators.dart';
 import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/domain/usecases/profile/profile_usecases.dart';
 import 'package:delwaqty/features/customer/profile/presentation/widgets/avatar_picker.dart';
+import 'package:delwaqty/features/customer/profile/presentation/widgets/login_security_section.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/gradient_background.dart';
 
@@ -295,6 +296,8 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 12),
+                      LoginSecuritySection(userId: widget.user.id),
                       const SizedBox(height: 12),
                       InkWell(
                         borderRadius: BorderRadius.circular(18),

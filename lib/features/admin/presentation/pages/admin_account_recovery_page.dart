@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:delwaqty/core/theme/app_spacing.dart';
-import 'package:delwaqty/core/utils/validators.dart';
+import 'package:delwaqty/core/utils/egypt_phone.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 /// Admin issues a one-time recovery code for a user who forgot the password

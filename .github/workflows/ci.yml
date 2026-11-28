@@ -136,6 +136,7 @@ jobs:
           -f supabase/tests/465_delivery_pricing_bounds_test.sql
           -f supabase/tests/467_email_facebook_signup_test.sql
           -f supabase/tests/468_auth_email_change_sync_test.sql
+          -f supabase/tests/469_signup_role_allowlist_test.sql
   build:
     name: Build APK (${{ matrix.flavor }})
     needs: changes

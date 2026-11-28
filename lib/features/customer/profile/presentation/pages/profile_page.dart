@@ -14,7 +14,7 @@ import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/customer/profile/presentation/pages/edit_profile_page.dart';
 import 'package:delwaqty/features/customer/profile/presentation/widgets/avatar_picker.dart';
-import 'package:delwaqty/shared/widgets/cairo_hero_painter.dart';
+import 'package:delwaqty/shared/widgets/cairo_hero.dart';
 import 'package:delwaqty/features/customer/profile/presentation/widgets/profile_sections.dart';
 import 'package:delwaqty/gen/assets.gen.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -24,16 +24,14 @@ import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/shared/widgets/floating_glass_buttons.dart';
 import 'package:delwaqty/shared/widgets/gradient_background.dart';
 
+const double _heroOverlap = 44;
+
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
   ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
-
-const _heroTextShadow = [
-  Shadow(color: Color(0x80000000), blurRadius: 6, offset: Offset(0, 1)),
-];
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
   bool _isUploadingAvatar = false;
@@ -59,48 +57,66 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final user = profileAsync?.value ?? authUser;
 
     final page = Scaffold(
-      body: GradientBackground(
+      body: ColoredBox(
+        color: Theme.of(context).scaffoldBackgroundColor,
         child: CustomScrollView(
           physics: const ClampingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),
           ),
           slivers: [
-            SliverToBoxAdapter(
-              child: user == null
-                  ? SizedBox(height: MediaQuery.paddingOf(context).top + 64)
-                  : _buildHeader(context, user, l10n),
-            ),
+            if (user == null)
+              SliverToBoxAdapter(
+                child: SizedBox(height: MediaQuery.paddingOf(context).top + 64),
+              ),
             SliverPadding(
-              padding: EdgeInsets.fromLTRB(
-                16,
-                8,
-                16,
-                kFloatingNavClearance + MediaQuery.paddingOf(context).bottom,
+              padding: EdgeInsets.only(
+                bottom:
+                    kFloatingNavClearance +
+                    MediaQuery.paddingOf(context).bottom,
               ),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  AnimatedFadeIn(
-                    child: _buildQuickActions(
-                      context,
-                      isProvider,
-                      isDriver,
-                      l10n,
+                  // The header is in the same list as the content so the
+                  // content paints over the faded lower edge of the hero.
+                  if (user != null) _buildHeader(context, user, l10n),
+                  Transform.translate(
+                    offset: Offset(0, user == null ? 0 : -_heroOverlap),
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        16,
+                        user == null ? 8 : 0,
+                        16,
+                        0,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          AnimatedFadeIn(
+                            child: _buildQuickActions(
+                              context,
+                              isProvider,
+                              isDriver,
+                              l10n,
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          AnimatedFadeIn(
+                            delay: const Duration(milliseconds: 70),
+                            child: _buildAccountSection(
+                              context,
+                              isProvider,
+                              isDriver,
+                              l10n,
+                            ),
+                          ),
+                          const SizedBox(height: 22),
+                          AnimatedFadeIn(
+                            delay: const Duration(milliseconds: 120),
+                            child: _buildLogoutButton(context, l10n),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 18),
-                  AnimatedFadeIn(
-                    delay: const Duration(milliseconds: 70),
-                    child: _buildAccountSection(
-                      context,
-                      isProvider,
-                      isDriver,
-                      l10n,
-                    ),
-                  ),
-                  const SizedBox(height: 22),
-                  AnimatedFadeIn(
-                    delay: const Duration(milliseconds: 120),
-                    child: _buildLogoutButton(context, l10n),
                   ),
                 ]),
               ),
@@ -110,11 +126,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       ),
     );
     if (user == null) return page;
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
+      value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
+        statusBarIconBrightness: dark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: dark ? Brightness.dark : Brightness.light,
       ),
       child: page,
     );
@@ -143,221 +160,208 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ? user.phone!
         : (user.email.isNotEmpty ? user.email : null);
 
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: top + 384),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: RepaintBoundary(
-                child: CustomPaint(
-                  painter: CairoHeroPainter(
-                    dark: Theme.of(context).brightness == Brightness.dark,
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(14, top + 8, 14, 24),
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: 44,
-                    child: Row(
-                      children: [
-                        const FloatingMenuCircleButton(
-                          size: 40,
-                          overDarkHero: true,
-                        ),
-                        Expanded(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                Assets.egypt.delwaqtyLogoMark.path,
-                                width: 30,
-                                height: 30,
-                                errorBuilder: (_, _, _) =>
-                                    const SizedBox.shrink(),
-                              ),
-                              const SizedBox(width: 8),
-                              Flexible(
-                                child: Text(
-                                  l10n.appName,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: context.textTheme.titleMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.w800,
-                                        color: Colors.white,
-                                        shadows: _heroTextShadow,
-                                      ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const FloatingNotificationCircleButton(
-                          size: 40,
-                          overDarkHero: true,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: 240,
-                    height: 128,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      clipBehavior: Clip.none,
-                      children: [
-                        _AvatarRing(
-                          child: GestureDetector(
-                            onTap: () => _openEditProfile(context, user),
-                            child: CircleAvatar(
-                              radius: 54,
-                              backgroundColor: cs.primary,
-                              foregroundImage:
-                                  user.avatarUrl?.isNotEmpty == true
-                                  ? NetworkImage(user.avatarUrl!)
-                                  : null,
-                              child: Text(
-                                initial,
-                                style: context.textTheme.headlineMedium
-                                    ?.copyWith(
-                                      color: cs.onPrimary,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        PositionedDirectional(
-                          bottom: 4,
-                          start: 44,
-                          child: _RoundBadge(
-                            icon: Icons.camera_alt_rounded,
-                            busy: _isUploadingAvatar,
-                            semantic: l10n.takePhoto,
-                            onTap: _isUploadingAvatar
-                                ? null
-                                : () => pickAndUploadAvatar(
-                                    context: context,
-                                    ref: ref,
-                                    userId: user.id,
-                                    l10n: l10n,
-                                    onBusy: (b) {
-                                      if (mounted) {
-                                        setState(() => _isUploadingAvatar = b);
-                                      }
-                                    },
-                                  ),
-                          ),
-                        ),
-                        PositionedDirectional(
-                          end: 0,
-                          bottom: 22,
-                          child: _RoundBadge(
-                            icon: Icons.settings_rounded,
-                            semantic: l10n.settings,
-                            onTap: () => context.push('/settings'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: () => _openEditProfile(context, user),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            user.fullName ?? user.username ?? l10n.user,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: context.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                              shadows: _heroTextShadow,
-                            ),
-                          ),
-                        ),
-                        if (user.verificationStatus.isApproved) ...[
-                          const SizedBox(width: 6),
-                          const Icon(
-                            Icons.verified_rounded,
-                            size: 20,
-                            color: Colors.white,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  if (user.username?.isNotEmpty == true)
-                    Text(
-                      '@${user.username}',
-                      textDirection: TextDirection.ltr,
-                      style: context.textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.92),
-                        fontWeight: FontWeight.w600,
-                        shadows: _heroTextShadow,
-                      ),
-                    ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 6,
-                    alignment: WrapAlignment.center,
+    final brightness = Theme.of(context).brightness;
+    final ink = CairoHeroBackdrop.ink(brightness);
+    final inkShadows = CairoHeroBackdrop.inkShadows(brightness);
+    final overDark = brightness == Brightness.dark;
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: top + 340),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          const CairoHeroBackdrop(),
+          Padding(
+            padding: EdgeInsets.fromLTRB(14, top + 8, 14, 24),
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 44,
+                  child: Row(
                     children: [
-                      if (contact != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 7,
-                          ),
-                          decoration: BoxDecoration(
-                            color: cs.surfaceContainerLowest,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: cs.outlineVariant.withValues(alpha: 0.4),
+                      FloatingMenuCircleButton(
+                        size: 40,
+                        overDarkHero: overDark,
+                      ),
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              Assets.egypt.delwaqtyLogoMark.path,
+                              width: 30,
+                              height: 30,
+                              errorBuilder: (_, _, _) =>
+                                  const SizedBox.shrink(),
                             ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                (user.phone?.isNotEmpty ?? false)
-                                    ? Icons.phone_rounded
-                                    : Icons.mail_outline_rounded,
-                                size: 16,
-                                color: cs.primary,
-                              ),
-                              const SizedBox(width: 6),
-                              Directionality(
-                                textDirection: TextDirection.ltr,
-                                child: Text(
-                                  contact,
-                                  style: context.textTheme.labelLarge?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                l10n.appName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: context.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: ink,
+                                  shadows: inkShadows,
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      if (roleLabel != null) _RoleChip(label: roleLabel),
+                      ),
+                      FloatingNotificationCircleButton(
+                        size: 40,
+                        overDarkHero: overDark,
+                      ),
                     ],
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: 240,
+                  height: 128,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
+                    children: [
+                      _AvatarRing(
+                        child: GestureDetector(
+                          onTap: () => _openEditProfile(context, user),
+                          child: CircleAvatar(
+                            radius: 54,
+                            backgroundColor: cs.primary,
+                            foregroundImage: user.avatarUrl?.isNotEmpty == true
+                                ? NetworkImage(user.avatarUrl!)
+                                : null,
+                            child: Text(
+                              initial,
+                              style: context.textTheme.headlineMedium?.copyWith(
+                                color: cs.onPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      PositionedDirectional(
+                        bottom: 4,
+                        start: 44,
+                        child: _RoundBadge(
+                          icon: Icons.camera_alt_rounded,
+                          busy: _isUploadingAvatar,
+                          semantic: l10n.takePhoto,
+                          onTap: _isUploadingAvatar
+                              ? null
+                              : () => pickAndUploadAvatar(
+                                  context: context,
+                                  ref: ref,
+                                  userId: user.id,
+                                  l10n: l10n,
+                                  onBusy: (b) {
+                                    if (mounted) {
+                                      setState(() => _isUploadingAvatar = b);
+                                    }
+                                  },
+                                ),
+                        ),
+                      ),
+                      PositionedDirectional(
+                        end: 0,
+                        bottom: 22,
+                        child: _RoundBadge(
+                          icon: Icons.settings_rounded,
+                          semantic: l10n.settings,
+                          onTap: () => context.push('/settings'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () => _openEditProfile(context, user),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          user.fullName ?? user.username ?? l10n.user,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: ink,
+                            shadows: inkShadows,
+                          ),
+                        ),
+                      ),
+                      if (user.verificationStatus.isApproved) ...[
+                        const SizedBox(width: 6),
+                        Icon(Icons.verified_rounded, size: 20, color: ink),
+                      ],
+                    ],
+                  ),
+                ),
+                if (user.username?.isNotEmpty == true)
+                  Text(
+                    '@${user.username}',
+                    textDirection: TextDirection.ltr,
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: ink.withValues(alpha: 0.92),
+                      fontWeight: FontWeight.w600,
+                      shadows: inkShadows,
+                    ),
+                  ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    if (contact != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          color: cs.surfaceContainerLowest,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: cs.outlineVariant.withValues(alpha: 0.4),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              (user.phone?.isNotEmpty ?? false)
+                                  ? Icons.phone_rounded
+                                  : Icons.mail_outline_rounded,
+                              size: 16,
+                              color: cs.primary,
+                            ),
+                            const SizedBox(width: 6),
+                            Directionality(
+                              textDirection: TextDirection.ltr,
+                              child: Text(
+                                contact,
+                                style: context.textTheme.labelLarge?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (roleLabel != null) _RoleChip(label: roleLabel),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

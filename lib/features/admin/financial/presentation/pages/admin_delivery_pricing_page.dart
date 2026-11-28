@@ -71,23 +71,18 @@ final deliveryPricingSaverProvider = Provider<DeliveryPricingSaver>((ref) {
 /// is the single separator with 1-2 digits after it ("1,5"). Anything else
 /// ("1,500", "1,5,5", "1.5,5") returns null so a typo never changes the price.
 String? normalizePricingNumber(String v) {
-  const arabic = '٠١٢٣٤٥٦٧٨٩';
-  const persian = '۰۱۲۳۴۵۶۷۸۹';
   final b = StringBuffer();
   for (final r in v.trim().runes) {
-    final ch = String.fromCharCode(r);
-    final ai = arabic.indexOf(ch);
-    final pi = persian.indexOf(ch);
-    if (ai >= 0) {
-      b.write(ai);
-    } else if (pi >= 0) {
-      b.write(pi);
-    } else if (ch == '٫') {
-      b.write('.');
-    } else if (ch == '،') {
-      b.write(',');
+    if (r >= 0x0660 && r <= 0x0669) {
+      b.write(r - 0x0660); // Arabic-Indic digits
+    } else if (r >= 0x06F0 && r <= 0x06F9) {
+      b.write(r - 0x06F0); // Persian digits
+    } else if (r == 0x066B) {
+      b.write('.'); // Arabic decimal separator
+    } else if (r == 0x060C) {
+      b.write(','); // Arabic comma
     } else {
-      b.write(ch);
+      b.writeCharCode(r);
     }
   }
   final t = b.toString();

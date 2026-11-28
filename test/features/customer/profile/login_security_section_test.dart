@@ -82,4 +82,13 @@ void main() {
     expect(reasons, hasLength(1));
     expect(find.text('New Password'), findsNothing);
   });
+
+  testWidgets('changing email asks the device lock first', (tester) async {
+    final reasons = <String>[];
+    await tester.pumpWidget(_host(false, reasons));
+    await tester.tap(find.text('Change email'));
+    await tester.pumpAndSettle();
+    expect(reasons, hasLength(1));
+    expect(find.text('New email'), findsNothing);
+  });
 }

@@ -3145,6 +3145,10 @@
   "setLoginPasswordHint": "استخدم هذه الكلمة مع بريدك أو اسم المستخدم لتسجيل الدخول.",
   "loginPasswordSaved": "تم حفظ كلمة المرور. يمكنك الدخول بها الآن.",
   "copyAction": "نسخ",
+  "changeEmail": "تغيير البريد الإلكتروني",
+  "changeEmailHint": "هنبعت رابط تأكيد على العنوان الجديد. بريدك مش هيتغير غير بعد ما تفتح الرابط.",
+  "newEmailLabel": "البريد الجديد",
+  "emailChangeSent": "افتح بريدك الجديد واضغط على الرابط لتأكيد التغيير.",
   "@adminPricingConfirmTitle": {"placeholders": {"service": {"type": "String"}}},
   "@adminPricingConfirmSample": {"placeholders": {"fare": {"type": "String"}}}
 }

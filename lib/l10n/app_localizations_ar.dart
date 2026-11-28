@@ -8886,4 +8886,18 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get copyAction => 'نسخ';
+
+  @override
+  String get changeEmail => 'تغيير البريد الإلكتروني';
+
+  @override
+  String get changeEmailHint =>
+      'هنبعت رابط تأكيد على العنوان الجديد. بريدك مش هيتغير غير بعد ما تفتح الرابط.';
+
+  @override
+  String get newEmailLabel => 'البريد الجديد';
+
+  @override
+  String get emailChangeSent =>
+      'افتح بريدك الجديد واضغط على الرابط لتأكيد التغيير.';
 }

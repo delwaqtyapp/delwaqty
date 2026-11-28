@@ -127,6 +127,72 @@ class _LoginSecuritySectionState extends ConsumerState<LoginSecuritySection> {
     }
   }
 
+  Future<void> _changeEmail() async {
+    if (_busy) return;
+    final l10n = AppLocalizations.of(context);
+    setState(() => _busy = true);
+    try {
+      if (!await _confirm(l10n.deviceLockReason)) {
+        _toast(l10n.deviceLockFailed);
+        return;
+      }
+      if (!mounted) return;
+      final email = await _askNewEmail(l10n);
+      if (email == null) return;
+      // GoTrue mails a link to the NEW address; auth email (and, via 468,
+      // public.users.email) changes only after that link is opened.
+      await Supabase.instance.client.auth.updateUser(
+        UserAttributes(email: email),
+      );
+      _toast(l10n.emailChangeSent);
+    } catch (_) {
+      _toast(l10n.somethingWentWrong);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<String?> _askNewEmail(AppLocalizations l10n) {
+    final email = TextEditingController();
+    final key = GlobalKey<FormState>();
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.changeEmail),
+        content: Form(
+          key: key,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(l10n.changeEmailHint),
+              TextFormField(
+                controller: email,
+                keyboardType: TextInputType.emailAddress,
+                textDirection: TextDirection.ltr,
+                decoration: InputDecoration(labelText: l10n.newEmailLabel),
+                validator: (v) => AppValidators.email(v),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (key.currentState!.validate()) {
+                Navigator.of(ctx).pop(email.text.trim());
+              }
+            },
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<String?> _askNewPassword(AppLocalizations l10n) {
     final password = TextEditingController();
     final confirm = TextEditingController();
@@ -189,6 +255,11 @@ class _LoginSecuritySectionState extends ConsumerState<LoginSecuritySection> {
           leading: const Icon(Icons.visibility_outlined),
           title: Text(l10n.showSavedPassword),
           onTap: _busy ? null : _showSaved,
+        ),
+        ListTile(
+          leading: const Icon(Icons.alternate_email_rounded),
+          title: Text(l10n.changeEmail),
+          onTap: _busy ? null : _changeEmail,
         ),
         ListTile(
           leading: const Icon(Icons.password_rounded),

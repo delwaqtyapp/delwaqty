@@ -16915,6 +16915,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copy'**
   String get copyAction;
+
+  /// No description provided for @changeEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Change email'**
+  String get changeEmail;
+
+  /// No description provided for @changeEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We send a confirmation link to the new address. Your email only changes after you open it.'**
+  String get changeEmailHint;
+
+  /// No description provided for @newEmailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New email'**
+  String get newEmailLabel;
+
+  /// No description provided for @emailChangeSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your new email and open the link to confirm the change.'**
+  String get emailChangeSent;
 }
 
 class _AppLocalizationsDelegate

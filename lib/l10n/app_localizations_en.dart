@@ -8971,4 +8971,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get copyAction => 'Copy';
+
+  @override
+  String get changeEmail => 'Change email';
+
+  @override
+  String get changeEmailHint =>
+      'We send a confirmation link to the new address. Your email only changes after you open it.';
+
+  @override
+  String get newEmailLabel => 'New email';
+
+  @override
+  String get emailChangeSent =>
+      'Check your new email and open the link to confirm the change.';
 }

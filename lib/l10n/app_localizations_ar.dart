@@ -8778,4 +8778,68 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cartConflictStartNew => 'ابدأ عربة جديدة';
+
+  @override
+  String get adminDeliveryPricing => 'تسعير التوصيل';
+
+  @override
+  String get adminDeliveryPricingNote =>
+      'التغييرات تسري على طلبات التوصيل الجديدة فقط. الطلبات الحالية تحتفظ بسعرها.';
+
+  @override
+  String get adminPricingBaseFee => 'رسوم البداية';
+
+  @override
+  String get adminPricingPerKm => 'سعر الكيلومتر';
+
+  @override
+  String get adminPricingPerKg => 'سعر الكيلوجرام';
+
+  @override
+  String get adminPricingMinFee => 'الحد الأدنى للأجرة';
+
+  @override
+  String get adminPricingPriorityX => 'معامل الأولوية';
+
+  @override
+  String get adminPricingExpressX => 'معامل السريع';
+
+  @override
+  String get adminPricingActive => 'مفعّل';
+
+  @override
+  String get adminPricingSaved => 'تم حفظ التسعير';
+
+  @override
+  String get adminPricingInvalid =>
+      'أدخل أرقامًا صحيحة. رسوم البداية والحد الأدنى حتى 500، وسعر الكيلومتر والكيلوجرام حتى 50، والمعاملات بين 1 و3.';
+
+  @override
+  String get adminPricingReadOnly =>
+      'تعديل الأسعار متاح لمديري مستوى الدولة والمالك فقط. يمكنك عرضها هنا.';
+
+  @override
+  String get adminPricingNotSaved =>
+      'لم يتم الحفظ. ليس لديك صلاحية تعديل تسعير التوصيل.';
+
+  @override
+  String get adminPricingDisableWarning =>
+      'إيقاف هذا الخيار يمنع الطلبات الجديدة من هذا النوع حتى يتم تفعيله مرة أخرى.';
+
+  @override
+  String adminPricingConfirmTitle(String service) {
+    return 'حفظ تسعير $service؟';
+  }
+
+  @override
+  String adminPricingConfirmSample(String fare) {
+    return 'سعر تقريبي لـ 5 كم و1 كجم عادي: $fare';
+  }
+
+  @override
+  String get adminPricingConfirmOff =>
+      'سيتم إيقاف هذه الخدمة وسيتم منع الطلبات الجديدة.';
+
+  @override
+  String get adminPricingConfirmNewOnly => 'يسري على الطلبات الجديدة فقط.';
 }

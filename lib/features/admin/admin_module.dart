@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:delwaqty/features/admin/financial/presentation/pages/admin_delivery_pricing_page.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
@@ -187,6 +188,11 @@ class AdminModule extends FeatureModule {
           path: 'penalties-policy',
           pageBuilder: (context, state) =>
               _adminPage(const AdminPenaltiesPolicyPage()),
+        ),
+        GoRoute(
+          path: 'delivery-pricing',
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminDeliveryPricingPage()),
         ),
         GoRoute(
           path: 'live-tracking',

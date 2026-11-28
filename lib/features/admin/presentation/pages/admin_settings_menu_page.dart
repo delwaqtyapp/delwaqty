@@ -424,6 +424,12 @@ class _AdminSettingsMenuPageState extends ConsumerState<AdminSettingsMenuPage> {
           onTap: () => context.go('/admin/push-notifications'),
         ),
         _SectionTile(
+          icon: Icons.two_wheeler_rounded,
+          color: AppColors.brandPurple,
+          title: l10n.adminDeliveryPricing,
+          onTap: () => context.go('/admin/delivery-pricing'),
+        ),
+        _SectionTile(
           icon: Icons.bar_chart_rounded,
           color: AppColors.orderReady,
           title: l10n.adminAnalytics,

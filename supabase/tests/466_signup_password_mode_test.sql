@@ -12,6 +12,11 @@ DECLARE
   v_flag boolean;
   v_ok boolean;
   n int;
+  adm uuid := gen_random_uuid();
+  drv uuid := gen_random_uuid();
+  v_code text;
+  drow uuid := gen_random_uuid();
+  v_res uuid;
 BEGIN
   INSERT INTO public.platform_settings(id) VALUES ('default') ON CONFLICT (id) DO NOTHING;
   v_ev := jsonb_build_object('user', jsonb_build_object(
@@ -102,5 +107,96 @@ BEGIN
   UPDATE public.users SET phone_verified = true WHERE id = u;
   INSERT INTO public.orders(user_id, merchant_id, status, payment_method, subtotal, total_amount)
     VALUES (u, m, 'pending', 'instapay', 10, 10);
+
+  -- (8) courier rides: same limits for an unconfirmed customer
+  UPDATE public.users SET phone_verified = false WHERE id = u;
+  BEGIN
+    INSERT INTO public.rides(rider_id, status, payment_method, pickup_latitude, pickup_longitude, dropoff_latitude, dropoff_longitude)
+      VALUES (u, 'searching', 'instapay', 30, 31, 30.1, 31.1);
+    ASSERT false, '466 8a: unconfirmed customer requested a non-cash ride';
+  EXCEPTION WHEN SQLSTATE 'P0001' THEN NULL; END;
+  INSERT INTO public.rides(rider_id, status, payment_method, pickup_latitude, pickup_longitude, dropoff_latitude, dropoff_longitude)
+    VALUES (u, 'searching', 'cash', 30, 31, 30.1, 31.1);
+  INSERT INTO public.rides(rider_id, status, payment_method, pickup_latitude, pickup_longitude, dropoff_latitude, dropoff_longitude)
+    VALUES (u, 'searching', 'cash', 30, 31, 30.1, 31.1);
+  BEGIN
+    INSERT INTO public.rides(rider_id, status, payment_method, pickup_latitude, pickup_longitude, dropoff_latitude, dropoff_longitude)
+      VALUES (u, 'searching', 'cash', 30, 31, 30.1, 31.1);
+    ASSERT false, '466 8b: third open ride allowed';
+  EXCEPTION WHEN SQLSTATE 'P0001' THEN NULL; END;
+  -- the driver on a ride can confirm; a different driver cannot
+  INSERT INTO auth.users(id, email) VALUES (drv, drv::text || '@example.invalid');
+  INSERT INTO public.users(id, email, role) VALUES (drv, drv::text || '@example.invalid', 'driver') ON CONFLICT (id) DO NOTHING;
+  INSERT INTO public.drivers(id, user_id, full_name) VALUES (drow, drv, 'T466 driver');
+  UPDATE public.rides SET driver_id = drow, status = 'matched' WHERE rider_id = u AND id = (SELECT id FROM public.rides WHERE rider_id = u LIMIT 1);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', gen_random_uuid())::text, true);
+  SET LOCAL ROLE authenticated;
+  r := public.confirm_customer_phone(u);
+  RESET ROLE;
+  ASSERT r ->> 'reason' = 'FORBIDDEN', '466 8c: a stranger confirmed via rides';
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', drv)::text, true);
+  SET LOCAL ROLE authenticated;
+  r := public.confirm_customer_phone(u);
+  RESET ROLE;
+  ASSERT (r ->> 'ok')::boolean AND (SELECT phone_verified FROM public.users WHERE id = u), '466 8d: ride driver could not confirm: ' || r::text;
+  -- the driver on an order can confirm too (drivers.id differs from users.id)
+  UPDATE public.users SET phone_verified = false WHERE id = u;
+  UPDATE public.rides SET driver_id = NULL, status = 'cancelled' WHERE rider_id = u;
+  UPDATE public.orders SET driver_id = drow WHERE id = (SELECT id FROM public.orders WHERE user_id = u LIMIT 1);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', drv)::text, true);
+  SET LOCAL ROLE authenticated;
+  r := public.confirm_customer_phone(u);
+  RESET ROLE;
+  ASSERT (r ->> 'ok')::boolean AND (SELECT phone_verified FROM public.users WHERE id = u), '466 8e: order driver could not confirm: ' || r::text;
+
+  UPDATE public.users SET phone_verified = false WHERE id = u;
+  -- banner flag: visible to the order's driver while unconfirmed, hidden from strangers
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', drv)::text, true);
+  SET LOCAL ROLE authenticated;
+  ASSERT public.customer_phone_needs_confirmation(u), '466 8f: banner flag false for the order driver';
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', gen_random_uuid())::text, true);
+  ASSERT NOT public.customer_phone_needs_confirmation(u), '466 8g: banner flag visible to a stranger';
+  RESET ROLE;
+
+  -- (9) forgotten password: admin-issued one-time code
+  INSERT INTO auth.users(id, email) VALUES (adm, adm::text || '@example.invalid');
+  INSERT INTO public.users(id, email, role) VALUES (adm, adm::text || '@example.invalid', 'owner') ON CONFLICT (id) DO UPDATE SET role = 'owner';
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', u)::text, true);
+  SET LOCAL ROLE authenticated;
+  r := public.admin_issue_recovery_code(v_phone);
+  RESET ROLE;
+  ASSERT r ->> 'reason' = 'FORBIDDEN', '466 9a: non-admin issued a recovery code: ' || r::text;
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', adm)::text, true);
+  SET LOCAL ROLE authenticated;
+  r := public.admin_issue_recovery_code(v_phone);
+  RESET ROLE;
+  ASSERT (r ->> 'ok')::boolean, '466 9b: admin could not issue: ' || r::text;
+  v_code := r ->> 'code';
+  ASSERT v_code ~ '^[0-9]{8}$', '466 9c: code shape';
+  ASSERT NOT EXISTS (SELECT 1 FROM public.account_recovery_codes WHERE code_hash = v_code), '466 9d: code stored in clear';
+  PERFORM set_config('request.jwt.claims', '{}', true);
+  v_res := public.consume_recovery_code(v_phone, CASE WHEN v_code = '00000000' THEN '00000001' ELSE '00000000' END);
+  ASSERT v_res IS NULL, '466 9e: wrong code accepted';
+  v_res := public.consume_recovery_code('+201999999999', v_code);
+  ASSERT v_res IS NULL, '466 9f: code worked for another phone';
+  v_res := public.consume_recovery_code(v_phone, v_code);
+  ASSERT v_res = u, '466 9g: right code refused';
+  v_res := public.consume_recovery_code(v_phone, v_code);
+  ASSERT v_res IS NULL, '466 9h: code reused';
+  -- five wrong tries burn a fresh code
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', adm)::text, true);
+  SET LOCAL ROLE authenticated;
+  r := public.admin_issue_recovery_code(v_phone);
+  RESET ROLE;
+  v_code := r ->> 'code';
+  PERFORM set_config('request.jwt.claims', '{}', true);
+  FOR n IN 1..5 LOOP
+    PERFORM public.consume_recovery_code(v_phone, CASE WHEN v_code = '00000000' THEN '00000001' ELSE '00000000' END);
+  END LOOP;
+  v_res := public.consume_recovery_code(v_phone, v_code);
+  ASSERT v_res IS NULL, '466 9i: code still valid after 5 wrong tries';
+  -- anon/authenticated cannot call consume directly
+  ASSERT NOT has_function_privilege('authenticated', 'public.consume_recovery_code(text,text)', 'EXECUTE'), '466 9j: consume callable by clients';
+  ASSERT NOT has_table_privilege('authenticated', 'public.account_recovery_codes', 'SELECT'), '466 9k: codes table readable';
 END $$;
 ROLLBACK;

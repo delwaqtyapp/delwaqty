@@ -225,6 +225,12 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
             '/admin/push-notifications',
           ),
           _ActionData(
+            l10n.adminRecoveryTitle,
+            Icons.lock_reset_rounded,
+            const Color(0xFFFF9500),
+            '/admin/account-recovery',
+          ),
+          _ActionData(
             l10n.auditLog,
             Icons.history_rounded,
             const Color(0xFF5B3DF0),

@@ -3220,6 +3220,18 @@
   "adminPricingConfirmSample": "Sample fare for 5 km, 1 kg, standard: {fare}",
   "adminPricingConfirmOff": "This service will be turned off. New requests will be blocked.",
   "adminPricingConfirmNewOnly": "Applies to new requests only.",
+  "phoneNotConfirmedTitle": "Phone number not confirmed",
+  "phoneNotConfirmedBody": "This customer signed up without a verified number. Call them to check it is right, then confirm it here.",
+  "confirmPhoneAction": "The number is right, confirm",
+  "phoneConfirmedDone": "Number confirmed",
+  "recoveryCodeLabel": "Recovery code (8 digits)",
+  "recoveryCodeHint": "Call Delwaqty support. After they check who you are, they give you a one-time code valid for 30 minutes.",
+  "adminRecoveryTitle": "Account recovery",
+  "adminRecoveryNote": "Use this only after you spoke with the account holder by phone and checked their name and last order. The code works once, for 30 minutes.",
+  "adminRecoveryIssue": "Issue one-time code",
+  "adminRecoveryCodeLabel": "Tell this code to the customer",
+  "adminRecoveryNoAccount": "No single account has this phone number.",
+  "adminRecoveryTooMany": "Too many codes were issued for this account today.",
   "@adminPricingConfirmTitle": {"placeholders": {"service": {"type": "String"}}},
   "@adminPricingConfirmSample": {"placeholders": {"fare": {"type": "String"}}}
 }

@@ -16,6 +16,7 @@ import 'package:delwaqty/features/provider/merchant/domain/entities/merchant_ord
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
+import 'package:delwaqty/shared/widgets/unconfirmed_phone_banner.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
@@ -397,6 +398,7 @@ class _OrderCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: AppSpacing.sm),
+                  UnconfirmedPhoneBanner(customerId: order.customerId),
                   Wrap(
                     spacing: AppSpacing.sm,
                     crossAxisAlignment: WrapCrossAlignment.center,

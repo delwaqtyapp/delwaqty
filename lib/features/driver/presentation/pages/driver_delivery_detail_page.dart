@@ -22,6 +22,7 @@ import 'package:delwaqty/features/customer/driver/presentation/providers/dispatc
 import 'package:delwaqty/features/customer/ride/presentation/widgets/ride_map.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
 import 'package:delwaqty/features/driver/presentation/widgets/cash_collection_card.dart';
+import 'package:delwaqty/shared/widgets/unconfirmed_phone_banner.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/services/maps/maps_service.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
@@ -476,6 +477,8 @@ class _DriverDeliveryDetailPageState
                       ),
                     ],
                   ),
+                  if (order.riderId != null)
+                    UnconfirmedPhoneBanner(customerId: order.riderId!),
                   if (customerPhone != null && customerPhone.isNotEmpty) ...[
                     const SizedBox(height: 10),
                     Row(

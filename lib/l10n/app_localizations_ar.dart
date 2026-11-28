@@ -8854,4 +8854,43 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get adminPricingConfirmNewOnly => 'يسري على الطلبات الجديدة فقط.';
+
+  @override
+  String get phoneNotConfirmedTitle => 'رقم الهاتف غير مؤكد';
+
+  @override
+  String get phoneNotConfirmedBody =>
+      'هذا العميل سجّل بدون توثيق رقمه. اتصل به وتأكد أن الرقم صحيح ثم أكّده من هنا.';
+
+  @override
+  String get confirmPhoneAction => 'الرقم صحيح، تأكيد';
+
+  @override
+  String get phoneConfirmedDone => 'تم تأكيد الرقم';
+
+  @override
+  String get recoveryCodeLabel => 'كود الاسترجاع (8 أرقام)';
+
+  @override
+  String get recoveryCodeHint =>
+      'اتصل بالدعم. بعد التأكد من أنك صاحب الحساب سيعطونك كوداً يُستخدم مرة واحدة وصالحاً لمدة 30 دقيقة.';
+
+  @override
+  String get adminRecoveryTitle => 'استرجاع حساب';
+
+  @override
+  String get adminRecoveryNote =>
+      'استخدمه فقط بعد ما تكلم صاحب الحساب بالتليفون وتتأكد من اسمه وآخر طلب له. الكود يُستخدم مرة واحدة وصالح 30 دقيقة.';
+
+  @override
+  String get adminRecoveryIssue => 'إصدار كود لمرة واحدة';
+
+  @override
+  String get adminRecoveryCodeLabel => 'قل هذا الكود للعميل';
+
+  @override
+  String get adminRecoveryNoAccount => 'لا يوجد حساب واحد بهذا الرقم.';
+
+  @override
+  String get adminRecoveryTooMany => 'تم إصدار أكواد كثيرة لهذا الحساب اليوم.';
 }

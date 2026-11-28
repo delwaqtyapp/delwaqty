@@ -8936,4 +8936,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminPricingConfirmNewOnly => 'Applies to new requests only.';
+
+  @override
+  String get phoneNotConfirmedTitle => 'Phone number not confirmed';
+
+  @override
+  String get phoneNotConfirmedBody =>
+      'This customer signed up without a verified number. Call them to check it is right, then confirm it here.';
+
+  @override
+  String get confirmPhoneAction => 'The number is right, confirm';
+
+  @override
+  String get phoneConfirmedDone => 'Number confirmed';
+
+  @override
+  String get recoveryCodeLabel => 'Recovery code (8 digits)';
+
+  @override
+  String get recoveryCodeHint =>
+      'Call Delwaqty support. After they check who you are, they give you a one-time code valid for 30 minutes.';
+
+  @override
+  String get adminRecoveryTitle => 'Account recovery';
+
+  @override
+  String get adminRecoveryNote =>
+      'Use this only after you spoke with the account holder by phone and checked their name and last order. The code works once, for 30 minutes.';
+
+  @override
+  String get adminRecoveryIssue => 'Issue one-time code';
+
+  @override
+  String get adminRecoveryCodeLabel => 'Tell this code to the customer';
+
+  @override
+  String get adminRecoveryNoAccount =>
+      'No single account has this phone number.';
+
+  @override
+  String get adminRecoveryTooMany =>
+      'Too many codes were issued for this account today.';
 }

@@ -3135,6 +3135,18 @@
   "adminPricingConfirmSample": "سعر تقريبي لـ 5 كم و1 كجم عادي: {fare}",
   "adminPricingConfirmOff": "سيتم إيقاف هذه الخدمة وسيتم منع الطلبات الجديدة.",
   "adminPricingConfirmNewOnly": "يسري على الطلبات الجديدة فقط.",
+  "phoneNotConfirmedTitle": "رقم الهاتف غير مؤكد",
+  "phoneNotConfirmedBody": "هذا العميل سجّل بدون توثيق رقمه. اتصل به وتأكد أن الرقم صحيح ثم أكّده من هنا.",
+  "confirmPhoneAction": "الرقم صحيح، تأكيد",
+  "phoneConfirmedDone": "تم تأكيد الرقم",
+  "recoveryCodeLabel": "كود الاسترجاع (8 أرقام)",
+  "recoveryCodeHint": "اتصل بالدعم. بعد التأكد من أنك صاحب الحساب سيعطونك كوداً يُستخدم مرة واحدة وصالحاً لمدة 30 دقيقة.",
+  "adminRecoveryTitle": "استرجاع حساب",
+  "adminRecoveryNote": "استخدمه فقط بعد ما تكلم صاحب الحساب بالتليفون وتتأكد من اسمه وآخر طلب له. الكود يُستخدم مرة واحدة وصالح 30 دقيقة.",
+  "adminRecoveryIssue": "إصدار كود لمرة واحدة",
+  "adminRecoveryCodeLabel": "قل هذا الكود للعميل",
+  "adminRecoveryNoAccount": "لا يوجد حساب واحد بهذا الرقم.",
+  "adminRecoveryTooMany": "تم إصدار أكواد كثيرة لهذا الحساب اليوم.",
   "@adminPricingConfirmTitle": {"placeholders": {"service": {"type": "String"}}},
   "@adminPricingConfirmSample": {"placeholders": {"fare": {"type": "String"}}}
 }

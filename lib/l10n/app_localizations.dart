@@ -16855,6 +16855,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Applies to new requests only.'**
   String get adminPricingConfirmNewOnly;
+
+  /// No description provided for @phoneNotConfirmedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number not confirmed'**
+  String get phoneNotConfirmedTitle;
+
+  /// No description provided for @phoneNotConfirmedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This customer signed up without a verified number. Call them to check it is right, then confirm it here.'**
+  String get phoneNotConfirmedBody;
+
+  /// No description provided for @confirmPhoneAction.
+  ///
+  /// In en, this message translates to:
+  /// **'The number is right, confirm'**
+  String get confirmPhoneAction;
+
+  /// No description provided for @phoneConfirmedDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Number confirmed'**
+  String get phoneConfirmedDone;
+
+  /// No description provided for @recoveryCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery code (8 digits)'**
+  String get recoveryCodeLabel;
+
+  /// No description provided for @recoveryCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Call Delwaqty support. After they check who you are, they give you a one-time code valid for 30 minutes.'**
+  String get recoveryCodeHint;
+
+  /// No description provided for @adminRecoveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account recovery'**
+  String get adminRecoveryTitle;
+
+  /// No description provided for @adminRecoveryNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this only after you spoke with the account holder by phone and checked their name and last order. The code works once, for 30 minutes.'**
+  String get adminRecoveryNote;
+
+  /// No description provided for @adminRecoveryIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue one-time code'**
+  String get adminRecoveryIssue;
+
+  /// No description provided for @adminRecoveryCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell this code to the customer'**
+  String get adminRecoveryCodeLabel;
+
+  /// No description provided for @adminRecoveryNoAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'No single account has this phone number.'**
+  String get adminRecoveryNoAccount;
+
+  /// No description provided for @adminRecoveryTooMany.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many codes were issued for this account today.'**
+  String get adminRecoveryTooMany;
 }
 
 class _AppLocalizationsDelegate

@@ -24,7 +24,7 @@ function loadHandler(file, { verified = false, revokeError = false, calls = [] }
     createClient: () => ({
       rpc: async (name, args) => {
         calls.push(name);
-        if (name === 'consume_whatsapp_reset_challenge') {
+        if (name === 'consume_whatsapp_reset_challenge' || name === 'consume_recovery_code') {
           return { data: verified ? '00000000-0000-4000-8000-000000000008' : null, error: null };
         }
         assert.equal(name, 'revoke_user_sessions');
@@ -89,6 +89,49 @@ test('verified reset revokes sessions before success and carries CORS', async ()
   assert.equal((await response.json()).ok, true);
   assert.deepEqual(calls, ['consume_whatsapp_reset_challenge', 'updateUserById', 'revoke_user_sessions']);
   cors(response);
+});
+
+const recoveryFile = 'supabase/functions/recovery-code-reset/index.ts';
+const recoveryBody = (code) => JSON.stringify({ phone: '+201000000001', code, new_password: 'TestOnlyPassword123' });
+
+test('recovery-code reset: preflight, bad method, malformed input and weak password carry CORS', async () => {
+  const handler = loadHandler(recoveryFile);
+  const pre = await handler(new Request('https://example.invalid', { method: 'OPTIONS' }));
+  assert.equal(pre.status, 200);
+  cors(pre);
+  const get = await handler(new Request('https://example.invalid'));
+  assert.equal(get.status, 405);
+  cors(get);
+  const badCode = await handler(new Request('https://example.invalid', { method: 'POST', body: recoveryBody('12ab') }));
+  assert.equal(badCode.status, 400);
+  const weak = await handler(new Request('https://example.invalid', { method: 'POST',
+    body: JSON.stringify({ phone: '+201000000001', code: '12345678', new_password: 'short' }) }));
+  assert.equal(weak.status, 400);
+});
+
+test('recovery-code reset fails closed when the code is not valid', async () => {
+  const calls = [];
+  const handler = loadHandler(recoveryFile, { verified: false, calls });
+  const response = await handler(new Request('https://example.invalid', { method: 'POST', body: recoveryBody('12345678') }));
+  assert.equal(response.status, 403);
+  assert.equal((await response.json()).code, 'RESET_NOT_VERIFIED');
+  assert.deepEqual(calls, ['consume_recovery_code']);
+  cors(response);
+});
+
+test('recovery-code reset sets the password and revokes sessions before success', async () => {
+  const calls = [];
+  const handler = loadHandler(recoveryFile, { verified: true, calls });
+  const response = await handler(new Request('https://example.invalid', { method: 'POST', body: recoveryBody('12345678') }));
+  assert.equal(response.status, 200);
+  assert.deepEqual(calls, ['consume_recovery_code', 'updateUserById', 'revoke_user_sessions']);
+  cors(response);
+});
+
+test('recovery-code reset refuses success when session revoke fails', async () => {
+  const handler = loadHandler(recoveryFile, { verified: true, revokeError: true });
+  const response = await handler(new Request('https://example.invalid', { method: 'POST', body: recoveryBody('12345678') }));
+  assert.equal(response.status, 500);
 });
 
 test('webhook handshake rejects a wrong token and accepts the configured token', async () => {

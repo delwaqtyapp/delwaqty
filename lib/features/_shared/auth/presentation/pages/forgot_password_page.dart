@@ -6,6 +6,7 @@ import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/utils/validators.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/widgets/whatsapp_otp_sheet.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
@@ -37,6 +38,23 @@ final whatsappPasswordResetProvider =
       };
     });
 
+/// Reset with a one-time code an admin gave over the phone (used while the
+/// WhatsApp proof is switched off). The server checks the hashed code.
+final recoveryCodeResetProvider =
+    Provider<Future<void> Function(String, String, String)>((ref) {
+      return (phone, code, password) async {
+        final response = await Supabase.instance.client.functions.invoke(
+          'recovery-code-reset',
+          body: {'phone': phone, 'code': code, 'new_password': password},
+        );
+        if (response.status != 200 ||
+            response.data is! Map ||
+            response.data['ok'] != true) {
+          throw StateError('Password reset not confirmed');
+        }
+      };
+    });
+
 class ForgotPasswordPage extends ConsumerStatefulWidget {
   const ForgotPasswordPage({super.key});
 
@@ -49,6 +67,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
+  final _codeController = TextEditingController();
   String? _challenge;
   bool _resetDone = false;
   bool _isLoading = false;
@@ -58,6 +77,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     _phoneController.dispose();
     _passwordController.dispose();
     _confirmController.dispose();
+    _codeController.dispose();
     super.dispose();
   }
 
@@ -66,6 +86,17 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     try {
+      final codeMode =
+          ref.read(signupPhoneModeProvider).asData?.value == 'password';
+      if (codeMode) {
+        await ref.read(recoveryCodeResetProvider)(
+          _phoneController.text.trim(),
+          _codeController.text.trim(),
+          _passwordController.text,
+        );
+        if (mounted) setState(() => _resetDone = true);
+        return;
+      }
       if (_challenge == null) {
         final challenge = await ref.read(whatsappResetVerifierProvider)(
           context,
@@ -305,6 +336,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   );
 
   Widget _buildFormView(AppLocalizations l10n) {
+    final codeMode =
+        ref.watch(signupPhoneModeProvider).asData?.value == 'password';
+    final showNewPassword = codeMode || _challenge != null;
     return Form(
       key: _formKey,
       child: Column(
@@ -341,7 +375,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
           ),
           const SizedBox(height: 12),
           Text(
-            l10n.resetEmailHint,
+            codeMode ? l10n.recoveryCodeHint : l10n.resetEmailHint,
             style: TextStyle(
               fontSize: 15,
               color: AppColors.textPrimary.withValues(alpha: 0.5),
@@ -353,7 +387,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
           TextFormField(
             controller: _phoneController,
             keyboardType: TextInputType.phone,
-            readOnly: _challenge != null,
+            readOnly: _challenge != null && !codeMode,
             textInputAction: TextInputAction.done,
             validator: AppValidators.phone,
             onFieldSubmitted: (_) => _handleResetPassword(),
@@ -363,7 +397,23 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
               Icons.phone_outlined,
             ),
           ),
-          if (_challenge != null) ...[
+          if (codeMode) ...[
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _codeController,
+              keyboardType: TextInputType.number,
+              maxLength: 8,
+              decoration: _inputDecoration(
+                l10n.recoveryCodeLabel,
+                Icons.pin_outlined,
+              ),
+              validator: (value) =>
+                  RegExp(r'^[0-9]{8}$').hasMatch((value ?? '').trim())
+                  ? null
+                  : l10n.recoveryCodeLabel,
+            ),
+          ],
+          if (showNewPassword) ...[
             const SizedBox(height: 24),
             TextFormField(
               controller: _passwordController,
@@ -392,18 +442,19 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                 _passwordController.text,
               ),
             ),
-            TextButton(
-              onPressed: _isLoading
-                  ? null
-                  : () => setState(() => _challenge = null),
-              child: Text(l10n.edit),
-            ),
+            if (!codeMode)
+              TextButton(
+                onPressed: _isLoading
+                    ? null
+                    : () => setState(() => _challenge = null),
+                child: Text(l10n.edit),
+              ),
           ],
           const SizedBox(height: 24),
           _PurpleButton(
             onPressed: _isLoading ? null : _handleResetPassword,
             isLoading: _isLoading,
-            label: _challenge == null
+            label: (_challenge == null && !codeMode)
                 ? l10n.verifyViaWhatsApp
                 : l10n.resetPassword,
           ),

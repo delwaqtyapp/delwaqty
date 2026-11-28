@@ -21,6 +21,9 @@
 --      orders, the driver on one, or an admin confirms the number after the
 --      call. Audited in audit_log.
 --   6. phone_verified cannot be changed by the account holder directly.
+--   7. Courier rides get the same limits (rides_unverified_limits).
+--   8. Forgotten password without WhatsApp: admin-issued one-time recovery
+--      code (admin_issue_recovery_code) consumed by an edge function.
 -- Re-runnable.
 
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS phone_verified boolean NOT NULL DEFAULT true;
@@ -311,6 +314,40 @@ CREATE TRIGGER orders_unverified_limits BEFORE INSERT ON public.orders
   FOR EACH ROW EXECUTE FUNCTION public.orders_unverified_limits();
 
 -- confirm after the call -------------------------------------------------------
+CREATE OR REPLACE FUNCTION public._can_confirm_customer_phone(p_user_id uuid, p_actor uuid)
+ RETURNS boolean
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $$
+  SELECT p_actor IS NOT NULL AND (
+    public.is_admin(p_actor)
+    OR EXISTS (
+      SELECT 1 FROM public.orders o
+       WHERE o.user_id = p_user_id
+         AND (o.driver_id IN (SELECT d.id FROM public.drivers d WHERE d.user_id = p_actor)
+              OR public._owns_merchant_row(o.merchant_id)))
+    OR EXISTS (
+      SELECT 1 FROM public.rides r
+       WHERE r.rider_id = p_user_id
+         AND r.driver_id IN (SELECT d.id FROM public.drivers d WHERE d.user_id = p_actor)));
+$$;
+REVOKE ALL ON FUNCTION public._can_confirm_customer_phone(uuid, uuid) FROM PUBLIC, anon, authenticated;
+
+-- true only for a caller who may confirm AND a customer who is unconfirmed:
+-- drives the "number not confirmed, call the customer" banner.
+CREATE OR REPLACE FUNCTION public.customer_phone_needs_confirmation(p_user_id uuid)
+ RETURNS boolean
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $$
+  SELECT public._can_confirm_customer_phone(p_user_id, auth.uid())
+     AND EXISTS (SELECT 1 FROM public.users WHERE id = p_user_id AND phone_verified = false);
+$$;
+REVOKE ALL ON FUNCTION public.customer_phone_needs_confirmation(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.customer_phone_needs_confirmation(uuid) TO authenticated;
+
 CREATE OR REPLACE FUNCTION public.confirm_customer_phone(p_user_id uuid)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -319,20 +356,11 @@ CREATE OR REPLACE FUNCTION public.confirm_customer_phone(p_user_id uuid)
 AS $$
 DECLARE
   v_uid uuid := auth.uid();
-  v_allowed boolean := false;
 BEGIN
   IF v_uid IS NULL THEN
     RETURN jsonb_build_object('ok', false, 'reason', 'UNAUTHENTICATED');
   END IF;
-  IF public.is_admin() THEN
-    v_allowed := true;
-  ELSE
-    v_allowed := EXISTS (
-      SELECT 1 FROM public.orders o
-       WHERE o.user_id = p_user_id
-         AND (o.driver_id = v_uid OR public._owns_merchant_row(o.merchant_id)));
-  END IF;
-  IF NOT v_allowed THEN
+  IF NOT public._can_confirm_customer_phone(p_user_id, v_uid) THEN
     RETURN jsonb_build_object('ok', false, 'reason', 'FORBIDDEN');
   END IF;
   UPDATE public.users SET phone_verified = true WHERE id = p_user_id AND phone_verified = false;
@@ -347,3 +375,130 @@ END;
 $$;
 REVOKE ALL ON FUNCTION public.confirm_customer_phone(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.confirm_customer_phone(uuid) TO authenticated, service_role;
+
+-- courier rides: same limits as orders for unconfirmed customers ----------------
+-- Decision: courier rides are allowed but limited (cash only, at most 2 open
+-- rides) until the phone is confirmed. The driver on the ride can confirm.
+CREATE OR REPLACE FUNCTION public.rides_unverified_limits()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $$
+DECLARE
+  v_ok boolean;
+  v_open int;
+BEGIN
+  SELECT phone_verified INTO v_ok FROM public.users WHERE id = NEW.rider_id;
+  IF COALESCE(v_ok, true) THEN
+    RETURN NEW;
+  END IF;
+  IF COALESCE(NEW.payment_method, 'cash') <> 'cash' THEN
+    RAISE EXCEPTION 'PHONE_NOT_CONFIRMED: cash only until your phone number is confirmed' USING ERRCODE = 'P0001';
+  END IF;
+  SELECT count(*) INTO v_open FROM public.rides
+   WHERE rider_id = NEW.rider_id AND status IN ('searching', 'matched', 'arrived', 'inTrip');
+  IF v_open >= 2 THEN
+    RAISE EXCEPTION 'PHONE_NOT_CONFIRMED: at most 2 open rides until your phone number is confirmed' USING ERRCODE = 'P0001';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.rides_unverified_limits() FROM PUBLIC, anon, authenticated;
+DROP TRIGGER IF EXISTS rides_unverified_limits ON public.rides;
+CREATE TRIGGER rides_unverified_limits BEFORE INSERT ON public.rides
+  FOR EACH ROW EXECUTE FUNCTION public.rides_unverified_limits();
+
+-- forgotten password while WhatsApp is blocked ----------------------------------
+-- An admin who has spoken to the account holder issues a one-time 8-digit
+-- code (valid 30 minutes, 5 wrong tries, at most 3 issues per account per
+-- day). Only a hash is stored. The edge function recovery-code-reset consumes
+-- it, sets the new password and revokes sessions. Audited, code never logged.
+CREATE TABLE IF NOT EXISTS public.account_recovery_codes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  code_hash text NOT NULL,
+  issued_by uuid,
+  attempts int NOT NULL DEFAULT 0,
+  expires_at timestamptz NOT NULL,
+  used_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE public.account_recovery_codes ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.account_recovery_codes FROM PUBLIC, anon, authenticated;
+
+CREATE OR REPLACE FUNCTION public.admin_issue_recovery_code(p_phone text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $$
+DECLARE
+  v_norm text := public._normalize_egypt_phone(p_phone);
+  v_user uuid;
+  v_n int;
+  v_code text;
+BEGIN
+  IF auth.uid() IS NULL OR NOT public.is_admin() THEN
+    RETURN jsonb_build_object('ok', false, 'reason', 'FORBIDDEN');
+  END IF;
+  SELECT count(*) INTO v_n FROM public.users WHERE public._normalize_egypt_phone(phone) = v_norm;
+  IF v_n <> 1 THEN
+    RETURN jsonb_build_object('ok', false, 'reason', 'NO_UNIQUE_ACCOUNT');
+  END IF;
+  SELECT id INTO v_user FROM public.users WHERE public._normalize_egypt_phone(phone) = v_norm;
+  SELECT count(*) INTO v_n FROM public.account_recovery_codes
+   WHERE user_id = v_user AND created_at > now() - interval '24 hours';
+  IF v_n >= 3 THEN
+    RETURN jsonb_build_object('ok', false, 'reason', 'TOO_MANY_CODES');
+  END IF;
+  UPDATE public.account_recovery_codes SET used_at = now() WHERE user_id = v_user AND used_at IS NULL;
+  v_code := lpad((floor(random() * 100000000))::bigint::text, 8, '0');
+  INSERT INTO public.account_recovery_codes (user_id, code_hash, issued_by, expires_at)
+  VALUES (v_user, encode(sha256(convert_to(v_user::text || ':' || v_code, 'utf8')), 'hex'), auth.uid(), now() + interval '30 minutes');
+  INSERT INTO public.audit_log (actor, action, resource, resource_id, reason)
+  VALUES (auth.uid(), 'issue_recovery_code', 'users', v_user::text, 'password recovery code issued');
+  RETURN jsonb_build_object('ok', true, 'code', v_code, 'expires_in_minutes', 30);
+END;
+$$;
+REVOKE ALL ON FUNCTION public.admin_issue_recovery_code(text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.admin_issue_recovery_code(text) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.consume_recovery_code(p_phone text, p_code text)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $$
+DECLARE
+  v_norm text := public._normalize_egypt_phone(p_phone);
+  v_user uuid;
+  v_n int;
+  v_row public.account_recovery_codes%rowtype;
+BEGIN
+  IF p_code IS NULL OR p_code !~ '^[0-9]{8}$' THEN
+    RETURN NULL;
+  END IF;
+  SELECT count(*) INTO v_n FROM public.users WHERE public._normalize_egypt_phone(phone) = v_norm;
+  IF v_n <> 1 THEN
+    RETURN NULL;
+  END IF;
+  SELECT id INTO v_user FROM public.users WHERE public._normalize_egypt_phone(phone) = v_norm;
+  SELECT * INTO v_row FROM public.account_recovery_codes
+   WHERE user_id = v_user AND used_at IS NULL AND expires_at > now() AND attempts < 5
+   ORDER BY created_at DESC LIMIT 1 FOR UPDATE;
+  IF v_row.id IS NULL THEN
+    RETURN NULL;
+  END IF;
+  IF v_row.code_hash <> encode(sha256(convert_to(v_user::text || ':' || p_code, 'utf8')), 'hex') THEN
+    UPDATE public.account_recovery_codes SET attempts = attempts + 1 WHERE id = v_row.id;
+    RETURN NULL;
+  END IF;
+  UPDATE public.account_recovery_codes SET used_at = now() WHERE id = v_row.id;
+  INSERT INTO public.audit_log (actor, action, resource, resource_id, reason)
+  VALUES (NULL, 'recovery_code_used', 'users', v_user::text, 'password reset with admin recovery code');
+  RETURN v_user;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.consume_recovery_code(text, text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.consume_recovery_code(text, text) TO service_role;

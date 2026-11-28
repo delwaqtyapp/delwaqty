@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/pages/forgot_password_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
@@ -111,4 +112,62 @@ void main() {
     reply.complete(null);
     await tester.pumpAndSettle();
   });
+
+  testWidgets(
+    'password mode resets with the admin recovery code, no WhatsApp',
+    (tester) async {
+      final submissions = <List<String>>[];
+      var whatsapp = 0;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            signupPhoneModeProvider.overrideWith((ref) async => 'password'),
+            whatsappResetVerifierProvider.overrideWithValue((
+              context,
+              phone,
+            ) async {
+              whatsapp++;
+              return 'x';
+            }),
+            recoveryCodeResetProvider.overrideWithValue((
+              phone,
+              code,
+              password,
+            ) async {
+              submissions.add([phone, code, password]);
+            }),
+          ],
+          child: const MaterialApp(
+            locale: Locale('en'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: ForgotPasswordPage(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Verify via WhatsApp'), findsNothing);
+      final fields = find.byType(TextFormField);
+      await tester.enterText(fields.at(0), '01000000001');
+      await tester.enterText(fields.at(1), '12ab');
+      await tester.enterText(fields.at(2), 'ExampleTestPassword123');
+      await tester.enterText(fields.at(3), 'ExampleTestPassword123');
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Reset Password').last);
+      await tester.tap(find.text('Reset Password').last);
+      await tester.pumpAndSettle();
+      expect(submissions, isEmpty, reason: 'a malformed code is never sent');
+      await tester.enterText(fields.at(1), '12345678');
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Reset Password').last);
+      await tester.tap(find.text('Reset Password').last);
+      await tester.pumpAndSettle();
+      expect(submissions, [
+        ['01000000001', '12345678', 'ExampleTestPassword123'],
+      ]);
+      expect(whatsapp, 0);
+    },
+  );
 }

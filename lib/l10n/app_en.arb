@@ -3220,6 +3220,16 @@
   "adminPricingConfirmSample": "Sample fare for 5 km, 1 kg, standard: {fare}",
   "adminPricingConfirmOff": "This service will be turned off. New requests will be blocked.",
   "adminPricingConfirmNewOnly": "Applies to new requests only.",
+  "loginSecurityTitle": "Login and security",
+  "showSavedPassword": "Show my saved password",
+  "savedPasswordTitle": "Saved password",
+  "noSavedPassword": "No password is saved on this device. Turn on fingerprint login to save it here.",
+  "deviceLockReason": "Confirm it is you with your fingerprint or phone lock",
+  "deviceLockFailed": "Could not confirm your identity. Nothing was changed.",
+  "setLoginPassword": "Set or change login password",
+  "setLoginPasswordHint": "Use this password with your email or username to sign in.",
+  "loginPasswordSaved": "Password saved. You can sign in with it now.",
+  "copyAction": "Copy",
   "@adminPricingConfirmTitle": {"placeholders": {"service": {"type": "String"}}},
   "@adminPricingConfirmSample": {"placeholders": {"fare": {"type": "String"}}}
 }

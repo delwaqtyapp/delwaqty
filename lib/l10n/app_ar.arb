@@ -3135,6 +3135,16 @@
   "adminPricingConfirmSample": "سعر تقريبي لـ 5 كم و1 كجم عادي: {fare}",
   "adminPricingConfirmOff": "سيتم إيقاف هذه الخدمة وسيتم منع الطلبات الجديدة.",
   "adminPricingConfirmNewOnly": "يسري على الطلبات الجديدة فقط.",
+  "loginSecurityTitle": "الدخول والأمان",
+  "showSavedPassword": "إظهار كلمة المرور المحفوظة",
+  "savedPasswordTitle": "كلمة المرور المحفوظة",
+  "noSavedPassword": "لا توجد كلمة مرور محفوظة على هذا الجهاز. فعّل الدخول بالبصمة لحفظها هنا.",
+  "deviceLockReason": "أكّد أنك أنت ببصمتك أو بقفل الهاتف",
+  "deviceLockFailed": "تعذر التأكد من هويتك. لم يتغير شيء.",
+  "setLoginPassword": "تعيين أو تغيير كلمة مرور الدخول",
+  "setLoginPasswordHint": "استخدم هذه الكلمة مع بريدك أو اسم المستخدم لتسجيل الدخول.",
+  "loginPasswordSaved": "تم حفظ كلمة المرور. يمكنك الدخول بها الآن.",
+  "copyAction": "نسخ",
   "@adminPricingConfirmTitle": {"placeholders": {"service": {"type": "String"}}},
   "@adminPricingConfirmSample": {"placeholders": {"fare": {"type": "String"}}}
 }
